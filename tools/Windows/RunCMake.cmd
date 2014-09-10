@@ -15,9 +15,7 @@ echo All arguments   = %*
 
 echo.
 
-:: Add qmake from our downloaded Qt to PATH.
-set PATH=%DEPS%\Qt\bin;%PATH%
-
+SET TUNDRA_DEP_PATH=%DEPS%
 SET URHO3D_HOME=%DEPS%\urho3d
 
 IF NOT EXIST Tundra.sln. (

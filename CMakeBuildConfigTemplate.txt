@@ -1,0 +1,72 @@
+## The CMakeBuildConfigTemplate.txt defines the default build settings
+## that are used when you build a clean checkout.
+##
+## CMakeBuildConfigTemplate.txt is only a template file! Changes to that file
+## do not have any effect on the actual CMake execution.
+##
+## For the actual configuration, the file CMakeBuildConfigTemplate.txt gets 
+## copied to CMakeBuildConfig.txt, in which you can customize your own settings.
+##
+## The CMakeBuildConfig.txt is not part of the repository, and do not add it there!
+## The idea is that everyone can customize the set of modules to build using that 
+## file, without having to fear about an accidental commit of these changes.
+
+###### BUILD CONFIGURATION DEFINES ######
+
+## Various flags/defines that configure your build
+
+# Do we want to build TundraCore as a shared or static library.
+set(TUNDRACORE_SHARED 1)
+
+# Enable solution folders
+if (NOT MSVC)
+    # Cannot enable solution folders by default when using Visual Studio as the Express versions don't support them.
+    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+endif()
+
+message("\n")
+
+if (TUNDRACORE_SHARED)
+    add_definitions(-DTUNDRACORE_SHARED)
+endif()
+
+if (MSVC)
+    if (ENABLE_MEMORY_LEAK_CHECKS)
+        add_definitions(-DMEMORY_LEAK_CHECK)
+    endif()
+
+    # Common flags for all configurations: build with multiple processes and increase PCH size in order to overcome occasional errors.
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MP /Zm1000")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MP /Zm1000")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MP /Zm1000")
+
+    # NOTE: RelWithDebInfo and Release use O2 (= /Ox /Gl /Gy/ = Og /Oi /Ot /Oy /Ob2 /Gs /GF /Gy) by default,
+    # with the exception with RelWithDebInfo has /Ob1 instead.
+    if (ENABLE_BUILD_OPTIMIZATIONS)
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Ob2 /GL")
+        set(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELEASE})
+        set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG /INCREMENTAL:NO /OPT:REF") # /OPT:REF enables also /OPT:ICF
+        set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO ${CMAKE_SHARED_LINKER_FLAGS_RELEASE})
+        set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG /INCREMENTAL:NO /OPT:REF")
+        set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO ${CMAKE_EXE_LINKER_FLAGS_RELEASE})
+    endif()
+endif()
+
+###### ENTITY-COMPONENTS ######
+message("\n=========== Configuring Optional Entity-Components ===========\n")
+
+###### TUNDRA FRAMEWORK ######
+message("\n=========== Configuring Tundra Framework ===========\n")
+
+## The following are the core modules/libs that are required 
+## for the project to build. None of these can be omitted.
+
+AddProject(Core TundraCore)
+
+AddProject(Core Tundra)
+
+###### MANDATORY PLUGINS ######
+message("\n=========== Configuring Mandatory Plugins ===========\n")
+
+###### OPTIONAL PLUGINS ######
+message("\n=========== Configuring Optional Plugins ===========\n")
