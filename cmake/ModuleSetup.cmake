@@ -160,7 +160,7 @@ macro (build_library TARGET_NAME LIB_TYPE)
     endif ()
 
     # internal library naming convention
-    set_target_properties (${TARGET_NAME} PROPERTIES DEBUG_POSTFIX d)
+    set_target_properties (${TARGET_NAME} PROPERTIES DEBUG_POSTFIX _d)
     if (NOT ANDROID OR NOT (${TARGET_NAME} STREQUAL "Tundra"))
         set_target_properties (${TARGET_NAME} PROPERTIES PREFIX "")
     endif ()
@@ -179,7 +179,7 @@ macro (build_executable TARGET_NAME)
         target_link_libraries (${TARGET_NAME} optimized dbghelp.lib)
     endif ()
 
-    set_target_properties (${TARGET_NAME} PROPERTIES DEBUG_POSTFIX d)
+    set_target_properties (${TARGET_NAME} PROPERTIES DEBUG_POSTFIX _d)
 
 endmacro (build_executable)
 

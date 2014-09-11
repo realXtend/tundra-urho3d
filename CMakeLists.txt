@@ -256,8 +256,8 @@ include (ConfigurePackages)
 include (ModuleSetup)
 include (TundraInstall)
 
-# Find Urho3D library
-find_package (Urho3D REQUIRED)
+# Find/configure Urho
+configure_urho3d()
 
 # Find/configure MathGeoLib
 configure_mathgeolib()

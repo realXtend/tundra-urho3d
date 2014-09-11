@@ -10,3 +10,13 @@ macro(configure_mathgeolib)
     set(MATHGEOLIB_LIBRARIES ${MATHGEOLIB_DIR}/build/lib/MathGeoLib${CMAKE_STATIC_LIBRARY_SUFFIX})
     set(MATHGEOLIB_DEBUG_LIBRARIES ${MATHGEOLIB_DIR}/build/lib/MathGeoLib_d${CMAKE_STATIC_LIBRARY_SUFFIX})
 endmacro (configure_mathgeolib)
+
+macro(configure_urho3d)
+    # Find Urho3D library
+    find_package (Urho3D REQUIRED)
+    # Set the debug libraries to match our convention
+    set (URHO3D_DEBUG_LIBRARIES ${URHO3D_LIBRARIES_DBG})
+    # Using just find_package does not set all Urho3D definitions. Set some most important of them manually
+    add_definitions(-DURHO3D_LOGGING)
+    add_definitions(-DURHO3D_PROFILING)
+endmacro(configure_urho3d)
