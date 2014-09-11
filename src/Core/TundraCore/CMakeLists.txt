@@ -12,8 +12,8 @@ file(GLOB H_FILES *.h)
 set(SOURCE_FILES ${CPP_FILES} ${H_FILES})
 
 UseTundraCore() # Include all subfolders within the project
-use_core_modules(Math)
-use_package(QJSON)
+use_package(Urho3D)
+use_package(MathGeoLib)
 
 add_definitions(-DTUNDRACORE_EXPORTS)
 
@@ -23,7 +23,8 @@ else()
     build_library(${TARGET_NAME} STATIC ${SOURCE_FILES})
 endif()
 
-# link_modules(Math)
+link_package(Urho3D)
+link_package(MathGeoLib)
 
 SetupCompileFlagsWithPCH()
 

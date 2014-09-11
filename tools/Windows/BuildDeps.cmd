@@ -33,7 +33,7 @@ IF NOT !BUILD_TYPE!==%BUILD_TYPE_MINSIZEREL% IF NOT !BUILD_TYPE!==%BUILD_TYPE_RE
     GOTO :EOF
 )
 :: DEBUG_OR_RELEASE and DEBUG_OR_RELEASE_LOWERCASE are "Debug" and "debug" for Debug build and "Release" and "release"
-:: for all of the Release variants. Lowercase version exists for Qt/nmake/jom.
+:: for all of the Release variants. 
 :: POSTFIX_D, POSTFIX_UNDERSCORE_D and POSTFIX_UNDERSCORE_DEBUG are helpers for performing file copies and checking
 :: for existence of files. In release build these variables are empty.
 set DEBUG_OR_RELEASE=Release
@@ -94,6 +94,30 @@ echo If you are not ready with the above, press Ctrl-C to abort!
 pause
 echo.
 
+:: MathGeoLib
+IF NOT EXIST "%DEPS%\MathGeoLib\". (
+    cecho {0D}Cloning MathGeoLib into "%DEPS%\MathGeoLib".{# #}{\n}
+    cd "%DEPS%"
+    git clone https://github.com/juj/MathGeoLib MathGeoLib
+    cd "%DEPS%\MathGeoLib\"
+    IF NOT EXIST "%DEPS%\MathGeoLib\.git" GOTO :ERROR
+)
+
+cecho {0D}Running CMake for MathGeoLib.{# #}{\n}
+cd "%DEPS%\MathGeoLib\"
+cmake . -G %GENERATOR% -DCMAKE_DEBUG_POSTFIX=_d -DCMAKE_INSTALL_PREFIX=%DEPS%\MathGeoLib\build
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+cecho {0D}Building %BUILD_TYPE% MathGeoLib. Please be patient, this will take a while.{# #}{\n}
+MSBuild MathGeoLib.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+:: Install the correct build type into MathGeoLib/build
+cecho {0D}Installing %BUILD_TYPE% MathGeoLib{# #}{\n}
+MSBuild INSTALL.%VCPROJ_FILE_EXT% /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+
 :: Urho3D engine
 :: latest master for now, if a "last known good version" is not needed
 IF NOT EXIST "%DEPS%\urho3d\". (
@@ -101,7 +125,6 @@ IF NOT EXIST "%DEPS%\urho3d\". (
     cd "%DEPS%"
     git clone https://github.com/urho3d/Urho3D.git urho3d
     cd "%DEPS%\urho3d\"
-    git checkout 671d2c45ac75f69d2f073f8bf6f4dad8f517971b
     IF NOT EXIST "%DEPS%\urho3d\.git" GOTO :ERROR
 )
 

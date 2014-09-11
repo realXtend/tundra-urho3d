@@ -244,11 +244,15 @@ message ("\n\n=========== Configuring Dependencies ===========\n")
 # The following CMake modules are required for the project to build.
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ENV_URHO3D_HOME}/Source/CMake/Modules cmake)
 include (Urho3D-CMake-common)
+include (ConfigurePackages)
 include (ModuleSetup)
 include (TundraInstall)
 
 # Find Urho3D library
 find_package (Urho3D REQUIRED)
+
+# Find/configure MathGeoLib
+configure_mathgeolib()
 
 # Set global hardcoded install prefix. User cannot change this at the moment, until we figure how we want to use this!
 # Call the cleanup step that cleans the install prefix before every installations. This is important as module setups might change between builds.
