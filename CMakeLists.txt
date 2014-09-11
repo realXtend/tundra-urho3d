@@ -4,10 +4,18 @@ project(tundra-mobile)
 # CMake version requirement
 cmake_minimum_required(VERSION 2.6.0)
 
-# Policy CMP0005 - Preprocessor definition values are now escaped automatically.
+# CMake policies
 if (COMMAND cmake_policy)
     cmake_policy(SET CMP0005 NEW)
-endif()
+    cmake_policy (SET CMP0003 NEW)
+    if (CMAKE_VERSION VERSION_GREATER 2.8.12 OR CMAKE_VERSION VERSION_EQUAL 2.8.12)
+        cmake_policy (SET CMP0022 NEW) # INTERFACE_LINK_LIBRARIES defines the link interface
+    endif ()
+    if (CMAKE_VERSION VERSION_GREATER 3.0.0 OR CMAKE_VERSION VERSION_EQUAL 3.0.0)
+        cmake_policy (SET CMP0026 OLD) # Disallow use of the LOCATION target property - therefore we set to OLD as we still need it
+        cmake_policy (SET CMP0042 NEW) # MACOSX_RPATH is enabled by default
+    endif ()
+endif ()
 
 macro(PrintUsedEnvVariables)
     # Print out the resolved variables. Note that this does not print the env variables
@@ -243,7 +251,7 @@ message ("\n\n=========== Configuring Dependencies ===========\n")
 # Set CMake custom module path & include them
 # The following CMake modules are required for the project to build.
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ENV_URHO3D_HOME}/Source/CMake/Modules cmake)
-include (Urho3D-CMake-common)
+include (FindUrho3D)
 include (ConfigurePackages)
 include (ModuleSetup)
 include (TundraInstall)
@@ -253,6 +261,9 @@ find_package (Urho3D REQUIRED)
 
 # Find/configure MathGeoLib
 configure_mathgeolib()
+
+message(STATUS "MathGeoLib debug libs " ${MATHGEOLIB_DEBUG_LIBRARIES})
+message(STATUS "MathGeoLib libs " ${MATHGEOLIB_LIBRARIES})
 
 # Set global hardcoded install prefix. User cannot change this at the moment, until we figure how we want to use this!
 # Call the cleanup step that cleans the install prefix before every installations. This is important as module setups might change between builds.
