@@ -1,5 +1,5 @@
 # Set project name
-project(tundra-mobile)
+project(tundra-urho3d)
 
 # CMake version requirement
 cmake_minimum_required(VERSION 2.6.0)
