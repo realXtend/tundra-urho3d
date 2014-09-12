@@ -29,10 +29,12 @@ Tundra-urho3d uses [CMake] as its build system.
 4. Run `CMake_Android.bat` from the checkout root directory to prepare the CMake build of Tundra-urho3d for Android.
 5. Navigate to `<Tundra-urho3d>\src\Android\` and execute
    make
-6. Build the apk. The 'android update project' line is only needed when building for the first time.
+6. Copy assets from the Tundra bin directory by executing `CopyData.bat`
+   (todo: automatize/remove this step)
+7. Build the apk. The 'android update project' line is only needed when building for the first time.
    android update project -p . -t <targetAPINumber>. (Use 'android list targets' to list your installed Android target API numbers for the -t parameter)
    ant debug (use ant release and sign your APK when building an actual release build)
-6. The apk is written to `<Tundra-urho3d>\src\Android\bin` directory where it can be uploaded to a device or run on an emulator.
+8. The apk is written to `<Tundra-urho3d>\src\Android\bin` directory where it can be uploaded to a device or run on an emulator.
 
 [Apache 2.0]: http://www.apache.org/licenses/LICENSE-2.0.txt "Apache 2.0 license"
 [Urho3D]: http://urho3d.github.io "Urho3D homepage"

@@ -157,7 +157,8 @@ macro (build_library TARGET_NAME LIB_TYPE)
 
     # internal library naming convention
     set_target_properties (${TARGET_NAME} PROPERTIES DEBUG_POSTFIX _d)
-    if (NOT (${TARGET_NAME} STREQUAL "Tundra"))
+    # Android always needs lib prefix
+    if (NOT ANDROID AND NOT (${TARGET_NAME} STREQUAL "Tundra"))
         set_target_properties (${TARGET_NAME} PROPERTIES PREFIX "")
     endif ()
     set_target_properties (${TARGET_NAME} PROPERTIES LINK_INTERFACE_LIBRARIES "")

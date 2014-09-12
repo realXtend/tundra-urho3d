@@ -7,11 +7,17 @@ file (GLOB H_FILES *.h)
 
 set (SOURCE_FILES ${CPP_FILES} ${H_FILES})
 
+# Add SDL Android main
+if (ANDROID)
+    include_directories (${URHO3D_HOME}/Source/ThirdParty/SDL/include)
+    set (SOURCE_FILES ${SOURCE_FILES} ${URHO3D_HOME}/Source/ThirdParty/SDL/src/main/android/SDL_android_main.c)
+    use_package(URHO3D)
+endif ()
+
 SetupCompileFlags()
 
 UseTundraCore()
 use_core_modules(TundraCore)
-
 
 if (MSVC)
    build_executable(${TARGET_NAME} WIN32 ${SOURCE_FILES} ${RESOURCE_FILES})
@@ -24,6 +30,9 @@ else()
 endif()
 
 link_modules(TundraCore)
+if (ANDROID)
+    link_package(URHO3D)
+endif()
 
 final_target ()
 

@@ -43,7 +43,7 @@ Makefile
 *.so
 
 # CMake -specific
-#*.cmake
+*.cmake
 CMakeFiles
 CMakeCache.txt
 CMakeBuildConfig.txt
@@ -62,6 +62,7 @@ doc/html/
 # Tundra bin/ and build/ files
 bin/Tundra*.exe
 build/
+install/
 
 # SVN admin
 *.svn-base
