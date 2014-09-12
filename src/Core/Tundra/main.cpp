@@ -60,7 +60,15 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR l
     else
         return run(0, 0);
 }
-#else // Unix entry point
+#elif defined(ANDROID)
+// Android entrypoint (use SDL_Main, which the Urho3D library will call)
+extern "C" int SDL_main(int argc, char** argv);
+int SDL_main(int argc, char** argv)
+{
+	return run(argc, argv);
+}
+#else
+// Unix entrypoint
 int main(int argc, char **argv)
 {
     return run(argc, argv);

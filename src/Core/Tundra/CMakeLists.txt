@@ -12,10 +12,15 @@ SetupCompileFlags()
 UseTundraCore()
 use_core_modules(TundraCore)
 
+
 if (MSVC)
    build_executable(${TARGET_NAME} WIN32 ${SOURCE_FILES} ${RESOURCE_FILES})
 else()
-   build_executable(${TARGET_NAME} ${SOURCE_FILES} ${RESOURCE_FILES})
+   if (ANDROID)
+       build_library(${TARGET_NAME} SHARED ${SOURCE_FILES})
+   else()
+       build_executable(${TARGET_NAME} ${SOURCE_FILES} ${RESOURCE_FILES})
+   endif()
 endif()
 
 link_modules(TundraCore)

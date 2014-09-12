@@ -250,7 +250,7 @@ message ("\n\n=========== Configuring Dependencies ===========\n")
 
 # Set CMake custom module path & include them
 # The following CMake modules are required for the project to build.
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ENV_URHO3D_HOME}/Source/CMake/Modules cmake)
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ENV_URHO3D_HOME}/Source/CMake/Modules ${CMAKE_SOURCE_DIR}/cmake)
 include (FindUrho3D)
 include (ConfigurePackages)
 include (ModuleSetup)
@@ -267,27 +267,38 @@ message(STATUS "MathGeoLib libs " ${MATHGEOLIB_LIBRARIES})
 
 # Set global hardcoded install prefix. User cannot change this at the moment, until we figure how we want to use this!
 # Call the cleanup step that cleans the install prefix before every installations. This is important as module setups might change between builds.
-set (CMAKE_INSTALL_PREFIX ${PROJECT_BINARY_DIR}/build)
-set (TUNDRA_BIN ${PROJECT_BINARY_DIR}/bin)
+set (CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
+set (TUNDRA_BIN ${CMAKE_SOURCE_DIR}/bin)
 setup_clean_install_step()
 
 # If the custom optional modules configuration file does not yet
 # exist, create it from the template file.
 if (NOT EXISTS CMakeBuildConfig.txt)
-    execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/CMakeBuildConfigTemplate.txt
-        ${CMAKE_CURRENT_SOURCE_DIR}/CMakeBuildConfig.txt)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/CMakeBuildConfigTemplate.txt
+        ${CMAKE_BINARY_DIR}/CMakeBuildConfig.txt)
+endif ()
+
+# Setup library output dir for Android
+if (ANDROID)
+    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/src/android/libs)
+    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/src/android/libs/${ANDROID_ABI})
+    # Deploy Urho3D library
+    # Todo: should rather happen as part of the deps build
+    foreach (lib ${URHO3D_LIBRARIES})
+        execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${lib} ${CMAKE_SOURCE_DIR}/src/android/libs/${ANDROID_ABI})
+    endforeach ()
 endif ()
 
 # Convenience macro for including all TundraCore subfolders.
 macro(UseTundraCore)
-    include_directories(${PROJECT_BINARY_DIR}/src/Core/TundraCore/)
+    include_directories(${CMAKE_SOURCE_DIR}/src/Core/TundraCore/)
 endmacro()
 
 # Read the set of optional modules from another file
 # that is kept outside the source control.
 # To configure the set of optional modules to add to the build,
 # edit CMakeBuildConfig.txt and rerun cmake.
-include(CMakeBuildConfig.txt)
+include(${CMAKE_BINARY_DIR}/CMakeBuildConfig.txt)
 
 PrintUsedEnvVariables ()
 PrintUsedBuildConfig ()

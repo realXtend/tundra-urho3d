@@ -7,8 +7,10 @@
 macro(configure_mathgeolib)
     set(MATHGEOLIB_DIR ${ENV_TUNDRA_DEP_PATH}/MathGeoLib)
     set(MATHGEOLIB_INCLUDE_DIRS ${MATHGEOLIB_DIR}/build/include ${MATHGEOLIB_DIR}/build/include/MathGeoLib)
-    set(MATHGEOLIB_LIBRARIES ${MATHGEOLIB_DIR}/build/lib/MathGeoLib${CMAKE_STATIC_LIBRARY_SUFFIX})
-    set(MATHGEOLIB_DEBUG_LIBRARIES ${MATHGEOLIB_DIR}/build/lib/MathGeoLib_d${CMAKE_STATIC_LIBRARY_SUFFIX})
+    set(MATHGEOLIB_LIBRARIES ${MATHGEOLIB_DIR}/build/lib/${CMAKE_STATIC_LIBRARY_PREFIX}MathGeoLib${CMAKE_STATIC_LIBRARY_SUFFIX})
+    if (WIN32)
+        set(MATHGEOLIB_DEBUG_LIBRARIES ${MATHGEOLIB_DIR}/build/lib/${CMAKE_STATIC_LIBRARY_PREFIX}MathGeoLib_d${CMAKE_STATIC_LIBRARY_SUFFIX})
+    endif()
 endmacro (configure_mathgeolib)
 
 macro(configure_urho3d)

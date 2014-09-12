@@ -1,5 +1,5 @@
 @echo off
-IF EXIST tundra.sln del /Q tundra.sln
+IF EXIST build\tundra-urho3d.sln del /Q build\tundra-urho3d.sln
 cd tools\Windows\
 call RunCMake "Visual Studio 10"
 cd ..\..

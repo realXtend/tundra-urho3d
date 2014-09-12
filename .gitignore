@@ -43,7 +43,7 @@ Makefile
 *.so
 
 # CMake -specific
-*.cmake
+#*.cmake
 CMakeFiles
 CMakeCache.txt
 CMakeBuildConfig.txt

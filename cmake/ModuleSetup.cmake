@@ -34,20 +34,24 @@ macro (init_target NAME)
         link_directories (${ENV_TUNDRA_DEP_PATH}/lib)
     endif ()
     
-    # Include our own module path. This makes #include "x.h" 
+    # Include our own module path. This makes #include "x.h"
     # work in project subfolders to include the main directory headers
     # note: CMAKE_INCLUDE_CURRENT_DIR could automate this
     include_directories (${CMAKE_CURRENT_SOURCE_DIR})
     
     # Add the SDK static libs build location for linking
     link_directories (${PROJECT_BINARY_DIR}/lib)
-    
+
     # set TARGET_DIR
     if (NOT "${TARGET_OUTPUT}" STREQUAL "")
-        set (TARGET_DIR ${PROJECT_BINARY_DIR}/bin/${TARGET_OUTPUT})
-        if (MSVC)
-            # export symbols, copy needs to be added via copy_target
-            add_definitions (-DMODULE_EXPORTS)
+        if (NOT ANDROID)
+            set (TARGET_DIR ${CMAKE_SOURCE_DIR}/bin/${TARGET_OUTPUT})
+            if (MSVC)
+                # export symbols, copy needs to be added via copy_target
+                add_definitions (-DMODULE_EXPORTS)
+            endif ()
+        else ()
+            set (TARGET_DIR ${CMAKE_SOURCE_DIR}/src/android/libs/${ANDROID_ABI})
         endif ()
     endif ()
 endmacro (init_target)
@@ -102,13 +106,7 @@ endmacro (final_target)
 # build a library from internal sources
 macro (build_library TARGET_NAME LIB_TYPE)
 
-    # On Android force all libs to be static, except the main lib (Tundra)
-    if (ANDROID AND ${LIB_TYPE} STREQUAL "SHARED" AND NOT (${TARGET_NAME} STREQUAL "Tundra"))
-        message("- Forcing lib to static for Android")
-        set (TARGET_LIB_TYPE "STATIC")
-    else ()
-        set (TARGET_LIB_TYPE ${LIB_TYPE})
-    endif ()
+    set (TARGET_LIB_TYPE ${LIB_TYPE})
 
     message (STATUS "-- build type:")
     message (STATUS "       " ${TARGET_LIB_TYPE} " library")
@@ -140,32 +138,34 @@ macro (build_library TARGET_NAME LIB_TYPE)
         endif ()
     endif ()
 
-    if (NOT ANDROID)
-        # build static libraries to /lib if
-        # - Is part of the SDK (/src/Core/)
-        # - Is a static EC declared by SDK on the build (/src/EntityComponents/)
-        if (${TARGET_LIB_TYPE} STREQUAL "STATIC" AND NOT TARGET_DIR)
-            string (REGEX MATCH  ".*/src/Core/?.*" TARGET_IS_CORE ${CMAKE_CURRENT_SOURCE_DIR})
-            string (REGEX MATCH  ".*/src/EntityComponents/?.*" TARGET_IS_EC ${CMAKE_CURRENT_SOURCE_DIR})
-            if (TARGET_IS_CORE)
-                message (STATUS "-- SDK lib output path:")
-            elseif (TARGET_IS_EC)
-                message (STATUS "-- SDK EC lib output path:")
-            endif ()
-            if (TARGET_IS_CORE OR TARGET_IS_EC)
-                message (STATUS "       " ${PROJECT_BINARY_DIR}/lib)
-                set_target_properties (${TARGET_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
-            endif ()
+    # build static libraries to /lib if
+    # - Is part of the SDK (/src/Core/)
+    # - Is a static EC declared by SDK on the build (/src/EntityComponents/)
+    if (${TARGET_LIB_TYPE} STREQUAL "STATIC" AND NOT TARGET_DIR)
+        string (REGEX MATCH  ".*/src/Core/?.*" TARGET_IS_CORE ${CMAKE_CURRENT_SOURCE_DIR})
+        string (REGEX MATCH  ".*/src/EntityComponents/?.*" TARGET_IS_EC ${CMAKE_CURRENT_SOURCE_DIR})
+        if (TARGET_IS_CORE)
+            message (STATUS "-- SDK lib output path:")
+        elseif (TARGET_IS_EC)
+            message (STATUS "-- SDK EC lib output path:")
+        endif ()
+        if (TARGET_IS_CORE OR TARGET_IS_EC)
+            message (STATUS "       " ${PROJECT_BINARY_DIR}/lib)
+            set_target_properties (${TARGET_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
         endif ()
     endif ()
 
     # internal library naming convention
     set_target_properties (${TARGET_NAME} PROPERTIES DEBUG_POSTFIX _d)
-    if (NOT ANDROID OR NOT (${TARGET_NAME} STREQUAL "Tundra"))
+    if (NOT (${TARGET_NAME} STREQUAL "Tundra"))
         set_target_properties (${TARGET_NAME} PROPERTIES PREFIX "")
     endif ()
     set_target_properties (${TARGET_NAME} PROPERTIES LINK_INTERFACE_LIBRARIES "")
-
+    
+    # Add common system library dependencies for Android
+    if (ANDROID)
+        target_link_libraries (${TARGET_NAME} log)
+    endif ()
 endmacro (build_library)
 
 # build an executable from internal sources 
