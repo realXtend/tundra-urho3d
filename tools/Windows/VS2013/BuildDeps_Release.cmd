@@ -1,3 +1,3 @@
 @cd ..
 @call BuildDeps.cmd "Visual Studio 12" Release
-@cd VS2010
+@cd VS2013

@@ -78,17 +78,17 @@ echo    2. Install DirectX SDK June 2010.
 echo     - http://www.microsoft.com/download/en/details.aspx?id=6812
 echo    3. Install CMake and make sure 'cmake' is accessible from PATH.
 echo     - http://www.cmake.org/
-echo    4. Install Visual Studio 2008/2010 (Express is ok, but see section 5).
+echo    4. Install Visual Studio 2010/2012/2013 (Express is ok, but see section 5).
 echo     - http://www.microsoft.com/visualstudio/eng/downloads
 cecho {0E}   5. Optional: Make sure you have the Visual Studio x64 tools installed{# #}{\n}
 cecho {0E}      before installing the Visual Studio Service Pack 1 (section 6), if{# #}{\n}
 cecho {0E}      wanting to build Tundra as a 64-bit application.{# #}{\n}
 cecho {0E}      NOTE: The x64 tools are not available for the Express editions.{# #}{\n}
-echo    6. Install Visual Studio 2008/2010 Service Pack 1.
+echo    6. Install Visual Studio 2010 Service Pack 1.
 echo     - http://www.microsoft.com/en-us/download/details.aspx?id=23691
 echo    7. Install Windows SDK.
 echo     - http://www.microsoft.com/download/en/details.aspx?id=8279
-echo    8. Execute this file from Visual Studio 2008/2010 ^(x64^) Command Prompt.
+echo    8. Execute this file from Visual Studio 2010/2012/2013 ^(x64^) Command Prompt.
 
 echo If you are not ready with the above, press Ctrl-C to abort!
 pause

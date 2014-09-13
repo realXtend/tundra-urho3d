@@ -6,8 +6,10 @@
 set GENERATOR=%1
 
 :: Supported Visual Studio versions:
-::set GENERATOR_VS2012="Visual Studio 11"
-::set GENERATOR_VS2012_WIN64="Visual Studio 11 Win64"
+set GENERATOR_VS2013="Visual Studio 12"
+set GENERATOR_VS2013_WIN64="Visual Studio 12 Win64"
+set GENERATOR_VS2012="Visual Studio 11"
+set GENERATOR_VS2012_WIN64="Visual Studio 11 Win64"
 set GENERATOR_VS2010="Visual Studio 10"
 set GENERATOR_VS2010_WIN64="Visual Studio 10 Win64"
 set GENERATOR_VS2008="Visual Studio 9 2008"
@@ -19,7 +21,7 @@ IF "!GENERATOR!"=="" (
     Utils\cecho {0E}VSConfig.cmd: Warning: Generator not passed - using the default %GENERATOR_DEFAULT%.{# #}{\n}
 )
 
-IF NOT !GENERATOR!==%GENERATOR_VS2008% IF NOT !GENERATOR!==%GENERATOR_VS2008_WIN64% IF NOT !GENERATOR!==%GENERATOR_VS2010% IF NOT !GENERATOR!==%GENERATOR_VS2010_WIN64% (
+IF NOT !GENERATOR!==%GENERATOR_VS2008% IF NOT !GENERATOR!==%GENERATOR_VS2008_WIN64% IF NOT !GENERATOR!==%GENERATOR_VS2010% IF NOT !GENERATOR!==%GENERATOR_VS2010_WIN64% IF NOT !GENERATOR!==%GENERATOR_VS2012% IF NOT !GENERATOR!==%GENERATOR_VS2012_WIN64% IF NOT !GENERATOR!==%GENERATOR_VS2013% IF NOT !GENERATOR!==%GENERATOR_VS2013_WIN64% (
     Utils\cecho {0C}VSConfig.cmd: Invalid or unsupported CMake generator string passed: !GENERATOR!. Cannot proceed, aborting!{# #}{\n}
     GOTO :EOF
 )
@@ -36,10 +38,14 @@ set VS_PLATFORM=Win32
 set GENERATOR_NO_DOUBLEQUOTES=%GENERATOR:"=%
 set GENERATOR_SPLIT=%GENERATOR_NO_DOUBLEQUOTES: =,%
 FOR %%i IN (%GENERATOR_SPLIT%) DO (
-    REM IF %%i==11 (
-    REM set VS_VER=vs2012
-    REM set VC_VER=vc11
-    REM )
+    IF %%i==12 (
+        set VS_VER=vs2013
+        set VC_VER=vc12
+    )
+    IF %%i==11 (
+        set VS_VER=vs2012
+        set VC_VER=vc11
+    )
     IF %%i==10 (
         set VS_VER=vs2010
         set VC_VER=vc10
