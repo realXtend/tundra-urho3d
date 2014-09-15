@@ -1,14 +1,15 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "TundraCoreApi.h"
+#include "Framework.h"
 
 #include <string>
 #include <vector>
 
-int TUNDRACORE_API run(int argc, char **argv);
-
 #if defined(WIN32) // Windows application entry point.
 #include <Windows.h>
+
+using namespace Tundra;
 
 int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR lpCmdLine, int /*nShowCmd*/){
     std::string cmdLine(lpCmdLine);
