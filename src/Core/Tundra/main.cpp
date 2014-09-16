@@ -66,7 +66,7 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR l
 extern "C" int SDL_main(int argc, char** argv);
 int SDL_main(int argc, char** argv)
 {
-	return run(argc, argv);
+    return run(argc, argv);
 }
 #else
 // Unix entrypoint

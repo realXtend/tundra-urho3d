@@ -13,4 +13,7 @@ namespace Urho3D
 namespace Tundra
 {
     class Framework;
+    class IModule;
+    class PluginAPI;
+    class ConfigAPI;
 }

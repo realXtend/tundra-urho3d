@@ -2,62 +2,389 @@
 
 #include "StableHeaders.h"
 #include "Framework.h"
+#include "JSON.h"
+#include "PluginAPI.h"
+#include "ConfigAPI.h"
 
 #include <Context.h>
 #include <Engine.h>
 #include <FileSystem.h>
+#include <Log.h>
+#include <File.h>
+#include <XMLFile.h>
+
+
+using namespace Urho3D;
 
 namespace Tundra
 {
 
-int run(int argc, char** argv)
+static int argc;
+static char** argv;
+
+int run(int argc_, char** argv_)
 {
-	Framework fw;
-	fw.Go();
-	return 0;
+    argc = argc_;
+    argv = argv_;
+
+    Context ctx;
+    Framework fw(&ctx);
+    fw.Go();
+    return 0;
 }
 
-Framework* Framework::instance = 0;
-
-Framework::Framework()
+Framework::Framework(Context* ctx) :
+    Object(ctx),
+    organizationName("realxtend"),
+    applicationName("tundra-urho3d"),
+    plugins(0),
+    config(0)
 {
-	instance = this;
+    plugins = new PluginAPI(this);
+    config = new ConfigAPI(this);
 
-	// Create the Urho3D context and engine, which creates various other subsystems,
-	// but does not initialize them yet
-	context = new Urho3D::Context();
-	engine = new Urho3D::Engine(context);
+    // Create the Urho3D engine, which creates various other subsystems, but does not initialize them yet
+    engine = new Urho3D::Engine(GetContext());
+    // Timestamps clutter the log. Disable for now
+    GetSubsystem<Log>()->SetTimeStamp(false);
+
+    ProcessStartupOptions();
 }
 
 Framework::~Framework()
 {
-	instance = 0;
+    delete plugins;
+    delete config;
 }
 
 void Framework::Go()
 {
-	// Initialize the Urho3D engine now
-	Urho3D::VariantMap engineInitMap;
-	engineInitMap["ResourcePaths"] = context->GetSubsystem<Urho3D::FileSystem>()->GetProgramDir() + "Data";
-	engineInitMap["AutoloadPaths"] = "";
-	engineInitMap["FullScreen"] = false;
-	engineInitMap["WindowTitle"] = "Tundra";
-	engineInitMap["LogName"] = "Tundra.log";
-	engine->Initialize(engineInitMap);
+    // Initialize the Urho3D engine now
+    VariantMap engineInitMap;
+    engineInitMap["ResourcePaths"] = GetSubsystem<FileSystem>()->GetProgramDir() + "Data";
+    engineInitMap["AutoloadPaths"] = "";
+    engineInitMap["FullScreen"] = false;
+    engineInitMap["WindowTitle"] = "Tundra";
+    engineInitMap["LogName"] = "Tundra.log";
+    engine->Initialize(engineInitMap);
 
-	// Run mainloop
-	while (!engine->IsExiting())
-		engine->RunFrame();
+    // Run mainloop
+    while (!engine->IsExiting())
+        ProcessOneFrame();
 }
 
-Urho3D::Context* Framework::Context() const
+void Framework::ProcessOneFrame()
 {
-	return context;
+    engine->RunFrame();
 }
 
-Urho3D::Engine* Framework::Engine() const
+Engine* Framework::Engine() const
 {
-	return engine;
+    return engine;
+}
+
+void Framework::SetCurrentWorkingDirectory(const String& newCwd)
+{
+    GetSubsystem<FileSystem>()->SetCurrentDir(newCwd);
+}
+
+String Framework::CurrentWorkingDirectory() const
+{
+    return GetSubsystem<FileSystem>()->GetCurrentDir();
+}
+
+String Framework::InstallationDirectory() const
+{
+    return GetSubsystem<FileSystem>()->GetProgramDir();
+}
+
+String Framework::UserDataDirectory() const
+{
+    return GetSubsystem<FileSystem>()->GetAppPreferencesDir(OrganizationName(), ApplicationName());
+}
+
+String Framework::UserDocumentsDirectory() const
+{
+    return GetSubsystem<FileSystem>()->GetUserDocumentsDir();
+}
+
+String Framework::ParseWildCardFilename(const String& input) const
+{
+    // Parse all the special symbols from the log filename.
+    String filename = input.Trimmed().Replaced("$(CWD)", CurrentWorkingDirectory());
+    filename = filename.Replaced("$(INSTDIR)", InstallationDirectory());
+    filename = filename.Replaced("$(USERDATA)", UserDataDirectory());
+    filename = filename.Replaced("$(USERDOCS)", UserDocumentsDirectory());
+    return filename;
+}
+
+String Framework::LookupRelativePath(String path) const
+{
+    FileSystem* fs = GetSubsystem<FileSystem>();
+
+    // If a relative path was specified, lookup from cwd first, then from application installation directory.
+    if (IsAbsolutePath(path))
+    {
+        String cwdPath = CurrentWorkingDirectory() + path;
+        if (fs->FileExists(cwdPath))
+            return cwdPath;
+        else
+            return InstallationDirectory() + path;
+    }
+    else
+        return path;
+}
+
+void Framework::AddCommandLineParameter(const String &command, const String &parameter)
+{
+    startupOptions[command].Push(parameter);
+}
+
+bool Framework::HasCommandLineParameter(const String &value) const
+{
+    if (value.Compare("--config", false) == 0)
+        return !configFiles.Empty();
+
+    return startupOptions.Find(value) != startupOptions.End();
+}
+
+Vector<String> Framework::CommandLineParameters(const String &key) const
+{
+    if (key.Compare("--config", false) == 0)
+        return ConfigFiles();
+    
+    OptionsMap::ConstIterator i = startupOptions.Find(key);
+    if (i != startupOptions.End())
+        return i->second_;
+    else
+        return Vector<String>();
+}
+
+void Framework::ProcessStartupOptions()
+{
+    for(int i = 1; i < argc; ++i)
+    {
+        String option(argv[i]);
+        String peekOption = (i+1 < argc ? String(argv[i+1]) : "");
+        if (option.StartsWith("--") && !peekOption.Empty())
+        {
+#ifdef WIN32
+            // --key "value
+            if (peekOption.StartsWith("\""))
+            {
+                // --key "value"
+                if (peekOption.EndsWith("\""))
+                {
+                    // Remove quotes and append to the return list.
+                    peekOption = peekOption.Substring(1, peekOption.Length() - 1);
+                }
+                // --key "val u e"
+                else
+                {
+                    for(int pi=i+2; pi+1 < argc; ++pi)
+                    {
+                        // If a new -- key is found before an end quote we have a error.
+                        // Report and don't add anything to the return list as the param is malformed.
+                        String param = argv[pi];
+                        if (param.StartsWith("--"))
+                        {
+                            LOGERROR("Could not find an end quote for '" + option + "' parameter: " + peekOption);
+                            i = pi - 1; // Step one back so the main for loop will inspect this element next.
+                            break;
+                        }
+                        
+                        peekOption += " " + param;
+                        if (param.EndsWith("\""))
+                        {                            
+                            if (peekOption.StartsWith("\""))
+                                peekOption = peekOption.Substring(1);
+                            if (peekOption.EndsWith("\""))
+                                peekOption.Resize(peekOption.Length() - 1);
+
+                            // Set the main for loops index so it will skip the 
+                            // parts that included in this quoted param.
+                            i = pi; 
+                            break;
+                        }
+                    }
+                }
+            }
+#endif
+        }
+        else if (option.StartsWith("--") && peekOption.Empty())
+            AddCommandLineParameter(option);
+        else
+        {
+            LOGWARNING("Orphaned startup option parameter value specified: " + String(argv[i]));
+            continue;
+        }
+
+        if (option.Trimmed().Empty())
+            continue;
+
+        // --config
+        if (option.Compare("--config", false) == 0)
+        {
+            LoadStartupOptionsFromFile(peekOption);
+            ++i;
+            continue;
+        }
+
+        // --key value
+        if (!peekOption.StartsWith("--"))
+        {
+            AddCommandLineParameter(option, peekOption);
+            ++i;
+        }
+        // --key
+        else
+            AddCommandLineParameter(option);
+    }
+
+    if (!HasCommandLineParameter("--config"))
+        LoadStartupOptionsFromFile("tundra.json");
+}
+
+void Framework::PrintStartupOptions()
+{
+    for (OptionsMap::ConstIterator i = startupOptions.Begin(); i != startupOptions.End(); ++i)
+    {
+        String option = i->first_;
+        LOGINFO("  " + option);
+        for (unsigned j = 0; j < i->second_.Size(); ++j)
+        {
+            if (!i->second_[j].Empty())
+                LOGINFO("    '" + i->second_[j] + "'");
+        }
+    }
+}
+
+bool Framework::LoadStartupOptionsFromFile(const String &configurationFile)
+{
+    String suffix = GetExtension(configurationFile);
+    bool read = false;
+    if (suffix == ".xml")
+        read = LoadStartupOptionsFromXML(configurationFile);
+    else if (suffix == ".json")
+        read = LoadStartupOptionsFromJSON(configurationFile);
+    else
+        LOGERROR("Invalid config file format. Only .xml and .json are supported: " + configurationFile);
+    if (read)
+        configFiles.Push(configurationFile);
+    return read;
+}
+
+bool Framework::LoadStartupOptionsFromXML(String configurationFile)
+{
+    configurationFile = LookupRelativePath(configurationFile);
+
+    XMLFile doc(GetContext());
+    File file(GetContext(), configurationFile, FILE_READ);
+    if (!doc.Load(file))
+    {
+        LOGERROR("Failed to open config file \"" + configurationFile + "\"!");
+        return false;
+    }
+
+    XMLElement root = doc.GetRoot();
+
+    XMLElement e = root.GetChild("option");
+    while(e)
+    {
+        if (e.HasAttribute("name"))
+        {
+            /// \todo Support build exclusion
+
+            /// If we have another config XML specified with --config inside this config XML, load those settings also
+            if (e.GetAttribute("name").Compare("--config", false) == 0)
+            {
+                if (!e.GetAttribute("value").Empty())
+                    LoadStartupOptionsFromFile(e.GetAttribute("value"));
+                e = e.GetNext("option");
+                continue;
+            }
+
+            AddCommandLineParameter(e.GetAttribute("name"), e.GetAttribute("value"));
+        }
+        e = e.GetNext("option");
+    }
+    return true;
+}
+
+bool Framework::LoadStartupOptionsFromJSON(String configurationFile)
+{
+    configurationFile = LookupRelativePath(configurationFile);
+    
+    File file(GetContext(), configurationFile, FILE_READ);
+    if (!file.IsOpen())
+    {
+        LOGERROR("Failed to open config file \"" + configurationFile + "\"!");
+        return false;
+    }
+    JSONValue root;
+    if (!root.FromString(file.ReadString()))
+    {
+        LOGERROR("Failed to parse config file \"" + configurationFile + "\"!");
+        return false;
+    }
+
+    if (root.IsArray())
+        LoadStartupOptionArray(root);
+    else if (root.IsObject())
+        LoadStartupOptionMap(root);
+    else if (root.IsString())
+        AddCommandLineParameter(root.GetString());
+    else
+        LOGERROR("JSON config file " + configurationFile + " was not an object, array or string");
+    
+    return true;
+}
+
+void Framework::LoadStartupOptionArray(const JSONValue& value)
+{
+    const JSONArray& arr = value.GetArray();
+    for (JSONArray::ConstIterator i = arr.Begin(); i != arr.End(); ++i)
+    {
+        const JSONValue& innerValue = *i;
+        if (innerValue.IsArray())
+            LoadStartupOptionArray(innerValue);
+        else if (innerValue.IsObject())
+            LoadStartupOptionMap(innerValue);
+        else if (innerValue.IsString())
+            AddCommandLineParameter(innerValue.GetString());
+    }
+}
+
+void Framework::LoadStartupOptionMap(const JSONValue& value)
+{
+    const JSONObject& obj = value.GetObject();
+    for (JSONObject::ConstIterator i = obj.Begin(); i != obj.End(); ++i)
+    {
+        /// \todo Support build and platform exclusion
+
+        String option = i->first_;
+        if (i->second_.IsString())
+        {
+            if (option.Compare("--config", false) == 0)
+                LoadStartupOptionsFromFile(i->second_.GetString());
+            else
+                AddCommandLineParameter(option, i->second_.GetString());
+        }
+        else if (i->second_.IsArray())
+        {
+            const JSONArray& innerArr = i->second_.GetArray();
+            for (JSONArray::ConstIterator j = innerArr.Begin(); j != innerArr.End(); ++j)
+            {
+                if (j->IsString())
+                {
+                    if (option.Compare("--config", false) == 0)
+                        LoadStartupOptionsFromFile(j->GetString());
+                    else
+                        AddCommandLineParameter(option, j->GetString());
+                }
+            }
+        }
+    }
 }
 
 }

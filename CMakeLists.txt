@@ -294,6 +294,7 @@ macro(UseTundraCore)
     include_directories(${CMAKE_SOURCE_DIR}/src/Core/TundraCore/ 
         ${CMAKE_SOURCE_DIR}/src/Core/TundraCore/Signals
         ${CMAKE_SOURCE_DIR}/src/Core/TundraCore/Framework
+        ${CMAKE_SOURCE_DIR}/src/Core/TundraCore/JSON
     )
     # Using TundraCore requires Urho3D headers as well (SharedPtr etc.)
     include_directories(${URHO3D_INCLUDE_DIRS})
