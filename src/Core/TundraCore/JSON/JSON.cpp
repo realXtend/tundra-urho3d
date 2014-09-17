@@ -448,7 +448,7 @@ bool JSONValue::Parse(const char*& pos, const char*& end)
         if (c == '/')
         {
             // Is a comment, skip until end of line
-            while (c >= 0x20)
+            while (c != '\n')
             {
                 if (!NextChar(c, pos, end, false))
                     return false;
