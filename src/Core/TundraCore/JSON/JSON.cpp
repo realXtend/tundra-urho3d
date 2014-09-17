@@ -438,27 +438,36 @@ bool JSONValue::Contains(const String& key) const
 bool JSONValue::Parse(const char*& pos, const char*& end)
 {
     char c;
-    if (!NextChar(c, pos, end, true))
-        return false;
     
-    if (c == '/')
+    // Handle comments
+    for (;;)
     {
-        if (!NextChar(c, pos, end, false))
+        if (!NextChar(c, pos, end, true))
             return false;
+    
         if (c == '/')
         {
-            // Is a comment, skip until end of line
-            while (c != '\n')
+            if (!NextChar(c, pos, end, false))
+                return false;
+            if (c == '/')
             {
-                if (!NextChar(c, pos, end, false))
+                // Skip until end of line
+                if (!MatchChar('\n', pos, end))
                     return false;
             }
-            // Now skip over the EOL / whitespace and proceed with parsing
-            if (!NextChar(c, pos, end, true))
+            else if (c == '*')
+            {
+                // Skip until end of comment
+                if (!MatchChar('*', pos, end))
+                    return false;
+                if (!MatchChar('/', pos, end))
+                    return false;
+            }
+            else
                 return false;
         }
         else
-            return false;
+            break;
     }
 
     if (c == '}' || c == ']')
@@ -742,6 +751,18 @@ bool JSONValue::MatchString(const char* str, const char*& pos, const char*& end)
     }
     
     return true;
+}
+
+bool JSONValue::MatchChar(char c, const char*& pos, const char*& end)
+{
+    char next;
+
+    while (NextChar(next, pos, end, false))
+    {
+        if (next == c)
+            return true;
+    }
+    return false;
 }
 
 }

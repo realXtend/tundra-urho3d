@@ -69,7 +69,7 @@ void PluginAPI::LoadPlugin(const String &filename)
 
     FileSystem* fs = GetSubsystem<FileSystem>();
 
-    String path = GetNativePath(owner->InstallationDirectory() + "plugins/" + filename.Trimmed() + pluginSuffix);
+    String path = GetNativePath(owner->InstallationDirectory() + "Plugins/" + filename.Trimmed() + pluginSuffix);
     if (!fs->FileExists(path))
     {
         LOGWARNINGF("Cannot load plugin \"%s\" as the file does not exist.", path.CString());

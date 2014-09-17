@@ -30,6 +30,20 @@ public:
     /// Runs through a single frame of logic update and rendering.
     void ProcessOneFrame();
 
+    /// Returns module by class T.
+    /** @param T class type of the module.
+        @return The module, or null if the module doesn't exist. Always remember to check for null pointer. */
+    template <class T>
+    T *Module() const;
+
+    /// Returns module by name.
+    /** @param name Name of the module. */
+    IModule *ModuleByName(const Urho3D::String& name) const;
+
+    /// Registers a new module into the Framework.
+    /** Framework will take ownership of the module pointer, so it is safe to pass in a raw pointer. */
+    void RegisterModule(IModule *module);
+
     /// Sets the current working directory. Use with caution.
     void SetCurrentWorkingDirectory(const Urho3D::String& newCwd);
 
@@ -109,7 +123,7 @@ public:
     bool IsHeadless() const { return headless; }
 
     /// Returns core API Plugin object.
-    PluginAPI* Plugins() const { return plugins; }
+    PluginAPI* Plugin() const { return plugin; }
 
     /// Return the Urho3D Engine object.
     Urho3D::Engine* Engine() const;
@@ -139,7 +153,7 @@ private:
     Urho3D::SharedPtr<Urho3D::Engine> engine;
     /// Framework owns the memory of all the modules in the system. These are freed when Framework is exiting.
     Urho3D::Vector<Urho3D::SharedPtr<IModule> > modules;
-    Urho3D::SharedPtr<PluginAPI> plugins;
+    Urho3D::SharedPtr<PluginAPI> plugin;
     Urho3D::SharedPtr<ConfigAPI> config;
     Urho3D::String organizationName;
     Urho3D::String applicationName;
@@ -150,6 +164,19 @@ private:
     bool exitSignal;
     bool headless;
 };
+
+template <class T>
+T *Framework::Module() const
+{
+    for(unsigned i = 0; i < modules.Size(); ++i)
+    {
+        T *module = dynamic_cast<T*>(modules[i].Get());
+        if (module)
+            return module;
+    }
+
+    return 0;
+}
 
 /// Instantiate the Framework and run until exited.
 TUNDRACORE_API int run(int argc, char** argv);

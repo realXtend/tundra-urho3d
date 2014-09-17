@@ -38,12 +38,10 @@ Framework::Framework(Context* ctx) :
     Object(ctx),
     organizationName("realXtend"),
     applicationName("tundra-urho3d"),
-    plugins(0),
-    config(0),
     exitSignal(false),
     headless(false)
 {
-    plugins = new PluginAPI(this);
+    plugin = new PluginAPI(this);
     config = new ConfigAPI(this);
 
     // Create the Urho3D engine, which creates various other subsystems, but does not initialize them yet
@@ -62,7 +60,7 @@ Framework::Framework(Context* ctx) :
 
 Framework::~Framework()
 {
-    plugins.Reset();
+    plugin.Reset();
     config.Reset();
 }
 
@@ -120,6 +118,15 @@ void Framework::Go()
     
     PrintStartupOptions();
 
+    // Load and initialize plugins
+    plugin->LoadPluginsFromCommandLine();
+
+    for(size_t i = 0; i < modules.Size(); ++i)
+    {
+        LOGDEBUG("Initializing module " + modules[i]->Name());
+        modules[i]->Initialize();
+    }
+
     // Initialize the Urho3D engine
     VariantMap engineInitMap;
     engineInitMap["ResourcePaths"] = GetSubsystem<FileSystem>()->GetProgramDir() + "Data";
@@ -136,6 +143,24 @@ void Framework::Go()
         while (!engine->IsExiting())
             ProcessOneFrame();
     }
+
+    for(size_t i = 0; i < modules.Size(); ++i)
+    {
+        LOGDEBUG("Uninitializing module " + modules[i]->Name());
+        modules[i]->Uninitialize();
+    }
+
+    for(size_t i = 0; i < modules.Size(); ++i)
+    {
+        LOGDEBUG("Unloading module " + modules[i]->Name());
+        modules[i]->Unload();
+    }
+
+    // Delete all modules.
+    modules.Clear();
+
+    // Actually unload all DLL plugins from memory.
+    plugin->UnloadPlugins();
 }
 
 void Framework::Exit()
@@ -174,6 +199,20 @@ void Framework::ProcessOneFrame()
 
     if (exitSignal)
         engine->Exit();
+}
+
+void Framework::RegisterModule(IModule *module)
+{
+    modules.Push(SharedPtr<IModule>(module));
+    module->Load();
+}
+
+IModule *Framework::ModuleByName(const String &name) const
+{
+    for(unsigned i = 0; i < modules.Size(); ++i)
+        if (modules[i]->Name() == name)
+            return modules[i].Get();
+    return 0;
 }
 
 Engine* Framework::Engine() const
