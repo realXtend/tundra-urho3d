@@ -47,9 +47,9 @@ static String GetErrorString(int error)
 /// Signature for Tundra plugins
 typedef void (*TundraPluginMainSignature)(Framework *owner);
 
-PluginAPI::PluginAPI(Framework *owner_) :
-    Object(owner->GetContext()),
-    owner(owner_)
+PluginAPI::PluginAPI(Framework *framework) :
+    Object(framework->GetContext()),
+    owner(framework)
 {
 }
 

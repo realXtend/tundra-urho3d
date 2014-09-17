@@ -152,7 +152,7 @@ private:
     /** @param configFolderName The name of the folder to store Tundra Config API data to. */
     void PrepareDataFolder(Urho3D::String configFolderName);
 
-    Framework *framework_;
+    Framework *owner;
     Urho3D::String configFolder_; ///< Absolute path to the folder where to store the config files.
     mutable Urho3D::HashMap<Urho3D::String, ConfigFile> configFiles_; // Configuration file in-memory data.
 };

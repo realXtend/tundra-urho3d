@@ -51,7 +51,7 @@ void ConfigFile::Load(Context* ctx, const String& fileName)
         return;
 
     String currentSection;
-    while (file->IsEof())
+    while (!file->IsEof())
     {
         String line = file->ReadLine().Trimmed();
         if (line.Length() && line[0] == ('['))
@@ -83,14 +83,14 @@ void ConfigFile::Save(Context* ctx, const String& fileName)
 
 ConfigAPI::ConfigAPI(Framework *framework) :
     Object(framework->GetContext()),
-    framework_(framework)
+    owner(framework)
 {
 }
 
 void ConfigAPI::PrepareDataFolder(String configFolder)
 {
     FileSystem* fs = GetSubsystem<FileSystem>();
-    String configPath = framework_->ParseWildCardFilename(configFolder.Trimmed());
+    String configPath = owner->ParseWildCardFilename(configFolder.Trimmed());
     
     if (!fs->DirExists(configPath))
     {

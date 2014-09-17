@@ -72,6 +72,7 @@ message("\n=========== Configuring Tundra Framework ===========\n")
 AddProject(Core TundraCore)
 
 AddProject(Core Tundra)
+AddProject(Core TundraConsole)
 
 ###### MANDATORY PLUGINS ######
 message("\n=========== Configuring Mandatory Plugins ===========\n")

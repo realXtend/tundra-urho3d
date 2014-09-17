@@ -441,6 +441,26 @@ bool JSONValue::Parse(const char*& pos, const char*& end)
     if (!NextChar(c, pos, end, true))
         return false;
     
+    if (c == '/')
+    {
+        if (!NextChar(c, pos, end, false))
+            return false;
+        if (c == '/')
+        {
+            // Is a comment, skip until end of line
+            while (c >= 0x20)
+            {
+                if (!NextChar(c, pos, end, false))
+                    return false;
+            }
+            // Now skip over the EOL / whitespace and proceed with parsing
+            if (!NextChar(c, pos, end, true))
+                return false;
+        }
+        else
+            return false;
+    }
+
     if (c == '}' || c == ']')
         return false;
     else if (c == 'n')

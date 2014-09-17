@@ -9,10 +9,11 @@
 #include <Context.h>
 #include <Engine.h>
 #include <FileSystem.h>
+#include <IModule.h>
 #include <Log.h>
 #include <File.h>
 #include <XMLFile.h>
-
+#include <ProcessUtils.h>
 
 using namespace Urho3D;
 
@@ -35,10 +36,12 @@ int run(int argc_, char** argv_)
 
 Framework::Framework(Context* ctx) :
     Object(ctx),
-    organizationName("realxtend"),
+    organizationName("realXtend"),
     applicationName("tundra-urho3d"),
     plugins(0),
-    config(0)
+    config(0),
+    exitSignal(false),
+    headless(false)
 {
     plugins = new PluginAPI(this);
     config = new ConfigAPI(this);
@@ -49,33 +52,128 @@ Framework::Framework(Context* ctx) :
     GetSubsystem<Log>()->SetTimeStamp(false);
 
     ProcessStartupOptions();
+    // In headless mode, no main UI/rendering window is initialized.
+    headless = HasCommandLineParameter("--headless");
+
+    // Open console window if necessary
+    if (headless)
+        OpenConsoleWindow();
 }
 
 Framework::~Framework()
 {
-    delete plugins;
-    delete config;
+    plugins.Reset();
+    config.Reset();
 }
 
 void Framework::Go()
 {
-    // Initialize the Urho3D engine now
+    // Initialization prints
+    LOGINFO("Starting up");
+    LOGINFO("* Installation directory : " + InstallationDirectory());
+    LOGINFO("* Working directory      : " + CurrentWorkingDirectory());
+    LOGINFO("* User data directory    : " + UserDataDirectory());
+
+    // Prepare ConfigAPI data folder
+    Vector<String> configDirs = CommandLineParameters("--configDir");
+    String configDir = "$(USERDATA)/configuration"; // The default configuration goes to "C:\Users\username\AppData\Roaming\Tundra\configuration"
+    if (configDirs.Size() >= 1)
+        configDir = configDirs.Back();
+    if (configDirs.Size() > 1)
+        LOGWARNING("Multiple --configDir parameters specified! Using \"" + configDir + "\" as the configuration directory.");
+    config->PrepareDataFolder(configDir);
+
+    // Set target FPS limits, if specified.
+    ConfigData targetFpsConfigData(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_RENDERING);
+    if (config->HasKey(targetFpsConfigData, "fps target limit"))
+    {
+        int targetFps = config->Read(targetFpsConfigData, "fps target limit").GetInt();
+        if (targetFps >= 0)
+            engine->SetMaxFps(targetFps);
+        else
+            LOGWARNING("Invalid target FPS value " + String(targetFps) + " read from config. Ignoring.");
+    }
+
+    Vector<String> fpsLimitParam = CommandLineParameters("--fpsLimit");
+    if (fpsLimitParam.Size() > 1)
+        LOGWARNING("Multiple --fpslimit parameters specified! Using " + fpsLimitParam.Front() + " as the value.");
+    if (fpsLimitParam.Size() > 0)
+    {
+        int targetFpsLimit = ToInt(fpsLimitParam.Front());
+        if (targetFpsLimit >= 0)
+            engine->SetMaxFps(targetFpsLimit);
+        else
+            LOGWARNING("Erroneous FPS limit given with --fpsLimit: " + fpsLimitParam.Front() + ". Ignoring.");
+    }
+
+    Vector<String> fpsLimitInactiveParam = CommandLineParameters("--fpsLimitWhenInactive");
+    if (fpsLimitInactiveParam.Size() > 1)
+        LOGWARNING("Multiple --fpslimit parameters specified! Using " + fpsLimitInactiveParam.Front() + " as the value.");
+    if (fpsLimitInactiveParam.Size() > 0)
+    {
+        int targetFpsLimit = ToInt(fpsLimitParam.Front());
+        if (targetFpsLimit >= 0)
+            engine->SetMaxInactiveFps(targetFpsLimit);
+        else
+            LOGWARNING("Erroneous FPS limit given with --fpsLimit: " + fpsLimitInactiveParam.Front() + ". Ignoring.");
+    }
+    
+    PrintStartupOptions();
+
+    // Initialize the Urho3D engine
     VariantMap engineInitMap;
     engineInitMap["ResourcePaths"] = GetSubsystem<FileSystem>()->GetProgramDir() + "Data";
     engineInitMap["AutoloadPaths"] = "";
     engineInitMap["FullScreen"] = false;
+    engineInitMap["Headless"] = headless;
     engineInitMap["WindowTitle"] = "Tundra";
     engineInitMap["LogName"] = "Tundra.log";
     engine->Initialize(engineInitMap);
 
     // Run mainloop
-    while (!engine->IsExiting())
-        ProcessOneFrame();
+    if (!exitSignal)
+    {
+        while (!engine->IsExiting())
+            ProcessOneFrame();
+    }
+}
+
+void Framework::Exit()
+{
+    exitSignal = true;
+    exitRequested.Emit();
+}
+
+void Framework::ForceExit()
+{
+    exitSignal = true;
+    engine->Exit(); // Can not be canceled
+}
+
+void Framework::CancelExit()
+{
+    exitSignal = false;
 }
 
 void Framework::ProcessOneFrame()
 {
-    engine->RunFrame();
+    float dt = engine->GetNextTimeStep();
+
+    Time* time = GetSubsystem<Time>();
+    time->BeginFrame(dt);
+
+    for(unsigned i = 0; i < modules.Size(); ++i)
+        modules[i]->Update(dt);
+
+    // Perform Urho engine update/render/measure next timestep
+    engine->Update();
+    engine->Render();
+    engine->ApplyFrameLimit();
+
+    time->EndFrame();
+
+    if (exitSignal)
+        engine->Exit();
 }
 
 Engine* Framework::Engine() const
@@ -100,7 +198,7 @@ String Framework::InstallationDirectory() const
 
 String Framework::UserDataDirectory() const
 {
-    return GetSubsystem<FileSystem>()->GetAppPreferencesDir(OrganizationName(), ApplicationName());
+    return GetInternalPath(GetSubsystem<FileSystem>()->GetAppPreferencesDir(OrganizationName(), ApplicationName()));
 }
 
 String Framework::UserDocumentsDirectory() const
@@ -111,10 +209,10 @@ String Framework::UserDocumentsDirectory() const
 String Framework::ParseWildCardFilename(const String& input) const
 {
     // Parse all the special symbols from the log filename.
-    String filename = input.Trimmed().Replaced("$(CWD)", CurrentWorkingDirectory());
-    filename = filename.Replaced("$(INSTDIR)", InstallationDirectory());
-    filename = filename.Replaced("$(USERDATA)", UserDataDirectory());
-    filename = filename.Replaced("$(USERDOCS)", UserDocumentsDirectory());
+    String filename = input.Trimmed().Replaced("$(CWD)/", CurrentWorkingDirectory());
+    filename = filename.Replaced("$(INSTDIR)/", InstallationDirectory());
+    filename = filename.Replaced("$(USERDATA)/", UserDataDirectory());
+    filename = filename.Replaced("$(USERDOCS)/", UserDocumentsDirectory());
     return filename;
 }
 
@@ -137,25 +235,29 @@ String Framework::LookupRelativePath(String path) const
 
 void Framework::AddCommandLineParameter(const String &command, const String &parameter)
 {
-    startupOptions[command].Push(parameter);
+    String commandLowercase = command.ToLower();
+    startupOptions[commandLowercase].first_ = command;
+    startupOptions[commandLowercase].second_.Push(parameter);
 }
 
 bool Framework::HasCommandLineParameter(const String &value) const
 {
-    if (value.Compare("--config", false) == 0)
+    String valueLowercase = value.ToLower();
+    if (value == "--config")
         return !configFiles.Empty();
 
-    return startupOptions.Find(value) != startupOptions.End();
+    return startupOptions.Find(valueLowercase) != startupOptions.End();
 }
 
 Vector<String> Framework::CommandLineParameters(const String &key) const
 {
-    if (key.Compare("--config", false) == 0)
+    String keyLowercase = key.ToLower();
+    if (key == "--config")
         return ConfigFiles();
     
-    OptionsMap::ConstIterator i = startupOptions.Find(key);
+    OptionsMap::ConstIterator i = startupOptions.Find(keyLowercase);
     if (i != startupOptions.End())
-        return i->second_;
+        return i->second_.second_;
     else
         return Vector<String>();
 }
@@ -247,14 +349,15 @@ void Framework::ProcessStartupOptions()
 
 void Framework::PrintStartupOptions()
 {
+    LOGINFO("Startup options:");
     for (OptionsMap::ConstIterator i = startupOptions.Begin(); i != startupOptions.End(); ++i)
     {
-        String option = i->first_;
+        String option = i->second_.first_;
         LOGINFO("  " + option);
-        for (unsigned j = 0; j < i->second_.Size(); ++j)
+        for (unsigned j = 0; j < i->second_.second_.Size(); ++j)
         {
-            if (!i->second_[j].Empty())
-                LOGINFO("    '" + i->second_[j] + "'");
+            if (!i->second_.second_[j].Empty())
+                LOGINFO("    '" + i->second_.second_[j] + "'");
         }
     }
 }

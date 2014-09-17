@@ -17,8 +17,6 @@ class TUNDRACORE_API PluginAPI : public Urho3D::Object
     OBJECT(PluginAPI);
 
 public:
-    explicit PluginAPI(Framework *owner);
-
     /// Returns list of plugin configuration files that were used to load the plugins at startup.
     Urho3D::Vector<Urho3D::String> ConfigurationFiles() const;
 
@@ -37,6 +35,11 @@ public:
     void ListPlugins() const;
 
 private:
+    friend class Framework;
+
+    /// @note Framework takes ownership of the object.
+    explicit PluginAPI(Framework *framework);
+
     struct Plugin
     {
         void *handle;
