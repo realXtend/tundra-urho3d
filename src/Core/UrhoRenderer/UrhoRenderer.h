@@ -9,13 +9,13 @@ namespace Tundra
 {
 
 /// A renderer module using Urho3D
-class URHO_MODULE_API UrhoRenderingModule : public IModule
+class URHO_MODULE_API UrhoRenderer : public IModule
 {
-    OBJECT(UrhoRenderingModule);
+    OBJECT(UrhoRenderer);
 
 public:
-    UrhoRenderingModule(Framework* owner);
-    virtual ~UrhoRenderingModule();
+    UrhoRenderer(Framework* owner);
+    virtual ~UrhoRenderer();
 
     virtual void Load();
     virtual void Initialize();

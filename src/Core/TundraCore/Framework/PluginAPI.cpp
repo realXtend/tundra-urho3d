@@ -67,14 +67,22 @@ void PluginAPI::LoadPlugin(const String &filename)
     const String pluginSuffix = ".so";
 #endif
 
-    FileSystem* fs = GetSubsystem<FileSystem>();
+    String path;
+#ifdef ANDROID
+    /// \todo Should not hardcode the package name, but transmit it from Java to native code
+    // Note that using just dlopen() with no path name will not succeed
+    path = "/data/data/com.github.realxtend/lib/lib" + filename.Trimmed() + pluginSuffix;
+#else
+    path = GetNativePath(owner->InstallationDirectory() + "Plugins/" + filename.Trimmed() + pluginSuffix);
+#endif
 
-    String path = GetNativePath(owner->InstallationDirectory() + "Plugins/" + filename.Trimmed() + pluginSuffix);
+    FileSystem* fs = GetSubsystem<FileSystem>();
     if (!fs->FileExists(path))
     {
         LOGWARNINGF("Cannot load plugin \"%s\" as the file does not exist.", path.CString());
         return;
     }
+
     LOGINFO("Loading plugin " + filename);
     //owner->App()->SetSplashMessage("Loading plugin " + filename);
 
@@ -96,7 +104,7 @@ void PluginAPI::LoadPlugin(const String &filename)
 #else
     const char *dlerrstr;
     dlerror();
-    void *module = dlopen(path.toStdString().c_str(), RTLD_GLOBAL|RTLD_LAZY);
+    void *module = dlopen(path.CString(), RTLD_GLOBAL|RTLD_LAZY);
     if ((dlerrstr=dlerror()) != 0)
     {
         LOGERROR("Failed to load plugin from file \"" + path + "\": Error " + String(dlerrstr) + "!");
@@ -123,8 +131,7 @@ void PluginAPI::UnloadPlugins()
 #ifdef WIN32
         FreeLibrary((HMODULE)plugin.handle);
 #else
-    /// \bug caused memory errors in destructors in the dlclose call chain
-    //        dlclose(iter->handle);
+        dlclose(plugin.handle);
 #endif
     }
     plugins.Clear();
@@ -142,8 +149,10 @@ Vector<String> PluginAPI::ConfigurationFiles() const
     Vector<String> configs;
     Vector<String> cmdLineParams = owner->CommandLineParameters("--config");
     if (cmdLineParams.Size() > 0)
+    {
         foreach(const String &config, cmdLineParams)
             configs.Push(owner->LookupRelativePath(config));
+    }
     return configs;
 }
 

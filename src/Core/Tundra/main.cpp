@@ -3,11 +3,10 @@
 #include "TundraCoreApi.h"
 #include "Framework.h"
 
-#include <string>
-#include <vector>
-
 #if defined(WIN32) // Windows application entry point.
 #include <Windows.h>
+#include <string>
+#include <vector>
 
 using namespace Tundra;
 
@@ -66,7 +65,7 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR l
 extern "C" int SDL_main(int argc, char** argv);
 int SDL_main(int argc, char** argv)
 {
-    return run(argc, argv);
+    return Tundra::run(argc, argv);
 }
 #else
 // Unix entrypoint

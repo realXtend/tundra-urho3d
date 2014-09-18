@@ -650,7 +650,7 @@ void JSONValue::WriteJSONString(String& dest, const String& str)
                 {
                     char buffer[6];
                     sprintf(buffer, "u%04x", c);
-                    dest += buffer;
+                    dest += (const char*)&buffer[0];
                 }
                 break;
             }

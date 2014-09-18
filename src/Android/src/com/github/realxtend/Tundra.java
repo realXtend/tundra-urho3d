@@ -13,25 +13,11 @@ public class Tundra extends SDLActivity {
 
     @Override
     protected boolean onLoadLibrary(ArrayList<String> libraryNames) {
-        // Ensure "Urho3D" and "TundraCore" are at the top of list
-        Collections.sort(libraryNames, new Comparator<String>() {
-            private String sortName(String name) {
-                return name.startsWith("Urho3D") ? "00_" + name : name;
-            }
-
-            @Override
-            public int compare(String lhs, String rhs) {
-                if (lhs.startsWith("Urho3D"))
-                    return -1;
-                if (rhs.startsWith("Urho3D"))
-                    return 1;
-                if (lhs.startsWith("TundraCore"))
-                    return -1;
-                if (rhs.startsWith("TundraCore"))
-                    return 1;
-                return sortName(lhs).compareTo(sortName(rhs));
-            }
-        });
+        // Only load these 3 hardcoded libs, rest are loaded dynamically at runtime
+        libraryNames.clear();
+        libraryNames.add(new String("Urho3D"));
+        libraryNames.add(new String("TundraCore"));
+        libraryNames.add(new String("Tundra"));
 
         return super.onLoadLibrary(libraryNames);
     }

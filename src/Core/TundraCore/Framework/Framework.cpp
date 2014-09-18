@@ -14,6 +14,7 @@
 #include <File.h>
 #include <XMLFile.h>
 #include <ProcessUtils.h>
+#include <Input.h>
 
 using namespace Urho3D;
 
@@ -190,6 +191,12 @@ void Framework::ProcessOneFrame()
     for(unsigned i = 0; i < modules.Size(); ++i)
         modules[i]->Update(dt);
 
+    /// \todo remove Android hack: exit by pressing back button, which is mapped to ESC
+#ifdef ANDROID
+    if (GetSubsystem<Input>()->GetKeyPress(KEY_ESC))
+        Exit();
+#endif
+
     // Perform Urho engine update/render/measure next timestep
     engine->Update();
     engine->Render();
@@ -260,8 +267,12 @@ String Framework::LookupRelativePath(String path) const
     FileSystem* fs = GetSubsystem<FileSystem>();
 
     // If a relative path was specified, lookup from cwd first, then from application installation directory.
-    if (IsAbsolutePath(path))
+    if (!IsAbsolutePath(path))
     {
+        // On Android always refer to the installation directory (inside APK) for relative paths
+#ifdef ANDROID
+        return InstallationDirectory() + path;
+#endif
         String cwdPath = CurrentWorkingDirectory() + path;
         if (fs->FileExists(cwdPath))
             return cwdPath;

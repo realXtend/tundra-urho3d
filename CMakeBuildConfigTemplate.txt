@@ -77,7 +77,7 @@ AddProject(Core TundraConsole)
 ###### MANDATORY PLUGINS ######
 message("\n=========== Configuring Mandatory Plugins ===========\n")
 
-AddProject(Core UrhoRenderingModule)
+AddProject(Core UrhoRenderer)
 
 ###### OPTIONAL PLUGINS ######
 message("\n=========== Configuring Optional Plugins ===========\n")

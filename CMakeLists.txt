@@ -17,6 +17,41 @@ if (COMMAND cmake_policy)
     endif ()
 endif ()
 
+# Compiler-specific C++11 activation. C++11 support is mandatory for Tundra-urho3d.
+if (APPLE) # todo: Test if this works on Linux too
+    if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+        execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
+        if (NOT (GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8))
+            message(FATAL_ERROR "${PROJECT_NAME} C++11 features require GCC 4.8 or greater.")
+        else ()
+            message(STATUS "C++11 features enabled for GCC")
+        endif ()
+    elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+        execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE CLANG_VERSION)
+        if (NOT (CLANG_VERSION VERSION_GREATER 4.1 OR CLANG_VERSION VERSION_EQUAL 4.1))
+            message(FATAL_ERROR "${PROJECT_NAME} C++11 features require clang 4.1 or greater.")
+        else ()
+            message(STATUS "C++11 features enabled for Clang")
+        endif ()
+    else ()
+        message(FATAL_ERROR "Your C++ compiler does not support C++11!")
+    endif ()
+
+    if ("${CMAKE_GENERATOR}" MATCHES "Xcode")
+        set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x")
+        set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
+    endif()
+elseif (UNIX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif (MSVC)
+    # MSVC has partial C++11 support beginning in VC10
+    if (MSVC90)
+        message(FATAL_ERROR "VC9 does not support C++11 features!")
+    endif()
+endif()
+
 macro(PrintUsedEnvVariables)
     # Print out the resolved variables. Note that this does not print the env variables
     # in most cases as they should be resolved to our CMake variables and get cached.

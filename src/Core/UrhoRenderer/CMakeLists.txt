@@ -1,5 +1,5 @@
 # Define target name and output directory
-init_target(UrhoRenderingModule OUTPUT Plugins)
+init_target(UrhoRenderer OUTPUT Plugins)
 
 # Define source files
 file(GLOB CPP_FILES *.cpp)
