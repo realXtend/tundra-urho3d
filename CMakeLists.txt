@@ -223,20 +223,21 @@ if (MSVC)
     endif()
     if (MSVC10)
         set(VC_VER "vc10")
+    elseif(MSVC11)
+        set(VC_VER "vc11")
     elseif(MSVC12)
         set(VC_VER "vc12")
     else()
-        message(WARNING "-- Warning: Unsupported Visual Studio version detected. Currently Visual Studio 2008 and 2010 are supported")
+        message(WARNING "-- Warning: Unsupported Visual Studio version detected. Currently Visual Studio 2010 and newer are supported")
     endif()
 endif()
 
 # Set compiler warning levels.
 # On MSVC, use warning level 4 but disable the following warnings:
-# C4127 conditional expression is constant
 # C4512 'class' : assignment operator could not be generated 
-# TODO Ideally we wouldn't like to disable these, but if we don't, we get warning spam from Qt files.
+# TODO If/when Urho3D is patched and doesn't cause C4512 spam, we can enable it too.
 if (MSVC)
-    add_definitions (/W4 /wd4127 /wd4512)
+    add_definitions (/W4 /wd4512)
 else ()
     add_definitions (-Wall -Wextra -Wno-unknown-pragmas -Wno-unused -Wno-reorder -Wno-switch -Wno-write-strings)
 endif()
