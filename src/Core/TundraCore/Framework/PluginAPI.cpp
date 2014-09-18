@@ -71,7 +71,7 @@ void PluginAPI::LoadPlugin(const String &filename)
 #ifdef ANDROID
     /// \todo Should not hardcode the package name, but transmit it from Java to native code
     // Note that using just dlopen() with no path name will not succeed
-    path = "/data/data/com.github.realxtend/lib/lib" + filename.Trimmed() + pluginSuffix;
+    path = "/data/data/" + owner->PackageName() + "/lib/lib" + filename.Trimmed() + pluginSuffix;
 #else
     path = GetNativePath(owner->InstallationDirectory() + "Plugins/" + filename.Trimmed() + pluginSuffix);
 #endif

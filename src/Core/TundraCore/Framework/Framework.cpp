@@ -5,6 +5,7 @@
 #include "JSON.h"
 #include "PluginAPI.h"
 #include "ConfigAPI.h"
+#include "TundraVersionInfo.h"
 
 #include <Context.h>
 #include <Engine.h>
@@ -23,6 +24,12 @@ namespace Tundra
 
 static int argc;
 static char** argv;
+static String organizationName(TUNDRA_ORGANIZATION_NAME);
+static String applicationName(TUNDRA_APPLICATION_NAME);
+static String versionString(TUNDRA_VERSION_STRING);
+#ifdef ANDROID
+static String packageName(TUNDRA_PACKAGE_NAME);
+#endif
 
 int run(int argc_, char** argv_)
 {
@@ -37,8 +44,6 @@ int run(int argc_, char** argv_)
 
 Framework::Framework(Context* ctx) :
     Object(ctx),
-    organizationName("realXtend"),
-    applicationName("tundra-urho3d"),
     exitSignal(false),
     headless(false)
 {
@@ -538,6 +543,29 @@ void Framework::LoadStartupOptionMap(const JSONValue& value)
             }
         }
     }
+}
+
+const Urho3D::String& Framework::OrganizationName()
+{
+    return organizationName;
+}
+
+const Urho3D::String& Framework::ApplicationName()
+{
+    return applicationName;
+}
+
+#ifdef ANDROID
+const Urho3D::String& Framework::PackageName()
+{
+    return packageName;
+}
+
+#endif
+
+const Urho3D::String& Framework::VersionString()
+{
+    return versionString;
 }
 
 }

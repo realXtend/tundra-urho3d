@@ -4,7 +4,7 @@
 
 #include "TundraCoreApi.h"
 #include "FrameworkFwd.h"
-#include "Signal.h"
+#include "Signals.h"
 
 #include <Object.h>
 
@@ -70,16 +70,18 @@ public:
     Urho3D::String UserDocumentsDirectory() const;
 
     /// Return organization of the application, e.g. "realXtend".
-    const Urho3D::String& OrganizationName() const { return organizationName; }
+    static const Urho3D::String& OrganizationName();
 
-    /// Returns name of the application, "Tundra" usually.
-    const Urho3D::String& ApplicationName() const { return applicationName; }
+    /// Returns name of the application, "Tundra-urho3d" by default.
+    static const Urho3D::String& ApplicationName();
 
-    /// Override organization name.
-    void SetOrganizationName(const Urho3D::String& newName) { organizationName = newName; }
+#ifdef ANDROID
+    /// Returns Android package name.
+    static const Urho3D::String& PackageName();
+#endif
 
-    /// Override application name.
-    void SetApplicationName(const Urho3D::String& newName) { applicationName = newName; }
+    /// Returns application version string.
+    static const Urho3D::String& VersionString();
 
     /// Parse a filename for specific wildcard modifiers, and return as parsed
     /** $(CWD) is expanded to the current working directory.
@@ -150,18 +152,21 @@ private:
     /// Load a JSON map to startup options.
     void LoadStartupOptionMap(const JSONValue& value);
 
+    /// Urho3D engine
     Urho3D::SharedPtr<Urho3D::Engine> engine;
     /// Framework owns the memory of all the modules in the system. These are freed when Framework is exiting.
     Urho3D::Vector<Urho3D::SharedPtr<IModule> > modules;
+    /// PluginAPI
     Urho3D::SharedPtr<PluginAPI> plugin;
+    /// ConfigAPI
     Urho3D::SharedPtr<ConfigAPI> config;
-    Urho3D::String organizationName;
-    Urho3D::String applicationName;
     /// Stores all command line parameters and expanded options specified in the Config XML files, except for the config file(s) themselves.
     OptionsMap startupOptions;
     /// Stores config XML filenames
     Urho3D::Vector<Urho3D::String> configFiles;
+    /// Exiting flag. When raised, the Framework will exit on the next main loop iteration
     bool exitSignal;
+    /// Headless flag. When headless, no rendering window is created
     bool headless;
 };
 
