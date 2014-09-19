@@ -127,7 +127,7 @@ void Framework::Go()
     // Load and initialize plugins
     plugin->LoadPluginsFromCommandLine();
 
-    for(size_t i = 0; i < modules.Size(); ++i)
+    for(uint i = 0; i < modules.Size(); ++i)
     {
         LOGDEBUG("Initializing module " + modules[i]->Name());
         modules[i]->Initialize();
@@ -150,13 +150,13 @@ void Framework::Go()
             ProcessOneFrame();
     }
 
-    for(size_t i = 0; i < modules.Size(); ++i)
+    for(uint i = 0; i < modules.Size(); ++i)
     {
         LOGDEBUG("Uninitializing module " + modules[i]->Name());
         modules[i]->Uninitialize();
     }
 
-    for(size_t i = 0; i < modules.Size(); ++i)
+    for(uint i = 0; i < modules.Size(); ++i)
     {
         LOGDEBUG("Unloading module " + modules[i]->Name());
         modules[i]->Unload();

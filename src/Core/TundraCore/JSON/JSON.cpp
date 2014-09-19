@@ -183,7 +183,7 @@ JSONValue& JSONValue::operator = (const JSONObject& value)
     return *this;
 }
 
-JSONValue& JSONValue::operator [] (size_t index)
+JSONValue& JSONValue::operator [] (uint index)
 {
     if (type != JSON_ARRAY)
         SetType(JSON_ARRAY);
@@ -191,7 +191,7 @@ JSONValue& JSONValue::operator [] (size_t index)
     return (*(reinterpret_cast<JSONArray*>(&data)))[index];
 }
 
-const JSONValue& JSONValue::operator [] (size_t index) const
+const JSONValue& JSONValue::operator [] (uint index) const
 {
     if (type == JSON_OBJECT)
         return (*(reinterpret_cast<const JSONArray*>(&data)))[index];
@@ -346,7 +346,7 @@ void JSONValue::Push(const JSONValue& value)
     (*(reinterpret_cast<JSONArray*>(&data))).Push(value);
 }
 
-void JSONValue::Insert(size_t index, const JSONValue& value)
+void JSONValue::Insert(uint index, const JSONValue& value)
 {
     SetType(JSON_ARRAY);
     (*(reinterpret_cast<JSONArray*>(&data))).Insert(index, value);
@@ -358,13 +358,13 @@ void JSONValue::Pop()
         (*(reinterpret_cast<JSONArray*>(&data))).Pop();
 }
 
-void JSONValue::Erase(size_t pos, size_t length)
+void JSONValue::Erase(uint pos, uint length)
 {
     if (type == JSON_ARRAY)
         (*(reinterpret_cast<JSONArray*>(&data))).Erase(pos, length);
 }
 
-void JSONValue::Resize(size_t newSize)
+void JSONValue::Resize(uint newSize)
 {
     SetType(JSON_ARRAY);
     (*(reinterpret_cast<JSONArray*>(&data))).Resize(newSize);
@@ -407,14 +407,14 @@ void JSONValue::SetNull()
     SetType(JSON_NULL);
 }
 
-size_t JSONValue::Size() const
+uint JSONValue::Size() const
 {
     if (type == JSON_ARRAY)
         return (*(reinterpret_cast<const JSONArray*>(&data))).Size();
     else if (type == JSON_OBJECT)
         return (*(reinterpret_cast<const JSONObject*>(&data))).Size();
     else
-        return 0;
+        return 0U;
 }
 
 bool JSONValue::IsEmpty() const
@@ -662,7 +662,7 @@ void JSONValue::WriteJSONString(String& dest, const String& str)
 
 void JSONValue::WriteIndent(String& dest, int indent)
 {
-    size_t oldLength = dest.Length();
+    uint oldLength = dest.Length();
     dest.Resize(oldLength + indent);
     for (int i = 0; i < indent; ++i)
         dest[oldLength + i] = ' ';

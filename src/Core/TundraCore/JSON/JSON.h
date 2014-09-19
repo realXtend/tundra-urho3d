@@ -92,9 +92,9 @@ public:
     /// Assign a JSON object.
     JSONValue& operator = (const JSONObject& value);
     /// Index as an array. Becomes an array if was not before.
-    JSONValue& operator [] (size_t index);
+    JSONValue& operator [] (uint index);
     /// Const index as an array. Return a null value if not an array.
-    const JSONValue& operator [] (size_t index) const;
+    const JSONValue& operator [] (uint index) const;
     /// Index as an object. Becomes an object if was not before.
     JSONValue& operator [] (const Urho3D::String& key);
     /// Const index as an object. Return a null value if not an object.
@@ -116,13 +116,13 @@ public:
     /// Push a value at the end. Becomes an array if was not before.
     void Push(const JSONValue& value);
     /// Insert a value at position. Becomes an array if was not before.
-    void Insert(size_t index, const JSONValue& value);
+    void Insert(uint index, const JSONValue& value);
     /// Remove the last value. No-op if not an array.
     void Pop();
     /// Remove indexed value(s). No-op if not an array.
-    void Erase(size_t pos, size_t length = 1);
+    void Erase(uint pos, uint length = 1);
     /// Resize array. Becomes an array if was not before.
-    void Resize(size_t newSize);
+    void Resize(uint newSize);
     /// Insert an associative value. Becomes an object if was not before.
     void Insert(const Urho3D::Pair<Urho3D::String, JSONValue>& pair);
     /// Remove an associative value. No-op if not an object.
@@ -137,7 +137,7 @@ public:
     void SetNull();
     
     /// Return number of values for objects or arrays, or 0 otherwise.
-    size_t Size() const;
+    uint Size() const;
     /// Return whether an object or array is empty. Return false if not an object or array.
     bool IsEmpty() const;
     
