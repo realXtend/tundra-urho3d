@@ -52,9 +52,6 @@ IF %BUILD_TYPE%==Debug (
 :: Make sure deps folder exists.
 IF NOT EXIST "%DEPS%". mkdir "%DEPS%"
 
-:: If we use VS2008, framework path (for msbuild) may not be correctly set. Manually attempt to add in that case
-IF %VS_VER%==vs2008 set PATH=C:\Windows\Microsoft.NET\Framework\v3.5;%PATH%
-
 :: Print user-defined variables
 cecho {F0}This script fetches and builds all Tundra dependencies{# #}{\n}
 echo.
@@ -78,17 +75,15 @@ echo    2. Install DirectX SDK June 2010.
 echo     - http://www.microsoft.com/download/en/details.aspx?id=6812
 echo    3. Install CMake and make sure 'cmake' is accessible from PATH.
 echo     - http://www.cmake.org/
-echo    4. Install Visual Studio 2010/2012/2013 (Express is ok, but see section 5).
+echo    4. Install Visual Studio 2010/2012/2013 with latest updates (Express is ok, but see section 5 for 2010).
 echo     - http://www.microsoft.com/visualstudio/eng/downloads
 cecho {0E}   5. Optional: Make sure you have the Visual Studio x64 tools installed{# #}{\n}
-cecho {0E}      before installing the Visual Studio Service Pack 1 (section 6), if{# #}{\n}
-cecho {0E}      wanting to build Tundra as a 64-bit application.{# #}{\n}
-cecho {0E}      NOTE: The x64 tools are not available for the Express editions.{# #}{\n}
-echo    6. Install Visual Studio 2010 Service Pack 1.
-echo     - http://www.microsoft.com/en-us/download/details.aspx?id=23691
-echo    7. Install Windows SDK.
+cecho {0E}      before installing the Visual Studio 2010 Service Pack 1, {# #}{\n}
+cecho {0E}      http://www.microsoft.com/en-us/download/details.aspx?id=23691 {# #}{\n}
+cecho {0E}      if wanting to build Tundra as a 64-bit application.{# #}{\n}
+echo    6. Install Windows SDK.
 echo     - http://www.microsoft.com/download/en/details.aspx?id=8279
-echo    8. Execute this file from Visual Studio 2010/2012/2013 ^(x64^) Command Prompt.
+echo    7. Execute this file from Visual Studio 2010/2012/2013 ^(x64^) Command Prompt.
 
 echo If you are not ready with the above, press Ctrl-C to abort!
 pause

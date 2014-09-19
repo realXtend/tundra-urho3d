@@ -1,4 +1,4 @@
-:: This script initializes various Visual Studio -related envinronment variables needed for building
+:: This script initializes various Visual Studio -related environment variables needed for building
 :: NOTE: The delayed environment variable expansion needs to be enabled before calling this.
 
 @echo off
@@ -12,8 +12,6 @@ set GENERATOR_VS2012="Visual Studio 11"
 set GENERATOR_VS2012_WIN64="Visual Studio 11 Win64"
 set GENERATOR_VS2010="Visual Studio 10"
 set GENERATOR_VS2010_WIN64="Visual Studio 10 Win64"
-set GENERATOR_VS2008="Visual Studio 9 2008"
-set GENERATOR_VS2008_WIN64="Visual Studio 9 2008 Win64"
 set GENERATOR_DEFAULT=%GENERATOR_VS2010%
 
 IF "!GENERATOR!"=="" (
@@ -21,7 +19,7 @@ IF "!GENERATOR!"=="" (
     Utils\cecho {0E}VSConfig.cmd: Warning: Generator not passed - using the default %GENERATOR_DEFAULT%.{# #}{\n}
 )
 
-IF NOT !GENERATOR!==%GENERATOR_VS2008% IF NOT !GENERATOR!==%GENERATOR_VS2008_WIN64% IF NOT !GENERATOR!==%GENERATOR_VS2010% IF NOT !GENERATOR!==%GENERATOR_VS2010_WIN64% IF NOT !GENERATOR!==%GENERATOR_VS2012% IF NOT !GENERATOR!==%GENERATOR_VS2012_WIN64% IF NOT !GENERATOR!==%GENERATOR_VS2013% IF NOT !GENERATOR!==%GENERATOR_VS2013_WIN64% (
+IF NOT !GENERATOR!==%GENERATOR_VS2010% IF NOT !GENERATOR!==%GENERATOR_VS2010_WIN64% IF NOT !GENERATOR!==%GENERATOR_VS2012% IF NOT !GENERATOR!==%GENERATOR_VS2012_WIN64% IF NOT !GENERATOR!==%GENERATOR_VS2013% IF NOT !GENERATOR!==%GENERATOR_VS2013_WIN64% (
     Utils\cecho {0C}VSConfig.cmd: Invalid or unsupported CMake generator string passed: !GENERATOR!. Cannot proceed, aborting!{# #}{\n}
     GOTO :EOF
 )
@@ -29,6 +27,7 @@ IF NOT !GENERATOR!==%GENERATOR_VS2008% IF NOT !GENERATOR!==%GENERATOR_VS2008_WIN
 :: Figure out the build configuration from the CMake generator string.
 :: Are we building 32-bit or 64-bit version.
 set TARGET_ARCH=x86
+:: TODO This can be probably removed.
 set INTEL_ARCH=ia32
 :: Visual Studio platform name.
 set VS_PLATFORM=Win32
@@ -50,10 +49,6 @@ FOR %%i IN (%GENERATOR_SPLIT%) DO (
         set VS_VER=vs2010
         set VC_VER=vc10
     )
-    IF %%i==2008 (
-        set VS_VER=vs2008
-        set VC_VER=vc9
-    )
     REM Are going to perform a 64-bit build?
     IF %%i==Win64 (
         set TARGET_ARCH=x64
@@ -62,16 +57,8 @@ FOR %%i IN (%GENERATOR_SPLIT%) DO (
     )
 )
 
-:: VS project file extension differs on different VS versions
-:: VS2008_OR_VS2010 is "vs2008" when building with VS 2008 and "vs2010" on all newer VS versions.
-IF %VS_VER%==vs2008 (
-    set VCPROJ_FILE_EXT=vcproj
-    set VS2008_OR_VS2010=vs2008
-) ELSE (
-    set VCPROJ_FILE_EXT=vcxproj
-    set VS2008_OR_VS2010=vs2010
-)
-
+:: VS project file extension is vcxproj on VS 2010 and newer always.
+set VCPROJ_FILE_EXT=vcxproj
 :: Populate path variables
 cd ..\..
 set ORIGINAL_PATH=%PATH%
