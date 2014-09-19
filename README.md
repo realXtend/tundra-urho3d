@@ -23,6 +23,10 @@ or Updates installed. Visual Studio 2012 should work, but is not tested regularl
 5. Now run CMake batch script corresponding to your desired build configration. This script will set up the needed build environment variables for CMake and invoke CMake to generate a tundra-urho3d.sln solution into the <Tundra-urho3d>\build subdirectory.
 6. Build Tundra-urho3d using the solution file.
 
+When building with the Windows 8 SDK, copy d3dcompiler_46.dll `from C:\Program Files (x86)\Windows Kits\8.0\bin\<x86|x64>`
+to `bin` directory so that the executables will run correctly.
+
+
 ### Windows, targeting Android
 
 1. Navigate to `<Tundra-urho3d>\tools\Windows\`
