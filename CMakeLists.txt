@@ -233,11 +233,8 @@ if (MSVC)
 endif()
 
 # Set compiler warning levels.
-# On MSVC, use warning level 4 but disable the following warnings:
-# C4512 'class' : assignment operator could not be generated 
-# TODO If/when Urho3D is patched and doesn't cause C4512 spam, we can enable it too.
 if (MSVC)
-    add_definitions (/W4 /wd4512)
+    add_definitions(/W4)
 else ()
     add_definitions (-Wall -Wextra -Wno-unknown-pragmas -Wno-unused -Wno-reorder -Wno-switch -Wno-write-strings)
 endif()
