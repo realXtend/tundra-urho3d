@@ -20,7 +20,7 @@ or Updates installed. Visual Studio 2012 should work, but is not tested regularl
 3. Run `BuildDeps_<BuildType>`, or `BuildDepsX64_<BuildType>` (if wanting to do a 64-bit build). RelWithDebInfo is recommended for the common development work, but you probably want to have the Debug builds available too.
    The build script will print information what you need in order to proceed, follow the instructions carefully. You can abort the script with Ctrl+C at this point and setup your environment.
 4. After the script has completed, the dependencies can be found `deps-vs<VersionNumber>-<TargetArchitecture>\`. The needed runtime libraries are automatically copied to `bin\`.
-5. Now run CMake batch script corresponding to your desired build configration. This script will set up the needed build environment variables for CMake and invoke CMake to generate a tundra-urho3d.sln solution into the <Tundra-urho3d>\build subdirectory.
+5. Now run CMake batch script corresponding to your desired build configration. This script will set up the needed build environment variables for CMake and invoke CMake to generate a tundra-urho3d.sln solution into the `<Tundra-urho3d>\build-vs<VersionNumber>-<TargetArchitecture>` subdirectory.
 6. Build Tundra-urho3d using the solution file.
 
 When building with the Windows 8 SDK, copy d3dcompiler_46.dll `from C:\Program Files (x86)\Windows Kits\8.0\bin\<x86|x64>`

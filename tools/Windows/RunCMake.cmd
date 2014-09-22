@@ -17,9 +17,10 @@ echo.
 
 SET TUNDRA_DEP_PATH=%DEPS%
 SET URHO3D_HOME=%DEPS%\urho3d
+SET BUILD_PATH=build-%VS_VER%-%TARGET_ARCH%
 
-IF NOT EXIST build mkdir build
-cd build
+IF NOT EXIST %BUILD_PATH% mkdir %BUILD_PATH%
+cd %BUILD_PATH%
 
 IF NOT EXIST tundra-urho3d.sln. (
     IF EXIST CMakeCache.txt. del /Q CMakeCache.txt
