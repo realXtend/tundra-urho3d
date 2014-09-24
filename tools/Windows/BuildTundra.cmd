@@ -1,23 +1,37 @@
-:: This batch file expects "/p:Configuration=<Debug/Release/RelWithDebInfo/MinSizeRel>" as the first parameter.
-:: If the parameter is not provided, the solution file seems to default to Debug build.
-:: Due to the "=" in the parameter, the actual build type string is nicely available using %2.
+:: This batch file expects build type as the first parameter and a valid CMake generator string as the second
+:: parameter, e.g. BuildTundra.cmd RelWithDebInfo "Visual Studio 12 Win64". If no CMake generator is provided,
+:: the default generator (VS 2010 x86 currently) is used. Rest of the parameters are passed for the MSBuild call.
+:: Typically you may want to pass at least /m to enable parallel build.
+
 @echo off
+
+:: Enable the delayed environment variable expansion needed in VSConfig.cmd.
+setlocal EnableDelayedExpansion
+:: TODO Calling VSConfig.cmd here and once again in RunCMake.cmd.
+call VSConfig.cmd %2
+
+set BUILD_PATH=build-%VS_VER%-%TARGET_ARCH%
+set BUILD_TYPE=%1
+IF "%BUILD_TYPE%"=="" set BUILD_TYPE=RelWithDebInfo
+:: If no build type would be passed for MSBuild, it seems to default to Debug.
+
 call RunCMake.cmd
 
-cd ..\..\build
+cd ..\..\%BUILD_PATH%
 set CALL_CECHO=..\tools\Windows\Utils\cecho
 %CALL_CECHO% {0D}Building %2 Tundra-Urho3D.{# #}{\n}
-MSBuild tundra-urho3d.sln %*
+MSBuild tundra-urho3d.sln /p:Configuration=%BUILD_TYPE% %3 %4 %5 %6 %7 %8 %9
 IF NOT %ERRORLEVEL%==0 GOTO :Error
 echo.
 
-%CALL_CECHO% {0A}%2 Tundra-Urho3D build finished.{# #}{\n}
+%CALL_CECHO% {0A}%BUILD_TYPE% Tundra-Urho3D build finished.{# #}{\n}
 goto :End
 
 :Error
 echo.
-%CALL_CECHO% {0C}%2 Tundra-Urho3D build failed!{# #}{\n}
+%CALL_CECHO% {0C}%BUILD_TYPE% Tundra-Urho3D build failed!{# #}{\n}
 
 :End
 :: Finish in same directory we started in.
 cd ..\tools\Windows
+endlocal

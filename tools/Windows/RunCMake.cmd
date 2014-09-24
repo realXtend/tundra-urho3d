@@ -1,3 +1,7 @@
+:: This batch file expects a valid CMake generator string passed as the first parameter, or no parameters at all.
+:: If no CMake generator is provided, the default generator (VS 2010 x86 currently) is used. All of the parameters
+:: provided, if any, are passed to the CMake invocation.
+
 @echo off
 echo.
 
