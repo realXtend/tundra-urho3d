@@ -42,6 +42,11 @@ if (MSVC)
         add_definitions(-DMEMORY_LEAK_CHECK)
     endif()
 
+    # If requested, enable Visual Studio's static code analysis (2010 Premium and Express >= 2012).
+    if (RUN_VS_ANALYZE)
+        add_definitions(/analyze)
+    endif()
+
     # Common flags for all configurations: build with multiple processes and increase PCH size in order to overcome occasional errors.
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MP /Zm800")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MP /Zm800")
