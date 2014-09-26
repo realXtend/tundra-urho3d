@@ -58,57 +58,23 @@ macro(PrintUsedBuildConfig)
     message("")
 endmacro()
 
-macro(GetLastElementFromPath dirPath outputParam)
-    string (FIND ${dirPath} "/" lastPathSepIndex REVERSE)
-    # This path does not have any subdirs in it
-    if (${lastPathSepIndex} STREQUAL "-1")
-        set (${outputParam} ${dirPath})
-    # Path has subdirs, pick the last
-    else ()
-        math(EXPR lastPathSepIndex "${lastPathSepIndex} + 1")
-        string(SUBSTRING ${dirPath} ${lastPathSepIndex} -1 ${outputParam})
-    endif ()
-endmacro ()
-
-macro(RemoveLastElementFromPath dirPath outputParam)
-    string (FIND ${dirPath} "/" lastPathSepIndex REVERSE)
-    # This path does not have any subdirs in it
-    if (${lastPathSepIndex} STREQUAL "-1")
-        set (${outputParam} ${dirPath})
-    # Path has subdirs, pick the path in front of it
-    else ()
-        string(SUBSTRING ${dirPath} 0 ${lastPathSepIndex} ${outputParam})
-    endif ()
-endmacro ()
-
 # AddProject takes in one or two parameters:
-# - One param  : argv0 == the relative directory (to the root CMakeLists.txt) where you project is and that contains the CMakeLists.txt for this project.
-# - Two params : argv0 == 'Core'|'Application'. argv1 folder name of the project in src/
+# - One param:  argv0 == the relative directory (to the root CMakeLists.txt) where you project is and that contains the CMakeLists.txt for this project.
+# - Two params: argv0 == project type/category (used also for the solution folder's name), wrap in double quotes if the name contains spaces
+#               argv1 == same as in one arg situation.
 # More useful for building the Tundra project when including platform provided projects.
-# Note: One param projects or two param "Application" type plugins will always be omitted if BUILD_SDK_ONLY is true!
 # Note: Due to the CMake's add_subdirectory restrictions, the directory cannot be outside the Tundra source tree, hopefully we can go around this one day.
-# Examples:     AddProject(Core TundraCore)
-#               AddProject(Application Plugins/JavascriptModule)
+# Examples:     AddProject(TundraCore)
+#               AddProject("Application Plugins" Plugins/JavascriptModule)
 #               AddProject(mysubdir/MyPlugin)
 function(AddProject)
-    set (PROJECT_TYPE ${ARGV0})
+    set(PROJECT_TYPE ${ARGV0})
     if (NOT ARGV1)
-        if (BUILD_SDK_ONLY)
-            message (STATUS "** Omitting Application level project " ${ARGV0} " because BUILD_SDK_ONLY is set to TRUE")
-        else ()
-            add_subdirectory(${ARGV0})
-        endif ()
-    else ()
-        if (NOT ${ARGV0} STREQUAL "Core" AND NOT ${ARGV0} STREQUAL "Application")
-            message (FATAL_ERROR "You are trying to use AddProject macro with invalid project type parameter: " ${ARGV0} " with project name " ${ARGV1})
-        endif()
-        if (BUILD_SDK_ONLY AND ${ARGV0} STREQUAL "Application")
-            message (STATUS "** Omitting Application level project " ${ARGV1} " because BUILD_SDK_ONLY is set to TRUE")
-        else ()
-            add_subdirectory(src/${ARGV1})
-        endif ()
-    endif ()
-    set (PROJECT_TYPE "")
+        add_subdirectory(${ARGV0})
+    else()
+        add_subdirectory(src/${ARGV1})
+    endif()
+    set(PROJECT_TYPE "")
 endfunction()
 
 # Adds the given folder_name into the source files of the current project. Use this macro when your module contains .cpp and .h files in several subdirectories.
@@ -135,6 +101,7 @@ macro(SetupCompileFlagsWithPCH)
             endif()
         endforeach()
     endif()
+    # TODO PCH for other platforms
 endmacro()
 
 # Sets up the compilation flags without PCH. For now just set the DEBUG_CPP_NAME to each compilation unit.
