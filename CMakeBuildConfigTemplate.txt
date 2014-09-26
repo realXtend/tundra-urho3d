@@ -23,11 +23,10 @@ set(TUNDRACORE_SHARED 1)
 set(ENABLE_BUILD_OPTIMIZATIONS 1)
 
 # Enable solution folders. VS Express < 2012 doesn't support solution folders.
+# Use set(PROJECT_TYPE "My Plugins") to set solution folders.
 if (NOT MSVC10)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif()
-
-message("\n")
 
 if (TUNDRACORE_SHARED)
     add_definitions(-DTUNDRACORE_SHARED)
@@ -64,19 +63,19 @@ if (MSVC)
     endif()
 endif()
 
-message("\n=========== Configuring Tundra Framework ===========\n")
+message("=========== Configuring Tundra Framework ===========\n")
 
-AddProject(Core TundraCore)
+AddProject(TundraCore TundraCore)
 
-message("\n=============== Configuring Plugins ================\n")
+message("=============== Configuring Plugins ================\n")
 
-AddProject(Core Plugins/UrhoRenderer)
+AddProject(Plugins Plugins/UrhoRenderer)
 
-message("\n========= Configuring Tundra Executable(s) =========\n")
+message("========= Configuring Tundra Executable(s) =========\n")
 
-AddProject(Core Tundra/Tundra)
+AddProject(Tundra Tundra/Tundra)
 # For Windows, also add a version of the project which builds using CONSOLE subsystem.
 # This is otherwise equivalent to the Tundra executable, but this one always shows the console window.
 if (WIN32)
-    AddProject(Core Tundra/TundraConsole)
+    AddProject(Tundra Tundra/TundraConsole)
 endif()
