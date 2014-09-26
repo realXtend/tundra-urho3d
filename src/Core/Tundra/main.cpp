@@ -10,14 +10,14 @@
 
 using namespace Tundra;
 
-int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR lpCmdLine, int /*nShowCmd*/){
+int WINAPI WinMain(_In_ HINSTANCE /*hInstance*/, _In_opt_ HINSTANCE /*hPrevInstance*/, _In_ LPSTR lpCmdLine, _In_ int /*nShowCmd*/){
     std::string cmdLine(lpCmdLine);
 
     // Parse the Windows command line.
     std::vector<std::string> arguments;
-    unsigned i;
-    unsigned cmdStart = 0;
-    unsigned cmdEnd = 0;
+    size_t i;
+    size_t cmdStart = 0;
+    size_t cmdEnd = 0;
     bool cmd = false;
     bool quote = false;
 
@@ -52,9 +52,9 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR l
         arguments.push_back(cmdLine.substr(cmdStart, i-cmdStart));
 
     std::vector<const char*> argv;
-    for(size_t i = 0; i < arguments.size(); ++i)
+    for(i = 0; i < arguments.size(); ++i)
         argv.push_back(arguments[i].c_str());
-    
+
     if (argv.size())
         return run((int)argv.size(), (char**)&argv[0]);
     else
@@ -74,4 +74,3 @@ int main(int argc, char **argv)
     return run(argc, argv);
 }
 #endif
-
