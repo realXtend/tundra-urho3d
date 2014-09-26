@@ -71,6 +71,6 @@ int SDL_main(int argc, char** argv)
 // Unix entrypoint
 int main(int argc, char **argv)
 {
-    return run(argc, argv);
+    return Tundra::run(argc, argv);
 }
 #endif
