@@ -23,8 +23,8 @@ set(TUNDRACORE_SHARED 1)
 set(ENABLE_BUILD_OPTIMIZATIONS 1)
 
 # Enable solution folders
-if (NOT MSVC)
-    # Cannot enable solution folders by default when using Visual Studio as the Express versions don't support them.
+ # VS Express < 2012 doesn't support solution folders.
+if (NOT MSVC10)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif()
 
