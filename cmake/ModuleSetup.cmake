@@ -25,15 +25,6 @@ macro (init_target NAME)
     
     message ("** " ${TARGET_NAME})
 
-    # Headers or libraries are found here will just work
-    # Removed from windows due we dont have anything here directly.
-    # On linux this might have useful things but still ConfigurePackages should
-    # find them properly so essentially this is not needed.
-    if (NOT WIN32 AND NOT APPLE)
-        include_directories (${ENV_TUNDRA_DEP_PATH}/include)
-        link_directories (${ENV_TUNDRA_DEP_PATH}/lib)
-    endif ()
-    
     # Include our own module path. This makes #include "x.h"
     # work in project subfolders to include the main directory headers
     # note: CMAKE_INCLUDE_CURRENT_DIR could automate this

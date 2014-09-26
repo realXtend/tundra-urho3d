@@ -195,7 +195,8 @@ macro (setup_install_target)
                      RUNTIME DESTINATION "bin/${INSTALL_SHARED_TARGET}" # DLL platforms shared libs are RUNTIME
                      CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES})
 
-            if (NOT INSTALL_BINARIES_ONLY)
+            # todo: This gives errors on linux. This should be enabled if we want linux SDK builds.
+            if (MSVC AND NOT INSTALL_BINARIES_ONLY)
                 install(TARGETS ${TARGET_NAME} ARCHIVE DESTINATION "lib" CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES}) # DLL platforms static link part of the shared lib are ARCHIVE
             endif()
         endif()

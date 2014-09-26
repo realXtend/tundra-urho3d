@@ -4,6 +4,30 @@ project(tundra-urho3d)
 # CMake version requirement
 cmake_minimum_required(VERSION 2.6.0)
 
+# Declare options and cached variables that
+# can be overridden via  cmake cmd line -D<var>=foo
+
+set (URHO3D_HOME         ""      CACHE PATH "Urho3D dependency directory")
+set (MATHGEOLIB_HOME     ""      CACHE PATH "MathGeoLib dependency directory")
+
+# If not passed to cmake, set and cache normalized path for environment variables
+if (NOT URHO3D_HOME)
+    file (TO_CMAKE_PATH "$ENV{URHO3D_HOME}" URHO3D_HOME)
+    set (URHO3D_HOME ${URHO3D_HOME} CACHE PATH "Urho3D dependency directory")
+endif()
+if (NOT MATHGEOLIB_HOME)
+    file (TO_CMAKE_PATH "$ENV{MATHGEOLIB_HOME}" MATHGEOLIB_HOME)
+    set (MATHGEOLIB_HOME ${MATHGEOLIB_HOME} CACHE PATH "MathGeoLib dependency directory")
+endif()
+
+# If we still haven't resolved dependencies report a fatal error
+if (NOT URHO3D_HOME)
+    message(FATAL_ERROR "URHO3D_HOME could not be resolved from a environment variable or from cmake cache!")
+endif ()
+if (NOT MATHGEOLIB_HOME)
+    message(FATAL_ERROR "MATHGEOLIB_HOME could not be resolved from a environment variable or from cmake cache!")
+endif ()
+
 # CMake policies
 if (COMMAND cmake_policy)
     cmake_policy(SET CMP0005 NEW)
@@ -42,14 +66,10 @@ if (MSVC)
     endif()
 endif()
 
-macro(PrintUsedEnvVariables)
-    # Print out the resolved variables. Note that this does not print the env variables
-    # in most cases as they should be resolved to our CMake variables and get cached.
-    # This way this printed list wont lie if ran without env variables and we are still
-    # successfully finding all the deps from our cacher (or in bad cases assumed) dirs.
-    message("\n============ Used Environment Variables ============\n")
-    message(STATUS "TUNDRA_DEP_PATH  = " ${ENV_TUNDRA_DEP_PATH})
+macro(PrintUsedDependencyVariables)
+    message("\n============ Dependency Variables ==================\n")
     message(STATUS "URHO3D_HOME      = " ${URHO3D_HOME})
+    message(STATUS "MATHGEOLIB_HOME  = " ${MATHGEOLIB_HOME})
 endmacro()
 
 macro(PrintUsedBuildConfig)
@@ -210,36 +230,13 @@ endif()
 add_definitions (-DPCH_ENABLED)
 SET(PCH_ENABLED 1)
 
-# Set normalized path for common environment variables
-file (TO_CMAKE_PATH "$ENV{TUNDRA_DEP_PATH}" ENV_TUNDRA_DEP_PATH)
-file (TO_CMAKE_PATH "$ENV{URHO3D_HOME}" ENV_URHO3D_HOME)
+PrintUsedDependencyVariables ()
 
-# Utilize CMake's cache for the environment variables. This is needed if e.g.. TUNDRA_DEP_PATH
-# was set on the first run of CMake, but once e.g.. Visual Studio auto runs CMake (after changes to any CMakeLists.txt)
-# it is no longer set. This will result us in losing all the acquired dependency information that was not found with
-# CMake macros find_packade, find_library etc. that automatically cache. This is more flexible for many use cases to remember
-# if we once got a valid TUNDRA_DEP_PATH. If env variable TUNDRA_DEP_PATH is present, the cache is never read but instead updated.
-if (NOT ENV_TUNDRA_DEP_PATH)
-    set (ENV_TUNDRA_DEP_PATH ${CACHED_ENV_TUNDRA_DEP_PATH})
-else ()
-    set (CACHED_ENV_TUNDRA_DEP_PATH ${ENV_TUNDRA_DEP_PATH} CACHE PATH "Tundra build dependency path" FORCE)
-endif ()
-if (NOT ENV_URHO3D_HOME)
-    set (ENV_URHO3D_HOME ${CACHED_ENV_URHO3D_HOME})
-else ()
-    set (CACHED_ENV_URHO3D_HOME ${ENV_URHO3D_HOME} CACHE PATH "Tundra build Urho3D path" FORCE)
-endif ()
-
-# If we still haven't resolved TUNDRA_DEP_PATH report a fatal error.
-if (NOT ENV_TUNDRA_DEP_PATH)
-    message(FATAL_ERROR "TUNDRA_DEP_PATH could not be resolved from a environment variable or from cmake cache!")
-endif ()
-
-message("\n\n============= Configuring Dependencies =============\n")
+message("\n============ Configuring Dependencies ==============\n")
 
 # Set CMake custom module path & include them
 # The following CMake modules are required for the project to build.
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ENV_URHO3D_HOME}/Source/CMake/Modules ${CMAKE_SOURCE_DIR}/cmake)
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${URHO3D_HOME}/Source/CMake/Modules ${CMAKE_SOURCE_DIR}/cmake)
 include (FindUrho3D)
 include (ConfigurePackages)
 include (ModuleSetup)
@@ -250,9 +247,6 @@ configure_urho3d()
 
 # Find/configure MathGeoLib
 configure_mathgeolib()
-
-message(STATUS "MathGeoLib debug libs " ${MATHGEOLIB_DEBUG_LIBRARIES})
-message(STATUS "MathGeoLib libs " ${MATHGEOLIB_LIBRARIES})
 
 # Set global hardcoded install prefix. User cannot change this at the moment, until we figure how we want to use this!
 # Call the cleanup step that cleans the install prefix before every installations. This is important as module setups might change between builds.
@@ -295,5 +289,4 @@ endmacro()
 # edit CMakeBuildConfig.txt and rerun cmake.
 include(${CMAKE_BINARY_DIR}/CMakeBuildConfig.txt)
 
-PrintUsedEnvVariables ()
 PrintUsedBuildConfig ()
