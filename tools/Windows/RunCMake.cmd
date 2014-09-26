@@ -19,8 +19,6 @@ echo All arguments   = %*
 
 echo.
 
-SET TUNDRA_DEP_PATH=%DEPS%
-SET URHO3D_HOME=%DEPS%\urho3d
 SET BUILD_PATH=build-%VS_VER%-%TARGET_ARCH%
 
 IF NOT EXIST %BUILD_PATH% mkdir %BUILD_PATH%
@@ -31,7 +29,7 @@ IF NOT EXIST tundra-urho3d.sln. (
     cecho {0D}Running CMake for Tundra.{# #}{\n}
     IF "%2"=="" (
         REM No extra arguments provided, trust that GENERATOR is set properly.    
-        cmake.exe .. -G %GENERATOR%
+        cmake.exe .. -G %GENERATOR% -DURHO3D_HOME=%DEPS%\urho3d -DMATHGEOLIB_HOME=%DEPS%\MathGeoLib\build
     ) ELSE (
         REM Extra arguments has been provided. As CMake options are typically of format -DINSTALL_BINARIES_ONLY:BOOL=ON,
         REM i.e. they contain an equal sign, they will mess up the batch file argument parsing if the arguments are passed on
