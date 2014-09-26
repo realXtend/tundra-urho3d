@@ -81,40 +81,14 @@ macro(RemoveLastElementFromPath dirPath outputParam)
     endif ()
 endmacro ()
 
-# The AddEntityComponent macro adds the static EC lib from the given sourceFolder directory to the build.
-# The componentName == A subfolder in src/EntityComponents/ or a relative path to the EC directory where the CMakeLists.txt is located.
-# Use this macro when adding ECs to the build, since this macro tracks the set of ECs that are added, so that the individual
-# modules get #defines in C++ code for each EC that is present. This allows conditionally excluding ECs from the build.
-# Note that for eg. AddEntityComponent(3rdparty/myecs/EC_Thingie) the define will be EC_Thingie_ENABLED and you would expect.
-# Examples:     AddEntityComponent(EC_Sound)
-#               AddEntityComponent(3rdparty/myecs/EC_Thingie)
-macro(AddEntityComponent componentName)
-    set (PROJECT_TYPE "EntityComponents")
-    # Chekc if the component is in our default entity components location
-    # note: from cmake docs: IS_DIRECTORY Behavior is well-defined only for full paths.
-    if (IS_DIRECTORY ${PROJECT_BINARY_DIR}/src/EntityComponents/${componentName})
-        add_subdirectory (src/EntityComponents/${componentName})
-        set (${componentName}_ENABLED 1)
-        set (USED_ENTITYCOMPONENTS ${USED_ENTITYCOMPONENTS} ${componentName})
-    elseif (IS_DIRECTORY ${PROJECT_BINARY_DIR}/${componentName})
-        add_subdirectory (${componentName})
-        GetLastElementFromPath(${componentName} compNameFromRelPath)
-        set(${compNameFromRelPath}_ENABLED 1)
-        set(USED_ENTITYCOMPONENTS ${USED_ENTITYCOMPONENTS} ${compNameFromRelPath})
-    else ()
-        message(FATAL_ERROR "Could not resolve AddEntityComponent() call with path " ${componentName} ". Are you sure the component is there?")
-    endif ()
-    set (PROJECT_TYPE "")
-endmacro()
-
-# AddProject takes in one or two parameters: 
+# AddProject takes in one or two parameters:
 # - One param  : argv0 == the relative directory (to the root CMakeLists.txt) where you project is and that contains the CMakeLists.txt for this project.
-# - Two params : argv0 == 'Core'|'Application'. argv1 folder name of the project in the src/argv0/
+# - Two params : argv0 == 'Core'|'Application'. argv1 folder name of the project in src/
 # More useful for building the Tundra project when including platform provided projects.
 # Note: One param projects or two param "Application" type plugins will always be omitted if BUILD_SDK_ONLY is true!
 # Note: Due to the CMake's add_subdirectory restrictions, the directory cannot be outside the Tundra source tree, hopefully we can go around this one day.
-# Examples:     AddProject(Core Input)
-#               AddProject(Application JavascriptModule)
+# Examples:     AddProject(Core TundraCore)
+#               AddProject(Application Plugins/JavascriptModule)
 #               AddProject(mysubdir/MyPlugin)
 function(AddProject)
     set (PROJECT_TYPE ${ARGV0})
@@ -131,19 +105,11 @@ function(AddProject)
         if (BUILD_SDK_ONLY AND ${ARGV0} STREQUAL "Application")
             message (STATUS "** Omitting Application level project " ${ARGV1} " because BUILD_SDK_ONLY is set to TRUE")
         else ()
-            add_subdirectory(src/${ARGV0}/${ARGV1})
+            add_subdirectory(src/${ARGV1})
         endif ()
     endif ()
     set (PROJECT_TYPE "")
 endfunction()
-
-# Generates in the current project a #define for each EC that has been added to the build. Use this macro in your module CMakeLists.txt
-# to receive information in C++ about which ECs have been added to the project. This allows supporting conditional compilation of the ECs in your module.
-macro(GetEntityComponents)
-   foreach(componentName ${USED_ENTITYCOMPONENTS})
-      add_definitions(-D${componentName}_ENABLED)
-   endforeach()
-endmacro()
 
 # Adds the given folder_name into the source files of the current project. Use this macro when your module contains .cpp and .h files in several subdirectories.
 macro(AddSourceFolder folder_name)
@@ -314,10 +280,10 @@ endif ()
 
 # Convenience macro for including all TundraCore subfolders.
 macro(UseTundraCore)
-    include_directories(${CMAKE_SOURCE_DIR}/src/Core/TundraCore/ 
-        ${CMAKE_SOURCE_DIR}/src/Core/TundraCore/Signals
-        ${CMAKE_SOURCE_DIR}/src/Core/TundraCore/Framework
-        ${CMAKE_SOURCE_DIR}/src/Core/TundraCore/JSON
+    include_directories(${CMAKE_SOURCE_DIR}/src/TundraCore/
+        ${CMAKE_SOURCE_DIR}/src/TundraCore/Signals
+        ${CMAKE_SOURCE_DIR}/src/TundraCore/Framework
+        ${CMAKE_SOURCE_DIR}/src/TundraCore/JSON
     )
     # Using TundraCore requires Urho3D headers as well (SharedPtr etc.)
     include_directories(${URHO3D_INCLUDE_DIRS})

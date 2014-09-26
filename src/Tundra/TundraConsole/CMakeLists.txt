@@ -12,7 +12,7 @@ set (SOURCE_FILES ${CPP_FILES} ${H_FILES})
 SetupCompileFlags()
 
 UseTundraCore()
-use_core_modules(TundraCore)
+use_modules(TundraCore)
 
 build_executable(${TARGET_NAME} ${SOURCE_FILES} ${RESOURCE_FILES})
 

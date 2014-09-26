@@ -70,14 +70,13 @@ message("\n=========== Configuring Tundra Framework ===========\n")
 ## for the project to build. None of these can be omitted.
 
 AddProject(Core TundraCore)
-
-AddProject(Core Tundra)
-AddProject(Core TundraConsole)
+AddProject(Core Tundra/Tundra)
+AddProject(Core Tundra/TundraConsole)
 
 ###### MANDATORY PLUGINS ######
 message("\n=========== Configuring Mandatory Plugins ===========\n")
 
-AddProject(Core UrhoRenderer)
+AddProject(Core Plugins/UrhoRenderer)
 
 ###### OPTIONAL PLUGINS ######
 message("\n=========== Configuring Optional Plugins ===========\n")

@@ -120,8 +120,8 @@ macro (build_library TARGET_NAME LIB_TYPE)
     #if (${TARGET_LIB_TYPE} STREQUAL "SHARED")
     #    if (WIN32)
     #        set(RESOURCE_FILES ${RESOURCE_FILES}
-    #            ${PROJECT_SOURCE_DIR}/src/Core/TundraCore/Resources/resource.h
-    #            ${PROJECT_SOURCE_DIR}/src/Core/TundraCore/Resources/TundraPlugin.rc)
+    #            ${PROJECT_SOURCE_DIR}/src/TundraCore/Resources/resource.h
+    #            ${PROJECT_SOURCE_DIR}/src/TundraCore/Resources/TundraPlugin.rc)
     #    endif()
     #    # TODO non-Windows platforms.
     #endif()
@@ -138,21 +138,10 @@ macro (build_library TARGET_NAME LIB_TYPE)
         endif ()
     endif ()
 
-    # build static libraries to /lib if
-    # - Is part of the SDK (/src/Core/)
-    # - Is a static EC declared by SDK on the build (/src/EntityComponents/)
+    # build static libraries to /lib
     if (${TARGET_LIB_TYPE} STREQUAL "STATIC" AND NOT TARGET_DIR)
-        string (REGEX MATCH  ".*/src/Core/?.*" TARGET_IS_CORE ${CMAKE_CURRENT_SOURCE_DIR})
-        string (REGEX MATCH  ".*/src/EntityComponents/?.*" TARGET_IS_EC ${CMAKE_CURRENT_SOURCE_DIR})
-        if (TARGET_IS_CORE)
-            message (STATUS "-- SDK lib output path:")
-        elseif (TARGET_IS_EC)
-            message (STATUS "-- SDK EC lib output path:")
-        endif ()
-        if (TARGET_IS_CORE OR TARGET_IS_EC)
-            message (STATUS "       " ${PROJECT_BINARY_DIR}/lib)
-            set_target_properties (${TARGET_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
-        endif ()
+        message (STATUS "       " ${PROJECT_BINARY_DIR}/lib)
+        set_target_properties (${TARGET_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
     endif ()
 
     # internal library naming convention
@@ -192,102 +181,6 @@ macro (use_package PREFIX)
     link_directories (${${PREFIX}_LIBRARY_DIRS})
 endmacro (use_package)
 
-# Macro for using modules outside the normal src/{Core|Application}/Project modules: 
-# include module header dir and add link dir. Takes in list of relative paths to the modules.
-# Example:      use_modules(mycompany/plugins/OurModuleOne 3rdParty/AnotherModule)
-#               link_modules(OurModuleOne AnotherModule)
-macro (use_modules)
-    message (STATUS "-- using modules:")
-    foreach (modulePath_ ${ARGN})
-        message (STATUS "       " ${modulePath_})
-        include_directories (${modulePath_})
-        link_directories (${modulePath_})
-    endforeach ()
-endmacro (use_modules)
-
-# Macro for src/Core modules: include local module headers and add link directory
-# Example:      use_core_modules(Framework Input Ui)
-#               link_modules(Framework Input Ui)
-macro (use_core_modules)
-    message (STATUS "-- using Core modules:")
-    set (INTERNAL_MODULE_DIR ${PROJECT_SOURCE_DIR}/src/Core)
-    foreach (module_ ${ARGN})
-        message (STATUS "       " ${module_})
-        include_directories (${INTERNAL_MODULE_DIR}/${module_})
-        link_directories (${INTERNAL_MODULE_DIR}/${module_})
-    endforeach ()
-endmacro (use_core_modules)
-
-# Macro for src/Application modules: include local module headers and add link directory
-# Example:      use_app_modules(JavascripModule)
-#               link_modules(JavascripModule)
-macro (use_app_modules)
-    message (STATUS "-- using Application modules:")
-    set (INTERNAL_MODULE_DIR ${PROJECT_SOURCE_DIR}/src/Application)
-    foreach (module_ ${ARGN})
-        message (STATUS "       " ${module_})
-        include_directories (${INTERNAL_MODULE_DIR}/${module_})
-        link_directories (${INTERNAL_MODULE_DIR}/${module_})
-    endforeach ()
-endmacro (use_app_modules)
-
-# Macro for EC include and link directory addition.
-# The EC list can have items from src/EntityComponents/ or any relative path from the Tundra source tree root.
-# note: You should not use this directly, use link_entity_components that will call this when needed.
-# Example:      use_entity_components(EC_Sound 3rdparty/myecs/EC_Thingie)
-macro (use_entity_components)
-    message (STATUS "-- using Entity-Components:")
-    set (INTERNAL_MODULE_DIR ${PROJECT_SOURCE_DIR}/src/EntityComponents)
-    foreach (entityComponent_ ${ARGN})
-        if (IS_DIRECTORY ${INTERNAL_MODULE_DIR}/${entityComponent_})
-            set (_compNameInternal ${entityComponent_})
-            include_directories (${INTERNAL_MODULE_DIR}/${entityComponent_})
-            link_directories (${INTERNAL_MODULE_DIR}/${entityComponent_})
-        elseif (IS_DIRECTORY ${PROJECT_BINARY_DIR}/${entityComponent_})
-            GetLastElementFromPath(${entityComponent_} _compNameInternal)
-            include_directories (${PROJECT_BINARY_DIR}/${entityComponent_})
-            link_directories (${PROJECT_BINARY_DIR}/${entityComponent_})
-        else ()
-            message(FATAL_ERROR "Could not resolve use_entity_components() call with " ${entityComponent_} ". Are you sure the component is there?")
-        endif ()
-        message (STATUS "       " ${_compNameInternal})
-    endforeach ()
-endmacro (use_entity_components)
-
-# Links the current project to the given EC, if that EC has been added to the build. Otherwise omits the EC.
-# The EC list can have items from src/EntityComponents/ or any relative path from the Tundra source tree root.
-# Example:      link_entity_components(EC_Sound 3rdparty/myecs/EC_Thingie)
-macro(link_entity_components)
-    # Link and track found components
-    set (foundComponents "")
-    foreach(componentName ${ARGN})
-        # Determine if this is a component under the usual static EC dir
-        # or a custom EC that is in a relative path.
-        if (IS_DIRECTORY ${PROJECT_SOURCE_DIR}/src/EntityComponents/${componentName})
-            set (_compNameInternal ${componentName})
-        elseif (IS_DIRECTORY ${PROJECT_BINARY_DIR}/${componentName})
-            GetLastElementFromPath(${componentName} _compNameInternal)
-        else ()
-            message(FATAL_ERROR "Could not resolve link_entity_components() call with " ${componentName} ". Are you sure the component is there?")
-        endif ()
-        
-        # Check if the component is included in the build
-        if (${_compNameInternal}_ENABLED)
-            # Link to the project folder name
-            link_modules(${_compNameInternal})
-            # Add the input 'path' to list of component we are using includes from
-            # 1. Its either a folder name under src/EntityComponents/componentName
-            # 2. Its a relative path from project binary dir <clone>/path/componentPath
-            set (foundComponents ${foundComponents} ${componentName})
-            add_definitions(-D${componentName}_ENABLED)
-        endif()
-    endforeach ()
-    # Include the ones that were found on this build
-    if (foundComponents)
-        use_entity_components(${foundComponents})
-    endif ()
-endmacro(link_entity_components)
-
 # link directories
 macro (link_package PREFIX)
     if (${PREFIX}_DEBUG_LIBRARIES)
@@ -301,6 +194,16 @@ macro (link_package PREFIX)
         target_link_libraries (${TARGET_NAME} ${${PREFIX}_LIBRARIES})
     endif ()
 endmacro (link_package)
+
+# Macro for using modules relative to the src directory
+# Example:      use_modules(TundraCore Plugins/UrhoRenderer)
+macro (use_modules)
+    message (STATUS "-- using modules:")
+    foreach (moduleName_ ${ARGN})
+        message (STATUS "       " ${moduleName_})
+        include_directories (${CMAKE_SOURCE_DIR}/src/${moduleName_})
+    endforeach ()
+endmacro (use_modules)
 
 # include local module libraries
 macro (link_modules)

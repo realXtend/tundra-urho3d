@@ -10,7 +10,7 @@ set (SOURCE_FILES ${CPP_FILES} ${H_FILES})
 add_definitions(-DURHO_MODULE_EXPORTS)
 
 UseTundraCore()
-use_core_modules(TundraCore)
+use_modules(TundraCore)
 use_package(URHO3D)
 use_package(MATHGEOLIB)
 

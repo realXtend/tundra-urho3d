@@ -17,7 +17,7 @@ endif ()
 SetupCompileFlags()
 
 UseTundraCore()
-use_core_modules(TundraCore)
+use_modules(TundraCore)
 
 if (MSVC)
    build_executable(${TARGET_NAME} WIN32 ${SOURCE_FILES} ${RESOURCE_FILES})
