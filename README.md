@@ -10,10 +10,11 @@ Compiling from Sources
 
 Tundra-Urho3D uses [CMake] as its build system.
 
-For Windows, Visual Studio 2010 and newer build environments are currently supported. Make sure that you have the latest Visual Studio Service Packs
-or Updates installed. Visual Studio 2012 should work, but is not tested regularly and no batch scripts are provided currently.
+Partial support for C++11 is required to compile successfully: in particular support for the auto keyword. More C++11 features may be considered later if found necessary. Currently minimum compiler requirements are VS2010 or newer (VS2008 not supported) or GCC 4.4 or newer. All Clang versions should support the needed feature set.
 
 ### Windows, targeting Windows
+
+Make sure that you have the latest Visual Studio Service Packs or Updates installed. Visual Studio 2012 should work, but is not tested regularly and no batch scripts are provided currently.
 
 1. Open up the Visual Studio (x64 Win64) Command Prompt which is required in order to have the required build tools and several other utilities in your PATH.
 2. Navigate to `<Tundra-Urho3D>\tools\Windows\VS<VersionNumber>\`
