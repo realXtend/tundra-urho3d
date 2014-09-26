@@ -13,3 +13,6 @@ export DEPS_SRC=$DEPS/src
 export DEPS_BIN=$DEPS/bin
 export DEPS_LIB=$DEPS/lib
 export DEPS_INC=$DEPS/include
+
+export TUNDRA_BUILD_DIR_NAME="build-$(uname -n)-$(lsb_release -sr)-$(dpkg-architecture -qDEB_HOST_ARCH)"
+export TUNDRA_BUILD_DIR=$TUNDRA/$TUNDRA_BUILD_DIR_NAME

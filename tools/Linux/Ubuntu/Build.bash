@@ -16,9 +16,17 @@ cat << EOF
 Usage: $(basename $0) OPTIONS
 
 Options:
-  -d, --debug            Build deps in debug mode.
+  -np, --no-packages     Skip running OS package manager.
+  -nc, --no-cmake        Skip running Tundra CMake
+  -nb, --no-build        Skip building Tundra
 
-  Note: Params cannot be combined to a single command eg. -ncnb).
+  -d, --debug            Build deps in debug mode.
+                           Note: You have to manually destroy
+                           the deps dir when changing modes.
+
+  -h, --help             Print this help
+
+  Note: Params cannot be combined to a single command eg. -dnc).
 
 EOF
 }
@@ -79,6 +87,7 @@ done
 
 # Init
 
+mkdir -p $TUNDRA_BUILD_DIR
 mkdir -p $DEPS_SRC $DEPS_BIN $DEPS_LIB $DEPS_INC
 
 # Packages
@@ -114,7 +123,10 @@ if [ $skip_deps = false ] ; then
     fi
 
     if ! is_built ; then
-        cmake . \
+        mkdir -p build
+        cd build
+
+        cmake .. \
             -DCMAKE_INSTALL_PREFIX=$DEPS \
             -DCMAKE_BUILD_TYPE=$build_type
 
@@ -133,8 +145,8 @@ if [ $skip_deps = false ] ; then
     fi
 
     if ! is_built ; then
-        mkdir -p Build
-        cd Build
+        mkdir -p build
+        cd build
 
         cmake ../Source \
             -DCMAKE_INSTALL_PREFIX=$DEPS \
@@ -151,4 +163,32 @@ if [ $skip_deps = false ] ; then
 
         mark_built
     fi
+fi
+
+# Tundra cmake
+
+if [ $skip_cmake = false ] ; then
+
+    print_title "Running Tundra CMake"
+
+    cd $TUNDRA_BUILD_DIR
+
+    if file_exists CMakeCache.txt ; then
+        rm CMakeCache.txt
+    fi
+
+    cmake .. \
+        -DMATHGEOLIB_HOME=$DEPS \
+        -DURHO3D_HOME=$DEPS_SRC/urho3d
+fi
+
+# Tundra build
+
+if [ $skip_build = false ] ; then
+
+    print_title "Building Tundra"
+
+    cd $TUNDRA_BUILD_DIR
+
+    make -j $num_cpu -S
 fi
