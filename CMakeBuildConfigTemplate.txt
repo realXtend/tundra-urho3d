@@ -22,8 +22,7 @@ set(TUNDRACORE_SHARED 1)
 # On Windows also enables some of the more aggressive linker optimizations. Do not enable if you are planning to retain reusable symbol information.
 set(ENABLE_BUILD_OPTIMIZATIONS 1)
 
-# Enable solution folders
- # VS Express < 2012 doesn't support solution folders.
+# Enable solution folders. VS Express < 2012 doesn't support solution folders.
 if (NOT MSVC10)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif()
@@ -60,23 +59,19 @@ if (MSVC)
     endif()
 endif()
 
-###### ENTITY-COMPONENTS ######
-message("\n=========== Configuring Optional Entity-Components ===========\n")
-
-###### TUNDRA FRAMEWORK ######
 message("\n=========== Configuring Tundra Framework ===========\n")
 
-## The following are the core modules/libs that are required 
-## for the project to build. None of these can be omitted.
-
 AddProject(Core TundraCore)
-AddProject(Core Tundra/Tundra)
-AddProject(Core Tundra/TundraConsole)
 
-###### MANDATORY PLUGINS ######
-message("\n=========== Configuring Mandatory Plugins ===========\n")
+message("\n=============== Configuring Plugins ================\n")
 
 AddProject(Core Plugins/UrhoRenderer)
 
-###### OPTIONAL PLUGINS ######
-message("\n=========== Configuring Optional Plugins ===========\n")
+message("\n========= Configuring Tundra Executable(s) =========\n")
+
+AddProject(Core Tundra/Tundra)
+# For Windows, also add a version of the project which builds using CONSOLE subsystem.
+# This is otherwise equivalent to the Tundra executable, but this one always shows the console window.
+if (WIN32)
+    AddProject(Core Tundra/TundraConsole)
+endif()

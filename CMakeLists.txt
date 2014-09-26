@@ -47,13 +47,13 @@ macro(PrintUsedEnvVariables)
     # in most cases as they should be resolved to our CMake variables and get cached.
     # This way this printed list wont lie if ran without env variables and we are still
     # successfully finding all the deps from our cacher (or in bad cases assumed) dirs.
-    message("\n=========== Used Environment Variables ===========\n")
+    message("\n============ Used Environment Variables ============\n")
     message(STATUS "TUNDRA_DEP_PATH  = " ${ENV_TUNDRA_DEP_PATH})
     message(STATUS "URHO3D_HOME      = " ${URHO3D_HOME})
 endmacro()
 
 macro(PrintUsedBuildConfig)
-    message("\n=========== Used Build Configuration =============\n")
+    message("\n============ Used Build Configuration ==============\n")
     message(STATUS "Install prefix = " ${CMAKE_INSTALL_PREFIX})
     message("")
 endmacro()
@@ -235,7 +235,7 @@ if (NOT ENV_TUNDRA_DEP_PATH)
     message(FATAL_ERROR "TUNDRA_DEP_PATH could not be resolved from a environment variable or from cmake cache!")
 endif ()
 
-message ("\n\n=========== Configuring Dependencies ===========\n")
+message("\n\n============= Configuring Dependencies =============\n")
 
 # Set CMake custom module path & include them
 # The following CMake modules are required for the project to build.
