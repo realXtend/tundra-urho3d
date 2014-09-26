@@ -62,6 +62,7 @@ doc/html/
 
 # Tundra bin/ and build/ files
 bin/Tundra*.exe
+bin/Tundra
 build/
 install/
 
