@@ -28,8 +28,6 @@ if (NOT MSVC10)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif()
 
-message("\n")
-
 if (TUNDRACORE_SHARED)
     add_definitions(-DTUNDRACORE_SHARED)
 endif()
@@ -65,15 +63,15 @@ if (MSVC)
     endif()
 endif()
 
-message("\n=========== Configuring Tundra Framework ===========\n")
+message("=========== Configuring Tundra Framework ===========\n")
 
 AddProject(TundraCore TundraCore)
 
-message("\n=============== Configuring Plugins ================\n")
+message("=============== Configuring Plugins ================\n")
 
 AddProject(Plugins Plugins/UrhoRenderer)
 
-message("\n========= Configuring Tundra Executable(s) =========\n")
+message("========= Configuring Tundra Executable(s) =========\n")
 
 AddProject(Tundra Tundra/Tundra)
 # For Windows, also add a version of the project which builds using CONSOLE subsystem.

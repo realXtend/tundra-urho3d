@@ -90,14 +90,12 @@ macro (final_target)
     endif ()
 
     if (NOT "${PROJECT_TYPE}" STREQUAL "")
-        message (STATUS "-- project type:")
-        message (STATUS "       ${PROJECT_TYPE}")
+        message (STATUS "-- project type: " ${PROJECT_TYPE})
         set_target_properties (${TARGET_NAME} PROPERTIES FOLDER ${PROJECT_TYPE})
     endif ()
-    
-    # pretty printing
-    message ("")
-    
+
+    message("") # newline after each project
+
     # run the setup install macro for everything included in this build
     setup_install_target ()
     
@@ -108,8 +106,7 @@ macro (build_library TARGET_NAME LIB_TYPE)
 
     set (TARGET_LIB_TYPE ${LIB_TYPE})
 
-    message (STATUS "-- build type:")
-    message (STATUS "       " ${TARGET_LIB_TYPE} " library")
+    message (STATUS "-- build type: " ${TARGET_LIB_TYPE} " library")
    
     # *unix add -fPIC for static libraries
     if (UNIX AND ${TARGET_LIB_TYPE} STREQUAL "STATIC")
@@ -160,9 +157,8 @@ endmacro (build_library)
 
 # build an executable from internal sources 
 macro (build_executable TARGET_NAME)
-
     set (TARGET_LIB_TYPE "EXECUTABLE")
-    message (STATUS "building executable: " ${TARGET_NAME})
+    message(STATUS "-- building executable: " ${TARGET_NAME})
 
     add_executable (${TARGET_NAME} ${ARGN})
     if (MSVC)
@@ -170,8 +166,7 @@ macro (build_executable TARGET_NAME)
     endif ()
 
     set_target_properties (${TARGET_NAME} PROPERTIES DEBUG_POSTFIX _d)
-
-endmacro (build_executable)
+endmacro()
 
 # include and lib directories, and definitions
 macro (use_package PREFIX)
@@ -196,14 +191,19 @@ macro (link_package PREFIX)
 endmacro (link_package)
 
 # Macro for using modules relative to the src directory
-# Example:      use_modules(TundraCore Plugins/UrhoRenderer)
-macro (use_modules)
-    message (STATUS "-- using modules:")
-    foreach (moduleName_ ${ARGN})
-        message (STATUS "       " ${moduleName_})
-        include_directories (${CMAKE_SOURCE_DIR}/src/${moduleName_})
-    endforeach ()
-endmacro (use_modules)
+# Example: use_modules(TundraCore Plugins/UrhoRenderer)
+macro(use_modules)
+    set(moduleList "")
+    foreach(moduleName_ ${ARGN})
+        include_directories(${CMAKE_SOURCE_DIR}/src/${moduleName_})
+        if (moduleList STREQUAL "")
+            set(moduleList ${moduleName_})
+        else()
+            set(moduleList "${moduleList}, ${moduleName_}")
+        endif()
+    endforeach()
+    message(STATUS "-- using modules: " ${moduleList})
+endmacro()
 
 # include local module libraries
 macro (link_modules)

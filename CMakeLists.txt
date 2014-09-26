@@ -17,6 +17,9 @@ if (COMMAND cmake_policy)
     endif ()
 endif ()
 
+
+message("") # Newline before any output from the CMake script.
+
 # Compiler-specific C++11 activation. Partial C++11 support is mandatory for Tundra-urho3d.
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
     execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
@@ -47,13 +50,14 @@ macro(PrintUsedEnvVariables)
     # in most cases as they should be resolved to our CMake variables and get cached.
     # This way this printed list wont lie if ran without env variables and we are still
     # successfully finding all the deps from our cacher (or in bad cases assumed) dirs.
-    message("\n============ Used Environment Variables ============\n")
+    message("============ Used Environment Variables ============\n")
     message(STATUS "TUNDRA_DEP_PATH  = " ${ENV_TUNDRA_DEP_PATH})
     message(STATUS "URHO3D_HOME      = " ${URHO3D_HOME})
+    message("")
 endmacro()
 
 macro(PrintUsedBuildConfig)
-    message("\n============ Used Build Configuration ==============\n")
+    message("============ Used Build Configuration ==============\n")
     message(STATUS "Install prefix = " ${CMAKE_INSTALL_PREFIX})
     message("")
 endmacro()
@@ -202,7 +206,7 @@ if (NOT ENV_TUNDRA_DEP_PATH)
     message(FATAL_ERROR "TUNDRA_DEP_PATH could not be resolved from a environment variable or from cmake cache!")
 endif ()
 
-message("\n\n============= Configuring Dependencies =============\n")
+message("============= Configuring Dependencies =============\n")
 
 # Set CMake custom module path & include them
 # The following CMake modules are required for the project to build.
@@ -220,6 +224,7 @@ configure_mathgeolib()
 
 message(STATUS "MathGeoLib debug libs " ${MATHGEOLIB_DEBUG_LIBRARIES})
 message(STATUS "MathGeoLib libs " ${MATHGEOLIB_LIBRARIES})
+message("")
 
 # Set global hardcoded install prefix. User cannot change this at the moment, until we figure how we want to use this!
 # Call the cleanup step that cleans the install prefix before every installations. This is important as module setups might change between builds.
