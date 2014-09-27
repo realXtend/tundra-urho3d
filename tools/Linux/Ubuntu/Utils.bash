@@ -1,7 +1,5 @@
 #!/bin/bash
 
-utils_current_dependency=""
-
 COROR_GREEN="\e[0;32m"
 COROR_GREY="\e[0;90m"
 COLOR_BLUE="\e[0;94m"
