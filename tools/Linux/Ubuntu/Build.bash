@@ -106,7 +106,7 @@ if [ $skip_pkg = false ] ; then
     print_subtitle "Build tools and utils"
     sudo apt-get -y --quiet install \
         build-essential gcc \
-        cmake cppcheck
+        cmake
 
     print_subtitle "Source control"
     sudo apt-get -y --quiet install \
@@ -206,9 +206,27 @@ fi
 
 if [ $run_analysis = true ] ; then
 
+    # Build cppcheck (one in apt-get is ancient on travis ci machines)
+
+    start_target cppcheck
+
+    if ! is_cloned ; then
+        wget -O cppcheck-1.66.tar.gz http://sourceforge.net/projects/cppcheck/files/cppcheck/1.66/cppcheck-1.66.tar.gz/download
+        tar -zxvf cppcheck-1.66.tar.gz
+
+        mv cppcheck-1.66 cppcheck
+        rm cppcheck-1.66.tar.gz
+    fi
+
+    if ! is_built ; then
+        make -j $num_cpu -S
+
+        mark_built
+    fi
+
     print_title "Running cppcheck"
 
-    cppcheck \
+    $DEPS_SRC/cppcheck/cppcheck \
         --template "{file}({line}): ({severity}) ({id}): {message}" \
         --enable=all \
         --suppress=missingInclude \
