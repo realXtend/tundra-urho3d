@@ -145,8 +145,9 @@ if [ $skip_deps = false ] ; then
     fi
 
     if ! is_built ; then
-        mkdir -p build
-        cd build
+        # note This must be 'Build' with capital letter
+        mkdir -p Build
+        cd Build
 
         cmake ../Source \
             -DCMAKE_INSTALL_PREFIX=$DEPS \
