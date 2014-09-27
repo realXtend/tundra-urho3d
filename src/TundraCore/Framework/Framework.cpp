@@ -224,7 +224,7 @@ IModule *Framework::ModuleByName(const String &name) const
     for(unsigned i = 0; i < modules.Size(); ++i)
         if (modules[i]->Name() == name)
             return modules[i].Get();
-    return 0;
+    return nullptr;
 }
 
 Engine* Framework::Engine() const

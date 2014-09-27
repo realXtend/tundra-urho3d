@@ -180,7 +180,7 @@ T *Framework::Module() const
             return module;
     }
 
-    return 0;
+    return nullptr;
 }
 
 /// Instantiate the Framework and run until exited.

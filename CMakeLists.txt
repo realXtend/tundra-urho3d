@@ -178,6 +178,9 @@ endif()
 # Set compiler warning levels.
 if (MSVC)
     add_definitions(/W4)
+    if (MSVC10) # We are using 'override' but it's a nonstandard extension in VC10 causing a warning.
+        add_definitions(/wd4481)
+    endif()
 else ()
     add_definitions (-Wall -Wextra -Wno-unknown-pragmas -Wno-unused -Wno-reorder -Wno-switch -Wno-write-strings)
 endif()

@@ -18,9 +18,9 @@ public:
     ~UrhoRenderer();
 
 private:
-    virtual void Load();
-    virtual void Initialize();
-    virtual void Uninitialize();
+    void Load() override;
+    void Initialize() override;
+    void Uninitialize() override;
 };
 
 }
