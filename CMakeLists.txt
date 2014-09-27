@@ -4,6 +4,8 @@ project(tundra-urho3d)
 # CMake version requirement
 cmake_minimum_required(VERSION 2.6.0)
 
+message("") # Newline before any output from the CMake script.
+
 # Declare options and cached variables that
 # can be overridden via  cmake cmd line -D<var>=foo
 
@@ -41,9 +43,6 @@ if (COMMAND cmake_policy)
     endif ()
 endif ()
 
-
-message("") # Newline before any output from the CMake script.
-
 # Compiler-specific C++11 activation. Partial C++11 support is mandatory for Tundra-urho3d.
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
     execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
@@ -62,21 +61,19 @@ if (APPLE)
         set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
     endif ()
 endif ()
-if (MSVC)
-    # MSVC has partial C++11 support beginning in VC10
-    if (MSVC90)
-        message(FATAL_ERROR "VC9 does not support C++11 features!")
-    endif()
+if (MSVC AND MSVC90) # MSVC has partial C++11 support beginning in VC10
+    message(FATAL_ERROR "VC9 does not support C++11 features!")
 endif()
 
 macro(PrintUsedDependencyVariables)
-    message("\n============ Dependency Variables ==================\n")
+    message("======================== Dependency Variables ========================\n") # 70 visible chars
     message(STATUS "URHO3D_HOME      = " ${URHO3D_HOME})
     message(STATUS "MATHGEOLIB_HOME  = " ${MATHGEOLIB_HOME})
+    message("")
 endmacro()
 
 macro(PrintUsedBuildConfig)
-    message("============ Used Build Configuration ==============\n")
+    message("====================== Used Build Configuration ======================\n")
     message(STATUS "Install prefix = " ${CMAKE_INSTALL_PREFIX})
     message("")
 endmacro()
@@ -196,13 +193,13 @@ else()
     add_definitions(-DUNIX) # Currently, kNet uses this flag for Unix OSes. (required also for client-side headers). TODO: Clean this up so it's not required.
 endif()
 
-# On all platforms, we enable PCH files by default.
+# On all platforms, we enable PCH files by default. TODO Not implemented on non-Windows plaforms!
 add_definitions (-DPCH_ENABLED)
 SET(PCH_ENABLED 1)
 
 PrintUsedDependencyVariables ()
 
-message("\n============ Configuring Dependencies ==============\n")
+message("====================== Configuring Dependencies ======================\n")
 
 # Set CMake custom module path & include them
 # The following CMake modules are required for the project to build.
@@ -217,6 +214,8 @@ configure_urho3d()
 
 # Find/configure MathGeoLib
 configure_mathgeolib()
+
+message("")
 
 # Set global hardcoded install prefix. User cannot change this at the moment, until we figure how we want to use this!
 # Call the cleanup step that cleans the install prefix before every installations. This is important as module setups might change between builds.

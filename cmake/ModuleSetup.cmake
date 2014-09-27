@@ -81,7 +81,7 @@ macro (final_target)
     endif ()
 
     if (NOT "${PROJECT_TYPE}" STREQUAL "")
-        message (STATUS "-- project type: " ${PROJECT_TYPE})
+        # message (STATUS "project type: " ${PROJECT_TYPE})
         set_target_properties (${TARGET_NAME} PROPERTIES FOLDER ${PROJECT_TYPE})
     endif ()
 
@@ -97,7 +97,7 @@ macro (build_library TARGET_NAME LIB_TYPE)
 
     set (TARGET_LIB_TYPE ${LIB_TYPE})
 
-    message (STATUS "-- build type: " ${TARGET_LIB_TYPE} " library")
+    message (STATUS "build type: " ${TARGET_LIB_TYPE} " library")
    
     # *unix add -fPIC for static libraries
     if (UNIX AND ${TARGET_LIB_TYPE} STREQUAL "STATIC")
@@ -149,7 +149,7 @@ endmacro (build_library)
 # build an executable from internal sources 
 macro (build_executable TARGET_NAME)
     set (TARGET_LIB_TYPE "EXECUTABLE")
-    message(STATUS "-- building executable: " ${TARGET_NAME})
+    message(STATUS "building executable: " ${TARGET_NAME})
 
     add_executable (${TARGET_NAME} ${ARGN})
     if (MSVC)
@@ -161,7 +161,7 @@ endmacro()
 
 # include and lib directories, and definitions
 macro (use_package PREFIX)
-    message (STATUS "-- using " ${PREFIX})
+    message (STATUS "using " ${PREFIX})
     add_definitions (${${PREFIX}_DEFINITIONS})
     include_directories (${${PREFIX}_INCLUDE_DIRS})
     link_directories (${${PREFIX}_LIBRARY_DIRS})
@@ -193,7 +193,7 @@ macro(use_modules)
             set(moduleList "${moduleList}, ${moduleName_}")
         endif()
     endforeach()
-    message(STATUS "-- using modules: " ${moduleList})
+    message(STATUS "using modules: " ${moduleList})
 endmacro()
 
 # include local module libraries
