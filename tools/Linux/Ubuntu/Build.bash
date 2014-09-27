@@ -16,9 +16,11 @@ cat << EOF
 Usage: $(basename $0) OPTIONS
 
 Options:
-  -np, --no-packages     Skip running OS package manager.
+  -np, --no-packages     Skip running OS package manager
   -nc, --no-cmake        Skip running Tundra CMake
   -nb, --no-build        Skip building Tundra
+
+  -ra, --run-analysis    Run static analysis with cppcheck
 
   -d, --debug            Build deps in debug mode.
                            Note: You have to manually destroy
@@ -41,6 +43,8 @@ skip_pkg=false
 skip_deps=false
 skip_cmake=false
 skip_build=false
+
+run_analysis=false
 
 build_type="Release"
 build_64bit=false
@@ -71,6 +75,9 @@ while [[ $1 = -* ]]; do
         --no-build|-nb)
             skip_build=true
             ;;
+        --run-analysis|-ra)
+            run_analysis=true
+            ;;
         --debug|-d)
             build_type="Debug"
             ;;
@@ -98,7 +105,8 @@ if [ $skip_pkg = false ] ; then
 
     print_subtitle "Build tools and utils"
     sudo apt-get -y --quiet install \
-        build-essential gcc cmake
+        build-essential gcc \
+        cmake cppcheck
 
     print_subtitle "Source control"
     sudo apt-get -y --quiet install \
@@ -192,4 +200,24 @@ if [ $skip_build = false ] ; then
     cd $TUNDRA_BUILD_DIR
 
     make -j $num_cpu -S
+fi
+
+# Run static code analysis
+
+if [ $run_analysis = true ] ; then
+
+    print_title "Running cppcheck"
+
+    cppcheck \
+        --template "{file}({line}): ({severity}) ({id}): {message}" \
+        --enable=all \
+        --suppress=missingInclude \
+        --suppress=missingIncludeSystem \
+        --std=c++11 \
+        --error-exitcode=1 \
+        --relative-paths=$TUNDRA_SRC \
+        --check-config \
+        -DTUNDRACORE_API= \
+        -I $TUNDRA_SRC \
+        $TUNDRA_SRC
 fi

@@ -6,6 +6,7 @@ PARENT_DIR=$(dirname $(readlink -f $0))
 
 export TUNDRA=$(cd $PARENT_DIR/../../.. && pwd)
 export TUNDRA_BIN=$TUNDRA/bin
+export TUNDRA_SRC=$TUNDRA/src
 
 export DEPS_DIR_NAME="deps-$(uname -n)-$(lsb_release -sr)-$(dpkg-architecture -qDEB_HOST_ARCH)"
 export DEPS=$TUNDRA/$DEPS_DIR_NAME
