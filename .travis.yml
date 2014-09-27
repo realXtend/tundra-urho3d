@@ -2,3 +2,6 @@ language: cpp
 compiler: gcc
 
 script: ./tools/Linux/Ubuntu/Build.bash
+
+notifications:
+  irc: "chat.freenode.net#realxtend-dev"
