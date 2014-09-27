@@ -19,44 +19,47 @@ class TUNDRACORE_API IModule : public Urho3D::Object
 
 public:
     /// Constructor.
-    /** @param moduleName Module name. */
-    explicit IModule(const Urho3D::String &moduleName, Framework* framework);
-    virtual ~IModule();
+    /** @param moduleName Module name.
+        @param owner The owner framework in the plugin's TundraPluginMain(). */
+    IModule(const Urho3D::String &moduleName, Framework *owner);
+    virtual ~IModule() {}
 
     /// Called when module is loaded into memory.
-    /** Override in your own module. Do not call.
+    /** Override and make private in your own module. Do not call.
         Components and asset types exposed by the module should be registered here using SceneAPI and AssetAPI respectively. */
     virtual void Load() {}
 
     /// Called when module is taken in use.
-    /** Override in your own module. Do not call. */
+    /** Override and make private in your own module. Do not call. */
     virtual void Initialize() {}
 
     /// Called when module is removed from use.
-    /** Override in your own module. Do not call. */
+    /** Override and make private in your own module. Do not call. */
     virtual void Uninitialize() {}
 
     /// Called when module is unloaded from memory.
-    /** Override in your own module. Do not call. */
+    /** Override and make private in your own module. Do not call. */
     virtual void Unload() {}
 
     /// Synchronized update for the module
-    /** Override in your own module if you want to perform synchronized update. Do not call.
+    /** Override and make private in your own module if you want to perform synchronized update. Do not call.
         @param frametime elapsed time in seconds since last frame */
-    virtual void Update(f32 frametime);
+    virtual void Update(f32 UNUSED_PARAM(frametime)) {}
 
     /// Returns the name of the module.
     const Urho3D::String &Name() const { return name; }
 
-    /// Returns parent framework.
-    Framework *GetFramework() const { return framework_; }
+    /// Returns the owner framework.
+    Framework *GetFramework() const { return framework; }
+    Framework *Fw() const { return framework; } ///< Convenience shortcut for GetFramework.
 
 protected:
-    Framework *framework_; ///< Parent framework
+    Framework *framework; ///< The owner framework
 
 private:
+    friend class Framework;
+
     const Urho3D::String name; ///< Name of the module
 };
 
 }
-

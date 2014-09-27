@@ -7,18 +7,10 @@
 namespace Tundra
 {
 
-IModule::IModule(const Urho3D::String &moduleName, Framework* framework) :
+IModule::IModule(const Urho3D::String &moduleName, Framework* owner) :
     Object(framework->GetContext()),
     name(moduleName),
-    framework_(framework)
-{
-}
-
-IModule::~IModule()
-{
-}
-
-void IModule::Update(f32 UNUSED_PARAM(frameTime))
+    framework(owner)
 {
 }
 

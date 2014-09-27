@@ -15,8 +15,9 @@ class URHO_MODULE_API UrhoRenderer : public IModule
 
 public:
     UrhoRenderer(Framework* owner);
-    virtual ~UrhoRenderer();
+    ~UrhoRenderer();
 
+private:
     virtual void Load();
     virtual void Initialize();
     virtual void Uninitialize();

@@ -21,7 +21,7 @@ class TUNDRACORE_API Framework : public Urho3D::Object
     OBJECT(Framework);
 
 public:
-    Framework(Urho3D::Context* ctx);
+    explicit Framework(Urho3D::Context* ctx);
     ~Framework();
 
     /// Run the main loop until exit requested.
