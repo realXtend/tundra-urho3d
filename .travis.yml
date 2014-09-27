@@ -1,0 +1,4 @@
+language: cpp
+compiler: gcc
+
+script: ./tools/Linux/Ubuntu/Build.bash
