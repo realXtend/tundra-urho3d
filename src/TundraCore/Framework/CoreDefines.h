@@ -47,3 +47,10 @@ inline Dst checked_static_cast(Src src)
 #else
 #define DEPRECATED(func) func
 #endif
+
+#ifdef __GNUC__
+#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#if GCC_VERSION < 40700
+#define override // 'overrride' available at GCC >= 4.7.0
+#endif
+#endif // ~__GNUC__
