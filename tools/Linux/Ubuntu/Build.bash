@@ -211,15 +211,15 @@ if [ $run_analysis = true ] ; then
     start_target cppcheck
 
     if ! is_cloned ; then
-        wget -O cppcheck-1.66.tar.gz http://sourceforge.net/projects/cppcheck/files/cppcheck/1.66/cppcheck-1.66.tar.gz/download
-        tar -zxvf cppcheck-1.66.tar.gz
+        wget -nv -O cppcheck-1.66.tar.gz http://sourceforge.net/projects/cppcheck/files/cppcheck/1.66/cppcheck-1.66.tar.gz/download
+        tar -zxf cppcheck-1.66.tar.gz
 
         mv cppcheck-1.66 cppcheck
         rm cppcheck-1.66.tar.gz
     fi
 
     if ! is_built ; then
-        make -j $num_cpu -S
+        make -j $num_cpu -S cppcheck
 
         mark_built
     fi
