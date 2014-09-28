@@ -174,6 +174,27 @@ if [ $skip_deps = false ] ; then
     fi
 fi
 
+# Build cppcheck if analysing
+
+if [ $run_analysis = true ] ; then
+
+    start_target cppcheck
+
+    if ! is_cloned ; then
+        wget -nv -O cppcheck-1.66.tar.gz http://sourceforge.net/projects/cppcheck/files/cppcheck/1.66/cppcheck-1.66.tar.gz/download
+        tar -zxf cppcheck-1.66.tar.gz
+
+        mv cppcheck-1.66 cppcheck
+        rm cppcheck-1.66.tar.gz
+    fi
+
+    if ! is_built ; then
+        make -j $num_cpu -S cppcheck
+
+        mark_built
+    fi
+fi
+
 # Tundra cmake
 
 if [ $skip_cmake = false ] ; then
@@ -205,24 +226,6 @@ fi
 # Run static code analysis
 
 if [ $run_analysis = true ] ; then
-
-    # Build cppcheck (one in apt-get is ancient on travis ci machines)
-
-    start_target cppcheck
-
-    if ! is_cloned ; then
-        wget -nv -O cppcheck-1.66.tar.gz http://sourceforge.net/projects/cppcheck/files/cppcheck/1.66/cppcheck-1.66.tar.gz/download
-        tar -zxf cppcheck-1.66.tar.gz
-
-        mv cppcheck-1.66 cppcheck
-        rm cppcheck-1.66.tar.gz
-    fi
-
-    if ! is_built ; then
-        make -j $num_cpu -S cppcheck
-
-        mark_built
-    fi
 
     print_title "Running cppcheck"
 
