@@ -96,10 +96,12 @@ IF NOT EXIST "%DEPS%\MathGeoLib\". (
     git clone https://github.com/juj/MathGeoLib MathGeoLib
     cd "%DEPS%\MathGeoLib\"
     IF NOT EXIST "%DEPS%\MathGeoLib\.git" GOTO :ERROR
+) ELSE (
+    cd "%DEPS%\MathGeoLib\"
+    git pull
 )
 
 cecho {0D}Running CMake for MathGeoLib.{# #}{\n}
-cd "%DEPS%\MathGeoLib\"
 cmake . -G %GENERATOR% -DCMAKE_DEBUG_POSTFIX=_d -DCMAKE_INSTALL_PREFIX=%DEPS%\MathGeoLib\build
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
@@ -121,10 +123,12 @@ IF NOT EXIST "%DEPS%\urho3d\". (
     git clone https://github.com/urho3d/Urho3D.git urho3d
     cd "%DEPS%\urho3d\"
     IF NOT EXIST "%DEPS%\urho3d\.git" GOTO :ERROR
+) ELSE (
+    cd "%DEPS%\urho3d\"
+    git pull
 )
 
 cecho {0D}Running CMake for Urho3D.{# #}{\n}
-cd "%DEPS%\urho3d\"
 IF NOT EXIST "Build" mkdir "Build"
 cd Build
 IF %TARGET_ARCH%==x64 (

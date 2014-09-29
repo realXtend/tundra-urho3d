@@ -39,10 +39,12 @@ IF NOT EXIST "%DEPS%\MathGeoLib\". (
     git clone https://github.com/juj/MathGeoLib MathGeoLib
     cd "%DEPS%\MathGeoLib\"
     IF NOT EXIST "%DEPS%\MathGeoLib\.git" GOTO :ERROR
+) ELSE (
+    cd "%DEPS%\MathGeoLib\"
+    git pull
 )
 
 cecho {0D}Running CMake for MathGeoLib.{# #}{\n}
-cd "%DEPS%\MathGeoLib\"
 cmake . -G "Unix Makefiles" -DANDROID=1 -DCMAKE_INSTALL_PREFIX=%DEPS%\MathGeoLib\build -DCMAKE_TOOLCHAIN_FILE=%TUNDRA_DIR%\cmake\android.toolchain.cmake
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
@@ -64,11 +66,12 @@ IF NOT EXIST "%DEPS%\urho3d\". (
     git clone https://github.com/urho3d/Urho3D.git urho3d
     cd "%DEPS%\urho3d\"
     IF NOT EXIST "%DEPS%\urho3d\.git" GOTO :ERROR
+) ELSE (
+    cd "%DEPS%\urho3d\"
+    git pull
 )
 
 cecho {0D}Running CMake for Urho3D.{# #}{\n}
-cd "%DEPS%\urho3d"
-
 cd Source\Android
 cmake .. -G "Unix Makefiles" -DANDROID=1 -DURHO3D_ANGELSCRIPT=0 -DURHO3D_LUA=0 -DURHO3D_TOOLS=0 -DURHO3D_LIB_TYPE=SHARED -DLIBRARY_OUTPUT_PATH_ROOT=. -DCMAKE_TOOLCHAIN_FILE=%TUNDRA_DIR%\cmake\android.toolchain.cmake
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
