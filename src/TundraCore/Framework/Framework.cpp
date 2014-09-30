@@ -3,6 +3,7 @@
 #include "StableHeaders.h"
 #include "Framework.h"
 #include "JSON.h"
+#include "FrameAPI.h"
 #include "PluginAPI.h"
 #include "ConfigAPI.h"
 #include "TundraVersionInfo.h"
@@ -47,13 +48,14 @@ Framework::Framework(Context* ctx) :
     exitSignal(false),
     headless(false)
 {
-    plugin = new PluginAPI(this);
-    config = new ConfigAPI(this);
-
     // Create the Urho3D engine, which creates various other subsystems, but does not initialize them yet
     engine = new Urho3D::Engine(GetContext());
     // Timestamps clutter the log. Disable for now
     GetSubsystem<Log>()->SetTimeStamp(false);
+
+    frame = new FrameAPI(this);
+    plugin = new PluginAPI(this);
+    config = new ConfigAPI(this);
 
     ProcessStartupOptions();
     // In headless mode, no main UI/rendering window is initialized.
@@ -66,6 +68,7 @@ Framework::Framework(Context* ctx) :
 
 Framework::~Framework()
 {
+    frame.Reset();
     plugin.Reset();
     config.Reset();
 }
@@ -172,7 +175,7 @@ void Framework::Go()
 void Framework::Exit()
 {
     exitSignal = true;
-    exitRequested.Emit();
+    ExitRequested.Emit();
 }
 
 void Framework::ForceExit()
@@ -195,6 +198,8 @@ void Framework::ProcessOneFrame()
 
     for(unsigned i = 0; i < modules.Size(); ++i)
         modules[i]->Update(dt);
+
+    frame->Update(dt);
 
     /// \todo remove Android hack: exit by pressing back button, which is mapped to ESC
 #ifdef ANDROID
@@ -225,6 +230,21 @@ IModule *Framework::ModuleByName(const String &name) const
         if (modules[i]->Name() == name)
             return modules[i].Get();
     return nullptr;
+}
+
+FrameAPI* Framework::Frame() const
+{
+    return frame;
+}
+
+ConfigAPI* Framework::Config() const
+{
+    return config;
+}
+
+PluginAPI* Framework::Plugin() const
+{
+    return plugin;
 }
 
 Engine* Framework::Engine() const

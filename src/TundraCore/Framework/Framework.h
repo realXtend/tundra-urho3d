@@ -125,13 +125,19 @@ public:
     bool IsHeadless() const { return headless; }
 
     /// Returns core API Plugin object.
-    PluginAPI* Plugin() const { return plugin; }
+    PluginAPI* Plugin() const;
+
+    /// Returns core API Config object.
+    ConfigAPI* Config() const;
+
+    /// Returns core API Frame object.
+    FrameAPI* Frame() const;
 
     /// Return the Urho3D Engine object.
     Urho3D::Engine* Engine() const;
 
     /// Exit request signal.
-    Signal0<void> exitRequested;
+    Signal0<void> ExitRequested;
 
 private:
     /// Adds new command line parameter (option | value pair)
@@ -156,6 +162,8 @@ private:
     Urho3D::SharedPtr<Urho3D::Engine> engine;
     /// Framework owns the memory of all the modules in the system. These are freed when Framework is exiting.
     Urho3D::Vector<Urho3D::SharedPtr<IModule> > modules;
+    /// FrameAPI
+    Urho3D::SharedPtr<FrameAPI> frame;
     /// PluginAPI
     Urho3D::SharedPtr<PluginAPI> plugin;
     /// ConfigAPI

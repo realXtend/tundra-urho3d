@@ -44,7 +44,7 @@ public:
     /// Synchronized update for the module
     /** Override and make private in your own module if you want to perform synchronized update. Do not call.
         @param frametime elapsed time in seconds since last frame */
-    virtual void Update(f32 UNUSED_PARAM(frametime)) {}
+    virtual void Update(float UNUSED_PARAM(frametime)) {}
 
     /// Returns the name of the module.
     const Urho3D::String &Name() const { return name; }
