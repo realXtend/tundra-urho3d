@@ -4,6 +4,7 @@
 
 #include "TundraCoreApi.h"
 #include "FrameworkFwd.h"
+#include "CoreTypes.h"
 
 #include <List.h>
 #include <Object.h>
@@ -18,13 +19,13 @@ class TUNDRACORE_API PluginAPI : public Urho3D::Object
 
 public:
     /// Returns list of plugin configuration files that were used to load the plugins at startup.
-    Urho3D::Vector<Urho3D::String> ConfigurationFiles() const;
+    Vector<String> ConfigurationFiles() const;
 
     /// Loads and executes the given shared library plugin.
-    void LoadPlugin(const Urho3D::String &filename);
+    void LoadPlugin(const String &filename);
 
     /// Parses the specified .xml file and loads and executes all plugins specified in that file.
-    void LoadPluginsFromXML(Urho3D::String pluginListFilename);
+    void LoadPluginsFromXML(String pluginListFilename);
 
     /// Loads plugins specified on command line with --plugin
     void LoadPluginsFromCommandLine();
@@ -43,10 +44,10 @@ private:
     struct Plugin
     {
         void *handle;
-        Urho3D::String name;
-        Urho3D::String filename;
+        String name;
+        String filename;
     };
-    Urho3D::Vector<Plugin> plugins;
+    Vector<Plugin> plugins;
 
     Framework *owner;
 };

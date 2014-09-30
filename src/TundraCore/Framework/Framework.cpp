@@ -565,25 +565,25 @@ void Framework::LoadStartupOptionMap(const JSONValue& value)
     }
 }
 
-const Urho3D::String& Framework::OrganizationName()
+const String& Framework::OrganizationName()
 {
     return organizationName;
 }
 
-const Urho3D::String& Framework::ApplicationName()
+const String& Framework::ApplicationName()
 {
     return applicationName;
 }
 
 #ifdef ANDROID
-const Urho3D::String& Framework::PackageName()
+const String& Framework::PackageName()
 {
     return packageName;
 }
 
 #endif
 
-const Urho3D::String& Framework::VersionString()
+const String& Framework::VersionString()
 {
     return versionString;
 }

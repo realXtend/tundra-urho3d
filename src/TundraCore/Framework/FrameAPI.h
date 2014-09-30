@@ -12,11 +12,21 @@
 
 #include <Object.h>
 #include <Timer.h>
+#include <List.h>
 
 namespace Tundra
 {
 
 class Framework;
+
+class DelayedSignal : public Signal1<float>
+{
+public:
+    /// The wallclock time at which was recorded.
+    float startTime;
+    /// The wallclock time in seconds at which will be triggered.
+    float triggerTime;
+};
 
 /// Provides a mechanism for plugins and scripts to receive per-frame and time-based events.
 /** This class cannot be created directly, it's created by Framework.
@@ -31,19 +41,10 @@ class TUNDRACORE_API FrameAPI : public Urho3D::Object
     /// Return wall clock time of Framework in seconds.
     float WallClockTime() const;
 
-    /// Triggers DelayedSignal::Triggered(float) signal when spesified amount of time has elapsed.
-    /** Use this function when the receiver is a QObject.
-        @param time Time in seconds.
-        @param receiver Receiver object.
-        @param member Member slot. */
-    //void DelayedExecute(float time, const QObject *receiver, const char *member);
-
-    /// @overload
-    /** This function is provided for convenience for scripting languages
-        @param time Time in seconds.
-        @note Never returns null pointer
-        @note Never store the returned pointer. */
-    //DelayedSignal *DelayedExecute(float time);
+    /// Returns a signal which will be triggered after the specified amount of time has elapsed.
+    /*  @param time Time in seconds.
+        @note Do not store the signal reference, rather connect to it immediately as necessary */
+    DelayedSignal& DelayedExecute(float time);
 
     /// Returns the current application frame number.
     /** @note It is best not to tie any timing-specific animation to this number, but instead use WallClockTime(). */
@@ -76,13 +77,14 @@ private:
     /// Clears all registered signals to this API.
     void Reset();
 
-    /// Emits Updated signal. Called by Framework each frame.
+    /// Emits Updated signal. Called by Framework each frame. Delayed signals are also processed here.
     /** @param frametime Time elapsed since last frame. */
     void Update(float frametime);
 
     // Wallclock high-res timer
     mutable Urho3D::HiresTimer wallClock;
     int currentFrameNumber;
+    List<DelayedSignal> delayedSignals;
 };
 
 }

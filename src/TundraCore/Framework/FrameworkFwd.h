@@ -6,8 +6,6 @@ namespace Urho3D
 {
     class Engine;
     class Context;
-    template <class T> class SharedPtr;
-    template <class T> class WeakPtr;
 }
 
 namespace Tundra

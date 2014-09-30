@@ -7,7 +7,7 @@
 namespace Tundra
 {
 
-IModule::IModule(const Urho3D::String &moduleName, Framework* owner) :
+IModule::IModule(const String &moduleName, Framework* owner) :
     Object(owner->GetContext()),
     name(moduleName),
     framework(owner)

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "TundraCoreApi.h"
+#include "CoreTypes.h"
 
 #include <HashMap.h>
 #include <Str.h>
@@ -13,8 +14,8 @@ namespace Tundra
 
 class JSONValue;
 
-typedef Urho3D::Vector<JSONValue> JSONArray;
-typedef Urho3D::HashMap<Urho3D::String, JSONValue> JSONObject;
+typedef Vector<JSONValue> JSONArray;
+typedef HashMap<String, JSONValue> JSONObject;
 
 /// JSON value types.
 enum JSONType
@@ -61,7 +62,7 @@ public:
     /// Construct from a floating point number.
     JSONValue(double value);
     /// Construct from a string.
-    JSONValue(const Urho3D::String& value);
+    JSONValue(const String& value);
     /// Construct from a C string.
     JSONValue(const char* value);
     /// Construct from a JSON object.
@@ -84,7 +85,7 @@ public:
     /// Assign a floating point number.
     JSONValue& operator = (double rhs);
     /// Assign a string.
-    JSONValue& operator = (const Urho3D::String& value);
+    JSONValue& operator = (const String& value);
     /// Assign a C string.
     JSONValue& operator = (const char* value);
     /// Assign a JSON array.
@@ -96,22 +97,22 @@ public:
     /// Const index as an array. Return a null value if not an array.
     const JSONValue& operator [] (uint index) const;
     /// Index as an object. Becomes an object if was not before.
-    JSONValue& operator [] (const Urho3D::String& key);
+    JSONValue& operator [] (const String& key);
     /// Const index as an object. Return a null value if not an object.
-    const JSONValue& operator [] (const Urho3D::String& key) const;
+    const JSONValue& operator [] (const String& key) const;
     /// Test for equality with another JSON value.
     bool operator == (const JSONValue& rhs) const;
     /// Test for inequality.
     bool operator != (const JSONValue& rhs) const { return !(*this == rhs); }
     
     /// Parse from a string. Return true on success.
-    bool FromString(const Urho3D::String& str);
+    bool FromString(const String& str);
     /// Parse from a C string. Return true on success.
     bool FromString(const char* str);
     /// Write to a string. Called recursively to write nested values.
-    void ToString(Urho3D::String& dest, int spacing = 2, int indent = 0) const;
+    void ToString(String& dest, int spacing = 2, int indent = 0) const;
     /// Return as string.
-    Urho3D::String ToString(int spacing = 2) const;
+    String ToString(int spacing = 2) const;
     
     /// Push a value at the end. Becomes an array if was not before.
     void Push(const JSONValue& value);
@@ -124,9 +125,9 @@ public:
     /// Resize array. Becomes an array if was not before.
     void Resize(uint newSize);
     /// Insert an associative value. Becomes an object if was not before.
-    void Insert(const Urho3D::Pair<Urho3D::String, JSONValue>& pair);
+    void Insert(const Urho3D::Pair<String, JSONValue>& pair);
     /// Remove an associative value. No-op if not an object.
-    void Erase(const Urho3D::String& key);
+    void Erase(const String& key);
     /// Clear array or object. No-op otherwise.
     void Clear();
     /// Set to an empty array.
@@ -160,13 +161,13 @@ public:
     /// Return value as a number, or zero on type mismatch.
     double GetNumber() const { return type == JSON_NUMBER ? data.numberValue : 0.0; }
     /// Return value as a string, or empty string on type mismatch.
-    const Urho3D::String& GetString() const { return type == JSON_STRING ? *(reinterpret_cast<const Urho3D::String*>(&data)) : Urho3D::String::EMPTY; }
+    const String& GetString() const { return type == JSON_STRING ? *(reinterpret_cast<const String*>(&data)) : String::EMPTY; }
     /// Return value as an array, or empty on type mismatch.
     const JSONArray& GetArray() const { return type == JSON_ARRAY ? *(reinterpret_cast<const JSONArray*>(&data)) : emptyJSONArray; }
     /// Return value as an object, or empty on type mismatch.
     const JSONObject& GetObject() const { return type == JSON_OBJECT ? *(reinterpret_cast<const JSONObject*>(&data)) : emptyJSONObject; }
     /// Return whether has an associative value.
-    bool Contains(const Urho3D::String& key) const;
+    bool Contains(const String& key) const;
     
     /// Empty (null) value.
     static const JSONValue EMPTY;
@@ -182,11 +183,11 @@ private:
     void SetType(JSONType newType);
     
     /// Append a string in JSON format into the destination.
-    static void WriteJSONString(Urho3D::String& dest, const Urho3D::String& str);
+    static void WriteJSONString(String& dest, const String& str);
     /// Append indent spaces to the destination.
-    static void WriteIndent(Urho3D::String& dest, int indent);
+    static void WriteIndent(String& dest, int indent);
     /// Read a string in JSON format from a stream. Return true on success.
-    static bool ReadJSONString(Urho3D::String& dest, const char*& pos, const char*& end, bool inQuote);
+    static bool ReadJSONString(String& dest, const char*& pos, const char*& end, bool inQuote);
     /// Match until the end of a string. Return true if successfully matched.
     static bool MatchString(const char* str, const char*& pos, const char*& end);
     /// Scan until a character is found. Return true if successfully matched.

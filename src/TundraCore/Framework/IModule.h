@@ -21,7 +21,7 @@ public:
     /// Constructor.
     /** @param moduleName Module name.
         @param owner The owner framework in the plugin's TundraPluginMain(). */
-    IModule(const Urho3D::String &moduleName, Framework *owner);
+    IModule(const String &moduleName, Framework *owner);
     virtual ~IModule() {}
 
     /// Called when module is loaded into memory.
@@ -47,7 +47,7 @@ public:
     virtual void Update(float UNUSED_PARAM(frametime)) {}
 
     /// Returns the name of the module.
-    const Urho3D::String &Name() const { return name; }
+    const String &Name() const { return name; }
 
     /// Returns the owner framework.
     Framework *GetFramework() const { return framework; }
@@ -59,7 +59,7 @@ protected:
 private:
     friend class Framework;
 
-    const Urho3D::String name; ///< Name of the module
+    const String name; ///< Name of the module
 };
 
 }

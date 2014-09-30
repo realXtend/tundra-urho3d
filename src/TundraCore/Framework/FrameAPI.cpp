@@ -33,12 +33,34 @@ float FrameAPI::WallClockTime() const
     return (float)((double)wallClock.GetUSec(false) / 1000000.0);
 }
 
+DelayedSignal& FrameAPI::DelayedExecute(float time)
+{
+    delayedSignals.Push(DelayedSignal());
+    DelayedSignal& newSignal = delayedSignals.Back();
+    newSignal.startTime = WallClockTime();
+    newSignal.triggerTime = newSignal.startTime + time;
+    return newSignal;
+}
+
 void FrameAPI::Update(float frametime)
 {
     PROFILE(FrameAPI_Update);
 
     Updated.Emit(frametime);
     PostFrameUpdate.Emit(frametime);
+
+    float currentTime = WallClockTime();
+    // Trigger and remove expired delayed signals
+    for (List<DelayedSignal>::Iterator it = delayedSignals.Begin(); it != delayedSignals.End();)
+    {
+        if (currentTime >= it->triggerTime)
+        {
+            it->Emit(currentTime - it->startTime);
+            it = delayedSignals.Erase(it);
+        }
+        else
+            ++it;
+    }
 
     ++currentFrameNumber;
     if (currentFrameNumber < 0)
