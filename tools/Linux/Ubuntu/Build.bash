@@ -235,7 +235,7 @@ if [ $run_analysis = true ] ; then
         --suppress=missingInclude \
         --suppress=missingIncludeSystem \
         --std=c++11 \
-        --error-exitcode=1 \
+        --error-exitcode=0 \
         --relative-paths=$TUNDRA_SRC \
         -DTUNDRACORE_API= \
         -I $TUNDRA_SRC \
