@@ -237,7 +237,6 @@ if [ $run_analysis = true ] ; then
         --std=c++11 \
         --error-exitcode=1 \
         --relative-paths=$TUNDRA_SRC \
-        --check-config \
         -DTUNDRACORE_API= \
         -I $TUNDRA_SRC \
         $TUNDRA_SRC

@@ -2,7 +2,8 @@ language: cpp
 
 compiler:
   - gcc
-  - clang
+  # Our use of nullptr borks clang build. Re-evaluate when Travis CI has up to date clang, std libs etc.
+  #- clang
 
 env:
   - LINUX=1
