@@ -12,6 +12,7 @@ file(GLOB H_FILES *.h)
 AddSourceFolder(Framework)
 AddSourceFolder(JSON)
 AddSourceFolder(Signals)
+AddSourceFolder(Scene)
 
 set(SOURCE_FILES ${CPP_FILES} ${H_FILES})
 

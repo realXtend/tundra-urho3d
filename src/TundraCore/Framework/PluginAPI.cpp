@@ -161,7 +161,7 @@ void PluginAPI::LoadPluginsFromXML(String pluginConfigurationFile)
     bool showDeprecationWarning = true;
     pluginConfigurationFile = owner->LookupRelativePath(pluginConfigurationFile);
 
-    XMLFile doc(GetContext());
+    Urho3D::XMLFile doc(GetContext());
     File file(GetContext(), pluginConfigurationFile, FILE_READ);
     if (!doc.Load(file))
     {

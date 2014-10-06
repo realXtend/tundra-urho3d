@@ -247,9 +247,11 @@ endif ()
 # Convenience macro for including all TundraCore subfolders.
 macro(UseTundraCore)
     include_directories(${CMAKE_SOURCE_DIR}/src/TundraCore/
-        ${CMAKE_SOURCE_DIR}/src/TundraCore/Signals
+        ${CMAKE_SOURCE_DIR}/src/TundraCore/Asset
         ${CMAKE_SOURCE_DIR}/src/TundraCore/Framework
         ${CMAKE_SOURCE_DIR}/src/TundraCore/JSON
+        ${CMAKE_SOURCE_DIR}/src/TundraCore/Scene
+        ${CMAKE_SOURCE_DIR}/src/TundraCore/Signals
     )
     # Using TundraCore requires Urho3D headers as well (SharedPtr etc.)
     include_directories(${URHO3D_INCLUDE_DIRS})

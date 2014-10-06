@@ -23,27 +23,32 @@ typedef unsigned int component_id_t;
 namespace Urho3D
 {
     class String;
+    class StringHash;
     class Variant;
     template <class T> class SharedPtr;
     template <class T> class WeakPtr;
     template <class T> class Vector;
+    template <class T> class PODVector;
     template <class T, class U> class HashMap;
     template <class T> class List;
     template <class T, class U> class Pair;
-    
 }
 
 namespace Tundra
 {
 
 using Urho3D::String;
+using Urho3D::StringHash;
 using Urho3D::Variant;
 using Urho3D::SharedPtr;
 using Urho3D::WeakPtr;
 using Urho3D::Vector;
+using Urho3D::PODVector;
 using Urho3D::HashMap;
 using Urho3D::List;
 using Urho3D::Pair;
+typedef Vector<String> StringVector;
+typedef Vector<Variant> VariantList;
 
 }
 

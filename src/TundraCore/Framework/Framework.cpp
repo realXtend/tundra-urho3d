@@ -6,6 +6,7 @@
 #include "FrameAPI.h"
 #include "PluginAPI.h"
 #include "ConfigAPI.h"
+#include "SceneAPI.h"
 #include "TundraVersionInfo.h"
 
 #include <Context.h>
@@ -56,6 +57,7 @@ Framework::Framework(Context* ctx) :
     frame = new FrameAPI(this);
     plugin = new PluginAPI(this);
     config = new ConfigAPI(this);
+    scene = new SceneAPI(this);
 
     ProcessStartupOptions();
     // In headless mode, no main UI/rendering window is initialized.
@@ -71,6 +73,7 @@ Framework::~Framework()
     frame.Reset();
     plugin.Reset();
     config.Reset();
+    scene.Reset();
 }
 
 void Framework::Go()
@@ -245,6 +248,11 @@ ConfigAPI* Framework::Config() const
 PluginAPI* Framework::Plugin() const
 {
     return plugin;
+}
+
+SceneAPI* Framework::Scene() const
+{
+    return scene;
 }
 
 Engine* Framework::Engine() const
@@ -456,7 +464,7 @@ bool Framework::LoadStartupOptionsFromXML(String configurationFile)
 {
     configurationFile = LookupRelativePath(configurationFile);
 
-    XMLFile doc(GetContext());
+    Urho3D::XMLFile doc(GetContext());
     File file(GetContext(), configurationFile, FILE_READ);
     if (!doc.Load(file))
     {

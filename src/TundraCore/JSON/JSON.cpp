@@ -726,7 +726,7 @@ bool JSONValue::ReadJSONString(String& dest, const char*& pos, const char*& end,
                     /// \todo Doesn't handle unicode surrogate pairs
                     unsigned code;
                     /// @todo check return value
-                    sscanf(pos, "%x", &code);
+                    code = strtol(pos, 0, 16);
                     pos += 4;
                     dest.AppendUTF8(code);
                 }

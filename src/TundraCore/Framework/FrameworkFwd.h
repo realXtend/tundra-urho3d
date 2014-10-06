@@ -15,4 +15,5 @@ namespace Tundra
     class PluginAPI;
     class ConfigAPI;
     class FrameAPI;
+    class SceneAPI;
 }
