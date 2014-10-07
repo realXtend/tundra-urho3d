@@ -4,6 +4,7 @@
     @file   Color.cpp
     @brief  A 4-component color value, component values are floating-points [0.0, 1.0]. */
 
+#include "StableHeaders.h"
 #include "Colour.h"
 #include "Math/MathFunc.h"
 #include "Math/float4.h"
