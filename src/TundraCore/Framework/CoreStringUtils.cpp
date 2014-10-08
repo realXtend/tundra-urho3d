@@ -20,7 +20,7 @@ String ReadUtf8String(kNet::DataDeserializer &dd)
 
 void WriteUtf8String(kNet::DataSerializer& ds, const String& str)
 {
-    ds.Add<u16>(str.Length());
+    ds.Add<u16>(static_cast<u16>(str.Length()));
     if (str.Length())
         ds.AddArray<u8>((const u8*)&str[0], str.Length());
 }

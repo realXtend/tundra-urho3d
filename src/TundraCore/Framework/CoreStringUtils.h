@@ -14,6 +14,7 @@ namespace Tundra
 String TUNDRACORE_API ReadUtf8String(kNet::DataDeserializer &dd);
 
 /// Writes String to a data stream using UTF-8 encoding.
+/** The maximum allowed length for the string is 65535 characters. */
 void TUNDRACORE_API WriteUtf8String(kNet::DataSerializer &ds, const String &str);
 
 }
