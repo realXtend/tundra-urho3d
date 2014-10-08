@@ -234,10 +234,10 @@ if [ $run_analysis = true ] ; then
         --enable=all \
         --suppress=missingInclude \
         --suppress=missingIncludeSystem \
+        --suppressions-list=$TUNDRA/tools/Windows/Cppcheck/Suppressions.txt \
         --std=c++11 \
-        --error-exitcode=1 \
+        --error-exitcode=0 \
         --relative-paths=$TUNDRA_SRC \
-        --check-config \
         -DTUNDRACORE_API= \
         -I $TUNDRA_SRC \
         $TUNDRA_SRC

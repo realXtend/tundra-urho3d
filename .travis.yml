@@ -2,8 +2,11 @@ language: cpp
 
 compiler:
   - gcc
-  # clang 3.4 build is still pulling in gcc 4.6 headers, nor sure how to fix this
+  # Our use of nullptr borks clang build. Re-evaluate when Travis CI has up to date clang, std libs etc.
   #- clang
+
+env:
+  - LINUX=1
 
 before_install:
   # g++4.8.1
