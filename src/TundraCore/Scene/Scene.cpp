@@ -541,7 +541,7 @@ bool Scene::SaveSceneBinary(const String& filename, bool serializeTemporary, boo
     foreach(EntityPtr entity, serialized)
         entity->SerializeToBinary(dest, serializeTemporary, serializeChildren, serializeLocal);
 
-    bytes.Resize(dest.BytesFilled());
+    bytes.Resize(static_cast<uint>(dest.BytesFilled()));
     Urho3D::File scenefile(context_);
     if (!scenefile.Open(filename, Urho3D::FILE_WRITE))
     {
@@ -1440,7 +1440,7 @@ void Scene::UpdateAttributeInterpolations(float frametime)
     
     interpolating_ = true;
     
-    for(size_t i = interpolations_.Size() - 1; i < interpolations_.Size(); --i)
+    for(uint i = interpolations_.Size() - 1; i < interpolations_.Size(); --i)
     {
         AttributeInterpolation& interp = interpolations_[i];
         bool finished = false;

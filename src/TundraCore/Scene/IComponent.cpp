@@ -157,7 +157,7 @@ bool IComponent::ShouldBeSerialized(bool serializeTemporary, bool serializeLocal
 
 IAttribute* IComponent::AttributeById(const String &id) const
 {
-    for(size_t i = 0; i < attributes.Size(); ++i)
+    for(uint i = 0; i < attributes.Size(); ++i)
         if(attributes[i] && attributes[i]->Id().Compare(id, false) == 0)
             return attributes[i];
     return 0;
@@ -165,7 +165,7 @@ IAttribute* IComponent::AttributeById(const String &id) const
 
 IAttribute* IComponent::AttributeByName(const String &name) const
 {
-    for(size_t i = 0; i < attributes.Size(); ++i)
+    for(uint i = 0; i < attributes.Size(); ++i)
         if(attributes[i] && attributes[i]->GetName().Compare(name, false) == 0)
             return attributes[i];
     return 0;
@@ -174,7 +174,7 @@ IAttribute* IComponent::AttributeByName(const String &name) const
 int IComponent::NumAttributes() const
 {
     int ret = 0;
-    for(size_t i = 0; i < attributes.Size(); ++i)
+    for(uint i = 0; i < attributes.Size(); ++i)
         if(attributes[i])
             ++ret;
     return ret;
@@ -183,7 +183,7 @@ int IComponent::NumAttributes() const
 int IComponent::NumStaticAttributes() const
 {
     int ret = 0;
-    for(size_t i = 0; i < attributes.Size(); ++i)
+    for(uint i = 0; i < attributes.Size(); ++i)
     {
         // Break when the first hole or dynamically allocated attribute is encountered
         if (attributes[i] && !attributes[i]->IsDynamic())
@@ -399,7 +399,7 @@ void IComponent::EmitAttributeChanged(IAttribute* attribute, AttributeChange::Ty
     AttributesChanged();
     // After having notified the derived class, clear all change bits on all attributes,
     // since the derived class has reacted on them. 
-    for(size_t i = 0; i < attributes.Size(); ++i)
+    for(uint i = 0; i < attributes.Size(); ++i)
         if (attributes[i])
             attributes[i]->ClearChangedFlag();
 }

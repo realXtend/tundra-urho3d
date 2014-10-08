@@ -415,7 +415,7 @@ void SceneAPI::RegisterComponentType(const String& typeName, IComponent* compone
     desc.typeName = typeName;
     desc.typeId = 0xffffffff; // Calculate from hash in RegisterPlaceholderComponentType()
     const AttributeVector& attrs = component->Attributes();
-    for (size_t i = 0; i < attrs.Size(); ++i)
+    for (uint i = 0; i < attrs.Size(); ++i)
     {
         IAttribute* attr = attrs[i];
         if (!attr)

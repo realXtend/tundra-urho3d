@@ -425,7 +425,7 @@ void Entity::SerializeToBinary(kNet::DataSerializer &dst, bool serializeTemporar
         comp_bytes.Resize(64 * 1024);
         kNet::DataSerializer comp_dest((char*)&comp_bytes[0], comp_bytes.Size());
         comp->SerializeToBinary(comp_dest);
-        comp_bytes.Resize(comp_dest.BytesFilled());
+        comp_bytes.Resize(static_cast<uint>(comp_dest.BytesFilled()));
         
         dst.Add<u32>(comp_bytes.Size());
         if (comp_bytes.Size())
@@ -779,7 +779,7 @@ void Entity::SetParent(EntityPtr parent, AttributeChange::Type change)
     if (oldParent)
     {
         ChildEntityVector& children = oldParent->children_;
-        for (size_t i = 0; i < children.Size(); ++i)
+        for (uint i = 0; i < children.Size(); ++i)
         {
             if (children[i].Lock().Get() == this)
             {
@@ -835,14 +835,14 @@ EntityPtr Entity::CreateLocalChild(const StringVector &components, AttributeChan
     return child;
 }
 
-EntityPtr Entity::Child(size_t index) const
+EntityPtr Entity::Child(uint index) const
 {
     return index < children_.Size() ? children_[index].Lock() : EntityPtr();
 }
 
 EntityPtr Entity::ChildByName(const String& name, bool recursive) const
 {
-    for (size_t i = 0; i < children_.Size(); ++i)
+    for (uint i = 0; i < children_.Size(); ++i)
     {
         // Safeguard in case the entity has become null without us knowing
         EntityPtr child = children_[i].Lock();
@@ -882,7 +882,7 @@ bool Entity::ShouldBeSerialized(bool serializeTemporary, bool serializeLocal, bo
 
 void Entity::CollectChildren(EntityVector& children, bool recursive) const
 {
-    for (size_t i = 0; i < children_.Size(); ++i)
+    for (uint i = 0; i < children_.Size(); ++i)
     {
         // Safeguard in case the entity has become null without us knowing
         EntityPtr child = children_[i].Lock();

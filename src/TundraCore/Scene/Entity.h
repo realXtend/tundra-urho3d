@@ -392,7 +392,7 @@ public:
     size_t NumChildren() const { return children_.Size(); }
 
     /// Returns child entity by index.
-    EntityPtr Child(size_t index) const;
+    EntityPtr Child(uint index) const;
 
     /// Returns child entity by name. Optionally recursive.
     EntityPtr ChildByName(const String& name, bool recursive = false) const;
