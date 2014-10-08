@@ -17,8 +17,6 @@ AddSourceFolder(Scene)
 set(SOURCE_FILES ${CPP_FILES} ${H_FILES})
 
 UseTundraCore() # Include all subfolders within the project
-use_package(URHO3D)
-use_package(MATHGEOLIB)
 
 add_definitions(-DTUNDRACORE_EXPORTS)
 
@@ -30,6 +28,7 @@ endif()
 
 link_package(URHO3D)
 link_package(MATHGEOLIB)
+link_package(KNET)
 
 SetupCompileFlagsWithPCH()
 

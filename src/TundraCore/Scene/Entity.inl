@@ -29,9 +29,9 @@ template <class T>
 Vector<SharedPtr<T> > Entity::ComponentsOfType() const
 {
     Vector<SharedPtr<T> > ret;
-    for(ComponentMap::const_iterator i = components_.begin(); i != components_.end(); ++i)
+    for(ComponentMap::ConstIterator i = components_.Begin(); i != components_.End(); ++i)
     {
-        SharedPtr<T> t = Urho3D::StaticCast<T>(i->second);
+        SharedPtr<T> t = Urho3D::StaticCast<T>(i->second_);
         if (t)
             ret.Push(t);
     }

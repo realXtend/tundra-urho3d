@@ -133,7 +133,7 @@ StringVector IComponent::GetAttributeNames() const
     StringVector attribute_list;
     for(AttributeVector::ConstIterator iter = attributes.Begin(); iter != attributes.End(); ++iter)
         if (*iter)
-            attribute_list.Push((*iter)->Name());
+            attribute_list.Push((*iter)->GetName());
     return attribute_list;
 }
 
@@ -166,7 +166,7 @@ IAttribute* IComponent::AttributeById(const String &id) const
 IAttribute* IComponent::AttributeByName(const String &name) const
 {
     for(size_t i = 0; i < attributes.Size(); ++i)
-        if(attributes[i] && attributes[i]->Name().Compare(name, false) == 0)
+        if(attributes[i] && attributes[i]->GetName().Compare(name, false) == 0)
             return attributes[i];
     return 0;
 }
@@ -341,8 +341,8 @@ Urho3D::XMLElement IComponent::BeginSerialization(Urho3D::XMLFile& doc, Urho3D::
 
     comp_element.SetAttribute("type", EnsureTypeNameWithoutPrefix(TypeName())); /**< @todo 27.09.2013 typeName would be better here */
     comp_element.SetUInt("typeId", TypeId());
-    if (!Name().Empty())
-        comp_element.SetAttribute("name", Name());
+    if (!componentName.Empty())
+        comp_element.SetAttribute("name", componentName);
     comp_element.SetBool("sync", replicated);
     if (serializeTemporary)
         comp_element.SetBool("temporary", temporary);
@@ -361,7 +361,7 @@ void IComponent::WriteAttribute(Urho3D::XMLFile& /*doc*/, Urho3D::XMLElement& co
 
 void IComponent::WriteAttribute(Urho3D::XMLFile& doc, Urho3D::XMLElement& compElement, const IAttribute *attr) const
 {
-    WriteAttribute(doc, compElement, attr->Name(), attr->Id(), attr->ToString(), attr->TypeName());
+    WriteAttribute(doc, compElement, attr->GetName(), attr->Id(), attr->ToString(), attr->TypeName());
 }
 
 bool IComponent::BeginDeserialization(Urho3D::XMLElement& compElem)

@@ -14,6 +14,8 @@
 #include "Math/float3.h"
 #include "Math/float4.h"
 #include "Transform.h"
+#include "DynamicComponent.h"
+#include "Name.h"
 #include "PlaceholderComponent.h"
 #include "Colour.h"
 
@@ -47,6 +49,10 @@ SceneAPI::SceneAPI(Framework *owner) :
     attributeTypeNames.Push(cAttributeVariantListTypeName);
     attributeTypeNames.Push(cAttributeTransformTypeName);
     attributeTypeNames.Push(cAttributePointTypeName);
+
+    // Name and DynamicComponent are always available
+    RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Name>()));
+    RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<DynamicComponent>()));
 }
 
 SceneAPI::~SceneAPI()
@@ -181,7 +187,7 @@ ComponentPtr SceneAPI::CreateComponentByName(Scene* scene, const String &compone
         LOGERROR("Cannot create component for type \"" + componentTypename + "\" - no factory exists!");
         return ComponentPtr();
     }
-    return factory->Create(scene, newComponentName);
+    return factory->Create(context_, scene, newComponentName);
 }
 
 ComponentPtr SceneAPI::CreateComponentById(Scene* scene, u32 componentTypeid, const String &newComponentName) const
@@ -197,7 +203,7 @@ ComponentPtr SceneAPI::CreateComponentById(Scene* scene, u32 componentTypeid, co
         LOGERROR("Cannot create component for typeid \"" + String(componentTypeid) + "\" - no factory exists!");
         return ComponentPtr();
     }
-    return factory->Create(scene, newComponentName);
+    return factory->Create(context_, scene, newComponentName);
 }
 
 String SceneAPI::ComponentTypeNameForTypeId(u32 componentTypeid) const
@@ -416,7 +422,7 @@ void SceneAPI::RegisterComponentType(const String& typeName, IComponent* compone
             continue;
         AttributeDesc attrDesc;
         attrDesc.id = attr->Id();
-        attrDesc.name = attr->Name();
+        attrDesc.name = attr->GetName();
         attrDesc.typeName = attr->TypeName();
         desc.attributes.Push(attrDesc);
     }

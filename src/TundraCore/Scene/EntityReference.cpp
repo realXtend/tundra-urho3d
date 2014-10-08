@@ -29,7 +29,7 @@ void EntityReference::Set(Entity* entity)
         return;
     }
     
-    String name = entity->Name();
+    String name = entity->GetName();
     Scene* scene = entity->ParentScene();
     if (!scene)
     {
@@ -87,7 +87,7 @@ bool EntityReference::Matches(Entity *entity) const
     entity_id_t id = Urho3D::ToInt(ref);
     if (id)
         return (entity->Id() == id);
-    return (entity->Name().Compare(ref, false) == 0);
+    return (entity->GetName().Compare(ref, false) == 0);
 }
 
 }

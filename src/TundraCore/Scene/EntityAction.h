@@ -27,7 +27,7 @@ public:
     ~EntityAction() {}
 
     /// Returns name of the action.
-    const String &Name() const { return name; }
+    const String &GetName() const { return name; }
 
     /// Execution type of the action, i.e. where the actions is executed.
     /** As combinations we get local+server, local+peers(all clients but not server),

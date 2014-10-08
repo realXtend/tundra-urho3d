@@ -37,7 +37,7 @@ namespace Tundra
     </table> */
 class TUNDRACORE_API Name : public IComponent
 {
-    COMPONENT_NAME("Name", 26)
+    COMPONENT_NAME(Name, 26)
 
 public:
     /// @cond PRIVATE

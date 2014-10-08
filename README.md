@@ -12,7 +12,7 @@ Compiling from Sources
 
 Tundra-Urho3D uses [CMake] as its build system.
 
-Partial support for C++11 is required to compile successfully: in particular support for the auto keyword. More C++11 features may be considered later if found necessary. Currently minimum compiler requirements are VS2010 or newer (VS2008 not supported) or GCC 4.4 or newer. All Clang versions should support the needed feature set.
+Partial support for C++11 is required to compile successfully: in particular support for the auto & override keywords. More C++11 features may be considered later if found necessary. Currently minimum compiler requirements are VS2010 or newer (VS2008 not supported) or GCC 4.7 or newer. All Clang versions should support the needed feature set.
 
 ### Windows, targeting Windows
 

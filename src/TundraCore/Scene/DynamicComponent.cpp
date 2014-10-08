@@ -158,7 +158,7 @@ IAttribute *DynamicComponent::CreateAttribute(const String &typeName, const Stri
     IAttribute *attribute = SceneAPI::CreateAttribute(typeName, id);
     if (!attribute)
     {
-        LOGERROR("Failed to create new attribute of type \"" + typeName + "\" with ID \"" + id + "\" to dynamic component \"" + Name() + "\".");
+        LOGERROR("Failed to create new attribute of type \"" + typeName + "\" with ID \"" + id + "\" to dynamic component \"" + GetName() + "\".");
         return 0;
     }
 

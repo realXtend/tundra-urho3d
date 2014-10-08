@@ -48,7 +48,7 @@ IAttribute *PlaceholderComponent::CreateAttribute(const String &typeName, const 
     IAttribute *attribute = SceneAPI::CreateAttribute(typeName, id);
     if (!attribute)
     {
-        LOGERROR("Failed to create new attribute of type \"" + typeName + "\" with ID \"" + id + "\" to placeholder component \"" + Name() + "\".");
+        LOGERROR("Failed to create new attribute of type \"" + typeName + "\" with ID \"" + id + "\" to placeholder component \"" + GetName() + "\".");
         return 0;
     }
 

@@ -40,7 +40,7 @@ public:
     typedef HashMap<StringHash, SharedPtr<Urho3D::Object> > SubsystemMap; ///< Maps scene subsystems by type
 
     /// Returns name of the scene.
-    const String &Name() const { return name_; }
+    const String &GetName() const { return name_; }
 
     /// Returns iterator to the beginning of the entities.
     Iterator Begin() { return Iterator(entities_.Begin()); }
@@ -58,13 +58,13 @@ public:
     const EntityMap &Entities() const { return entities_; }
 
     /// Returns true if the two scenes have the same name
-    bool operator == (const Scene &other) const { return Name() == other.Name(); }
+    bool operator == (const Scene &other) const { return GetName() == other.GetName(); }
 
     /// Returns true if the two scenes have different names
     bool operator != (const Scene &other) const { return !(*this == other); }
 
     /// Order by scene name
-    bool operator < (const Scene &other) const { return Name() < other.Name(); }
+    bool operator < (const Scene &other) const { return GetName() < other.GetName(); }
     
     /// Add a subsystem world (GraphicsWorld, PhysicsWorld)
     void AddSubsystem(Urho3D::Object* system);
@@ -120,14 +120,6 @@ public:
     /// @overload
     /** @param data Binary data to be processed. */
     SceneDesc CreateSceneDescFromBinary(PODVector<unsigned char> &data, SceneDesc &sceneDesc) const;
-
-    /// Inspects .js file content for dependencies and adds them to sceneDesc.assets
-    ///@todo This function is a duplicate copy of void ScriptAsset::ParseReferences(). Delete this code. -jj.
-    /** @param filePath. Path to the file that is opened for inspection.
-        @param SceneDesc. Scene description struct ref, found asset dependencies will be added here.
-        @todo Make one implementation of this to a common place that EC_Script and Scene can use.
-        @note If the way we introduce js dependencies (!ref: and engine.IncludeFile()) changes, this function needs to change too. */
-    void SearchScriptAssetDependencies(const String &filePath, SceneDesc &sceneDesc) const;
 
     /// Creates scene content from scene description.
     /** @param desc Scene description.

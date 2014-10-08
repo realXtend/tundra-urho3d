@@ -7,27 +7,27 @@ template <class T>
 SharedPtr<T> Scene::Subsystem() const
 {
     SubsystemMap::ConstIterator it = subsystems.Find(T::GetTypeStatic());
-    return DynamicCast<T>(it->second_);
+    return Urho3D::DynamicCast<T>(it->second_);
 }
 
 template <typename T>
 Vector<SharedPtr<T> > Scene::Components(const String &name) const
 {
     Vector<SharedPtr<T> > ret;
-    if (name.isEmpty())
+    if (name.Empty())
     {
-        for(const_iterator it = Begin(); it != End(); ++it)
+        for(ConstIterator it = Begin(); it != End(); ++it)
         {
-            Vector<SharedPtr<T> > components =  it->second->ComponentsOfType<T>();
+            Vector<SharedPtr<T> > components =  it->second_->ComponentsOfType<T>();
             if (!components.Empty())
                 ret.insert(ret.End(), components.Begin(), components.End());
         }
     }
     else
     {
-        for(const_iterator it = Begin(); it != End(); ++it)
+        for(ConstIterator it = Begin(); it != End(); ++it)
         {
-            SharedPtr<T> component = it->second->GetComponent<T>(name);
+            SharedPtr<T> component = it->second_->Component<T>(name);
             if (component)
                 ret.Push(component);
         }

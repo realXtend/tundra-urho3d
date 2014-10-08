@@ -254,7 +254,7 @@ public:
     void SetName(const String &name);
 
     /// Returns name of this entity if Name is available, empty string otherwise.
-    String Name() const;
+    String GetName() const;
 
     /// Sets description of the entity to Name component. If the component doesn't exist, it will be created.
     /** @param desc Description. */

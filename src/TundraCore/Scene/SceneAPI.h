@@ -14,6 +14,8 @@
 namespace Tundra
 {
 
+class Framework;
+
 /// Gives access to the scenes in the system.
 /** With this API you can create, remove, query scenes and listen to scene additions and removals.
     Owned by Framework. */
@@ -22,8 +24,8 @@ class TUNDRACORE_API SceneAPI : public Urho3D::Object
     OBJECT(SceneAPI);
 
 public:
-    typedef HashMap<u32, ComponentDesc> PlaceholderComponentTypeMap;
-    typedef HashMap<String, u32> PlaceholderComponentTypeIdMap;
+    typedef HashMap<unsigned, ComponentDesc> PlaceholderComponentTypeMap;
+    typedef HashMap<String, unsigned> PlaceholderComponentTypeIdMap;
 
     ~SceneAPI();
 
@@ -35,7 +37,7 @@ public:
     SharedPtr<T> CreateComponent(Scene* parentScene, const String &newComponentName = "") const
     {
         /// @todo static_pointer_cast should be ok here
-        return DynamicCast<T>(CreateComponentById(parentScene, T::TypeIdStatic(), newComponentName));
+        return Urho3D::DynamicCast<T>(CreateComponentById(parentScene, T::TypeIdStatic(), newComponentName));
     }
 
     /// Returns a list of all attribute type names that can be used in the CreateAttribute function to create an attribute.
@@ -195,7 +197,7 @@ private:
     ComponentFactoryPtr GetFactory(u32 typeId) const;
 
     typedef HashMap<String, ComponentFactoryPtr> ComponentFactoryMap;
-    typedef HashMap<u32, WeakPtr<IComponentFactory> > ComponentFactoryWeakMap;
+    typedef HashMap<unsigned, WeakPtr<IComponentFactory> > ComponentFactoryWeakMap;
 
     ComponentFactoryMap componentFactories;
     ComponentFactoryWeakMap componentFactoriesByTypeid;

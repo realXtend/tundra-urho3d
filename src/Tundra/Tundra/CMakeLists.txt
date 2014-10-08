@@ -11,7 +11,6 @@ set (SOURCE_FILES ${CPP_FILES} ${H_FILES})
 if (ANDROID)
     include_directories (${URHO3D_HOME}/Source/ThirdParty/SDL/include)
     set (SOURCE_FILES ${SOURCE_FILES} ${URHO3D_HOME}/Source/ThirdParty/SDL/src/main/android/SDL_android_main.c)
-    use_package(URHO3D)
 endif ()
 
 SetupCompileFlags()

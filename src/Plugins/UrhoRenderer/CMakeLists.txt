@@ -11,8 +11,6 @@ add_definitions(-DURHO_MODULE_EXPORTS)
 
 UseTundraCore()
 use_modules(TundraCore)
-use_package(URHO3D)
-use_package(MATHGEOLIB)
 
 build_library(${TARGET_NAME} SHARED ${SOURCE_FILES})
 

@@ -21,7 +21,7 @@ public:
 
     virtual const String &TypeName() const = 0;
     virtual u32 TypeId() const = 0;
-    virtual ComponentPtr Create(Scene* scene, const String &newComponentName) const = 0;
+    virtual ComponentPtr Create(Urho3D::Context* context, Scene* scene, const String &newComponentName) const = 0;
 //    virtual ComponentPtr Clone(IComponent *existingComponent, const String &newComponentName) const = 0;
 };
 

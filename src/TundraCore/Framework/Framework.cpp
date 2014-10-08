@@ -135,7 +135,7 @@ void Framework::Go()
 
     for(uint i = 0; i < modules.Size(); ++i)
     {
-        LOGDEBUG("Initializing module " + modules[i]->Name());
+        LOGDEBUG("Initializing module " + modules[i]->GetName());
         modules[i]->Initialize();
     }
 
@@ -158,13 +158,13 @@ void Framework::Go()
 
     for(uint i = 0; i < modules.Size(); ++i)
     {
-        LOGDEBUG("Uninitializing module " + modules[i]->Name());
+        LOGDEBUG("Uninitializing module " + modules[i]->GetName());
         modules[i]->Uninitialize();
     }
 
     for(uint i = 0; i < modules.Size(); ++i)
     {
-        LOGDEBUG("Unloading module " + modules[i]->Name());
+        LOGDEBUG("Unloading module " + modules[i]->GetName());
         modules[i]->Unload();
     }
 
@@ -230,7 +230,7 @@ void Framework::RegisterModule(IModule *module)
 IModule *Framework::ModuleByName(const String &name) const
 {
     for(unsigned i = 0; i < modules.Size(); ++i)
-        if (modules[i]->Name() == name)
+        if (modules[i]->GetName() == name)
             return modules[i].Get();
     return nullptr;
 }

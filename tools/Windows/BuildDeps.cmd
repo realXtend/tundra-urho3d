@@ -115,6 +115,28 @@ MSBuild INSTALL.%VCPROJ_FILE_EXT% /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly 
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
 
+:: kNet
+IF NOT EXIST "%DEPS%\kNet\". (
+    cecho {0D}Cloning kNet into "%DEPS%\kNet".{# #}{\n}
+    cd "%DEPS%"
+    git clone https://github.com/juj/kNet kNet
+    cd "%DEPS%\kNet\"
+    IF NOT EXIST "%DEPS%\kNet\.git" GOTO :ERROR
+    git checkout master
+) ELSE (
+    cd "%DEPS%\kNet\"
+    git pull
+)
+
+cecho {0D}Running CMake for kNet.{# #}{\n}
+cmake . -G %GENERATOR% -DCMAKE_DEBUG_POSTFIX=_d
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+cecho {0D}Building %BUILD_TYPE% kNet. Please be patient, this will take a while.{# #}{\n}
+MSBuild kNet.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+
 :: Urho3D engine
 :: latest master for now, if a "last known good version" is not needed
 IF NOT EXIST "%DEPS%\urho3d\". (
@@ -136,7 +158,7 @@ IF %TARGET_ARCH%==x64 (
 ) ELSE (
     set URHO3D_64BIT=0
 )
-cmake ../Source -G %GENERATOR% -DURHO3D_LIB_TYPE=SHARED -DURHO3D_64BIT=%URHO3D_64BIT% -DURHO3D_ANGELSCRIPT=0 -DURHO3D_LUA=0 -DURHO3D_TOOLS=0
+cmake ../Source -G %GENERATOR% -DURHO3D_LIB_TYPE=SHARED -DURHO3D_64BIT=%URHO3D_64BIT% -DURHO3D_ANGELSCRIPT=0 -DURHO3D_LUA=0 -DURHO3D_TOOLS=0 -DURHO3D_NETWORK=0 
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
 cecho {0D}Building %BUILD_TYPE% Urho3D. Please be patient, this will take a while.{# #}{\n}

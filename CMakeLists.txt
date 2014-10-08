@@ -11,6 +11,7 @@ message("") # Newline before any output from the CMake script.
 
 set (URHO3D_HOME         ""      CACHE PATH "Urho3D dependency directory")
 set (MATHGEOLIB_HOME     ""      CACHE PATH "MathGeoLib dependency directory")
+set (KNET_HOME           ""      CACHE PATH "kNet dependency directory")
 
 # If not passed to cmake, set and cache normalized path for environment variables
 if (NOT URHO3D_HOME)
@@ -21,6 +22,10 @@ if (NOT MATHGEOLIB_HOME)
     file (TO_CMAKE_PATH "$ENV{MATHGEOLIB_HOME}" MATHGEOLIB_HOME)
     set (MATHGEOLIB_HOME ${MATHGEOLIB_HOME} CACHE PATH "MathGeoLib dependency directory")
 endif()
+if (NOT KNET_HOME)
+    file (TO_CMAKE_PATH "$ENV{KNET_HOME}" KNET_HOME)
+    set (KNET_HOME ${KNET_HOME} CACHE PATH "MathGeoLib dependency directory")
+endif()
 
 # If we still haven't resolved dependencies report a fatal error
 if (NOT URHO3D_HOME)
@@ -28,6 +33,9 @@ if (NOT URHO3D_HOME)
 endif ()
 if (NOT MATHGEOLIB_HOME)
     message(FATAL_ERROR "MATHGEOLIB_HOME could not be resolved from a environment variable or from cmake cache!")
+endif ()
+if (NOT KNET_HOME)
+    message(FATAL_ERROR "KNET_HOME could not be resolved from a environment variable or from cmake cache!")
 endif ()
 
 # CMake policies
@@ -46,10 +54,10 @@ endif ()
 # Compiler-specific C++11 activation. Partial C++11 support is mandatory for Tundra-urho3d.
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
     execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
-    if (NOT (GCC_VERSION VERSION_GREATER 4.4 OR GCC_VERSION VERSION_EQUAL 4.4))
-        message(FATAL_ERROR "${PROJECT_NAME} C++11 features require GCC 4.4 or greater.")
+    if (NOT (GCC_VERSION VERSION_GREATER 4.7 OR GCC_VERSION VERSION_EQUAL 4.7))
+        message(FATAL_ERROR "${PROJECT_NAME} C++11 features require GCC 4.7 or greater.")
     else ()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
         if (APPLE)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
         endif ()
@@ -57,7 +65,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
 endif ()
 if (APPLE)
     if ("${CMAKE_GENERATOR}" MATCHES "Xcode")
-        set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x")
+        set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11")
         set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
     endif ()
 endif ()
@@ -69,6 +77,7 @@ macro(PrintUsedDependencyVariables)
     message("======================== Dependency Variables ========================\n") # 70 visible chars
     message(STATUS "URHO3D_HOME      = " ${URHO3D_HOME})
     message(STATUS "MATHGEOLIB_HOME  = " ${MATHGEOLIB_HOME})
+    message(STATUS "KNET_HOME        = " ${KNET_HOME})
     message("")
 endmacro()
 
@@ -218,6 +227,9 @@ configure_urho3d()
 # Find/configure MathGeoLib
 configure_mathgeolib()
 
+# Find/configure kNet
+configure_knet()
+
 message("")
 
 # Set global hardcoded install prefix. User cannot change this at the moment, until we figure how we want to use this!
@@ -253,8 +265,11 @@ macro(UseTundraCore)
         ${CMAKE_SOURCE_DIR}/src/TundraCore/Scene
         ${CMAKE_SOURCE_DIR}/src/TundraCore/Signals
     )
-    # Using TundraCore requires Urho3D headers as well (SharedPtr etc.)
-    include_directories(${URHO3D_INCLUDE_DIRS})
+    # Due to automatic CMake dependency transfer, we will need kNet and MathGeoLib link directories
+    # Urho3D include directories are also needed throughout the project
+    use_package(URHO3D)
+    use_package(MATHGEOLIB)
+    use_package(KNET)
 endmacro()
 
 # Read the set of optional modules from another file

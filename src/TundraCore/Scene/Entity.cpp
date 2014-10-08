@@ -19,6 +19,7 @@
 #include <Profiler.h>
 #include <algorithm>
 
+/// \todo Find out where these are getting defined
 #undef min
 #undef max
 
@@ -125,7 +126,7 @@ void Entity::RemoveComponent(const ComponentPtr &component, AttributeChange::Typ
                 return;
             }
 
-        LOGWARNINGF("Entity::RemoveComponent: Failed to find %s \"%s\" from %s.", component->TypeName().CString(), component->Name().CString(), ToString().CString());
+        LOGWARNINGF("Entity::RemoveComponent: Failed to find %s \"%s\" from %s.", component->TypeName().CString(), component->GetName().CString(), ToString().CString());
     }
 }
 
@@ -370,7 +371,7 @@ ComponentPtr Entity::Component(const String &type_name, const String& name) cons
 {
     const String cTypeName = IComponent::EnsureTypeNameWithoutPrefix(type_name);
     for (ComponentMap::ConstIterator i = components_.Begin(); i != components_.End(); ++i)
-        if (i->second_->TypeName() == cTypeName && i->second_->Name() == name)
+        if (i->second_->TypeName() == cTypeName && i->second_->GetName() == name)
             return i->second_;
 
     return ComponentPtr();
@@ -379,7 +380,7 @@ ComponentPtr Entity::Component(const String &type_name, const String& name) cons
 ComponentPtr Entity::Component(u32 typeId, const String& name) const
 {
     for (ComponentMap::ConstIterator i = components_.Begin(); i != components_.End(); ++i)
-        if (i->second_->TypeId() == typeId && i->second_->Name() == name)
+        if (i->second_->TypeId() == typeId && i->second_->GetName() == name)
             return i->second_;
 
     return ComponentPtr();
@@ -415,7 +416,7 @@ void Entity::SerializeToBinary(kNet::DataSerializer &dst, bool serializeTemporar
     foreach(const ComponentPtr &comp, serializable)
     {
         dst.Add<u32>(comp->TypeId()); ///\todo VLE this!
-        dst.AddString(comp->Name().CString());
+        dst.AddString(comp->GetName().CString());
         dst.Add<u8>(comp->IsReplicated() ? 1 : 0);
 
         // Write each component to a separate buffer, then write out its size first, so we can skip unknown components
@@ -550,39 +551,39 @@ EntityPtr Entity::Clone(bool local, bool temporary, const String &cloneName, Att
 
 void Entity::SetName(const String &name)
 {
-    SharedPtr<Tundra::Name> comp = GetOrCreateComponent<Tundra::Name>();
+    SharedPtr<Name> comp = GetOrCreateComponent<Name>();
     assert(comp);
     comp->name.Set(name, AttributeChange::Default);
 }
 
-String Entity::Name() const
+String Entity::GetName() const
 {
-    SharedPtr<Tundra::Name> name = Component<Tundra::Name>();
+    SharedPtr<Name> name = Component<Name>();
     return name ? name->name.Get() : "";
 }
 
 void Entity::SetDescription(const String &desc)
 {
-    SharedPtr<Tundra::Name> comp = GetOrCreateComponent<Tundra::Name>();
+    SharedPtr<Name> comp = GetOrCreateComponent<Name>();
     assert(comp);
     comp->description.Set(desc, AttributeChange::Default);
 }
 
 String Entity::Description() const
 {
-    SharedPtr<Tundra::Name> name = Component<Tundra::Name>();
+    SharedPtr<Name> name = Component<Name>();
     return name ? name->description.Get() : "";
 }
 
 void Entity::SetGroup(const String &groupName)
 {
-    SharedPtr<Tundra::Name> comp = GetOrCreateComponent<Tundra::Name>();
+    SharedPtr<Name> comp = GetOrCreateComponent<Name>();
     comp->group.Set(groupName, AttributeChange::Default);
 }
 
 String Entity::Group() const
 {
-    SharedPtr<Tundra::Name> comp = Component<Tundra::Name>();
+    SharedPtr<Name> comp = Component<Name>();
     return comp ? comp->group.Get() : "";
 }
 
@@ -590,7 +591,7 @@ EntityAction *Entity::Action(const String &name)
 {
     for (ActionMap::Iterator it = actions_.Begin(); it != actions_.End(); ++it)
     {
-        if (it->second_->Name().Compare(name, false) == 0)
+        if (it->second_->GetName().Compare(name, false) == 0)
             return it->second_;
     }
 
@@ -691,7 +692,7 @@ void Entity::SetTemporary(bool enable, AttributeChange::Type change)
 
 String Entity::ToString() const
 {
-    String name = Name();
+    String name = GetName();
     if (name.Trimmed().Empty())
         return String("Entity ID ") + String(Id());
     else
@@ -847,7 +848,7 @@ EntityPtr Entity::ChildByName(const String& name, bool recursive) const
         EntityPtr child = children_[i].Lock();
         if (child)
         {
-            if (name.Compare(child->Name(), false) == 0)
+            if (name.Compare(child->GetName(), false) == 0)
                 return child;
             if (recursive)
             {

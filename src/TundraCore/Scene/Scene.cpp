@@ -21,7 +21,6 @@
 #include <kNet/DataSerializer.h>
 #include <kNet/PolledTimer.h>
 #include <algorithm>
-#include <regex>
 
 #include <Log.h>
 #include <File.h>
@@ -29,6 +28,7 @@
 #include <ForEach.h>
 #include <FileSystem.h>
 
+/// \todo Find out where these are getting defined
 #undef min
 #undef max
 
@@ -141,7 +141,7 @@ EntityPtr Scene::EntityByName(const String &name) const
         return EntityPtr();
 
     for(ConstIterator it = Begin(); it != End(); ++it)
-        if (it->second_->Name() == name)
+        if (it->second_->GetName() == name)
             return it->second_;
 
     return EntityPtr();
@@ -481,14 +481,12 @@ bool Scene::SaveSceneXML(const String& filename, bool serializeTemporary, bool s
     Urho3D::File scenefile(context_);
     if (!scenefile.Open(filename, Urho3D::FILE_WRITE))
     {
-        scenefile.WriteString(sceneXML);
-        return true;
-    }
-    else
-    {
         LOGERROR("SaveSceneXML: Failed to open file " + filename + " for writing.");
         return false;
     }
+
+    scenefile.WriteString(sceneXML);
+    return true;
 }
 
 Vector<Entity *> Scene::LoadSceneBinary(const String& filename, bool clearScene, bool useEntityIDsFromFile, AttributeChange::Type change)
@@ -545,17 +543,15 @@ bool Scene::SaveSceneBinary(const String& filename, bool serializeTemporary, boo
 
     bytes.Resize(dest.BytesFilled());
     Urho3D::File scenefile(context_);
-    if (scenefile.Open(filename, Urho3D::FILE_WRITE))
-    {
-        if (bytes.Size())
-            scenefile.Write(&bytes[0], bytes.Size());
-        return true;
-    }
-    else
+    if (!scenefile.Open(filename, Urho3D::FILE_WRITE))
     {
         LOGERROR("Scene::SaveSceneBinary: Could not open file " + filename + " for writing when saving scene binary.");
         return false;
     }
+
+    if (bytes.Size())
+        scenefile.Write(&bytes[0], bytes.Size());
+    return true;
 }
 
 Vector<Entity *> Scene::CreateContentFromXml(const String &xml,  bool useEntityIDsFromFile, AttributeChange::Type change)
@@ -1029,7 +1025,7 @@ void Scene::CreateEntityFromDesc(EntityPtr parent, const EntityDesc& e, bool use
                     {
                         if (attr->TypeName().Compare(a.typeName, false) == 0 &&
                             (attr->Id().Compare(a.id, false) == 0 ||
-                             attr->Name().Compare(a.name, false) == 0))
+                             attr->GetName().Compare(a.name, false) == 0))
                         {
                            attr->FromString(a.value, AttributeChange::Disconnected); // Trigger no signal yet when scene is in incoherent state
                         }
@@ -1140,7 +1136,7 @@ void Scene::CreateEntityDescFromXml(SceneDesc& sceneDesc, Vector<EntityDesc>& de
         {
             ComponentPtr comp = (hasTypeId ? framework_->Scene()->CreateComponentById(0, compDesc.typeId, compDesc.name) :
                 framework_->Scene()->CreateComponentByName(0, compDesc.typeName, compDesc.name));
-            Tundra::Name *ecName = static_cast<Tundra::Name*>(comp.Get());
+            Name *ecName = static_cast<Name*>(comp.Get());
             ecName->DeserializeFrom(comp_elem, AttributeChange::Disconnected);
             entityDesc.name = ecName->name.Get();
             entityDesc.group = ecName->group.Get();
@@ -1162,7 +1158,7 @@ void Scene::CreateEntityDescFromXml(SceneDesc& sceneDesc, Vector<EntityDesc>& de
                 continue;
                     
             const String typeName = a->TypeName();
-            AttributeDesc attrDesc = { typeName, a->Name(), a->ToString(), a->Id() };
+            AttributeDesc attrDesc = { typeName, a->GetName(), a->ToString(), a->Id() };
             compDesc.attributes.Push(attrDesc);
 
             String attrValue = a->ToString();
@@ -1177,7 +1173,7 @@ void Scene::CreateEntityDescFromXml(SceneDesc& sceneDesc, Vector<EntityDesc>& de
                     const String &assetRef = assetRefs[avi];
 
                     AssetDesc ad;
-                    ad.typeName = a->Name();
+                    ad.typeName = a->GetName();
 
                     // Resolve absolute file path for asset reference and the destination name (just the filename).
                     if (!sceneDesc.assetCache.Fill(assetRef, ad))
@@ -1192,9 +1188,10 @@ void Scene::CreateEntityDescFromXml(SceneDesc& sceneDesc, Vector<EntityDesc>& de
 
                     sceneDesc.assets[MakePair(ad.source, ad.subname)] = ad;
 
+                    /// \todo Implement elsewhere
                     // If this is a script, look for dependecies
-                    if (ad.source.ToLower().EndsWith(".js"))
-                        SearchScriptAssetDependencies(ad.source, sceneDesc);
+                    //if (ad.source.ToLower().EndsWith(".js"))
+                    //    SearchScriptAssetDependencies(ad.source, sceneDesc);
                 } 
             }
         }
@@ -1213,65 +1210,6 @@ void Scene::CreateEntityDescFromXml(SceneDesc& sceneDesc, Vector<EntityDesc>& de
     }
 
     dest.Push(entityDesc);
-}
-
-///\todo This function is a redundant duplicate copy of void ScriptAsset::ParseReferences(). Delete this code. -jj.
-void Scene::SearchScriptAssetDependencies(const String &filePath, SceneDesc &sceneDesc) const
-{
-    if (!filePath.ToLower().EndsWith(".js"))
-        return;
-
-    if (GetSubsystem<Urho3D::FileSystem>()->FileExists(filePath))
-    {
-        Urho3D::File script(context_);
-        if (script.Open(filePath, Urho3D::FILE_READ))
-        {
-            String scriptData = script.ReadString();
-            std::string content(scriptData.CString());
-            StringVector foundRefs;
-            sregex_iterator searchEnd;
-
-            regex expression("!ref:\\s*(.*?)\\s*(\\n|\\r|$)");
-            for(sregex_iterator iter(content.begin(), content.end(), expression); iter != searchEnd; ++iter)
-            {
-                String ref = String((*iter)[1].str().c_str());
-                if (!foundRefs.Contains(ref))
-                    foundRefs.Push(ref);
-            }
-
-            expression = regex("engine.IncludeFile\\(\\s*\"\\s*(.*?)\\s*\"\\s*\\)");
-            for(sregex_iterator iter(content.begin(), content.end(), expression); iter != searchEnd; ++iter)
-            {
-                String ref = String((*iter)[1].str().c_str());
-                if (!foundRefs.Contains(ref))
-                    foundRefs.Push(ref);
-            }
-
-            foreach(String scriptDependency, foundRefs)
-            {
-                AssetDesc ad;
-                ad.typeName = "Script dependency";
-
-                String basePath = Urho3D::GetPath(sceneDesc.filename);
-                /// \todo Implement Asset API
-                //framework_->Asset()->ResolveLocalAssetPath(scriptDependency, basePath, ad.source);
-                //ad.destinationName = AssetAPI::ExtractFilenameFromAssetRef(ad.source);
-                
-                // We have to check if the asset is already added. As we do this recursively there is a danger of a infinite loop.
-                // This check wont let that happen. Situation when infinite loop would happen: A.js depends on B.js and B.js depends on A.js
-                // Other than .js depedency assets cannot cause this.
-                SceneDesc::AssetMapKey key = MakePair(ad.source, ad.subname);
-                if (!sceneDesc.assets.Contains(key))
-                {
-                    sceneDesc.assets[key] = ad;
-
-                    // Go deeper if dep file is .js
-                    if (ad.source.ToLower().EndsWith(".js"))
-                        SearchScriptAssetDependencies(ad.source, sceneDesc);
-                }
-            }
-        }
-    }
 }
 
 SceneDesc Scene::CreateSceneDescFromBinary(const String &filename) const
@@ -1357,7 +1295,7 @@ SceneDesc Scene::CreateSceneDescFromBinary(PODVector<unsigned char> &data, Scene
                                     continue;
                                 
                                 String typeName = a->TypeName();
-                                AttributeDesc attrDesc = { typeName, a->Name(), a->ToString(), a->Id() };
+                                AttributeDesc attrDesc = { typeName, a->GetName(), a->ToString(), a->Id() };
                                 compDesc.attributes.Push(attrDesc);
 
                                 String attrValue = a->ToString();
@@ -1372,7 +1310,7 @@ SceneDesc Scene::CreateSceneDescFromBinary(PODVector<unsigned char> &data, Scene
                                         const String &assetRef = assetRefs[avi];
 
                                         AssetDesc ad;
-                                        ad.typeName = a->Name();
+                                        ad.typeName = a->GetName();
 
                                         // Resolve absolute file path for asset reference and the destination name (just the filename).
                                         if (!sceneDesc.assetCache.Fill(assetRef, ad))
@@ -1385,9 +1323,10 @@ SceneDesc Scene::CreateSceneDescFromBinary(PODVector<unsigned char> &data, Scene
 
                                         sceneDesc.assets[MakePair(ad.source, ad.subname)] = ad;
 
+                                        /// \todo Implement elsewhere
                                         // If this is a script, look for dependecies
-                                        if (ad.source.ToLower().EndsWith(".js"))
-                                            SearchScriptAssetDependencies(ad.source, sceneDesc);
+                                        //if (ad.source.ToLower().EndsWith(".js"))
+                                        //    SearchScriptAssetDependencies(ad.source, sceneDesc);
                                     }
                                 }
                             }
@@ -1571,7 +1510,7 @@ EntityVector Scene::FindEntitiesContaining(const String &substring, bool caseSen
     for(ConstIterator it = Begin(); it != End(); ++it)
     {
         EntityPtr entity = it->second_;
-        if (entity->Name().Contains(substring, caseSensitivity))
+        if (entity->GetName().Contains(substring, caseSensitivity))
             entities.Push(entity);
     }
 
@@ -1585,7 +1524,7 @@ EntityVector Scene::FindEntitiesByName(const String &name, bool caseSensitivity)
     for(ConstIterator it = Begin(); it != End(); ++it)
     {
         EntityPtr entity = it->second_;
-        if (entity->Name().Compare(name, caseSensitivity) == 0)
+        if (entity->GetName().Compare(name, caseSensitivity) == 0)
             entities.Push(entity);
     }
 

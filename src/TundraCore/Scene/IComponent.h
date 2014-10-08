@@ -101,7 +101,7 @@ public:
     /** The name of a component is a custom user-specified name for
         this component instance, and identifies separate instances of the same component in an object. 
         The (TypeName, Name) pairs of all components in an Entity must be unique. The Name string can be empty. */
-    const String &Name() const { return componentName; }
+    const String &GetName() const { return componentName; }
 
     /// Sets the name of the component.
     /** This call will silently fail if there already exists a component with the
@@ -169,8 +169,8 @@ public:
     template<typename T>
     Attribute<T> *AttributeByName(const String &name) const
     {
-        for(size_t i = 0; i < attributes.size(); ++i)
-            if (attributes[i] && attributes[i]->Name().compare(name, Qt::CaseInsensitive) == 0)
+        for(size_t i = 0; i < attributes.Size(); ++i)
+            if (attributes[i] && attributes[i]->GetName().Compare(name, false) == 0)
                 return dynamic_cast<Attribute<T> *>(&attributes[i]);
         return 0;
     }
@@ -183,8 +183,8 @@ public:
     template<typename T>
     Attribute<T> *AttributeById(const String &id) const
     {
-        for(size_t i = 0; i < attributes.size(); ++i)
-            if (attributes[i] && attributes[i]->Id().compare(id, Qt::CaseInsensitive) == 0)
+        for(size_t i = 0; i < attributes.Size(); ++i)
+            if (attributes[i] && attributes[i]->Id().Compare(id, false) == 0)
                 return dynamic_cast<Attribute<T> *>(&attributes[i]);
         return 0;
     }

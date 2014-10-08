@@ -58,6 +58,28 @@ make install
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
 
+:: kNet
+IF NOT EXIST "%DEPS%\kNet\". (
+    cecho {0D}Cloning kNet into "%DEPS%\kNet".{# #}{\n}
+    cd "%DEPS%"
+    git clone https://github.com/juj/kNet kNet
+    cd "%DEPS%\kNet\"
+    IF NOT EXIST "%DEPS%\kNet\.git" GOTO :ERROR
+    git checkout master
+) ELSE (
+    cd "%DEPS%\kNet\"
+    git pull
+)
+
+cecho {0D}Running CMake for kNet.{# #}{\n}
+cmake . -G "Unix Makefiles" -DANDROID=1 -DCMAKE_TOOLCHAIN_FILE=%TUNDRA_DIR%\cmake\android.toolchain.cmake
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+cecho {0D}Building kNet. Please be patient, this will take a while.{# #}{\n}
+make -j%NUMBER_OF_PROCESSORS%
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+
 :: Urho3D
 :: latest master for now, if a "last known good version" is not needed
 IF NOT EXIST "%DEPS%\urho3d\". (
@@ -73,7 +95,7 @@ IF NOT EXIST "%DEPS%\urho3d\". (
 
 cecho {0D}Running CMake for Urho3D.{# #}{\n}
 cd Source\Android
-cmake .. -G "Unix Makefiles" -DANDROID=1 -DURHO3D_ANGELSCRIPT=0 -DURHO3D_LUA=0 -DURHO3D_TOOLS=0 -DURHO3D_LIB_TYPE=SHARED -DLIBRARY_OUTPUT_PATH_ROOT=. -DCMAKE_TOOLCHAIN_FILE=%TUNDRA_DIR%\cmake\android.toolchain.cmake
+cmake .. -G "Unix Makefiles" -DANDROID=1 -DURHO3D_ANGELSCRIPT=0 -DURHO3D_LUA=0 -DURHO3D_TOOLS=0 -DURHO3D_NETWORK=0 -DURHO3D_LIB_TYPE=SHARED -DLIBRARY_OUTPUT_PATH_ROOT=. -DCMAKE_TOOLCHAIN_FILE=%TUNDRA_DIR%\cmake\android.toolchain.cmake
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
 cecho {0D}Building %BUILD_TYPE% Urho3D. Please be patient, this will take a while.{# #}{\n}

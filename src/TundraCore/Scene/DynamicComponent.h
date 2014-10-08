@@ -49,7 +49,7 @@ struct DeserializeData;
     </table> */
 class TUNDRACORE_API DynamicComponent : public IComponent
 {
-    COMPONENT_NAME("DynamicComponent", 25)
+    COMPONENT_NAME(DynamicComponent, 25)
 
 public:
      /// @cond PRIVATE
