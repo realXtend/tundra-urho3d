@@ -38,10 +38,30 @@ public:                                                                         
     }                                                                                   \
 private: // Return the class visibility specifier to the strictest form so that the user most likely catches that this macro had to change the visibility.
 
-/// Macro for constructing an attribute in the component's constructor initializer list. "id" is the property/variable name, "name" is the human-readable name used in editing.
-#define INIT_ATTRIBUTE(id, name) id(this, #id, name)
-/// Macro for constructing an attribute in the component's constructor initializer list. "id" is the property/variable name, "name" is the human-readable name used in editing, "value" is initial value.
-#define INIT_ATTRIBUTE_VALUE(id, name, value) id(this, #id, name, value)
+// MSVC __pragma tricks for the macros below: we're using 'this' in initializer list which is technically UB but safe in our case.
+#ifndef _MSC_VER
+#define __pragma(x)
+#endif
+
+/// Macro for constructing an attribute in the component's constructor initializer list.
+/** "id" is the property/variable name, "name" is the human-readable name used in editing. */
+#define INIT_ATTRIBUTE(id, name) \
+__pragma(warning(push)) \
+__pragma(warning(disable:4355)) \
+id(this, #id, name) \
+__pragma(warning(pop))
+
+/// Macro for constructing an attribute in the component's constructor initializer list.
+/** "id" is the property/variable name, "name" is the human-readable name used in editing, "value" is initial value. */
+#define INIT_ATTRIBUTE_VALUE(id, name, value) \
+__pragma(warning(push)) \
+__pragma(warning(disable:4355)) \
+id(this, #id, name, value) \
+__pragma(warning(pop))
+
+#ifndef _MSC_VER
+#undef __pragma
+#endif
 
 namespace Tundra
 {
