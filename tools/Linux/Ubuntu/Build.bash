@@ -144,6 +144,26 @@ if [ $skip_deps = false ] ; then
         mark_built
     fi
 
+    #### kNet
+
+    start_target kNet
+
+    if ! is_cloned ; then
+        git clone https://github.com/juj/kNet.git kNet
+    fi
+
+    if ! is_built ; then
+        mkdir -p build
+        cd build
+
+        cmake .. \
+            -DCMAKE_BUILD_TYPE=$build_type
+
+        make -j $num_cpu -S
+
+        mark_built
+    fi
+
     #### Urho3D
 
     start_target urho3d
@@ -164,6 +184,7 @@ if [ $skip_deps = false ] ; then
             -DURHO3D_LIB_TYPE=SHARED \
             -DURHO3D_ANGELSCRIPT=0 \
             -DURHO3D_LUA=0 \
+            -DURHO3D_NETWORK=0 \
             -DURHO3D_TOOLS=0
 
         make -j $num_cpu -S
@@ -209,7 +230,8 @@ if [ $skip_cmake = false ] ; then
 
     cmake .. \
         -DMATHGEOLIB_HOME=$DEPS \
-        -DURHO3D_HOME=$DEPS_SRC/urho3d
+        -DURHO3D_HOME=$DEPS_SRC/urho3d \
+        -DKNET_HOME=$DEPS_SRC/kNet
 fi
 
 # Tundra build
