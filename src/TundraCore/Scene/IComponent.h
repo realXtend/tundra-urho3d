@@ -14,7 +14,7 @@
 
 #include <Object.h>
 
-/// Define component shared and weak pointers. Ie. PlaceablePtr and PlaceableWeakPtr for a Placeable component.
+/// Define component shared and weak pointers, e.g. PlaceablePtr and PlaceableWeakPtr for a Placeable component.
 /** This define should be placed after the class definition, but inside the Tundra namespace */
 #define COMPONENT_TYPEDEFS(componentTypeName)                                           \
 typedef SharedPtr<componentTypeName> componentTypeName ## Ptr;                          \
@@ -44,30 +44,27 @@ public:                                                                         
     }                                                                                   \
 private: // Return the class visibility specifier to the strictest form so that the user most likely catches that this macro had to change the visibility.
 
-// MSVC __pragma tricks for the macros below: we're using 'this' in initializer list which is technically UB but safe in our case.
-#ifdef _MSC_VER
+/** @def INIT_ATTRIBUTE(id, name)
+    Macro for constructing an attribute in the component's constructor initializer list.
+    "id" is the property/variable name, "name" is the human-readable name used in editing. */
+/** @def INIT_ATTRIBUTE_VALUE(id, name, value)
+     Macro for constructing an attribute in the component's constructor initializer list.
+     "id" is the property/variable name, "name" is the human-readable name used in editing, "value" is initial value. */
 
-/// Macro for constructing an attribute in the component's constructor initializer list.
-/** "id" is the property/variable name, "name" is the human-readable name used in editing. */
+#ifdef _MSC_VER // using 'this' in initializer list which is technically UB but safe in our case.
 #define INIT_ATTRIBUTE(id, name) \
-__pragma(warning(push)) \
-__pragma(warning(disable:4355)) \
-id(this, #id, name) \
-__pragma(warning(pop))
-
-/// Macro for constructing an attribute in the component's constructor initializer list.
-/** "id" is the property/variable name, "name" is the human-readable name used in editing, "value" is initial value. */
+    __pragma(warning(push)) \
+    __pragma(warning(disable:4355)) \
+    id(this, #id, name) \
+    __pragma(warning(pop))
 #define INIT_ATTRIBUTE_VALUE(id, name, value) \
-__pragma(warning(push)) \
-__pragma(warning(disable:4355)) \
-id(this, #id, name, value) \
-__pragma(warning(pop))
-
+    __pragma(warning(push)) \
+    __pragma(warning(disable:4355)) \
+    id(this, #id, name, value) \
+    __pragma(warning(pop))
 #else
-
 #define INIT_ATTRIBUTE(id, name) id(this, #id, name)
 #define INIT_ATTRIBUTE_VALUE(id, name, value) id(this, #id, name, value)
-
 #endif
 
 namespace Tundra
