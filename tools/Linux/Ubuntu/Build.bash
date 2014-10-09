@@ -157,7 +157,8 @@ if [ $skip_deps = false ] ; then
         cd build
 
         cmake .. \
-            -DCMAKE_BUILD_TYPE=$build_type
+            -DCMAKE_BUILD_TYPE=$build_type \
+            -DUSE_BOOST:BOOL=FALSE
 
         make -j $num_cpu -S
 
