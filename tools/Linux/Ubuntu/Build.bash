@@ -159,6 +159,7 @@ if [ $skip_deps = false ] ; then
 
         cmake .. \
             -DCMAKE_BUILD_TYPE=$build_type \
+            -DCMAKE_CXX_FLAGS="-fPIC" \
             -DUSE_BOOST:BOOL=FALSE
 
         make -j $num_cpu -S
