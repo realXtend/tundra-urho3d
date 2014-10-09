@@ -52,3 +52,8 @@ typedef Vector<Variant> VariantList;
 
 }
 
+// Prevent Windows.h include from defining MIN & MAX
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+

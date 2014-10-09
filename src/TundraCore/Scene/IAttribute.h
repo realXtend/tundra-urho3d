@@ -47,7 +47,7 @@ public:
     const String &Id() const { return id; }
 
     /// Returns human-readable name of the attribute. This is shown in the EC editor. For dynamic attributes, is the same as ID.
-    const String &GetName() const { return name; }
+    const String &Name() const { return name; }
 
     /// Change the attribute's name. Needed for PlaceholderComponent when constructing attributes dynamically at deserialization
     void SetName(const String& newName);

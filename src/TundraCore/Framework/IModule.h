@@ -47,7 +47,7 @@ public:
     virtual void Update(float UNUSED_PARAM(frametime)) {}
 
     /// Returns the name of the module.
-    const String &GetName() const { return name; }
+    const String &Name() const { return name; }
 
     /// Returns the owner framework.
     Framework *GetFramework() const { return framework; }

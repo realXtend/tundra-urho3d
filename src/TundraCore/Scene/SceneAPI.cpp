@@ -422,7 +422,7 @@ void SceneAPI::RegisterComponentType(const String& typeName, IComponent* compone
             continue;
         AttributeDesc attrDesc;
         attrDesc.id = attr->Id();
-        attrDesc.name = attr->GetName();
+        attrDesc.name = attr->Name();
         attrDesc.typeName = attr->TypeName();
         desc.attributes.Push(attrDesc);
     }

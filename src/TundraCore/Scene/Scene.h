@@ -40,7 +40,7 @@ public:
     typedef HashMap<StringHash, SharedPtr<Urho3D::Object> > SubsystemMap; ///< Maps scene subsystems by type
 
     /// Returns name of the scene.
-    const String &GetName() const { return name_; }
+    const String &Name() const { return name_; }
 
     /// Returns iterator to the beginning of the entities.
     Iterator Begin() { return Iterator(entities_.Begin()); }
@@ -58,13 +58,13 @@ public:
     const EntityMap &Entities() const { return entities_; }
 
     /// Returns true if the two scenes have the same name
-    bool operator == (const Scene &other) const { return GetName() == other.GetName(); }
+    bool operator == (const Scene &other) const { return Name() == other.Name(); }
 
     /// Returns true if the two scenes have different names
     bool operator != (const Scene &other) const { return !(*this == other); }
 
     /// Order by scene name
-    bool operator < (const Scene &other) const { return GetName() < other.GetName(); }
+    bool operator < (const Scene &other) const { return Name() < other.Name(); }
     
     /// Add a subsystem world (GraphicsWorld, PhysicsWorld)
     void AddSubsystem(Urho3D::Object* system);

@@ -133,7 +133,7 @@ StringVector IComponent::GetAttributeNames() const
     StringVector attribute_list;
     for(AttributeVector::ConstIterator iter = attributes.Begin(); iter != attributes.End(); ++iter)
         if (*iter)
-            attribute_list.Push((*iter)->GetName());
+            attribute_list.Push((*iter)->Name());
     return attribute_list;
 }
 
@@ -166,7 +166,7 @@ IAttribute* IComponent::AttributeById(const String &id) const
 IAttribute* IComponent::AttributeByName(const String &name) const
 {
     for(uint i = 0; i < attributes.Size(); ++i)
-        if(attributes[i] && attributes[i]->GetName().Compare(name, false) == 0)
+        if(attributes[i] && attributes[i]->Name().Compare(name, false) == 0)
             return attributes[i];
     return 0;
 }
@@ -361,7 +361,7 @@ void IComponent::WriteAttribute(Urho3D::XMLFile& /*doc*/, Urho3D::XMLElement& co
 
 void IComponent::WriteAttribute(Urho3D::XMLFile& doc, Urho3D::XMLElement& compElement, const IAttribute *attr) const
 {
-    WriteAttribute(doc, compElement, attr->GetName(), attr->Id(), attr->ToString(), attr->TypeName());
+    WriteAttribute(doc, compElement, attr->Name(), attr->Id(), attr->ToString(), attr->TypeName());
 }
 
 bool IComponent::BeginDeserialization(Urho3D::XMLElement& compElem)

@@ -121,7 +121,7 @@ public:
     /** The name of a component is a custom user-specified name for
         this component instance, and identifies separate instances of the same component in an object. 
         The (TypeName, Name) pairs of all components in an Entity must be unique. The Name string can be empty. */
-    const String &GetName() const { return componentName; }
+    const String &Name() const { return componentName; }
 
     /// Sets the name of the component.
     /** This call will silently fail if there already exists a component with the
@@ -190,7 +190,7 @@ public:
     Attribute<T> *AttributeByName(const String &name) const
     {
         for(size_t i = 0; i < attributes.Size(); ++i)
-            if (attributes[i] && attributes[i]->GetName().Compare(name, false) == 0)
+            if (attributes[i] && attributes[i]->Name().Compare(name, false) == 0)
                 return dynamic_cast<Attribute<T> *>(&attributes[i]);
         return 0;
     }

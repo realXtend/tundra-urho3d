@@ -19,7 +19,6 @@
 
 #include <kNet/DataDeserializer.h>
 #include <kNet/DataSerializer.h>
-#include <kNet/PolledTimer.h>
 #include <algorithm>
 
 #include <Log.h>
@@ -27,10 +26,6 @@
 #include <XMLFile.h>
 #include <ForEach.h>
 #include <FileSystem.h>
-
-/// \todo Find out where these are getting defined
-#undef min
-#undef max
 
 using namespace kNet;
 using namespace std;
@@ -141,7 +136,7 @@ EntityPtr Scene::EntityByName(const String &name) const
         return EntityPtr();
 
     for(ConstIterator it = Begin(); it != End(); ++it)
-        if (it->second_->GetName() == name)
+        if (it->second_->Name() == name)
             return it->second_;
 
     return EntityPtr();
@@ -1025,7 +1020,7 @@ void Scene::CreateEntityFromDesc(EntityPtr parent, const EntityDesc& e, bool use
                     {
                         if (attr->TypeName().Compare(a.typeName, false) == 0 &&
                             (attr->Id().Compare(a.id, false) == 0 ||
-                             attr->GetName().Compare(a.name, false) == 0))
+                             attr->Name().Compare(a.name, false) == 0))
                         {
                            attr->FromString(a.value, AttributeChange::Disconnected); // Trigger no signal yet when scene is in incoherent state
                         }
@@ -1136,7 +1131,7 @@ void Scene::CreateEntityDescFromXml(SceneDesc& sceneDesc, Vector<EntityDesc>& de
         {
             ComponentPtr comp = (hasTypeId ? framework_->Scene()->CreateComponentById(0, compDesc.typeId, compDesc.name) :
                 framework_->Scene()->CreateComponentByName(0, compDesc.typeName, compDesc.name));
-            Name *ecName = static_cast<Name*>(comp.Get());
+            Tundra::Name *ecName = static_cast<Tundra::Name*>(comp.Get());
             ecName->DeserializeFrom(comp_elem, AttributeChange::Disconnected);
             entityDesc.name = ecName->name.Get();
             entityDesc.group = ecName->group.Get();
@@ -1158,7 +1153,7 @@ void Scene::CreateEntityDescFromXml(SceneDesc& sceneDesc, Vector<EntityDesc>& de
                 continue;
                     
             const String typeName = a->TypeName();
-            AttributeDesc attrDesc = { typeName, a->GetName(), a->ToString(), a->Id() };
+            AttributeDesc attrDesc = { typeName, a->Name(), a->ToString(), a->Id() };
             compDesc.attributes.Push(attrDesc);
 
             String attrValue = a->ToString();
@@ -1173,7 +1168,7 @@ void Scene::CreateEntityDescFromXml(SceneDesc& sceneDesc, Vector<EntityDesc>& de
                     const String &assetRef = assetRefs[avi];
 
                     AssetDesc ad;
-                    ad.typeName = a->GetName();
+                    ad.typeName = a->Name();
 
                     // Resolve absolute file path for asset reference and the destination name (just the filename).
                     if (!sceneDesc.assetCache.Fill(assetRef, ad))
@@ -1295,7 +1290,7 @@ SceneDesc Scene::CreateSceneDescFromBinary(PODVector<unsigned char> &data, Scene
                                     continue;
                                 
                                 String typeName = a->TypeName();
-                                AttributeDesc attrDesc = { typeName, a->GetName(), a->ToString(), a->Id() };
+                                AttributeDesc attrDesc = { typeName, a->Name(), a->ToString(), a->Id() };
                                 compDesc.attributes.Push(attrDesc);
 
                                 String attrValue = a->ToString();
@@ -1310,7 +1305,7 @@ SceneDesc Scene::CreateSceneDescFromBinary(PODVector<unsigned char> &data, Scene
                                         const String &assetRef = assetRefs[avi];
 
                                         AssetDesc ad;
-                                        ad.typeName = a->GetName();
+                                        ad.typeName = a->Name();
 
                                         // Resolve absolute file path for asset reference and the destination name (just the filename).
                                         if (!sceneDesc.assetCache.Fill(assetRef, ad))
@@ -1510,7 +1505,7 @@ EntityVector Scene::FindEntitiesContaining(const String &substring, bool caseSen
     for(ConstIterator it = Begin(); it != End(); ++it)
     {
         EntityPtr entity = it->second_;
-        if (entity->GetName().Contains(substring, caseSensitivity))
+        if (entity->Name().Contains(substring, caseSensitivity))
             entities.Push(entity);
     }
 
@@ -1524,7 +1519,7 @@ EntityVector Scene::FindEntitiesByName(const String &name, bool caseSensitivity)
     for(ConstIterator it = Begin(); it != End(); ++it)
     {
         EntityPtr entity = it->second_;
-        if (entity->GetName().Compare(name, caseSensitivity) == 0)
+        if (entity->Name().Compare(name, caseSensitivity) == 0)
             entities.Push(entity);
     }
 
