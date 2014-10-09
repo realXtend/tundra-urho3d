@@ -13,11 +13,11 @@
 #include "Math/float2.h"
 #include "Math/float3.h"
 #include "Math/float4.h"
-#include "Transform.h"
+#include "Math/Transform.h"
+#include "Math/Color.h"
 #include "DynamicComponent.h"
 #include "Name.h"
 #include "PlaceholderComponent.h"
-#include "Colour.h"
 
 #include <Log.h>
 #include <XMLElement.h>

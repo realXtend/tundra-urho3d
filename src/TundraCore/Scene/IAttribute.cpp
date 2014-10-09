@@ -12,16 +12,15 @@
 #include "CoreTypes.h"
 #include "CoreDefines.h"
 #include "CoreStringUtils.h"
-#include "Transform.h"
 #include "AssetReference.h"
 #include "EntityReference.h"
-//#include "Color.h"
+#include "Math/Transform.h"
 #include "Math/Quat.h"
 #include "Math/float2.h"
 #include "Math/float3.h"
 #include "Math/float3.h"
 #include "Math/MathFunc.h"
-#include "Colour.h"
+#include "Math/Color.h"
 
 #include <StringUtils.h>
 #include <Log.h>

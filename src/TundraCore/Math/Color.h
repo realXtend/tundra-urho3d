@@ -1,5 +1,4 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
-// Note: file name is intentionally Colour.h to not clash with Urho3D headers
 
 #pragma once
 
