@@ -39,9 +39,7 @@ public:                                                                         
 private: // Return the class visibility specifier to the strictest form so that the user most likely catches that this macro had to change the visibility.
 
 // MSVC __pragma tricks for the macros below: we're using 'this' in initializer list which is technically UB but safe in our case.
-#ifndef _MSC_VER
-#define __pragma(x)
-#endif
+#ifdef _MSC_VER
 
 /// Macro for constructing an attribute in the component's constructor initializer list.
 /** "id" is the property/variable name, "name" is the human-readable name used in editing. */
@@ -59,8 +57,11 @@ __pragma(warning(disable:4355)) \
 id(this, #id, name, value) \
 __pragma(warning(pop))
 
-#ifndef _MSC_VER
-#undef __pragma
+#else
+
+#define INIT_ATTRIBUTE(id, name) id(this, #id, name)
+#define INIT_ATTRIBUTE_VALUE(id, name, value) id(this, #id, name, value)
+
 #endif
 
 namespace Tundra
