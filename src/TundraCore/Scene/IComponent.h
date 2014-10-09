@@ -14,6 +14,12 @@
 
 #include <Object.h>
 
+/// Define component shared and weak pointers. Ie. PlaceablePtr and PlaceableWeakPtr for a Placeable component.
+/** This define should be placed after the class definition, but inside the Tundra namespace */
+#define COMPONENT_TYPEDEFS(componentTypeName)                                           \
+typedef SharedPtr<componentTypeName> componentTypeName ## Ptr;                          \
+typedef WeakPtr<componentTypeName> componentTypeName ## WeakPtr;
+
 /// Specifies unique type name and unique type ID of this component.
 /** Warning: This #define alters the current visibility specifier in the class file. */
 #define COMPONENT_NAME(componentTypeName, componentTypeId)                              \

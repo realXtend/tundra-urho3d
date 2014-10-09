@@ -68,4 +68,6 @@ public:
     Attribute<String> group;
 };
 
+COMPONENT_TYPEDEFS(Name)
+
 }

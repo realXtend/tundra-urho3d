@@ -106,4 +106,6 @@ private:
     int GetInternalAttributeIndex(int index) const;
 };
 
+COMPONENT_TYPEDEFS(DynamicComponent)
+
 }

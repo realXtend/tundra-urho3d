@@ -12,7 +12,7 @@ namespace Tundra
 /// Placeholder/fallback for components that don't currently have a registered C++ implementation.
 class TUNDRACORE_API PlaceholderComponent : public IComponent
 {
-    OBJECT(CustomComponent);
+    OBJECT(PlaceholderComponent);
 
 public:
      /// @cond PRIVATE
@@ -58,5 +58,7 @@ private:
     String typeName;
     u32 typeId;
 };
+
+COMPONENT_TYPEDEFS(PlaceholderComponent)
 
 }

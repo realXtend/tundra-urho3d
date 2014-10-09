@@ -560,26 +560,26 @@ String Entity::Name() const
 
 void Entity::SetDescription(const String &desc)
 {
-    SharedPtr<Tundra::Name> comp = GetOrCreateComponent<Tundra::Name>();
+    NamePtr comp = GetOrCreateComponent<Tundra::Name>();
     assert(comp);
     comp->description.Set(desc, AttributeChange::Default);
 }
 
 String Entity::Description() const
 {
-    SharedPtr<Tundra::Name> name = Component<Tundra::Name>();
+    NamePtr name = Component<Tundra::Name>();
     return name ? name->description.Get() : "";
 }
 
 void Entity::SetGroup(const String &groupName)
 {
-    SharedPtr<Tundra::Name> comp = GetOrCreateComponent<Tundra::Name>();
+    NamePtr comp = GetOrCreateComponent<Tundra::Name>();
     comp->group.Set(groupName, AttributeChange::Default);
 }
 
 String Entity::Group() const
 {
-    SharedPtr<Tundra::Name> comp = Component<Tundra::Name>();
+    NamePtr comp = Component<Tundra::Name>();
     return comp ? comp->group.Get() : "";
 }
 
