@@ -22,9 +22,6 @@ public:
     explicit AssetReference(const String &reference) : ref(reference) {}
 
     /// @note This form of a ctor should not be used, since asset references can contain unicode characters, which a std::string cannot represent.
-    explicit AssetReference(const std::string &reference) : ref(reference.c_str()) {}
-
-    /// @note This form of a ctor should not be used, since asset references can contain unicode characters, which a std::string cannot represent.
     explicit AssetReference(const char *reference) : ref(reference) {}
 
     AssetReference(const String &reference, const String &type_) : ref(reference), type(type_) {}
