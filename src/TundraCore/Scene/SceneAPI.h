@@ -87,7 +87,7 @@ public:
 
         @note As Tundra doesn't currently support multiple replicated scenes, @c change has no real effect,
         unless AttributeChange::Disconnected is passed, which can be used f.ex. when creating dummy scenes silently
-        (no OgreWorld or PhysicsWorld will be created) for serialization purposes.
+        (no GraphicsWorld or PhysicsWorld will be created) for serialization purposes.
 
         @return The new scene, or empty pointer if scene with the specified name already exists. */
     ScenePtr CreateScene(const String &name, bool viewEnabled, bool authority, AttributeChange::Type change = AttributeChange::Default);

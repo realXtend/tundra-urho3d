@@ -11,9 +11,9 @@
 namespace Tundra
 {
 
-void EntityAction::Trigger(const String &param1, const String &param2, const String &param3, const StringVector &params)
+void EntityAction::Trigger(const StringVector &parameters)
 {
-    Triggered.Emit(param1, param2, param3, params);
+    Triggered.Emit(parameters);
 }
 
 EntityAction::EntityAction(const String &name_)

@@ -49,6 +49,9 @@ Scene::Scene(const String &name, Framework *framework, bool viewEnabled, bool au
 
 Scene::~Scene()
 {
+    if (subsystems.Size())
+        LOGWARNING("Subsystems not removed at scene destruct time");
+
     EndAllAttributeInterpolations();
     
     // Do not send entity removal or scene cleared events on destruction
@@ -145,6 +148,18 @@ EntityPtr Scene::EntityByName(const String &name) const
 bool Scene::IsUniqueName(const String& name) const
 {
     return !EntityByName(name);
+}
+
+void Scene::AddSubsystem(Urho3D::Object* system)
+{
+    if (system)
+        subsystems[system->GetType()] = system;
+}
+
+void Scene::RemoveSubsystem(Urho3D::Object* system)
+{
+    if (system)
+        subsystems.Erase(system->GetType());
 }
 
 void Scene::ChangeEntityId(entity_id_t old_id, entity_id_t new_id)
@@ -612,7 +627,7 @@ Vector<Entity *> Scene::CreateContentFromXml(Urho3D::XMLFile &xml, bool useEntit
     // so sorting here still makes a difference.
     Vector<EntityWeakPtr> sortedDescEntities = SortEntities(entities);
 
-    // Fix parent ref of EC_Placeable if new entity IDs were generated.
+    // Fix parent ref of Placeable if new entity IDs were generated.
     // This should be done first so that we wont be firing signals
     // with partially updated state (these ends are already in the scene for querying).
     if (!useEntityIDsFromFile)
@@ -779,7 +794,7 @@ Vector<Entity *> Scene::CreateContentFromBinary(const char *data, int numBytes, 
         return Vector<Entity *>();
     }
 
-    // Fix parent ref of EC_Placeable if new entity IDs were generated.
+    // Fix parent ref of Placeable if new entity IDs were generated.
     // This should be done first so that we wont be firing signals
     // with partially updated state (these ends are already in the scene for querying).
     if (!useEntityIDsFromFile)
@@ -920,7 +935,7 @@ Vector<Entity *> Scene::CreateContentFromSceneDesc(const SceneDesc &desc, bool u
     for (int ei=0, eilen=sortedDescEntities.Size(); ei<eilen; ++ei)
         CreateEntityFromDesc(EntityPtr(), sortedDescEntities[ei], useEntityIDsFromFile, change, ret, oldToNewIds);
 
-    // Fix parent ref of EC_Placeable if new entity IDs were generated.
+    // Fix parent ref of Placeable if new entity IDs were generated.
     // This should be done first so that we wont be firing signals
     // with partially updated state (these ends are already in the scene for querying).
     if (!useEntityIDsFromFile)
@@ -1776,7 +1791,7 @@ entity_id_t Scene::EntityParentId(const Entity *ent) const
 
 entity_id_t Scene::PlaceableParentId(const Entity *ent) const
 {
-    ComponentPtr comp = ent->Component(20); // EC_Placeable
+    ComponentPtr comp = ent->Component(20); // Placeable
     if (!comp)
         return 0;
     Attribute<EntityReference> *parentRef = static_cast<Attribute<EntityReference> *>(comp->AttributeById("parentRef"));
@@ -1830,7 +1845,7 @@ uint Scene::FixPlaceableParentIds(const Vector<Entity *> &entities, const Entity
         if (!entity)
             continue;
 
-        ComponentPtr placeable = entity->Component(20); // EC_Placeable
+        ComponentPtr placeable = entity->Component(20); // Placeable
         Attribute<EntityReference> *parentRef = (placeable.Get() ? static_cast<Attribute<EntityReference> *>(placeable->AttributeById("parentRef")) : 0);
         if (parentRef && !parentRef->Get().IsEmpty())
         {

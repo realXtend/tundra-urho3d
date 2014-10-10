@@ -46,11 +46,8 @@ public:
     typedef unsigned int ExecTypeField;
 
     /// Emitted when action is triggered.
-    /** @param p1 1st parameter for the action, if applicable.
-        @param p2 2nd parameter for the action, if applicable.
-        @param p3 3rd parameter for the action, if applicable.
-        @param rest Rest of the parameters, if applicable. */
-    Signal4<String, String, String, StringVector> Triggered;
+    /** @param parameters Action parameters, as applicable. */
+    Signal1<const StringVector&> Triggered;
 
 private:
     friend class Entity;
@@ -60,11 +57,8 @@ private:
     explicit EntityAction(const String &name);
 
     /// Triggers this action i.e. emits the Triggered signal.
-    /** @param p1 1st parameter for the action, if applicable.
-        @param p2 2nd parameter for the action, if applicable.
-        @param p3 3rd parameter for the action, if applicable.
-        @param rest Rest of the parameters, if applicable. */
-    void Trigger(const String &p1 = "", const String &p2 = "", const String &p3 = "", const StringVector &rest = StringVector());
+    /** @param parameters Action parameters, as applicable. */
+    void Trigger(const StringVector& parameters = StringVector());
 
     const String name; ///< Name of the action.
 };

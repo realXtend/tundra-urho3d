@@ -624,24 +624,7 @@ void Entity::Exec(EntityAction::ExecTypeField type, const String &action, const 
     
     EntityAction *act = Action(action);
     if ((type & EntityAction::Local) != 0)
-    {
-        if (params.Size() == 0)
-            act->Trigger();
-        else if (params.Size() == 1)
-            act->Trigger(params[0]);
-        else if (params.Size() == 2)
-            act->Trigger(params[0], params[1]);
-        else if (params.Size() == 3)
-            act->Trigger(params[0], params[1], params[2]);
-        else if (params.Size() >= 4)
-        {
-            StringVector rest;
-            rest.Reserve(params.Size() - 3);
-            for (u32 i = 3; i < params.Size(); ++i)
-                rest.Push(params[i]);
-            act->Trigger(params[0], params[1], params[2], rest);
-        }
-    }
+        act->Trigger(params);
 
     if (ParentScene())
         ParentScene()->EmitActionTriggered(this, action, params, type);

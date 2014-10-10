@@ -63,7 +63,9 @@ SceneAPI::~SceneAPI()
 
 void SceneAPI::Reset()
 {
-    scenes.Clear();
+    while (scenes.Size())
+        RemoveScene(scenes.Begin()->first_);
+
     componentFactories.Clear();
     componentFactoriesByTypeid.Clear();
 }

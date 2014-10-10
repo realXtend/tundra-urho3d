@@ -16,6 +16,7 @@ namespace Urho3D
     template <class T> class Vector;
     template <class T> class PODVector;
     template <class T, class U> class HashMap;
+    template <class T> class HashSet;
     template <class T> class List;
     template <class T, class U> class Pair;
 }
@@ -31,6 +32,7 @@ namespace Tundra
     using Urho3D::Vector;
     using Urho3D::PODVector;
     using Urho3D::HashMap;
+    using Urho3D::HashSet;
     using Urho3D::List;
     using Urho3D::Pair;
     typedef Vector<String> StringVector;

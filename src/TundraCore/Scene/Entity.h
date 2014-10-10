@@ -328,8 +328,8 @@ public:
     Scene* ParentScene() const { return scene_; }
 
     /// Add an entity as a child.
-    /** When an entity is added as a child, its rendering transform in the EC_Placeable component will automatically follow the parent entity,
-        unless the EC_Placeable component specifies an alternate parent (such as a bone) to follow. Child entities are also 
+    /** When an entity is added as a child, its rendering transform in the Placeable component will automatically follow the parent entity,
+        unless the Placeable component specifies an alternate parent (such as a bone) to follow. Child entities are also 
         automatically removed from the scene when the parent entity is removed.
         If the child already is parented to another entity, the existing parent assignment is removed.
         @param entity Entity to add as a child.
@@ -449,6 +449,19 @@ private:
 
     ChildEntityVector children_; ///< Child entities. Note that the entities are authoritatively owned by the scene; the child reference is weak intentionally.
     EntityWeakPtr parent_; ///< Parent entity. Note that the entities are authoritatively owned by the scene; the parent reference is weak intentionally.
+};
+
+/// Represents weak pointer to Transform attribute.
+struct TransformAttributeWeakPtr : public AttributeWeakPtr
+{
+    /** @param p If the placeable component is parented, pointer to the parent placeable entity. */
+    TransformAttributeWeakPtr(IComponent* c, IAttribute *a, const EntityPtr &p) :
+        AttributeWeakPtr(c, a),
+        parentPlaceableEntity(p)
+    {
+    }
+    /// If the placeable component is parented, points to the parent placeable entity.
+    EntityWeakPtr parentPlaceableEntity;
 };
 
 }

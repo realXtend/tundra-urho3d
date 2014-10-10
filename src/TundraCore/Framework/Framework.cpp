@@ -74,7 +74,6 @@ Framework::~Framework()
     frame.Reset();
     plugin.Reset();
     config.Reset();
-    scene.Reset();
 }
 
 void Framework::Go()
@@ -131,14 +130,8 @@ void Framework::Go()
     
     PrintStartupOptions();
 
-    // Load and initialize plugins
+    // Load plugins
     plugin->LoadPluginsFromCommandLine();
-
-    for(uint i = 0; i < modules.Size(); ++i)
-    {
-        LOGDEBUG("Initializing module " + modules[i]->Name());
-        modules[i]->Initialize();
-    }
 
     // Initialize the Urho3D engine
     VariantMap engineInitMap;
@@ -150,12 +143,22 @@ void Framework::Go()
     engineInitMap["LogName"] = "Tundra.log";
     engine->Initialize(engineInitMap);
 
+    // Initialize plugins now
+    for(uint i = 0; i < modules.Size(); ++i)
+    {
+        LOGDEBUG("Initializing module " + modules[i]->Name());
+        modules[i]->Initialize();
+    }
+
     // Run mainloop
     if (!exitSignal)
     {
         while (!engine->IsExiting())
             ProcessOneFrame();
     }
+
+    // Delete scenes
+    scene.Reset();
 
     for(uint i = 0; i < modules.Size(); ++i)
     {

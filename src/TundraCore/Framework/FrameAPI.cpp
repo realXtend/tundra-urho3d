@@ -15,7 +15,7 @@ namespace Tundra
 {
 
 FrameAPI::FrameAPI(Framework *fw) :
-    Urho3D::Object(fw->GetContext()),
+    Object(fw->GetContext()),
     currentFrameNumber(0)
 {
 }

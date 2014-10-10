@@ -7,6 +7,8 @@
 #include "Math/float2.h"
 #include "Math/float3.h"
 
+#include <Vector.h>
+
 namespace Tundra
 {
 
@@ -45,6 +47,8 @@ struct TUNDRACORE_API RayQueryResult
     float t;
 };
 
+typedef Vector<RayQueryResult> RayQueryResultVector;
+
 /// Describes the system renderer.
 /** @note This class is not an abstract reimplementable interface, but exists only internally for DLL dependency inversion
         purposes between Framework and UrhoRenderer plugin. This interface is only internal to Framework.
@@ -57,10 +61,10 @@ public:
     virtual ~IRenderer() {}
 
     /// Returns the Entity which contains the currently active camera that is used to render on the main window.
-    /// The returned Entity is guaranteed to have an EC_Camera component, and it is guaranteed to be attached to a scene.
+    /// The returned Entity is guaranteed to have an Camera component, and it is guaranteed to be attached to a scene.
     virtual Entity *MainCamera() = 0;
 
-    /// Returns the EC_Camera of the main camera, or 0 if no main camera is active.
+    /// Returns the Camera of the main camera, or 0 if no main camera is active.
     virtual Camera *MainCameraComponent() = 0;
 
     /// Returns the Scene the current active main camera is in, or 0 if no main camera is active.

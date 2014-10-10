@@ -80,15 +80,19 @@ void IComponent::SetUpdateMode(AttributeChange::Type defaultMode)
 
 void IComponent::SetParentEntity(Entity* entity)
 {
-    parentEntity = entity;
-    if (parentEntity)
+    if (entity)
     {
+        parentEntity = entity;
          // Make sure that framework pointer will be valid, in case this component was originally created unparented.
         framework = parentEntity->GetFramework();
         ParentEntitySet.Emit();
     }
     else
-        ParentEntityDetached.Emit();
+    {
+        // Let signal cleanup etc. happen before the parent entity is set null
+        ParentEntityAboutToBeDetached.Emit();
+        parentEntity = entity;
+    }
 }
 
 Entity* IComponent::ParentEntity() const

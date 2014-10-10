@@ -69,6 +69,9 @@ public:
     /// Add a subsystem world (GraphicsWorld, PhysicsWorld)
     void AddSubsystem(Urho3D::Object* system);
 
+    /// Remove a subsystem world
+    void RemoveSubsystem(Urho3D::Object* system);
+
     /// Return a subsystem world 
     template <class T>
     SharedPtr<T> Subsystem() const;
@@ -202,7 +205,7 @@ public:
 
     /// @cond PRIVATE
     // Not publicly documented as ideally Scene should not know about Placeable until its defined in TundraCore.
-    /// Fix parent Entity ids that are set to EC_Placeable::parentRef.
+    /// Fix parent Entity ids that are set to Placeable::parentRef.
     /** If @c printStats is true, a summary of the execution is printed once done.
         @return Number of fixed parent refs. */
     uint FixPlaceableParentIds(const Vector<Entity *> &entities, const EntityIdMap &oldToNewIds, AttributeChange::Type change, bool printStats = false) const;
@@ -416,7 +419,7 @@ public:
     entity_id_t EntityParentId(const Entity *ent) const;
 
     /// Sorts @c entities by scene hierarchy and returns the sorted list.
-    /** Takes into account both Entity::Parent and EC_Placeable::parentRef parenting,
+    /** Takes into account both Entity::Parent and Placeable::parentRef parenting,
         Entity-level parenting takes precedence. */
     Vector<Entity*> SortEntities(const Vector<Entity*> &entities) const;
     Vector<EntityWeakPtr> SortEntities(const Vector<EntityWeakPtr> &entities) const;
@@ -524,7 +527,7 @@ private:
         float length;
     };
 
-    /// Resolved parent Entity id that is set to EC_Placeable::parentRef.
+    /// Resolved parent Entity id that is set to Placeable::parentRef.
     /** @return Returns 0 if parent is not set or the parent ref is not a Entity id (but a entity name). */
     entity_id_t PlaceableParentId(const Entity *ent) const;
     entity_id_t PlaceableParentId(const EntityDesc &ent) const; ///< @overload

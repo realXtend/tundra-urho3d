@@ -199,7 +199,7 @@ public:
     /** Sets attribute's value.
         @param value New value.
         @param change Change type. */
-    void Set(const T &value, AttributeChange::Type change)
+    void Set(const T &value, AttributeChange::Type change = AttributeChange::Default)
     {
         this->value = value;
         valueChanged = true; // Signal to IComponent owning this attribute that the value of this attribute has changed.
@@ -304,19 +304,6 @@ struct AttributeWeakPtr
 
     ComponentWeakPtr owner; ///< Owner component.
     IAttribute *attribute; ///< The actual attribute.
-};
-
-/// Represents weak pointer to Transform attribute.
-struct TransformAttributeWeakPtr : public AttributeWeakPtr
-{
-    /** @param p If the placeable component is parented, pointer to the parent placeable entity. */
-    TransformAttributeWeakPtr(IComponent* c, IAttribute *a, const EntityPtr &p) :
-        AttributeWeakPtr(c, a),
-        parentPlaceableEntity(p)
-    {
-    }
-    /// If the placeable component is parented, points to the parent placeable entity.
-    EntityWeakPtr parentPlaceableEntity;
 };
 
 }

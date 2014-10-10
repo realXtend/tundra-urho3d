@@ -343,8 +343,8 @@ public:
     /** When this signal is emitted, the framework pointer is guaranteed to valid. */
     Signal0<void> ParentEntitySet;
 
-    /// This signal is emitted when this Component is detached from its parent, i.e. the new parent is set to null.
-    Signal0<void> ParentEntityDetached;
+    /// This signal is emitted when this Component is detached from its parent, i.e. the new parent is about to be set to null.
+    Signal0<void> ParentEntityAboutToBeDetached;
 
     /// Emitted when a new attribute is added to this component.
     /** @param attr New attribute. */

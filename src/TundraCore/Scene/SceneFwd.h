@@ -26,6 +26,7 @@ class IComponentFactory;
 class IAttribute;
 class AttributeMetadata;
 class ChangeRequest;
+class Transform;
 
 struct SceneDesc;
 struct EntityDesc;
