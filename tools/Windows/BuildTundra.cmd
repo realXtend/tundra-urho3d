@@ -15,11 +15,11 @@ set BUILD_TYPE=%1
 IF "%BUILD_TYPE%"=="" set BUILD_TYPE=RelWithDebInfo
 :: If no build type would be passed for MSBuild, it seems to default to Debug.
 
-call RunCMake.cmd
+call RunCMake.cmd %2
 
 cd ..\..\%BUILD_PATH%
 set CALL_CECHO=..\tools\Windows\Utils\cecho
-%CALL_CECHO% {0D}Building %2 Tundra-Urho3D.{# #}{\n}
+%CALL_CECHO% {0D}Building %BUILD_TYPE% Tundra-Urho3D.{# #}{\n}
 MSBuild tundra-urho3d.sln /p:Configuration=%BUILD_TYPE% %3 %4 %5 %6 %7 %8 %9
 IF NOT %ERRORLEVEL%==0 GOTO :Error
 echo.
