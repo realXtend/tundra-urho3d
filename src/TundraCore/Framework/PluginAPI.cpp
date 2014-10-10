@@ -28,8 +28,11 @@ static String GetErrorString(int error)
     void *lpMsgBuf = 0;
 
     HRESULT hresult = HRESULT_FROM_WIN32(error);
-    FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-        0, hresult, 0 /*Default language*/, (LPTSTR) &lpMsgBuf, 0, 0);
+    if (FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        0, hresult, 0 /*Default language*/, (LPTSTR)&lpMsgBuf, 0, 0) == 0)
+    {
+        return ""; /**< @todo return error message describing the failure of this function and/or LogError() print?*/
+    }
 
     // Copy message to C++ -style string, since the data need to be freed before return.
     String ret;

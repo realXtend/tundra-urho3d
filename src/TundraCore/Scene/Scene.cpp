@@ -633,8 +633,8 @@ Vector<Entity *> Scene::CreateContentFromXml(Urho3D::XMLFile &xml, bool useEntit
         {
             EntityPtr entityShared = weakEnt.Lock();
             const Entity::ComponentMap &components = entityShared->Components();
-            for (Entity::ComponentMap::ConstIterator i = components.Begin(); i != components.End(); ++i)
-                i->second_->ComponentChanged(change);
+            for (Entity::ComponentMap::ConstIterator it = components.Begin(); it != components.End(); ++it)
+                it->second_->ComponentChanged(change);
         }
     }
     
@@ -654,7 +654,7 @@ void Scene::CreateEntityFromXml(EntityPtr parent, const Urho3D::XMLElement& ent_
     AttributeChange::Type change, Vector<EntityWeakPtr>& entities, EntityIdMap& oldToNewIds)
 {
     const bool replicated = ent_elem.HasAttribute("sync") ? ent_elem.GetBool("sync") : true;
-    const bool temporary = ent_elem.GetBool("temporary");
+    const bool entityTemporary = ent_elem.GetBool("temporary");
 
     entity_id_t id = ent_elem.GetUInt("id"); // toUInt() return 0 on failure.
     if (!useEntityIDsFromFile || id == 0) // If we don't want to use entity IDs from file, or if file doesn't contain one, generate a new one.
@@ -685,7 +685,7 @@ void Scene::CreateEntityFromXml(EntityPtr parent, const Urho3D::XMLElement& ent_
 
     if (entity)
     {
-        entity->SetTemporary(temporary);
+        entity->SetTemporary(entityTemporary);
 
         Urho3D::XMLElement comp_elem = ent_elem.GetChild("component");
         while (comp_elem)
@@ -694,7 +694,7 @@ void Scene::CreateEntityFromXml(EntityPtr parent, const Urho3D::XMLElement& ent_
             const u32 typeId = comp_elem.GetUInt("typeId");
             const String name = comp_elem.GetAttribute("name");
             const bool compReplicated = comp_elem.HasAttribute("sync") ? comp_elem.GetBool("sync") : true;
-            const bool temporary = comp_elem.GetBool("temporary");
+            const bool compTemporary = comp_elem.GetBool("temporary");
 
             // If we encounter an unknown component type, now is the time to register a placeholder type for it
             // The XML holds all needed data for it, while binary doesn't
@@ -706,7 +706,7 @@ void Scene::CreateEntityFromXml(EntityPtr parent, const Urho3D::XMLElement& ent_
                 entity->GetOrCreateComponent(typeId, name, AttributeChange::Default, compReplicated));
             if (new_comp)
             {
-                new_comp->SetTemporary(temporary);
+                new_comp->SetTemporary(compTemporary);
                 new_comp->DeserializeFrom(comp_elem, AttributeChange::Disconnected);// Trigger no signal yet when scene is in incoherent state
             }
 
@@ -800,8 +800,8 @@ Vector<Entity *> Scene::CreateContentFromBinary(const char *data, int numBytes, 
         {
             EntityPtr entityShared = weakEnt.Lock();
             const Entity::ComponentMap &components = entityShared->Components();
-            for (Entity::ComponentMap::ConstIterator i = components.Begin(); i != components.End(); ++i)
-                i->second_->ComponentChanged(change);
+            for (Entity::ComponentMap::ConstIterator it = components.Begin(); it != components.End(); ++it)
+                it->second_->ComponentChanged(change);
         }
     }
     
@@ -1256,7 +1256,7 @@ SceneDesc Scene::CreateSceneDescFromBinary(PODVector<unsigned char> &data, Scene
             entityDesc.id = String(id);
 
             const uint num_components = source.Read<u32>();
-            for(uint i = 0; i < num_components; ++i)
+            for(uint j = 0; j < num_components; ++j)
             {
                 SceneAPI *sceneAPI = framework_->Scene();
 
