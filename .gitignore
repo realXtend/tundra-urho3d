@@ -43,6 +43,13 @@ Makefile
 *.a
 *.so
 
+# Android assets, build configuration and build directories
+src/Android/assets
+src/Android/bin
+src/Android/gen
+src/Android/*.properties
+src/Android/proguard-project.txt
+
 # CMake -specific
 *.cmake
 CMakeFiles

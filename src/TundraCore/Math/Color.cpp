@@ -47,6 +47,13 @@ Color Color::FromString(const char *str)
     return c;
 }
 
+String Color::SerializeToString() const
+{
+    char str[256];
+    sprintf(str, "%.9g,%.9g,%.9g,%.9g", r, g, b, a);
+    return str;
+}
+
 Color::operator float4() const
 {
     return float4(r, g, b, a);

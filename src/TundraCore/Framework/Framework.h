@@ -140,6 +140,18 @@ public:
     /// Return the Urho3D Engine object.
     Urho3D::Engine* Engine() const;
 
+    /// @cond PRIVATE
+    /// Registers the system Renderer object.
+    /** @note Please don't use this function. Called only by the UrhoRenderer which implements the rendering subsystem. */
+    void RegisterRenderer(IRenderer *renderer);
+    /// @endcond
+
+    /// Returns the system Renderer object.
+    /** @note Please don't use this function. It exists for dependency inversion purposes only.
+        Instead, call framework->Module<UrhoRenderer>()->Renderer(); to directly obtain the renderer,
+        as that will make the dependency explicit. The IRenderer interface is not continuously updated to match the real Renderer implementation. */
+    IRenderer *Renderer() const;
+
     /// Exit request signal.
     Signal0<void> ExitRequested;
 
@@ -182,6 +194,8 @@ private:
     bool exitSignal;
     /// Headless flag. When headless, no rendering window is created
     bool headless;
+    /// Renderer object
+    IRenderer* renderer;
 };
 
 template <class T>

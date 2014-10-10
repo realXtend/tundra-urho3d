@@ -21,6 +21,7 @@
 #include "Math/float3.h"
 #include "Math/MathFunc.h"
 #include "Math/Color.h"
+#include "Math/Point.h"
 
 #include <StringUtils.h>
 #include <Log.h>
@@ -106,6 +107,7 @@ template<> u32 TUNDRACORE_API Attribute<EntityReference>::TypeId() const { retur
 template<> u32 TUNDRACORE_API Attribute<Variant>::TypeId() const { return cAttributeVariant; }
 template<> u32 TUNDRACORE_API Attribute<VariantList>::TypeId() const { return cAttributeVariantList; }
 template<> u32 TUNDRACORE_API Attribute<Transform>::TypeId() const { return cAttributeTransform; }
+template<> u32 TUNDRACORE_API Attribute<Point>::TypeId() const { return cAttributePoint; }
 
 // DefaultValue implementations
 template<> String TUNDRACORE_API Attribute<String>::DefaultValue() const { return String(); }
@@ -124,6 +126,7 @@ template<> EntityReference TUNDRACORE_API Attribute<EntityReference>::DefaultVal
 template<> Variant TUNDRACORE_API Attribute<Variant>::DefaultValue() const { return Variant(); }
 template<> VariantList TUNDRACORE_API Attribute<VariantList>::DefaultValue() const { return VariantList(); }
 template<> Transform TUNDRACORE_API Attribute<Transform>::DefaultValue() const { return Transform(); }
+template<> Point TUNDRACORE_API Attribute<Point>::DefaultValue() const { return Point(); }
 
 // TOSTRING TEMPLATE IMPLEMENTATIONS.
 
@@ -181,7 +184,12 @@ template<> String TUNDRACORE_API Attribute<float4>::ToString() const
 
 template<> String TUNDRACORE_API Attribute<Color>::ToString() const
 {
-    return String(Get().ToFloat4().SerializeToString().c_str());
+    return Get().SerializeToString();
+}
+
+template<> String TUNDRACORE_API Attribute<Point>::ToString() const
+{
+    return Get().SerializeToString();
 }
 
 template<> String TUNDRACORE_API Attribute<AssetReference>::ToString() const
@@ -314,6 +322,11 @@ template<> const String TUNDRACORE_API & Attribute<Transform>::TypeName() const
     return cAttributeTransformTypeName;
 }
 
+template<> const String TUNDRACORE_API & Attribute<Point>::TypeName() const
+{
+    return cAttributePointTypeName;
+}
+
 // FROMSTRING TEMPLATE IMPLEMENTATIONS.
 
 template<> void TUNDRACORE_API Attribute<String>::FromString(const String& str, AttributeChange::Type change)
@@ -410,6 +423,12 @@ template<> void TUNDRACORE_API Attribute<Transform>::FromString(const String& st
 {
     Set(Transform::FromString(str), change);
 }
+
+template<> void TUNDRACORE_API Attribute<Point>::FromString(const String& str, AttributeChange::Type change)
+{
+    Set(Point::FromString(str.CString()), change);
+}
+
 
 // TOBINARY TEMPLATE IMPLEMENTATIONS.
 
@@ -518,6 +537,12 @@ template<> void TUNDRACORE_API Attribute<Transform>::ToBinary(kNet::DataSerializ
     dest.Add<float>(value.scale.x);
     dest.Add<float>(value.scale.y);
     dest.Add<float>(value.scale.z);
+}
+
+template<> void TUNDRACORE_API Attribute<Point>::ToBinary(kNet::DataSerializer& dest) const
+{
+    dest.Add<s32>(value.x);
+    dest.Add<s32>(value.y);
 }
 
 // FROMBINARY TEMPLATE IMPLEMENTATIONS.
@@ -651,6 +676,14 @@ template<> void TUNDRACORE_API Attribute<Transform>::FromBinary(kNet::DataDeseri
     value.scale.x = source.Read<float>();
     value.scale.y = source.Read<float>();
     value.scale.z = source.Read<float>();
+    Set(value, change);
+}
+
+template<> void TUNDRACORE_API Attribute<Point>::FromBinary(kNet::DataDeserializer& source, AttributeChange::Type change)
+{
+    Point value;
+    value.x = source.Read<s32>();
+    value.y = source.Read<s32>();
     Set(value, change);
 }
 

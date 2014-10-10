@@ -257,7 +257,7 @@ static const u32 cAttributeEntityReference = 13;
 static const u32 cAttributeVariant = 14;
 static const u32 cAttributeVariantList = 15;
 static const u32 cAttributeTransform = 16;
-static const u32 cAttributePoint = 17; // Essentially a Float2
+static const u32 cAttributePoint = 17;
 static const u32 cNumAttributeTypes = 18;
 
 static const String cAttributeNoneTypeName = "";
@@ -274,10 +274,10 @@ static const String cAttributeQuatTypeName = "Quat";
 static const String cAttributeAssetReferenceTypeName = "AssetReference";
 static const String cAttributeAssetReferenceListTypeName = "AssetReferenceList";
 static const String cAttributeEntityReferenceTypeName = "EntityReference";
-static const String cAttributeVariantTypeName = "Variant";
-static const String cAttributeVariantListTypeName = "VariantList";
+static const String cAttributeVariantTypeName = "QVariant";
+static const String cAttributeVariantListTypeName = "QVariantList";
 static const String cAttributeTransformTypeName = "Transform";
-static const String cAttributePointTypeName = "Point";
+static const String cAttributePointTypeName = "QPoint";
 
 /// Represents weak pointer to an attribute.
 struct AttributeWeakPtr

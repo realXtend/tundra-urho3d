@@ -6,6 +6,7 @@
 #include "Scene/Scene.h"
 #include "IComponentFactory.h"
 #include "IComponent.h"
+#include "IRenderer.h"
 #include "AssetReference.h"
 #include "EntityReference.h"
 #include "Framework.h"
@@ -77,12 +78,10 @@ ScenePtr SceneAPI::SceneByName(const String &name) const
 
 Scene *SceneAPI::MainCameraScene()
 {
-    /*
     if (!framework || !framework->Renderer())
         return 0;
     return framework->Renderer()->MainCameraScene();
-    */
-    return 0;
+
 }
 
 ScenePtr SceneAPI::CreateScene(const String &name, bool viewEnabled, bool authority, AttributeChange::Type change)

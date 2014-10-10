@@ -12,6 +12,7 @@ namespace Tundra
 {
     class Framework;
     class IModule;
+    class IRenderer;
     class PluginAPI;
     class ConfigAPI;
     class FrameAPI;

@@ -59,6 +59,9 @@ public:
         @sa SerializeToString */
     static Color FromString(const char *str);
 
+    /// Serialize to a string in the format "r,g,b,a"
+    String SerializeToString() const;
+
     /// Implicit conversion to float4.
     operator float4() const;
 

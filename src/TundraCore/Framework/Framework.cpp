@@ -47,7 +47,8 @@ int run(int argc_, char** argv_)
 Framework::Framework(Context* ctx) :
     Object(ctx),
     exitSignal(false),
-    headless(false)
+    headless(false),
+    renderer(0)
 {
     // Create the Urho3D engine, which creates various other subsystems, but does not initialize them yet
     engine = new Urho3D::Engine(GetContext());
@@ -258,6 +259,16 @@ SceneAPI* Framework::Scene() const
 Engine* Framework::Engine() const
 {
     return engine;
+}
+
+void Framework::RegisterRenderer(IRenderer *renderer_)
+{
+    renderer = renderer_;
+}
+
+IRenderer *Framework::Renderer() const
+{
+    return renderer;
 }
 
 void Framework::SetCurrentWorkingDirectory(const String& newCwd)
