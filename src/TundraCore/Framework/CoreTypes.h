@@ -5,20 +5,6 @@
 // Use kNet/Types.h for fixed-width types instead of duplicating the code here.
 #include <kNet/Types.h>
 
-// Floating-point types
-typedef float f32;
-typedef double f64;
-
-// Unsigned types
-typedef unsigned char uchar;
-typedef unsigned int uint;
-typedef unsigned short ushort;
-typedef unsigned long ulong;
-
-// Special Tundra identifiers
-typedef unsigned int entity_id_t;
-typedef unsigned int component_id_t;
-
 // Urho3D often used types
 namespace Urho3D
 {
@@ -36,24 +22,38 @@ namespace Urho3D
 
 namespace Tundra
 {
+    // Pull in often used Urho3D types.
+    using Urho3D::String;
+    using Urho3D::StringHash;
+    using Urho3D::Variant;
+    using Urho3D::SharedPtr;
+    using Urho3D::WeakPtr;
+    using Urho3D::Vector;
+    using Urho3D::PODVector;
+    using Urho3D::HashMap;
+    using Urho3D::List;
+    using Urho3D::Pair;
+    typedef Vector<String> StringVector;
+    typedef Vector<Variant> VariantList;
 
-using Urho3D::String;
-using Urho3D::StringHash;
-using Urho3D::Variant;
-using Urho3D::SharedPtr;
-using Urho3D::WeakPtr;
-using Urho3D::Vector;
-using Urho3D::PODVector;
-using Urho3D::HashMap;
-using Urho3D::List;
-using Urho3D::Pair;
-typedef Vector<String> StringVector;
-typedef Vector<Variant> VariantList;
+    // Floating-point types
+    typedef float f32;
+    typedef double f64;
 
+    // Unsigned types
+    typedef unsigned char uchar;
+    typedef unsigned int uint;
+    typedef unsigned short ushort;
+    typedef unsigned long ulong;
+    typedef unsigned long long ulonglong;
+
+    // Special Tundra identifiers
+    typedef unsigned int entity_id_t;
+    typedef unsigned int component_id_t;
 }
 
+/// @todo Better place for this.
 // Prevent Windows.h include from defining MIN & MAX
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-
