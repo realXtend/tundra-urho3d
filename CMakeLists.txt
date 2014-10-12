@@ -197,15 +197,21 @@ endif()
 # Disable unnecessary build types
 set(CMAKE_CONFIGURATION_TYPES "Release;RelWithDebInfo;Debug" CACHE STRING "Configurations" FORCE)
 
+if (WIN32)
+    add_definitions(-DUNICODE -D_UNICODE)# Always use Unicode character set on Windows.
+endif()
+
 if (MSVC)
-    # In Visual Studio, use Unicode character set
-    add_definitions(-DUNICODE -D_UNICODE)
+    # TODO Due to the C++11/C99 requirement, we should use the safe versions of sprintf() et al.
+    # and the following should not be used.
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 else()
-    add_definitions(-DUNIX) # Currently, kNet uses this flag for Unix OSes. (required also for client-side headers). TODO: Clean this up so it's not required.
+    # TODO This was/is needed for kNet, will not anymore as soon as kNet's master branch is merged to stable.
+    add_definitions(-DUNIX)
 endif()
 
 # On all platforms, we enable PCH files by default. TODO Not implemented on non-Windows plaforms!
+# TODO Make this an option instead?
 add_definitions (-DPCH_ENABLED)
 SET(PCH_ENABLED 1)
 
