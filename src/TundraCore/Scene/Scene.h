@@ -261,11 +261,9 @@ public:
     float3 ForwardVector() const;
 
     /// Is scene view enabled (i.e. rendering-related components actually create stuff).
-    /** @todo Exposed as Q_PROPERTY, doesn't need to be a slot. */
     bool ViewEnabled() const { return viewEnabled_; }
 
     /// Is scene authoritative i.e. a server or standalone scene
-    /** @todo Exposed as Q_PROPERTY, doesn't need to be a slot. */
     bool IsAuthority() const { return authority_; }
 
     /// Returns entity with the specified id

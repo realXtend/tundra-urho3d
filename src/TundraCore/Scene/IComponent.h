@@ -232,28 +232,22 @@ public:
     
     /// Returns true if network synchronization of the attributes of this component is enabled.
     /// A component is always either local or replicated, but not both.
-    /// @todo Doesn't need to be a slot, exposed as Q_PROPERTY.
     bool IsReplicated() const { return replicated; }
 
     /// Returns true if network synchronization of the attributes of this component is NOT enabled.
     /// A component is always either local or replicated, but not both.
-    /// @todo Doesn't need to be a slot, exposed as Q_PROPERTY.
     bool IsLocal() const { return !replicated; }
 
     /// Returns true if this component is pending a replicated ID assignment from the server.
-    /// @todo Doesn't need to be a slot, exposed as Q_PROPERTY.
     bool IsUnacked() const;
 
     /// Sets the default mode for attribute change operations
-    /// @todo Doesn't need to be a slot, exposed as Q_PROPERTY.
     void SetUpdateMode(AttributeChange::Type defaultmode);
 
     /// Gets the default mode for attribute change operations
-    /// @todo Doesn't need to be a slot, exposed as Q_PROPERTY.
     AttributeChange::Type UpdateMode() const { return updateMode; }
 
     /// Returns component id, which is unique within the parent entity
-    /// @todo Doesn't need to be a slot, exposed as Q_PROPERTY.
     component_id_t Id() const { return id; }
 
     /// Returns whether this component supports adding dynamic attributes. False by default.
@@ -308,12 +302,10 @@ public:
     Scene* ParentScene() const;
 
     /// Sets whether component is temporary. Temporary components won't be saved when the scene is saved.
-    /// @todo Doesn't need to be a slot, exposed as Q_PROPERTY.
     void SetTemporary(bool enable);
 
     /// Returns whether component is temporary. Temporary components won't be saved when the scene is saved.
     /** @note if parent entity is temporary, this returns always true regardless of the component's temporary flag. */
-    /// @todo Doesn't need to be a slot, exposed as Q_PROPERTY.
     bool IsTemporary() const;
 
     /// Returns whether the component is in a view-enabled scene, or not.
@@ -333,9 +325,6 @@ public:
 
     /// Helper function for determinating whether or not this component should be serialized with the provided serialization options.
     bool ShouldBeSerialized(bool serializeTemporary, bool serializeLocal) const;
-
-    // DEPRECATED
-    void SetNetworkSyncEnabled(bool enable); /**< @deprecated Currently a no-op, as replication mode can not be changed after adding to an entity. @todo Remove! */
 
     /// This signal is emitted when an Attribute of this Component has changed. 
     Signal2<IAttribute*, AttributeChange::Type> AttributeChanged;

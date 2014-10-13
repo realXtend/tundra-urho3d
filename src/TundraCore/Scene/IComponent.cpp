@@ -64,11 +64,6 @@ bool IComponent::IsUnacked() const
     return id >= UniqueIdGenerator::FIRST_UNACKED_ID && id < UniqueIdGenerator::FIRST_LOCAL_ID;
 }
 
-void IComponent::SetNetworkSyncEnabled(bool /*enable*/)
-{
-    LOGWARNING("SetNetworkSyncEnabled called. This function is deprecated and does not do anything.");
-}
-
 void IComponent::SetUpdateMode(AttributeChange::Type defaultMode)
 {
     // Note: we can't allow default mode to be Default, because that would be meaningless

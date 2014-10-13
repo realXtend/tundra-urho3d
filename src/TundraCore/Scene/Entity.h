@@ -298,21 +298,17 @@ public:
 
     /// Returns whether entity is temporary. Temporary entities won't be saved when the scene is saved.
     /** By definition, all components of a temporary entity are temporary as well. */
-    ///@todo Doesn't need to be slot, exposed as Q_PROPERTY
     bool IsTemporary() const { return temporary_; }
 
     /// Returns if this entity's changes will NOT be sent over the network.
     /// An Entity is always either local or replicated, but not both.
-    ///@todo Doesn't need to be slot, exposed as Q_PROPERTY
     bool IsLocal() const { return id_ >= UniqueIdGenerator::FIRST_LOCAL_ID; }
 
     /// Returns if this entity's changes will be sent over the network.
     /// An Entity is always either local or replicated, but not both.
-    ///@todo Doesn't need to be slot, exposed as Q_PROPERTY
     bool IsReplicated() const { return id_ < UniqueIdGenerator::FIRST_LOCAL_ID; }
 
     /// Returns if this entity is pending a proper ID assignment from the server.
-    ///@todo Doesn't need to be slot, exposed as Q_PROPERTY
     bool IsUnacked() const { return id_ >= UniqueIdGenerator::FIRST_UNACKED_ID && id_ < UniqueIdGenerator::FIRST_LOCAL_ID; }
 
     /// Returns the identifier string for the entity.
@@ -323,7 +319,6 @@ public:
     String toString() const { return ToString(); }
 
     /// Returns the unique id of this entity
-    ///@todo Doesn't need to be slot, exposed as Q_PROPERTY
     entity_id_t Id() const { return id_; }
 
     /// Returns framework
