@@ -25,7 +25,7 @@ public:
 private:
     typedef std::set<_Delegate> DelegateList;
     typedef typename DelegateList::const_iterator DelegateIterator;
-    DelegateList delegateList;
+    mutable DelegateList delegateList; // Tundra: changed to mutable
 
 public:
     void Connect( _Delegate delegate )
@@ -71,7 +71,9 @@ public:
     {
         for (DelegateIterator i = delegateList.begin(); i != delegateList.end(); )
         {
-            (*(i++))();
+            // Tundra: added expiration check
+            if (!i->Expired()) (*(i++))();
+            else { DelegateIterator e = i++; delegateList.erase(e); }
         }
     }
 
@@ -96,7 +98,7 @@ public:
 private:
     typedef std::set<_Delegate> DelegateList;
     typedef typename DelegateList::const_iterator DelegateIterator;
-    DelegateList delegateList;
+    mutable DelegateList delegateList; // Tundra: changed to mutable
 
 public:
     void Connect( _Delegate delegate )
@@ -142,7 +144,9 @@ public:
     {
         for (DelegateIterator i = delegateList.begin(); i != delegateList.end(); )
         {
-            (*(i++))( p1 );
+            // Tundra: added expiration check
+            if (!i->Expired()) (*(i++))( p1 );
+            else { DelegateIterator e = i++; delegateList.erase(e); }
         }
     }
 
@@ -167,7 +171,7 @@ public:
 private:
     typedef std::set<_Delegate> DelegateList;
     typedef typename DelegateList::const_iterator DelegateIterator;
-    DelegateList delegateList;
+    mutable DelegateList delegateList; // Tundra: changed to mutable
 
 public:
     void Connect( _Delegate delegate )
@@ -213,7 +217,9 @@ public:
     {
         for (DelegateIterator i = delegateList.begin(); i != delegateList.end(); )
         {
-            (*(i++))( p1, p2 );
+            // Tundra: added expiration check
+            if (!i->Expired()) (*(i++))( p1, p2 );
+            else { DelegateIterator e = i++; delegateList.erase(e); }
         }
     }
 
@@ -238,7 +244,7 @@ public:
 private:
     typedef std::set<_Delegate> DelegateList;
     typedef typename DelegateList::const_iterator DelegateIterator;
-    DelegateList delegateList;
+    mutable DelegateList delegateList; // Tundra: changed to mutable
 
 public:
     void Connect( _Delegate delegate )
@@ -284,7 +290,9 @@ public:
     {
         for (DelegateIterator i = delegateList.begin(); i != delegateList.end(); )
         {
-            (*(i++))( p1, p2, p3 );
+            // Tundra: added expiration check
+            if (!i->Expired()) (*(i++))( p1, p2, p3 );
+            else { DelegateIterator e = i++; delegateList.erase(e); }
         }
     }
 
@@ -309,7 +317,7 @@ public:
 private:
     typedef std::set<_Delegate> DelegateList;
     typedef typename DelegateList::const_iterator DelegateIterator;
-    DelegateList delegateList;
+    mutable DelegateList delegateList; // Tundra: changed to mutable
 
 public:
     void Connect( _Delegate delegate )
@@ -355,7 +363,9 @@ public:
     {
         for (DelegateIterator i = delegateList.begin(); i != delegateList.end(); )
         {
-            (*(i++))( p1, p2, p3, p4 );
+            // Tundra: added expiration check
+            if (!i->Expired()) (*(i++))( p1, p2, p3, p4 );
+            else { DelegateIterator e = i++; delegateList.erase(e); }
         }
     }
 
@@ -380,7 +390,7 @@ public:
 private:
     typedef std::set<_Delegate> DelegateList;
     typedef typename DelegateList::const_iterator DelegateIterator;
-    DelegateList delegateList;
+    mutable DelegateList delegateList; // Tundra: changed to mutable
 
 public:
     void Connect( _Delegate delegate )
@@ -426,7 +436,9 @@ public:
     {
         for (DelegateIterator i = delegateList.begin(); i != delegateList.end(); )
         {
-            (*(i++))( p1, p2, p3, p4, p5 );
+            // Tundra: added expiration check
+            if (!i->Expired()) (*(i++))( p1, p2, p3, p4, p5 );
+            else { DelegateIterator e = i++; delegateList.erase(e); }
         }
     }
 
@@ -451,7 +463,7 @@ public:
 private:
     typedef std::set<_Delegate> DelegateList;
     typedef typename DelegateList::const_iterator DelegateIterator;
-    DelegateList delegateList;
+    mutable DelegateList delegateList; // Tundra: changed to mutable
 
 public:
     void Connect( _Delegate delegate )
@@ -497,7 +509,9 @@ public:
     {
         for (DelegateIterator i = delegateList.begin(); i != delegateList.end(); )
         {
-            (*(i++))( p1, p2, p3, p4, p5, p6 );
+            // Tundra: added expiration check
+            if (!i->Expired()) (*(i++))( p1, p2, p3, p4, p5, p6 );
+            else { DelegateIterator e = i++; delegateList.erase(e); }
         }
     }
 
@@ -522,7 +536,7 @@ public:
 private:
     typedef std::set<_Delegate> DelegateList;
     typedef typename DelegateList::const_iterator DelegateIterator;
-    DelegateList delegateList;
+    mutable DelegateList delegateList; // Tundra: changed to mutable
 
 public:
     void Connect( _Delegate delegate )
@@ -568,7 +582,9 @@ public:
     {
         for (DelegateIterator i = delegateList.begin(); i != delegateList.end(); )
         {
-            (*(i++))( p1, p2, p3, p4, p5, p6, p7 );
+            // Tundra: added expiration check
+            if (!i->Expired()) (*(i++))( p1, p2, p3, p4, p5, p6, p7 );
+            else { DelegateIterator e = i++; delegateList.erase(e); }
         }
     }
 
@@ -593,7 +609,7 @@ public:
 private:
     typedef std::set<_Delegate> DelegateList;
     typedef typename DelegateList::const_iterator DelegateIterator;
-    DelegateList delegateList;
+    mutable DelegateList delegateList; // Tundra: changed to mutable
 
 public:
     void Connect( _Delegate delegate )
@@ -639,7 +655,9 @@ public:
     {
         for (DelegateIterator i = delegateList.begin(); i != delegateList.end(); )
         {
-            (*(i++))( p1, p2, p3, p4, p5, p6, p7, p8 );
+            // Tundra: added expiration check
+            if (!i->Expired()) (*(i++))( p1, p2, p3, p4, p5, p6, p7, p8 );
+            else { DelegateIterator e = i++; delegateList.erase(e); }
         }
     }
 

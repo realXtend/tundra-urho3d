@@ -77,6 +77,10 @@
 #include <memory.h> // to allow <,> comparisons
 #include <stdlib.h>
 
+// Tundra: added for expiration checking. This -pointers need to be Urho3D::RefCounted subclasses
+#include <Engine/Container/Ptr.h>
+#include <Engine/Container/RefCounted.h>
+
 ////////////////////////////////////////////////////////////////////////////////
 //                        Configuration options
 //
@@ -595,6 +599,8 @@ protected:
     GenericFuncPtr m_pStaticFunction;
 #endif
 
+    Urho3D::WeakPtr<Urho3D::RefCounted> m_pthisweak;
+
 public:
 #if !defined(FASTDELEGATE_USESTATICFUNCTIONHACK)
     DelegateMemento() : m_pthis(0), m_pFunction(0), m_pStaticFunction(0) {};
@@ -603,7 +609,7 @@ public:
     }
 #else
     DelegateMemento() : m_pthis(0), m_pFunction(0) {};
-    void clear() {    m_pthis=0; m_pFunction=0;    }
+    void clear() {    m_pthis=0; m_pFunction=0; m_pthisweak.Reset();   }
 #endif
 public:
 #if !defined(FASTDELEGATE_USESTATICFUNCTIONHACK)
@@ -653,7 +659,7 @@ public:
         return right.IsLess(*this);
     }
     DelegateMemento (const DelegateMemento &right)    :
-        m_pthis(right.m_pthis), m_pFunction(right.m_pFunction)
+        m_pthis(right.m_pthis), m_pFunction(right.m_pFunction), m_pthisweak(right.m_pthisweak)
 #if !defined(FASTDELEGATE_USESTATICFUNCTIONHACK)
         , m_pStaticFunction (right.m_pStaticFunction)
 #endif
@@ -662,6 +668,7 @@ protected:
     void SetMementoFrom(const DelegateMemento &right)  {
         m_pFunction = right.m_pFunction;
         m_pthis = right.m_pthis;
+        m_pthisweak = right.m_pthisweak;
 #if !defined(FASTDELEGATE_USESTATICFUNCTIONHACK)
         m_pStaticFunction = right.m_pStaticFunction;
 #endif
@@ -701,6 +708,7 @@ public:
 #if !defined(FASTDELEGATE_USESTATICFUNCTIONHACK)
         m_pStaticFunction = 0;
 #endif
+        m_pthisweak = pthis;
     }
     // For const member functions, we only need a const class pointer.
     // Since we know that the member function is const, it's safe to
@@ -713,6 +721,7 @@ public:
 #if !defined(FASTDELEGATE_USESTATICFUNCTIONHACK)
         m_pStaticFunction = 0;
 #endif
+        m_pthisweak = pthis;
     }
 #ifdef FASTDELEGATE_GCC_BUG_8271    // At present, GCC doesn't recognize constness of MFPs in templates
     template < class X, class XMemFunc>
@@ -724,6 +733,7 @@ public:
     }
 #endif
     // These functions are required for invoking the stored function
+    inline bool Expired() const { return m_pthisweak.Expired(); }
     inline GenericClass *GetClosureThis() const { return m_pthis; }
     inline GenericMemFunc GetClosureMemPtr() const { return reinterpret_cast<GenericMemFunc>(m_pFunction); }
 
@@ -886,6 +896,7 @@ private:
     typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
     ClosureType m_Closure;
 public:
+    inline bool Expired() const { return m_Closure.Expired(); } // Tundra: added
     // Typedefs to aid generic programming
     typedef Delegate0 type;
 
@@ -971,6 +982,7 @@ private:
     typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
     ClosureType m_Closure;
 public:
+    inline bool Expired() const { return m_Closure.Expired(); } // Tundra: added
     // Typedefs to aid generic programming
     typedef Delegate1 type;
 
@@ -1056,6 +1068,7 @@ private:
     typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
     ClosureType m_Closure;
 public:
+    inline bool Expired() const { return m_Closure.Expired(); } // Tundra: added
     // Typedefs to aid generic programming
     typedef Delegate2 type;
 
@@ -1141,6 +1154,7 @@ private:
     typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
     ClosureType m_Closure;
 public:
+    inline bool Expired() const { return m_Closure.Expired(); } // Tundra: added
     // Typedefs to aid generic programming
     typedef Delegate3 type;
 
@@ -1226,6 +1240,7 @@ private:
     typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
     ClosureType m_Closure;
 public:
+    inline bool Expired() const { return m_Closure.Expired(); } // Tundra: added
     // Typedefs to aid generic programming
     typedef Delegate4 type;
 
@@ -1311,6 +1326,7 @@ private:
     typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
     ClosureType m_Closure;
 public:
+    inline bool Expired() const { return m_Closure.Expired(); } // Tundra: added
     // Typedefs to aid generic programming
     typedef Delegate5 type;
 
@@ -1396,6 +1412,7 @@ private:
     typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
     ClosureType m_Closure;
 public:
+    inline bool Expired() const { return m_Closure.Expired(); } // Tundra: added
     // Typedefs to aid generic programming
     typedef Delegate6 type;
 
@@ -1481,6 +1498,7 @@ private:
     typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
     ClosureType m_Closure;
 public:
+    inline bool Expired() const { return m_Closure.Expired(); } // Tundra: added
     // Typedefs to aid generic programming
     typedef Delegate7 type;
 
@@ -1566,6 +1584,7 @@ private:
     typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
     ClosureType m_Closure;
 public:
+    inline bool Expired() const { return m_Closure.Expired(); } // Tundra: added
     // Typedefs to aid generic programming
     typedef Delegate8 type;
 
