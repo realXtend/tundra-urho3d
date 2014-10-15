@@ -98,9 +98,29 @@ public:
     /// Signal is emitted when skeleton has successfully applied to entity.
     Signal0<void> SkeletonChanged;
 
+    /// Return the Urho mesh entity component.
+    Urho3D::AnimatedModel* UrhoMesh() const;
+
 private:
+    /// Called when the parent entity has been set.
+    void UpdateSignals();
+
+    /// Called when component has been added or removed from the parent entity. Checks the existence of the Placeable component, and attaches this mesh entity to it.
+    void OnComponentStructureChanged(IComponent*, AttributeChange::Type);
+
+    /// Attaches mesh to placeable
+    void AttachMesh();
+
+    /// Detaches mesh from placeable
+    void DetachMesh();
+
+    /// React to attribute changes
+    void AttributesChanged() override;
+
     /// Adjustment scene node (scaling/offset/orientation modifications)
     SharedPtr<Urho3D::Node> adjustmentNode_;
+    /// Urho mesh component. Always an AnimatedModel; this does not hurt in case the model is non-skeletal instead
+    SharedPtr<Urho3D::AnimatedModel> mesh_;
 
     /// Placeable component attached to.
     PlaceableWeakPtr placeable_;

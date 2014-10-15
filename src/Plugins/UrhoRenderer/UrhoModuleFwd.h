@@ -7,6 +7,7 @@ namespace Urho3D
     class Node;
     class Scene;
     class Camera;
+    class AnimatedModel;
 }
 
 namespace Tundra

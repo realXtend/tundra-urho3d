@@ -8,6 +8,8 @@
 // Urho3D often used types
 namespace Urho3D
 {
+    class RefCounted;
+    class Object;
     class String;
     class StringHash;
     class Variant;
@@ -24,6 +26,8 @@ namespace Urho3D
 namespace Tundra
 {
     // Pull in often used Urho3D types.
+    using Urho3D::RefCounted;
+    using Urho3D::Object;
     using Urho3D::String;
     using Urho3D::StringHash;
     using Urho3D::Variant;

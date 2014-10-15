@@ -13,7 +13,7 @@ namespace Tundra
 {
 
 /// Implements plugin loading functionality.
-class TUNDRACORE_API PluginAPI : public Urho3D::Object
+class TUNDRACORE_API PluginAPI : public Object
 {
     OBJECT(PluginAPI);
 

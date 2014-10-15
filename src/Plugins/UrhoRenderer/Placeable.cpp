@@ -58,7 +58,6 @@ Placeable::~Placeable()
 
     if (sceneNode_)
     {
-        GraphicsWorldPtr world = world_.Lock();
         // Emit signal now so that children can detach themselves back to scene root
         AboutToBeDestroyed.Emit();
 
@@ -68,7 +67,6 @@ Placeable::~Placeable()
     }
     else
         AboutToBeDestroyed.Emit();
-
 }
 
 void Placeable::SetPosition(float x, float y, float z)

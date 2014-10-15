@@ -22,7 +22,7 @@ namespace Tundra
 
     Entities should not be directly created, instead use Scene::CreateEntity() et al.
     @ingroup Scene_group */
-class TUNDRACORE_API Entity : public Urho3D::Object
+class TUNDRACORE_API Entity : public Object
 {
     OBJECT(Entity);
 

@@ -47,17 +47,35 @@ void UrhoRenderer::Initialize()
     framework->Scene()->SceneCreated.Connect(this, &UrhoRenderer::CreateGraphicsWorld);
     framework->Scene()->SceneAboutToBeRemoved.Connect(this, &UrhoRenderer::RemoveGraphicsWorld);
 
-    /*
+    // Enable the main (full-screen) viewport
+    Urho3D::Renderer* rend = GetSubsystem<Urho3D::Renderer>();
+    if (rend)
+    {
+        rend->SetNumViewports(1);
+        rend->SetViewport(0, new Urho3D::Viewport(context_));
+    }
+
+    /// \todo Remove
+    // Test code to get something on the screen
     ScenePtr scene = framework->Scene()->CreateScene("Test", true, true);
-    EntityPtr entity = scene->CreateEntity();
-    entity->SetName("TestEntity");
-    Placeable* pl = entity->CreateComponent<Placeable>();
-    Transform newTransform;
-    newTransform.pos = float3(100,100,100);
-    pl->transform.Set(newTransform);
+    {
+        EntityPtr entity = scene->CreateEntity();
+        entity->SetName("TestBox");
+        Placeable* pl = entity->CreateComponent<Placeable>();
+        entity->CreateComponent<Mesh>();
+        Transform newTransform;
+        newTransform.pos = float3(0.0f, 0.0f, 10.0f);
+        pl->transform.Set(newTransform);
+    }
+    {
+        EntityPtr entity = scene->CreateEntity();
+        entity->SetName("Camera");
+        entity->CreateComponent<Placeable>();
+        Camera* cam = entity->CreateComponent<Camera>();
+        cam->SetActive();
+    }
+
     scene->SaveSceneXML("Test.txml", true, true);
-    framework->Exit();
-    */
 }
 
 void UrhoRenderer::Uninitialize()
@@ -127,15 +145,17 @@ void UrhoRenderer::SetMainCamera(Entity *mainCameraEntity)
         LOGWARNING("Setting main window camera to null!");
 
     Urho3D::Renderer* rend = GetSubsystem<Urho3D::Renderer>();
-    if (rend)
+    if (!rend)
+        return; // In headless mode the renderer doesn't exist
+
+    Urho3D::Viewport* vp = rend->GetViewport(0);
+    if (vp)
     {
-        Urho3D::Viewport* vp = rend->GetViewport(0);
-        if (vp)
-        {
-            vp->SetCamera(newActiveCamera);
-            vp->SetScene(mainCameraEntity->ParentScene()->Subsystem<GraphicsWorld>()->UrhoScene());
-        }
+        vp->SetCamera(newActiveCamera);
+        vp->SetScene(mainCameraEntity->ParentScene()->Subsystem<GraphicsWorld>()->UrhoScene());
     }
+    else
+        LOGWARNING("Could not set active camera, no viewport defined");
 
     MainCameraChanged.Emit(mainCameraEntity);
 }

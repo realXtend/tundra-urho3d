@@ -131,25 +131,21 @@ private:
     /// Called when the parent entity has been set.
     void UpdateSignals();
 
-    /// Called when component has been added or removed from the parent entity. Checks the existence of the EC_Placeable component, and attaches this camera to it.
+    /// Called when component has been added or removed from the parent entity. Checks the existence of the Placeable component, and attaches this camera to it.
     void OnComponentStructureChanged(IComponent*, AttributeChange::Type);
 
-    void AttributesChanged();
+    void AttributesChanged() override;
 
     /// Sets placeable component
     /** set a null placeable to detach the camera, otherwise will attach
         @param placeable placeable component */
     void SetPlaceable(const ComponentPtr &placeable);
 
-    /// attaches camera to placeable
+    /// Attaches camera to placeable
     void AttachCamera();
 
-    /// detaches camera from placeable
+    /// Detaches camera from placeable
     void DetachCamera();
-
-    /// Deletes the Urho camera associated with this component from the Urho scene.
-    /// After calling this function, the internal camera_ pointer is null.
-    void DestroyCamera();
 
     /// Perform a frustum query for visible entities
     void QueryVisibleEntities();
@@ -160,9 +156,6 @@ private:
 
     /// placeable component 
     PlaceableWeakPtr placeable_;
-
-    /// Attached to placeable -flag.
-    bool attached_;
 
     /// World ptr
     GraphicsWorldWeakPtr world_;

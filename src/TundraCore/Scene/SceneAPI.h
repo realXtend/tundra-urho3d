@@ -19,7 +19,7 @@ class Framework;
 /// Gives access to the scenes in the system.
 /** With this API you can create, remove, query scenes and listen to scene additions and removals.
     Owned by Framework. */
-class TUNDRACORE_API SceneAPI : public Urho3D::Object
+class TUNDRACORE_API SceneAPI : public Object
 {
     OBJECT(SceneAPI);
 

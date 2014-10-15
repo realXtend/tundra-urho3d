@@ -17,13 +17,14 @@
 #include "Geometry/LineSegment.h"
 #include "Math/float3.h"
 #include "Math/float4.h"
+#include "Math/MathUtilities.h"
 #include "Geometry/Circle.h"
 #include "Geometry/Sphere.h"
 
 #include <Log.h>
 #include <Engine/Scene/Scene.h>
 #include <Engine/Graphics/Octree.h>
-
+#include <Engine/Graphics/Zone.h>
 namespace Tundra
 {
 
@@ -35,11 +36,23 @@ GraphicsWorld::GraphicsWorld(UrhoRenderer* owner, Scene* scene) :
 {
     urhoScene_ = new Urho3D::Scene(context_);
     urhoScene_->CreateComponent<Urho3D::Octree>();
+
+    // Set a default ambient color that matches the default ambient color of EnvironmentLight, in case there is no environmentlight component.
+    Urho3D::Zone* zone = urhoScene_->CreateComponent<Urho3D::Zone>();
+    // Just set up a large bounding zone for the whole scene
+    /// \todo The octree size is not adjusted yet, so objects outside the default octree range always end up in the root octqant
+    zone->SetBoundingBox(Urho3D::BoundingBox(-100000.0f, 100000.0f));
+    zone->SetAmbientColor(ToColor(DefaultSceneAmbientLightColor()));
 }
 
 GraphicsWorld::~GraphicsWorld()
 {
     urhoScene_.Reset();
+}
+
+Color GraphicsWorld::DefaultSceneAmbientLightColor()
+{
+    return Color(0.364f, 0.364f, 0.364f, 1.f);
 }
 
 void GraphicsWorld::SetDefaultSceneFog()

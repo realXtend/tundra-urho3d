@@ -150,13 +150,13 @@ bool Scene::IsUniqueName(const String& name) const
     return !EntityByName(name);
 }
 
-void Scene::AddSubsystem(Urho3D::Object* system)
+void Scene::AddSubsystem(Object* system)
 {
     if (system)
         subsystems[system->GetType()] = system;
 }
 
-void Scene::RemoveSubsystem(Urho3D::Object* system)
+void Scene::RemoveSubsystem(Object* system)
 {
     if (system)
         subsystems.Erase(system->GetType());

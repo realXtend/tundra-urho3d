@@ -21,7 +21,7 @@ class Entity;
 /** Components (and other instances) can register to these actions by using Entity::ConnectAction().
     Actions allow more complicated in-world logic to be built in slightly more data-driven fashion.
     Actions cannot be created directly, they're created by Entity::Action(). */
-class TUNDRACORE_API EntityAction : public Urho3D::RefCounted
+class TUNDRACORE_API EntityAction : public RefCounted
 {
 public:
     ~EntityAction() {}

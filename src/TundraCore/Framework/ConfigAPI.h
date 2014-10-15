@@ -73,7 +73,7 @@ struct ConfigFile
 
     @note All file, key and section parameters are case-insensitive. This means all of them are transformed to 
     lower case before any accessing files. "MyKey" will get and set you same value as "mykey". */
-class TUNDRACORE_API ConfigAPI : public Urho3D::Object
+class TUNDRACORE_API ConfigAPI : public Object
 {
     OBJECT(ConfigAPI);
 

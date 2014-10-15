@@ -42,8 +42,6 @@ Camera::Camera(Urho3D::Context* context, Scene* scene) :
     }
     nearPlane.SetMetadata(&minZero);
 
-    if (scene)
-        world_ = scene->Subsystem<GraphicsWorld>();
     ParentEntitySet.Connect(this, &Camera::UpdateSignals);
 }
 
@@ -57,9 +55,15 @@ Camera::~Camera()
     }
     
     GraphicsWorldPtr world = world_.Lock();
-    
     DetachCamera();
-    DestroyCamera();
+    
+    if (camera_)
+    {
+        camera_.Reset();
+        // The camera component will be destroyed along with the node
+        cameraNode_->Remove();
+        cameraNode_.Reset();
+    }
 }
 
 void Camera::SetActive()
@@ -69,7 +73,7 @@ void Camera::SetActive()
 
     if (!camera_)
     {
-        LOGERROR("Camera::SetActive failed: No Ogre camera initialized to Camera!");
+        LOGERROR("Camera::SetActive failed: No Urho camera setup!");
         return;
     }
     if (world_.Expired())
@@ -143,37 +147,40 @@ bool Camera::IsActive() const
 
 void Camera::DetachCamera()
 {
-    if (!camera_ || !cameraNode_)
+    if (!camera_ || world_.Expired())
         return;
 
-    
-    placeable_.Reset();
+    if (placeable_)
+    {
+        Urho3D::Scene* urhoScene = world_->UrhoScene();
+        // When removed from the placeable, attach to scene root to avoid being removed from scene
+        cameraNode_->SetParent(urhoScene);
+        placeable_.Reset();
+    }
 }
 
 void Camera::AttachCamera()
 {
-    if (!camera_ || !cameraNode_)
+    if (!camera_ || world_.Expired())
         return;
 
+    // Detach first, in case the original placeable no longer exists
     DetachCamera();
+
     Entity *entity = ParentEntity();
     if (!entity)
         return;
     placeable_ = entity->Component<Placeable>();
+    if (!placeable_)
+        return;
 
-    /// \todo Implement
-}
-
-void Camera::DestroyCamera()
-{
-    if (cameraNode_)
+    Urho3D::Node* placeableNode = placeable_->UrhoSceneNode();
+    if (!placeableNode)
     {
-        cameraNode_->RemoveComponent(camera_);
-        camera_ = 0;
-
-        cameraNode_->Remove();
-        cameraNode_ = 0;
+        LOGERROR("Can not attach camera: placeable does not have an Urho3D scene node");
+        return;
     }
+    cameraNode_->SetParent(placeableNode);
 }
 
 Ray Camera::ViewportPointToRay(float x, float y) const
@@ -198,17 +205,30 @@ void Camera::UpdateSignals()
     if (!parent)
         return;
 
-    parent->ComponentAdded.Connect(this, &Camera::OnComponentStructureChanged);
-    parent->ComponentRemoved.Connect(this, &Camera::OnComponentStructureChanged);
-
     // If scene is not view-enabled, no further action
     if (!ViewEnabled())
         return;
+
+    parent->ComponentAdded.Connect(this, &Camera::OnComponentStructureChanged);
+    parent->ComponentRemoved.Connect(this, &Camera::OnComponentStructureChanged);
     
+    if (parent->ParentScene())
+        world_ = parent->ParentScene()->Subsystem<GraphicsWorld>();
+
     // Create camera now if not yet created
-    if (!camera_)
+    if (world_ && !camera_)
     {
-        /// \todo Implement
+        Urho3D::Scene* urhoScene = world_->UrhoScene();
+        // Also create a scene node for the camera so that it can exist irrespective of whether there is a Placeable scene node
+        // (in Urho3D components can not be created detached from a node)
+        cameraNode_ = urhoScene->CreateChild("CameraNode");
+        camera_ = cameraNode_->CreateComponent<Urho3D::Camera>();
+
+        // Set initial attribute values
+        SetNearClipDistance(nearPlane.Get());
+        SetFarClipDistance(farPlane.Get());
+        SetFovY(verticalFov.Get());
+        SetAspectRatio(AspectRatio());
     }
 
     // Make sure we attach to the EC_Placeable if exists.
@@ -217,6 +237,10 @@ void Camera::UpdateSignals()
 
 void Camera::OnComponentStructureChanged(IComponent*, AttributeChange::Type)
 {
+    // No-op if attached to the same placeable already
+    if (placeable_ == parentEntity->Component<Placeable>())
+        return;
+
     AttachCamera(); // Try to attach if placeable is present, otherwise detach
 }
 

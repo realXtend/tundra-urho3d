@@ -34,7 +34,7 @@ public:
     -retrieve signal every time frame has been processed
     -retrieve the wall clock time of Framework
     -trigger delayed signals when spesified amount of time has elapsed. */
-class TUNDRACORE_API FrameAPI : public Urho3D::Object
+class TUNDRACORE_API FrameAPI : public Object
 {
     OBJECT(FrameAPI);
 

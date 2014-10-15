@@ -14,7 +14,7 @@ namespace Tundra
 {
 
 /// A common interface for factories which instantiate components of different types.
-class TUNDRACORE_API IComponentFactory : public Urho3D::RefCounted
+class TUNDRACORE_API IComponentFactory : public RefCounted
 {
 public:
     virtual ~IComponentFactory() {}

@@ -13,7 +13,7 @@ namespace Tundra
 {
 
 /// Interface for modules. When creating new modules, inherit from this class.
-class TUNDRACORE_API IModule : public Urho3D::Object
+class TUNDRACORE_API IModule : public Object
 {
     OBJECT(IModule);
 

@@ -94,7 +94,7 @@ class Framework;
     Every Component has a state variable updateMode that specifies a default setting for managing which objects
     get notified whenever an Attribute change event occurs. This is used to create "Local Only"-objects as well
     as when doing batch updates of Attributes (for performance or correctness). */
-class TUNDRACORE_API IComponent : public Urho3D::Object
+class TUNDRACORE_API IComponent : public Object
 {
     OBJECT(IComponent);
 
