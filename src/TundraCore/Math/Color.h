@@ -2,13 +2,14 @@
 
 #pragma once
 
+#include "TundraCoreApi.h"
 #include "Math/float4.h"
 
 namespace Tundra
 {
 
 /// A 4-component color value, component values are floating-points [0.0, 1.0].
-class Color
+class TUNDRACORE_API Color
 {
 public:
     float r; ///< Red component
