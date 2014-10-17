@@ -64,7 +64,7 @@ public:
     /// Implicit conversion to float4.
     operator float4() const { return float4(r, g, b, a); }
     /// Explicit conversion to float4.
-    float4 Color::ToFloat4() const { return static_cast<float4>(*this); }
+    float4 ToFloat4() const { return static_cast<float4>(*this); }
 
     /// Implicit conversion to Urho3D::Color.
     operator Urho3D::Color() const { return Urho3D::Color(r, g, b, a);  }
