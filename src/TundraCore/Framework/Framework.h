@@ -25,8 +25,19 @@ public:
     explicit Framework(Urho3D::Context* ctx);
     ~Framework();
 
+    /// Reads cmd line parameters, loads modules and setups the Urho engine.
+    /** @note You must call this function before Go() or pumping your own main loop with ProcessOneFrame. */
+    void Initialize();
+
+    /// Clears Framework and unloads all plugins. Call this before destructing Framework.
+    void Uninitialize();
+
     /// Run the main loop until exit requested.
     void Go();
+
+    /// Alternative to Go(). This function will process once frame and return.
+    /** @return False if Framework or Engine is exiting and no processing was done, othewise true. */
+    bool Pump();
 
     /// Runs through a single frame of logic update and rendering.
     void ProcessOneFrame();
@@ -213,5 +224,6 @@ T *Framework::Module() const
 
 /// Instantiate the Framework and run until exited.
 TUNDRACORE_API int run(int argc, char** argv);
+TUNDRACORE_API void set_run_args(int argc, char** argv);
 
 }

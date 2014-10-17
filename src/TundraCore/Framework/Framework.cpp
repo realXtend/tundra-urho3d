@@ -40,8 +40,18 @@ int run(int argc_, char** argv_)
 
     Context ctx;
     Framework fw(&ctx);
+
+    fw.Initialize();
     fw.Go();
+    fw.Uninitialize();
+
     return 0;
+}
+
+void set_run_args(int argc_, char** argv_)
+{
+    argc = argc_;
+    argv = argv_;
 }
 
 Framework::Framework(Context* ctx) :
@@ -76,7 +86,7 @@ Framework::~Framework()
     config.Reset();
 }
 
-void Framework::Go()
+void Framework::Initialize()
 {
     // Initialization prints
     LOGINFO("Starting up");
@@ -149,14 +159,28 @@ void Framework::Go()
         LOGDEBUG("Initializing module " + modules[i]->Name());
         modules[i]->Initialize();
     }
+}
 
+void Framework::Go()
+{
     // Run mainloop
     if (!exitSignal)
     {
         while (!engine->IsExiting())
             ProcessOneFrame();
     }
+}
 
+bool Framework::Pump()
+{
+    if (exitSignal || engine->IsExiting())
+        return false;
+    ProcessOneFrame();
+    return true;
+}
+
+void Framework::Uninitialize()
+{
     // Delete scenes
     scene.Reset();
 
