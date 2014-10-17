@@ -102,9 +102,7 @@ Entity* IComponent::ParentEntity() const
 
 Scene* IComponent::ParentScene() const
 {
-    if (!parentEntity)
-        return 0;
-    return parentEntity->ParentScene();
+    return parentEntity ? parentEntity->ParentScene() : nullptr;
 }
 
 void IComponent::SetReplicated(bool enable)
@@ -159,7 +157,7 @@ IAttribute* IComponent::AttributeById(const String &id) const
     for(uint i = 0; i < attributes.Size(); ++i)
         if(attributes[i] && attributes[i]->Id().Compare(id, false) == 0)
             return attributes[i];
-    return 0;
+    return nullptr;
 }
 
 IAttribute* IComponent::AttributeByName(const String &name) const
@@ -167,7 +165,7 @@ IAttribute* IComponent::AttributeByName(const String &name) const
     for(uint i = 0; i < attributes.Size(); ++i)
         if(attributes[i] && attributes[i]->Name().Compare(name, false) == 0)
             return attributes[i];
-    return 0;
+    return nullptr;
 }
 
 int IComponent::NumAttributes() const
@@ -198,7 +196,7 @@ IAttribute* IComponent::CreateAttribute(u8 index, u32 typeID, const String& id, 
     if (!SupportsDynamicAttributes())
     {
         LOGERROR("CreateAttribute called on a component that does not support dynamic attributes");
-        return 0;
+        return nullptr;
     }
     
     // If this message should be sent with the default attribute change mode specified in the IComponent,
@@ -209,12 +207,12 @@ IAttribute* IComponent::CreateAttribute(u8 index, u32 typeID, const String& id, 
 
     IAttribute *attribute = SceneAPI::CreateAttribute(typeID, id);
     if(!attribute)
-        return 0;
+        return nullptr;
     
     if (!AddAttribute(attribute, index))
     {
         delete attribute;
-        return 0;
+        return nullptr;
     }
     
     // Trigger scenemanager signal

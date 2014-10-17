@@ -98,12 +98,12 @@ Entity *UrhoRenderer::MainCamera()
 {
     Entity *mainCameraEntity = activeMainCamera.Lock().Get();
     if (!mainCameraEntity)
-        return 0;
+        return nullptr;
 
     if (!mainCameraEntity->ParentScene() || !mainCameraEntity->Component<Camera>())
     {
         SetMainCamera(0);
-        return 0;
+        return nullptr;
     }
     return mainCameraEntity;
 }
@@ -112,7 +112,7 @@ Camera *UrhoRenderer::MainCameraComponent()
 {
     Entity *mainCamera = MainCamera();
     if (!mainCamera)
-        return 0;
+        return nullptr;
     return mainCamera->Component<Camera>().Get();
 }
 
@@ -128,7 +128,7 @@ Scene *UrhoRenderer::MainCameraScene()
     if (scenes.Size() > 0)
         return scenes.Begin()->second_.Get();
 
-    return 0;
+    return nullptr;
 }
 
 void UrhoRenderer::SetMainCamera(Entity *mainCameraEntity)

@@ -79,10 +79,7 @@ void Mesh::DeserializeFrom(Urho3D::XMLElement& element, AttributeChange::Type ch
     while(attributeElement)
     {
         if (attributeElement.GetAttribute("id").Empty() && attributeElement.GetAttribute("name").Compare("Mesh materials", false) == 0)
-        {
-            LOGINFO("jees");
             attributeElement.SetAttribute("name", "Material refs");
-        }
         DeserializeAttributeFrom(attributeElement, change);
         attributeElement = attributeElement.GetNext("attribute");
     }
