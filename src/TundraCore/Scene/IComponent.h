@@ -70,8 +70,6 @@ private: // Return the class visibility specifier to the strictest form so that 
 namespace Tundra
 {
 
-class Framework;
-
 /// The common interface for all components, which are the building blocks the scene entities are formed of.
 /** Inherit your own components from this class. Never directly allocate new components using operator new,
     but use the factory-based SceneAPI::CreateComponent functions instead.
@@ -352,7 +350,7 @@ public:
     /** @param attr Attribute about to be removed.
         @todo Scripts cannot access IAttribute; consider maybe using name or something else in the signature. */
     Signal1<IAttribute*> AttributeAboutToBeRemoved;
-    
+
 protected:
     /// Helper function for starting component serialization.
     /** This function creates an XML element <component> with the name of this component, adds it to the document, and returns it. 
@@ -367,6 +365,9 @@ protected:
     /** Checks that XML element contains the right kind of EC, and if it is right, sets the component name.
         Otherwise returns false and does nothing. */
     bool BeginDeserialization(Urho3D::XMLElement& compElement);
+
+    /// Deserializes a single attribute.
+    void DeserializeAttributeFrom(Urho3D::XMLElement& attributeElement, AttributeChange::Type change);
 
     /// Add attribute to this component.
     /** If the attribute is dynamic, a matching QObject property will be automatically added to this component.

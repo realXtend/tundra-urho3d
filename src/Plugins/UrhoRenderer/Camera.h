@@ -24,9 +24,7 @@ typedef WeakPtr<Placeable> PlaceableWeakPtr;
     Ogre camera entity component
     Needs to be attached to a placeable (aka scene node) to be useful.
 
-    Registered by OgreRenderer::OgreRenderingModule.
-
-    \ingroup OgreRenderingModuleClient
+    Registered by UrhoRenderer.
 
     <b>Attributes</b>:
     <ul>

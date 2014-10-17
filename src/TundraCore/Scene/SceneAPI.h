@@ -14,8 +14,6 @@
 namespace Tundra
 {
 
-class Framework;
-
 /// Gives access to the scenes in the system.
 /** With this API you can create, remove, query scenes and listen to scene additions and removals.
     Owned by Framework. */
@@ -36,8 +34,7 @@ public:
     template<typename T>
     SharedPtr<T> CreateComponent(Scene* parentScene, const String &newComponentName = "") const
     {
-        /// @todo static_pointer_cast should be ok here
-        return Urho3D::DynamicCast<T>(CreateComponentById(parentScene, T::TypeIdStatic(), newComponentName));
+        return Urho3D::StaticCast<T>(CreateComponentById(parentScene, T::TypeIdStatic(), newComponentName));
     }
 
     /// Returns a list of all attribute type names that can be used in the CreateAttribute function to create an attribute.

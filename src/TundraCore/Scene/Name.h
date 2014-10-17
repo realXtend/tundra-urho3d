@@ -20,7 +20,7 @@ namespace Tundra
     Provides network-synchronizable means of identification for entities in addition to the plain ID number.
     This EC is not present by default for entities.
 
-    Registered by TundraLogicModule.
+    Registered by SceneAPI.
 
     <b>Attributes</b>:
     <ul>

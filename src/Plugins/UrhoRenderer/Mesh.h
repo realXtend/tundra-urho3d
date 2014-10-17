@@ -86,6 +86,10 @@ public:
     /// Returns adjustment scene node (used for scaling/offset/orientation modifications)
     Urho3D::Node* AdjustmentSceneNode() const { return adjustmentNode_; }
 
+    /// IComponent override, implemented to support old TXML with the "Mesh materials" attribute instead of "materialRefs"/"Material refs".
+    /// @todo 2014-10-17 This can be removed at some point when enough time has passed.
+    void DeserializeFrom(Urho3D::XMLElement& element, AttributeChange::Type change) override;
+
     /// Emitted before the mesh is about to be destroyed
     Signal0<void> MeshAboutToBeDestroyed;
 
