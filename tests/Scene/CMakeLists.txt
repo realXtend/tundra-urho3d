@@ -1,0 +1,2 @@
+
+CreateTest(Scene main.cpp)

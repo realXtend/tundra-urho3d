@@ -196,7 +196,7 @@ IF NOT EXIST "build" mkdir "build"
 cd build
 
 cecho {0D}Running CMake for Google C++ Testing Framework.{# #}{\n}
-cmake ../ -G %GENERATOR%
+cmake ../ -G %GENERATOR% -Dgtest_force_shared_crt=TRUE
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
 :: build

@@ -13,14 +13,14 @@
 
 ###### BUILD CONFIGURATION DEFINES ######
 
-## Various flags/defines that configure your build
-
-# Do we want to build TundraCore as a shared or static library.
 set(TUNDRACORE_SHARED 1)
 
-# Enables certain build optimizations on the release builds, currently Windows-only.
-# On Windows also enables some of the more aggressive linker optimizations. Do not enable if you are planning to retain reusable symbol information.
-option(ENABLE_BUILD_OPTIMIZATIONS "Enables certain build optimizations on the release builds." OFF)
+option (ENABLE_BUILD_OPTIMIZATIONS
+    "Windows only: Enables certain build optimizations on the release builds" OFF
+)
+option (ENABLE_TESTS
+    "Enables building unit tests" ON
+)
 
 # Enable solution folders. VS Express < 2012 doesn't support solution folders.
 # Use set(PROJECT_TYPE "My Plugins") to set solution folders.
@@ -63,19 +63,22 @@ if (MSVC)
     endif()
 endif()
 
-message("=================== Configuring Tundra Framework =====================\n") # 70 visible chars to match CMakeLists.txt's prints
-
+BeginSection("Configuring Tundra Framework") # 70 visible chars to match CMakeLists.txt's prints
 AddProject(TundraCore TundraCore)
 
-message("======================== Configuring Plugins =========================\n")
-
+BeginSection("Configuring Plugins")
 AddProject(Plugins Plugins/UrhoRenderer)
 
-message("================== Configuring Tundra Executable(s) ==================\n")
-
+BeginSection("Configuring Tundra Executable(s)")
 AddProject(Tundra Tundra/Tundra)
+
 # For Windows, also add a version of the project which builds using CONSOLE subsystem.
 # This is otherwise equivalent to the Tundra executable, but this one always shows the console window.
 if (WIN32)
     AddProject(Tundra Tundra/TundraConsole)
+endif()
+
+if (ENABLE_TESTS)
+    BeginSection("Configuring Tests")
+    add_subdirectory(tests)
 endif()

@@ -74,18 +74,33 @@ if (MSVC AND MSVC90) # MSVC has partial C++11 support beginning in VC10
 endif()
 
 macro(PrintUsedDependencyVariables)
-    message("======================== Dependency Variables ========================\n") # 70 visible chars
+    BeginSection("Dependency Variables")
     message(STATUS "URHO3D_HOME      = " ${URHO3D_HOME})
     message(STATUS "MATHGEOLIB_HOME  = " ${MATHGEOLIB_HOME})
     message(STATUS "KNET_HOME        = " ${KNET_HOME})
-    message("")
 endmacro()
 
 macro(PrintUsedBuildConfig)
-    message("====================== Used Build Configuration ======================\n")
+    BeginSection("Used Build Configuration")
     message(STATUS "Install prefix = " ${CMAKE_INSTALL_PREFIX})
-    message("")
 endmacro()
+
+macro(BeginSection title)
+    EndSection()
+    string(TOUPPER ${title} title_upper)
+    string(REGEX REPLACE "." "-" title_line ${title_upper})
+    message("\n${title_upper}")
+    message("${title_line}\n")
+    set(_SECTION_ENDED FALSE)
+endmacro()
+
+macro(EndSection)
+    if (NOT _SECTION_ENDED)
+        message(" ")
+    endif()
+    set(_SECTION_ENDED TRUE)
+endmacro()
+set(_SECTION_ENDED TRUE) # init section macro state
 
 # AddProject takes in one or two parameters:
 # - One param:  argv0 == the relative directory (to the root CMakeLists.txt) where you project is and that contains the CMakeLists.txt for this project.
@@ -217,7 +232,7 @@ SET(PCH_ENABLED 1)
 
 PrintUsedDependencyVariables ()
 
-message("====================== Configuring Dependencies ======================\n")
+BeginSection("Configuring Dependencies")
 
 # Set CMake custom module path & include them
 # The following CMake modules are required for the project to build.
@@ -236,7 +251,7 @@ configure_mathgeolib()
 # Find/configure kNet
 configure_knet()
 
-message("")
+EndSection()
 
 # Set global hardcoded install prefix. User cannot change this at the moment, until we figure how we want to use this!
 # Call the cleanup step that cleans the install prefix before every installations. This is important as module setups might change between builds.

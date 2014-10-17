@@ -70,6 +70,10 @@ doc/html/
 # Tundra bin/ and build/ files
 bin/Tundra*.exe
 bin/Tundra
+bin/TundraTest*
+bin/Tundra.log
+bin/Test.txml
+bin/Data/Shaders/HLSL/Cache
 build-*/
 install/
 
