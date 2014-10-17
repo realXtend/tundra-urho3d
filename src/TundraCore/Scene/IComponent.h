@@ -113,7 +113,7 @@ public:
 
     /// Returns the type name of this component.
     /** The type name is the "class" type of the component,
-        e.g. "EC_Mesh" or "DynamicComponent". The type name of a component cannot be an empty string.
+        e.g. "Mesh" or "DynamicComponent". The type name of a component cannot be an empty string.
         The type name of a component never changes at runtime.
         @note Prefer TypeId over TypeName when inspecting the component type (performance). */
     virtual const String &TypeName() const = 0;
@@ -313,15 +313,13 @@ public:
     bool ViewEnabled() const;
 
     /// Returns list of attribute names of the component
-    StringVector GetAttributeNames() const;
+    StringVector AttributeNames() const;
 
     /// Returns list of attribute IDs of the component.
-    StringVector GetAttributeIds() const;
+    StringVector AttributeIds() const;
 
     /// Crafts a component type name string that is guaranteed not to have the "EC_" prefix. "EC_" prefix is deprecated and should only be used for legacy txml loading compatibility.
     static String EnsureTypeNameWithoutPrefix(const String &tn) { return (tn.StartsWith("EC_", false) ? tn.Substring(3) : tn); }
-    /// Crafts a component type name string that is guaranteed to have the "EC_" prefix. "EC_" prefix is deprecated and should only be used for legacy txml loading compatibility.
-    static String EnsureTypeNameWithPrefix(const String &tn) { return (tn.StartsWith("EC_", false) ? tn : "EC_" + tn); }
 
     /// Helper function for determinating whether or not this component should be serialized with the provided serialization options.
     bool ShouldBeSerialized(bool serializeTemporary, bool serializeLocal) const;

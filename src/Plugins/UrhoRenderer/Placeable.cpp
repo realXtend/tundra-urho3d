@@ -426,7 +426,7 @@ void Placeable::AttachNode()
         
     // Three possible cases
     // 1) attach to scene root node
-    // 2) attach to another EC_Placeable's scene node
+    // 2) attach to another Placeable's scene node
     // 3) attach to a bone on a skeletal mesh
     // Disconnect from the EntityCreated & ComponentAdded signals, as responding to them might not be needed anymore.
     // We will reconnect signals as necessary
@@ -487,7 +487,7 @@ void Placeable::AttachNode()
                     {
                         // Could not find the bone. Connect to the parent mesh MeshChanged signal to wait for the proper mesh to be assigned.
                         if (ViewEnabled())
-                            LOGWARNING("EC_Placeable::AttachNode: Could not find bone " + boneName + " to attach to, attaching to the parent scene node instead.");
+                            LOGWARNING("Placeable::AttachNode: Could not find bone " + boneName + " to attach to, attaching to the parent scene node instead.");
                         parentMesh->MeshChanged.Connect(this, &Placeable::OnParentMeshChanged);
                         // While we wait, fall through to attaching to the scene node instead
                     }
@@ -509,7 +509,7 @@ void Placeable::AttachNode()
                 {
                     if (parentCheck == this)
                     {
-                        LOGWARNING("EC_Placeable::AttachNode: Cyclic scene node parenting attempt detected! Parenting to the scene root node instead.");
+                        LOGWARNING("Placeable::AttachNode: Cyclic scene node parenting attempt detected! Parenting to the scene root node instead.");
                         sceneNode_->SetParent(root_node);
                         attached_ = true;
                         return;
@@ -655,7 +655,7 @@ void Placeable::CheckParentEntityCreated(Entity* entity, AttributeChange::Type)
 {
     if (!attached_ && entity)
     {
-        PROFILE(EC_Placeable_CheckParentEntityCreated);
+        PROFILE(Placeable_CheckParentEntityCreated);
         /** @note EntityReference::Lookup was replaced here by Matches that does
             not iterate the whole scene (worst case scenario, parented by name).
             This freezes Tundra for quite badly if there are thousands of Entities

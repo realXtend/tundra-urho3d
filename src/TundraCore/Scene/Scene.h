@@ -218,7 +218,7 @@ public:
         To create an empty entity, omit the components parameter.
 
         @param id Id of the new entity. Specify 0 to use the next free (replicated) ID, see also NextFreeId and NextFreeIdLocal.
-        @param components Optional list of component names ("EC_" prefix can be omitted) the entity will use. If omitted or the list is empty, creates an empty entity.
+        @param components Optional list of component names the entity will use. If omitted or the list is empty, creates an empty entity.
         @param change Notification/network replication mode
         @param replicated Whether entity is replicated. Default true.
         @param componentsReplicated Whether components will be replicated, true by default.
@@ -233,7 +233,7 @@ public:
 
         To create an empty entity omit components parameter.
 
-        @param components Optional list of component names ("EC_" prefix can be omitted) the entity will use. If omitted or the list is empty, creates an empty entity.
+        @param components Optional list of component names the entity will use. If omitted or the list is empty, creates an empty entity.
         @param change Notification/network replication mode
         @param componentsReplicated Whether components will be replicated, false by default, but components of local entities are not replicated so this has no effect.
         @param temporary Will the entity be temporary i.e. it is no serialized to disk by default.
@@ -413,7 +413,7 @@ public:
     Vector<Entity *> CreateContentFromBinary(const char *data, int numBytes, bool useEntityIDsFromFile, AttributeChange::Type change); /**< @overload @param data Data buffer @param numBytes Data size. */
 
     /// Returns @c ent parent Entity id.
-    /** Check both Entity and EC_Placeble::parentRef parenting,
+    /** Check both Entity and Placeable::parentRef parenting,
         Entity parenting takes precedence.
         @return Returns 0 if parent is not set or the parent ref is not a Entity id (but a entity name). */
     entity_id_t EntityParentId(const Entity *ent) const;

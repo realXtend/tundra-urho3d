@@ -121,7 +121,6 @@ public:
     void RegisterComponentFactory(const ComponentFactoryPtr &factory);
 
     /// Creates a new component instance by specifying the typename of the new component to create, and the scene where to create.
-    /** @note the @c componentTypeName doesn't need to have the "EC_" prefix. */
     ComponentPtr CreateComponentByName(Scene* scene, const String &componentTypeName, const String &newComponentName = "") const;
 
     /// Creates a new component instance by specifying the typeid of the new component to create, and the scene where to create.

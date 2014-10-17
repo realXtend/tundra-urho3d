@@ -46,7 +46,7 @@ typedef WeakPtr<Placeable> PlaceableWeakPtr;
 
     Does not emit any actions.
 
-    <b>Depends on the component @ref EC_Placeable "Placeable".</b>
+    <b>Depends on the Placeable component.</b>
     </table> */
 class URHO_MODULE_API Camera : public IComponent
 {

@@ -97,7 +97,7 @@ void Mesh::UpdateSignals()
         mesh_->SetModel(GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Model>("Models/Box.mdl"));
     }
 
-    // Make sure we attach to the EC_Placeable if exists.
+    // Make sure we attach to the Placeable if exists.
     AttachMesh();
 }
 

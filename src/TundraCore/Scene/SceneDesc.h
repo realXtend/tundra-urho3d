@@ -140,13 +140,11 @@ struct TUNDRACORE_API AttributeDesc
     bool operator != (const AttributeDesc &rhs) const { return !(*this == rhs); }
 };
 
-/// Description of an entity-component (EC_*, IComponent).
+/// Description of an entity-component (IComponent).
 struct TUNDRACORE_API ComponentDesc
 {
-    /** @note 'typeName' might or might not have the "EC_"-prefix so remember to take that into account.
-        @see IComponent::EnsureTypeNameWithoutPrefix, IComponent::EnsureTypeNameWithPrefix. */
-
     u32 typeId;                         ///< Unique type ID, if available, 0xffffffff if not.
+    /** @note 'typeName' Type name should not have the "EC_"-prefix anymore, enforce this with IComponent::EnsureTypeNameWithoutPrefix. */
     String typeName;                   ///< Unique type name.
     String name;                       ///< Name (if applicable).
 

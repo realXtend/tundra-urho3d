@@ -127,7 +127,7 @@ AttributeVector IComponent::NonEmptyAttributes() const
     return ret;
 }
 
-StringVector IComponent::GetAttributeNames() const
+StringVector IComponent::AttributeNames() const
 {
     StringVector attribute_list;
     for(AttributeVector::ConstIterator iter = attributes.Begin(); iter != attributes.End(); ++iter)
@@ -136,7 +136,7 @@ StringVector IComponent::GetAttributeNames() const
     return attribute_list;
 }
 
-StringVector IComponent::GetAttributeIds() const
+StringVector IComponent::AttributeIds() const
 {
     StringVector attribute_list;
     for(AttributeVector::ConstIterator iter = attributes.Begin(); iter != attributes.End(); ++iter)

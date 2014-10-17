@@ -63,7 +63,7 @@ typedef WeakPtr<Placeable> PlaceableWeakPtr;
 
     Does not emit any actions.
 
-    <b>Depends on the component @ref EC_Placeable "Placeable"</b>. The position in the Placeable component specifies the position in the world space where this light is placed at.
+    <b>Depends on the Placeable component. The position in the Placeable component specifies the position in the world space where this light is placed at.
     </table> */
 class URHO_MODULE_API Light : public IComponent
 {

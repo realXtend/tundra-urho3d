@@ -200,7 +200,7 @@ public:
     /// @note This function sets the parentRef and parentBone attributes of this component to achieve the parenting.
     void SetParent(Entity *parent, bool preserveWorldTransform);
 
-    /// Re-parents this scene node to the named bone of the given parent scene node. The parent scene node must contain an Placeable component and an EC_Mesh with a skeleton.
+    /// Re-parents this scene node to the named bone of the given parent scene node. The parent scene node must contain a Placeable component and a Mesh with a skeleton.
     /// Detaches this placeable from its previous parent.
     /// @param preserveWorldTransform If true, the world space position of this placeable is preserved.
     ///                               If false, the transform attibute of this placeable is treated as the new local->parent transform for this placeable.

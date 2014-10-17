@@ -78,7 +78,7 @@ void Light::UpdateSignals()
     if (parent->ParentScene())
         world_ = parent->ParentScene()->Subsystem<GraphicsWorld>();
 
-    // Make sure we attach to the EC_Placeable if exists.
+    // Make sure we attach to the Placeable if exists.
     AttachLight();
 }
 

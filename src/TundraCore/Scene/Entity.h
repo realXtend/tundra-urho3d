@@ -122,7 +122,7 @@ public:
     ComponentPtr ComponentById(component_id_t id) const;
     /// Returns a component with type 'typeName' or empty pointer if component was not found
     /** If there are several components with the specified type, returns the first component found (arbitrary).
-        @param typeName type of the component, the "EC_" prefix is not required. */
+        @param typeName type of the component. */
     ComponentPtr Component(const String &typeName) const;
     /// @overload
     /** @param typeId Component type ID. */
@@ -136,7 +136,7 @@ public:
     ComponentPtr Component(u32 typeId, const String &name) const;
 
     /// Returns a component with type 'typeName' or creates & adds it if not found. If could not create, returns empty pointer
-    /** @param typeName The type name of the component to create, the "EC_" prefix is not required.
+    /** @param typeName The type name of the component to create.
         @param change Change signaling mode, in case component has to be created
         @param replicated Whether new component will be replicated through network
         @return Pointer to the component, or an empty pointer if the component could be retrieved or created. */
@@ -158,7 +158,7 @@ public:
     ComponentPtr GetOrCreateLocalComponent(const String &typeName, const String &name);
 
     /// Creates a new component and attaches it to this entity. 
-    /** @param typeName type of the component, the "EC_" prefix is not required.
+    /** @param typeName type of the component.
         @param change Change signaling mode, in case component has to be created
         @param replicated Whether new component will be replicated through network
         @return Returns a pointer to the newly created component, or null if creation failed. Common causes for failing to create an component
@@ -175,7 +175,7 @@ public:
         @param name name of the component */
     ComponentPtr CreateComponent(u32 typeId, const String &name, AttributeChange::Type change = AttributeChange::Default, bool replicated = true);
     
-    /// Creates a local component with type 'typeName' (the "EC_" prefix not required) and adds it to the entity. If could not create, return empty pointer
+    /// Creates a local component with type 'typeName' and adds it to the entity. If could not create, return empty pointer
     ComponentPtr CreateLocalComponent(const String &typeName);
     /// @overload @param name The arbitrary name identifier for the component.
     ComponentPtr CreateLocalComponent(const String &typeName, const String &name);
@@ -199,7 +199,7 @@ public:
         @param change Specifies how other parts of the system are notified of this removal.
         @sa RemoveComponentById */
     void RemoveComponent(const ComponentPtr &component, AttributeChange::Type change = AttributeChange::Default); /**< @overload */
-    void RemoveComponent(const String &typeName, AttributeChange::Type change = AttributeChange::Default) { RemoveComponent(Component(typeName), change); } /**< @overload @param typeName The component type name, the "EC_" prefix is not required. */
+    void RemoveComponent(const String &typeName, AttributeChange::Type change = AttributeChange::Default) { RemoveComponent(Component(typeName), change); } /**< @overload @param typeName The component type name. */
     void RemoveComponent(const String &typeName, const String &name, AttributeChange::Type change = AttributeChange::Default) { RemoveComponent(Component(typeName, name), change); }  /**< @overload */
     
     /// Removes component by ID.
@@ -219,7 +219,7 @@ public:
     /** @param typeId Component type ID. */
     ComponentVector ComponentsOfType(u32 typeId) const;
     /// @overload
-    /** @param typeName Type name of the component, the "EC_" prefix is not required.
+    /** @param typeName Type name of the component.
         @note The overload taking component type ID is more efficient than this overload. */
     ComponentVector ComponentsOfType(const String &typeName) const;
 
@@ -360,7 +360,7 @@ public:
     /// Creates new child entity that contains the specified components.
     /** To create an empty entity, omit the components parameter.
         @param id Id of the new entity. Specify 0 to use the next free (replicated) ID, see also NextFreeId and NextFreeIdLocal.
-        @param components Optional list of component names ("EC_" prefix can be omitted) the entity will use. If omitted or the list is empty, creates an empty entity.
+        @param components Optional list of component names the entity will use. If omitted or the list is empty, creates an empty entity.
         @param change Notification/network replication mode
         @param replicated Whether entity is replicated. Default true.
         @param componentsReplicated Whether components will be replicated, true by default.
@@ -370,7 +370,7 @@ public:
 
     /// Creates new local child entity that contains the specified components
     /** To create an empty entity omit components parameter.
-        @param components Optional list of component names ("EC_" prefix can be omitted) the entity will use. If omitted or the list is empty, creates an empty entity.
+        @param components Optional list of component names the entity will use. If omitted or the list is empty, creates an empty entity.
         @param change Notification/network replication mode
         @param componentsReplicated Whether components will be replicated, false by default, but components of local entities are not replicated so this has no effect.
         @param temporary Will the entity be temporary i.e. it is no serialized to disk by default. */
