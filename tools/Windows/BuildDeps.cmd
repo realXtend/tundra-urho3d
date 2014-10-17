@@ -89,7 +89,8 @@ echo If you are not ready with the above, press Ctrl-C to abort!
 pause
 echo.
 
-:: MathGeoLib
+:::::::::::::::::::::::: MathGeoLib
+
 IF NOT EXIST "%DEPS%\MathGeoLib\". (
     cecho {0D}Cloning MathGeoLib into "%DEPS%\MathGeoLib".{# #}{\n}
     cd "%DEPS%"
@@ -114,8 +115,8 @@ cecho {0D}Installing %BUILD_TYPE% MathGeoLib{# #}{\n}
 MSBuild INSTALL.%VCPROJ_FILE_EXT% /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
+:::::::::::::::::::::::: kNet
 
-:: kNet
 IF NOT EXIST "%DEPS%\kNet\". (
     cecho {0D}Cloning kNet into "%DEPS%\kNet".{# #}{\n}
     cd "%DEPS%"
@@ -128,18 +129,22 @@ IF NOT EXIST "%DEPS%\kNet\". (
     git pull
 )
 
+:: pre build
+
 cecho {0D}Running CMake for kNet.{# #}{\n}
 cmake . -G %GENERATOR% -DCMAKE_DEBUG_POSTFIX=_d
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+:: build
 
 cecho {0D}Building %BUILD_TYPE% kNet. Please be patient, this will take a while.{# #}{\n}
 MSBuild kNet.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
+:::::::::::::::::::::::: Urho3D engine
 
-:: Urho3D engine
-:: latest master for now, if a "last known good version" is not needed
 IF NOT EXIST "%DEPS%\urho3d\". (
+    :: latest master for now, if a "last known good version" is not needed
     cecho {0D}Cloning Urho3D into "%DEPS%\urho3d".{# #}{\n}
     cd "%DEPS%"
     git clone https://github.com/urho3d/Urho3D.git urho3d
@@ -149,6 +154,8 @@ IF NOT EXIST "%DEPS%\urho3d\". (
     cd "%DEPS%\urho3d\"
     git pull
 )
+
+:: pre build
 
 cecho {0D}Running CMake for Urho3D.{# #}{\n}
 IF NOT EXIST "Build" mkdir "Build"
@@ -161,19 +168,52 @@ IF %TARGET_ARCH%==x64 (
 cmake ../Source -G %GENERATOR% -DURHO3D_LIB_TYPE=SHARED -DURHO3D_64BIT=%URHO3D_64BIT% -DURHO3D_ANGELSCRIPT=0 -DURHO3D_LUA=0 -DURHO3D_TOOLS=0 -DURHO3D_PHYSICS=0 -DURHO3D_NETWORK=0 
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
+:: build
+
 cecho {0D}Building %BUILD_TYPE% Urho3D. Please be patient, this will take a while.{# #}{\n}
 MSBuild Urho3D.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
+:: deploy
+
 cecho {0D}Deploying Urho3D DLL to Tundra bin\ directory.{# #}{\n}
 copy /Y "%DEPS%\urho3D\Bin\*.dll" "%TUNDRA_BIN%"
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+:::::::::::::::::::::::: gtest
+
+IF NOT EXIST "%DEPS%\gtest\". (
+    cecho {0D}Cloning Google C++ Testing Framework into "%DEPS%\gtest".{# #}{\n}
+    cd "%DEPS%"
+    svn checkout http://googletest.googlecode.com/svn/tags/release-1.7.0/ gtest
+    IF NOT EXIST "%DEPS%\gtest\.svn" GOTO :ERROR
+)
+
+:: pre build
+
+cd "%DEPS%\gtest"
+IF NOT EXIST "build" mkdir "build"
+cd build
+
+cecho {0D}Running CMake for Google C++ Testing Framework.{# #}{\n}
+cmake ../ -G %GENERATOR%
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+:: build
+
+cecho {0D}Building %BUILD_TYPE% Google C++ Testing Framework. Please be patient, this will take a while.{# #}{\n}
+MSBuild gtest.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+:::::::::::::::::::::::: All done
 
 echo.
 %TOOLS%\Utils\cecho {0A}Tundra dependencies built.{# #}{\n}
 set PATH=%ORIGINAL_PATH%
 cd %TOOLS%
 GOTO :EOF
+
+:::::::::::::::::::::::: Error exit handler
 
 :ERROR
 echo.
