@@ -121,13 +121,13 @@ private:
     /// Called when the parent entity has been set.
     void UpdateSignals();
 
-    /// Called when component has been added or removed from the parent entity. Checks the existence of the Placeable component, and attaches this camera to it.
+    /// Called when component has been added or removed from the parent entity. Checks the existence of the Placeable component, and attaches this light to it.
     void OnComponentStructureChanged(IComponent*, AttributeChange::Type);
 
     void AttributesChanged() override;
 
     /// Sets placeable component
-    /** set a null placeable to detach the camera, otherwise will attach
+    /** set a null placeable to detach the light, otherwise will attach
         @param placeable placeable component */
     void SetPlaceable(const ComponentPtr &placeable);
 
