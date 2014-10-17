@@ -47,6 +47,7 @@ macro (CreateTest testname testsrcs)
 
     link_modules(TundraCore)
     link_package(GTEST)
+    link_package(URHO3D)
 
     set_target_properties (${TARGET_NAME} PROPERTIES FOLDER ${PROJECT_TYPE})
 
