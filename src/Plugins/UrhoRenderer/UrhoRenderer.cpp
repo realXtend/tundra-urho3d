@@ -7,6 +7,7 @@
 #include "Placeable.h"
 #include "Mesh.h"
 #include "Camera.h"
+#include "Light.h"
 #include "IComponentFactory.h"
 #include "SceneAPI.h"
 #include "Entity.h"
@@ -37,6 +38,7 @@ void UrhoRenderer::Load()
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Placeable>()));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Mesh>()));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Camera>()));
+    scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Light>()));
 }
 
 void UrhoRenderer::Initialize()
@@ -73,6 +75,15 @@ void UrhoRenderer::Initialize()
         entity->CreateComponent<Placeable>();
         Camera* cam = entity->CreateComponent<Camera>();
         cam->SetActive();
+    }
+    {
+        EntityPtr entity = scene->CreateEntity();
+        entity->SetName("Light");
+        Placeable *pl = entity->CreateComponent<Placeable>();
+        Transform newTransform;
+        newTransform.pos = float3(0.0f, 6.0f, 7.0f);
+        pl->transform.Set(newTransform);
+        entity->CreateComponent<Light>();
     }
 
     scene->SaveSceneXML("Test.txml", true, true);
