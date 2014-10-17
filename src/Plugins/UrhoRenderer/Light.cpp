@@ -21,8 +21,8 @@ namespace Tundra
 Light::Light(Urho3D::Context* context, Scene* scene) :
     IComponent(context, scene),
     INIT_ATTRIBUTE_VALUE(type, "Type", PointLight),
-	INIT_ATTRIBUTE_VALUE(diffColor, "Diffuse color", Color::White),
-	INIT_ATTRIBUTE_VALUE(specColor, "Specular color", Color::Black),
+    INIT_ATTRIBUTE_VALUE(diffColor, "Diffuse color", Color::White),
+    INIT_ATTRIBUTE_VALUE(specColor, "Specular color", Color::Black),
     INIT_ATTRIBUTE_VALUE(castShadows, "Cast shadows", false),
     INIT_ATTRIBUTE_VALUE(range, "Range", 25),
     INIT_ATTRIBUTE_VALUE(brightness, "Brightness", 1.0f),
@@ -104,10 +104,10 @@ void Light::AttributesChanged()
         light_->SetLightType(urhoType);
     }
     if (diffColor.ValueChanged())
-        light_->SetColor(Tundra::ToColor(diffColor.Get()));
+        light_->SetColor(diffColor.Get());
     // Specular color value ignored, only use intensity
     if (specColor.ValueChanged())
-		light_->SetSpecularIntensity(specColor.Get().ToFloat4().AverageOfElements());
+        light_->SetSpecularIntensity(specColor.Get().ToFloat4().AverageOfElements());
     //if (castShadows.ValueChanged())
     //    light_->SetShadowFadeDistance(0);
     if (range.ValueChanged())
@@ -148,8 +148,8 @@ void Light::AttachLight()
     else if (tundraType == SpotLight)
         urhoType = Urho3D::LIGHT_SPOT;
     light_->SetLightType(urhoType);
-    light_->SetColor(Tundra::ToColor(diffColor.Get()));
-	light_->SetSpecularIntensity(specColor.Get().ToFloat4().AverageOfElements());
+    light_->SetColor(diffColor.Get());
+    light_->SetSpecularIntensity(specColor.Get().ToFloat4().AverageOfElements());
     light_->SetRange(range.Get());
     light_->SetBrightness(brightness.Get());
 }

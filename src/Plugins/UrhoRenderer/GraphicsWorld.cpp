@@ -42,7 +42,7 @@ GraphicsWorld::GraphicsWorld(UrhoRenderer* owner, Scene* scene) :
     // Just set up a large bounding zone for the whole scene
     /// \todo The octree size is not adjusted yet, so objects outside the default octree range always end up in the root octqant
     zone->SetBoundingBox(Urho3D::BoundingBox(-100000.0f, 100000.0f));
-    zone->SetAmbientColor(ToColor(DefaultSceneAmbientLightColor()));
+    zone->SetAmbientColor(DefaultSceneAmbientLightColor());
 }
 
 GraphicsWorld::~GraphicsWorld()

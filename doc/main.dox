@@ -1,12 +1,12 @@
 namespace Tundra
 {
 /**
-\mainpage realXtend-Urho3D
+\mainpage realXtend Tundra-Urho3D
 
 Documentations of major external libraries used with Tundra:
 <ul><li><a href="http://urho3d.github.io/documentation/HEAD/index.html">Urho3D</a></ul>
 <ul><li><a href="http://clb.demon.fi/MathGeoLib/nightly/reference.html">MathGeoLib</a></ul>
-<ul><li><a href="http://clb.demon.fi/knet/">kNet documentation</a></ul>
+<ul><li><a href="http://clb.demon.fi/knet/">kNet</a></ul>
 
 */
 }
