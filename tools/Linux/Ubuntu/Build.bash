@@ -258,6 +258,7 @@ if [ $skip_cmake = false ] ; then
     fi
 
     cmake .. \
+        -DCMAKE_CXX_FLAGS="-Wunused-parameter" \
         -DMATHGEOLIB_HOME=$DEPS \
         -DURHO3D_HOME=$DEPS_SRC/urho3d \
         -DKNET_HOME=$DEPS_SRC/kNet \
@@ -286,6 +287,7 @@ if [ $run_analysis = true ] ; then
         --enable=all \
         --suppress=missingInclude \
         --suppress=missingIncludeSystem \
+        --suppress=unusedFunction \
         --suppressions-list=$TUNDRA/tools/Windows/Cppcheck/Suppressions.txt \
         --std=c++11 \
         --error-exitcode=0 \
