@@ -10,8 +10,6 @@
 using namespace Tundra;
 using namespace Tundra::Test;
 
-
-
 TEST_F(Runner, CreateEntity)
 {
     for (TrueFalseVec::ConstIterator iRepl = TrueFalse.Begin(); iRepl != TrueFalse.End(); ++iRepl)

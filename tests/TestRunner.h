@@ -109,25 +109,20 @@ namespace Tundra
 
             virtual void SetUp()
             {
-                Log("Creating Runner");
-
                 arguments.push_back("TundraTestRunner.exe");
 
+                // Let tests write log file for inspection on failures,
+                // don't log anything to console.
+                arguments.push_back("--quiet");
+
                 if (server)
-                {
                     arguments.push_back("--server");
-                    Log("-- server", 2);
-                }
                 if (headless)
-                {
                     arguments.push_back("--headless");
-                    Log("-- headless", 2);
-                }
                 if (!config.empty())
                 {
                     arguments.push_back("--config");
                     arguments.push_back(config.c_str());
-                    Log(String("-- config ") + config.c_str(), 2);
                 }
 
                 set_run_args((int)arguments.size(), (char**)&arguments[0]);
