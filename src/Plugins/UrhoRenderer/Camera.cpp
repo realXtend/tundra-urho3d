@@ -321,9 +321,7 @@ Frustum Camera::ToFrustum() const
     f.SetFront(p->WorldOrientation() * -float3::unitZ);
     f.SetUp(upVector.Get().Normalized());
     f.SetViewPlaneDistances(nearPlane.Get(), farPlane.Get());
-    const float vFov = DegToRad(verticalFov.Get());
-    const float hFov = vFov / AspectRatio();
-    f.SetPerspective(hFov, vFov);
+    f.SetVerticalFovAndAspectRatio(DegToRad(verticalFov.Get()), AspectRatio());
     return f;
 }
 
