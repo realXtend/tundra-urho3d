@@ -70,8 +70,11 @@ doc/html/
 # Tundra bin/ and build/ files
 bin/Tundra*.exe
 bin/Tundra
+bin/Tundra.log
+bin/Data/Shaders/*/Cache
 build-*/
 install/
+
 
 # SVN admin
 *.svn-base
