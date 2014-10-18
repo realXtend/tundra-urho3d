@@ -78,76 +78,17 @@ Framework::~Framework()
 
 void Framework::Go()
 {
-    // Initialization prints
-    LOGINFO("Starting up");
-    LOGINFO("* Installation directory : " + InstallationDirectory());
-    LOGINFO("* Working directory      : " + CurrentWorkingDirectory());
-    LOGINFO("* User data directory    : " + UserDataDirectory());
-
     // Urho engine initialization parameters
     VariantMap engineInitMap;
 
-    // Prepare ConfigAPI data folder
-    Vector<String> configDirs = CommandLineParameters("--configDir");
-    String configDir = "$(USERDATA)/configuration"; // The default configuration goes to "C:\Users\username\AppData\Roaming\Tundra\configuration"
-    if (configDirs.Size() >= 1)
-        configDir = configDirs.Back();
-    if (configDirs.Size() > 1)
-        LOGWARNING("Multiple --configDir parameters specified! Using \"" + configDir + "\" as the configuration directory.");
-    config->PrepareDataFolder(configDir);
+    // Read options.
+    ApplyStartupOptions(engineInitMap);
 
-    // Set target FPS limits, if specified.
-    ConfigData targetFpsConfigData(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_RENDERING);
-    if (config->HasKey(targetFpsConfigData, "fps target limit"))
-    {
-        int targetFps = config->Read(targetFpsConfigData, "fps target limit").GetInt();
-        if (targetFps >= 0)
-            engine->SetMaxFps(targetFps);
-        else
-            LOGWARNING("Invalid target FPS value " + String(targetFps) + " read from config. Ignoring.");
-    }
-
-    Vector<String> fpsLimitParam = CommandLineParameters("--fpsLimit");
-    if (fpsLimitParam.Size() > 1)
-        LOGWARNING("Multiple --fpslimit parameters specified! Using " + fpsLimitParam.Front() + " as the value.");
-    if (fpsLimitParam.Size() > 0)
-    {
-        int targetFpsLimit = ToInt(fpsLimitParam.Front());
-        if (targetFpsLimit >= 0)
-            engine->SetMaxFps(targetFpsLimit);
-        else
-            LOGWARNING("Erroneous FPS limit given with --fpsLimit: " + fpsLimitParam.Front() + ". Ignoring.");
-    }
-
-    Vector<String> fpsLimitInactiveParam = CommandLineParameters("--fpsLimitWhenInactive");
-    if (fpsLimitInactiveParam.Size() > 1)
-        LOGWARNING("Multiple --fpslimit parameters specified! Using " + fpsLimitInactiveParam.Front() + " as the value.");
-    if (fpsLimitInactiveParam.Size() > 0)
-    {
-        int targetFpsLimit = ToInt(fpsLimitParam.Front());
-        if (targetFpsLimit >= 0)
-            engine->SetMaxInactiveFps(targetFpsLimit);
-        else
-            LOGWARNING("Erroneous FPS limit given with --fpsLimit: " + fpsLimitInactiveParam.Front() + ". Ignoring.");
-    }
-
-    Vector<String> logLevelParam  = CommandLineParameters("--loglevel");
-    if (logLevelParam.Size() > 1)
-        LOGWARNING("Multiple --loglevel parameters specified! Using " + logLevelParam.Front() + " as the value.");
-    if (logLevelParam.Size() > 0)
-    {
-        String logLevel = logLevelParam.Front();
-        if (logLevel.Compare("debug", false) == 0 || logLevel.Compare("verbose", false) == 0)
-            engineInitMap["LogLevel"] = Urho3D::LOG_DEBUG;
-        else if (logLevel.Compare("warn", false) == 0 || logLevel.Compare("warning", false) == 0)
-            engineInitMap["LogLevel"] = Urho3D::LOG_WARNING;
-        else if (logLevel.Compare("error", false) == 0)
-            engineInitMap["LogLevel"] = Urho3D::LOG_ERROR;
-        else if (logLevel.Compare("none", false) == 0 || logLevel.Compare("disabled", false) == 0)
-            engineInitMap["LogLevel"] = Urho3D::LOG_NONE;
-        else
-            LOGWARNING("Erroneous --loglevel: " + logLevelParam.Front() + ". Ignoring.");
-    }
+    // Initialization prints
+    LOGINFO("Installation  " + InstallationDirectory());
+    LOGINFO("Working       " + CurrentWorkingDirectory());
+    LOGINFO("Data          " + UserDataDirectory());
+    LOGINFO("Config        " + config->ConfigFolder());
 
     PrintStartupOptions();
 
@@ -161,12 +102,16 @@ void Framework::Go()
     engineInitMap["Headless"] = headless;
     engineInitMap["WindowTitle"] = "Tundra";
     engineInitMap["LogName"] = "Tundra.log";
+
+    LOGINFO("");
     engine->Initialize(engineInitMap);
 
     // Initialize plugins now
+    LOGINFO("");
+    LOGINFO("Initializing");
     for(uint i = 0; i < modules.Size(); ++i)
     {
-        LOGDEBUG("Initializing module " + modules[i]->Name());
+        LOGINFO("  " + modules[i]->Name());
         modules[i]->Initialize();
     }
 
@@ -180,15 +125,17 @@ void Framework::Go()
     // Delete scenes
     scene.Reset();
 
+    LOGDEBUG("");
+    LOGDEBUG("Uninitializing");
     for(uint i = 0; i < modules.Size(); ++i)
     {
-        LOGDEBUG("Uninitializing module " + modules[i]->Name());
+        LOGDEBUG("  " + modules[i]->Name());
         modules[i]->Uninitialize();
     }
-
+    LOGDEBUG("Unloading");
     for(uint i = 0; i < modules.Size(); ++i)
     {
-        LOGDEBUG("Unloading module " + modules[i]->Name());
+        LOGDEBUG("  " + modules[i]->Name());
         modules[i]->Unload();
     }
 
@@ -464,9 +411,91 @@ void Framework::ProcessStartupOptions()
         LoadStartupOptionsFromFile("tundra.json");
 }
 
+void Framework::ApplyStartupOptions(VariantMap &engineInitMap)
+{
+    // --loglevel controls both shell/console and file logging
+    Vector<String> logLevelParam  = CommandLineParameters("--loglevel");
+    if (logLevelParam.Size() > 1)
+        LOGWARNING("Multiple --loglevel parameters specified! Using " + logLevelParam.Front() + " as the value.");
+    if (logLevelParam.Size() > 0)
+    {
+        String logLevel = logLevelParam.Front();
+        if (logLevel.Compare("debug", false) == 0 || logLevel.Compare("verbose", false) == 0)
+            engineInitMap["LogLevel"] = Urho3D::LOG_DEBUG;
+        else if (logLevel.Compare("warn", false) == 0 || logLevel.Compare("warning", false) == 0)
+            engineInitMap["LogLevel"] = Urho3D::LOG_WARNING;
+        else if (logLevel.Compare("error", false) == 0)
+            engineInitMap["LogLevel"] = Urho3D::LOG_ERROR;
+        else if (logLevel.Compare("none", false) == 0 || logLevel.Compare("disabled", false) == 0)
+            engineInitMap["LogLevel"] = Urho3D::LOG_NONE;
+        else
+            LOGWARNING("Erroneous --loglevel: " + logLevelParam.Front() + ". Ignoring.");
+
+        // Apply the log level now, as there will be logging on Tundra side before engine->Initialize()
+        Log* log = engine->GetSubsystem<Log>();
+        if (log)
+            log->SetLevel(Engine::GetParameter(engineInitMap, "LogLevel", Urho3D::LOG_INFO).GetInt());
+    }
+    // --quiet silences < LOG_ERROR from shell/console but stil writes as per --loglevel to file log
+    if (HasCommandLineParameter("--quiet"))
+    {
+        engineInitMap["LogQuiet"] = true;
+        Log* log = engine->GetSubsystem<Log>();
+        if (log)
+        {
+            log->SetQuiet(true);
+        }
+    }
+
+    // Prepare ConfigAPI data folder
+    Vector<String> configDirs = CommandLineParameters("--configDir");
+    String configDir = "$(USERDATA)/configuration"; // The default configuration goes to "C:\Users\username\AppData\Roaming\Tundra\configuration"
+    if (configDirs.Size() >= 1)
+        configDir = configDirs.Back();
+    if (configDirs.Size() > 1)
+        LOGWARNING("Multiple --configDir parameters specified! Using \"" + configDir + "\" as the configuration directory.");
+    config->PrepareDataFolder(configDir);
+
+    // Set target FPS limits, if specified.
+    ConfigData targetFpsConfigData(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_RENDERING);
+    if (config->HasKey(targetFpsConfigData, "fps target limit"))
+    {
+        int targetFps = config->Read(targetFpsConfigData, "fps target limit").GetInt();
+        if (targetFps >= 0)
+            engine->SetMaxFps(targetFps);
+        else
+            LOGWARNING("Invalid target FPS value " + String(targetFps) + " read from config. Ignoring.");
+    }
+
+    Vector<String> fpsLimitParam = CommandLineParameters("--fpsLimit");
+    if (fpsLimitParam.Size() > 1)
+        LOGWARNING("Multiple --fpslimit parameters specified! Using " + fpsLimitParam.Front() + " as the value.");
+    if (fpsLimitParam.Size() > 0)
+    {
+        int targetFpsLimit = ToInt(fpsLimitParam.Front());
+        if (targetFpsLimit >= 0)
+            engine->SetMaxFps(targetFpsLimit);
+        else
+            LOGWARNING("Erroneous FPS limit given with --fpsLimit: " + fpsLimitParam.Front() + ". Ignoring.");
+    }
+
+    Vector<String> fpsLimitInactiveParam = CommandLineParameters("--fpsLimitWhenInactive");
+    if (fpsLimitInactiveParam.Size() > 1)
+        LOGWARNING("Multiple --fpslimit parameters specified! Using " + fpsLimitInactiveParam.Front() + " as the value.");
+    if (fpsLimitInactiveParam.Size() > 0)
+    {
+        int targetFpsLimit = ToInt(fpsLimitParam.Front());
+        if (targetFpsLimit >= 0)
+            engine->SetMaxInactiveFps(targetFpsLimit);
+        else
+            LOGWARNING("Erroneous FPS limit given with --fpsLimit: " + fpsLimitInactiveParam.Front() + ". Ignoring.");
+    }
+}
+
 void Framework::PrintStartupOptions()
 {
-    LOGINFO("Startup options:");
+    LOGINFO("");
+    LOGINFO("Startup options");
     for (OptionsMap::ConstIterator i = startupOptions.Begin(); i != startupOptions.End(); ++i)
     {
         String option = i->second_.first_;

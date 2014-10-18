@@ -102,7 +102,6 @@ void ConfigAPI::PrepareDataFolder(String configFolder)
         }
     }
     configFolder_ = AddTrailingSlash(configPath);
-    LOGINFO("* Config directory       : " + configFolder_);
 }
 
 String ConfigAPI::GetFilePath(const String &file) const
