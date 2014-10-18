@@ -136,7 +136,7 @@ void Framework::Go()
         LOGWARNING("Multiple --loglevel parameters specified! Using " + logLevelParam.Front() + " as the value.");
     if (logLevelParam.Size() > 0)
     {
-        String logLevel = fpsLimitParam.Front();
+        String logLevel = logLevelParam.Front();
         if (logLevel.Compare("debug", false) == 0 || logLevel.Compare("verbose", false) == 0)
             engineInitMap["LogLevel"] = Urho3D::LOG_DEBUG;
         else if (logLevel.Compare("warn", false) == 0 || logLevel.Compare("warning", false) == 0)
@@ -146,7 +146,7 @@ void Framework::Go()
         else if (logLevel.Compare("none", false) == 0 || logLevel.Compare("disabled", false) == 0)
             engineInitMap["LogLevel"] = Urho3D::LOG_NONE;
         else
-            LOGWARNING("Erroneous FPS limit given with --fpsLimit: " + logLevelParam.Front() + ". Ignoring.");
+            LOGWARNING("Erroneous --loglevel: " + logLevelParam.Front() + ". Ignoring.");
     }
 
     PrintStartupOptions();
