@@ -115,12 +115,6 @@ public:
     /// Returns list of all the config XML filenames specified on command line or within another config XML
     Vector<String> ConfigFiles() const { return configFiles; }
 
-    /// Processes command line options and stores them into a multimap
-    void ProcessStartupOptions();
-
-    /// Prints to console all the used startup options.
-    void PrintStartupOptions();
-
     /// Lookup a filename relative to either the installation or current working directory.
     String LookupRelativePath(String path) const;
 
@@ -167,6 +161,15 @@ public:
     Signal0<void> ExitRequested;
 
 private:
+    /// Processes command line options and stores them into a multimap
+    void ProcessStartupOptions();
+
+    /// Read and apply startup options relevant for Framework/Urho engine.
+    void ApplyStartupOptions(Urho3D::VariantMap &engineInitMap);
+
+    /// Prints to console all the used startup options.
+    void PrintStartupOptions();
+
     /// Adds new command line parameter (option | value pair)
     void AddCommandLineParameter(const String &command, const String &parameter = "");
 

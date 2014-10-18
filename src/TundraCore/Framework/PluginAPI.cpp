@@ -13,6 +13,7 @@
 #include <File.h>
 #include <FileSystem.h>
 #include <Log.h>
+#include <ProcessUtils.h>
 #include <ForEach.h>
 #include <XMLFile.h>
 
@@ -86,7 +87,7 @@ void PluginAPI::LoadPlugin(const String &filename)
         return;
     }
 
-    LOGINFO("Loading plugin " + filename);
+    LOGINFO("  " + filename);
     //owner->App()->SetSplashMessage("Loading plugin " + filename);
 
 #ifdef WIN32
@@ -195,6 +196,9 @@ void PluginAPI::LoadPluginsFromCommandLine()
 {
     if (!owner->HasCommandLineParameter("--plugin"))
         return;
+
+    LOGINFO("");
+    LOGINFO("Loading");
 
     Vector<String> plugins = owner->CommandLineParameters("--plugin");
     foreach(String plugin, plugins)
