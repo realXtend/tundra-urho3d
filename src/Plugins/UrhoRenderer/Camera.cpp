@@ -91,6 +91,7 @@ void Camera::SetActive()
 
     world_.Lock()->Renderer()->SetMainCamera(ParentEntity());
 
+    /// @todo cadaver: probably no bugs with Urho here?
     // Forcibly update the aspect ratio for the new camera. Ogre has a bug that activating a new camera will not automatically re-apply the aspect ratio automatically,
     // if its setAutoAspectRatio was set to true. Therefore, re-apply the aspect ratio when activating a new camera to the main viewport.
     SetAspectRatio(AspectRatio());
@@ -286,17 +287,17 @@ float4x4 Camera::ProjectionMatrix() const
 
 void Camera::SetFromFrustum(const Frustum &f)
 {
-    Placeable* p = static_cast<Placeable*>(placeable_.Get());
+    PlaceablePtr p = placeable_.Lock();
     if (p)
         p->SetWorldTransform(float3x4::LookAt(f.Pos(), f.Pos() + f.Front(), -float3::unitZ, float3::unitY, f.Up()));
     else
         LOGWARNING("Camera::SetFromFrustum: Camera entity has no Placeable, cannot set world transform.");
 
     upVector.Set(f.Up(), AttributeChange::Disconnected);
-    nearPlane.Set(f.NearPlane().Distance(f.Pos()), AttributeChange::Disconnected);
-    farPlane.Set(f.FarPlane().Distance(f.Pos()), AttributeChange::Disconnected);
+    nearPlane.Set(f.NearPlaneDistance(), AttributeChange::Disconnected);
+    farPlane.Set(f.FarPlaneDistance(), AttributeChange::Disconnected);
     // f.horizontalFov is used for calculating the aspect ratio
-    /// @todo verticalFov.Set(RadToDeg(f.verticalFov), AttributeChange::Disconnected);
+    verticalFov.Set(RadToDeg(f.VerticalFov()), AttributeChange::Disconnected);
     aspectRatio.Set(String(f.AspectRatio()), AttributeChange::Default);
 }
 
@@ -306,22 +307,23 @@ Frustum Camera::ToFrustum() const
 
     if (!camera_)
     {
-        LOGERROR("Camera::ToFrustum failed: No Ogre camera initialized to Camera!");
+        LOGERROR("Camera::ToFrustum failed: No Urho camera initialized to Camera!");
         return f;
     }
-    Placeable* p = static_cast<Placeable*>(placeable_.Get());
+    PlaceablePtr p = placeable_.Lock();
     if (!p)
     {
         LOGERROR("Camera::ToFrustum failed: No Placeable set to the camera entity!");
         return f;
     }
 
-    const float horizontalFov = DegToRad(verticalFov.Get());
     f.SetPos(p->WorldPosition());
     f.SetFront(p->WorldOrientation() * -float3::unitZ);
     f.SetUp(upVector.Get().Normalized());
     f.SetViewPlaneDistances(nearPlane.Get(), farPlane.Get());
-    f.SetPerspective(horizontalFov, AspectRatio() * horizontalFov);
+    const float vFov = DegToRad(verticalFov.Get());
+    const float hFov = vFov / AspectRatio();
+    f.SetPerspective(hFov, vFov);
     return f;
 }
 
