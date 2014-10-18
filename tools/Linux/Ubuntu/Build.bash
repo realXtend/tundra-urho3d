@@ -258,7 +258,7 @@ if [ $skip_cmake = false ] ; then
     fi
 
     cmake .. \
-        -DCMAKE_CXX_FLAGS="-Wunused-parameter" \
+        -DCMAKE_CXX_FLAGS="-Wno-unused-parameter -Wno-unused-variable" \
         -DMATHGEOLIB_HOME=$DEPS \
         -DURHO3D_HOME=$DEPS_SRC/urho3d \
         -DKNET_HOME=$DEPS_SRC/kNet \
