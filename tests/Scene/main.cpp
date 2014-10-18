@@ -1,5 +1,6 @@
 
-#include "TestHelpers.h"
+#include "TestRunner.h"
+#include "TestBenchmark.h"
 
 #include "Scene.h"
 #include "Entity.h"
@@ -8,6 +9,8 @@
 
 using namespace Tundra;
 using namespace Tundra::Test;
+
+
 
 TEST_F(Runner, CreateEntity)
 {
@@ -18,25 +21,33 @@ TEST_F(Runner, CreateEntity)
             bool replicated = *iRepl;
             bool temporary = *iTemp;
 
-            Log("Replicated " + String(replicated) + " Temporary " + String(temporary), 4);
+            Tundra::Benchmark::Iterations = 10000;
 
-            EntityPtr ent = scene->CreateEntity(0, StringVector(), AttributeChange::Default,
-                replicated, replicated, temporary);
+            BENCHMARK(PadString(replicated ? "Replicated" : "Local", 10) + PadString(temporary ? " + Temp" : "", 4), 25)
+            {
+                EntityPtr ent = scene->CreateEntity(0, StringVector(), AttributeChange::Default,
+                    replicated, replicated, temporary);
 
-            EXPECT_TRUE(ent);
-            EXPECT_TRUE(ent->ParentScene());
-            EXPECT_TRUE(!ent->Parent());
+                EXPECT_TRUE(ent);
+                EXPECT_TRUE(ent->ParentScene());
+                EXPECT_TRUE(!ent->Parent());
 
-            EXPECT_EQ(ent->IsReplicated(), replicated);
-            EXPECT_EQ(ent->IsUnacked(), replicated); // replicated == server needs to ack entity
-            EXPECT_EQ(ent->IsTemporary(), temporary);
+                EXPECT_EQ(ent->IsReplicated(), replicated);
+                EXPECT_EQ(ent->IsUnacked(), replicated); // replicated == server needs to ack entity
+                EXPECT_EQ(ent->IsTemporary(), temporary);
 
-            EXPECT_EQ(ent->Name(), EmptyString);
-            EXPECT_EQ(ent->Description(), EmptyString);
-            EXPECT_EQ(ent->Group(), EmptyString);
+                EXPECT_EQ(ent->Name(), EmptyString);
+                EXPECT_EQ(ent->Description(), EmptyString);
+                EXPECT_EQ(ent->Group(), EmptyString);
 
-            EXPECT_EQ(ent->NumComponents(), ZeroSizeT);
-            EXPECT_EQ(ent->NumChildren(), ZeroSizeT);
+                EXPECT_EQ(ent->NumComponents(), ZeroSizeT);
+                EXPECT_EQ(ent->NumChildren(), ZeroSizeT);
+
+                BENCHMARK_STEP_END;
+
+                scene->RemoveEntity(ent->Id());
+            }
+            BENCHMARK_END;
         }
     }
 }
@@ -51,32 +62,39 @@ TEST_F(Runner, CreateAttributes)
     {
         String attributeTypeName = *iType;
         u32 attributeTypeId = SceneAPI::AttributeTypeIdForTypeName(attributeTypeName);
-        Log(String(attributeTypeId) + " " + attributeTypeName, 4);
 
-        IAttribute *byName = SceneAPI::CreateAttribute(attributeTypeName, "ByName");
+        Tundra::Benchmark::Iterations = 10000;
 
-        EXPECT_TRUE(byName);
-        EXPECT_TRUE(!byName->Owner());
+        BENCHMARK(PadString(attributeTypeId, 3) + attributeTypeName, 25)
+        {
+            IAttribute *byName = SceneAPI::CreateAttribute(attributeTypeName, "ByName");
 
-        dsName.ResetFill();
-        byName->ToBinary(dsName);
+            EXPECT_TRUE(byName);
+            EXPECT_TRUE(!byName->Owner());
 
-        EXPECT_TRUE(dsName.BytesFilled() > 0);
+            dsName.ResetFill();
+            byName->ToBinary(dsName);
 
-        IAttribute *byId = SceneAPI::CreateAttribute(attributeTypeId, "ById");
+            EXPECT_TRUE(dsName.BytesFilled() > 0);
 
-        EXPECT_TRUE(byId);
-        EXPECT_TRUE(!byId->Owner());
+            IAttribute *byId = SceneAPI::CreateAttribute(attributeTypeId, "ById");
 
-        dsId.ResetFill();
-        byName->ToBinary(dsId);
+            EXPECT_TRUE(byId);
+            EXPECT_TRUE(!byId->Owner());
 
-        EXPECT_TRUE(dsName.BytesFilled() > 0);
+            dsId.ResetFill();
+            byName->ToBinary(dsId);
 
-        EXPECT_EQ(dsName.BytesFilled(), dsId.BytesFilled());
+            EXPECT_TRUE(dsName.BytesFilled() > 0);
 
-        SAFE_DELETE(byName);
-        SAFE_DELETE(byId);
+            EXPECT_EQ(dsName.BytesFilled(), dsId.BytesFilled());
+
+            BENCHMARK_STEP_END;
+
+            SAFE_DELETE(byName);
+            SAFE_DELETE(byId);
+        }
+        BENCHMARK_END;
     }
 }
 
@@ -87,28 +105,35 @@ TEST_F(Runner, CreateComponentsUnparented)
     {
         String componentTypeName = *iType;
         u32 componentTypeId = framework->Scene()->ComponentTypeIdForTypeName(componentTypeName);
-        Log(String(componentTypeId) + " " + componentTypeName, 4);
 
-        EXPECT_TRUE(framework->Scene()->IsComponentTypeRegistered(componentTypeName));
-        EXPECT_TRUE(framework->Scene()->IsComponentFactoryRegistered(componentTypeName));
+        Tundra::Benchmark::Iterations = 10000;
 
-        ComponentPtr byName = framework->Scene()->CreateComponentByName(0, componentTypeName);
+        BENCHMARK(PadString(componentTypeId, 4) + componentTypeName, 25)
+        {
+            EXPECT_TRUE(framework->Scene()->IsComponentTypeRegistered(componentTypeName));
+            EXPECT_TRUE(framework->Scene()->IsComponentFactoryRegistered(componentTypeName));
 
-        EXPECT_TRUE(byName);
-        EXPECT_TRUE(!byName->ParentScene());
-        EXPECT_TRUE(!byName->ParentEntity());
+            ComponentPtr byName = framework->Scene()->CreateComponentByName(0, componentTypeName);
 
-        EXPECT_EQ(byName->TypeId(), componentTypeId);
-        EXPECT_EQ(byName->TypeName(), componentTypeName);
+            EXPECT_TRUE(byName);
+            EXPECT_TRUE(!byName->ParentScene());
+            EXPECT_TRUE(!byName->ParentEntity());
 
-        ComponentPtr byId = framework->Scene()->CreateComponentById(0, componentTypeId);
+            EXPECT_EQ(byName->TypeId(), componentTypeId);
+            EXPECT_EQ(byName->TypeName(), componentTypeName);
 
-        EXPECT_TRUE(byId);
-        EXPECT_TRUE(!byId->ParentScene());
-        EXPECT_TRUE(!byId->ParentEntity());
+            ComponentPtr byId = framework->Scene()->CreateComponentById(0, componentTypeId);
 
-        EXPECT_EQ(byId->TypeId(), componentTypeId);
-        EXPECT_EQ(byId->TypeName(), componentTypeName);
+            EXPECT_TRUE(byId);
+            EXPECT_TRUE(!byId->ParentScene());
+            EXPECT_TRUE(!byId->ParentEntity());
+
+            EXPECT_EQ(byId->TypeId(), componentTypeId);
+            EXPECT_EQ(byId->TypeName(), componentTypeName);
+
+            BENCHMARK_STEP_END;
+        }
+        BENCHMARK_END;
     }
 }
 
@@ -119,7 +144,7 @@ TEST_F(Runner, CreateComponentsParented)
     {
         String componentTypeName = *iType;
         u32 componentTypeId = framework->Scene()->ComponentTypeIdForTypeName(componentTypeName);
-        Log(String(componentTypeId) + " " + componentTypeName, 4);
+        Log(componentTypeName + " " + String(componentTypeId), 1);
 
         for (TrueFalseVec::ConstIterator iRepl = TrueFalse.Begin(); iRepl != TrueFalse.End(); ++iRepl)
         {
@@ -128,38 +153,44 @@ TEST_F(Runner, CreateComponentsParented)
                 bool replicated = *iRepl;
                 bool temporary = *iTemp;
 
-                Log("Replicated " + String(replicated) + " Temporary " + String(temporary), 8);
+                Tundra::Benchmark::Iterations = 10000;
 
-                EntityPtr parent = scene->CreateEntity(0, StringVector(), AttributeChange::Default,
-                    replicated, replicated, temporary);
+                BENCHMARK(PadString(replicated ? "Replicated" : "Local", 10) + PadString(temporary ? " + Temp" : "", 4), 25)
+                {
+                    EntityPtr parent = scene->CreateEntity(0, StringVector(), AttributeChange::Default,
+                        replicated, replicated, temporary);
 
-                ComponentPtr byName = parent->CreateComponent(componentTypeName, "ByName", AttributeChange::Default, replicated);
+                    ComponentPtr byName = parent->CreateComponent(componentTypeName, "ByName", AttributeChange::Default, replicated);
 
-                EXPECT_TRUE(byName);
-                EXPECT_TRUE(byName->ParentScene());
-                EXPECT_TRUE(byName->ParentEntity());
+                    EXPECT_TRUE(byName);
+                    EXPECT_TRUE(byName->ParentScene());
+                    EXPECT_TRUE(byName->ParentEntity());
 
-                EXPECT_EQ(byName->ParentScene(), scene);
-                EXPECT_EQ(byName->ParentEntity(), parent);
+                    EXPECT_EQ(byName->ParentScene(), scene);
+                    EXPECT_EQ(byName->ParentEntity(), parent);
 
-                EXPECT_EQ(byName->TypeId(), componentTypeId);
-                EXPECT_EQ(byName->TypeName(), componentTypeName);
-                EXPECT_EQ(byName->IsTemporary(), temporary);
+                    EXPECT_EQ(byName->TypeId(), componentTypeId);
+                    EXPECT_EQ(byName->TypeName(), componentTypeName);
+                    EXPECT_EQ(byName->IsTemporary(), temporary);
 
-                ComponentPtr byId = parent->CreateComponent(componentTypeId, "ById", AttributeChange::Default, replicated);
+                    ComponentPtr byId = parent->CreateComponent(componentTypeId, "ById", AttributeChange::Default, replicated);
 
-                EXPECT_TRUE(byId);
-                EXPECT_TRUE(byId->ParentScene());
-                EXPECT_TRUE(byId->ParentEntity());
+                    EXPECT_TRUE(byId);
+                    EXPECT_TRUE(byId->ParentScene());
+                    EXPECT_TRUE(byId->ParentEntity());
 
-                EXPECT_EQ(byId->ParentScene(), scene);
-                EXPECT_EQ(byId->ParentEntity(), parent);
+                    EXPECT_EQ(byId->ParentScene(), scene);
+                    EXPECT_EQ(byId->ParentEntity(), parent);
 
-                EXPECT_EQ(byId->TypeId(), componentTypeId);
-                EXPECT_EQ(byId->TypeName(), componentTypeName);
-                EXPECT_EQ(byId->IsTemporary(), temporary);
+                    EXPECT_EQ(byId->TypeId(), componentTypeId);
+                    EXPECT_EQ(byId->TypeName(), componentTypeName);
+                    EXPECT_EQ(byId->IsTemporary(), temporary);
 
-                scene->RemoveEntity(parent->Id());
+                    BENCHMARK_STEP_END;
+
+                    scene->RemoveEntity(parent->Id());
+                }
+                BENCHMARK_END;
             }
         }
     }
