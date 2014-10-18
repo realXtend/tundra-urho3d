@@ -10,15 +10,17 @@
 #include "AssetReference.h"
 #include "EntityReference.h"
 #include "Framework.h"
-#include "Math/Quat.h"
-#include "Math/float2.h"
-#include "Math/float3.h"
-#include "Math/float4.h"
 #include "Math/Transform.h"
 #include "Math/Color.h"
+#include "Math/Point.h"
 #include "DynamicComponent.h"
 #include "Name.h"
 #include "PlaceholderComponent.h"
+
+#include <Math/Quat.h>
+#include <Math/float2.h>
+#include <Math/float3.h>
+#include <Math/float4.h>
 
 #include <Log.h>
 #include <XMLElement.h>
@@ -50,6 +52,7 @@ SceneAPI::SceneAPI(Framework *owner) :
     attributeTypeNames.Push(cAttributeVariantListTypeName);
     attributeTypeNames.Push(cAttributeTransformTypeName);
     attributeTypeNames.Push(cAttributePointTypeName);
+    assert(attributeTypeNames.Size() == cNumAttributeTypes - 1 && "Attribute type registration mismatch!"); // -1 as cAttributeNoneTypeName is not in the list.
 
     // Name and DynamicComponent are always available
     RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Name>()));
@@ -316,6 +319,8 @@ IAttribute* SceneAPI::CreateAttribute(u32 attributeTypeId, const String& newAttr
         attribute = new Attribute<VariantList>(0, newAttributeId.CString()); break;
     case cAttributeTransform:
         attribute = new Attribute<Transform>(0, newAttributeId.CString()); break;
+    case cAttributePoint:
+        attribute = new Attribute<Point>(0, newAttributeId.CString()); break;
     default:
         LOGERRORF("SceneAPI::CreateAttribute: unknown attribute type ID \"%d\" when creating attribute \"%s\")!", attributeTypeId, newAttributeId.CString());
         break;
@@ -406,7 +411,7 @@ void SceneAPI::RegisterPlaceholderComponentType(ComponentDesc desc, AttributeCha
 
     PlaceholderComponentTypeRegistered.Emit(desc.typeId, desc.typeName, change);
 }
- 
+
 void SceneAPI::RegisterComponentType(const String& typeName, IComponent* component)
 {
     if (!component)

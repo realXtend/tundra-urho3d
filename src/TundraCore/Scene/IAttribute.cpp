@@ -813,6 +813,20 @@ template<> void TUNDRACORE_API Attribute<Transform>::Interpolate(IAttribute* sta
     }
 }
 
+template<> void TUNDRACORE_API Attribute<Point>::Interpolate(IAttribute* start, IAttribute* end, float t, AttributeChange::Type change)
+{
+    Attribute<Point>* startPoint = dynamic_cast<Attribute<Point>*>(start);
+    Attribute<Point>* endPoint = dynamic_cast<Attribute<Point>*>(end);
+    if (startPoint && endPoint)
+    {
+        const Point& startValue = startPoint->Get();
+        const Point& endValue = endPoint->Get();
+        Point newValue;
+        newValue.x = (int)(startValue.x * (1.f - t) + endValue.x * t + 0.5f);
+        newValue.y = (int)(startValue.y * (1.f - t) + endValue.y * t + 0.5f);
+        Set(newValue, change);
+    }
+}
 /// @endcond
 
 }

@@ -20,14 +20,16 @@
 #include <Engine/Graphics/Graphics.h>
 #include <Engine/Graphics/Camera.h>
 
+#include <Geometry/Plane.h>
+
 namespace Tundra
 {
 
 Camera::Camera(Urho3D::Context* context, Scene* scene) :
     IComponent(context, scene),
     INIT_ATTRIBUTE_VALUE(upVector, "Up vector", float3::unitY),
-    INIT_ATTRIBUTE_VALUE(nearPlane, "Near plane", 0.1f),
-    INIT_ATTRIBUTE_VALUE(farPlane, "Far plane", 2000.f),
+    INIT_ATTRIBUTE_VALUE(nearPlane, "Near plane", 0.1f), /**< @todo Appending "distance" to the name would be nice */
+    INIT_ATTRIBUTE_VALUE(farPlane, "Far plane", 2000.f), /**< @todo Appending "distance" to the name would be nice */
     INIT_ATTRIBUTE_VALUE(verticalFov, "Vertical FOV", 45.f),
     INIT_ATTRIBUTE_VALUE(aspectRatio, "Aspect ratio", ""),
     camera_(0),
@@ -286,22 +288,22 @@ void Camera::SetFromFrustum(const Frustum &f)
 {
     Placeable* p = static_cast<Placeable*>(placeable_.Get());
     if (p)
-        p->SetWorldTransform(float3x4::LookAt(f.pos, f.pos + f.front, -float3::unitZ, float3::unitY, f.up));
+        p->SetWorldTransform(float3x4::LookAt(f.Pos(), f.Pos() + f.Front(), -float3::unitZ, float3::unitY, f.Up()));
     else
         LOGWARNING("Camera::SetFromFrustum: Camera entity has no Placeable, cannot set world transform.");
 
-    upVector.Set(f.up, AttributeChange::Disconnected);
-    nearPlane.Set(f.nearPlaneDistance, AttributeChange::Disconnected);
-    farPlane.Set(f.farPlaneDistance, AttributeChange::Disconnected);
+    upVector.Set(f.Up(), AttributeChange::Disconnected);
+    nearPlane.Set(f.NearPlane().Distance(f.Pos()), AttributeChange::Disconnected);
+    farPlane.Set(f.FarPlane().Distance(f.Pos()), AttributeChange::Disconnected);
     // f.horizontalFov is used for calculating the aspect ratio
-    verticalFov.Set(RadToDeg(f.verticalFov), AttributeChange::Disconnected);
+    /// @todo verticalFov.Set(RadToDeg(f.verticalFov), AttributeChange::Disconnected);
     aspectRatio.Set(String(f.AspectRatio()), AttributeChange::Default);
 }
 
 Frustum Camera::ToFrustum() const
 {
     Frustum f;
-    f.type = InvalidFrustum;
+
     if (!camera_)
     {
         LOGERROR("Camera::ToFrustum failed: No Ogre camera initialized to Camera!");
@@ -314,14 +316,12 @@ Frustum Camera::ToFrustum() const
         return f;
     }
 
-    f.type = PerspectiveFrustum;
-    f.pos = p->WorldPosition();
-    f.front = p->WorldOrientation() * -float3::unitZ;
-    f.up = upVector.Get().Normalized();
-    f.nearPlaneDistance = nearPlane.Get();
-    f.farPlaneDistance = farPlane.Get();
-    f.horizontalFov = DegToRad(verticalFov.Get());
-    f.verticalFov = AspectRatio() * f.horizontalFov;
+    const float horizontalFov = DegToRad(verticalFov.Get());
+    f.SetPos(p->WorldPosition());
+    f.SetFront(p->WorldOrientation() * -float3::unitZ);
+    f.SetUp(upVector.Get().Normalized());
+    f.SetViewPlaneDistances(nearPlane.Get(), farPlane.Get());
+    f.SetPerspective(horizontalFov, AspectRatio() * horizontalFov);
     return f;
 }
 
