@@ -159,7 +159,7 @@ IAttribute *DynamicComponent::CreateAttribute(const String &typeName, const Stri
     if (!attribute)
     {
         LOGERROR("Failed to create new attribute of type \"" + typeName + "\" with ID \"" + id + "\" to dynamic component \"" + Name() + "\".");
-        return 0;
+        return nullptr;
     }
 
     IComponent::AddAttribute(attribute);

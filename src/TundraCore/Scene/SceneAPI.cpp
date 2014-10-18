@@ -81,7 +81,7 @@ ScenePtr SceneAPI::SceneByName(const String &name) const
 Scene *SceneAPI::MainCameraScene()
 {
     if (!framework || !framework->Renderer())
-        return 0;
+        return nullptr;
     return framework->Renderer()->MainCameraScene();
 
 }

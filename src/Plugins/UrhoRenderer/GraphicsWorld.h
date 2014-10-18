@@ -162,7 +162,7 @@ public:
     /// Renders a simple box-like debug camera.
     void DebugDrawCamera(const float3x4 &t, float size, const Color &clr, bool depthTest = true);
     void DebugDrawCamera(const float3x4 &t, float size, float r, float g, float b, bool depthTest = true) { DebugDrawCamera(t, size, Color(r, g, b), depthTest); } /**< @overload */
-    /// Renders a visualization for a spatial EC_Sound object.
+    /// Renders a visualization for a spatial Sound object.
     void DebugDrawSoundSource(const float3 &soundPos, float soundInnerRadius, float soundOuterRadius, const Color &clr, bool depthTest = true);
     void DebugDrawSoundSource(const float3 &soundPos, float soundInnerRadius, float soundOuterRadius, float r, float g, float b, bool depthTest = true) { DebugDrawSoundSource(soundPos, soundInnerRadius, soundOuterRadius, Color(r, g, b), depthTest); } /**< @overload */
     /// Renders a sphere as geosphere.

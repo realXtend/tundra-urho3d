@@ -8,6 +8,7 @@ namespace Urho3D
     class Scene;
     class Camera;
     class AnimatedModel;
+    class Light;
 }
 
 namespace Tundra

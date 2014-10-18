@@ -49,7 +49,7 @@ IAttribute *PlaceholderComponent::CreateAttribute(const String &typeName, const 
     if (!attribute)
     {
         LOGERROR("Failed to create new attribute of type \"" + typeName + "\" with ID \"" + id + "\" to placeholder component \"" + Name() + "\".");
-        return 0;
+        return nullptr;
     }
 
     attribute->SetName(name);

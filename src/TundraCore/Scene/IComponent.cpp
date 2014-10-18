@@ -102,9 +102,7 @@ Entity* IComponent::ParentEntity() const
 
 Scene* IComponent::ParentScene() const
 {
-    if (!parentEntity)
-        return 0;
-    return parentEntity->ParentScene();
+    return parentEntity ? parentEntity->ParentScene() : nullptr;
 }
 
 void IComponent::SetReplicated(bool enable)
@@ -127,7 +125,7 @@ AttributeVector IComponent::NonEmptyAttributes() const
     return ret;
 }
 
-StringVector IComponent::GetAttributeNames() const
+StringVector IComponent::AttributeNames() const
 {
     StringVector attribute_list;
     for(AttributeVector::ConstIterator iter = attributes.Begin(); iter != attributes.End(); ++iter)
@@ -136,7 +134,7 @@ StringVector IComponent::GetAttributeNames() const
     return attribute_list;
 }
 
-StringVector IComponent::GetAttributeIds() const
+StringVector IComponent::AttributeIds() const
 {
     StringVector attribute_list;
     for(AttributeVector::ConstIterator iter = attributes.Begin(); iter != attributes.End(); ++iter)
@@ -159,7 +157,7 @@ IAttribute* IComponent::AttributeById(const String &id) const
     for(uint i = 0; i < attributes.Size(); ++i)
         if(attributes[i] && attributes[i]->Id().Compare(id, false) == 0)
             return attributes[i];
-    return 0;
+    return nullptr;
 }
 
 IAttribute* IComponent::AttributeByName(const String &name) const
@@ -167,7 +165,7 @@ IAttribute* IComponent::AttributeByName(const String &name) const
     for(uint i = 0; i < attributes.Size(); ++i)
         if(attributes[i] && attributes[i]->Name().Compare(name, false) == 0)
             return attributes[i];
-    return 0;
+    return nullptr;
 }
 
 int IComponent::NumAttributes() const
@@ -198,7 +196,7 @@ IAttribute* IComponent::CreateAttribute(u8 index, u32 typeID, const String& id, 
     if (!SupportsDynamicAttributes())
     {
         LOGERROR("CreateAttribute called on a component that does not support dynamic attributes");
-        return 0;
+        return nullptr;
     }
     
     // If this message should be sent with the default attribute change mode specified in the IComponent,
@@ -209,12 +207,12 @@ IAttribute* IComponent::CreateAttribute(u8 index, u32 typeID, const String& id, 
 
     IAttribute *attribute = SceneAPI::CreateAttribute(typeID, id);
     if(!attribute)
-        return 0;
+        return nullptr;
     
     if (!AddAttribute(attribute, index))
     {
         delete attribute;
-        return 0;
+        return nullptr;
     }
     
     // Trigger scenemanager signal
@@ -349,6 +347,25 @@ Urho3D::XMLElement IComponent::BeginSerialization(Urho3D::XMLFile& doc, Urho3D::
     return comp_element;
 }
 
+void IComponent::DeserializeAttributeFrom(Urho3D::XMLElement& attributeElement, AttributeChange::Type change)
+{
+    IAttribute* attr = 0;
+    String id = attributeElement.GetAttribute("id");
+    // Prefer lookup by ID if it's specified, but fallback to using attribute's human-readable name if ID not defined or erroneous.
+    if (!id.Empty())
+        attr = AttributeById(id);
+    if (!attr)
+    {
+        id = attributeElement.GetAttribute("name");
+        attr = AttributeByName(id);
+    }
+
+    if (!attr)
+        LOGWARNING(TypeName() + "::DeserializeFrom: Could not find attribute \"" + id + "\" specified in the XML element.");
+    else
+        attr->FromString(attributeElement.GetAttribute("value"), change);
+}
+
 void IComponent::WriteAttribute(Urho3D::XMLFile& /*doc*/, Urho3D::XMLElement& comp_element, const String& name, const String& id, const String& value, const String &type) const
 {
     Urho3D::XMLElement attribute_element = comp_element.CreateChild("attribute");
@@ -446,26 +463,11 @@ void IComponent::DeserializeFrom(Urho3D::XMLElement& element, AttributeChange::T
     // For all other elements, use the current value in the attribute (if this is a newly allocated component, the current value
     // is the default value for that attribute specified in ctor. If this is an existing component, the DeserializeFrom can be 
     // thought of applying the given "delta modifications" from the XML element).
-    Urho3D::XMLElement attribute_element = element.GetChild("attribute");
-    while (attribute_element)
+    Urho3D::XMLElement attributeElement = element.GetChild("attribute");
+    while(attributeElement)
     {
-        IAttribute* attr = 0;
-        String id = attribute_element.GetAttribute("id");
-        // Prefer lookup by ID if it's specified, but fallback to using attribute's human-readable name if ID not defined or erroneous.
-        if (!id.Empty())
-            attr = AttributeById(id);
-        if (!attr)
-        {
-            id = attribute_element.GetAttribute("name");
-            attr = AttributeByName(id);
-        }
-        
-        if (!attr)
-            LOGWARNING(TypeName() + "::DeserializeFrom: Could not find attribute \"" + id + "\" specified in the XML element.");
-        else
-            attr->FromString(attribute_element.GetAttribute("value"), change);
-        
-        attribute_element = attribute_element.GetNext("attribute");
+        DeserializeAttributeFrom(attributeElement, change);
+        attributeElement = attributeElement.GetNext("attribute");
     }
 }
 

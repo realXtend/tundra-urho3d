@@ -22,7 +22,9 @@ namespace Tundra
 
     Usage example (we're assuming that you have attribute "Attribute<float> range" as member variable):
     @code
-    EC_Example() : range(this, "example attribute", -1.f);
+    ExampleComponent::ExampleComponent(Urho3D::Context* context, Scene* scene):
+        IComponent(context, scene),
+        range(this, "example attribute", -1.f)
     {
         static AttributeMetadata metadata("this attribute is used as an example", "-128.3", "256.7")
         range.SetMetadata(&metadata);

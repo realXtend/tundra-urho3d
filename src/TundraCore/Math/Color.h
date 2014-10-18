@@ -2,13 +2,17 @@
 
 #pragma once
 
+#include "TundraCoreApi.h"
 #include "Math/float4.h"
+
+#include <Engine/Math/Color.h>
 
 namespace Tundra
 {
 
 /// A 4-component color value, component values are floating-points [0.0, 1.0].
-class Color
+/** Can be used as an entity-component attribute. */
+class TUNDRACORE_API Color
 {
 public:
     float r; ///< Red component
@@ -17,17 +21,11 @@ public:
     float a; ///< Alpha component
 
     /// The default ctor initializes values to 0.f, 0.f, 0.f, 1.f (opaque black).
-    Color() : r(0.0f), g(0.0f), b(0.0f), a(1.0f)
-    {
-    }
-
-    Color(float nr, float ng, float nb) : r(nr), g(ng), b(nb), a(1.0f)
-    {
-    }
-
-    Color(float nr, float ng, float nb, float na) : r(nr), g(ng), b(nb), a(na)
-    {
-    }
+    Color() : r(0.0f), g(0.0f), b(0.0f), a(1.0f) {}
+    /// Alpha is initialized to 1.
+    Color(float nr, float ng, float nb) : r(nr), g(ng), b(nb), a(1.0f) {}
+    Color(float nr, float ng, float nb, float na) : r(nr), g(ng), b(nb), a(na) {}
+    Color(const Urho3D::Color &c) : r(c.r_), g(c.g_), b(c.b_), a(c.a_) {}
 
     bool operator == (const Color& rhs) const
     {
@@ -60,13 +58,18 @@ public:
     static Color FromString(const char *str);
 
     /// Serialize to a string in the format "r,g,b,a"
+    /// @todo "r g b a" instead so that's it's consistent with float2/3/4/Quat etc.
     String SerializeToString() const;
 
     /// Implicit conversion to float4.
-    operator float4() const;
+    operator float4() const { return float4(r, g, b, a); }
+    /// Explicit conversion to float4.
+    float4 ToFloat4() const { return static_cast<float4>(*this); }
 
-    /// Returns Color as a float4.
-    float4 ToFloat4() const;
+    /// Implicit conversion to Urho3D::Color.
+    operator Urho3D::Color() const { return Urho3D::Color(r, g, b, a);  }
+    /// Explicit conversion to Urho3D::Color.
+    Urho3D::Color ToUrhoColor() const { return static_cast<Urho3D::Color>(*this); }
 
     static const Color Red; ///< (1, 0, 0, 1)
     static const Color Green; ///< (0, 1, 0, 1)

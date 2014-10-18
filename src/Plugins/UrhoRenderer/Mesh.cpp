@@ -22,7 +22,7 @@ Mesh::Mesh(Urho3D::Context* context, Scene* scene) :
     INIT_ATTRIBUTE_VALUE(nodeTransformation, "Transform", Transform(float3(0,0,0),float3(0,0,0),float3(1,1,1))),
     INIT_ATTRIBUTE_VALUE(meshRef, "Mesh ref", AssetReference("", "OgreMesh")),
     INIT_ATTRIBUTE_VALUE(skeletonRef, "Skeleton ref", AssetReference("", "OgreSkeleton")),
-    INIT_ATTRIBUTE_VALUE(materialRefs, "Mesh materials", AssetReferenceList("OgreMaterial")), /**< @todo 24.10.2013 Rename name to "Material refs" or similar. */
+    INIT_ATTRIBUTE_VALUE(materialRefs, "Material refs", AssetReferenceList("OgreMaterial")),
     INIT_ATTRIBUTE_VALUE(drawDistance, "Draw distance", 0.0f),
     INIT_ATTRIBUTE_VALUE(castShadows, "Cast shadows", false),
     INIT_ATTRIBUTE_VALUE(useInstancing, "Use instancing", false)
@@ -63,7 +63,26 @@ Mesh::~Mesh()
 Urho3D::Node* Mesh::BoneNode(const String& name) const
 {
     // When a skeletal mesh is created, the bone hierarchy will be under the adjustment node
-    return adjustmentNode_ ? adjustmentNode_->GetChild(name, true) : (Urho3D::Node*)0;
+    return adjustmentNode_ ? adjustmentNode_->GetChild(name, true) : nullptr;
+}
+
+void Mesh::DeserializeFrom(Urho3D::XMLElement& element, AttributeChange::Type change)
+{
+    if (!BeginDeserialization(element))
+        return;
+
+    if (change == AttributeChange::Default)
+        change = updateMode;
+    assert(change != AttributeChange::Default);
+
+    Urho3D::XMLElement attributeElement = element.GetChild("attribute");
+    while(attributeElement)
+    {
+        if (attributeElement.GetAttribute("id").Empty() && attributeElement.GetAttribute("name").Compare("Mesh materials", false) == 0)
+            attributeElement.SetAttribute("name", "Material refs");
+        DeserializeAttributeFrom(attributeElement, change);
+        attributeElement = attributeElement.GetNext("attribute");
+    }
 }
 
 Urho3D::AnimatedModel* Mesh::UrhoMesh() const
@@ -97,7 +116,7 @@ void Mesh::UpdateSignals()
         mesh_->SetModel(GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Model>("Models/Box.mdl"));
     }
 
-    // Make sure we attach to the EC_Placeable if exists.
+    // Make sure we attach to the Placeable if exists.
     AttachMesh();
 }
 

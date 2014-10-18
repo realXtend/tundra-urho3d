@@ -13,12 +13,6 @@
 
 #include <Ptr.h>
 
-namespace kNet
-{
-    class DataSerializer;
-    class DataDeserializer;
-}
-
 namespace Tundra
 {
 

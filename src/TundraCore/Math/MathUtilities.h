@@ -6,13 +6,11 @@
 #include "Math/float3x4.h"
 #include "Math/float4x4.h"
 #include "Math/Quat.h"
-#include "Math/Color.h"
 #include "Geometry/AABB.h"
 
 #include <Matrix3x4.h>
 #include <Matrix4.h>
 #include <Engine/Math/BoundingBox.h>
-#include <Engine/Math/Color.h>
 
 namespace Tundra
 {
@@ -34,9 +32,6 @@ inline Urho3D::Matrix3x4 ToMatrix3(const float3x4& m) { return Urho3D::Matrix3(m
 
 /// Convert float4x4 to Urho3D Matrix4
 inline Urho3D::Matrix4 ToMatrix4(const float4x4& m) { return Urho3D::Matrix3(m.ptr()); }
-
-/// Convert Color to Urho3D Color
-inline Urho3D::Color ToColor(const Color& c) { return Urho3D::Color(c.r, c.g, c.b, c.a); }
 
 /// Convert AABB to Urho3D BoundingBox
 inline Urho3D::BoundingBox ToBoundingBox(const AABB& b) { return Urho3D::BoundingBox(ToVector3(b.minPoint), ToVector3(b.maxPoint)); }
@@ -62,9 +57,6 @@ inline float4x4 ToFloat4x4(const Urho3D::Matrix4& m) { return float4x4(m.m00_, m
 
 /// Convert Urho3D Matrix3x4 to float4x4.
 inline float4x4 ToFloat4x4(const Urho3D::Matrix3x4& m) { return float4x4(m.m00_, m.m01_, m.m02_, m.m03_, m.m10_, m.m11_, m.m12_, m.m13_, m.m20_, m.m21_, m.m22_, m.m23_, 0.0f, 0.0f, 0.0f, 1.0f); }
-
-/// Convert Urho3D Color to Color.
-inline Color ToColor(const Urho3D::Color& c) { return Color(c.r_, c.g_, c.b_, c.a_); }
 
 /// Convert Urho3D BoundingBox to AABB.
 inline AABB ToAABB(const Urho3D::BoundingBox& b) { return AABB(ToFloat3(b.min_), ToFloat3(b.max_)); }

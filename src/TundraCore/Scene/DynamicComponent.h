@@ -9,12 +9,6 @@
 
 #include <Variant.h>
 
-namespace kNet
-{
-    class DataSerializer;
-    class DataDeserializer;
-}
-
 namespace Tundra
 {
 
@@ -36,7 +30,7 @@ struct DeserializeData;
     between those two and use that information to remove attributes that are not in the new list and add those
     that are only in new list and only update those values that are same in both lists.
 
-    Registered by TundraLogicModule.
+    Registered by SceneAPI.
 
     <b>No Static Attributes.</b>
 
@@ -58,18 +52,11 @@ public:
     /// @endcond
     ~DynamicComponent();
 
-    /// IComponent override.
-    void DeserializeFrom(Urho3D::XMLElement& element, AttributeChange::Type change);
+    void DeserializeFrom(Urho3D::XMLElement& element, AttributeChange::Type change) override;
+    void SerializeToBinary(kNet::DataSerializer& dest) const override;
+    void DeserializeFromBinary(kNet::DataDeserializer& source, AttributeChange::Type change) override;
+    bool SupportsDynamicAttributes() const override { return true; }
 
-    /// IComponent override
-    virtual void SerializeToBinary(kNet::DataSerializer& dest) const;
-
-    /// IComponent override
-    virtual void DeserializeFromBinary(kNet::DataDeserializer& source, AttributeChange::Type change);
-
-    /// IComponent override
-    virtual bool SupportsDynamicAttributes() const { return true; }
-    
     /// A factory method that constructs a new attribute of a given the type name.
     /** @param typeName Type name of the attribute, see SceneAPI::AttributeTypes().
         @param id ID of the attribute, case-insensitive.

@@ -7,7 +7,6 @@
 #include "StableHeaders.h"
 #include "Color.h"
 #include "Math/MathFunc.h"
-#include "Math/float4.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,16 +53,4 @@ String Color::SerializeToString() const
     return str;
 }
 
-Color::operator float4() const
-{
-    return float4(r, g, b, a);
 }
-
-float4 Color::ToFloat4() const
-{
-    return (float4)*this;
-}
-
-}
-
- 

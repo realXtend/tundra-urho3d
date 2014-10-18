@@ -231,7 +231,7 @@ void Camera::UpdateSignals()
         SetAspectRatio(AspectRatio());
     }
 
-    // Make sure we attach to the EC_Placeable if exists.
+    // Make sure we attach to the Placeable if exists.
     AttachCamera();
 }
 

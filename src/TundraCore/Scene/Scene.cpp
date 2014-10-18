@@ -1739,7 +1739,7 @@ EntityDescList Scene::SortEntities(const EntityDescList &entities) const
         }
     }
 
-    // Find entities that have parent ref set (EC_Placeble::parentRef parenting).
+    // Find entities that have parent ref set (Placeable::parentRef parenting).
     int childrenStartIndex = sortedDescEntities.Size();
     for (int ei=0; ei < (int)iterDescEntities.Size(); ++ei)
     {

@@ -7,6 +7,7 @@
 #include "Placeable.h"
 #include "Mesh.h"
 #include "Camera.h"
+#include "Light.h"
 #include "IComponentFactory.h"
 #include "SceneAPI.h"
 #include "Entity.h"
@@ -37,6 +38,7 @@ void UrhoRenderer::Load()
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Placeable>()));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Mesh>()));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Camera>()));
+    scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Light>()));
 }
 
 void UrhoRenderer::Initialize()
@@ -74,6 +76,15 @@ void UrhoRenderer::Initialize()
         Camera* cam = entity->CreateComponent<Camera>();
         cam->SetActive();
     }
+    {
+        EntityPtr entity = scene->CreateEntity();
+        entity->SetName("Light");
+        Placeable *pl = entity->CreateComponent<Placeable>();
+        Transform newTransform;
+        newTransform.pos = float3(0.0f, 6.0f, 7.0f);
+        pl->transform.Set(newTransform);
+        entity->CreateComponent<Light>();
+    }
 
     scene->SaveSceneXML("Test.txml", true, true);
 }
@@ -87,12 +98,12 @@ Entity *UrhoRenderer::MainCamera()
 {
     Entity *mainCameraEntity = activeMainCamera.Lock().Get();
     if (!mainCameraEntity)
-        return 0;
+        return nullptr;
 
     if (!mainCameraEntity->ParentScene() || !mainCameraEntity->Component<Camera>())
     {
         SetMainCamera(0);
-        return 0;
+        return nullptr;
     }
     return mainCameraEntity;
 }
@@ -101,7 +112,7 @@ Camera *UrhoRenderer::MainCameraComponent()
 {
     Entity *mainCamera = MainCamera();
     if (!mainCamera)
-        return 0;
+        return nullptr;
     return mainCamera->Component<Camera>().Get();
 }
 
@@ -117,7 +128,7 @@ Scene *UrhoRenderer::MainCameraScene()
     if (scenes.Size() > 0)
         return scenes.Begin()->second_.Get();
 
-    return 0;
+    return nullptr;
 }
 
 void UrhoRenderer::SetMainCamera(Entity *mainCameraEntity)
