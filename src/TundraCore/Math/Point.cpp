@@ -33,5 +33,3 @@ String Point::SerializeToString() const
 }
 
 }
-
- 

@@ -234,6 +234,7 @@ private:
     T value; ///< The value of this Attribute.
 };
 
+/// @todo Would these be nice as an enum within IAttribute, something like IAttribute::Float3TypeId
 static const u32 cAttributeNone = 0;
 static const u32 cAttributeString = 1;
 static const u32 cAttributeInt = 2;
@@ -254,6 +255,7 @@ static const u32 cAttributeTransform = 16;
 static const u32 cAttributePoint = 17;
 static const u32 cNumAttributeTypes = 18;
 
+/// @todo Would these be nicer within IAttribute, something like IAttribute::Float3TypeName
 static const String cAttributeNoneTypeName = "";
 static const String cAttributeStringTypeName = "string";
 static const String cAttributeIntTypeName = "int";

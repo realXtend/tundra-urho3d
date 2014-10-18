@@ -2,13 +2,15 @@
 
 #pragma once
 
-#include "Math/float4.h"
+#include "TundraCoreApi.h"
+#include "CoreTypes.h"
 
 namespace Tundra
 {
 
 /// Two-dimensional integer point.
-class Point
+/** Can be used as an entity-component attribute. */
+class TUNDRACORE_API Point
 {
 public:
     int x;
