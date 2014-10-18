@@ -84,6 +84,9 @@ void Framework::Go()
     LOGINFO("* Working directory      : " + CurrentWorkingDirectory());
     LOGINFO("* User data directory    : " + UserDataDirectory());
 
+    // Urho engine initialization parameters
+    VariantMap engineInitMap;
+
     // Prepare ConfigAPI data folder
     Vector<String> configDirs = CommandLineParameters("--configDir");
     String configDir = "$(USERDATA)/configuration"; // The default configuration goes to "C:\Users\username\AppData\Roaming\Tundra\configuration"
@@ -127,14 +130,31 @@ void Framework::Go()
         else
             LOGWARNING("Erroneous FPS limit given with --fpsLimit: " + fpsLimitInactiveParam.Front() + ". Ignoring.");
     }
-    
+
+    Vector<String> logLevelParam  = CommandLineParameters("--loglevel");
+    if (logLevelParam.Size() > 1)
+        LOGWARNING("Multiple --loglevel parameters specified! Using " + logLevelParam.Front() + " as the value.");
+    if (logLevelParam.Size() > 0)
+    {
+        String logLevel = fpsLimitParam.Front();
+        if (logLevel.Compare("debug", false) == 0 || logLevel.Compare("verbose", false) == 0)
+            engineInitMap["LogLevel"] = Urho3D::LOG_DEBUG;
+        else if (logLevel.Compare("warn", false) == 0 || logLevel.Compare("warning", false) == 0)
+            engineInitMap["LogLevel"] = Urho3D::LOG_WARNING;
+        else if (logLevel.Compare("error", false) == 0)
+            engineInitMap["LogLevel"] = Urho3D::LOG_ERROR;
+        else if (logLevel.Compare("none", false) == 0 || logLevel.Compare("disabled", false) == 0)
+            engineInitMap["LogLevel"] = Urho3D::LOG_NONE;
+        else
+            LOGWARNING("Erroneous FPS limit given with --fpsLimit: " + logLevelParam.Front() + ". Ignoring.");
+    }
+
     PrintStartupOptions();
 
     // Load plugins
     plugin->LoadPluginsFromCommandLine();
 
     // Initialize the Urho3D engine
-    VariantMap engineInitMap;
     engineInitMap["ResourcePaths"] = GetSubsystem<FileSystem>()->GetProgramDir() + "Data";
     engineInitMap["AutoloadPaths"] = "";
     engineInitMap["FullScreen"] = false;
