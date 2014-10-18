@@ -8,7 +8,7 @@
 #include "UrhoRenderer.h"
 #include "Scene/Scene.h"
 #include "Math/MathUtilities.h"
-//
+
 #include <Log.h>
 #include <Engine/Scene/Node.h>
 #include <Engine/Scene/Scene.h>
@@ -26,9 +26,9 @@ Light::Light(Urho3D::Context* context, Scene* scene) :
     INIT_ATTRIBUTE_VALUE(castShadows, "Cast shadows", false),
     INIT_ATTRIBUTE_VALUE(range, "Range", 25),
     INIT_ATTRIBUTE_VALUE(brightness, "Brightness", 1.0f),
-    INIT_ATTRIBUTE_VALUE(constAtten, "Constant atten", 0.0f),
-    INIT_ATTRIBUTE_VALUE(linearAtten, "Linear atten", 0.01f),
-    INIT_ATTRIBUTE_VALUE(quadraAtten, "Quadratic atten", 0.01f),
+    INIT_ATTRIBUTE_VALUE(constAtten, "Constant atten", 0.0f), /**< @todo "Constant attennuation" */
+    INIT_ATTRIBUTE_VALUE(linearAtten, "Linear atten", 0.01f), /**< @todo "Linear attennuation" */
+    INIT_ATTRIBUTE_VALUE(quadraAtten, "Quadratic atten", 0.01f), /**< @todo "Quadratic attennuation" */
     INIT_ATTRIBUTE_VALUE(innerAngle, "Light inner angle", 30.0f),
     INIT_ATTRIBUTE_VALUE(outerAngle, "Light outer angle", 40.0f)
 {
@@ -37,7 +37,7 @@ Light::Light(Urho3D::Context* context, Scene* scene) :
     if(!metadataInitialized)
     {
         typeAttrData.enums[PointLight] = "Point";
-        typeAttrData.enums[SpotLight] = "Spot";
+        typeAttrData.enums[Spotlight] = "Spot";
         typeAttrData.enums[DirectionalLight] = "Directional";
         metadataInitialized = true;
     }
@@ -54,27 +54,25 @@ Light::~Light()
             LOGERROR("Light: World has expired, skipping uninitialization!");
         return;
     }
-    
-    GraphicsWorldPtr world = world_.Lock();
+
     DetachLight();
-    
+
     if (light_)
         light_.Reset();
 }
 
 void Light::UpdateSignals()
 {
+    // If scene is not view-enabled, no further action
+    if (!ViewEnabled())
+        return;
     Entity* parent = ParentEntity();
     if (!parent)
         return;
 
-    // If scene is not view-enabled, no further action
-    if (!ViewEnabled())
-        return;
-
     parent->ComponentAdded.Connect(this, &Light::OnComponentStructureChanged);
     parent->ComponentRemoved.Connect(this, &Light::OnComponentStructureChanged);
-    
+
     if (parent->ParentScene())
         world_ = parent->ParentScene()->Subsystem<GraphicsWorld>();
 
@@ -99,7 +97,7 @@ void Light::AttributesChanged()
         Urho3D::LightType urhoType = Urho3D::LIGHT_DIRECTIONAL;
         if (tundraType == PointLight)
             urhoType = Urho3D::LIGHT_POINT;
-        else if (tundraType == SpotLight)
+        else if (tundraType == Spotlight)
             urhoType = Urho3D::LIGHT_SPOT;
         light_->SetLightType(urhoType);
     }
@@ -127,7 +125,7 @@ void Light::AttachLight()
     Entity *entity = ParentEntity();
     if (!entity)
         return;
-    entity->Component<Placeable>();
+
     placeable_ = entity->Component<Placeable>();
     if (!placeable_)
         return;
@@ -145,7 +143,7 @@ void Light::AttachLight()
     Urho3D::LightType urhoType = Urho3D::LIGHT_DIRECTIONAL;
     if (tundraType == PointLight)
         urhoType = Urho3D::LIGHT_POINT;
-    else if (tundraType == SpotLight)
+    else if (tundraType == Spotlight)
         urhoType = Urho3D::LIGHT_SPOT;
     light_->SetLightType(urhoType);
     light_->SetColor(diffColor.Get());
@@ -172,6 +170,5 @@ void Light::DetachLight()
         placeable_.Reset();
     }
 }
-
 
 }

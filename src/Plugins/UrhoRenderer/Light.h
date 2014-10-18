@@ -80,7 +80,7 @@ public:
     enum Type
     {
         PointLight,
-        SpotLight,
+        Spotlight,
         DirectionalLight,
     };
 
