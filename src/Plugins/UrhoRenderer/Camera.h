@@ -21,8 +21,8 @@ typedef WeakPtr<Placeable> PlaceableWeakPtr;
     <tr>
     <td>
     <h2>Camera</h2>
-    Ogre camera entity component
-    Needs to be attached to a placeable (aka scene node) to be useful.
+    Camera entity component
+    The Camera entity also need a Placeable in order to be useful.
 
     Registered by UrhoRenderer.
 
@@ -167,4 +167,3 @@ private:
 COMPONENT_TYPEDEFS(Camera)
 
 }
-
