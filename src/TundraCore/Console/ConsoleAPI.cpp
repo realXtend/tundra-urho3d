@@ -31,8 +31,7 @@ ConsoleAPI::ConsoleAPI(Framework *framework) :
 {
     SubscribeToEvent(Urho3D::E_CONSOLECOMMAND, HANDLER(ConsoleAPI, HandleConsoleCommand));
 
-    RegisterCommand("help", "Lists all registered commands.")
-        ->Executed.Connect(this, &ConsoleAPI::ListCommands);
+    RegisterCommand("help", "Lists all registered commands.", this, &ConsoleAPI::ListCommands);
 }
 
 void ConsoleAPI::Initialize()
@@ -47,7 +46,7 @@ ConsoleAPI::~ConsoleAPI()
 
 ConsoleAPI::CommandMap::ConstIterator ConsoleAPI::FindCaseInsensitive(const String &name) const
 {
-    for (CommandMap::ConstIterator iter = commands_.Begin(); iter != commands_.End(); ++iter)
+    for (auto iter = commands_.Begin(); iter != commands_.End(); ++iter)
         if (iter->first_.Compare(name, false) == 0)
             return iter;
     return commands_.End();
@@ -55,7 +54,7 @@ ConsoleAPI::CommandMap::ConstIterator ConsoleAPI::FindCaseInsensitive(const Stri
 
 ConsoleAPI::CommandMap::Iterator ConsoleAPI::FindCaseInsensitive(const String &name)
 {
-    for (CommandMap::Iterator iter = commands_.Begin(); iter != commands_.End(); ++iter)
+    for (auto iter = commands_.Begin(); iter != commands_.End(); ++iter)
         if (iter->first_.Compare(name, false) == 0)
             return iter;
     return commands_.End();
@@ -64,14 +63,14 @@ ConsoleAPI::CommandMap::Iterator ConsoleAPI::FindCaseInsensitive(const String &n
 StringVector ConsoleAPI::AvailableCommands() const
 {
     StringVector ret;
-    for(CommandMap::ConstIterator iter = commands_.Begin(); iter != commands_.End(); ++iter)
+    for(auto iter = commands_.Begin(); iter != commands_.End(); ++iter)
         ret.Push(iter->first_);
     return ret;
 }
 
 ConsoleCommand *ConsoleAPI::Command(const String &name) const
 {
-    CommandMap::ConstIterator existing = FindCaseInsensitive(name);
+    auto existing = FindCaseInsensitive(name);
     if (existing != commands_.End())
     {
         LOGWARNING("ConsoleAPI::RegisterCommand: Command '" + name + "' does not exist.");
@@ -87,7 +86,7 @@ ConsoleCommand *ConsoleAPI::RegisterCommand(const String &name, const String &de
         LOGERROR("ConsoleAPI::RegisterCommand: Command name can not be an empty string.");
         return 0;
     }
-    CommandMap::Iterator existing = FindCaseInsensitive(name);
+    auto existing = FindCaseInsensitive(name);
     if (existing != commands_.End())
     {
         LOGWARNING("ConsoleAPI::RegisterCommand: Command '" + name + "' is already registered.");
@@ -101,7 +100,7 @@ ConsoleCommand *ConsoleAPI::RegisterCommand(const String &name, const String &de
 
 void ConsoleAPI::UnregisterCommand(const String &name)
 {
-    CommandMap::Iterator existing = FindCaseInsensitive(name);
+    auto existing = FindCaseInsensitive(name);
     if (existing != commands_.End())
     {
         LOGWARNING("ConsoleAPI: Trying to unregister non-existing command '" + name + "'.");
@@ -117,7 +116,7 @@ void ConsoleAPI::ExecuteCommand(const String &command)
     ParseCommand(command, name, parameters);
     if (name.Empty())
         return;
-    CommandMap::Iterator existing = FindCaseInsensitive(name);
+    auto existing = FindCaseInsensitive(name);
     if (existing == commands_.End())
     {
         LOGERROR("Cannot find a console command '" + name + "'");
@@ -126,19 +125,15 @@ void ConsoleAPI::ExecuteCommand(const String &command)
     existing->second_->Invoke(parameters);
 }
 
-void ParseCommand(String &command, StringVector &parameters)
-{
-}
-
 void ConsoleAPI::ListCommands()
 {
     LOGINFO("Available Console Commands (case-insensitive)");
-    int longestName = 0;
-    for(CommandMap::ConstIterator iter = commands_.Begin(); iter != commands_.End(); ++iter)
+    uint longestName = 0;
+    for(auto iter = commands_.Begin(); iter != commands_.End(); ++iter)
         if (iter->first_.Length() > longestName)
             longestName = iter->first_.Length();
     longestName += 2;
-    for(CommandMap::ConstIterator iter = commands_.Begin(); iter != commands_.End(); ++iter)
+    for(auto iter = commands_.Begin(); iter != commands_.End(); ++iter)
         LOGINFO("  " + PadString(iter->first_, longestName) + iter->second_->Description());
 }
 

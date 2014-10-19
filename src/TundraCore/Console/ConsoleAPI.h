@@ -9,8 +9,8 @@
 #include "TundraCoreApi.h"
 #include "CoreTypes.h"
 #include "FrameworkFwd.h"
-
 #include "Signals.h"
+
 #include <Object.h>
 #include <RefCounted.h>
 
@@ -19,33 +19,33 @@ namespace Tundra
 
 class TUNDRACORE_API ConsoleCommand : public RefCounted
 {
-    public:
-        ConsoleCommand(const String &name, const String &description) :
-            name_(name),
-            description_(description)
-        {
-        }
+public:
+    ConsoleCommand(const String &name, const String &description) :
+        name_(name),
+        description_(description)
+    {
+    }
 
-        /// Listen for execution with parameters.
-        Signal1<const StringVector&> ExecutedWith;
-        /// Listen for executions without parameters.
-        Signal0<void> Executed;
+    /// Listen for execution with parameters.
+    Signal1<const StringVector&> ExecutedWith;
+    /// Listen for executions without parameters.
+    Signal0<void> Executed;
 
-        /// Returns the name of this command.
-        const String &Name() const { return name_; }
+    /// Returns the name of this command.
+    const String &Name() const { return name_; }
 
-        /// Returns the description of this command.
-        const String &Description() const { return description_; }
+    /// Returns the description of this command.
+    const String &Description() const { return description_; }
 
-        void Invoke(const StringVector &parameters)
-        {
-            Executed.Emit();
-            ExecutedWith.Emit(parameters);
-        }
+    void Invoke(const StringVector &parameters)
+    {
+        Executed.Emit();
+        ExecutedWith.Emit(parameters);
+    }
 
-    private:
-        String name_;
-        String description_;
+private:
+    String name_;
+    String description_;
 };
 
 /// Console core API.
@@ -64,9 +64,22 @@ public:
 
     ConsoleCommand *Command(const String &name) const;
 
+    /// Registers a new console command which invokes a member function on the specified receiver object.
+    /** @param name The function name to use for this command.
+        @param desc A help description of this command.
+        @param receiver The object instance that will be invoked when this command is executed.
+        @param memberFunc A function of the @c receiver that is to be called when this command is executed.
+        @see UnregisterCommand */
+    template<class X, class Y>
+    void RegisterCommand(const String &name, const String &desc, Y *receiver, void (X::*memberFunc)())
+    {
+        ConsoleCommand *cmd = RegisterCommand(name, desc);
+        if (cmd)
+            cmd->Executed.Connect(receiver, memberFunc);
+    }
+
     /// Registers a new console command which triggers a signal when executed.
-    /** Use this function from QtScript to implement custom console commands from a script.
-        @param name The function name to use for this command.
+    /** param name The function name to use for this command.
         @param desc A help description of this command.
         @return This function returns a pointer to the newly created ConsoleCommand data structure.
                 Connect the Invoked() signal of this structure to your script slot/function.
