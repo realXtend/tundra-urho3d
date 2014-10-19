@@ -53,6 +53,11 @@ macro (CreateTest testname testsrcs)
 
     # Let cmake/ctest know of the test executable
     AddTest (${testname} ${TARGET_NAME})
+    message(" ")
 endmacro()
 
-add_subdirectory(Scene)
+# Add all subfolders as projects
+GetSubDirectories(TEST_SUBDIRS)
+foreach (TEST_SUBDIR ${TEST_SUBDIRS})
+    add_subdirectory (${TEST_SUBDIR})
+endforeach()

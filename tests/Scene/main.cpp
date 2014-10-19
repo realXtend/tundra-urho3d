@@ -26,20 +26,20 @@ TEST_F(Runner, CreateEntity)
                 EntityPtr ent = scene->CreateEntity(0, StringVector(), AttributeChange::Default,
                     replicated, replicated, temporary);
 
-                EXPECT_TRUE(ent);
-                EXPECT_TRUE(ent->ParentScene());
-                EXPECT_TRUE(!ent->Parent());
+                ASSERT_TRUE(ent);
+                ASSERT_TRUE(ent->ParentScene());
+                ASSERT_TRUE(!ent->Parent());
 
-                EXPECT_EQ(ent->IsReplicated(), replicated);
-                EXPECT_EQ(ent->IsUnacked(), replicated); // replicated == server needs to ack entity
-                EXPECT_EQ(ent->IsTemporary(), temporary);
+                ASSERT_EQ(ent->IsReplicated(), replicated);
+                ASSERT_EQ(ent->IsUnacked(), replicated); // replicated == server needs to ack entity
+                ASSERT_EQ(ent->IsTemporary(), temporary);
 
-                EXPECT_EQ(ent->Name(), EmptyString);
-                EXPECT_EQ(ent->Description(), EmptyString);
-                EXPECT_EQ(ent->Group(), EmptyString);
+                ASSERT_EQ(ent->Name(), EmptyString);
+                ASSERT_EQ(ent->Description(), EmptyString);
+                ASSERT_EQ(ent->Group(), EmptyString);
 
-                EXPECT_EQ(ent->NumComponents(), ZeroSizeT);
-                EXPECT_EQ(ent->NumChildren(), ZeroSizeT);
+                ASSERT_EQ(ent->NumComponents(), ZeroSizeT);
+                ASSERT_EQ(ent->NumChildren(), ZeroSizeT);
 
                 BENCHMARK_STEP_END;
 
@@ -67,25 +67,25 @@ TEST_F(Runner, CreateAttributes)
         {
             IAttribute *byName = SceneAPI::CreateAttribute(attributeTypeName, "ByName");
 
-            EXPECT_TRUE(byName);
-            EXPECT_TRUE(!byName->Owner());
+            ASSERT_TRUE(byName);
+            ASSERT_TRUE(!byName->Owner());
 
             dsName.ResetFill();
             byName->ToBinary(dsName);
 
-            EXPECT_TRUE(dsName.BytesFilled() > 0);
+            ASSERT_TRUE(dsName.BytesFilled() > 0);
 
             IAttribute *byId = SceneAPI::CreateAttribute(attributeTypeId, "ById");
 
-            EXPECT_TRUE(byId);
-            EXPECT_TRUE(!byId->Owner());
+            ASSERT_TRUE(byId);
+            ASSERT_TRUE(!byId->Owner());
 
             dsId.ResetFill();
             byName->ToBinary(dsId);
 
-            EXPECT_TRUE(dsName.BytesFilled() > 0);
+            ASSERT_TRUE(dsName.BytesFilled() > 0);
 
-            EXPECT_EQ(dsName.BytesFilled(), dsId.BytesFilled());
+            ASSERT_EQ(dsName.BytesFilled(), dsId.BytesFilled());
 
             BENCHMARK_STEP_END;
 
@@ -108,26 +108,26 @@ TEST_F(Runner, CreateComponentsUnparented)
 
         BENCHMARK(PadString(componentTypeId, 4) + componentTypeName, 25)
         {
-            EXPECT_TRUE(framework->Scene()->IsComponentTypeRegistered(componentTypeName));
-            EXPECT_TRUE(framework->Scene()->IsComponentFactoryRegistered(componentTypeName));
+            ASSERT_TRUE(framework->Scene()->IsComponentTypeRegistered(componentTypeName));
+            ASSERT_TRUE(framework->Scene()->IsComponentFactoryRegistered(componentTypeName));
 
             ComponentPtr byName = framework->Scene()->CreateComponentByName(0, componentTypeName);
 
-            EXPECT_TRUE(byName);
-            EXPECT_TRUE(!byName->ParentScene());
-            EXPECT_TRUE(!byName->ParentEntity());
+            ASSERT_TRUE(byName);
+            ASSERT_TRUE(!byName->ParentScene());
+            ASSERT_TRUE(!byName->ParentEntity());
 
-            EXPECT_EQ(byName->TypeId(), componentTypeId);
-            EXPECT_EQ(byName->TypeName(), componentTypeName);
+            ASSERT_EQ(byName->TypeId(), componentTypeId);
+            ASSERT_EQ(byName->TypeName(), componentTypeName);
 
             ComponentPtr byId = framework->Scene()->CreateComponentById(0, componentTypeId);
 
-            EXPECT_TRUE(byId);
-            EXPECT_TRUE(!byId->ParentScene());
-            EXPECT_TRUE(!byId->ParentEntity());
+            ASSERT_TRUE(byId);
+            ASSERT_TRUE(!byId->ParentScene());
+            ASSERT_TRUE(!byId->ParentEntity());
 
-            EXPECT_EQ(byId->TypeId(), componentTypeId);
-            EXPECT_EQ(byId->TypeName(), componentTypeName);
+            ASSERT_EQ(byId->TypeId(), componentTypeId);
+            ASSERT_EQ(byId->TypeName(), componentTypeName);
 
             BENCHMARK_STEP_END;
         }
@@ -160,29 +160,29 @@ TEST_F(Runner, CreateComponentsParented)
 
                     ComponentPtr byName = parent->CreateComponent(componentTypeName, "ByName", AttributeChange::Default, replicated);
 
-                    EXPECT_TRUE(byName);
-                    EXPECT_TRUE(byName->ParentScene());
-                    EXPECT_TRUE(byName->ParentEntity());
+                    ASSERT_TRUE(byName);
+                    ASSERT_TRUE(byName->ParentScene());
+                    ASSERT_TRUE(byName->ParentEntity());
 
-                    EXPECT_EQ(byName->ParentScene(), scene);
-                    EXPECT_EQ(byName->ParentEntity(), parent);
+                    ASSERT_EQ(byName->ParentScene(), scene);
+                    ASSERT_EQ(byName->ParentEntity(), parent);
 
-                    EXPECT_EQ(byName->TypeId(), componentTypeId);
-                    EXPECT_EQ(byName->TypeName(), componentTypeName);
-                    EXPECT_EQ(byName->IsTemporary(), temporary);
+                    ASSERT_EQ(byName->TypeId(), componentTypeId);
+                    ASSERT_EQ(byName->TypeName(), componentTypeName);
+                    ASSERT_EQ(byName->IsTemporary(), temporary);
 
                     ComponentPtr byId = parent->CreateComponent(componentTypeId, "ById", AttributeChange::Default, replicated);
 
-                    EXPECT_TRUE(byId);
-                    EXPECT_TRUE(byId->ParentScene());
-                    EXPECT_TRUE(byId->ParentEntity());
+                    ASSERT_TRUE(byId);
+                    ASSERT_TRUE(byId->ParentScene());
+                    ASSERT_TRUE(byId->ParentEntity());
 
-                    EXPECT_EQ(byId->ParentScene(), scene);
-                    EXPECT_EQ(byId->ParentEntity(), parent);
+                    ASSERT_EQ(byId->ParentScene(), scene);
+                    ASSERT_EQ(byId->ParentEntity(), parent);
 
-                    EXPECT_EQ(byId->TypeId(), componentTypeId);
-                    EXPECT_EQ(byId->TypeName(), componentTypeName);
-                    EXPECT_EQ(byId->IsTemporary(), temporary);
+                    ASSERT_EQ(byId->TypeId(), componentTypeId);
+                    ASSERT_EQ(byId->TypeName(), componentTypeName);
+                    ASSERT_EQ(byId->IsTemporary(), temporary);
 
                     BENCHMARK_STEP_END;
 
