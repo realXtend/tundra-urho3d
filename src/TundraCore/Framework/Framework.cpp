@@ -80,12 +80,6 @@ Framework::~Framework()
 
 void Framework::Go()
 {
-    console->Initialize();
-    console->RegisterCommand("plugins", "Prints all currently loaded plugins.")
-        ->Executed.Connect(plugin.Get(), &PluginAPI::ListPlugins);
-    console->RegisterCommand("exit", "Shuts down gracefully.")
-        ->Executed.Connect(this, &Framework::Exit);
-
     // Urho engine initialization parameters
     VariantMap engineInitMap;
 
@@ -113,6 +107,14 @@ void Framework::Go()
 
     LOGINFO("");
     engine->Initialize(engineInitMap);
+
+    // Initialize core APIs
+    console->Initialize();
+
+    console->RegisterCommand("plugins", "Prints all currently loaded plugins.")
+        ->Executed.Connect(plugin.Get(), &PluginAPI::ListPlugins);
+    console->RegisterCommand("exit", "Shuts down gracefully.")
+        ->Executed.Connect(this, &Framework::Exit);
 
     // Initialize plugins now
     LOGINFO("");
