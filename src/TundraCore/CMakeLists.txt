@@ -14,6 +14,7 @@ AddSourceFolder(JSON)
 AddSourceFolder(Signals)
 AddSourceFolder(Scene)
 AddSourceFolder(Math)
+AddSourceFolder(Console)
 
 set(SOURCE_FILES ${CPP_FILES} ${H_FILES})
 

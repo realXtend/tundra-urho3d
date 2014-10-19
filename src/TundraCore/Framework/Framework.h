@@ -131,6 +131,9 @@ public:
     /// Returns core API Scene object.
     SceneAPI* Scene() const;
 
+    /// Return core API Console object.
+    ConsoleAPI* Console() const;
+
     /// Return the Urho3D Engine object.
     Urho3D::Engine* Engine() const;
 
@@ -189,6 +192,8 @@ private:
     SharedPtr<ConfigAPI> config;
     /// SceneAPI
     SharedPtr<SceneAPI> scene;
+    /// ConsoleAPI
+    SharedPtr<ConsoleAPI> console;
     /// Stores all command line parameters and expanded options specified in the Config XML files, except for the config file(s) themselves.
     OptionsMap startupOptions;
     /// Stores config XML filenames

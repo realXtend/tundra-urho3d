@@ -2,6 +2,7 @@
 
 #include "StableHeaders.h"
 #include "PluginAPI.h"
+#include "ConsoleAPI.h"
 #include "Framework.h"
 
 #ifdef WIN32
@@ -141,7 +142,7 @@ void PluginAPI::UnloadPlugins()
     plugins.Clear();
 }
 
-void PluginAPI::ListPlugins() const
+void PluginAPI::ListPlugins()
 {
     LOGINFO("Loaded plugins:");
     foreach(const Plugin &plugin, plugins)
