@@ -8,6 +8,7 @@
 #include "Application.h"
 #include "SceneAPI.h"
 #include "Scene.h"
+#include "CoreStringUtils.h"
 
 #include "Math/MathFunc.h"
 
@@ -74,30 +75,6 @@ namespace Tundra
             void LogError(const String &msg, int pad = 0)
             {
                 LogLine(msg, pad, false);
-            }
-
-            template <typename T>
-            String PadString(T val, int pad)
-            {
-                return PadString(String(val), pad);
-            }
-
-            String PadString(String str, int pad)
-            {
-                if (pad == 0)
-                    return str;
-                int orig = pad;
-                int to = Abs(pad);
-                pad = Abs(pad);
-                while (pad > 0 && str.Length() < to)
-                {
-                    if (orig < 0)
-                        str = " " + str;
-                    else
-                        str += " ";
-                    pad--;
-                }
-                return str;
             }
 
         protected:

@@ -5,6 +5,7 @@
 
 #include "CoreTypes.h"
 #include "CoreDefines.h"
+#include "CoreStringUtils.h"
 
 #include "Time/Clock.h"
 
