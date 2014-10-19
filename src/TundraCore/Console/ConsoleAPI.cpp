@@ -132,14 +132,14 @@ void ParseCommand(String &command, StringVector &parameters)
 
 void ConsoleAPI::ListCommands()
 {
-    LOGINFO("Available console commands (case-insensitive):");
+    LOGINFO("Available Console Commands (case-insensitive)");
     int longestName = 0;
     for(CommandMap::ConstIterator iter = commands_.Begin(); iter != commands_.End(); ++iter)
         if (iter->first_.Length() > longestName)
             longestName = iter->first_.Length();
     longestName += 2;
     for(CommandMap::ConstIterator iter = commands_.Begin(); iter != commands_.End(); ++iter)
-        LOGINFO(PadString(iter->first_, longestName) + iter->second_->Description());
+        LOGINFO("  " + PadString(iter->first_, longestName) + iter->second_->Description());
 }
 
 void ConsoleAPI::HandleConsoleCommand(StringHash eventType, Urho3D::VariantMap &eventData)
