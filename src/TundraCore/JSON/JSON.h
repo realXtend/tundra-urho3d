@@ -9,6 +9,14 @@
 #include <Str.h>
 #include <Vector.h>
 
+#ifdef WIN32
+// Fix JSONValue::GetObjectW
+// unresolved external symbol
+#ifdef GetObject
+#undef GetObject
+#endif
+#endif
+
 namespace Tundra
 {
 
