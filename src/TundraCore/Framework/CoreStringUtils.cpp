@@ -71,7 +71,7 @@ String PadString(String str, int pad)
     if (pad == 0)
         return str;
     int orig = pad;
-    int to = Abs(pad);
+    uint to = Abs(pad);
     pad = Abs(pad);
     while (pad > 0 && str.Length() < to)
     {

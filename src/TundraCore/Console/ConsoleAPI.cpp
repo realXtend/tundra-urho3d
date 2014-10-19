@@ -126,14 +126,10 @@ void ConsoleAPI::ExecuteCommand(const String &command)
     existing->second_->Invoke(parameters);
 }
 
-void ParseCommand(String &command, StringVector &parameters)
-{
-}
-
 void ConsoleAPI::ListCommands()
 {
     LOGINFO("Available Console Commands (case-insensitive)");
-    int longestName = 0;
+    uint longestName = 0;
     for(CommandMap::ConstIterator iter = commands_.Begin(); iter != commands_.End(); ++iter)
         if (iter->first_.Length() > longestName)
             longestName = iter->first_.Length();
@@ -142,7 +138,7 @@ void ConsoleAPI::ListCommands()
         LOGINFO("  " + PadString(iter->first_, longestName) + iter->second_->Description());
 }
 
-void ConsoleAPI::HandleConsoleCommand(StringHash eventType, Urho3D::VariantMap &eventData)
+void ConsoleAPI::HandleConsoleCommand(StringHash /*eventType*/, Urho3D::VariantMap &eventData)
 {
     ExecuteCommand(eventData[Urho3D::ConsoleCommand::P_COMMAND].GetString());
 }
@@ -155,7 +151,7 @@ void ConsoleAPI::OnUpdate(float /*frametime*/)
         ExecuteCommand(input);
 }
 
-void SetConsoleVisible(bool visible)
+void SetConsoleVisible(bool /*visible*/)
 {
     /// @todo GUI console
 }
