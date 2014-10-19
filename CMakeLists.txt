@@ -200,6 +200,7 @@ macro(UseTundraCore)
         ${CMAKE_SOURCE_DIR}/src/TundraCore/Framework
         ${CMAKE_SOURCE_DIR}/src/TundraCore/JSON
         ${CMAKE_SOURCE_DIR}/src/TundraCore/Scene
+        ${CMAKE_SOURCE_DIR}/src/TundraCore/Console
         ${CMAKE_SOURCE_DIR}/src/TundraCore/Signals
     )
     # Due to automatic CMake dependency transfer, we will need kNet and MathGeoLib link directories

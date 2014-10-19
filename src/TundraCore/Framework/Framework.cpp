@@ -7,6 +7,7 @@
 #include "PluginAPI.h"
 #include "ConfigAPI.h"
 #include "SceneAPI.h"
+#include "ConsoleAPI.h"
 #include "TundraVersionInfo.h"
 
 #include <Context.h>
@@ -65,6 +66,7 @@ Framework::Framework(Context* ctx) :
     // Timestamps clutter the log. Disable for now
     GetSubsystem<Log>()->SetTimeStamp(false);
 
+    console = new ConsoleAPI(this);
     frame = new FrameAPI(this);
     plugin = new PluginAPI(this);
     config = new ConfigAPI(this);
@@ -115,6 +117,14 @@ void Framework::Initialize()
 
     LOGINFO("");
     engine->Initialize(engineInitMap);
+
+    // Initialize core APIs
+    console->Initialize();
+
+    console->RegisterCommand("plugins", "Prints all currently loaded plugins.")
+        ->Executed.Connect(plugin.Get(), &PluginAPI::ListPlugins);
+    console->RegisterCommand("exit", "Shuts down gracefully.")
+        ->Executed.Connect(this, &Framework::Exit);
 
     // Initialize plugins now
     LOGINFO("");
@@ -248,6 +258,11 @@ PluginAPI* Framework::Plugin() const
 SceneAPI* Framework::Scene() const
 {
     return scene;
+}
+
+ConsoleAPI* Framework::Console() const
+{
+    return console;
 }
 
 Engine* Framework::Engine() const

@@ -17,4 +17,12 @@ String TUNDRACORE_API ReadUtf8String(kNet::DataDeserializer &dd);
 /** The maximum allowed length for the string is 65535 characters. */
 void TUNDRACORE_API WriteUtf8String(kNet::DataSerializer &ds, const String &str);
 
+/// Parses a input string to a command and optional parameters.
+/** Works on both forms of: "MyFunction(one, to, three)" and "MyFunction one to three" */
+void TUNDRACORE_API ParseCommand(String input, String &command, StringVector &parameters);
+
+/// Pad a string with whitespace.
+/** Negative @pad will insert the whitespace to the left, prositive to the right. */
+String TUNDRACORE_API PadString(String str, int pad);
+
 }
