@@ -10,6 +10,15 @@ namespace kNet { class DataSerializer; class DataDeserializer; }
 namespace Tundra
 {
 
+/// Can be used as a custom comparator in std::map or similar when wanting case-insensitive comparison.
+struct TUNDRACORE_API StringCompareCaseInsensitive
+{
+    bool operator()(const String &a, const String &b) const
+    {
+        return a.Compare(b, false) < 0;
+    }
+};
+
 /// Reads an UTF-8 encoded String from a data stream
 String TUNDRACORE_API ReadUtf8String(kNet::DataDeserializer &dd);
 
@@ -22,7 +31,7 @@ void TUNDRACORE_API WriteUtf8String(kNet::DataSerializer &ds, const String &str)
 void TUNDRACORE_API ParseCommand(String input, String &command, StringVector &parameters);
 
 /// Pad a string with whitespace.
-/** Negative @pad will insert the whitespace to the left, prositive to the right. */
+/** Negative @pad will insert the whitespace to the left, positive to the right. */
 String TUNDRACORE_API PadString(String str, int pad);
 
 }
