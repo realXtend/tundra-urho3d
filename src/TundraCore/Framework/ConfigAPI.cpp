@@ -35,8 +35,9 @@ VariantType GetVariantTypeFromString(const String& in)
     }    
     else
         return VAR_STRING;
-
 }
+
+// ConfigFile
 
 void ConfigFile::Load(Context* ctx, const String& fileName)
 {
@@ -80,6 +81,8 @@ void ConfigFile::Save(Context* ctx, const String& fileName)
         file->WriteLine("");
     }
 }
+
+// ConfigAPI
 
 ConfigAPI::ConfigAPI(Framework *framework) :
     Object(framework->GetContext()),
