@@ -5,7 +5,7 @@ set URHO3D_HOME=%TUNDRA_DEP_PATH%\urho3d
 set MATHGEOLIB_HOME=%TUNDRA_DEP_PATH%\MathGeoLib\build
 set KNET_HOME=%TUNDRA_DEP_PATH%\kNet
 cd src\android
-cmake -G "Unix Makefiles" -DANDROID=1 -DCMAKE_TOOLCHAIN_FILE=%TUNDRA_DIR%\cmake\android.toolchain.cmake ../..
+cmake -G "Unix Makefiles" -DANDROID=1 -DENABLE_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=%TUNDRA_DIR%\cmake\android.toolchain.cmake ../..
 if ERRORLEVEL 0 goto Success
 goto End
 :Success
