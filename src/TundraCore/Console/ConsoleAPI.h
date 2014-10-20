@@ -116,6 +116,23 @@ public:
     /// Clears UI console.
     void ClearConsole();
 
+    /// Prints a message to the console log and stdout.
+    /** @param message The text message to print. */
+    void Print(const String &message);
+
+    /// Sets the current log level.
+    /// @param level One of "error, warning, info, debug".
+    /// @note This function calls SetEnabledLogChannels with one of the above four predefined combinations. It is possible to further customize the set of 
+    /// active log channels by directly calling the SetEnabledLogChannels function with an appropriate bitset.
+    void SetLogLevel(const String &level);
+
+    /// Sets the new currently enabled log channels. Messages at the given channels will be printed, and others channels will be disabled.
+    void SetEnabledLogChannels(u32 newChannels);
+    /// Returns true if the given log channel is enabled.
+    bool IsLogChannelEnabled(u32 logChannel) const;
+    /// Returns the bitset of currently enabled log channels.
+    u32 EnabledLogChannels() const;
+
 private:
     friend class Framework;
 
@@ -138,6 +155,7 @@ private:
 
     Framework *framework_;
     CommandMap commands_;
+    u32 enabledLogChannels; ///< Stores the set of currently active log channels.
 };
 
 }

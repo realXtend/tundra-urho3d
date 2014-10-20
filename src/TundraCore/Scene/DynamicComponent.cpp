@@ -6,11 +6,11 @@
 #include "SceneAPI.h"
 #include "Entity.h"
 #include "Scene.h"
+#include "LoggingFunctions.h"
 
 #include <kNet/DataSerializer.h>
 #include <kNet/DataDeserializer.h>
 
-#include <Log.h>
 #include <XMLFile.h>
 #include <Sort.h>
 
@@ -158,7 +158,7 @@ IAttribute *DynamicComponent::CreateAttribute(const String &typeName, const Stri
     IAttribute *attribute = SceneAPI::CreateAttribute(typeName, id);
     if (!attribute)
     {
-        LOGERROR("Failed to create new attribute of type \"" + typeName + "\" with ID \"" + id + "\" to dynamic component \"" + Name() + "\".");
+        LogError("Failed to create new attribute of type \"" + typeName + "\" with ID \"" + id + "\" to dynamic component \"" + Name() + "\".");
         return nullptr;
     }
 

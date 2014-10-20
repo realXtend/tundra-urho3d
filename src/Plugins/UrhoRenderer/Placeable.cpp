@@ -13,8 +13,8 @@
 #include "Math/float3x3.h"
 #include "Math/float3x4.h"
 #include "Math/MathUtilities.h"
+#include "LoggingFunctions.h"
 
-#include <Log.h>
 #include <Engine/Scene/Scene.h>
 #include <Engine/Scene/Node.h>
 #include <ForEach.h>
@@ -52,7 +52,7 @@ Placeable::~Placeable()
     if (world_.Expired())
     {
         if (sceneNode_)
-            LOGERROR("Placeable: World has expired, skipping uninitialization!");
+            LogError("Placeable: World has expired, skipping uninitialization!");
         return;
     }
 
@@ -164,9 +164,9 @@ void Placeable::SetWorldTransform(const float3x4 &tm)
     if (!success)
     {
         if (parentEntity)
-            LOGERROR("Parent for entity " + parentEntity->ToString() + " has an invalid world transform!");
+            LogError("Parent for entity " + parentEntity->ToString() + " has an invalid world transform!");
         else
-            LOGERROR("Parent for a detached entity has an invalid world transform!");
+            LogError("Parent for a detached entity has an invalid world transform!");
         return;
     }
         
@@ -288,7 +288,7 @@ bool Placeable::IsGrandparentOf(Entity *entity) const
 {
     if (!entity)
     {
-        LOGERROR("Placeable::IsGrandParentOf: called with null pointer.");
+        LogError("Placeable::IsGrandParentOf: called with null pointer.");
         return false;
     }
     if (!ParentEntity())
@@ -311,7 +311,7 @@ bool Placeable::IsGrandchildOf(Entity *entity) const
 {
     if (!entity)
     {
-        LOGERROR("Placeable::IsGrandChildOf: called with null pointer.");
+        LogError("Placeable::IsGrandChildOf: called with null pointer.");
         return false;
     }
     if (!ParentEntity())
@@ -386,7 +386,7 @@ void Placeable::AttributesChanged()
         if (orientation.IsFinite())
             sceneNode_->SetRotation(ToQuaternion(orientation));
         else
-            ::LOGERROR("Placeable: transform attribute changed, but orientation not valid!");
+            LogError("Placeable: transform attribute changed, but orientation not valid!");
 
         sceneNode_->SetScale(ToVector3(trans.scale));
 
@@ -411,7 +411,7 @@ void Placeable::AttachNode()
     
     if (world_.Expired())
     {
-        LOGERROR("Placeable::AttachNode: No GraphicsWorld available to call this function!");
+        LogError("Placeable::AttachNode: No GraphicsWorld available to call this function!");
         return;
     }
     GraphicsWorldPtr world = world_.Lock();
@@ -487,7 +487,7 @@ void Placeable::AttachNode()
                     {
                         // Could not find the bone. Connect to the parent mesh MeshChanged signal to wait for the proper mesh to be assigned.
                         if (ViewEnabled())
-                            LOGWARNING("Placeable::AttachNode: Could not find bone " + boneName + " to attach to, attaching to the parent scene node instead.");
+                            LogWarning("Placeable::AttachNode: Could not find bone " + boneName + " to attach to, attaching to the parent scene node instead.");
                         parentMesh->MeshChanged.Connect(this, &Placeable::OnParentMeshChanged);
                         // While we wait, fall through to attaching to the scene node instead
                     }
@@ -509,7 +509,7 @@ void Placeable::AttachNode()
                 {
                     if (parentCheck == this)
                     {
-                        LOGWARNING("Placeable::AttachNode: Cyclic scene node parenting attempt detected! Parenting to the scene root node instead.");
+                        LogWarning("Placeable::AttachNode: Cyclic scene node parenting attempt detected! Parenting to the scene root node instead.");
                         sceneNode_->SetParent(root_node);
                         attached_ = true;
                         return;
@@ -552,7 +552,7 @@ void Placeable::DetachNode()
 
     if (world_.Expired())
     {
-        LOGERROR("Placeable::DetachNode: No GraphicsWorld available to call this function!");
+        LogError("Placeable::DetachNode: No GraphicsWorld available to call this function!");
         return;
     }
 

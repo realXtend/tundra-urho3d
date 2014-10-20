@@ -152,6 +152,9 @@ public:
     /// Exit request signal.
     Signal0<void> ExitRequested;
 
+    /// Return the static Framework instance. Only to be used internally.
+    static Framework* Instance();
+
 private:
     /// Processes command line options and stores them into a multimap
     void ProcessStartupOptions();

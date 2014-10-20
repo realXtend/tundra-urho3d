@@ -10,6 +10,7 @@
 #include "Framework.h"
 #include "FrameAPI.h"
 #include "CoreStringUtils.h"
+#include "LoggingFunctions.h"
 
 #include <CoreEvents.h>
 #include <EngineEvents.h>
@@ -27,7 +28,8 @@ namespace Tundra
 
 ConsoleAPI::ConsoleAPI(Framework *framework) :
     Object(framework->GetContext()),
-    framework_(framework)
+    framework_(framework),
+    enabledLogChannels(LogLevelErrorWarnInfo)
 {
     SubscribeToEvent(Urho3D::E_CONSOLECOMMAND, HANDLER(ConsoleAPI, HandleConsoleCommand));
 
@@ -73,7 +75,7 @@ ConsoleCommand *ConsoleAPI::Command(const String &name) const
     auto existing = FindCaseInsensitive(name);
     if (existing != commands_.End())
     {
-        LOGWARNING("ConsoleAPI::RegisterCommand: Command '" + name + "' does not exist.");
+        LogWarning("ConsoleAPI::RegisterCommand: Command '" + name + "' does not exist.");
         return 0;
     }
     return existing->second_.Get();
@@ -83,13 +85,13 @@ ConsoleCommand *ConsoleAPI::RegisterCommand(const String &name, const String &de
 {
     if (name.Empty())
     {
-        LOGERROR("ConsoleAPI::RegisterCommand: Command name can not be an empty string.");
+        LogError("ConsoleAPI::RegisterCommand: Command name can not be an empty string.");
         return 0;
     }
     auto existing = FindCaseInsensitive(name);
     if (existing != commands_.End())
     {
-        LOGWARNING("ConsoleAPI::RegisterCommand: Command '" + name + "' is already registered.");
+        LogWarning("ConsoleAPI::RegisterCommand: Command '" + name + "' is already registered.");
         return existing->second_.Get();
     }
 
@@ -103,7 +105,7 @@ void ConsoleAPI::UnregisterCommand(const String &name)
     auto existing = FindCaseInsensitive(name);
     if (existing != commands_.End())
     {
-        LOGWARNING("ConsoleAPI: Trying to unregister non-existing command '" + name + "'.");
+        LogWarning("ConsoleAPI: Trying to unregister non-existing command '" + name + "'.");
         return;
     }
     commands_.Erase(existing);
@@ -119,7 +121,7 @@ void ConsoleAPI::ExecuteCommand(const String &command)
     auto existing = FindCaseInsensitive(name);
     if (existing == commands_.End())
     {
-        LOGERROR("Cannot find a console command '" + name + "'");
+        LogError("Cannot find a console command '" + name + "'");
         return;
     }
     existing->second_->Invoke(parameters);
@@ -127,14 +129,14 @@ void ConsoleAPI::ExecuteCommand(const String &command)
 
 void ConsoleAPI::ListCommands()
 {
-    LOGINFO("Available Console Commands (case-insensitive)");
+    LogInfo("Available Console Commands (case-insensitive)");
     uint longestName = 0;
     for(auto iter = commands_.Begin(); iter != commands_.End(); ++iter)
         if (iter->first_.Length() > longestName)
             longestName = iter->first_.Length();
     longestName += 2;
     for(auto iter = commands_.Begin(); iter != commands_.End(); ++iter)
-        LOGINFO("  " + PadString(iter->first_, longestName) + iter->second_->Description());
+        LogInfo("  " + PadString(iter->first_, longestName) + iter->second_->Description());
 }
 
 void ConsoleAPI::HandleConsoleCommand(StringHash eventType, Urho3D::VariantMap &eventData)
@@ -171,6 +173,40 @@ void ConsoleAPI::ClearConsole()
 #else
     (void)system("clear");
 #endif
+}
+
+void ConsoleAPI::SetLogLevel(const String &level)
+{
+    if (level.Compare("error", false))
+        SetEnabledLogChannels(LogLevelErrorsOnly);
+    else if (level.Compare("warning", false))
+        SetEnabledLogChannels(LogLevelErrorWarning);
+    else if (level.Compare("info", false))
+        SetEnabledLogChannels(LogLevelErrorWarnInfo);
+    else if (level.Compare("debug", false))
+        SetEnabledLogChannels(LogLevelErrorWarnInfoDebug);
+    else
+        LogError("Unknown parameter \"" + level + "\" specified to ConsoleAPI::SetLogLevel!");
+}
+
+void ConsoleAPI::SetEnabledLogChannels(u32 newChannels)
+{
+    enabledLogChannels = newChannels;
+}
+
+bool ConsoleAPI::IsLogChannelEnabled(u32 logChannel) const
+{
+    return (enabledLogChannels & logChannel) != 0;
+}
+
+u32 ConsoleAPI::EnabledLogChannels() const
+{
+    return enabledLogChannels;
+}
+
+void ConsoleAPI::Print(const String &message)
+{
+    LOGRAW(message);
 }
 
 }

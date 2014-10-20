@@ -12,8 +12,8 @@
 #include "SceneAPI.h"
 #include "Entity.h"
 #include "Scene/Scene.h"
+#include "LoggingFunctions.h"
 
-#include <Log.h>
 #include <Engine/Graphics/Camera.h>
 #include <Engine/Graphics/Graphics.h>
 #include <Engine/Graphics/Renderer.h>
@@ -143,17 +143,17 @@ void UrhoRenderer::SetMainCamera(Entity *mainCameraEntity)
     {
         activeMainCamera.Reset();
         if (mainCameraEntity)
-            LOGWARNING("Cannot activate camera '" + mainCameraEntity->Name() + "': It does not have a Camera component!");
+            LogWarning("Cannot activate camera '" + mainCameraEntity->Name() + "': It does not have a Camera component!");
     }
     if (mainCameraEntity && !mainCameraEntity->ParentScene()) // If the new to-be camera is not in a scene, don't add it as active.
     {
-        LOGWARNING("Cannot activate camera \"" + mainCameraEntity->Name() + "\": It is not attached to a scene!");
+        LogWarning("Cannot activate camera \"" + mainCameraEntity->Name() + "\": It is not attached to a scene!");
         activeMainCamera.Reset();
         newActiveCamera = 0;
     }
 
     if (!activeMainCamera.Lock() || !newActiveCamera)
-        LOGWARNING("Setting main window camera to null!");
+        LogWarning("Setting main window camera to null!");
 
     Urho3D::Renderer* rend = GetSubsystem<Urho3D::Renderer>();
     if (!rend)
@@ -166,7 +166,7 @@ void UrhoRenderer::SetMainCamera(Entity *mainCameraEntity)
         vp->SetScene(mainCameraEntity->ParentScene()->Subsystem<GraphicsWorld>()->UrhoScene());
     }
     else
-        LOGWARNING("Could not set active camera, no viewport defined");
+        LogWarning("Could not set active camera, no viewport defined");
 
     MainCameraChanged.Emit(mainCameraEntity);
 }

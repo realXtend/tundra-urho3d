@@ -3,11 +3,11 @@
 #include "StableHeaders.h"
 #include "Framework.h"
 #include "ConfigAPI.h"
+#include "LoggingFunctions.h"
 
 #include <Context.h>
 #include <File.h>
 #include <FileSystem.h>
-#include <Log.h>
 
 using namespace Urho3D;
 
@@ -97,7 +97,7 @@ void ConfigAPI::PrepareDataFolder(String configFolder)
         bool success = fs->CreateDir(configPath);
         if (!success)
         {
-            LOGERROR("Failed to create configuration folder \"" + configPath + "\"! Check that this path is valid, and it is write-accessible!");
+            LogError("Failed to create configuration folder \"" + configPath + "\"! Check that this path is valid, and it is write-accessible!");
             return;
         }
     }
@@ -108,7 +108,7 @@ String ConfigAPI::GetFilePath(const String &file) const
 {
     if (configFolder_.Empty())
     {
-        LOGERROR("ConfigAPI::GetFilePath: Config folder has not been prepared, returning empty string.");
+        LogError("ConfigAPI::GetFilePath: Config folder has not been prepared, returning empty string.");
         return "";
     }
 
@@ -122,7 +122,7 @@ bool ConfigAPI::IsFilePathSecure(const String &file) const
 {
     if (file.Trimmed().Empty())
     {
-        LOGERROR("ConfigAPI: File path to perform read/write operations is not permitted as it's an empty string.");
+        LogError("ConfigAPI: File path to perform read/write operations is not permitted as it's an empty string.");
         return false;
     }
 
@@ -132,7 +132,7 @@ bool ConfigAPI::IsFilePathSecure(const String &file) const
     else if (file.Contains(".."))
         secure = false;
     if (!secure)
-        LOGERROR("ConfigAPI: File path to perform read/write operations is not permitted: " + file);
+        LogError("ConfigAPI: File path to perform read/write operations is not permitted: " + file);
     return secure;
 }
 
@@ -151,7 +151,7 @@ bool ConfigAPI::HasKey(const ConfigData &data) const
 {
     if (data.file.Empty() || data.section.Empty() || data.key.Empty())
     {
-        LOGWARNING("ConfigAPI::HasKey: ConfigData does not have enough information (file, section, and key).");
+        LogWarning("ConfigAPI::HasKey: ConfigData does not have enough information (file, section, and key).");
         return false;
     }
     return HasKey(data.file, data.section, data.key);
@@ -161,7 +161,7 @@ bool ConfigAPI::HasKey(const ConfigData &data, String key) const
 {
     if (data.file.Empty() || data.section.Empty())
     {
-        LOGWARNING("ConfigAPI::HasKey: ConfigData does not have enough information (file, and section).");
+        LogWarning("ConfigAPI::HasKey: ConfigData does not have enough information (file, and section).");
         return false;
     }
     return HasKey(data.file, data.section, key);
@@ -171,7 +171,7 @@ bool ConfigAPI::HasKey(String file, String section, String key) const
 {
     if (configFolder_.Empty())
     {
-        LOGERROR("ConfigAPI::HasKey: Config folder has not been prepared, returning false.");
+        LogError("ConfigAPI::HasKey: Config folder has not been prepared, returning false.");
         return false;
     }
 
@@ -193,7 +193,7 @@ Variant ConfigAPI::Read(const ConfigData &data) const
 {
     if (data.file.Empty() || data.section.Empty() || data.key.Empty())
     {
-        LOGWARNING("ConfigAPI::Read: ConfigData does not have enough information (file, section, and key).");
+        LogWarning("ConfigAPI::Read: ConfigData does not have enough information (file, section, and key).");
         return data.defaultValue;
     }
     return Read(data.file, data.section, data.key, data.defaultValue);
@@ -203,7 +203,7 @@ Variant ConfigAPI::Read(const ConfigData &data, String key, const Variant &defau
 {
     if (data.file.Empty() || data.section.Empty())
     {
-        LOGWARNING("ConfigAPI::Read: ConfigData does not have enough information (file and section).");
+        LogWarning("ConfigAPI::Read: ConfigData does not have enough information (file and section).");
         return data.defaultValue;
     }
     if (defaultValue.IsEmpty())
@@ -216,7 +216,7 @@ Variant ConfigAPI::Read(String file, String section, String key, const Variant &
 {
     if (configFolder_.Empty())
     {
-        LOGERROR("ConfigAPI::Read: Config folder has not been prepared, returning null Variant.");
+        LogError("ConfigAPI::Read: Config folder has not been prepared, returning null Variant.");
         return "";
     }
 
@@ -243,7 +243,7 @@ void ConfigAPI::Write(const ConfigData &data)
 {
     if (data.file.Empty() || data.section.Empty() || data.key.Empty() || data.value.IsEmpty())
     {
-        LOGWARNING("ConfigAPI::Write: ConfigData does not have enough information (file, section, key, and value).");
+        LogWarning("ConfigAPI::Write: ConfigData does not have enough information (file, section, key, and value).");
         return;
     }
     Write(data.file, data.section, data.key, data.value);
@@ -258,7 +258,7 @@ void ConfigAPI::Write(const ConfigData &data, String key, const Variant &value)
 {
     if (data.file.Empty() || data.section.Empty())
     {
-        LOGWARNING("ConfigAPI::Write: ConfigData does not have enough information (file and section).");
+        LogWarning("ConfigAPI::Write: ConfigData does not have enough information (file and section).");
         return;
     }
     Write(data.file, data.section, key, value);
@@ -268,7 +268,7 @@ void ConfigAPI::Write(String file, String section, String key, const Variant &va
 {
     if (configFolder_.Empty())
     {
-        LOGERROR("ConfigAPI::Write: Config folder has not been prepared, can not write value to config.");
+        LogError("ConfigAPI::Write: Config folder has not been prepared, can not write value to config.");
         return;
     }
 

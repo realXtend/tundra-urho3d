@@ -16,13 +16,13 @@
 #include "DynamicComponent.h"
 #include "Name.h"
 #include "PlaceholderComponent.h"
+#include "LoggingFunctions.h"
 
 #include <Math/Quat.h>
 #include <Math/float2.h>
 #include <Math/float3.h>
 #include <Math/float4.h>
 
-#include <Log.h>
 #include <XMLElement.h>
 
 namespace Tundra
@@ -156,7 +156,7 @@ void SceneAPI::RegisterComponentFactory(const ComponentFactoryPtr &factory)
 {
     if (factory->TypeName().Trimmed() != factory->TypeName() || factory->TypeName().Empty() || factory->TypeId() == 0)
     {
-        LOGERROR("Cannot add a new ComponentFactory for component typename \"" + factory->TypeName() + "\" and typeid " + String(factory->TypeId()) + ". Invalid input!");
+        LogError("Cannot add a new ComponentFactory for component typename \"" + factory->TypeName() + "\" and typeid " + String(factory->TypeId()) + ". Invalid input!");
         return;
     }
 
@@ -170,7 +170,7 @@ void SceneAPI::RegisterComponentFactory(const ComponentFactoryPtr &factory)
 
     if (existingFactory)
     {
-        LOGERROR("Cannot add a new ComponentFactory for component typename \"" + factory->TypeName() + "\" and typeid " + String(factory->TypeId()) + ". Conflicting type factory with typename " + existingFactory->TypeName() + " and typeid " + String(existingFactory->TypeId()) + " already exists!");
+        LogError("Cannot add a new ComponentFactory for component typename \"" + factory->TypeName() + "\" and typeid " + String(factory->TypeId()) + ". Conflicting type factory with typename " + existingFactory->TypeName() + " and typeid " + String(existingFactory->TypeId()) + " already exists!");
         return;
     }
 
@@ -188,7 +188,7 @@ ComponentPtr SceneAPI::CreateComponentByName(Scene* scene, const String &compone
         if (i != placeholderComponentTypeIds.End())
             return CreatePlaceholderComponentById(scene, i->second_, newComponentName);
 
-        LOGERROR("Cannot create component for type \"" + componentTypename + "\" - no factory exists!");
+        LogError("Cannot create component for type \"" + componentTypename + "\" - no factory exists!");
         return ComponentPtr();
     }
     return factory->Create(context_, scene, newComponentName);
@@ -204,7 +204,7 @@ ComponentPtr SceneAPI::CreateComponentById(Scene* scene, u32 componentTypeid, co
         if (i != placeholderComponentTypes.End())
             return CreatePlaceholderComponentById(scene, componentTypeid, newComponentName);
 
-        LOGERROR("Cannot create component for typeid \"" + String(componentTypeid) + "\" - no factory exists!");
+        LogError("Cannot create component for typeid \"" + String(componentTypeid) + "\" - no factory exists!");
         return ComponentPtr();
     }
     return factory->Create(context_, scene, newComponentName);
@@ -278,7 +278,7 @@ IAttribute *SceneAPI::CreateAttribute(const String &attributeTypeName, const Str
     // CreateAttribute(u32) already logs error, but AttributeTypeIdForTypeName returns 0 for
     // invalid type names and hence we have no idea what the user has inputted here so log the type name.
     if (!attr)
-        LOGERROR("Erroneous attribute type name \"" + attributeTypeName + "\".");
+        LogError("Erroneous attribute type name \"" + attributeTypeName + "\".");
     return attr;
 }
 
@@ -322,7 +322,7 @@ IAttribute* SceneAPI::CreateAttribute(u32 attributeTypeId, const String& newAttr
     case cAttributePoint:
         attribute = new Attribute<Point>(0, newAttributeId.CString()); break;
     default:
-        LOGERRORF("SceneAPI::CreateAttribute: unknown attribute type ID \"%d\" when creating attribute \"%s\")!", attributeTypeId, newAttributeId.CString());
+        LogError("SceneAPI::CreateAttribute: unknown attribute type ID \"" + String(attributeTypeId) + "\" when creating attribute \"" + newAttributeId + "\")!");
         break;
     }
 
@@ -341,7 +341,7 @@ void SceneAPI::RegisterPlaceholderComponentType(Urho3D::XMLElement& element, Att
     ComponentDesc desc;
     if (!element.HasAttribute("type"))
     {
-        LOGERROR("Component XML element is missing type attribute, can not register placeholder component type");
+        LogError("Component XML element is missing type attribute, can not register placeholder component type");
         return;
     }
 
@@ -365,7 +365,7 @@ void SceneAPI::RegisterPlaceholderComponentType(Urho3D::XMLElement& element, Att
         if (!attr.typeName.Empty())
             desc.attributes.Push(attr);
         else
-            LOGWARNING("Can not store placeholder component attribute " + attr.name + ", no type specified");
+            LogWarning("Can not store placeholder component attribute " + attr.name + ", no type specified");
 
         child = child.GetNext("attribute");
     }
@@ -384,25 +384,25 @@ void SceneAPI::RegisterPlaceholderComponentType(ComponentDesc desc, AttributeCha
 
     if (GetFactory(desc.typeId))
     {
-        LOGERROR("Component factory for component typeId " + String(desc.typeId) + " already exists, can not register placeholder component type");
+        LogError("Component factory for component typeId " + String(desc.typeId) + " already exists, can not register placeholder component type");
         return;
     }
     if (desc.typeName.Empty())
     {
-        LOGERROR("Empty typeName in placeholder component description, can not register");
+        LogError("Empty typeName in placeholder component description, can not register");
         return;
     }
 
     if (placeholderComponentTypes.Find(desc.typeId) == placeholderComponentTypes.End())
-        LOGINFO("Registering placeholder component type " + desc.typeName);
+        LogInfo("Registering placeholder component type " + desc.typeName);
     else
     {
         // Check for hash collision
         /// \todo Is not yet resolved in any meaningful way, the old desc is still overwritten
         if (placeholderComponentTypes[desc.typeId].typeName != desc.typeName)
-            LOGERROR("Placeholder component typeId hash collision! Old name " + placeholderComponentTypes[desc.typeId].typeName + " new name " + desc.typeName);
+            LogError("Placeholder component typeId hash collision! Old name " + placeholderComponentTypes[desc.typeId].typeName + " new name " + desc.typeName);
         else
-            LOGWARNING("Re-registering placeholder component type " + desc.typeName);
+            LogWarning("Re-registering placeholder component type " + desc.typeName);
     }
 
     placeholderComponentTypes[desc.typeId] = desc;
@@ -441,7 +441,7 @@ ComponentPtr SceneAPI::CreatePlaceholderComponentById(Scene* scene, u32 componen
     PlaceholderComponentTypeMap::ConstIterator i = placeholderComponentTypes.Find(componentTypeid);
     if (i == placeholderComponentTypes.End())
     {
-        LOGERROR("Unknown placeholder component type " + String(componentTypeid) + ", can not create placeholder component");
+        LogError("Unknown placeholder component type " + String(componentTypeid) + ", can not create placeholder component");
         return ComponentPtr();
     }
 

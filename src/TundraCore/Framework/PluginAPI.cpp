@@ -4,6 +4,7 @@
 #include "PluginAPI.h"
 #include "ConsoleAPI.h"
 #include "Framework.h"
+#include "LoggingFunctions.h"
 
 #ifdef WIN32
 #include <Windows.h>
@@ -13,7 +14,6 @@
 
 #include <File.h>
 #include <FileSystem.h>
-#include <Log.h>
 #include <ProcessUtils.h>
 #include <ForEach.h>
 #include <XMLFile.h>
@@ -84,11 +84,11 @@ void PluginAPI::LoadPlugin(const String &filename)
     FileSystem* fs = GetSubsystem<FileSystem>();
     if (!fs->FileExists(path))
     {
-        LOGWARNINGF("Cannot load plugin \"%s\" as the file does not exist.", path.CString());
+        LogWarning("Cannot load plugin \"" + path + "\" as the file does not exist.");
         return;
     }
 
-    LOGINFO("  " + filename);
+    LogInfo("  " + filename);
     //owner->App()->SetSplashMessage("Loading plugin " + filename);
 
 #ifdef WIN32
@@ -96,14 +96,14 @@ void PluginAPI::LoadPlugin(const String &filename)
     if (module == NULL)
     {
         DWORD errorCode = GetLastError();
-        LOGERRORF("Failed to load plugin from \"%s\": %s (Missing dependencies?)", path.CString(), GetErrorString(errorCode).CString());
+        LogError("Failed to load plugin from \"" + path + "\": " + GetErrorString(errorCode) + " (Missing dependencies?)");
         return;
     }
     TundraPluginMainSignature mainEntryPoint = (TundraPluginMainSignature)GetProcAddress(module, "TundraPluginMain");
     if (mainEntryPoint == NULL)
     {
         DWORD errorCode = GetLastError();
-        LOGERRORF("Failed to find plugin startup function 'TundraPluginMain' from plugin file \"%s\": %s", path.CString(), GetErrorString(errorCode).CString());
+        LogError("Failed to find plugin startup function 'TundraPluginMain' from plugin file \"" + path + "\": " + GetErrorString(errorCode));
         return;
     }
 #else
@@ -112,7 +112,7 @@ void PluginAPI::LoadPlugin(const String &filename)
     void *module = dlopen(path.CString(), RTLD_GLOBAL|RTLD_LAZY);
     if ((dlerrstr=dlerror()) != 0)
     {
-        LOGERROR("Failed to load plugin from file \"" + path + "\": Error " + String(dlerrstr) + "!");
+        LogError("Failed to load plugin from file \"" + path + "\": Error " + String(dlerrstr) + "!");
         return;
     }
 
@@ -120,7 +120,7 @@ void PluginAPI::LoadPlugin(const String &filename)
     TundraPluginMainSignature mainEntryPoint = (TundraPluginMainSignature)dlsym(module, "TundraPluginMain");
     if ((dlerrstr=dlerror()) != 0)
     {
-        LOGERROR("Failed to find plugin startup function 'TundraPluginMain' from plugin file \"" + path + "\": Error " + String(dlerrstr) + "!");
+        LogError("Failed to find plugin startup function 'TundraPluginMain' from plugin file \"" + path + "\": Error " + String(dlerrstr) + "!");
         return;
     }
 #endif
@@ -144,9 +144,9 @@ void PluginAPI::UnloadPlugins()
 
 void PluginAPI::ListPlugins()
 {
-    LOGINFO("Loaded Plugins");
+    LogInfo("Loaded Plugins");
     foreach(const Plugin &plugin, plugins)
-        LOGINFO("  " + plugin.name);
+        LogInfo("  " + plugin.name);
 }
 
 Vector<String> PluginAPI::ConfigurationFiles() const
@@ -170,7 +170,7 @@ void PluginAPI::LoadPluginsFromXML(String pluginConfigurationFile)
     File file(GetContext(), pluginConfigurationFile, FILE_READ);
     if (!doc.Load(file))
     {
-        LOGERROR("PluginAPI::LoadPluginsFromXML: Failed to open file \"" + pluginConfigurationFile + "\"!");
+        LogError("PluginAPI::LoadPluginsFromXML: Failed to open file \"" + pluginConfigurationFile + "\"!");
         return;
     }
     file.Close();
@@ -185,7 +185,7 @@ void PluginAPI::LoadPluginsFromXML(String pluginConfigurationFile)
             LoadPlugin(pluginPath);
             if (showDeprecationWarning)
             {
-                LOGWARNING("PluginAPI::LoadPluginsFromXML: In file " + pluginConfigurationFile + ", using XML tag <plugin path=\"PluginNameHere\"/> will be deprecated. Consider replacing it with --plugin command line argument instead");
+                LogWarning("PluginAPI::LoadPluginsFromXML: In file " + pluginConfigurationFile + ", using XML tag <plugin path=\"PluginNameHere\"/> will be deprecated. Consider replacing it with --plugin command line argument instead");
                 showDeprecationWarning = false;
             }
         }
@@ -198,8 +198,8 @@ void PluginAPI::LoadPluginsFromCommandLine()
     if (!owner->HasCommandLineParameter("--plugin"))
         return;
 
-    LOGINFO("");
-    LOGINFO("Loading");
+    LogInfo("");
+    LogInfo("Loading");
 
     Vector<String> plugins = owner->CommandLineParameters("--plugin");
     foreach(String plugin, plugins)

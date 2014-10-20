@@ -20,11 +20,12 @@
 #include "Math/MathUtilities.h"
 #include "Geometry/Circle.h"
 #include "Geometry/Sphere.h"
+#include "LoggingFunctions.h"
 
-#include <Log.h>
 #include <Engine/Scene/Scene.h>
 #include <Engine/Graphics/Octree.h>
 #include <Engine/Graphics/Zone.h>
+
 namespace Tundra
 {
 
