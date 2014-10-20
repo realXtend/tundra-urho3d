@@ -1771,8 +1771,9 @@ EntityDescList Scene::SortEntities(const EntityDescList &entities) const
     // Double check no information was lost. If these do not match, use the original passed in entity desc list.
     if (!iterDescEntities.Empty() || sortedDescEntities.Size() != entities.Size())
     {
-        LogError("Scene::SortEntities: Sorting Entity hierarchy resulted in loss of information. Using original unsorted Entity list. Iteration list size: " + String(iterDescEntities.Size()) + 
-            " Sorted Entities: " + String(sortedDescEntities.Size()) + " Original Entities: " + entities.Size());
+        LogError("Scene::SortEntities: Sorting Entity hierarchy resulted in loss of information. "
+            "Using original unsorted Entity list. Iteration list size: " + String(iterDescEntities.Size()) + 
+            " Sorted Entities: " + String(sortedDescEntities.Size()) + " Original Entities: " + String(entities.Size()));
         return entities;
     }
 
