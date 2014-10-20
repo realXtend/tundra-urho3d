@@ -21,6 +21,7 @@ Options:
   -nb, --no-build        Skip building Tundra
 
   -ra, --run-analysis    Run static analysis with cppcheck
+  -rt, --run-tests       Run unit tests
 
   -d, --debug            Build deps in debug mode.
                            Note: You have to manually destroy
@@ -45,6 +46,7 @@ skip_cmake=false
 skip_build=false
 
 run_analysis=false
+run_tests=false
 
 build_type="Release"
 build_64bit=false
@@ -77,6 +79,9 @@ while [[ $1 = -* ]]; do
             ;;
         --run-analysis|-ra)
             run_analysis=true
+            ;;
+        --run-tests|-rt)
+            run_tests=true
             ;;
         --debug|-d)
             build_type="Debug"
@@ -197,6 +202,26 @@ if [ $skip_deps = false ] ; then
 
         mark_built
     fi
+
+    #### Google C++ Test Framework
+
+    start_target gtest
+
+    if ! is_cloned ; then
+        svn checkout http://googletest.googlecode.com/svn/tags/release-1.7.0/ gtest
+    fi
+
+    if ! is_built ; then
+        mkdir -p build
+        cd build
+
+        cmake ../ \
+            -DCMAKE_BUILD_TYPE=$build_type
+
+        make -j $num_cpu -S
+
+        mark_built
+    fi
 fi
 
 # Build cppcheck if analysing
@@ -233,9 +258,11 @@ if [ $skip_cmake = false ] ; then
     fi
 
     cmake .. \
+        -DCMAKE_CXX_FLAGS="-Wno-unused-parameter -Wno-unused-variable" \
         -DMATHGEOLIB_HOME=$DEPS \
         -DURHO3D_HOME=$DEPS_SRC/urho3d \
-        -DKNET_HOME=$DEPS_SRC/kNet
+        -DKNET_HOME=$DEPS_SRC/kNet \
+        -DGTEST_HOME=$DEPS_SRC/gtest
 fi
 
 # Tundra build
@@ -260,6 +287,7 @@ if [ $run_analysis = true ] ; then
         --enable=all \
         --suppress=missingInclude \
         --suppress=missingIncludeSystem \
+        --suppress=unusedFunction \
         --suppressions-list=$TUNDRA/tools/Windows/Cppcheck/Suppressions.txt \
         --std=c++11 \
         --error-exitcode=0 \
@@ -267,4 +295,13 @@ if [ $run_analysis = true ] ; then
         -DTUNDRACORE_API= \
         -I $TUNDRA_SRC \
         $TUNDRA_SRC
+fi
+
+# Unit tests
+
+if [ $run_tests = true ] ; then
+    print_title "Running tests"
+
+    cd $TUNDRA_BUILD_DIR
+    make RUN_ALL_TESTS
 fi

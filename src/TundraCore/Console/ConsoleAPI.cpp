@@ -123,7 +123,7 @@ void ConsoleAPI::ListCommands()
         LogInfo("  " + PadString(iter->first, longestName) + iter->second->Description());
 }
 
-void ConsoleAPI::HandleConsoleCommand(StringHash eventType, Urho3D::VariantMap &eventData)
+void ConsoleAPI::HandleConsoleCommand(StringHash /*eventType*/, Urho3D::VariantMap &eventData)
 {
     ExecuteCommand(eventData[Urho3D::ConsoleCommand::P_COMMAND].GetString());
 }
@@ -136,7 +136,7 @@ void ConsoleAPI::OnUpdate(float /*frametime*/)
         ExecuteCommand(input);
 }
 
-void SetConsoleVisible(bool visible)
+void SetConsoleVisible(bool /*visible*/)
 {
     /// @todo GUI console
 }

@@ -4,6 +4,10 @@ project(tundra-urho3d)
 # CMake version requirement
 cmake_minimum_required(VERSION 2.6.0)
 
+# Make our cmake macros to be available for include
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+include (TundraUtils)
+
 message("") # Newline before any output from the CMake script.
 
 # Declare options and cached variables that
@@ -73,82 +77,6 @@ if (MSVC AND MSVC90) # MSVC has partial C++11 support beginning in VC10
     message(FATAL_ERROR "VC9 does not support C++11 features!")
 endif()
 
-macro(PrintUsedDependencyVariables)
-    message("======================== Dependency Variables ========================\n") # 70 visible chars
-    message(STATUS "URHO3D_HOME      = " ${URHO3D_HOME})
-    message(STATUS "MATHGEOLIB_HOME  = " ${MATHGEOLIB_HOME})
-    message(STATUS "KNET_HOME        = " ${KNET_HOME})
-    message("")
-endmacro()
-
-macro(PrintUsedBuildConfig)
-    message("====================== Used Build Configuration ======================\n")
-    message(STATUS "Install prefix = " ${CMAKE_INSTALL_PREFIX})
-    message("")
-endmacro()
-
-# AddProject takes in one or two parameters:
-# - One param:  argv0 == the relative directory (to the root CMakeLists.txt) where you project is and that contains the CMakeLists.txt for this project.
-# - Two params: argv0 == project type/category (used also for the solution folder's name), wrap in double quotes if the name contains spaces
-#               argv1 == same as in one arg situation.
-# More useful for building the Tundra project when including platform provided projects.
-# Note: Due to the CMake's add_subdirectory restrictions, the directory cannot be outside the Tundra source tree, hopefully we can go around this one day.
-# Examples:     AddProject(TundraCore)
-#               AddProject("Application Plugins" Plugins/JavascriptModule)
-#               AddProject(mysubdir/MyPlugin)
-function(AddProject)
-    set(PROJECT_TYPE ${ARGV0})
-    if (NOT ARGV1)
-        add_subdirectory(${ARGV0})
-    else()
-        add_subdirectory(src/${ARGV1})
-    endif()
-    set(PROJECT_TYPE "")
-endfunction()
-
-# Adds the given folder_name into the source files of the current project. Use this macro when your module contains .cpp and .h files in several subdirectories.
-macro(AddSourceFolder folder_name)
-    file(GLOB H_FILES_IN_FOLDER_${folder_name} ${folder_name}/*.h ${folder_name}/*.inl)
-    file(GLOB CPP_FILES_IN_FOLDER_${folder_name} ${folder_name}/*.cpp)
-    source_group("Header Files\\${folder_name}" FILES ${H_FILES_IN_FOLDER_${folder_name}})
-    source_group("Source Files\\${folder_name}" FILES ${CPP_FILES_IN_FOLDER_${folder_name}})
-    set(H_FILES ${H_FILES} ${H_FILES_IN_FOLDER_${folder_name}})
-    set(CPP_FILES ${CPP_FILES} ${CPP_FILES_IN_FOLDER_${folder_name}})
-endmacro()
-
-# Enables the use of Precompiled Headers in the project this macro is invoked in. Also adds the DEBUG_CPP_NAME to each .cpp file that specifies the name of that compilation unit. MSVC only.
-macro(SetupCompileFlagsWithPCH)
-    if (MSVC)
-        # Label StableHeaders.cpp to create the PCH file and mark all other .cpp files to use that PCH file.
-        # Add a #define DEBUG_CPP_NAME "this compilation unit name" to each compilation unit to aid in memory leak checking.
-        foreach(src_file ${CPP_FILES})
-            if (${src_file} MATCHES "StableHeaders.cpp$")
-                set_source_files_properties(${src_file} PROPERTIES COMPILE_FLAGS "/YcStableHeaders.h")        
-            else()
-                get_filename_component(basename ${src_file} NAME)
-                set_source_files_properties(${src_file} PROPERTIES COMPILE_FLAGS "/YuStableHeaders.h -DDEBUG_CPP_NAME=\"\\\"${basename}\"\\\"")
-            endif()
-        endforeach()
-    endif()
-    # TODO PCH for other platforms
-endmacro()
-
-# Sets up the compilation flags without PCH. For now just set the DEBUG_CPP_NAME to each compilation unit.
-# TODO: The SetupCompileFlags and SetupCompileFlagsWithPCH macros should be merged, and the option to use PCH be passed in as a param. However,
-# CMake string ops in PROPERTIES COMPILE_FLAGS gave some problems with this, so these are separate for now.
-macro(SetupCompileFlags)
-    if (MSVC)
-        # Add a #define DEBUG_CPP_NAME "this compilation unit name" to each compilation unit to aid in memory leak checking.
-        foreach(src_file ${CPP_FILES})
-            if (${src_file} MATCHES "StableHeaders.cpp$")
-            else()
-                get_filename_component(basename ${src_file} NAME)
-                set_source_files_properties(${src_file} PROPERTIES COMPILE_FLAGS "-DDEBUG_CPP_NAME=\"\\\"${basename}\"\\\"")
-            endif()
-        endforeach()
-    endif()
-endmacro()
-
 # Set CMake library search policy
 if (COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
@@ -215,13 +143,16 @@ endif()
 add_definitions (-DPCH_ENABLED)
 SET(PCH_ENABLED 1)
 
-PrintUsedDependencyVariables ()
+BeginSection("Dependency Variables")
+message(STATUS "URHO3D_HOME      = " ${URHO3D_HOME})
+message(STATUS "MATHGEOLIB_HOME  = " ${MATHGEOLIB_HOME})
+message(STATUS "KNET_HOME        = " ${KNET_HOME})
 
-message("====================== Configuring Dependencies ======================\n")
+BeginSection("Configuring Dependencies")
 
 # Set CMake custom module path & include them
 # The following CMake modules are required for the project to build.
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${URHO3D_HOME}/Source/CMake/Modules ${CMAKE_SOURCE_DIR}/cmake)
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${URHO3D_HOME}/Source/CMake/Modules)
 include (FindUrho3D)
 include (ConfigurePackages)
 include (ModuleSetup)
@@ -236,7 +167,7 @@ configure_mathgeolib()
 # Find/configure kNet
 configure_knet()
 
-message("")
+EndSection()
 
 # Set global hardcoded install prefix. User cannot change this at the moment, until we figure how we want to use this!
 # Call the cleanup step that cleans the install prefix before every installations. This is important as module setups might change between builds.
@@ -285,4 +216,8 @@ endmacro()
 # edit CMakeBuildConfig.txt and rerun cmake.
 include(${CMAKE_BINARY_DIR}/CMakeBuildConfig.txt)
 
-PrintUsedBuildConfig ()
+BeginSection("Used Build Configuration")
+message(STATUS "CMAKE_INSTALL_PREFIX        " ${CMAKE_INSTALL_PREFIX})
+message(STATUS "ENABLE_BUILD_OPTIMIZATIONS  " ${ENABLE_BUILD_OPTIMIZATIONS})
+message(STATUS "ENABLE_TESTS                " ${ENABLE_TESTS})
+message(" ")

@@ -27,7 +27,7 @@ install:
   - if [ "$CXX" == "clang++" ]; then export CXX="clang++-3.4"; CC="clang-3.4"; fi
 
 script: 
-  - ./tools/Linux/Ubuntu/Build.bash --run-analysis
+  - ./tools/Linux/Ubuntu/Build.bash --run-analysis --run-tests
 
 notifications:
   irc: 
