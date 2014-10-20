@@ -23,6 +23,7 @@
 #include "LoggingFunctions.h"
 
 #include <Engine/Scene/Scene.h>
+#include <Engine/Graphics/DebugRenderer.h>
 #include <Engine/Graphics/Octree.h>
 #include <Engine/Graphics/Zone.h>
 
@@ -37,6 +38,7 @@ GraphicsWorld::GraphicsWorld(UrhoRenderer* owner, Scene* scene) :
 {
     urhoScene_ = new Urho3D::Scene(context_);
     urhoScene_->CreateComponent<Urho3D::Octree>();
+    urhoScene_->CreateComponent<Urho3D::DebugRenderer>();
 
     // Set a default ambient color that matches the default ambient color of EnvironmentLight, in case there is no environmentlight component.
     Urho3D::Zone* zone = urhoScene_->CreateComponent<Urho3D::Zone>();
@@ -203,12 +205,16 @@ void GraphicsWorld::DebugDrawOBB(const OBB &obb, const Color &clr, bool depthTes
 
 void GraphicsWorld::DebugDrawLineSegment(const LineSegment &l, const Color &clr, bool depthTest)
 {
-    /// \todo Implement using Urho DebugRenderer
+    Urho3D::DebugRenderer* debug = urhoScene_->GetComponent<Urho3D::DebugRenderer>();
+    if (debug)
+        debug->AddLine(ToVector3(l.a), ToVector3(l.b), clr.ToUrhoColor(), depthTest);
 }
 
 void GraphicsWorld::DebugDrawLine(const float3& start, const float3& end, const Color &clr, bool depthTest)
 {
-    /// \todo Implement using Urho DebugRenderer
+    Urho3D::DebugRenderer* debug = urhoScene_->GetComponent<Urho3D::DebugRenderer>();
+    if (debug)
+        debug->AddLine(ToVector3(start), ToVector3(end), clr.ToUrhoColor(), depthTest);
 }
 
 void GraphicsWorld::DebugDrawPlane(const Plane &plane, const Color &clr, const float3 &refPoint, float uSpacing, float vSpacing, 
