@@ -108,28 +108,16 @@ void ConsoleAPI::ExecuteCommand(const String &command)
         LogError("Cannot find a console command '" + name + "'");
         return;
     }
-<<<<<<< HEAD
-    existing->second_->Invoke(parameters);
-=======
     existing->second->Invoke(parameters);
->>>>>>> origin/master
 }
 
 void ConsoleAPI::ListCommands()
 {
-<<<<<<< HEAD
-    LOGINFO("Available Console Commands (case-insensitive)");
-    uint longestName = 0;
-    for(CommandMap::ConstIterator iter = commands_.Begin(); iter != commands_.End(); ++iter)
-        if (iter->first_.Length() > longestName)
-            longestName = iter->first_.Length();
-=======
     LogInfo("Available Console Commands (case-insensitive)");
     uint longestName = 0;
     for(auto iter = commands_.begin(); iter != commands_.end(); ++iter)
         if (iter->first.Length() > longestName)
             longestName = iter->first.Length();
->>>>>>> origin/master
     longestName += 2;
     for(auto iter = commands_.begin(); iter != commands_.end(); ++iter)
         LogInfo("  " + PadString(iter->first, longestName) + iter->second->Description());
