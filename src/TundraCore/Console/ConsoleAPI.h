@@ -10,7 +10,9 @@
 #include "CoreTypes.h"
 #include "FrameworkFwd.h"
 #include "Signals.h"
+
 #include "CoreStringUtils.h"
+#include "CoreTimeUtils.h"
 
 #include <Object.h>
 #include <RefCounted.h>
@@ -154,8 +156,9 @@ private:
     void OnUpdate(float frametime);
 
     Framework *framework_;
-    CommandMap commands_;
-    u32 enabledLogChannels; ///< Stores the set of currently active log channels.
+    CommandMap commands_;       ///< Currently registered console commands.
+    u32 enabledLogChannels;     ///< Stores the set of currently active log channels.
+    FrameLimiter pollInput_;    ///< Frame limiter for polling shell input.
 };
 
 }

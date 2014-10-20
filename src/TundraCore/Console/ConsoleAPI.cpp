@@ -9,7 +9,6 @@
 #include "ConsoleAPI.h"
 #include "Framework.h"
 #include "FrameAPI.h"
-#include "CoreStringUtils.h"
 #include "LoggingFunctions.h"
 
 #include <CoreEvents.h>
@@ -29,7 +28,8 @@ namespace Tundra
 ConsoleAPI::ConsoleAPI(Framework *framework) :
     Object(framework->GetContext()),
     framework_(framework),
-    enabledLogChannels(LogLevelErrorWarnInfo)
+    enabledLogChannels(LogLevelErrorWarnInfo),
+    pollInput_(1.f/30.f)
 {
     SubscribeToEvent(Urho3D::E_CONSOLECOMMAND, HANDLER(ConsoleAPI, HandleConsoleCommand));
 
@@ -128,12 +128,15 @@ void ConsoleAPI::HandleConsoleCommand(StringHash /*eventType*/, Urho3D::VariantM
     ExecuteCommand(eventData[Urho3D::ConsoleCommand::P_COMMAND].GetString());
 }
 
-void ConsoleAPI::OnUpdate(float /*frametime*/)
+void ConsoleAPI::OnUpdate(float frametime)
 {
-    // Check if there is input from stdin
-    String input = Urho3D::GetConsoleInput();
-    if (input.Length())
-        ExecuteCommand(input);
+    if (pollInput_.ShouldUpdate(frametime))
+    {
+        // Check if there is input from stdin
+        String input = Urho3D::GetConsoleInput();
+        if (input.Length())
+            ExecuteCommand(input);
+    }
 }
 
 void SetConsoleVisible(bool /*visible*/)
