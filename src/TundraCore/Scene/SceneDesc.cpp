@@ -2,14 +2,14 @@
 
 #include "StableHeaders.h"
 #include "SceneDesc.h"
-
 #include "Scene.h"
 #include "Entity.h"
 #include "IAttribute.h"
 #include "EntityReference.h"
+#include "LoggingFunctions.h"
 
 #include <FileSystem.h>
-#include <Log.h>
+#include <StringUtils.h>
 
 namespace Tundra
 {
@@ -58,7 +58,7 @@ void ParentingTracker::Track(Entity *ent)
 {
     if (ent)
     {
-        LOGDEBUGF("[ParentingTracker]: Tracking unacked id %d", ent->Id());
+        LogDebug("[ParentingTracker]: Tracking unacked id " + String(ent->Id()));
         unacked.Push(ent->Id());
     }
 }
@@ -84,7 +84,7 @@ void ParentingTracker::Ack(Scene *scene, entity_id_t newId, entity_id_t oldId)
 
 void ParentingTracker::_fixParenting(Scene *scene)
 {
-    LOGINFOF("[ParentingTracker]: Received new ids for %d tracked Entities. Processing scene hierarchy.", unackedToAcked.Size());
+    LogInfo("[ParentingTracker]: Received new ids for " + String(unackedToAcked.Size()) + " tracked Entities. Processing scene hierarchy.");
     
     /** @todo Check and fix ent->Parent() stuff here!? See if ent->Parent()->Id()
         is old unacked or new acked at this point! Or if there is a better place 
@@ -98,7 +98,7 @@ void ParentingTracker::_fixParenting(Scene *scene)
         EntityPtr ent = scene->EntityById(ackedIds[ai]);
         if (!ent)
         {
-            LOGWARNINGF("[ParentingTracker]: Failed to find Entity by new acked id %d", ackedIds[ai]);
+            LogWarning("[ParentingTracker]: Failed to find Entity by new acked id " + String(ackedIds[ai]));
             continue; 
         }
         entitiesToCheck.Push(ent);

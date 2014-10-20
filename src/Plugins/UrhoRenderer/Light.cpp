@@ -8,8 +8,8 @@
 #include "UrhoRenderer.h"
 #include "Scene/Scene.h"
 #include "Math/MathUtilities.h"
+#include "LoggingFunctions.h"
 
-#include <Log.h>
 #include <Engine/Scene/Node.h>
 #include <Engine/Scene/Scene.h>
 #include <Engine/Graphics/Graphics.h>
@@ -51,7 +51,7 @@ Light::~Light()
     if (world_.Expired())
     {
         if (light_)
-            LOGERROR("Light: World has expired, skipping uninitialization!");
+            LogError("Light: World has expired, skipping uninitialization!");
         return;
     }
 
@@ -133,7 +133,7 @@ void Light::AttachLight()
     Urho3D::Node* placeableNode = placeable_->UrhoSceneNode();
     if (!placeableNode)
     {
-        LOGERROR("Can not attach light: placeable does not have an Urho3D scene node");
+        LogError("Can not attach light: placeable does not have an Urho3D scene node");
         return;
     }
     
@@ -162,7 +162,7 @@ void Light::DetachLight()
         Urho3D::Node* placeableNode = placeable_->UrhoSceneNode();
         if (!placeableNode)
         {
-            LOGERROR("Can not detach light: placeable does not have an Urho3D scene node");
+            LogError("Can not detach light: placeable does not have an Urho3D scene node");
             return;
         }
         placeableNode->RemoveComponent(light_);

@@ -10,15 +10,15 @@
 #include "Entity.h"
 #include "Scene.h"
 #include "SceneAPI.h"
-
 #include "Framework.h"
+#include "LoggingFunctions.h"
 
 #include <XMLFile.h>
 
 #include <kNet/DataSerializer.h>
 #include <kNet/DataDeserializer.h>
 #include <ForEach.h>
-#include <Log.h>
+#include <StringUtils.h>
 
 namespace Tundra
 {
@@ -74,7 +74,7 @@ void IComponent::SetUpdateMode(AttributeChange::Type defaultMode)
     }
     else
     {
-        LOGWARNING("IComponent::SetUpdateMode: Trying to set default update mode to an invalid value! (" + String((int)defaultMode) + ")");
+        LogWarning("IComponent::SetUpdateMode: Trying to set default update mode to an invalid value! (" + String((int)defaultMode) + ")");
     }
 }
 
@@ -109,7 +109,7 @@ void IComponent::SetReplicated(bool enable)
 {
     if (id)
     {
-        LOGERROR("Replication mode can not be changed after an ID has been assigned!");
+        LogError("Replication mode can not be changed after an ID has been assigned!");
         return;
     }
     
@@ -195,7 +195,7 @@ IAttribute* IComponent::CreateAttribute(u8 index, u32 typeID, const String& id, 
 {
     if (!SupportsDynamicAttributes())
     {
-        LOGERROR("CreateAttribute called on a component that does not support dynamic attributes");
+        LogError("CreateAttribute called on a component that does not support dynamic attributes");
         return nullptr;
     }
     
@@ -230,7 +230,7 @@ void IComponent::RemoveAttribute(u8 index, AttributeChange::Type change)
 {
     if (!SupportsDynamicAttributes())
     {
-        LOGERROR("RemoveAttribute called on a component that does not support dynamic attributes");
+        LogError("RemoveAttribute called on a component that does not support dynamic attributes");
         return;
     }
     
@@ -245,7 +245,7 @@ void IComponent::RemoveAttribute(u8 index, AttributeChange::Type change)
         IAttribute* attr = attributes[index];
         if (!attr->IsDynamic())
         {
-            LOGERROR("Can not remove static attribute at index " + String((int)index));
+            LogError("Can not remove static attribute at index " + String((int)index));
             return;
         }
         
@@ -259,7 +259,7 @@ void IComponent::RemoveAttribute(u8 index, AttributeChange::Type change)
         SAFE_DELETE(attributes[index]);
     }
     else
-        LOGERROR("Can not remove nonexisting attribute at index " + String((int)index));
+        LogError("Can not remove nonexisting attribute at index " + String((int)index));
 }
 
 void IComponent::AddAttribute(IAttribute* attr)
@@ -303,12 +303,12 @@ bool IComponent::AddAttribute(IAttribute* attr, u8 index)
         {
             if (!existing->IsDynamic())
             {
-                LOGERROR("Can not overwrite static attribute at index " + String((int)index));
+                LogError("Can not overwrite static attribute at index " + String((int)index));
                 return false;
             }
             else
             {
-                LOGWARNING("Removing existing attribute at index " + String((int)index) + " to make room for new attribute");
+                LogWarning("Removing existing attribute at index " + String((int)index) + " to make room for new attribute");
                 delete existing;
                 attributes[index] = 0;
             }
@@ -361,7 +361,7 @@ void IComponent::DeserializeAttributeFrom(Urho3D::XMLElement& attributeElement, 
     }
 
     if (!attr)
-        LOGWARNING(TypeName() + "::DeserializeFrom: Could not find attribute \"" + id + "\" specified in the XML element.");
+        LogWarning(TypeName() + "::DeserializeFrom: Could not find attribute \"" + id + "\" specified in the XML element.");
     else
         attr->FromString(attributeElement.GetAttribute("value"), change);
 }
@@ -426,7 +426,7 @@ void IComponent::EmitAttributeMetadataChanged(IAttribute* attribute)
         return;
     if (!attribute->Metadata())
     {
-        LOGWARNING("IComponent::EmitAttributeMetadataChanged: Given attributes metadata is null, signal won't be emitted!");
+        LogWarning("IComponent::EmitAttributeMetadataChanged: Given attributes metadata is null, signal won't be emitted!");
         return;
     }
     AttributeMetadataChanged.Emit(attribute, attribute->Metadata());
@@ -484,7 +484,7 @@ void IComponent::DeserializeFromBinary(kNet::DataDeserializer& source, Attribute
     u8 num_attributes = source.Read<u8>();
     if (num_attributes != NumAttributes())
     {
-        LOGERROR("Wrong number of attributes in DeserializeFromBinary!");
+        LogError("Wrong number of attributes in DeserializeFromBinary!");
         return;
     }
     for(uint i = 0; i < attributes.Size(); ++i)

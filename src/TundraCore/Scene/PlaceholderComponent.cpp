@@ -2,13 +2,13 @@
 
 #include "StableHeaders.h"
 #include "PlaceholderComponent.h"
-
 #include "SceneAPI.h"
+#include "LoggingFunctions.h"
 
 #include "Entity.h"
 #include "Scene/Scene.h"
 
-#include <Log.h>
+
 
 namespace Tundra
 {
@@ -34,7 +34,7 @@ void PlaceholderComponent::SetTypeName(const String& newTypeName)
 
 void PlaceholderComponent::DeserializeFromBinary(kNet::DataDeserializer& /*source*/, AttributeChange::Type /*change*/)
 {
-    LOGERROR("PlaceholderComponent can not support deserialization from binary");
+    LogError("PlaceholderComponent can not support deserialization from binary");
 }
 
 IAttribute *PlaceholderComponent::CreateAttribute(const String &typeName, const String &id, const String &name, AttributeChange::Type /*change*/)
@@ -48,7 +48,7 @@ IAttribute *PlaceholderComponent::CreateAttribute(const String &typeName, const 
     IAttribute *attribute = SceneAPI::CreateAttribute(typeName, id);
     if (!attribute)
     {
-        LOGERROR("Failed to create new attribute of type \"" + typeName + "\" with ID \"" + id + "\" to placeholder component \"" + Name() + "\".");
+        LogError("Failed to create new attribute of type \"" + typeName + "\" with ID \"" + id + "\" to placeholder component \"" + Name() + "\".");
         return nullptr;
     }
 

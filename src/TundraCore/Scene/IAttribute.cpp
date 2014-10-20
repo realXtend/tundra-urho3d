@@ -22,9 +22,9 @@
 #include "Math/MathFunc.h"
 #include "Math/Color.h"
 #include "Math/Point.h"
+#include "LoggingFunctions.h"
 
 #include <StringUtils.h>
-#include <Log.h>
 
 #include <kNet/DataDeserializer.h>
 #include <kNet/DataSerializer.h>
@@ -691,37 +691,37 @@ template<> void TUNDRACORE_API Attribute<Point>::FromBinary(kNet::DataDeserializ
 
 template<> void TUNDRACORE_API Attribute<String>::Interpolate(IAttribute* /*start*/, IAttribute* /*end*/, float /*t*/, AttributeChange::Type /*change*/)
 {
-    LOGERROR("Attribute<String>::Interpolate invoked! String attributes cannot be animated!");
+    LogError("Attribute<String>::Interpolate invoked! String attributes cannot be animated!");
 }
 
 template<> void TUNDRACORE_API Attribute<bool>::Interpolate(IAttribute* /*start*/, IAttribute* /*end*/, float /*t*/, AttributeChange::Type /*change*/)
 {
-    LOGERROR("Attribute<bool>::Interpolate invoked! bool attributes cannot be animated!");
+    LogError("Attribute<bool>::Interpolate invoked! bool attributes cannot be animated!");
 }
 
 template<> void TUNDRACORE_API Attribute<AssetReference>::Interpolate(IAttribute* /*start*/, IAttribute* /*end*/, float /*t*/, AttributeChange::Type /*change*/)
 {
-    LOGERROR("Attribute<AssetReference>::Interpolate invoked! AssetReference attributes cannot be animated!");
+    LogError("Attribute<AssetReference>::Interpolate invoked! AssetReference attributes cannot be animated!");
 }
 
 template<> void TUNDRACORE_API Attribute<AssetReferenceList>::Interpolate(IAttribute* /*start*/, IAttribute* /*end*/, float /*t*/, AttributeChange::Type /*change*/)
 {
-    LOGERROR("Attribute<AssetReferenceList>::Interpolate invoked! AssetReferenceList attributes cannot be animated!");
+    LogError("Attribute<AssetReferenceList>::Interpolate invoked! AssetReferenceList attributes cannot be animated!");
 }
 
 template<> void TUNDRACORE_API Attribute<EntityReference>::Interpolate(IAttribute* /*start*/, IAttribute* /*end*/, float /*t*/, AttributeChange::Type /*change*/)
 {
-    LOGERROR("Attribute<EntityReference>::Interpolate invoked! EntityReference attributes cannot be animated!");
+    LogError("Attribute<EntityReference>::Interpolate invoked! EntityReference attributes cannot be animated!");
 }
 
 template<> void TUNDRACORE_API Attribute<Variant>::Interpolate(IAttribute* /*start*/, IAttribute* /*end*/, float /*t*/, AttributeChange::Type /*change*/)
 {
-    LOGERROR("Attribute<Variant>::Interpolate invoked! Variant attributes cannot be animated!");
+    LogError("Attribute<Variant>::Interpolate invoked! Variant attributes cannot be animated!");
 }
 
 template<> void TUNDRACORE_API Attribute<VariantList>::Interpolate(IAttribute* /*start*/, IAttribute* /*end*/, float /*t*/, AttributeChange::Type /*change*/)
 {
-    LOGERROR("Attribute<VariantList>::Interpolate invoked! VariantList attributes cannot be animated!");
+    LogError("Attribute<VariantList>::Interpolate invoked! VariantList attributes cannot be animated!");
 }
 
 template<> void TUNDRACORE_API Attribute<int>::Interpolate(IAttribute* start, IAttribute* end, float t, AttributeChange::Type change)

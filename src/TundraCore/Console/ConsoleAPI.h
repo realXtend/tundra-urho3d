@@ -9,43 +9,46 @@
 #include "TundraCoreApi.h"
 #include "CoreTypes.h"
 #include "FrameworkFwd.h"
-
 #include "Signals.h"
+#include "CoreStringUtils.h"
+
 #include <Object.h>
 #include <RefCounted.h>
+
+#include <map>
 
 namespace Tundra
 {
 
 class TUNDRACORE_API ConsoleCommand : public RefCounted
 {
-    public:
-        ConsoleCommand(const String &name, const String &description) :
-            name_(name),
-            description_(description)
-        {
-        }
+public:
+    ConsoleCommand(const String &name, const String &description) :
+        name_(name),
+        description_(description)
+    {
+    }
 
-        /// Listen for execution with parameters.
-        Signal1<const StringVector&> ExecutedWith;
-        /// Listen for executions without parameters.
-        Signal0<void> Executed;
+    /// Listen for execution with parameters.
+    Signal1<const StringVector&> ExecutedWith;
+    /// Listen for executions without parameters.
+    Signal0<void> Executed;
 
-        /// Returns the name of this command.
-        const String &Name() const { return name_; }
+    /// Returns the name of this command.
+    const String &Name() const { return name_; }
 
-        /// Returns the description of this command.
-        const String &Description() const { return description_; }
+    /// Returns the description of this command.
+    const String &Description() const { return description_; }
 
-        void Invoke(const StringVector &parameters)
-        {
-            Executed.Emit();
-            ExecutedWith.Emit(parameters);
-        }
+    void Invoke(const StringVector &parameters)
+    {
+        Executed.Emit();
+        ExecutedWith.Emit(parameters);
+    }
 
-    private:
-        String name_;
-        String description_;
+private:
+    String name_;
+    String description_;
 };
 
 /// Console core API.
@@ -57,16 +60,29 @@ class TUNDRACORE_API ConsoleAPI : public Object
     OBJECT(ConsoleAPI);
 
 public:
-    typedef HashMap<String, SharedPtr<ConsoleCommand> > CommandMap;
+    typedef std::map<String, SharedPtr<ConsoleCommand>, StringCompareCaseInsensitive> CommandMap;
 
     /// Returns all command for introspection purposes.
     const CommandMap &Commands() const { return commands_; }
 
     ConsoleCommand *Command(const String &name) const;
 
+    /// Registers a new console command which invokes a member function on the specified receiver object.
+    /** @param name The function name to use for this command.
+        @param desc A help description of this command.
+        @param receiver The object instance that will be invoked when this command is executed.
+        @param memberFunc A function of the @c receiver that is to be called when this command is executed.
+        @see UnregisterCommand */
+    template<class X, class Y>
+    void RegisterCommand(const String &name, const String &desc, Y *receiver, void (X::*memberFunc)())
+    {
+        ConsoleCommand *cmd = RegisterCommand(name, desc);
+        if (cmd)
+            cmd->Executed.Connect(receiver, memberFunc);
+    }
+
     /// Registers a new console command which triggers a signal when executed.
-    /** Use this function from QtScript to implement custom console commands from a script.
-        @param name The function name to use for this command.
+    /** param name The function name to use for this command.
         @param desc A help description of this command.
         @return This function returns a pointer to the newly created ConsoleCommand data structure.
                 Connect the Invoked() signal of this structure to your script slot/function.
@@ -103,6 +119,23 @@ public:
     /// Clears UI console.
     void ClearConsole();
 
+    /// Prints a message to the console log and stdout.
+    /** @param message The text message to print. */
+    void Print(const String &message);
+
+    /// Sets the current log level.
+    /// @param level One of "error, warning, info, debug".
+    /// @note This function calls SetEnabledLogChannels with one of the above four predefined combinations. It is possible to further customize the set of 
+    /// active log channels by directly calling the SetEnabledLogChannels function with an appropriate bitset.
+    void SetLogLevel(const String &level);
+
+    /// Sets the new currently enabled log channels. Messages at the given channels will be printed, and others channels will be disabled.
+    void SetEnabledLogChannels(u32 newChannels);
+    /// Returns true if the given log channel is enabled.
+    bool IsLogChannelEnabled(u32 logChannel) const;
+    /// Returns the bitset of currently enabled log channels.
+    u32 EnabledLogChannels() const;
+
 private:
     friend class Framework;
 
@@ -120,11 +153,9 @@ private:
     /// Frame update handler
     void OnUpdate(float frametime);
 
-    CommandMap::ConstIterator FindCaseInsensitive(const String &name) const;
-    CommandMap::Iterator FindCaseInsensitive(const String &name);
-
     Framework *framework_;
     CommandMap commands_;
+    u32 enabledLogChannels; ///< Stores the set of currently active log channels.
 };
 
 }

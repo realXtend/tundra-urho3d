@@ -11,9 +11,9 @@
 #include "Profiler.h"
 #include "AttributeMetadata.h"
 #include "Framework.h"
+#include "LoggingFunctions.h"
 #include "Math/MathUtilities.h"
 
-#include <Log.h>
 #include <StringUtils.h>
 #include <Engine/Scene/Node.h>
 #include <Engine/Scene/Scene.h>
@@ -52,7 +52,7 @@ Camera::~Camera()
     if (world_.Expired())
     {
         if (camera_)
-            LOGERROR("Camera: World has expired, skipping uninitialization!");
+            LogError("Camera: World has expired, skipping uninitialization!");
         return;
     }
     
@@ -75,17 +75,17 @@ void Camera::SetActive()
 
     if (!camera_)
     {
-        LOGERROR("Camera::SetActive failed: No Urho camera setup!");
+        LogError("Camera::SetActive failed: No Urho camera setup!");
         return;
     }
     if (world_.Expired())
     {
-        LOGERROR("Camera::SetActive failed: The camera component is in a scene that has already been destroyed!");
+        LogError("Camera::SetActive failed: The camera component is in a scene that has already been destroyed!");
         return;
     }
     if (!ParentEntity())
     {
-        LOGERROR("Camera::SetActive failed: The camera component is not attached to an Entity!");
+        LogError("Camera::SetActive failed: The camera component is not attached to an Entity!");
         return;
     }
 
@@ -119,7 +119,7 @@ float Camera::AspectRatio() const
                     return width / height;
             }
         }
-        LOGERROR("Invalid format for the aspectRatio field: \"" + aspectRatio.Get() + "\"! Should be of form \"float\" or \"float:float\". Leave aspectRatio empty to match the current main viewport aspect ratio.");
+        LogError("Invalid format for the aspectRatio field: \"" + aspectRatio.Get() + "\"! Should be of form \"float\" or \"float:float\". Leave aspectRatio empty to match the current main viewport aspect ratio.");
     }
 
     /// \todo Assumes entire physical window is the viewport
@@ -127,7 +127,7 @@ float Camera::AspectRatio() const
     if (gfx)
         return (float)gfx->GetWidth() / (float)gfx->GetHeight();
 
-    LOGWARNING("Camera::AspectRatio: No viewport or aspectRatio attribute set! Don't have an aspect ratio for the camera!");
+    LogWarning("Camera::AspectRatio: No viewport or aspectRatio attribute set! Don't have an aspect ratio for the camera!");
     return 1.f;
 }
 
@@ -180,7 +180,7 @@ void Camera::AttachCamera()
     Urho3D::Node* placeableNode = placeable_->UrhoSceneNode();
     if (!placeableNode)
     {
-        LOGERROR("Can not attach camera: placeable does not have an Urho3D scene node");
+        LogError("Can not attach camera: placeable does not have an Urho3D scene node");
         return;
     }
     cameraNode_->SetParent(placeableNode);
@@ -190,7 +190,7 @@ Ray Camera::ViewportPointToRay(float x, float y) const
 {
     // Do a bit of sanity checking that the user didn't go and input absolute window coordinates.
     if (fabs(x) >= 10.f || fabs(y) >= 10.f || !IsFinite(x) || !IsFinite(y))
-        LOGERRORF("Camera::ViewportPointToRay takes input (x,y) coordinates normalized in the range [0,1]! (You inputted x=%f, y=%f", x, y);
+        LogError("Camera::ViewportPointToRay takes input (x,y) coordinates normalized in the range [0,1]! (You inputted x=" + String(x) + ", y=" + String(y));
 
     /// \todo Implement
     return Ray();
@@ -291,7 +291,7 @@ void Camera::SetFromFrustum(const Frustum &f)
     if (p)
         p->SetWorldTransform(float3x4::LookAt(f.Pos(), f.Pos() + f.Front(), -float3::unitZ, float3::unitY, f.Up()));
     else
-        LOGWARNING("Camera::SetFromFrustum: Camera entity has no Placeable, cannot set world transform.");
+        LogWarning("Camera::SetFromFrustum: Camera entity has no Placeable, cannot set world transform.");
 
     upVector.Set(f.Up(), AttributeChange::Disconnected);
     nearPlane.Set(f.NearPlaneDistance(), AttributeChange::Disconnected);
@@ -307,13 +307,13 @@ Frustum Camera::ToFrustum() const
 
     if (!camera_)
     {
-        LOGERROR("Camera::ToFrustum failed: No Urho camera initialized to Camera!");
+        LogError("Camera::ToFrustum failed: No Urho camera initialized to Camera!");
         return f;
     }
     PlaceablePtr p = placeable_.Lock();
     if (!p)
     {
-        LOGERROR("Camera::ToFrustum failed: No Placeable set to the camera entity!");
+        LogError("Camera::ToFrustum failed: No Placeable set to the camera entity!");
         return f;
     }
 

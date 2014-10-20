@@ -7,8 +7,8 @@
 #include "GraphicsWorld.h"
 #include "AttributeMetadata.h"
 #include "Math/MathUtilities.h"
+#include "LoggingFunctions.h"
 
-#include <Log.h>
 #include <Engine/Scene/Scene.h>
 #include <Engine/Scene/Node.h>
 #include <Engine/Graphics/AnimatedModel.h>
@@ -45,7 +45,7 @@ Mesh::~Mesh()
     if (world_.Expired())
     {
         if (mesh_)
-            LOGERROR("Mesh: World has expired, skipping uninitialization!");
+            LogError("Mesh: World has expired, skipping uninitialization!");
         return;
     }
 
@@ -153,7 +153,7 @@ void Mesh::AttachMesh()
     Urho3D::Node* placeableNode = placeable_->UrhoSceneNode();
     if (!placeableNode)
     {
-        LOGERROR("Can not attach mesh: placeable does not have an Urho3D scene node");
+        LogError("Can not attach mesh: placeable does not have an Urho3D scene node");
         return;
     }
     adjustmentNode_->SetParent(placeableNode);

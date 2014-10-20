@@ -9,22 +9,24 @@
 #include "SceneAPI.h"
 #include "ConsoleAPI.h"
 #include "TundraVersionInfo.h"
+#include "LoggingFunctions.h"
+#include "IModule.h"
 
 #include <Context.h>
 #include <Engine.h>
 #include <FileSystem.h>
-#include <IModule.h>
-#include <Log.h>
 #include <File.h>
 #include <XMLFile.h>
 #include <ProcessUtils.h>
 #include <Input.h>
+#include <Log.h>
 
 using namespace Urho3D;
 
 namespace Tundra
 {
 
+static Framework* instance = 0;
 static int argc;
 static char** argv;
 static String organizationName(TUNDRA_ORGANIZATION_NAME);
@@ -61,6 +63,8 @@ Framework::Framework(Context* ctx) :
     headless(false),
     renderer(0)
 {
+    instance = this;
+
     // Create the Urho3D engine, which creates various other subsystems, but does not initialize them yet
     engine = new Urho3D::Engine(GetContext());
     // Timestamps clutter the log. Disable for now
@@ -86,6 +90,8 @@ Framework::~Framework()
     frame.Reset();
     plugin.Reset();
     config.Reset();
+
+    instance = 0;
 }
 
 void Framework::Initialize()
@@ -97,10 +103,10 @@ void Framework::Initialize()
     ApplyStartupOptions(engineInitMap);
 
     // Initialization prints
-    LOGINFO("Installation  " + InstallationDirectory());
-    LOGINFO("Working       " + CurrentWorkingDirectory());
-    LOGINFO("Data          " + UserDataDirectory());
-    LOGINFO("Config        " + config->ConfigFolder());
+    LogInfo("Installation  " + InstallationDirectory());
+    LogInfo("Working       " + CurrentWorkingDirectory());
+    LogInfo("Data          " + UserDataDirectory());
+    LogInfo("Config        " + config->ConfigFolder());
 
     PrintStartupOptions();
 
@@ -115,23 +121,21 @@ void Framework::Initialize()
     engineInitMap["WindowTitle"] = "Tundra";
     engineInitMap["LogName"] = "Tundra.log";
 
-    LOGINFO("");
+    LogInfo("");
     engine->Initialize(engineInitMap);
 
     // Initialize core APIs
     console->Initialize();
 
-    console->RegisterCommand("plugins", "Prints all currently loaded plugins.")
-        ->Executed.Connect(plugin.Get(), &PluginAPI::ListPlugins);
-    console->RegisterCommand("exit", "Shuts down gracefully.")
-        ->Executed.Connect(this, &Framework::Exit);
+    console->RegisterCommand("plugins", "Prints all currently loaded plugins.", plugin.Get(), &PluginAPI::ListPlugins);
+    console->RegisterCommand("exit", "Shuts down gracefully.", this, &Framework::Exit);
 
     // Initialize plugins now
-    LOGINFO("");
-    LOGINFO("Initializing");
+    LogInfo("");
+    LogInfo("Initializing");
     for(uint i = 0; i < modules.Size(); ++i)
     {
-        LOGINFO("  " + modules[i]->Name());
+        LogInfo("  " + modules[i]->Name());
         modules[i]->Initialize();
     }
 }
@@ -159,17 +163,17 @@ void Framework::Uninitialize()
     // Delete scenes
     scene.Reset();
 
-    LOGDEBUG("");
-    LOGDEBUG("Uninitializing");
+    LogDebug("");
+    LogDebug("Uninitializing");
     for(uint i = 0; i < modules.Size(); ++i)
     {
-        LOGDEBUG("  " + modules[i]->Name());
+        LogDebug("  " + modules[i]->Name());
         modules[i]->Uninitialize();
     }
-    LOGDEBUG("Unloading");
+    LogDebug("Unloading");
     for(uint i = 0; i < modules.Size(); ++i)
     {
-        LOGDEBUG("  " + modules[i]->Name());
+        LogDebug("  " + modules[i]->Name());
         modules[i]->Unload();
     }
 
@@ -278,6 +282,11 @@ void Framework::RegisterRenderer(IRenderer *renderer_)
 IRenderer *Framework::Renderer() const
 {
     return renderer;
+}
+
+Framework* Framework::Instance()
+{
+    return instance;
 }
 
 void Framework::SetCurrentWorkingDirectory(const String& newCwd)
@@ -393,7 +402,7 @@ void Framework::ProcessStartupOptions()
                         String param = argv[pi];
                         if (param.StartsWith("--"))
                         {
-                            LOGERROR("Could not find an end quote for '" + option + "' parameter: " + peekOption);
+                            LogError("Could not find an end quote for '" + option + "' parameter: " + peekOption);
                             i = pi - 1; // Step one back so the main for loop will inspect this element next.
                             break;
                         }
@@ -420,7 +429,7 @@ void Framework::ProcessStartupOptions()
             AddCommandLineParameter(option);
         else
         {
-            LOGWARNING("Orphaned startup option parameter value specified: " + String(argv[i]));
+            LogWarning("Orphaned startup option parameter value specified: " + String(argv[i]));
             continue;
         }
 
@@ -455,7 +464,7 @@ void Framework::ApplyStartupOptions(VariantMap &engineInitMap)
     // --loglevel controls both shell/console and file logging
     Vector<String> logLevelParam  = CommandLineParameters("--loglevel");
     if (logLevelParam.Size() > 1)
-        LOGWARNING("Multiple --loglevel parameters specified! Using " + logLevelParam.Front() + " as the value.");
+        LogWarning("Multiple --loglevel parameters specified! Using " + logLevelParam.Front() + " as the value.");
     if (logLevelParam.Size() > 0)
     {
         String logLevel = logLevelParam.Front();
@@ -468,7 +477,7 @@ void Framework::ApplyStartupOptions(VariantMap &engineInitMap)
         else if (logLevel.Compare("none", false) == 0 || logLevel.Compare("disabled", false) == 0)
             engineInitMap["LogLevel"] = Urho3D::LOG_NONE;
         else
-            LOGWARNING("Erroneous --loglevel: " + logLevelParam.Front() + ". Ignoring.");
+            LogWarning("Erroneous --loglevel: " + logLevelParam.Front() + ". Ignoring.");
 
         // Apply the log level now, as there will be logging on Tundra side before engine->Initialize()
         Log* log = engine->GetSubsystem<Log>();
@@ -492,7 +501,7 @@ void Framework::ApplyStartupOptions(VariantMap &engineInitMap)
     if (configDirs.Size() >= 1)
         configDir = configDirs.Back();
     if (configDirs.Size() > 1)
-        LOGWARNING("Multiple --configDir parameters specified! Using \"" + configDir + "\" as the configuration directory.");
+        LogWarning("Multiple --configDir parameters specified! Using \"" + configDir + "\" as the configuration directory.");
     config->PrepareDataFolder(configDir);
 
     // Set target FPS limits, if specified.
@@ -503,46 +512,46 @@ void Framework::ApplyStartupOptions(VariantMap &engineInitMap)
         if (targetFps >= 0)
             engine->SetMaxFps(targetFps);
         else
-            LOGWARNING("Invalid target FPS value " + String(targetFps) + " read from config. Ignoring.");
+            LogWarning("Invalid target FPS value " + String(targetFps) + " read from config. Ignoring.");
     }
 
     Vector<String> fpsLimitParam = CommandLineParameters("--fpsLimit");
     if (fpsLimitParam.Size() > 1)
-        LOGWARNING("Multiple --fpslimit parameters specified! Using " + fpsLimitParam.Front() + " as the value.");
+        LogWarning("Multiple --fpslimit parameters specified! Using " + fpsLimitParam.Front() + " as the value.");
     if (fpsLimitParam.Size() > 0)
     {
         int targetFpsLimit = ToInt(fpsLimitParam.Front());
         if (targetFpsLimit >= 0)
             engine->SetMaxFps(targetFpsLimit);
         else
-            LOGWARNING("Erroneous FPS limit given with --fpsLimit: " + fpsLimitParam.Front() + ". Ignoring.");
+            LogWarning("Erroneous FPS limit given with --fpsLimit: " + fpsLimitParam.Front() + ". Ignoring.");
     }
 
     Vector<String> fpsLimitInactiveParam = CommandLineParameters("--fpsLimitWhenInactive");
     if (fpsLimitInactiveParam.Size() > 1)
-        LOGWARNING("Multiple --fpslimit parameters specified! Using " + fpsLimitInactiveParam.Front() + " as the value.");
+        LogWarning("Multiple --fpslimit parameters specified! Using " + fpsLimitInactiveParam.Front() + " as the value.");
     if (fpsLimitInactiveParam.Size() > 0)
     {
         int targetFpsLimit = ToInt(fpsLimitParam.Front());
         if (targetFpsLimit >= 0)
             engine->SetMaxInactiveFps(targetFpsLimit);
         else
-            LOGWARNING("Erroneous FPS limit given with --fpsLimit: " + fpsLimitInactiveParam.Front() + ". Ignoring.");
+            LogWarning("Erroneous FPS limit given with --fpsLimit: " + fpsLimitInactiveParam.Front() + ". Ignoring.");
     }
 }
 
 void Framework::PrintStartupOptions()
 {
-    LOGINFO("");
-    LOGINFO("Startup options");
+    LogInfo("");
+    LogInfo("Startup options");
     for (OptionsMap::ConstIterator i = startupOptions.Begin(); i != startupOptions.End(); ++i)
     {
         String option = i->second_.first_;
-        LOGINFO("  " + option);
+        LogInfo("  " + option);
         for (unsigned j = 0; j < i->second_.second_.Size(); ++j)
         {
             if (!i->second_.second_[j].Empty())
-                LOGINFO("    '" + i->second_.second_[j] + "'");
+                LogInfo("    '" + i->second_.second_[j] + "'");
         }
     }
 }
@@ -556,7 +565,7 @@ bool Framework::LoadStartupOptionsFromFile(const String &configurationFile)
     else if (suffix == ".json")
         read = LoadStartupOptionsFromJSON(configurationFile);
     else
-        LOGERROR("Invalid config file format. Only .xml and .json are supported: " + configurationFile);
+        LogError("Invalid config file format. Only .xml and .json are supported: " + configurationFile);
     if (read)
         configFiles.Push(configurationFile);
     return read;
@@ -570,7 +579,7 @@ bool Framework::LoadStartupOptionsFromXML(String configurationFile)
     File file(GetContext(), configurationFile, FILE_READ);
     if (!doc.Load(file))
     {
-        LOGERROR("Failed to open config file \"" + configurationFile + "\"!");
+        LogError("Failed to open config file \"" + configurationFile + "\"!");
         return false;
     }
 
@@ -606,13 +615,13 @@ bool Framework::LoadStartupOptionsFromJSON(String configurationFile)
     File file(GetContext(), configurationFile, FILE_READ);
     if (!file.IsOpen())
     {
-        LOGERROR("Failed to open config file \"" + configurationFile + "\"!");
+        LogError("Failed to open config file \"" + configurationFile + "\"!");
         return false;
     }
     JSONValue root;
     if (!root.FromString(file.ReadString()))
     {
-        LOGERROR("Failed to parse config file \"" + configurationFile + "\"!");
+        LogError("Failed to parse config file \"" + configurationFile + "\"!");
         return false;
     }
 
@@ -623,7 +632,7 @@ bool Framework::LoadStartupOptionsFromJSON(String configurationFile)
     else if (root.IsString())
         AddCommandLineParameter(root.GetString());
     else
-        LOGERROR("JSON config file " + configurationFile + " was not an object, array or string");
+        LogError("JSON config file " + configurationFile + " was not an object, array or string");
     
     return true;
 }

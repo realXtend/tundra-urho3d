@@ -6,11 +6,10 @@
 #include "Scene/Scene.h"
 #include "Name.h"
 #include "SceneAPI.h"
-
 #include "Framework.h"
 #include "IComponent.h"
+#include "LoggingFunctions.h"
 
-#include <Log.h>
 #include <XMLFile.h>
 #include <ForEach.h>
 
@@ -51,7 +50,7 @@ void Entity::ChangeComponentId(component_id_t old_id, component_id_t new_id)
     
     if (ComponentById(new_id))
     {
-        LOGWARNING("Purged component " + String(new_id) + " to make room for a ChangeComponentId request. This should not happen.");
+        LogWarning("Purged component " + String(new_id) + " to make room for a ChangeComponentId request. This should not happen.");
         RemoveComponentById(new_id, AttributeChange::LocalOnly);
     }
     
@@ -92,7 +91,7 @@ void Entity::AddComponent(component_id_t id, const ComponentPtr &component, Attr
             // If component ID is specified manually, but it already exists, it is an error. Do not add the component in that case.
             if (components_.Find(id) != components_.End())
             {
-                LOGERROR("Can not add component: a component with id " + String(id) + " already exists in entity " + ToString());
+                LogError("Can not add component: a component with id " + String(id) + " already exists in entity " + ToString());
                 return;
             }
             // Whenever a manual replicated ID is assigned, reset the ID generator to the highest value to avoid unnecessary free ID probing in the future
@@ -122,7 +121,7 @@ void Entity::RemoveComponent(const ComponentPtr &component, AttributeChange::Typ
                 return;
             }
 
-        LOGWARNINGF("Entity::RemoveComponent: Failed to find %s \"%s\" from %s.", component->TypeName().CString(), component->Name().CString(), ToString().CString());
+        LogWarning("Entity::RemoveComponent: Failed to find " + component->TypeName() + " \"" + component->Name() + "\" from " + ToString() + ".");
     }
 }
 
@@ -131,7 +130,7 @@ void Entity::RemoveAllComponents(AttributeChange::Type change)
     while(!components_.Empty())
     {
         if (components_.Begin()->first_ != components_.Begin()->second_->Id())
-            LOGWARNING("Component ID mismatch on RemoveAllComponents: map key " + String(components_.Begin()->first_) + " component ID " + String(components_.Begin()->second_->Id()));
+            LogWarning("Component ID mismatch on RemoveAllComponents: map key " + String(components_.Begin()->first_) + " component ID " + String(components_.Begin()->second_->Id()));
         RemoveComponent(components_.Begin(), change);
     }
 }
@@ -234,7 +233,7 @@ ComponentPtr Entity::CreateComponent(const String &type_name, AttributeChange::T
     ComponentPtr new_comp = framework_->Scene()->CreateComponentByName(scene_, type_name);
     if (!new_comp)
     {
-        LOGERROR("Failed to create a component of type \"" + type_name + "\" to " + ToString());
+        LogError("Failed to create a component of type \"" + type_name + "\" to " + ToString());
         return ComponentPtr();
     }
 
@@ -251,7 +250,7 @@ ComponentPtr Entity::CreateComponent(const String &type_name, const String &name
     ComponentPtr new_comp = framework_->Scene()->CreateComponentByName(scene_, type_name, name);
     if (!new_comp)
     {
-        LOGERROR("Failed to create a component of type \"" + type_name + "\" and name \"" + name + "\" to " + ToString());
+        LogError("Failed to create a component of type \"" + type_name + "\" and name \"" + name + "\" to " + ToString());
         return ComponentPtr();
     }
 
@@ -268,7 +267,7 @@ ComponentPtr Entity::CreateComponent(u32 typeId, AttributeChange::Type change, b
     ComponentPtr new_comp = framework_->Scene()->CreateComponentById(scene_, typeId);
     if (!new_comp)
     {
-        LOGERROR("Failed to create a component of type id " + String(typeId) + " to " + ToString());
+        LogError("Failed to create a component of type id " + String(typeId) + " to " + ToString());
         return ComponentPtr();
     }
 
@@ -285,7 +284,7 @@ ComponentPtr Entity::CreateComponent(u32 typeId, const String &name, AttributeCh
     ComponentPtr new_comp = framework_->Scene()->CreateComponentById(scene_, typeId, name);
     if (!new_comp)
     {
-        LOGERROR("Failed to create a component of type id " + String(typeId) + " and name \"" + name + "\" to " + ToString());
+        LogError("Failed to create a component of type id " + String(typeId) + " and name \"" + name + "\" to " + ToString());
         return ComponentPtr();
     }
 
@@ -302,7 +301,7 @@ ComponentPtr Entity::CreateComponentWithId(component_id_t compId, u32 typeId, co
     ComponentPtr new_comp = framework_->Scene()->CreateComponentById(scene_, typeId, name);
     if (!new_comp)
     {
-        LOGERROR("Failed to create a component of type id " + String(typeId) + " and name \"" + name + "\" to " + ToString());
+        LogError("Failed to create a component of type id " + String(typeId) + " and name \"" + name + "\" to " + ToString());
         return ComponentPtr();
     }
 
@@ -404,9 +403,9 @@ void Entity::SerializeToBinary(kNet::DataSerializer &dst, bool serializeTemporar
 
     /// \hack Retain binary compatibility with earlier scene format, at the cost of max. 65535 components or child entities
     if (serializable.Size() > 0xffff)
-        LOGERROR("Entity::SerializeToBinary: entity contains more than 65535 components, binary save will be erroneous");
+        LogError("Entity::SerializeToBinary: entity contains more than 65535 components, binary save will be erroneous");
     if (serializableChildren.Size() > 0xffff)
-        LOGERROR("Entity::SerializeToBinary: entity contains more than 65535 child entities, binary save will be erroneous");
+        LogError("Entity::SerializeToBinary: entity contains more than 65535 child entities, binary save will be erroneous");
 
     dst.Add<u32>(serializable.Size() | (serializableChildren.Size() << 16));
     foreach(const ComponentPtr &comp, serializable)
@@ -682,7 +681,7 @@ void Entity::AddChild(EntityPtr child, AttributeChange::Type change)
 {
     if (!child)
     {
-        LOGWARNING("Entity::AddChild: null child entity specified");
+        LogWarning("Entity::AddChild: null child entity specified");
         return;
     }
 
@@ -693,7 +692,7 @@ void Entity::RemoveChild(EntityPtr child, AttributeChange::Type change)
 {
     if (child->Parent().Get() != this)
     {
-        LOGWARNING("Entity::RemoveChild: the specified entity is not parented to this entity");
+        LogWarning("Entity::RemoveChild: the specified entity is not parented to this entity");
         return;
     }
 
@@ -701,7 +700,7 @@ void Entity::RemoveChild(EntityPtr child, AttributeChange::Type change)
     if (scene_)
         scene_->RemoveEntity(child->Id(), change);
     else
-        LOGERROR("Entity::RemoveChild: null parent scene, can not remove the entity from scene");
+        LogError("Entity::RemoveChild: null parent scene, can not remove the entity from scene");
 }
 
 void Entity::RemoveAllChildren(AttributeChange::Type change)
@@ -714,12 +713,12 @@ void Entity::DetachChild(EntityPtr child, AttributeChange::Type change)
 {
     if (!child)
     {
-        LOGWARNING("Entity::DetachChild: null child entity specified");
+        LogWarning("Entity::DetachChild: null child entity specified");
         return;
     }
     if (child->Parent().Get() != this)
     {
-        LOGWARNING("Entity::DetachChild: the specified entity is not parented to this entity");
+        LogWarning("Entity::DetachChild: the specified entity is not parented to this entity");
         return;
     }
 
@@ -735,7 +734,7 @@ void Entity::SetParent(EntityPtr parent, AttributeChange::Type change)
     // Prevent self assignment
     if (parent.Get() == this)
     {
-        LOGERROR("Entity::SetParent: self parenting attempted.");
+        LogError("Entity::SetParent: self parenting attempted.");
         return;
     }
 
@@ -747,7 +746,7 @@ void Entity::SetParent(EntityPtr parent, AttributeChange::Type change)
         {
             if (parentCheck == this)
             {
-                LOGERROR("Entity::SetParent: Cyclic parenting attempted.");
+                LogError("Entity::SetParent: Cyclic parenting attempted.");
                 return;
             }
             parentCheck = parentCheck->Parent().Get();
@@ -789,7 +788,7 @@ EntityPtr Entity::CreateChild(entity_id_t id, const StringVector &components, At
 {
     if (!scene_)
     {
-        LOGERROR("Entity::CreateChild: not attached to a scene, can not create a child entity");
+        LogError("Entity::CreateChild: not attached to a scene, can not create a child entity");
         return EntityPtr();
     }
 
@@ -804,7 +803,7 @@ EntityPtr Entity::CreateLocalChild(const StringVector &components, AttributeChan
 {
     if (!scene_)
     {
-        LOGERROR("Entity::CreateLocalChild: not attached to a scene, can not create a child entity");
+        LogError("Entity::CreateLocalChild: not attached to a scene, can not create a child entity");
         return EntityPtr();
     }
 

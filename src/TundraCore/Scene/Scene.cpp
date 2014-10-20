@@ -16,16 +16,17 @@
 #include "Application.h"
 #include "FrameAPI.h"
 #include "Profiler.h"
+#include "LoggingFunctions.h"
 
 #include <kNet/DataDeserializer.h>
 #include <kNet/DataSerializer.h>
 #include <algorithm>
 
-#include <Log.h>
 #include <File.h>
 #include <XMLFile.h>
 #include <ForEach.h>
 #include <FileSystem.h>
+#include <StringUtils.h>
 
 using namespace kNet;
 using namespace std;
@@ -50,7 +51,7 @@ Scene::Scene(const String &name, Framework *framework, bool viewEnabled, bool au
 Scene::~Scene()
 {
     if (subsystems.Size())
-        LOGWARNING("Subsystems not removed at scene destruct time");
+        LogWarning("Subsystems not removed at scene destruct time");
 
     EndAllAttributeInterpolations();
     
@@ -85,7 +86,7 @@ EntityPtr Scene::CreateEntity(entity_id_t id, const StringVector &components, At
     {
         if(entities_.Find(id) != entities_.End())
         {
-            LOGERROR("Can't create entity with given id because it's already used: " + String(id));
+            LogError("Can't create entity with given id because it's already used: " + String(id));
             return EntityPtr();
         }
         else
@@ -173,7 +174,7 @@ void Scene::ChangeEntityId(entity_id_t old_id, entity_id_t new_id)
     
     if (EntityById(new_id))
     {
-        LOGWARNING("Purged entity " + String(new_id) + " to make room for a ChangeEntityId request. This should not happen");
+        LogWarning("Purged entity " + String(new_id) + " to make room for a ChangeEntityId request. This should not happen");
         RemoveEntity(new_id, AttributeChange::LocalOnly);
     }
     
@@ -190,7 +191,7 @@ bool Scene::RemoveEntity(entity_id_t id, AttributeChange::Type change)
         EntityPtr del_entity = it->second_;
         if (!del_entity.Get())
         {
-            LOGERROR("Scene::RemoveEntity: Found null EntityPtr from internal state with id " + String(id));
+            LogError("Scene::RemoveEntity: Found null EntityPtr from internal state with id " + String(id));
             return false;
         }
         
@@ -245,7 +246,7 @@ void Scene::RemoveAllEntities(bool signal, AttributeChange::Type change)
     
     if (entities_.Size())
     {
-        LOGWARNING("Scene::RemoveAllEntities: entity map was not clear after removing all entities, clearing manually");
+        LogWarning("Scene::RemoveAllEntities: entity map was not clear after removing all entities, clearing manually");
         entities_.Clear();
     }
     
@@ -450,14 +451,14 @@ Vector<Entity *> Scene::LoadSceneXML(const String& filename, bool clearScene, bo
     Urho3D::File file(context_);
     if (!file.Open(filename, Urho3D::FILE_READ))
     {
-        LOGERROR("Scene::LoadSceneXML: Failed to open file " + filename + ".");
+        LogError("Scene::LoadSceneXML: Failed to open file " + filename + ".");
         return Vector<Entity*>();
     }
 
     Urho3D::XMLFile scene_doc(context_);
     if (!scene_doc.Load(file))
     {
-        LOGERROR("Parsing scene XML from " + filename + " failed.");
+        LogError("Parsing scene XML from " + filename + " failed.");
         return Vector<Entity*>();
     }
     file.Close();
@@ -491,7 +492,7 @@ bool Scene::SaveSceneXML(const String& filename, bool serializeTemporary, bool s
     Urho3D::File scenefile(context_);
     if (!scenefile.Open(filename, Urho3D::FILE_WRITE))
     {
-        LOGERROR("SaveSceneXML: Failed to open file " + filename + " for writing.");
+        LogError("SaveSceneXML: Failed to open file " + filename + " for writing.");
         return false;
     }
 
@@ -506,13 +507,13 @@ Vector<Entity *> Scene::LoadSceneBinary(const String& filename, bool clearScene,
     Urho3D::File file(context_);
     if (!file.Open(filename, Urho3D::FILE_READ))
     {
-        LOGERROR("Scene::LoadSceneBinary: Failed to open file " + filename + ".");
+        LogError("Scene::LoadSceneBinary: Failed to open file " + filename + ".");
         return ret;
     }
 
     if (!file.GetSize())
     {
-        LOGERROR("Scene::LoadSceneBinary: File " + filename + " contained 0 bytes when loading scene binary.");
+        LogError("Scene::LoadSceneBinary: File " + filename + " contained 0 bytes when loading scene binary.");
         return ret;
     }
 
@@ -555,7 +556,7 @@ bool Scene::SaveSceneBinary(const String& filename, bool serializeTemporary, boo
     Urho3D::File scenefile(context_);
     if (!scenefile.Open(filename, Urho3D::FILE_WRITE))
     {
-        LOGERROR("Scene::SaveSceneBinary: Could not open file " + filename + " for writing when saving scene binary.");
+        LogError("Scene::SaveSceneBinary: Could not open file " + filename + " for writing when saving scene binary.");
         return false;
     }
 
@@ -571,7 +572,7 @@ Vector<Entity *> Scene::CreateContentFromXml(const String &xml,  bool useEntityI
     Urho3D::XMLFile scene_doc(context_);
     if (!scene_doc.FromString(xml))
     {
-        LOGERROR("Scene::CreateContentFromXml: Parsing scene XML from text failed");
+        LogError("Scene::CreateContentFromXml: Parsing scene XML from text failed");
         return ret;
     }
 
@@ -582,7 +583,7 @@ Vector<Entity *> Scene::CreateContentFromXml(Urho3D::XMLFile &xml, bool useEntit
 {
     if (!IsAuthority() && parentTracker_.IsTracking())
     {
-        LOGERROR("Scene::CreateContentFromXml: Still waiting for previous content creation to complete on the server. Try again after it completes.");
+        LogError("Scene::CreateContentFromXml: Still waiting for previous content creation to complete on the server. Try again after it completes.");
         return Vector<Entity*>();
     }
 
@@ -594,7 +595,7 @@ Vector<Entity *> Scene::CreateContentFromXml(Urho3D::XMLFile &xml, bool useEntit
     Urho3D::XMLElement scene_elem = xml.GetRoot("scene");
     if (!scene_elem)
     {
-        LOGERROR("Scene::CreateContentFromXml: Could not find 'scene' element from XML.");
+        LogError("Scene::CreateContentFromXml: Could not find 'scene' element from XML.");
         return Vector<Entity*>();
     }
 
@@ -687,8 +688,8 @@ void Scene::CreateEntityFromXml(EntityPtr parent, const Urho3D::XMLElement& ent_
 
     if (HasEntity(id)) // If the entity we are about to add conflicts in ID with an existing entity in the scene, delete the old entity.
     {
-        LOGDEBUG("Scene::CreateContentFromXml: Destroying previous entity with id " + String(id) + " to avoid conflict with new created entity with the same id.");
-        LOGERROR("Warning: Invoking buggy behavior: Object with id " + String(id) +" might not replicate properly!");
+        LogDebug("Scene::CreateContentFromXml: Destroying previous entity with id " + String(id) + " to avoid conflict with new created entity with the same id.");
+        LogError("Warning: Invoking buggy behavior: Object with id " + String(id) +" might not replicate properly!");
         RemoveEntity(id, AttributeChange::Replicate); ///<@todo Consider do we want to always use Replicate
     }
 
@@ -731,7 +732,7 @@ void Scene::CreateEntityFromXml(EntityPtr parent, const Urho3D::XMLElement& ent_
     }
     else
     {
-        LOGERROR("Scene::CreateContentFromXml: Failed to create entity with id " + String(id) + "!");
+        LogError("Scene::CreateContentFromXml: Failed to create entity with id " + String(id) + "!");
     }
 
     // Spawn any child entities
@@ -748,13 +749,13 @@ Vector<Entity *> Scene::CreateContentFromBinary(const String &filename, bool use
     Urho3D::File file(context_);
     if (!file.Open(filename, Urho3D::FILE_READ))
     {
-        LOGERROR("Scene::LoadSceneBinary: Failed to open file " + filename + ".");
+        LogError("Scene::LoadSceneBinary: Failed to open file " + filename + ".");
         return Vector<Entity*>();
     }
 
     if (!file.GetSize())
     {
-        LOGERROR("Scene::LoadSceneBinary: File " + filename + " contained 0 bytes when loading scene binary.");
+        LogError("Scene::LoadSceneBinary: File " + filename + " contained 0 bytes when loading scene binary.");
         return Vector<Entity*>();
     }
 
@@ -770,7 +771,7 @@ Vector<Entity *> Scene::CreateContentFromBinary(const char *data, int numBytes, 
 {
     if (!IsAuthority() && parentTracker_.IsTracking())
     {
-        LOGERROR("Scene::CreateContentFromBinary: Still waiting for previous content creation to complete on the server. Try again after it completes.");
+        LogError("Scene::CreateContentFromBinary: Still waiting for previous content creation to complete on the server. Try again after it completes.");
         return Vector<Entity*>();
     }
 
@@ -850,8 +851,8 @@ void Scene::CreateEntityFromBinary(EntityPtr parent, kNet::DataDeserializer& sou
 
     if (HasEntity(id)) // If the entity we are about to add conflicts in ID with an existing entity in the scene.
     {
-        LOGDEBUG("Scene::CreateContentFromBinary: Destroying previous entity with id " + String(id) + " to avoid conflict with new created entity with the same id.");
-        LOGERROR("Warning: Invoking buggy behavior: Object with id " + String(id) + "might not replicate properly!");
+        LogDebug("Scene::CreateContentFromBinary: Destroying previous entity with id " + String(id) + " to avoid conflict with new created entity with the same id.");
+        LogError("Warning: Invoking buggy behavior: Object with id " + String(id) + "might not replicate properly!");
         RemoveEntity(id, AttributeChange::Replicate); ///<@todo Consider do we want to always use Replicate
     }
 
@@ -863,7 +864,7 @@ void Scene::CreateEntityFromBinary(EntityPtr parent, kNet::DataDeserializer& sou
 
     if (!entity)
     {
-        LOGERROR("Scene::CreateEntityFromBinary: Failed to create entity.");
+        LogError("Scene::CreateEntityFromBinary: Failed to create entity.");
         return;
     }
     
@@ -898,11 +899,11 @@ void Scene::CreateEntityFromBinary(EntityPtr parent, kNet::DataDeserializer& sou
                 }
             }
             else
-                LOGERROR("Scene::CreateEntityFromBinary: Failed to load component \"" + framework_->Scene()->ComponentTypeNameForTypeId(typeId) + "\"!");
+                LogError("Scene::CreateEntityFromBinary: Failed to load component \"" + framework_->Scene()->ComponentTypeNameForTypeId(typeId) + "\"!");
         }
         catch(...)
         {
-            LOGERROR("Scene::CreateEntityFromBinary: Failed to load component \"" + framework_->Scene()->ComponentTypeNameForTypeId(typeId) + "\"!");
+            LogError("Scene::CreateEntityFromBinary: Failed to load component \"" + framework_->Scene()->ComponentTypeNameForTypeId(typeId) + "\"!");
         }
     }
 
@@ -917,12 +918,12 @@ Vector<Entity *> Scene::CreateContentFromSceneDesc(const SceneDesc &desc, bool u
     Vector<Entity *> ret;
     if (desc.entities.Empty())
     {
-        LOGERROR("Scene::CreateContentFromSceneDesc: Empty scene description.");
+        LogError("Scene::CreateContentFromSceneDesc: Empty scene description.");
         return ret;
     }
     if (!IsAuthority() && parentTracker_.IsTracking())
     {
-        LOGERROR("Scene::CreateContentFromSceneDesc: Still waiting for previous content creation to complete on the server. Try again after it completes.");
+        LogError("Scene::CreateContentFromSceneDesc: Still waiting for previous content creation to complete on the server. Try again after it completes.");
         return ret;
     }
 
@@ -975,8 +976,8 @@ void Scene::CreateEntityFromDesc(EntityPtr parent, const EntityDesc& e, bool use
 
     if (HasEntity(id)) // If the entity we are about to add conflicts in ID with an existing entity in the scene.
     {
-        LOGDEBUG("Scene::CreateEntityFromDesc: Destroying previous entity with id " + String(id) + " to avoid conflict with new created entity with the same id.");
-        LOGERROR("Warning: Invoking buggy behavior: Object with id " + String(id) + " might not replicate properly!");
+        LogDebug("Scene::CreateEntityFromDesc: Destroying previous entity with id " + String(id) + " to avoid conflict with new created entity with the same id.");
+        LogError("Warning: Invoking buggy behavior: Object with id " + String(id) + " might not replicate properly!");
         RemoveEntity(id, AttributeChange::Replicate); ///<@todo Consider do we want to always use Replicate
     }
 
@@ -1004,7 +1005,7 @@ void Scene::CreateEntityFromDesc(EntityPtr parent, const EntityDesc& e, bool use
             assert(comp);
             if (!comp)
             {
-                LOGERRORF("Scene::CreateEntityFromDesc: failed to create component %s %s .", c.typeName.CString(), c.name.CString());
+                LogError("Scene::CreateEntityFromDesc: failed to create component " + c.typeName + " " + c.name);
                 continue;
             }
             if (comp->TypeId() == 25 /*DynamicComponent*/)
@@ -1059,22 +1060,22 @@ SceneDesc Scene::CreateSceneDescFromXml(const String &filename) const
     if (!filename.EndsWith(".txml", false))
     {
         if (filename.EndsWith(".tbin", false))
-            LOGERROR("Scene::CreateSceneDescFromXml: Try using CreateSceneDescFromBinary() instead for " + filename);
+            LogError("Scene::CreateSceneDescFromXml: Try using CreateSceneDescFromBinary() instead for " + filename);
         else
-            LOGERROR("Scene::CreateSceneDescFromXml: Unsupported file extension " + filename + " when trying to create scene description.");
+            LogError("Scene::CreateSceneDescFromXml: Unsupported file extension " + filename + " when trying to create scene description.");
         return sceneDesc;
     }
 
     Urho3D::File file(context_);
     if (!file.Open(filename, Urho3D::FILE_READ))
     {
-        LOGERROR("Scene::CreateSceneDescFromXml: Failed to open file " + filename + ".");
+        LogError("Scene::CreateSceneDescFromXml: Failed to open file " + filename + ".");
         return sceneDesc;
     }
 
     if (!file.GetSize())
     {
-        LOGERROR("Scene::LoadSceneBinary: File " + filename + " contained 0 bytes when loading scene binary.");
+        LogError("Scene::LoadSceneBinary: File " + filename + " contained 0 bytes when loading scene binary.");
         return sceneDesc;
     }
 
@@ -1089,7 +1090,7 @@ SceneDesc Scene::CreateSceneDescFromXml(const String &data, SceneDesc &sceneDesc
     Urho3D::XMLFile scene_doc(context_);
     if (!scene_doc.FromString(data))
     {
-        LOGERRORF("Scene::CreateSceneDescFromXml: Parsing scene XML from %s failed when loading Scene XML", sceneDesc.filename.CString());
+        LogError("Scene::CreateSceneDescFromXml: Parsing scene XML from " + sceneDesc.filename + " failed when loading Scene XML");
         return sceneDesc;
     }
 
@@ -1097,7 +1098,7 @@ SceneDesc Scene::CreateSceneDescFromXml(const String &data, SceneDesc &sceneDesc
     Urho3D::XMLElement scene_elem = scene_doc.GetRoot("scene");
     if (!scene_elem)
     {
-        LOGERROR("Scene::CreateSceneDescFromXml: Could not find 'scene' element from XML.");
+        LogError("Scene::CreateSceneDescFromXml: Could not find 'scene' element from XML.");
         return sceneDesc;
     }
 
@@ -1229,16 +1230,16 @@ SceneDesc Scene::CreateSceneDescFromBinary(const String &filename) const
     if (!filename.EndsWith(".tbin", false))
     {
         if (filename.EndsWith(".txml", false))
-            LOGERROR("Scene::CreateSceneDescFromBinary: Try using CreateSceneDescFromXml() instead for " + filename);
+            LogError("Scene::CreateSceneDescFromBinary: Try using CreateSceneDescFromXml() instead for " + filename);
         else
-            LOGERROR("Scene::CreateSceneDescFromBinary: Unsupported file extension : " + filename + " when trying to create scene description.");
+            LogError("Scene::CreateSceneDescFromBinary: Unsupported file extension : " + filename + " when trying to create scene description.");
         return sceneDesc;
     }
 
     Urho3D::File file(context_);
     if (!file.Open(filename, Urho3D::FILE_READ))
     {
-        LOGERROR("Scene::CreateSceneDescFromBinary: Failed to open file " + filename + " when trying to create scene description.");
+        LogError("Scene::CreateSceneDescFromBinary: Failed to open file " + filename + " when trying to create scene description.");
         return sceneDesc;
     }
 
@@ -1255,7 +1256,7 @@ SceneDesc Scene::CreateSceneDescFromBinary(PODVector<unsigned char> &data, Scene
 {
     if (!data.Size())
     {
-        LOGERROR("Scene::CreateSceneDescFromBinary: File " + sceneDesc.filename + " contained 0 bytes when trying to create scene description.");
+        LogError("Scene::CreateSceneDescFromBinary: File " + sceneDesc.filename + " contained 0 bytes when trying to create scene description.");
         return sceneDesc;
     }
 
@@ -1346,12 +1347,12 @@ SceneDesc Scene::CreateSceneDescFromBinary(PODVector<unsigned char> &data, Scene
                     }
                     else
                     {
-                        LOGERRORF("Scene::CreateSceneDescFromBinary: Failed to load component %s %s!", compDesc.typeName.CString(), compDesc.name.CString());
+                        LogError("Scene::CreateSceneDescFromBinary: Failed to load component " + compDesc.typeName + " " + compDesc.name);
                     }
                 }
                 catch(...)
                 {
-                    LOGERRORF("Scene::CreateSceneDescFromBinary: Exception while trying to load component %s %s!", compDesc.typeName.CString(), compDesc.name.CString());
+                    LogError("Scene::CreateSceneDescFromBinary: Exception while trying to load component " + compDesc.typeName + " " + compDesc.name);
                 }
             }
 
@@ -1646,7 +1647,7 @@ Vector<EntityWeakPtr> Scene::SortEntities(const Vector<EntityWeakPtr> &entities)
         EntityWeakPtr weakEnt = entities[ei];
         if (weakEnt.Expired())
         {
-            LOGERRORF("Scene::SortEntities: Input contained an expired WeakPtr at index %u. Aborting sort and returning original list.", ei);
+            LogError("Scene::SortEntities: Input contained an expired WeakPtr at index " + String(ei) + ". Aborting sort and returning original list.");
             return entities;
         }
         rawEntities.Push(weakEnt.Lock().Get());
@@ -1664,12 +1665,11 @@ Vector<EntityWeakPtr> Scene::SortEntities(const Vector<EntityWeakPtr> &entities)
     }
     if (sortedEntities.Size() != entities.Size())
     {
-        LOGERRORF("Scene::SortEntities: Sorting resulted in loss of information. Returning original unsorted list. Sorted size: %u Unsorted size: %u.",
-            sortedEntities.Size(), entities.Size());
+        LogError("Scene::SortEntities: Sorting resulted in loss of information. Returning original unsorted list. Sorted size: " + String(sortedEntities.Size()) + " Unsorted size: " + String(entities.Size()));
         return entities;
     }
 
-    LOGDEBUGF("Scene::SortEntities: Sorted Entities in %d msecs. Input Entities %u", (int)(t.GetUSec(false)/1000), entities.Size());
+    LogDebug("Scene::SortEntities: Sorted Entities in " + String((int)(t.GetUSec(false)/1000)) + " msecs. Input Entities " + String(entities.Size()));
     return sortedEntities;
 }
 
@@ -1683,7 +1683,7 @@ Vector<Entity*> Scene::SortEntities(const Vector<Entity*> &entities) const
         Entity *ent = entities[ei];
         if (!ent)
         {
-            LOGERRORF("Scene::SortEntities: Input contained a null pointer at index %u. Aborting sort and returning original list.", ei);
+            LogError("Scene::SortEntities: Input contained a null pointer at index " + String(ei) + ". Aborting sort and returning original list.");
             return entities;
         }
 
@@ -1695,12 +1695,11 @@ Vector<Entity*> Scene::SortEntities(const Vector<Entity*> &entities) const
     }
     if (sortedEntities.Size() != entities.Size())
     {
-        LOGERRORF("Scene::SortEntities: Sorting resulted in loss of information. Returning original unsorted list. Sorted size: %u Unsorted size: %u.",
-            sortedEntities.Size(), entities.Size());
+        LogError("Scene::SortEntities: Sorting resulted in loss of information. Returning original unsorted list. Sorted size: " + String(sortedEntities.Size()) + " Unsorted size: " + String(entities.Size()));
         return entities;
     }
 
-    LOGDEBUGF("Scene::SortEntities: Sorted Entities in %d msecs. Input Entities %u", (int)(t.GetUSec(false)/1000), entities.Size());
+    LogDebug("Scene::SortEntities: Sorted Entities in " + String((int)(t.GetUSec(false)/1000)) + " msecs. Input Entities " + String(entities.Size()));
     return sortedEntities;
 }
 
@@ -1773,12 +1772,12 @@ EntityDescList Scene::SortEntities(const EntityDescList &entities) const
     // Double check no information was lost. If these do not match, use the original passed in entity desc list.
     if (!iterDescEntities.Empty() || sortedDescEntities.Size() != entities.Size())
     {
-        LOGERRORF("Scene::SortEntities: Sorting Entity hierarchy resulted in loss of information. Using original unsorted Entity list. Iteration list size: %u Sorted Entities: %u Original Entities: %u",
-            iterDescEntities.Size(), sortedDescEntities.Size(), entities.Size());
+        LogError("Scene::SortEntities: Sorting Entity hierarchy resulted in loss of information. Using original unsorted Entity list. Iteration list size: " + String(iterDescEntities.Size()) + 
+            " Sorted Entities: " + String(sortedDescEntities.Size()) + " Original Entities: " + entities.Size());
         return entities;
     }
 
-    LOGDEBUGF("Scene::SortEntities: Sorted EntityDescs in %d msecs. Input Entities %u", (int)(t.GetUSec(false)/1000), entities.Size());
+    LogDebug("Scene::SortEntities: Sorted Entities in " + String((int)(t.GetUSec(false)/1000)) + " msecs. Input Entities " + String(entities.Size()));
     return sortedDescEntities;
 }
 
@@ -1862,9 +1861,9 @@ uint Scene::FixPlaceableParentIds(const Vector<Entity *> &entities, const Entity
     }
 
     if (printStats && fixed > 0)
-        LOGINFOF("Scene::FixPlaceableParentIds: Fixed %u parentRefs in %d msecs. Input Entities %u", fixed, (int)(t.GetUSec(false)/1000), entities.Size());
+        LogInfo("Scene::FixPlaceableParentIds: Fixed " + String(fixed) + " parentRefs in " + String((int)(t.GetUSec(false)/1000)) + " msecs. Input Entities " + String(entities.Size()));
     else
-        LOGDEBUGF("Scene::FixPlaceableParentIds: Fixed %u parentRefs in %d msecs. Input Entities %u", fixed, (int)(t.GetUSec(false)/1000), entities.Size());
+        LogDebug("Scene::FixPlaceableParentIds: Fixed " + String(fixed) + " parentRefs in " + String((int)(t.GetUSec(false)/1000)) + " msecs. Input Entities " + String(entities.Size()));
     return fixed;
 }
 
