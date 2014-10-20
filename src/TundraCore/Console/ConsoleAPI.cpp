@@ -43,42 +43,26 @@ void ConsoleAPI::Initialize()
 
 ConsoleAPI::~ConsoleAPI()
 {
-    commands_.Clear();
-}
-
-ConsoleAPI::CommandMap::ConstIterator ConsoleAPI::FindCaseInsensitive(const String &name) const
-{
-    for (auto iter = commands_.Begin(); iter != commands_.End(); ++iter)
-        if (iter->first_.Compare(name, false) == 0)
-            return iter;
-    return commands_.End();
-}
-
-ConsoleAPI::CommandMap::Iterator ConsoleAPI::FindCaseInsensitive(const String &name)
-{
-    for (auto iter = commands_.Begin(); iter != commands_.End(); ++iter)
-        if (iter->first_.Compare(name, false) == 0)
-            return iter;
-    return commands_.End();
+    commands_.clear();
 }
 
 StringVector ConsoleAPI::AvailableCommands() const
 {
     StringVector ret;
-    for(auto iter = commands_.Begin(); iter != commands_.End(); ++iter)
-        ret.Push(iter->first_);
+    for(auto iter = commands_.begin(); iter != commands_.end(); ++iter)
+        ret.Push(iter->first);
     return ret;
 }
 
 ConsoleCommand *ConsoleAPI::Command(const String &name) const
 {
-    auto existing = FindCaseInsensitive(name);
-    if (existing != commands_.End())
+    auto existing = commands_.find(name);
+    if (existing != commands_.end())
     {
         LogWarning("ConsoleAPI::RegisterCommand: Command '" + name + "' does not exist.");
         return 0;
     }
-    return existing->second_.Get();
+    return existing->second.Get();
 }
 
 ConsoleCommand *ConsoleAPI::RegisterCommand(const String &name, const String &desc)
@@ -88,11 +72,11 @@ ConsoleCommand *ConsoleAPI::RegisterCommand(const String &name, const String &de
         LogError("ConsoleAPI::RegisterCommand: Command name can not be an empty string.");
         return 0;
     }
-    auto existing = FindCaseInsensitive(name);
-    if (existing != commands_.End())
+    auto existing = commands_.find(name);
+    if (existing != commands_.end())
     {
         LogWarning("ConsoleAPI::RegisterCommand: Command '" + name + "' is already registered.");
-        return existing->second_.Get();
+        return existing->second.Get();
     }
 
     SharedPtr<ConsoleCommand> command = SharedPtr<ConsoleCommand>(new ConsoleCommand(name, desc));
@@ -102,13 +86,13 @@ ConsoleCommand *ConsoleAPI::RegisterCommand(const String &name, const String &de
 
 void ConsoleAPI::UnregisterCommand(const String &name)
 {
-    auto existing = FindCaseInsensitive(name);
-    if (existing != commands_.End())
+    auto existing = commands_.find(name);
+    if (existing != commands_.end())
     {
         LogWarning("ConsoleAPI: Trying to unregister non-existing command '" + name + "'.");
         return;
     }
-    commands_.Erase(existing);
+    commands_.erase(existing);
 }
 
 void ConsoleAPI::ExecuteCommand(const String &command)
@@ -118,25 +102,25 @@ void ConsoleAPI::ExecuteCommand(const String &command)
     ParseCommand(command, name, parameters);
     if (name.Empty())
         return;
-    auto existing = FindCaseInsensitive(name);
-    if (existing == commands_.End())
+    auto existing = commands_.find(name);
+    if (existing == commands_.end())
     {
         LogError("Cannot find a console command '" + name + "'");
         return;
     }
-    existing->second_->Invoke(parameters);
+    existing->second->Invoke(parameters);
 }
 
 void ConsoleAPI::ListCommands()
 {
     LogInfo("Available Console Commands (case-insensitive)");
     uint longestName = 0;
-    for(auto iter = commands_.Begin(); iter != commands_.End(); ++iter)
-        if (iter->first_.Length() > longestName)
-            longestName = iter->first_.Length();
+    for(auto iter = commands_.begin(); iter != commands_.end(); ++iter)
+        if (iter->first.Length() > longestName)
+            longestName = iter->first.Length();
     longestName += 2;
-    for(auto iter = commands_.Begin(); iter != commands_.End(); ++iter)
-        LogInfo("  " + PadString(iter->first_, longestName) + iter->second_->Description());
+    for(auto iter = commands_.begin(); iter != commands_.end(); ++iter)
+        LogInfo("  " + PadString(iter->first, longestName) + iter->second->Description());
 }
 
 void ConsoleAPI::HandleConsoleCommand(StringHash eventType, Urho3D::VariantMap &eventData)

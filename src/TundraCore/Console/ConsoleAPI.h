@@ -10,9 +10,12 @@
 #include "CoreTypes.h"
 #include "FrameworkFwd.h"
 #include "Signals.h"
+#include "CoreStringUtils.h"
 
 #include <Object.h>
 #include <RefCounted.h>
+
+#include <map>
 
 namespace Tundra
 {
@@ -57,7 +60,7 @@ class TUNDRACORE_API ConsoleAPI : public Object
     OBJECT(ConsoleAPI);
 
 public:
-    typedef HashMap<String, SharedPtr<ConsoleCommand> > CommandMap;
+    typedef std::map<String, SharedPtr<ConsoleCommand>, StringCompareCaseInsensitive> CommandMap;
 
     /// Returns all command for introspection purposes.
     const CommandMap &Commands() const { return commands_; }
@@ -149,9 +152,6 @@ private:
 
     /// Frame update handler
     void OnUpdate(float frametime);
-
-    CommandMap::ConstIterator FindCaseInsensitive(const String &name) const;
-    CommandMap::Iterator FindCaseInsensitive(const String &name);
 
     Framework *framework_;
     CommandMap commands_;
