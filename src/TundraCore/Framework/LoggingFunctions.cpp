@@ -9,14 +9,11 @@
 #include "LoggingFunctions.h"
 #include "Framework.h"
 #include "ConsoleAPI.h"
-#include "Application.h"
+
+#include <Engine/Core/ProcessUtils.h>
 
 #ifdef WIN32
 #include <Windows.h>
-#endif
-
-#ifdef ANDROID
-#include <android/log.h>
 #endif
 
 namespace Tundra
@@ -62,20 +59,7 @@ bool IsLogChannelEnabled(u32 logChannel)
 
 void PrintRaw(const String &str)
 {
-#if defined(WIN32)
-    HANDLE stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (stdoutHandle == INVALID_HANDLE_VALUE)
-        return;
-    Urho3D::WString wstr(str);
-    DWORD charsWritten;
-    WriteConsoleW(stdoutHandle, wstr.CString(), static_cast<DWORD>(wstr.Length()), &charsWritten, 0);
-#elif defined(ANDROID)
-    Framework *instance = Framework::Instance();
-    __android_log_print(ANDROID_LOG_INFO, instance ? instance->ApplicationName().CString() : "Tundra", "%s", str.CString());
-#else
-    printf("%s", str.CString());
-#endif
+    Urho3D::PrintUnicode(str);
 }
 
 }
-
