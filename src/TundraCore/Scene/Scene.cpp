@@ -1773,7 +1773,7 @@ EntityDescList Scene::SortEntities(const EntityDescList &entities) const
     if (!iterDescEntities.Empty() || sortedDescEntities.Size() != entities.Size())
     {
         LogError("Scene::SortEntities: Sorting Entity hierarchy resulted in loss of information. Using original unsorted Entity list. Iteration list size: " + String(iterDescEntities.Size()) + 
-            " Sorted Entities: " + sortedDescEntities.Size() + " Original Entities: " + entities.Size());
+            " Sorted Entities: " + String(sortedDescEntities.Size()) + " Original Entities: " + entities.Size());
         return entities;
     }
 
