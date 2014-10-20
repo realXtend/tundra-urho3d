@@ -92,6 +92,10 @@ void UrhoRenderer::Initialize()
 void UrhoRenderer::Uninitialize()
 {
     framework->RegisterRenderer(0);
+    Urho3D::Renderer* rend = GetSubsystem<Urho3D::Renderer>();
+    // Let go of the viewport that we created. If done later at Urho Context destruction time, may cause a crash
+    if (rend)
+        rend->SetViewport(0, 0);
 }
 
 Entity *UrhoRenderer::MainCamera()
