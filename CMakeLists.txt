@@ -193,23 +193,6 @@ if (ANDROID)
     endforeach ()
 endif ()
 
-# Convenience macro for including all TundraCore subfolders.
-macro(UseTundraCore)
-    include_directories(${CMAKE_SOURCE_DIR}/src/TundraCore/
-        ${CMAKE_SOURCE_DIR}/src/TundraCore/Asset
-        ${CMAKE_SOURCE_DIR}/src/TundraCore/Framework
-        ${CMAKE_SOURCE_DIR}/src/TundraCore/JSON
-        ${CMAKE_SOURCE_DIR}/src/TundraCore/Scene
-        ${CMAKE_SOURCE_DIR}/src/TundraCore/Console
-        ${CMAKE_SOURCE_DIR}/src/TundraCore/Signals
-    )
-    # Due to automatic CMake dependency transfer, we will need kNet and MathGeoLib link directories
-    # Urho3D include directories are also needed throughout the project
-    use_package(URHO3D)
-    use_package(MATHGEOLIB)
-    use_package(KNET)
-endmacro()
-
 # Read the set of optional modules from another file
 # that is kept outside the source control.
 # To configure the set of optional modules to add to the build,

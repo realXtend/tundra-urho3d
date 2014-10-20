@@ -7,11 +7,13 @@
 # 3. call use_modules() with a list of local module names for includes
 # 4. call build_library/executable() on the source files
 # 5. call link_package (${PACKAGE}) once per build target
-# 5. call link_modules() with a list of local module names libraries
-# 6. call final_target () at the end of build target's cmakelists.txt
+# 6. call link_modules() with a list of local module names libraries
+# 7. call SetupCompileFlags/SetupCompileFlagsWithPCH
+# 8. call final_target () at the end of build target's CMakeLists.txt
 #    (not needed for lib targets, only exe's & modules)
 
 # =============================================================================
+
 # reusable macros
 
 # define target name, and directory, if it should be output
@@ -210,3 +212,53 @@ macro (find_debug_libraries PREFIX DEBUG_POSTFIX)
             ${lib_}${DEBUG_POSTFIX})
     endforeach ()
 endmacro ()
+
+# Enables the use of Precompiled Headers in the project this macro is invoked in. Also adds the DEBUG_CPP_NAME to each .cpp file that specifies the name of that compilation unit. MSVC only.
+macro(SetupCompileFlagsWithPCH)
+    if (MSVC)
+        # Label StableHeaders.cpp to create the PCH file and mark all other .cpp files to use that PCH file.
+        # Add a #define DEBUG_CPP_NAME "this compilation unit name" to each compilation unit to aid in memory leak checking.
+        foreach(src_file ${CPP_FILES})
+            if (${src_file} MATCHES "StableHeaders.cpp$")
+                set_source_files_properties(${src_file} PROPERTIES COMPILE_FLAGS "/YcStableHeaders.h")        
+            else()
+                get_filename_component(basename ${src_file} NAME)
+                set_source_files_properties(${src_file} PROPERTIES COMPILE_FLAGS "/YuStableHeaders.h -DDEBUG_CPP_NAME=\"\\\"${basename}\"\\\"")
+            endif()
+        endforeach()
+    endif()
+    # TODO PCH for other platforms/compilers
+endmacro()
+
+# Sets up the compilation flags without PCH. For now just set the DEBUG_CPP_NAME to each compilation unit.
+# TODO: The SetupCompileFlags and SetupCompileFlagsWithPCH macros should be merged, and the option to use PCH be passed in as a param. However,
+# CMake string ops in PROPERTIES COMPILE_FLAGS gave some problems with this, so these are separate for now.
+macro(SetupCompileFlags)
+    if (MSVC)
+        # Add a #define DEBUG_CPP_NAME "this compilation unit name" to each compilation unit to aid in memory leak checking.
+        foreach(src_file ${CPP_FILES})
+            if (${src_file} MATCHES "StableHeaders.cpp$")
+            else()
+                get_filename_component(basename ${src_file} NAME)
+                set_source_files_properties(${src_file} PROPERTIES COMPILE_FLAGS "-DDEBUG_CPP_NAME=\"\\\"${basename}\"\\\"")
+            endif()
+        endforeach()
+    endif()
+endmacro()
+
+# Convenience macro for including all TundraCore subfolders.
+macro(UseTundraCore)
+    include_directories(${CMAKE_SOURCE_DIR}/src/TundraCore/
+        ${CMAKE_SOURCE_DIR}/src/TundraCore/Asset
+        ${CMAKE_SOURCE_DIR}/src/TundraCore/Framework
+        ${CMAKE_SOURCE_DIR}/src/TundraCore/JSON
+        ${CMAKE_SOURCE_DIR}/src/TundraCore/Scene
+        ${CMAKE_SOURCE_DIR}/src/TundraCore/Console
+        ${CMAKE_SOURCE_DIR}/src/TundraCore/Signals
+    )
+    # Due to automatic CMake dependency transfer, we will need kNet and MathGeoLib link directories
+    # Urho3D include directories are also needed throughout the project
+    use_package(URHO3D)
+    use_package(MATHGEOLIB)
+    use_package(KNET)
+endmacro()

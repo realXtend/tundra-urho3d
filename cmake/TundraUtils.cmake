@@ -50,39 +50,6 @@ macro(AddSourceFolder folder_name)
     set(CPP_FILES ${CPP_FILES} ${CPP_FILES_IN_FOLDER_${folder_name}})
 endmacro()
 
-# Enables the use of Precompiled Headers in the project this macro is invoked in. Also adds the DEBUG_CPP_NAME to each .cpp file that specifies the name of that compilation unit. MSVC only.
-macro(SetupCompileFlagsWithPCH)
-    if (MSVC)
-        # Label StableHeaders.cpp to create the PCH file and mark all other .cpp files to use that PCH file.
-        # Add a #define DEBUG_CPP_NAME "this compilation unit name" to each compilation unit to aid in memory leak checking.
-        foreach(src_file ${CPP_FILES})
-            if (${src_file} MATCHES "StableHeaders.cpp$")
-                set_source_files_properties(${src_file} PROPERTIES COMPILE_FLAGS "/YcStableHeaders.h")        
-            else()
-                get_filename_component(basename ${src_file} NAME)
-                set_source_files_properties(${src_file} PROPERTIES COMPILE_FLAGS "/YuStableHeaders.h -DDEBUG_CPP_NAME=\"\\\"${basename}\"\\\"")
-            endif()
-        endforeach()
-    endif()
-    # TODO PCH for other platforms
-endmacro()
-
-# Sets up the compilation flags without PCH. For now just set the DEBUG_CPP_NAME to each compilation unit.
-# TODO: The SetupCompileFlags and SetupCompileFlagsWithPCH macros should be merged, and the option to use PCH be passed in as a param. However,
-# CMake string ops in PROPERTIES COMPILE_FLAGS gave some problems with this, so these are separate for now.
-macro(SetupCompileFlags)
-    if (MSVC)
-        # Add a #define DEBUG_CPP_NAME "this compilation unit name" to each compilation unit to aid in memory leak checking.
-        foreach(src_file ${CPP_FILES})
-            if (${src_file} MATCHES "StableHeaders.cpp$")
-            else()
-                get_filename_component(basename ${src_file} NAME)
-                set_source_files_properties(${src_file} PROPERTIES COMPILE_FLAGS "-DDEBUG_CPP_NAME=\"\\\"${basename}\"\\\"")
-            endif()
-        endforeach()
-    endif()
-endmacro()
-
 # Lists sub directories
 # Get sub directory names from directory of current CMakeLists.txt
 #   GetSubDirectories(MY_RESULT_VAR)
