@@ -109,10 +109,16 @@ void Framework::Go()
     engineInitMap["FullScreen"] = false;
     engineInitMap["Headless"] = headless;
     engineInitMap["WindowTitle"] = "Tundra";
+    engineInitMap["WindowWidth"] = 1024; /// \todo Read from config
+    engineInitMap["WindowHeight"] = 768;
+    engineInitMap["WindowResizable"] = true;
     engineInitMap["LogName"] = "Tundra.log";
 
     LogInfo("");
     engine->Initialize(engineInitMap);
+    // Show mouse cursor for more pleasant experience
+    /// \todo Move to InputAPI once it exists
+    GetSubsystem<Input>()->SetMouseVisible(true);
 
     // Initialize core APIs
     console->Initialize();

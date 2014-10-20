@@ -15,7 +15,6 @@
 #include <File.h>
 #include <FileSystem.h>
 #include <ProcessUtils.h>
-#include <ForEach.h>
 #include <XMLFile.h>
 
 using namespace Urho3D;

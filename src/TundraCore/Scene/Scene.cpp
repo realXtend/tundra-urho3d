@@ -24,7 +24,6 @@
 
 #include <File.h>
 #include <XMLFile.h>
-#include <ForEach.h>
 #include <FileSystem.h>
 #include <StringUtils.h>
 

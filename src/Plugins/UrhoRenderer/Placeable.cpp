@@ -17,7 +17,6 @@
 
 #include <Engine/Scene/Scene.h>
 #include <Engine/Scene/Node.h>
-#include <ForEach.h>
 
 namespace Tundra
 {

@@ -17,7 +17,6 @@
 
 #include <kNet/DataSerializer.h>
 #include <kNet/DataDeserializer.h>
-#include <ForEach.h>
 #include <StringUtils.h>
 
 namespace Tundra

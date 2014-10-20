@@ -11,7 +11,6 @@
 #include "LoggingFunctions.h"
 
 #include <XMLFile.h>
-#include <ForEach.h>
 
 #include <kNet/DataSerializer.h>
 #include <kNet/DataDeserializer.h>
