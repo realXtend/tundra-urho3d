@@ -13,7 +13,6 @@
 #include "ChangeRequest.h"
 #include "EntityReference.h"
 #include "Framework.h"
-#include "Application.h"
 #include "FrameAPI.h"
 #include "Profiler.h"
 #include "LoggingFunctions.h"
