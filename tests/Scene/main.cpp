@@ -162,9 +162,9 @@ TEST_F(Runner, CreateComponentsParented)
 
                     ComponentPtr byName = parent->CreateComponent(componentTypeName, "ByName", AttributeChange::Default, replicated);
 
-                    ASSERT_TRUE(byName);
-                    ASSERT_TRUE(byName->ParentScene());
-                    ASSERT_TRUE(byName->ParentEntity());
+                    ASSERT_TRUE(byName != nullptr);
+                    ASSERT_TRUE(byName->ParentScene() != nullptr);
+                    ASSERT_TRUE(byName->ParentEntity() != nullptr);
 
                     ASSERT_EQ(byName->ParentScene(), scene);
                     ASSERT_EQ(byName->ParentEntity(), parent);
@@ -175,9 +175,9 @@ TEST_F(Runner, CreateComponentsParented)
 
                     ComponentPtr byId = parent->CreateComponent(componentTypeId, "ById", AttributeChange::Default, replicated);
 
-                    ASSERT_TRUE(byId);
-                    ASSERT_TRUE(byId->ParentScene());
-                    ASSERT_TRUE(byId->ParentEntity());
+                    ASSERT_TRUE(byId != nullptr);
+                    ASSERT_TRUE(byId->ParentScene() != nullptr);
+                    ASSERT_TRUE(byId->ParentEntity() != nullptr);
 
                     ASSERT_EQ(byId->ParentScene(), scene);
                     ASSERT_EQ(byId->ParentEntity(), parent);
