@@ -107,7 +107,7 @@ void Light::AttributesChanged()
     if (specColor.ValueChanged())
         light_->SetSpecularIntensity(specColor.Get().ToFloat4().AverageOfElements());
     if (castShadows.ValueChanged())
-		light_->SetCastShadows(castShadows.Get());
+        light_->SetCastShadows(castShadows.Get());
     if (range.ValueChanged())
         light_->SetRange(range.Get());
     if (brightness.ValueChanged())
@@ -148,7 +148,7 @@ void Light::AttachLight()
     light_->SetLightType(urhoType);
     light_->SetColor(diffColor.Get());
     light_->SetSpecularIntensity(specColor.Get().ToFloat4().AverageOfElements());
-	light_->SetCastShadows(castShadows.Get());
+    light_->SetCastShadows(castShadows.Get());
     light_->SetRange(range.Get());
     light_->SetBrightness(brightness.Get());
 }

@@ -25,10 +25,10 @@ namespace Tundra
 
 AnimationController::AnimationController(Urho3D::Context* context, Scene* scene) :
     IComponent(context, scene),
-	INIT_ATTRIBUTE_VALUE(animationState, "Animation state", ""),
-	INIT_ATTRIBUTE_VALUE(drawDebug, "Draw debug", false)
+    INIT_ATTRIBUTE_VALUE(animationState, "Animation state", ""),
+    INIT_ATTRIBUTE_VALUE(drawDebug, "Draw debug", false)
 {
-	ParentEntitySet.Connect(this, &AnimationController::UpdateSignals);
+    ParentEntitySet.Connect(this, &AnimationController::UpdateSignals);
 }
 
 AnimationController::~AnimationController()
@@ -58,7 +58,7 @@ void AnimationController::OnComponentStructureChanged(IComponent*, AttributeChan
         return;
 
     placeable_ = entity->Component<Placeable>();
-	mesh_ = entity->Component<Mesh>();
+    mesh_ = entity->Component<Mesh>();
 }
 
 void AnimationController::AttributesChanged()
@@ -68,60 +68,60 @@ void AnimationController::AttributesChanged()
 
 Urho3D::AnimationState* AnimationController::GetAnimationState(const String& name)
 {
-	if (!mesh_)
-		return 0;
+    if (!mesh_)
+        return 0;
 
-	Urho3D::AnimatedModel* model = mesh_.Get()->UrhoMesh();
-	if (!model)
-		return 0;
+    Urho3D::AnimatedModel* model = mesh_.Get()->UrhoMesh();
+    if (!model)
+        return 0;
 
-	int animIndex = -1;
-	const auto& animationStates = model->GetAnimationStates();
-	for (unsigned int i=0 ; i<animationStates.Size() ; ++i)
-	{
-		if (name.Compare(animationStates[i]->GetAnimation()->GetAnimationName(), false))
-		{
-			animIndex = i;
-			break;
-		}
-	}
-	if (animIndex < 0)
-		return 0;
-	
-	return animationStates[animIndex];
+    int animIndex = -1;
+    const auto& animationStates = model->GetAnimationStates();
+    for (unsigned int i=0 ; i<animationStates.Size() ; ++i)
+    {
+        if (name.Compare(animationStates[i]->GetAnimation()->GetAnimationName(), false))
+        {
+            animIndex = i;
+            break;
+        }
+    }
+    if (animIndex < 0)
+        return 0;
+
+    return animationStates[animIndex];
 }
 
 void AnimationController::Update(float frametime)
 {
-	for (auto iter = animationStates_.Begin() ; iter != animationStates_.End() ; ++iter)
-	{
-		animationStates_[iter->first_]->AddTime(frametime);
-	}
+    for (auto iter = animationStates_.Begin() ; iter != animationStates_.End() ; ++iter)
+    {
+        animationStates_[iter->first_]->AddTime(frametime);
+    }
 
-	/// \todo implement
+    /// \todo implement
 }
 
 void AnimationController::DrawSkeleton(float frametime)
 {
-	if (!world_ || !mesh_)
-	    return;
-	
-	Urho3D::AnimatedModel* model = mesh_->UrhoMesh();
-	if (!model)
-		return;
-	
-	//Urho3D::Skeleton &skeleton = model->GetSkeleton();
+    if (!world_ || !mesh_)
+        return;
 
-	/// \todo draw skeleton
+    Urho3D::AnimatedModel* model = mesh_->UrhoMesh();
+    if (!model)
+        return;
+
+    //Urho3D::Skeleton &skeleton = model->GetSkeleton();
+
+    /// \todo draw skeleton
 }
 
 bool AnimationController::EnableAnimation(const String& name, bool looped, float fadein, bool high_priority)
 {
-	Urho3D::AnimationState* animstate = GetAnimationState(name);
+    Urho3D::AnimationState* animstate = GetAnimationState(name);
     if (!animstate) 
         return false;
 
-	animstate->SetLooped(looped);
+    animstate->SetLooped(looped);
 
     // See if we already have this animation
     auto i = animations_.Find(name);
@@ -134,7 +134,7 @@ bool AnimationController::EnableAnimation(const String& name, bool looped, float
         // If animation is nonlooped and has already reached end, rewind to beginning
         if ((!looped) && (i->second_.speed_factor_ > 0.0f))
         {
-			if (animstate->GetTime() >= animstate->GetLength())
+            if (animstate->GetTime() >= animstate->GetLength())
                 animstate->SetTime(0.0f);
         }
         return true;
@@ -161,7 +161,7 @@ bool AnimationController::EnableExclusiveAnimation(const String& name, bool loop
     while(i != animations_.End())
     {
         const String& other_name = i->first_;
-		if (other_name.Compare(name, false) == 0)
+        if (other_name.Compare(name, false) == 0)
         {
             i->second_.phase_ = PHASE_FADEOUT;
             i->second_.fade_period_ = fadeout;
@@ -183,7 +183,7 @@ bool AnimationController::HasAnimationFinished(const String& name)
     auto i = animations_.Find(name);
     if (i != animations_.End())
     {
-		if ((!animstate->IsLooped()) && ((i->second_.speed_factor_ >= 0.f && animstate->GetTime() >= animstate->GetLength()) ||
+        if ((!animstate->IsLooped()) && ((i->second_.speed_factor_ >= 0.f && animstate->GetTime() >= animstate->GetLength()) ||
             (i->second_.speed_factor_ < 0.f && animstate->GetTime() <= 0.f)))
             return true;
         else
@@ -253,17 +253,17 @@ StringList AnimationController::GetAvailableAnimations()
     //    availableList << QString(animstate->getAnimationName().c_str());
     //}
 
-	StringList availableList;
-	if (!mesh_ || !mesh_->UrhoMesh())
-		return availableList;
+    StringList availableList;
+    if (!mesh_ || !mesh_->UrhoMesh())
+        return availableList;
 
-	Urho3D::AnimatedModel *animatedModel = mesh_->UrhoMesh();
-	auto animstates = animatedModel->GetAnimationStates();
-	availableList.Resize(animstates.Size());
-	for (unsigned int i = 0 ; i<animstates.Size() ; ++i)
-	{
-		availableList[i] = animstates[i]->GetAnimation()->GetAnimationName();
-	}
+    Urho3D::AnimatedModel *animatedModel = mesh_->UrhoMesh();
+    auto animstates = animatedModel->GetAnimationStates();
+    availableList.Resize(animstates.Size());
+    for (unsigned int i = 0 ; i<animstates.Size() ; ++i)
+    {
+        availableList[i] = animstates[i]->GetAnimation()->GetAnimationName();
+    }
 
     return availableList;
 }
@@ -307,7 +307,7 @@ void AnimationController::DisableAllAnimations(float fadeout)
 
 void AnimationController::SetAnimationToEnd(const String& name)
 {
-	Urho3D::AnimationState* animstate = GetAnimationState(name);
+    Urho3D::AnimationState* animstate = GetAnimationState(name);
     if (!animstate)
         return;
         
@@ -363,7 +363,7 @@ bool AnimationController::SetAnimationTimePosition(const String& name, float new
     auto i = animations_.Find(name);
     if (i != animations_.End())
     {
-		animstate->SetTime(newPosition);
+        animstate->SetTime(newPosition);
         return true;
     }
     // Animation not active
@@ -438,7 +438,7 @@ void AnimationController::PlayAnim(const String &name, const String &fadein, con
         fadein_ = Urho3D::ToFloat(fadein);
     bool exclusive_ = false;
     if (exclusive.Length())
-		exclusive_ = Urho3D::ToBool(exclusive);
+        exclusive_ = Urho3D::ToBool(exclusive);
 
     bool success;
     if (exclusive_)

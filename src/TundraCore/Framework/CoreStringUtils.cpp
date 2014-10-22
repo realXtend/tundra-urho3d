@@ -86,15 +86,15 @@ String PadString(String str, int pad)
 
 String Join(const StringList &list, const String &separator)
 {
-	String joined = "";
-	for (unsigned int i=0 ; i<list.Size() ; ++i)
-	{
-		if (i != 0)
-			joined += separator;
-		joined += list[i];
-	}
+    String joined = "";
+    for (unsigned int i=0 ; i<list.Size() ; ++i)
+    {
+        if (i != 0)
+            joined += separator;
+        joined += list[i];
+    }
 
-	return joined;
+    return joined;
 }
 
 }

@@ -63,22 +63,22 @@ typedef WeakPtr<Mesh> MeshWeakPtr;
     </table> */
 class URHO_MODULE_API AnimationController : public IComponent
 {
-	COMPONENT_NAME(AnimationController, 14)
+    COMPONENT_NAME(AnimationController, 14)
 
 public:
-	/// @cond PRIVATE
+    /// @cond PRIVATE
     /// Do not directly allocate new components using operator new, but use the factory-based SceneAPI::CreateComponent functions instead.
     explicit AnimationController(Urho3D::Context* context, Scene* scene);
     /// @endcond
     virtual ~AnimationController();
 
-	/// Animation state attribute. Is a "freedata" field to store the current animation state.
+     /// Animation state attribute. Is a "freedata" field to store the current animation state.
     /** It is up to a logic script to change & interpret this, AnimationController does not change or read it by itself. */
-	Attribute<String> animationState;
+    Attribute<String> animationState;
 
-	Attribute<bool> drawDebug;
+    Attribute<bool> drawDebug;
 
-	/// Enumeration of animation phase
+    /// Enumeration of animation phase
     enum AnimationPhase
     {
         PHASE_FADEIN = 0,
@@ -88,7 +88,7 @@ public:
         PHASE_FREE //in external control. for dynamiccomponent testing now
     };
 
-	/// Structure for an ongoing animation
+    /// Structure for an ongoing animation
     struct Animation
     {
         /// Autostop at end (default false)
@@ -127,12 +127,12 @@ public:
         {
         }
     };
-	typedef HashMap<String, Animation> AnimationMap;
+    typedef HashMap<String, Animation> AnimationMap;
 
-	/// Returns all running animations
+    /// Returns all running animations
     const AnimationMap& GetRunningAnimations() const { return animations_; }
 
-	/// Auto-associate mesh component if not yet set
+    /// Auto-associate mesh component if not yet set
     void AutoSetMesh();
     
     /// Updates animation(s) by elapsed time
@@ -141,7 +141,7 @@ public:
     /// Draws the mesh skeleton
     void DrawSkeleton(float frametime);
 
-	/// Enables animation with optional fade-in time
+    /// Enables animation with optional fade-in time
     /* @param name Animation name
        @param looped Is animation looped
        @param fadein Animation fadein time, 0 = instant
@@ -162,7 +162,7 @@ public:
     /* @return true if animation finished */
     bool HasAnimationFinished(const String& name);
 
-	/// Checks whether animation is active
+    /// Checks whether animation is active
     /** @param name Animation name
         @param check_fade_out if true, also fade-out (until totally faded) phase is interpreted as "active"
         @return true if animation active */
@@ -178,7 +178,7 @@ public:
     /** @param fadeout Animation fadeout time */
     void DisableAllAnimations(float fadeout = 0.0f);
 
-	/// Forwards animation to end, useful if animation is played in reverse
+    /// Forwards animation to end, useful if animation is played in reverse
     /** @param name Animation name */
     void SetAnimationToEnd(const String& name);
 
@@ -262,13 +262,13 @@ public:
     /// Implements the SetAnimWeight action
     void SetAnimWeight(const String &name, const String &animweight);
 
-	/// Emitted when a non-looping animation has finished
-	Signal1<String> AnimationFinished;
-	/// Emitted when a looping animation has completed a cycle
-	Signal1<String> AnimationCycled;
+    /// Emitted when a non-looping animation has finished
+    Signal1<String> AnimationFinished;
+    /// Emitted when a looping animation has completed a cycle
+    Signal1<String> AnimationCycled;
 
 private:
-	/// Called when the parent entity has been set.
+    /// Called when the parent entity has been set.
     void UpdateSignals();
 
     /// Called when component has been added or removed from the parent entity. Checks the existence of the Placeable component, and attaches this light to it.
@@ -276,24 +276,24 @@ private:
 
     void AttributesChanged() override;
 
-	/// Gets animationstate 
+    /// Gets animationstate 
     /** @param name Animation name
         @return animationstate, or null if not found */
     Urho3D::AnimationState* GetAnimationState(const String& name);
 
-	/// Mesh component
-	MeshWeakPtr mesh_;
+    /// Mesh component
+    MeshWeakPtr mesh_;
 
-	/// placeable component 
+    /// placeable component 
     PlaceableWeakPtr placeable_;
 
     /// World ptr
     GraphicsWorldWeakPtr world_;
 
-	/// Map of animations
-	AnimationMap animations_;
+    /// Map of animations
+    AnimationMap animations_;
 
-	HashMap<String, Urho3D::AnimationState*> animationStates_;
+    HashMap<String, Urho3D::AnimationState*> animationStates_;
 };
 
 COMPONENT_TYPEDEFS(AnimationController)
