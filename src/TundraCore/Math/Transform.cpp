@@ -32,39 +32,24 @@ String Transform::SerializeToString() const
 
 Transform Transform::FromString(const char *str)
 {
+    assert(IsNeutralCLocale());
     assume(str);
     if (!str)
         return Transform();
-    if (*str == '(')
-        ++str;
+    MATH_SKIP_WORD(str, "Transform");
+    MATH_SKIP_WORD(str, "(");
     Transform t;
-    t.pos.x = (float)strtod(str, const_cast<char**>(&str));
-    if (*str == ',' || *str == ';')
-        ++str;
-    t.pos.y = (float)strtod(str, const_cast<char**>(&str));
-    if (*str == ',' || *str == ';')
-        ++str;
-    t.pos.z = (float)strtod(str, const_cast<char**>(&str));
-    if (*str == ',' || *str == ';')
-        ++str;
-    t.rot.x = (float)strtod(str, const_cast<char**>(&str));
-    if (*str == ',' || *str == ';')
-        ++str;
-    t.rot.y = (float)strtod(str, const_cast<char**>(&str));
-    if (*str == ',' || *str == ';')
-        ++str;
-    t.rot.z = (float)strtod(str, const_cast<char**>(&str));
-    if (*str == ',' || *str == ';')
-        ++str;
-    t.scale.x = (float)strtod(str, const_cast<char**>(&str));
-    if (*str == ',' || *str == ';')
-        ++str;
-    t.scale.y = (float)strtod(str, const_cast<char**>(&str));
-    if (*str == ',' || *str == ';')
-        ++str;
-    t.scale.z = (float)strtod(str, const_cast<char**>(&str));
-    if (*str == ',' || *str == ';')
-        ++str;
+    // Use DeserializeFloat() instead of duplicating its code but comply 
+    // with the old strtod behavior where 0 is used on conversion failure.
+    t.pos.x = DeserializeFloat(str, &str); if (IsNan(t.pos.x)) t.pos.x = 0.f;
+    t.pos.y = DeserializeFloat(str, &str); if (IsNan(t.pos.y)) t.pos.y = 0.f;
+    t.pos.z = DeserializeFloat(str, &str); if (IsNan(t.pos.z)) t.pos.z = 0.f;
+    t.rot.x = DeserializeFloat(str, &str); if (IsNan(t.rot.x)) t.rot.x = 0.f;
+    t.rot.y = DeserializeFloat(str, &str); if (IsNan(t.rot.y)) t.rot.y = 0.f;
+    t.rot.z = DeserializeFloat(str, &str); if (IsNan(t.rot.z)) t.rot.z = 0.f;
+    t.scale.x = DeserializeFloat(str, &str); if (IsNan(t.scale.x)) t.scale.x = 0.f;
+    t.scale.y = DeserializeFloat(str, &str); if (IsNan(t.scale.y)) t.scale.y = 0.f;
+    t.scale.z = DeserializeFloat(str, &str); if (IsNan(t.scale.z)) t.scale.z = 0.f;
     return t;
 }
 

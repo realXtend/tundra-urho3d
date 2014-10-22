@@ -84,7 +84,7 @@ public:
         pos.z = z;
     }
 
-    /// Direcly sets the rotation angles in euler ZYX convention, in degrees.
+    /// Directly sets the rotation angles in Euler ZYX convention, in degrees.
     void SetRotation(float x, float y, float z)
     {
         assume(IsFinite(x) && IsFinite(y) && IsFinite(z));
@@ -228,15 +228,15 @@ public:
     String toString() const { return (String)*this; }
 
     /// Returns "px,py,pz,rx,ry,rz,sx,sy,sz".
-    /** This is the preferred format for the Transfrom if it has to be serialized to a string for machine transfer.
+    /** This is the preferred format for the Transform if it has to be serialized to a string for machine transfer.
         @todo Remove commas from the string. */
     String SerializeToString() const;
 
-    /// Parses a string to a new Color.
-    /** Accepted format is "px,py,pz,rx,ry,rz,sx,sy,sz".
+    /// Parses a string to a new Transform.
+    /** Accepted format is "px py pz rx ry rz sx sy sz", alternatively ',' and ';' are accepted as separators and the string can be wrapped in parentheses.
         @sa SerializeToString */
     static Transform FromString(const char *str);
-    static Transform FromString(const String &str) { return FromString(str.Trimmed().CString()); } ///< @overload
+    static Transform FromString(const String &str) { return FromString(str.Trimmed().CString()); } /**< @overload */
 };
 
 }

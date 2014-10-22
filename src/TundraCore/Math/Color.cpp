@@ -26,23 +26,23 @@ const Color Color::Gray = Color(0.5f, 0.5f, 0.5f, 1.f);
 
 Color Color::FromString(const char *str)
 {
+    assert(IsNeutralCLocale());
     assume(str);
     if (!str)
         return Color();
-    if (*str == '(')
-        ++str;
+    MATH_SKIP_WORD(str, "Color");
+    MATH_SKIP_WORD(str, "(");
     Color c;
-    c.r = (float)strtod(str, const_cast<char**>(&str));
-    if (*str == ',' || *str == ';')
-        ++str;
-    c.g = (float)strtod(str, const_cast<char**>(&str));
-    if (*str == ',' || *str == ';')
-        ++str;
-    c.b = (float)strtod(str, const_cast<char**>(&str));
-    if (*str == ',' || *str == ';')
-        ++str;
+    // Use DeserializeFloat() instead of duplicating its code but comply 
+    // with the old strtod behavior where 0 is used on conversion failure.
+    c.r = DeserializeFloat(str, &str); if (IsNan(c.r)) c.r = 0.f;
+    c.g = DeserializeFloat(str, &str); if (IsNan(c.g)) c.g = 0.f;
+    c.b = DeserializeFloat(str, &str); if (IsNan(c.b)) c.b = 0.f;
     if (str && *str != '\0') // alpha optional
-        c.a = (float)strtod(str, const_cast<char**>(&str));
+    {
+        c.a = DeserializeFloat(str, &str);
+        if (IsNan(c.a)) c.a = 01.f;
+    }
     return c;
 }
 
