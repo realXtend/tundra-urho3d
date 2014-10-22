@@ -9,12 +9,9 @@
 #include "LoggingFunctions.h"
 #include "Framework.h"
 #include "ConsoleAPI.h"
+#include "Win.h"
 
 #include <Engine/Core/ProcessUtils.h>
-
-#ifdef WIN32
-#include "Win.h"
-#endif
 
 namespace Tundra
 {

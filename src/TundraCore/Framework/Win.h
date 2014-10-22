@@ -53,4 +53,10 @@
 #undef max
 #endif
 
+// Fix JSONValue::GetObjectW
+// unresolved external symbol
+#ifdef GetObject
+#undef GetObject
+#endif
+
 #endif

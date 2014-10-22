@@ -10,6 +10,7 @@
 #include "Framework.h"
 #include "FrameAPI.h"
 #include "LoggingFunctions.h"
+#include "Win.h"
 
 #include <CoreEvents.h>
 #include <EngineEvents.h>
@@ -17,9 +18,6 @@
 #include <Console.h>
 #include <Log.h>
 
-#ifdef WIN32
-#include "Win.h"
-#endif
 
 namespace Tundra
 {

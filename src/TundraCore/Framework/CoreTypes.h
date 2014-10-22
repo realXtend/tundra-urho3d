@@ -61,8 +61,3 @@ namespace Tundra
     typedef unsigned int component_id_t;
 }
 
-/// @todo Better place for this.
-// Prevent Windows.h include from defining MIN & MAX
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
