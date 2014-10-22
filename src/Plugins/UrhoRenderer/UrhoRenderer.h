@@ -35,7 +35,7 @@ public:
     /// Sets the given Entity as the main camera for the main window.
     /** This function fails if the given Entity does not have an Camera component, or if the given Entity is not attached to a scene.
         Whenever the main camera is changed, the signal MainCameraChanged is triggered. */
-    void SetMainCamera(Entity *mainCameraEntity);
+    void SetMainCamera(Entity *mainCameraEntity) override;
 
     /// Emitted every time the main window active camera changes.
     /** The pointer specified in this signal may be null, if the main camera was set to null.

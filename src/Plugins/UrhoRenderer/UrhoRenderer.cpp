@@ -56,37 +56,6 @@ void UrhoRenderer::Initialize()
         rend->SetNumViewports(1);
         rend->SetViewport(0, new Urho3D::Viewport(context_));
     }
-
-    /// \todo Remove
-    // Test code to get something on the screen
-    ScenePtr scene = framework->Scene()->CreateScene("Test", true, true);
-    {
-        EntityPtr entity = scene->CreateEntity();
-        entity->SetName("TestBox");
-        Placeable* pl = entity->CreateComponent<Placeable>();
-        entity->CreateComponent<Mesh>();
-        Transform newTransform;
-        newTransform.pos = float3(0.0f, 0.0f, 10.0f);
-        pl->transform.Set(newTransform);
-    }
-    {
-        EntityPtr entity = scene->CreateEntity();
-        entity->SetName("Camera");
-        entity->CreateComponent<Placeable>();
-        Camera* cam = entity->CreateComponent<Camera>();
-        cam->SetActive();
-    }
-    {
-        EntityPtr entity = scene->CreateEntity();
-        entity->SetName("Light");
-        Placeable *pl = entity->CreateComponent<Placeable>();
-        Transform newTransform;
-        newTransform.pos = float3(0.0f, 6.0f, 7.0f);
-        pl->transform.Set(newTransform);
-        entity->CreateComponent<Light>();
-    }
-
-    scene->SaveSceneXML("Test.txml", true, true);
 }
 
 void UrhoRenderer::Uninitialize()

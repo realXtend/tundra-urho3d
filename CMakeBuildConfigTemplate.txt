@@ -68,6 +68,7 @@ AddProject(TundraCore TundraCore)
 
 BeginSection("Configuring Plugins")
 AddProject(Plugins Plugins/UrhoRenderer)
+AddProject(Plugins Plugins/TundraLogic)
 
 BeginSection("Configuring Tundra Executable(s)")
 AddProject(Tundra Tundra/Tundra)

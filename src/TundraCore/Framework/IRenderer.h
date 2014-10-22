@@ -69,6 +69,9 @@ public:
 
     /// Returns the Scene the current active main camera is in, or 0 if no main camera is active.
     virtual Scene *MainCameraScene() = 0;
+
+    /// Set an entity (that contains a camera component) as the current active main camera.
+    virtual void SetMainCamera(Entity* mainCameraEntity) = 0;
 };
 
 }

@@ -1,5 +1,11 @@
 [
     {
-        "--plugin" : "UrhoRenderer"
+        "--plugin" : [
+			"UrhoRenderer", 
+			"TundraLogic"
+		]
+    },
+    {
+        "--file" : "Scenes/Test.txml"
     }
 ]
