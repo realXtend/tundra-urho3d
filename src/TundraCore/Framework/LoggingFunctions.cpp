@@ -13,7 +13,7 @@
 #include <Engine/Core/ProcessUtils.h>
 
 #ifdef WIN32
-#include <Windows.h>
+#include "Win.h"
 #endif
 
 namespace Tundra

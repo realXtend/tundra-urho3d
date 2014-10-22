@@ -7,7 +7,7 @@
 #include "LoggingFunctions.h"
 
 #ifdef WIN32
-#include <Windows.h>
+#include "Win.h"
 #else
 #include <dlfcn.h>
 #endif

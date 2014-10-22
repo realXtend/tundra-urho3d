@@ -4,7 +4,7 @@
 #include "Framework.h"
 
 #if defined(WIN32) // Windows application entry point.
-#include <Windows.h>
+#include "Win.h"
 #include <string>
 #include <vector>
 

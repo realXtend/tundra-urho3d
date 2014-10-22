@@ -6,7 +6,6 @@
 #include "CoreDefines.h"
 
 #include "Framework.h"
-#include "Application.h"
 #include "SceneAPI.h"
 #include "Scene.h"
 #include "CoreStringUtils.h"
