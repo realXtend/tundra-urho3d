@@ -1,3 +1,4 @@
+// For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "TestRunner.h"
 #include "TestBenchmark.h"
@@ -5,19 +6,20 @@
 #include "Scene.h"
 #include "Entity.h"
 
-#include "kNet/DataSerializer.h"
+#include <kNet/DataSerializer.h>
+#include <Engine/Container/ForEach.h>
 
 using namespace Tundra;
 using namespace Tundra::Test;
 
 TEST_F(Runner, CreateEntity)
 {
-    for (TrueFalseVec::ConstIterator iRepl = TrueFalse.Begin(); iRepl != TrueFalse.End(); ++iRepl)
+    for(size_t iRepl = 0; iRepl < NUMELEMS(TrueAndFalse); ++iRepl)
     {
-        for (TrueFalseVec::ConstIterator iTemp = TrueFalse.Begin(); iTemp != TrueFalse.End(); ++iTemp)
+        for(size_t iTemp = 0; iTemp < NUMELEMS(TrueAndFalse); ++iTemp)
         {
-            bool replicated = *iRepl;
-            bool temporary = *iTemp;
+            const bool replicated = TrueAndFalse[iRepl];
+            const bool temporary = TrueAndFalse[iTemp];
 
             Tundra::Benchmark::Iterations = 10000;
 
@@ -26,17 +28,17 @@ TEST_F(Runner, CreateEntity)
                 EntityPtr ent = scene->CreateEntity(0, StringVector(), AttributeChange::Default,
                     replicated, replicated, temporary);
 
-                ASSERT_TRUE(ent);
-                ASSERT_TRUE(ent->ParentScene());
-                ASSERT_TRUE(!ent->Parent());
+                ASSERT_TRUE(ent != nullptr);
+                ASSERT_TRUE(ent->ParentScene() != nullptr);
+                ASSERT_TRUE(ent->Parent() == nullptr);
 
                 ASSERT_EQ(ent->IsReplicated(), replicated);
                 ASSERT_EQ(ent->IsUnacked(), replicated); // replicated == server needs to ack entity
                 ASSERT_EQ(ent->IsTemporary(), temporary);
 
-                ASSERT_EQ(ent->Name(), EmptyString);
-                ASSERT_EQ(ent->Description(), EmptyString);
-                ASSERT_EQ(ent->Group(), EmptyString);
+                ASSERT_EQ(ent->Name(), String::EMPTY);
+                ASSERT_EQ(ent->Description(), String::EMPTY);
+                ASSERT_EQ(ent->Group(), String::EMPTY);
 
                 ASSERT_EQ(ent->NumComponents(), ZeroSizeT);
                 ASSERT_EQ(ent->NumChildren(), ZeroSizeT);
@@ -67,8 +69,8 @@ TEST_F(Runner, CreateAttributes)
         {
             IAttribute *byName = SceneAPI::CreateAttribute(attributeTypeName, "ByName");
 
-            ASSERT_TRUE(byName);
-            ASSERT_TRUE(!byName->Owner());
+            ASSERT_TRUE(byName != nullptr);
+            ASSERT_TRUE(byName->Owner() == nullptr);
 
             dsName.ResetFill();
             byName->ToBinary(dsName);
@@ -77,8 +79,8 @@ TEST_F(Runner, CreateAttributes)
 
             IAttribute *byId = SceneAPI::CreateAttribute(attributeTypeId, "ById");
 
-            ASSERT_TRUE(byId);
-            ASSERT_TRUE(!byId->Owner());
+            ASSERT_TRUE(byId != nullptr);
+            ASSERT_TRUE(byId->Owner() == nullptr);
 
             dsId.ResetFill();
             byName->ToBinary(dsId);
@@ -113,18 +115,18 @@ TEST_F(Runner, CreateComponentsUnparented)
 
             ComponentPtr byName = framework->Scene()->CreateComponentByName(0, componentTypeName);
 
-            ASSERT_TRUE(byName);
-            ASSERT_TRUE(!byName->ParentScene());
-            ASSERT_TRUE(!byName->ParentEntity());
+            ASSERT_TRUE(byName != nullptr);
+            ASSERT_TRUE(byName->ParentScene() == nullptr);
+            ASSERT_TRUE(byName->ParentEntity() == nullptr);
 
             ASSERT_EQ(byName->TypeId(), componentTypeId);
             ASSERT_EQ(byName->TypeName(), componentTypeName);
 
             ComponentPtr byId = framework->Scene()->CreateComponentById(0, componentTypeId);
 
-            ASSERT_TRUE(byId);
-            ASSERT_TRUE(!byId->ParentScene());
-            ASSERT_TRUE(!byId->ParentEntity());
+            ASSERT_TRUE(byId != nullptr);
+            ASSERT_TRUE(byId->ParentScene() == nullptr);
+            ASSERT_TRUE(byId->ParentEntity() == nullptr);
 
             ASSERT_EQ(byId->TypeId(), componentTypeId);
             ASSERT_EQ(byId->TypeName(), componentTypeName);
@@ -144,12 +146,12 @@ TEST_F(Runner, CreateComponentsParented)
         u32 componentTypeId = framework->Scene()->ComponentTypeIdForTypeName(componentTypeName);
         Log(componentTypeName + " " + String(componentTypeId), 1);
 
-        for (TrueFalseVec::ConstIterator iRepl = TrueFalse.Begin(); iRepl != TrueFalse.End(); ++iRepl)
+        for(size_t iRepl = 0; iRepl < NUMELEMS(TrueAndFalse); ++iRepl)
         {
-            for (TrueFalseVec::ConstIterator iTemp = TrueFalse.Begin(); iTemp != TrueFalse.End(); ++iTemp)
+            for(size_t iTemp = 0; iTemp < NUMELEMS(TrueAndFalse); ++iTemp)
             {
-                bool replicated = *iRepl;
-                bool temporary = *iTemp;
+                const bool replicated = TrueAndFalse[iRepl];
+                const bool temporary = TrueAndFalse[iTemp];
 
                 Tundra::Benchmark::Iterations = 10000;
 

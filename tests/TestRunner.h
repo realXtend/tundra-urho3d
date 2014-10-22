@@ -1,3 +1,4 @@
+// For conditions of distribution and use, see copyright notice in LICENSE
 
 #pragma once
 
@@ -10,7 +11,7 @@
 #include "Scene.h"
 #include "CoreStringUtils.h"
 
-#include "Math/MathFunc.h"
+#include <Math/MathFunc.h>
 
 #include <Context.h>
 #include <ProcessUtils.h>
@@ -23,22 +24,14 @@ namespace Tundra
 {
     namespace Test
     {
-        /** Static common QCOMPARE variables. It is understadably very strict about types,
+        /* Static common QCOMPARE variables. It is understandably very strict about types,
             so to make tests more compact and easy to read these should be used. */
-        static String EmptyString = "";
-        static size_t ZeroSizeT = 0;
+        static const size_t ZeroSizeT = 0;
 
-        /// Returns a list of true and false values.
-        typedef Vector<bool> TrueFalseVec;
-        static TrueFalseVec TrueAndFalse()
-        {
-            TrueFalseVec modes;
-            modes.Push(true);
-            modes.Push(false);
-            return modes;
-        }
+        /// An array containing true and false.
+        static const bool TrueAndFalse[2] = { true, false };
 
-        static String TruthyString(bool truthy)
+        inline String TruthyString(bool truthy)
         {
             return truthy ? "true" : "false";
         }
@@ -63,8 +56,6 @@ namespace Tundra
                 this->server = server;
                 this->headless = headless;
                 this->config = config;
-
-                TrueFalse = TrueAndFalse();
             }
 
             void Log(const String &msg, int pad = 0)
@@ -82,8 +73,6 @@ namespace Tundra
             ContextPtr context;
             FrameworkPtr framework;
             ScenePtr scene;
-
-            TrueFalseVec TrueFalse;
 
             virtual void SetUp()
             {

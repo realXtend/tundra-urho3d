@@ -43,11 +43,12 @@ macro (CreateTest testname testsrcs)
     include_directories(${CMAKE_SOURCE_DIR}/tests)
 
     add_executable (${TARGET_NAME} ${testsrcs})
-    target_link_libraries (${TARGET_NAME} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTTEST_LIBRARY})
 
     link_modules(TundraCore)
     link_package(GTEST)
     link_package(URHO3D)
+    link_package(KNET)
+    link_package(MATHGEOLIB)
 
     set_target_properties (${TARGET_NAME} PROPERTIES FOLDER ${PROJECT_TYPE})
 
