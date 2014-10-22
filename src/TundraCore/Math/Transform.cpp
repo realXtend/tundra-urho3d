@@ -32,7 +32,6 @@ String Transform::SerializeToString() const
 
 Transform Transform::FromString(const char *str)
 {
-    assert(IsNeutralCLocale());
     assume(str);
     if (!str)
         return Transform();

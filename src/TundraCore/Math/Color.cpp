@@ -6,7 +6,8 @@
 
 #include "StableHeaders.h"
 #include "Color.h"
-#include "Math/MathFunc.h"
+
+#include <Math/MathFunc.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,7 +27,6 @@ const Color Color::Gray = Color(0.5f, 0.5f, 0.5f, 1.f);
 
 Color Color::FromString(const char *str)
 {
-    assert(IsNeutralCLocale());
     assume(str);
     if (!str)
         return Color();
