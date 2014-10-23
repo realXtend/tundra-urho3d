@@ -10,12 +10,11 @@
 #include "IComponent.h"
 #include "LoggingFunctions.h"
 
-#include <XMLFile.h>
+#include <Engine/Resource/XMLFile.h>
+#include <Engine/Core/Profiler.h>
 
 #include <kNet/DataSerializer.h>
 #include <kNet/DataDeserializer.h>
-#include <Profiler.h>
-#include <algorithm>
 
 namespace Tundra
 {
@@ -95,7 +94,7 @@ void Entity::AddComponent(component_id_t id, const ComponentPtr &component, Attr
             }
             // Whenever a manual replicated ID is assigned, reset the ID generator to the highest value to avoid unnecessary free ID probing in the future
             if (id < UniqueIdGenerator::FIRST_LOCAL_ID)
-                idGenerator_.ResetReplicatedId(std::max(id, idGenerator_.id));
+                idGenerator_.ResetReplicatedId(Max(id, idGenerator_.id));
         }
 
         component->SetNewId(id);

@@ -9,6 +9,10 @@
 #include <Str.h>
 #include <Vector.h>
 
+#ifdef GetObject
+#undef GetObject // Guard against Win32 GetObject macro
+#endif
+
 namespace Tundra
 {
 

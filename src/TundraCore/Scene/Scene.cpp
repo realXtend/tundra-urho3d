@@ -14,17 +14,16 @@
 #include "EntityReference.h"
 #include "Framework.h"
 #include "FrameAPI.h"
-#include "Profiler.h"
 #include "LoggingFunctions.h"
 
 #include <kNet/DataDeserializer.h>
 #include <kNet/DataSerializer.h>
-#include <algorithm>
 
-#include <File.h>
-#include <XMLFile.h>
-#include <FileSystem.h>
-#include <StringUtils.h>
+#include <Engine/IO/File.h>
+#include <Engine/Resource/XMLFile.h>
+#include <Engine/IO/FileSystem.h>
+#include <Engine/Core/StringUtils.h>
+#include <Engine/Core/Profiler.h>
 
 using namespace kNet;
 using namespace std;
@@ -91,7 +90,7 @@ EntityPtr Scene::CreateEntity(entity_id_t id, const StringVector &components, At
         {
             // Reset the ID generator to the manually assigned value to avoid unnecessary free ID probing in the future
             if (id < UniqueIdGenerator::FIRST_LOCAL_ID)
-                idGenerator_.ResetReplicatedId(std::max(id, idGenerator_.id));
+                idGenerator_.ResetReplicatedId(Max(id, idGenerator_.id));
         }
     }
 
