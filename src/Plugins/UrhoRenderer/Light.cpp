@@ -63,9 +63,9 @@ Light::~Light()
 
 void Light::UpdateSignals()
 {
-    // If scene is not view-enabled, no further action
     if (!ViewEnabled())
         return;
+
     Entity* parent = ParentEntity();
     if (!parent)
         return;
@@ -91,6 +91,9 @@ void Light::OnComponentStructureChanged(IComponent*, AttributeChange::Type)
 
 void Light::AttributesChanged()
 {
+    if (!ViewEnabled() || !light_)
+        return;
+
     if (type.ValueChanged())
     {
         int tundraType = type.Get();
