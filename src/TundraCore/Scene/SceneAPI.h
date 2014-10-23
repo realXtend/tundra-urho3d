@@ -56,7 +56,7 @@ public:
     void RegisterPlaceholderComponentType(ComponentDesc desc, AttributeChange::Type change = AttributeChange::Default);
 
     /// Returns the registered placeholder component descs.
-    const PlaceholderComponentTypeMap& GetPlaceholderComponentTypes() const { return placeholderComponentTypes; }
+    const PlaceholderComponentTypeMap& PlaceholderComponentTypes() const { return placeholderComponentTypes; }
 
     /// Returns a pointer to a scene
     /** Manage the pointer carefully, as scenes may not get deleted properly if
@@ -117,10 +117,10 @@ public:
     /// Registers a new factory to create new components of type name IComponentFactory::TypeName and ID IComponentFactory::TypeId.
     void RegisterComponentFactory(const ComponentFactoryPtr &factory);
 
-    /// Creates a new component instance by specifying the typename of the new component to create, and the scene where to create.
+    /// Creates a new component instance by specifying the type name of the new component to create, and the scene where to create.
     ComponentPtr CreateComponentByName(Scene* scene, const String &componentTypeName, const String &newComponentName = "") const;
 
-    /// Creates a new component instance by specifying the typeid of the new component to create, and the scene where to create.
+    /// Creates a new component instance by specifying the type ID of the new component to create, and the scene where to create.
     ComponentPtr CreateComponentById(Scene* scene, u32 componentTypeid, const String &newComponentName = "") const;
 
     /// Looks up the given type id and returns the type name string for that id.
@@ -154,7 +154,7 @@ public:
 
     /// Register a custom static-attribute component type by using an existing component (DynamicComponent) as a blueprint.
     /** This is the same mechanism as the RegisterPlaceholderComponent above, but meant to be used from scripts.
-        @param typeName The typename that is to be registered
+        @param typeName The type name that is to be registered
         @param component The DynamicComponent that is used as a blueprint */
     void RegisterComponentType(const String& typeName, IComponent* component);
 

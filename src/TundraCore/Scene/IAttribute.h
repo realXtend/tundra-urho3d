@@ -270,10 +270,10 @@ static const String cAttributeQuatTypeName = "Quat";
 static const String cAttributeAssetReferenceTypeName = "AssetReference";
 static const String cAttributeAssetReferenceListTypeName = "AssetReferenceList";
 static const String cAttributeEntityReferenceTypeName = "EntityReference";
-static const String cAttributeVariantTypeName = "QVariant";
-static const String cAttributeVariantListTypeName = "QVariantList";
+static const String cAttributeVariantTypeName = "Variant";
+static const String cAttributeVariantListTypeName = "VariantList";
 static const String cAttributeTransformTypeName = "Transform";
-static const String cAttributePointTypeName = "QPoint";
+static const String cAttributePointTypeName = "Point";
 
 /// Represents weak pointer to an attribute.
 struct AttributeWeakPtr

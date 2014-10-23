@@ -156,7 +156,8 @@ void SceneAPI::RegisterComponentFactory(const ComponentFactoryPtr &factory)
 {
     if (factory->TypeName().Trimmed() != factory->TypeName() || factory->TypeName().Empty() || factory->TypeId() == 0)
     {
-        LogError("Cannot add a new ComponentFactory for component typename \"" + factory->TypeName() + "\" and typeid " + String(factory->TypeId()) + ". Invalid input!");
+        LogError("Cannot add a new ComponentFactory for component type name \"" + factory->TypeName() +
+            "\" and type ID " + String(factory->TypeId()) + ". Invalid input!");
         return;
     }
 
@@ -170,7 +171,9 @@ void SceneAPI::RegisterComponentFactory(const ComponentFactoryPtr &factory)
 
     if (existingFactory)
     {
-        LogError("Cannot add a new ComponentFactory for component typename \"" + factory->TypeName() + "\" and typeid " + String(factory->TypeId()) + ". Conflicting type factory with typename " + existingFactory->TypeName() + " and typeid " + String(existingFactory->TypeId()) + " already exists!");
+        LogError("Cannot add a new ComponentFactory for component type name \"" + factory->TypeName() + "\" and type ID " + 
+            String(factory->TypeId()) + ". Conflicting type factory with type name " + existingFactory->TypeName() + 
+            " and type ID " + String(existingFactory->TypeId()) + " already exists!");
         return;
     }
 
@@ -204,7 +207,7 @@ ComponentPtr SceneAPI::CreateComponentById(Scene* scene, u32 componentTypeid, co
         if (i != placeholderComponentTypes.End())
             return CreatePlaceholderComponentById(scene, componentTypeid, newComponentName);
 
-        LogError("Cannot create component for typeid \"" + String(componentTypeid) + "\" - no factory exists!");
+        LogError("Cannot create component for type ID \"" + String(componentTypeid) + "\" - no factory exists!");
         return ComponentPtr();
     }
     return factory->Create(context_, scene, newComponentName);
@@ -255,8 +258,11 @@ u32 SceneAPI::AttributeTypeIdForTypeName(const String &attributeTypename)
 {
     for (u32 i = 0; i < attributeTypeNames.Size(); ++i)
     {
-        if (attributeTypeNames[i].Compare(attributeTypename, false) == 0)
+        if (attributeTypeNames[i].Compare(attributeTypename, false) == 0 ||
+            attributeTypeNames[i].Compare(attributeTypename.Substring(1), false) == 0) // Handle Q-prefixed deprecated forms
+        {
             return i + 1; // 0 is illegal, actual types start from 1
+        }
     }
     return 0;
 }
