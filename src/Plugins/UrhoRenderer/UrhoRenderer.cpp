@@ -6,6 +6,7 @@
 #include "Framework.h"
 #include "Placeable.h"
 #include "Mesh.h"
+#include "AnimationController.h"
 #include "Camera.h"
 #include "Light.h"
 #include "IComponentFactory.h"
@@ -44,7 +45,7 @@ void UrhoRenderer::Load()
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Mesh>()));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Camera>()));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Light>()));
-
+    scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<AnimationController>()));
     framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<UrhoMeshAsset>("UrhoMesh", ".mdl")));
 }
 

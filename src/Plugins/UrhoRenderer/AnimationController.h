@@ -292,7 +292,7 @@ private:
     /// Map of animations
     AnimationMap animations_;
 
-    HashMap<String, Urho3D::AnimationState*> animationStates_;
+    HashMap<String, Urho3D::SharedPtr<Urho3D::AnimationState>> animationStates_;
 };
 
 COMPONENT_TYPEDEFS(AnimationController)

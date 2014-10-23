@@ -14,10 +14,11 @@
 #include <Engine/Scene/Scene.h>
 #include <Engine/Graphics/Graphics.h>
 #include <Engine/Graphics/Light.h>
-#include "Engine/Graphics/Animation.h"
-#include "Engine/Graphics/AnimatedModel.h"
-#include "Engine/Graphics/AnimationState.h"
-#include "Engine/Core/StringUtils.h"
+#include <Engine/Graphics/Animation.h>
+#include <Engine/Graphics/AnimatedModel.h>
+#include <Engine/Graphics/AnimationState.h>
+#include <Engine/Core/StringUtils.h>
+#include <Engine/Resource/ResourceCache.h>
 
 namespace Tundra
 {
@@ -32,6 +33,7 @@ AnimationController::AnimationController(Urho3D::Context* context, Scene* scene)
 
 AnimationController::~AnimationController()
 {
+    animationStates_.Clear();
 }
 
 void AnimationController::UpdateSignals()
@@ -43,6 +45,8 @@ void AnimationController::UpdateSignals()
     if (!parent)
         return;
 
+    framework->Frame()->Updated.Connect(this, &AnimationController::Update);
+
     parent->ComponentAdded.Connect(this, &AnimationController::OnComponentStructureChanged);
     parent->ComponentRemoved.Connect(this, &AnimationController::OnComponentStructureChanged);
 
@@ -52,12 +56,12 @@ void AnimationController::UpdateSignals()
 
 void AnimationController::OnComponentStructureChanged(IComponent*, AttributeChange::Type)
 {
-    Entity *entity = ParentEntity();
-    if (!entity)
+    Entity *parent = ParentEntity();
+    if (!parent)
         return;
 
-    placeable_ = entity->Component<Placeable>();
-    mesh_ = entity->Component<Mesh>();
+    placeable_ = parent->Component<Placeable>();
+    mesh_ = parent->Component<Mesh>();
 }
 
 void AnimationController::AttributesChanged()
@@ -85,7 +89,18 @@ Urho3D::AnimationState* AnimationController::UrhoAnimationState(const String& na
         }
     }
     if (animIndex < 0)
+    {
+        //Urho3D::AnimationState* newState = 0;
+        //Urho3D::ResourceCache* cache = GetSubsystem<Urho3D::ResourceCache>();
+        //Urho3D::Animation* walkAnimation = cache->GetResource<Urho3D::Animation>("Models/Jack_Walk.ani");
+        //if (walkAnimation)
+        //{
+        //    newState = model->AddAnimationState(walkAnimation);
+        //    animationStates_[name] = newState;
+        //}
+        //return newState;
         return 0;
+    }
 
     return animationStates[animIndex];
 }
