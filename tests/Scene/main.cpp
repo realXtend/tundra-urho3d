@@ -35,7 +35,7 @@ TEST_F(Runner, CreateEntity)
                 ASSERT_TRUE(ent->Parent() == nullptr);
 
                 ASSERT_EQ(ent->IsReplicated(), replicated);
-                ASSERT_EQ(ent->IsUnacked(), replicated); // replicated == server needs to ack entity
+                ASSERT_EQ(ent->IsUnacked(), !scene->IsAuthority());
                 ASSERT_EQ(ent->IsTemporary(), temporary);
 
                 ASSERT_EQ(ent->Name(), String::EMPTY);
@@ -197,6 +197,7 @@ TEST_F(Runner, CreateComponentsParented)
 
 TEST_F(Runner, SceneSerialization)
 {
+    // Remove tundra.json hardcoded scene ents
     scene->RemoveAllEntities();
 
     String txmlPath = framework->GetSubsystem<Urho3D::FileSystem>()->GetProgramDir() + "TundraTestScene.txml";

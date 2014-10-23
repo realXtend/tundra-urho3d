@@ -98,7 +98,7 @@ namespace Tundra
                 framework->Initialize();
 
                 if (createScene)
-                    scene = framework->Scene()->CreateScene("TestScene", false, server);
+                    scene = framework->Scene()->CreateScene("TestScene", false, true);
 
                 ProcessEvents();
             }
