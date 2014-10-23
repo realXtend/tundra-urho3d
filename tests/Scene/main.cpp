@@ -6,6 +6,8 @@
 #include "Scene.h"
 #include "Entity.h"
 
+#include "FileSystem.h"
+
 #include <kNet/DataSerializer.h>
 #include <Engine/Container/ForEach.h>
 
@@ -193,6 +195,51 @@ TEST_F(Runner, CreateComponentsParented)
                 BENCHMARK_END;
             }
         }
+    }
+}
+
+TEST_F(Runner, SceneSerialization)
+{
+    String txmlPath = framework->GetSubsystem<Urho3D::FileSystem>()->GetProgramDir() + "TundraTestScene.txml";
+    ASSERT_FALSE(txmlPath.Empty());
+
+    StringVector types = framework->Scene()->ComponentTypes();
+    for (StringVector::ConstIterator iType = types.Begin(); iType != types.End(); ++iType)
+    {
+        String componentTypeName = *iType;
+
+        EntityPtr ent = scene->CreateEntity();
+        ent->SetName("Entity_" + componentTypeName);
+        ent->CreateComponent(componentTypeName, "Component_" + componentTypeName);
+    }
+
+    uint numEnts = scene->Entities().Size();
+    ASSERT_EQ(types.Size(), numEnts);
+
+    ASSERT_TRUE(scene->SaveSceneXML(txmlPath, false, false));
+
+    scene->RemoveAllEntities();
+    uint numEntsEmpty = scene->Entities().Size();
+
+    Vector<Entity*> ents = scene->LoadSceneXML(txmlPath, true, true, AttributeChange::Default);
+
+    // Cleanup file before any asserts can exit prematurely
+    framework->GetSubsystem<Urho3D::FileSystem>()->Delete(txmlPath);
+
+    ASSERT_EQ(numEntsEmpty, 0);
+    ASSERT_EQ(ents.Size(), numEnts);
+
+    for (StringVector::ConstIterator iType = types.Begin(); iType != types.End(); ++iType)
+    {
+        String componentTypeName = *iType;
+
+        EntityPtr ent = scene->EntityByName("Entity_" + componentTypeName);
+        ASSERT_TRUE(ent != nullptr);
+
+        ComponentPtr comp = ent->Component(componentTypeName, "Component_" + componentTypeName);
+        ASSERT_TRUE(comp != nullptr);
+
+        Log(PadString(componentTypeName, 25) + "OK", 2);
     }
 }
 
