@@ -60,9 +60,8 @@ TEST_F(Runner, CreateAttributes)
     kNet::DataSerializer dsId(64 * 1024);
 
     StringVector types = SceneAPI::AttributeTypes();
-    for (StringVector::ConstIterator iType = types.Begin(); iType != types.End(); ++iType)
+    foreach(const String &attributeTypeName, types)
     {
-        String attributeTypeName = *iType;
         u32 attributeTypeId = SceneAPI::AttributeTypeIdForTypeName(attributeTypeName);
 
         Tundra::Benchmark::Iterations = 10000;
@@ -103,9 +102,8 @@ TEST_F(Runner, CreateAttributes)
 TEST_F(Runner, CreateComponentsUnparented)
 {
     StringVector types = framework->Scene()->ComponentTypes();
-    for (StringVector::ConstIterator iType = types.Begin(); iType != types.End(); ++iType)
+    foreach(const String &componentTypeName, types)
     {
-        String componentTypeName = *iType;
         u32 componentTypeId = framework->Scene()->ComponentTypeIdForTypeName(componentTypeName);
 
         Tundra::Benchmark::Iterations = 10000;
@@ -142,9 +140,8 @@ TEST_F(Runner, CreateComponentsUnparented)
 TEST_F(Runner, CreateComponentsParented)
 {
     StringVector types = framework->Scene()->ComponentTypes();
-    for (StringVector::ConstIterator iType = types.Begin(); iType != types.End(); ++iType)
+    foreach(const String &componentTypeName, types)
     {
-        String componentTypeName = *iType;
         u32 componentTypeId = framework->Scene()->ComponentTypeIdForTypeName(componentTypeName);
         Log(componentTypeName + " " + String(componentTypeId), 1);
 
@@ -204,10 +201,8 @@ TEST_F(Runner, SceneSerialization)
     ASSERT_FALSE(txmlPath.Empty());
 
     StringVector types = framework->Scene()->ComponentTypes();
-    for (StringVector::ConstIterator iType = types.Begin(); iType != types.End(); ++iType)
+    foreach(const String &componentTypeName, types)
     {
-        String componentTypeName = *iType;
-
         EntityPtr ent = scene->CreateEntity();
         ent->SetName("Entity_" + componentTypeName);
         ent->CreateComponent(componentTypeName, "Component_" + componentTypeName);
@@ -229,10 +224,8 @@ TEST_F(Runner, SceneSerialization)
     ASSERT_EQ(numEntsEmpty, 0);
     ASSERT_EQ(ents.Size(), numEnts);
 
-    for (StringVector::ConstIterator iType = types.Begin(); iType != types.End(); ++iType)
+    foreach(const String &componentTypeName, types)
     {
-        String componentTypeName = *iType;
-
         EntityPtr ent = scene->EntityByName("Entity_" + componentTypeName);
         ASSERT_TRUE(ent != nullptr);
 
