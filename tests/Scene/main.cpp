@@ -197,6 +197,8 @@ TEST_F(Runner, CreateComponentsParented)
 
 TEST_F(Runner, SceneSerialization)
 {
+    scene->RemoveAllEntities();
+
     String txmlPath = framework->GetSubsystem<Urho3D::FileSystem>()->GetProgramDir() + "TundraTestScene.txml";
     ASSERT_FALSE(txmlPath.Empty());
 
