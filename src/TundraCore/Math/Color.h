@@ -26,16 +26,14 @@ public:
     Color(float nr, float ng, float nb) : r(nr), g(ng), b(nb), a(1.0f) {}
     Color(float nr, float ng, float nb, float na) : r(nr), g(ng), b(nb), a(na) {}
     Color(const Urho3D::Color &c) : r(c.r_), g(c.g_), b(c.b_), a(c.a_) {}
+    Color(const float4 &c) : r(c.x), g(c.y), b(c.z), a(c.w) {}
 
-    bool operator == (const Color& rhs) const
-    {
-        return r == rhs.r && g == rhs.g && b == rhs.b && a == rhs.a; /**< @todo Use epsilon! */
-    }
+    /// @todo Bring back if needed, but use Equals().
+    /// bool operator == (const Color& rhs) const { return r == rhs.r && g == rhs.g && b == rhs.b && a == rhs.a; }
+    /// bool operator != (const Color& rhs) const { return !(*this == rhs); }
 
-    bool operator != (const Color& rhs) const
-    {
-        return !(*this == rhs);
-    }
+    /// Returns true if this vector is equal to the given vector, up to given per-element epsilon.
+    bool Equals(const Color &other, float epsilon = 1e-3f) const;
 
     Color operator * (float scalar) const
     {
@@ -58,8 +56,15 @@ public:
     static Color FromString(const char *str);
 
     /// Serialize to a string in the format "r,g,b,a"
-    /// @todo "r g b a" instead so that's it's consistent with float2/3/4/Quat etc.
+    /** @todo "r g b a" instead so that this would be consistent with float2/3/4/Quat etc.
+        @todo Apparently MGL has switched to using ',' instead of ' '  as separator. Which one we want to use? */
     String SerializeToString() const;
+
+    /// Returns "Color(r, g, b, a)".
+    String SerializeToCodeString() const;
+
+    /// Returns "(r, g, b, a)" (limited precision).
+    String ToString() const;
 
     /// Implicit conversion to float4.
     operator float4() const { return float4(r, g, b, a); }

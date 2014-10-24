@@ -25,6 +25,11 @@ const Color Color::Cyan = Color(0.f, 1.f, 1.f, 1.f);
 const Color Color::Magenta = Color(1.f, 0.f, 1.f, 1.f);
 const Color Color::Gray = Color(0.5f, 0.5f, 0.5f, 1.f);
 
+bool Color ::Equals(const Color &other, float e) const
+{
+    return  Abs(r - other.r) < e && Abs(g - other.g) < e && Abs(b - other.b) < e && Abs(a - other.a) < e;
+}
+
 Color Color::FromString(const char *str)
 {
     assume(str);
@@ -46,11 +51,23 @@ Color Color::FromString(const char *str)
     return c;
 }
 
+String Color::ToString() const
+{
+    char str[256];
+    sprintf(str, "(%.3f, %.3f, %.3f, %.3f)", r, g, b, a);
+    return str;
+}
+
 String Color::SerializeToString() const
 {
     char str[256];
     sprintf(str, "%.9g,%.9g,%.9g,%.9g", r, g, b, a);
     return str;
+}
+
+String Color::SerializeToCodeString() const
+{
+    return "Color(" + SerializeToString() + ")";
 }
 
 }
