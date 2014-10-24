@@ -5,24 +5,21 @@
 
 #include "Scene.h"
 #include "Entity.h"
+#include "LoggingFunctions.h"
 
-#include "FileSystem.h"
+#include <Engine/IO/FileSystem.h>
 
 #include <kNet/DataSerializer.h>
-#include <Engine/Container/ForEach.h>
 
 using namespace Tundra;
 using namespace Tundra::Test;
 
 TEST_F(Runner, CreateEntity)
 {
-    for(size_t iRepl = 0; iRepl < NUMELEMS(TrueAndFalse); ++iRepl)
+    foreach2(bool replicated, TrueAndFalse)
     {
-        for(size_t iTemp = 0; iTemp < NUMELEMS(TrueAndFalse); ++iTemp)
+        foreach2(bool temporary, TrueAndFalse)
         {
-            const bool replicated = TrueAndFalse[iRepl];
-            const bool temporary = TrueAndFalse[iTemp];
-
             Tundra::Benchmark::Iterations = 10000;
 
             BENCHMARK(PadString(replicated ? "Replicated" : "Local", 10) + PadString(temporary ? " + Temp" : "", 4), 25)
@@ -102,6 +99,7 @@ TEST_F(Runner, CreateAttributes)
 TEST_F(Runner, CreateComponentsUnparented)
 {
     StringVector types = framework->Scene()->ComponentTypes();
+
     foreach(const String &componentTypeName, types)
     {
         u32 componentTypeId = framework->Scene()->ComponentTypeIdForTypeName(componentTypeName);

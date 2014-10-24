@@ -73,7 +73,7 @@ namespace Tundra
             FrameworkPtr framework;
             ScenePtr scene;
 
-            virtual void SetUp()
+            void SetUp() override
             {
                 arguments.push_back("TundraTestRunner.exe");
 
@@ -103,7 +103,7 @@ namespace Tundra
                 ProcessEvents();
             }
 
-            virtual void TearDown()
+            void TearDown() override
             {
                 scene.Reset();
 
