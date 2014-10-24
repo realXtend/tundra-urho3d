@@ -1,22 +1,24 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
+#define MATH_URHO3D_INTEROP
 #include "Placeable.h"
 #include "GraphicsWorld.h"
 #include "Renderer.h"
-#include "Profiler.h"
+#include "Mesh.h"
+
 #include "AttributeMetadata.h"
 #include "Entity.h"
-#include "Mesh.h"
 #include "Scene/Scene.h"
-#include "Math/Quat.h"
-#include "Math/float3x3.h"
-#include "Math/float3x4.h"
-#include "Math/MathUtilities.h"
 #include "LoggingFunctions.h"
+
+#include <Math/Quat.h>
+#include <Math/float3x3.h>
+#include <Math/float3x4.h>
 
 #include <Engine/Scene/Scene.h>
 #include <Engine/Scene/Node.h>
+#include <Engine/Core/Profiler.h>
 
 namespace Tundra
 {
@@ -232,7 +234,7 @@ float3x4 Placeable::LocalToWorld() const
 {
     // The Urho3D scene node world transform is always up to date with the transform attribute
     if (sceneNode_)
-        return ToFloat3x4(sceneNode_->GetWorldTransform());
+        return sceneNode_->GetWorldTransform();
     
     // Otherwise, if scene node is not available, use theoretical derived transform from Tundra scene structure
     Placeable *parentPlaceable = ParentPlaceableComponent();
@@ -379,15 +381,15 @@ void Placeable::AttributesChanged()
 
         const Transform& trans = transform.Get();
         if (trans.pos.IsFinite())
-            sceneNode_->SetPosition(ToVector3(trans.pos));
+            sceneNode_->SetPosition(trans.pos);
 
         Quat orientation = trans.Orientation();
         if (orientation.IsFinite())
-            sceneNode_->SetRotation(ToQuaternion(orientation));
+            sceneNode_->SetRotation(orientation);
         else
             LogError("Placeable: transform attribute changed, but orientation not valid!");
 
-        sceneNode_->SetScale(ToVector3(trans.scale));
+        sceneNode_->SetScale(trans.scale);
 
         TransformChanged.Emit();
     }

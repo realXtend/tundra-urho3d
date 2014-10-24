@@ -1,6 +1,7 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
+#define MATH_URHO3D_INTEROP
 #include "Camera.h"
 #include "Placeable.h"
 #include "GraphicsWorld.h"
@@ -272,12 +273,12 @@ EntityVector Camera::VisibleEntities()
 
 float4x4 Camera::ViewMatrix() const
 {
-    return (camera_ ? ToFloat4x4(camera_->GetView()) : float4x4::nan);
+    return (camera_ ? float4x4(camera_->GetView()) : float4x4::nan);
 }
 
 float4x4 Camera::ProjectionMatrix() const
 {
-    return (camera_ ? ToFloat4x4(camera_->GetProjection()) : float4x4::nan);
+    return (camera_ ? float4x4(camera_->GetProjection()) : float4x4::nan);
 }
 
 void Camera::SetFromFrustum(const Frustum &f)

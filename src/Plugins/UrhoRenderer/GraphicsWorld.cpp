@@ -1,26 +1,29 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
+#define MATH_URHO3D_INTEROP
 #include "GraphicsWorld.h"
 #include "UrhoRenderer.h"
+
 #include "Entity.h"
 #include "Scene/Scene.h"
 #include "Profiler.h"
 #include "ConfigAPI.h"
 #include "FrameAPI.h"
-#include "Math/Transform.h"
-#include "Math/float2.h"
-#include "Math/float3x4.h"
-#include "Geometry/AABB.h"
-#include "Geometry/OBB.h"
-#include "Geometry/Plane.h"
-#include "Geometry/LineSegment.h"
-#include "Math/float3.h"
-#include "Math/float4.h"
-#include "Math/MathUtilities.h"
-#include "Geometry/Circle.h"
-#include "Geometry/Sphere.h"
 #include "LoggingFunctions.h"
+#include "Math/Transform.h"
+#include "Math/Color.h"
+
+#include <Math/float2.h>
+#include <Math/float3x4.h>
+#include <Geometry/AABB.h>
+#include <Geometry/OBB.h>
+#include <Geometry/Plane.h>
+#include <Geometry/LineSegment.h>
+#include <Math/float3.h>
+#include <Math/float4.h>
+#include <Geometry/Circle.h>
+#include <Geometry/Sphere.h>
 
 #include <Engine/Scene/Scene.h>
 #include <Engine/Graphics/DebugRenderer.h>
@@ -207,14 +210,14 @@ void GraphicsWorld::DebugDrawLineSegment(const LineSegment &l, const Color &clr,
 {
     Urho3D::DebugRenderer* debug = urhoScene_->GetComponent<Urho3D::DebugRenderer>();
     if (debug)
-        debug->AddLine(ToVector3(l.a), ToVector3(l.b), clr.ToUrhoColor(), depthTest);
+        debug->AddLine(l.a, l.b, clr, depthTest);
 }
 
 void GraphicsWorld::DebugDrawLine(const float3& start, const float3& end, const Color &clr, bool depthTest)
 {
     Urho3D::DebugRenderer* debug = urhoScene_->GetComponent<Urho3D::DebugRenderer>();
     if (debug)
-        debug->AddLine(ToVector3(start), ToVector3(end), clr.ToUrhoColor(), depthTest);
+        debug->AddLine(start, end, clr, depthTest);
 }
 
 void GraphicsWorld::DebugDrawPlane(const Plane &plane, const Color &clr, const float3 &refPoint, float uSpacing, float vSpacing, 

@@ -1,12 +1,12 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
+#define MATH_URHO3D_INTEROP
 #include "Mesh.h"
+#include "GraphicsWorld.h"
 #include "Placeable.h"
 #include "Scene/Scene.h"
-#include "GraphicsWorld.h"
 #include "AttributeMetadata.h"
-#include "Math/MathUtilities.h"
 #include "LoggingFunctions.h"
 
 #include <Engine/Scene/Scene.h>
@@ -181,10 +181,10 @@ void Mesh::AttributesChanged()
         mesh_->SetCastShadows(castShadows.Get());
     if (nodeTransformation.ValueChanged())
     {
-        Transform newTransform = nodeTransformation.Get();
-        adjustmentNode_->SetPosition(ToVector3(newTransform.pos));
-        adjustmentNode_->SetRotation(ToQuaternion(newTransform.Orientation()));
-        adjustmentNode_->SetScale(ToVector3(newTransform.scale));
+        const Transform &newTransform = nodeTransformation.Get();
+        adjustmentNode_->SetPosition(newTransform.pos);
+        adjustmentNode_->SetRotation(newTransform.Orientation());
+        adjustmentNode_->SetScale(newTransform.scale);
     }
     if (meshRef.ValueChanged())
     {
