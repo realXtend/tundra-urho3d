@@ -1,0 +1,2 @@
+
+CreateTest(MathUrhoInterop MathUrhoInterop.cpp)
