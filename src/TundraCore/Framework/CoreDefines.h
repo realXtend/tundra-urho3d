@@ -27,6 +27,12 @@ inline Dst checked_static_cast(Src src)
     return static_cast<Dst>(src);
 }
 
+/// Urho's foreach doesn't work for STL containers and C arrays, so add second foreach version for those use cases.
+#define foreach2(val, container) \
+    for(auto it = std::begin(container); it != std::end(container); ++it) \
+        if (bool _foreach_flag = false) {} \
+        else for(val = *it; !_foreach_flag; _foreach_flag = true)
+
 /** @def UNUSED_PARAM(x)
     Preprocessor macro for suppressing unused formal parameter warnings while still showing the variable name in Doxygen documentation.  */
 #if defined(DOXYGEN) // DOXYGEN is a special define used when Doxygen is run.
