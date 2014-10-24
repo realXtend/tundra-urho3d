@@ -138,6 +138,9 @@ else()
     add_definitions(-DUNIX)
 endif()
 
+# Enable MathGeoLib-Urho3D interoperability by default everywhere.
+add_definitions(-DMATH_URHO3D_INTEROP)
+
 # On all platforms, we enable PCH files by default. TODO Not implemented on non-Windows plaforms!
 # TODO Make this an option instead?
 add_definitions (-DPCH_ENABLED)

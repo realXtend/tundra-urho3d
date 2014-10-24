@@ -1,6 +1,5 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
-#define MATH_URHO3D_INTEROP
 #include "TestRunner.h"
 #include "TestBenchmark.h"
 

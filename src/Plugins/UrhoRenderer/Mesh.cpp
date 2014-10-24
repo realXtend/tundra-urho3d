@@ -1,10 +1,10 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
-#define MATH_URHO3D_INTEROP
 #include "Mesh.h"
 #include "GraphicsWorld.h"
 #include "Placeable.h"
+
 #include "Scene/Scene.h"
 #include "AttributeMetadata.h"
 #include "LoggingFunctions.h"

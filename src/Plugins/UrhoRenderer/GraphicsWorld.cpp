@@ -1,7 +1,6 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
-#define MATH_URHO3D_INTEROP
 #include "GraphicsWorld.h"
 #include "UrhoRenderer.h"
 

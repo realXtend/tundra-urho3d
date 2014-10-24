@@ -1,15 +1,14 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
-#define MATH_URHO3D_INTEROP
 #include "Camera.h"
 #include "Placeable.h"
 #include "GraphicsWorld.h"
 #include "UrhoRenderer.h"
+
 #include "Entity.h"
 #include "FrameAPI.h"
 #include "Scene/Scene.h"
-#include "Profiler.h"
 #include "AttributeMetadata.h"
 #include "Framework.h"
 #include "LoggingFunctions.h"
@@ -19,7 +18,7 @@
 #include <Engine/Scene/Scene.h>
 #include <Engine/Graphics/Graphics.h>
 #include <Engine/Graphics/Camera.h>
-
+#include <Engine/Core/Profiler.h>
 #include <Geometry/Plane.h>
 
 namespace Tundra
