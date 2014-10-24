@@ -57,6 +57,10 @@ TEST_F(Runner, CreateAttributes)
     kNet::DataSerializer dsId(64 * 1024);
 
     StringVector types = SceneAPI::AttributeTypes();
+    // Also test that the deprecated Q-prefixed type names work too.
+    types.Push("QVariant");
+    types.Push("QVariantList");
+    types.Push("QPoint");
     foreach(const String &attributeTypeName, types)
     {
         u32 attributeTypeId = SceneAPI::AttributeTypeIdForTypeName(attributeTypeName);
