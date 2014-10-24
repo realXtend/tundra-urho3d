@@ -101,13 +101,13 @@ EntityPtr Scene::CreateEntity(entity_id_t id, const StringVector &components, At
         if (newComp)
         {
             newComp->SetReplicated(componentsReplicated);
-            entity->AddComponent(newComp, change); //change the param to a qstringlist or so \todo XXX
+            entity->AddComponent(newComp, change); //change the param to a Stringlist or so \todo XXX
         }
     }
     entities_[entity->Id()] = entity;
 
     // Remember the creation and signal at end of frame if EmitEntityCreated() not called for this entity manually
-    entitiesCreatedThisFrame_.Push(std::make_pair(entity, change));
+    entitiesCreatedThisFrame_.Push(MakePair(EntityWeakPtr(entity), change));
 
     return entity;
 }
@@ -374,7 +374,7 @@ void Scene::EmitEntityCreated(Entity *entity, AttributeChange::Type change)
     // Remove from the create signalling queue
     for (unsigned i = 0; i < entitiesCreatedThisFrame_.Size(); ++i)
     {
-        if (entitiesCreatedThisFrame_[i].first.Lock().Get() == entity)
+        if (entitiesCreatedThisFrame_[i].first_.Lock().Get() == entity)
         {
             entitiesCreatedThisFrame_.Erase(entitiesCreatedThisFrame_.Begin() + i);
             break;
@@ -1493,11 +1493,11 @@ void Scene::OnUpdated(float /*frameTime*/)
     // Signal queued entity creations now
     for (unsigned i = 0; i < entitiesCreatedThisFrame_.Size(); ++i)
     {
-        Entity* entity = entitiesCreatedThisFrame_[i].first.Lock().Get();
+        Entity* entity = entitiesCreatedThisFrame_[i].first_.Lock().Get();
         if (!entity)
             continue;
         
-        AttributeChange::Type change = entitiesCreatedThisFrame_[i].second;
+        AttributeChange::Type change = entitiesCreatedThisFrame_[i].second_;
         if (change == AttributeChange::Disconnected)
             continue;
         if (change == AttributeChange::Default)

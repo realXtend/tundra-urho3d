@@ -13,6 +13,7 @@
 #include "Framework.h"
 #include "LoggingFunctions.h"
 
+#include <Profiler.h>
 #include <StringUtils.h>
 #include <Engine/Scene/Node.h>
 #include <Engine/Scene/Scene.h>

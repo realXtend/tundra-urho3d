@@ -43,8 +43,10 @@ public:
     /** Not all asset types can support this kind of interpretation. For example, avatar assets are of type .xml, which can
         only be distinguished from generic xml files by explicitly specifying the type here.
 
-        @sa AssetAPI::GetResourceTypeFromAssetRef() */
+        @sa AssetAPI::GetResourceTypeForAssetRef() */
     String type;
+
+    unsigned ToHash() const { return ref.ToHash() | type.ToHash(); }
 };
 
 /// Represents list of asset references.
@@ -134,7 +136,7 @@ struct TUNDRACORE_API AssetReferenceList
 
     /// Preferred type for asset refs in the list
     /** @sa AssetReference::type;
-        @sa AssetAPI::GetResourceTypeFromAssetRef() */
+        @sa AssetAPI::GetResourceTypeForAssetRef() */
     String type;
 };
 

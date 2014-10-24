@@ -36,7 +36,7 @@ typedef WeakPtr<Placeable> PlaceableWeakPtr;
     <div> @copydoc </div>
     <li>float3: verticalFov
     <div> @copydoc </div>
-    <li>QString: aspectRatio
+    <li>String: aspectRatio
     <div> @copydoc </div>
     </ul>
 

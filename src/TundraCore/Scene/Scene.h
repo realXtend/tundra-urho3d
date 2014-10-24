@@ -540,7 +540,7 @@ private:
     bool interpolating_; ///< Currently doing interpolation-flag.
     bool authority_; ///< Authority -flag
     Vector<AttributeInterpolation> interpolations_; ///< Running attribute interpolations.
-    Vector<std::pair<EntityWeakPtr, AttributeChange::Type> > entitiesCreatedThisFrame_; ///< Entities to signal for creation at frame end.
+    Vector<Pair<EntityWeakPtr, AttributeChange::Type> > entitiesCreatedThisFrame_; ///< Entities to signal for creation at frame end.
     ParentingTracker parentTracker_; ///< Tracker for client side mass Entity imports (eg. SceneDesc based).
     SubsystemMap subsystems; ///< Scene subsystems
 };

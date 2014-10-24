@@ -8,6 +8,7 @@
 #include "ConfigAPI.h"
 #include "SceneAPI.h"
 #include "ConsoleAPI.h"
+#include "AssetAPI.h"
 #include "TundraVersionInfo.h"
 #include "LoggingFunctions.h"
 #include "IModule.h"
@@ -71,15 +72,16 @@ Framework::Framework(Context* ctx) :
     // Timestamps clutter the log. Disable for now
     GetSubsystem<Log>()->SetTimeStamp(false);
 
+    ProcessStartupOptions();
+    // In headless mode, no main UI/rendering window is initialized.
+    headless = HasCommandLineParameter("--headless");
+
     console = new ConsoleAPI(this);
     frame = new FrameAPI(this);
     plugin = new PluginAPI(this);
     config = new ConfigAPI(this);
     scene = new SceneAPI(this);
-
-    ProcessStartupOptions();
-    // In headless mode, no main UI/rendering window is initialized.
-    headless = HasCommandLineParameter("--headless");
+    asset = new AssetAPI(this, headless);
 
     // Open console window if necessary
     if (headless)
@@ -88,9 +90,11 @@ Framework::Framework(Context* ctx) :
 
 Framework::~Framework()
 {
+    scene.Reset();
     frame.Reset();
     plugin.Reset();
     config.Reset();
+    asset.Reset();
 
     instance = 0;
 }
@@ -247,6 +251,7 @@ void Framework::ProcessOneFrame()
     for(unsigned i = 0; i < modules.Size(); ++i)
         modules[i]->Update(dt);
 
+    asset->Update(dt);
     frame->Update(dt);
 
     /// \todo remove Android hack: exit by pressing back button, which is mapped to ESC
@@ -303,6 +308,11 @@ SceneAPI* Framework::Scene() const
 ConsoleAPI* Framework::Console() const
 {
     return console;
+}
+
+AssetAPI* Framework::Asset() const
+{
+    return asset;
 }
 
 Engine* Framework::Engine() const
@@ -445,7 +455,7 @@ void Framework::ProcessStartupOptions()
                         
                         peekOption += " " + param;
                         if (param.EndsWith("\""))
-                        {                            
+                        {
                             if (peekOption.StartsWith("\""))
                                 peekOption = peekOption.Substring(1);
                             if (peekOption.EndsWith("\""))

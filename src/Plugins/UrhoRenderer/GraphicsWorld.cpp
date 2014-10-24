@@ -6,7 +6,6 @@
 
 #include "Entity.h"
 #include "Scene/Scene.h"
-#include "Profiler.h"
 #include "ConfigAPI.h"
 #include "FrameAPI.h"
 #include "LoggingFunctions.h"
@@ -24,6 +23,7 @@
 #include <Geometry/Circle.h>
 #include <Geometry/Sphere.h>
 
+#include <Profiler.h>
 #include <Engine/Scene/Scene.h>
 #include <Engine/Graphics/DebugRenderer.h>
 #include <Engine/Graphics/Octree.h>
@@ -280,7 +280,7 @@ void GraphicsWorld::DebugDrawSphere(const float3& center, float radius, int vert
     if (vertices <= 0)
         return;
     
-    std::vector<float3> positions(vertices);
+    Vector<float3> positions(vertices);
 
     Sphere sphere(center, radius);
     int actualVertices = sphere.Triangulate(&positions[0], 0, 0, vertices, true);

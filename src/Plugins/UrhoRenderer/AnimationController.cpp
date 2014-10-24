@@ -249,7 +249,7 @@ StringList AnimationController::GetAvailableAnimations()
     //while(i.hasMoreElements()) 
     //{
     //    Ogre::AnimationState *animstate = i.getNext();
-    //    availableList << QString(animstate->getAnimationName().c_str());
+    //    availableList << String(animstate->getAnimationName().c_str());
     //}
 
     StringList availableList;

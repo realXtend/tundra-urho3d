@@ -5,7 +5,6 @@
 #include "GraphicsWorld.h"
 #include "Renderer.h"
 #include "Mesh.h"
-
 #include "AttributeMetadata.h"
 #include "Entity.h"
 #include "Scene/Scene.h"
@@ -14,7 +13,6 @@
 #include <Math/Quat.h>
 #include <Math/float3x3.h>
 #include <Math/float3x4.h>
-
 #include <Engine/Scene/Scene.h>
 #include <Engine/Scene/Node.h>
 #include <Engine/Core/Profiler.h>

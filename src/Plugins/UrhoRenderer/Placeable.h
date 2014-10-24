@@ -34,7 +34,7 @@ namespace Tundra
     <div> @copydoc selectionLayer </div>
     <li>EntityReference: parentRef
     <div> @copydoc parentRef </div>
-    <li>QString: parentBone
+    <li>String: parentBone
     <div> @copydoc parentBone </div>
     </ul>
 

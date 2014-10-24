@@ -18,4 +18,5 @@ namespace Tundra
     class FrameAPI;
     class SceneAPI;
     class ConsoleAPI;
+    class AssetAPI;
 }

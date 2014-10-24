@@ -370,21 +370,9 @@ protected:
     void DeserializeAttributeFrom(Urho3D::XMLElement& attributeElement, AttributeChange::Type change);
 
     /// Add attribute to this component.
-    /** If the attribute is dynamic, a matching QObject property will be automatically added to this component.
-        This property will be updated automatically when ever the underlying IAttribute value changes.
-        The QObject property is not created if the IAttribute::Id() cannot be converted into a valid property name,
-        it must only contain alphanumeric, underscore '_' and space ' ' characters and it cannot start with a number.
-        The attribute id is camel-cased, space characters are stripped and made to start with a lower case letter.
-        @note Avoid starting your attribute name with "_q_" as its reserved for Qt internals. */
     void AddAttribute(IAttribute* attr);
 
     /// Add attribute to this component at specified index, creating new holes if necessary. Static attributes can not be overwritten. Return true if successful.
-        /** If the attribute is dynamic, a matching QObject property will be automatically added to this component.
-        This property will be updated automatically when ever the underlying IAttribute value changes.
-        The QObject property is not created if the IAttribute::Id() cannot be converted into a valid property name,
-        it must only contain alphanumeric, underscore '_' and space ' ' characters and it cannot start with a number.
-        The attribute id is camel-cased, space characters are stripped and made to start with a lower case letter.
-        @note Avoid starting your attribute name with "_q_" as its reserved for Qt internals. */
     bool AddAttribute(IAttribute* attr, u8 index);
 
     Entity* parentEntity; ///< The Entity this Component is part of, or null if this Component is not attached to any Entity.

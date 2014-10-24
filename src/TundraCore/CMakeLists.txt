@@ -9,6 +9,7 @@ endif()
 file(GLOB CPP_FILES *.cpp)
 file(GLOB H_FILES *.h)
 
+AddSourceFolder(Asset)
 AddSourceFolder(Framework)
 AddSourceFolder(JSON)
 AddSourceFolder(Signals)
