@@ -13,7 +13,6 @@
 #include "AttributeMetadata.h"
 #include "Framework.h"
 #include "LoggingFunctions.h"
-#include "Math/MathUtilities.h"
 
 #include <StringUtils.h>
 #include <Engine/Scene/Node.h>

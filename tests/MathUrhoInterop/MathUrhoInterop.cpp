@@ -39,7 +39,6 @@ using namespace Tundra::Test;
 
 TEST_F(Runner, MathUrhoInterop)
 {
-#ifdef HAS_MATH_URHO3D_INTEROP /**< @todo Enable when MGL has Urho interop */
     math::LCG lcg;
     math::float2 mglFloat2 = float2::RandomDir(lcg);
     math::float3 mglFloat3 = float3::RandomDir(lcg);
@@ -147,7 +146,6 @@ TEST_F(Runner, MathUrhoInterop)
     ASSERT_TRUE(tundraColor.Equals(tundraColor));
 
     Urho3D::PrintUnicodeLine("OK!");
-#endif
 }
 
 TUNDRA_TEST_MAIN();

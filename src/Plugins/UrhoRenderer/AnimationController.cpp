@@ -8,7 +8,6 @@
 #include "Mesh.h"
 #include "UrhoRenderer.h"
 #include "Scene/Scene.h"
-#include "Math/MathUtilities.h"
 #include "LoggingFunctions.h"
 
 #include <Engine/Scene/Node.h>
