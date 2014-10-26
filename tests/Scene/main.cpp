@@ -16,9 +16,9 @@ using namespace Tundra::Test;
 
 TEST_F(Runner, CreateEntity)
 {
-    forEach(bool replicated, TrueAndFalse)
+    foreach_std(bool replicated, TrueAndFalse)
     {
-        forEach(bool temporary, TrueAndFalse)
+        foreach_std(bool temporary, TrueAndFalse)
         {
             Tundra::Benchmark::Iterations = 10000;
 
