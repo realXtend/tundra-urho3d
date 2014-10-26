@@ -147,7 +147,6 @@ void ConfigFile::Save(Context* ctx, const String& fileName)
             file->WriteLine(j->first_ + "=" + j->second_.ToString());
         file->WriteLine("");
     }
-    LogWarning("Saved " + fileName);
     modified_ = false;
 }
 

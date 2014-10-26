@@ -59,6 +59,7 @@ void UrhoRenderer::Initialize()
         rend->SetViewport(0, new Urho3D::Viewport(context_));
     }
 
+    // @todo Is null 'rend' == our headless mode? Move this line inside above block?
     if (!framework->IsHeadless())
         SubscribeToEvent(Urho3D::E_SCREENMODE, HANDLER(UrhoRenderer, HandleScreenModeChange));
 }
@@ -80,6 +81,7 @@ void UrhoRenderer::HandleScreenModeChange(StringHash /*eventType*/, Urho3D::Vari
 
     HashMap<String, Variant> data;
 
+    /// @todo Read 'window position' from Urho3D::ScreenMode::P_POSITION_X/P_POSITION_Y if my pull request goes trough to Urho
     Urho3D::Graphics* graphics = GetSubsystem<Urho3D::Graphics>();
     if (graphics)
         data["window position"] = graphics->GetWindowPosition();
