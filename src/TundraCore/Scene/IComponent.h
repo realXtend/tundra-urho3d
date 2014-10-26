@@ -191,7 +191,7 @@ public:
     template<typename T>
     Attribute<T> *AttributeByName(const String &name) const
     {
-        for(size_t i = 0; i < attributes.Size(); ++i)
+        for(uint i = 0; i < attributes.Size(); ++i)
             if (attributes[i] && attributes[i]->Name().Compare(name, false) == 0)
                 return dynamic_cast<Attribute<T> *>(&attributes[i]);
         return nullptr;
@@ -205,7 +205,7 @@ public:
     template<typename T>
     Attribute<T> *AttributeById(const String &id) const
     {
-        for(size_t i = 0; i < attributes.Size(); ++i)
+        for(uint i = 0; i < attributes.Size(); ++i)
             if (attributes[i] && attributes[i]->Id().Compare(id, false) == 0)
                 return dynamic_cast<Attribute<T> *>(&attributes[i]);
         return nullptr;

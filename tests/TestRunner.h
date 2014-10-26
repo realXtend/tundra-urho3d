@@ -4,7 +4,6 @@
 
 #include "CoreTypes.h"
 #include "CoreDefines.h"
-
 #include "Framework.h"
 #include "SceneAPI.h"
 #include "Scene.h"
@@ -12,8 +11,8 @@
 
 #include <Math/MathFunc.h>
 
-#include <Context.h>
-#include <ProcessUtils.h>
+#include <Engine/Core/Context.h>
+#include <Engine/Core/ProcessUtils.h>
 
 #include <gtest/gtest.h>
 
@@ -23,10 +22,6 @@ namespace Tundra
 {
     namespace Test
     {
-        /* Static common QCOMPARE variables. It is understandably very strict about types,
-            so to make tests more compact and easy to read these should be used. */
-        static const size_t ZeroSizeT = 0;
-
         /// An array containing true and false.
         static const bool TrueAndFalse[2] = { true, false };
 

@@ -39,8 +39,8 @@ TEST_F(Runner, CreateEntity)
                 ASSERT_EQ(ent->Description(), String::EMPTY);
                 ASSERT_EQ(ent->Group(), String::EMPTY);
 
-                ASSERT_EQ(ent->NumComponents(), ZeroSizeT);
-                ASSERT_EQ(ent->NumChildren(), ZeroSizeT);
+                ASSERT_EQ(ent->NumComponents(), 0U);
+                ASSERT_EQ(ent->NumChildren(), 0U);
 
                 BENCHMARK_STEP_END;
 
@@ -147,13 +147,10 @@ TEST_F(Runner, CreateComponentsParented)
         u32 componentTypeId = framework->Scene()->ComponentTypeIdForTypeName(componentTypeName);
         Log(componentTypeName + " " + String(componentTypeId), 1);
 
-        for(size_t iRepl = 0; iRepl < NUMELEMS(TrueAndFalse); ++iRepl)
+        foreach_std(bool replicated, TrueAndFalse)
         {
-            for(size_t iTemp = 0; iTemp < NUMELEMS(TrueAndFalse); ++iTemp)
+            foreach_std(bool temporary, TrueAndFalse)
             {
-                const bool replicated = TrueAndFalse[iRepl];
-                const bool temporary = TrueAndFalse[iTemp];
-
                 Tundra::Benchmark::Iterations = 10000;
 
                 BENCHMARK(PadString(replicated ? "Replicated" : "Local", 10) + PadString(temporary ? " + Temp" : "", 4), 25)

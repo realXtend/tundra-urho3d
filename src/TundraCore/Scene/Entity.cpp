@@ -154,7 +154,7 @@ void Entity::RemoveComponentById(component_id_t id, AttributeChange::Type change
         RemoveComponent(comp, change);
 }
 
-size_t Entity::RemoveComponents(const String &typeName, AttributeChange::Type change)
+uint Entity::RemoveComponents(const String &typeName, AttributeChange::Type change)
 {
     Vector<component_id_t> removeIds;
     for(ComponentMap::ConstIterator it = components_.Begin(); it != components_.End(); ++it)
@@ -167,7 +167,7 @@ size_t Entity::RemoveComponents(const String &typeName, AttributeChange::Type ch
     return removeIds.Size();
 }
 
-size_t Entity::RemoveComponents(u32 typeId, AttributeChange::Type change)
+uint Entity::RemoveComponents(u32 typeId, AttributeChange::Type change)
 {
     Vector<component_id_t> removeIds;
     for(ComponentMap::ConstIterator it = components_.Begin(); it != components_.End(); ++it)

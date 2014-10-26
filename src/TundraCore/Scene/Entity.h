@@ -104,7 +104,7 @@ public:
     const ComponentMap &Components() const { return components_; }
 
     /// Returns number of components.
-    size_t NumComponents() const { return components_.Size(); }
+    uint NumComponents() const { return components_.Size(); }
 
     /// Returns actions map for introspection/reflection.
     const ActionMap &Actions() const { return actions_; }
@@ -207,10 +207,10 @@ public:
     void RemoveComponentById(component_id_t id, AttributeChange::Type change = AttributeChange::Default);
     
     /// Removes all components that match @c typeName and returns how many was removed.
-    size_t RemoveComponents(const String &typeName, AttributeChange::Type change = AttributeChange::Default);
+    uint  RemoveComponents(const String &typeName, AttributeChange::Type change = AttributeChange::Default);
     
     /// Removes all components that match @c typeId and returns how many was removed.
-    size_t RemoveComponents(u32 typeId, AttributeChange::Type change = AttributeChange::Default);
+    uint RemoveComponents(u32 typeId, AttributeChange::Type change = AttributeChange::Default);
 
     /// Removes all components from the entity.
     void RemoveAllComponents(AttributeChange::Type change = AttributeChange::Default);
@@ -384,7 +384,7 @@ public:
     bool HasParent() const { return parent_.Get() != nullptr; }
 
     /// Returns number of child entities.
-    size_t NumChildren() const { return children_.Size(); }
+    uint NumChildren() const { return children_.Size(); }
 
     /// Returns child entity by index.
     EntityPtr Child(uint index) const;
