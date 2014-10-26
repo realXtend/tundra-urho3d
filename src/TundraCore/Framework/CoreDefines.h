@@ -28,7 +28,7 @@ inline Dst checked_static_cast(Src src)
 }
 
 /// Urho's foreach doesn't work for STL containers and C arrays, so add second foreach version for those use cases.
-#define foreach2(val, container) \
+#define forEach(val, container) \
     for(auto it = std::begin(container); it != std::end(container); ++it) \
         if (bool _foreach_flag = false) {} \
         else for(val = *it; !_foreach_flag; _foreach_flag = true)
