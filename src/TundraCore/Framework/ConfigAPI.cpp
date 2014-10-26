@@ -14,24 +14,47 @@ using namespace Urho3D;
 namespace Tundra
 {
 
-String ConfigAPI::FILE_FRAMEWORK = "tundra";
-String ConfigAPI::SECTION_FRAMEWORK = "framework";
-String ConfigAPI::SECTION_SERVER = "server";
-String ConfigAPI::SECTION_CLIENT = "client";
-String ConfigAPI::SECTION_RENDERING = "rendering";
-String ConfigAPI::SECTION_UI = "ui";
-String ConfigAPI::SECTION_SOUND = "sound";
+String ConfigAPI::FILE_FRAMEWORK        = "tundra";
+String ConfigAPI::SECTION_FRAMEWORK     = "framework";
+String ConfigAPI::SECTION_SERVER        = "server";
+String ConfigAPI::SECTION_CLIENT        = "client";
+String ConfigAPI::SECTION_RENDERING     = "rendering";
+String ConfigAPI::SECTION_GRAPHICS      = "graphics";
+String ConfigAPI::SECTION_UI            = "ui";
+String ConfigAPI::SECTION_SOUND         = "sound";
+
+/* Prepare string for config usage. Removes spaces from end and start, replaces mid string spaces with '_' and forces to lower case.
+   @param str String to prepare.
+   @param isKey If true "[" and "]" are replaces by "(" and ")".
+   They are not allowed in keys as the parsing code will mistake them as sections */
+void PrepareString(String &str, bool isKey = false)
+{
+    if (!str.Empty())
+    {
+        str = str.Trimmed().ToLower();   // Remove spaces from start/end, force to lower case
+        str = str.Replaced(" ", "_");    // Replace ' ' with '_', so we don't get %20 in the config as spaces
+        str = str.Replaced("=", "_");    // Replace '=' with '_', as = has special meaning in .ini files
+        str = str.Replaced("/", "_");    // Replace '/' with '_', as / has a special meaning in .ini file keys/sections. Also file name cannot have a forward slash.
+        if (isKey)
+        {
+            // Keys cannot contain the "[" or "]" tokens so they wont be mistaken as sections.
+            str = str.Replaced("[", "(");
+            str = str.Replaced("]", ")");
+        }
+    }
+}
 
 VariantType GetVariantTypeFromString(const String& in)
 {
     if (in == "true" || in == "false")
         return VAR_BOOL;
-    else if (in.Length() && IsDigit(in[0]))
+    else if ((in.Length() && IsDigit(in[0])) || (in.Length() >= 2 && in[0] == '-' && IsDigit(in[1])))
     {
+        uint num = in.Trimmed().Split(' ').Size();
         if (in.Contains('.'))
-            return VAR_FLOAT;
+            return (num <= 1 ? VAR_FLOAT : (num == 2 ? VAR_VECTOR2 : (num == 3 ? VAR_VECTOR3 : VAR_VECTOR4)));
         else
-            return VAR_INT;
+            return (num <= 1 ? VAR_INT : VAR_INTVECTOR2);
     }    
     else
         return VAR_STRING;
@@ -39,12 +62,52 @@ VariantType GetVariantTypeFromString(const String& in)
 
 // ConfigFile
 
+bool ConfigFile::HasKey(const String &section, const String &key) const
+{
+    HashMap<String, ConfigSection>::ConstIterator iter = sections_.Find(section);
+    if (iter != sections_.End())
+        return iter->second_.keys.Contains(key);
+    return false;
+}
+
+void ConfigFile::Set(const String &section, const String &key, const Variant &value)
+{
+    if (section.Empty() || key.Empty())
+        return;
+
+    sections_[section].keys[key] = value;
+    modified_ = true;
+}
+
+void ConfigFile::Set(const String section, const HashMap<String, Variant> &values)
+{
+    if (section.Empty() || values.Empty())
+        return;
+
+    ConfigSection &s = sections_[section];
+    for(HashMap<String, Variant>::ConstIterator iter = values.Begin(); iter != values.End(); ++iter)
+    {
+        String key = iter->first_;
+        PrepareString(key, true);
+        s.keys[key] = iter->second_;
+    }
+    modified_ = true;
+}
+
+Variant ConfigFile::Get(const String &section, const String &key, const Variant &defaultValue)
+{
+    if (HasKey(section, key))
+        return sections_[section].keys[key];
+    return defaultValue;
+}
+
 void ConfigFile::Load(Context* ctx, const String& fileName)
 {
-    if (loaded)
-        return; // Already loaded
+    // Already loaded to memory from disk?
+    if (loaded_)
+        return;
+    loaded_ = true;
 
-    loaded = true;
     if (!ctx->GetSubsystem<FileSystem>()->FileExists(fileName))
         return;
     SharedPtr<File> file(new File(ctx, fileName, FILE_READ));
@@ -61,18 +124,22 @@ void ConfigFile::Load(Context* ctx, const String& fileName)
         {
             Vector<String> parts = line.Split('=');
             if (parts.Size() == 2)
-                sections[currentSection].keys[parts[0]].FromString(GetVariantTypeFromString(parts[1]), parts[1]);
+                sections_[currentSection].keys[parts[0]].FromString(GetVariantTypeFromString(parts[1]), parts[1]);
         }
     }
 }
 
 void ConfigFile::Save(Context* ctx, const String& fileName)
 {
+    // No in memory changes done. Skip saving to disk.
+    if (!modified_)
+        return;
+
     SharedPtr<File> file(new File(ctx, fileName, FILE_WRITE));
     if (!file->IsOpen())
-        return;    
+        return;
 
-    for (HashMap<String, ConfigSection>::ConstIterator i = sections.Begin(); i != sections.End(); ++i)
+    for (HashMap<String, ConfigSection>::ConstIterator i = sections_.Begin(); i != sections_.End(); ++i)
     {
         String sectionStr = "[" + i->first_ + "]";
         file->WriteLine(sectionStr);
@@ -80,6 +147,8 @@ void ConfigFile::Save(Context* ctx, const String& fileName)
             file->WriteLine(j->first_ + "=" + j->second_.ToString());
         file->WriteLine("");
     }
+    LogWarning("Saved " + fileName);
+    modified_ = false;
 }
 
 // ConfigAPI
@@ -88,6 +157,12 @@ ConfigAPI::ConfigAPI(Framework *framework) :
     Object(framework->GetContext()),
     owner(framework)
 {
+}
+
+ConfigAPI::~ConfigAPI()
+{
+    for(HashMap<String, ConfigFile>::Iterator iter = configFiles_.Begin(); iter != configFiles_.End(); ++iter)
+        iter->second_.Save(GetContext(), GetFilePath(iter->first_));
 }
 
 void ConfigAPI::PrepareDataFolder(String configFolder)
@@ -139,17 +214,6 @@ bool ConfigAPI::IsFilePathSecure(const String &file) const
     return secure;
 }
 
-void ConfigAPI::PrepareString(String &str) const
-{
-    if (!str.Empty())
-    {
-        str = str.Trimmed().ToLower();  // Remove spaces from start/end, force to lower case
-        str = str.Replaced(" ", "_");    // Replace ' ' with '_', so we don't get %20 in the config as spaces
-        str = str.Replaced("=", "_");    // Replace '=' with '_', as = has special meaning in .ini files
-        str = str.Replaced("/", "_");    // Replace '/' with '_', as / has a special meaning in .ini file keys/sections. Also file name cannot have a forward slash.
-    }
-}
-
 bool ConfigAPI::HasKey(const ConfigData &data) const
 {
     if (data.file.Empty() || data.section.Empty() || data.key.Empty())
@@ -180,16 +244,14 @@ bool ConfigAPI::HasKey(String file, String section, String key) const
 
     PrepareString(file);
     PrepareString(section);
-    PrepareString(key);
+    PrepareString(key, true);
 
     if (!IsFilePathSecure(file))
         return false;
-        
-    configFiles_[file].Load(GetContext(), GetFilePath(file)); // No-op after loading once
-    if (configFiles_[file].sections.Contains(section))
-        return configFiles_[file].sections[section].keys.Contains(key);
-    else
-        return false;
+    
+    ConfigFile &f = configFiles_[file];
+    f.Load(GetContext(), GetFilePath(file)); // No-op after loading once
+    return f.HasKey(section, key);
 }
 
 Variant ConfigAPI::Read(const ConfigData &data) const
@@ -225,21 +287,16 @@ Variant ConfigAPI::Read(String file, String section, String key, const Variant &
 
     PrepareString(file);
     PrepareString(section);
-    PrepareString(key);
+    PrepareString(key, true);
 
     // Don't return 'defaultValue' but null Variant
     // as this is an error situation.
     if (!IsFilePathSecure(file))
         return Variant();
 
-    configFiles_[file].Load(GetContext(), GetFilePath(file)); // No-op after loading once
-    if (configFiles_[file].sections.Contains(section))
-    {
-        if (configFiles_[file].sections[section].keys.Contains(key))
-            return configFiles_[file].sections[section].keys[key];
-    }
-
-    return defaultValue;
+    ConfigFile &f = configFiles_[file];
+    f.Load(GetContext(), GetFilePath(file)); // No-op after loading once
+    return f.Get(section, key, defaultValue);
 }
 
 void ConfigAPI::Write(const ConfigData &data)
@@ -277,13 +334,72 @@ void ConfigAPI::Write(String file, String section, String key, const Variant &va
 
     PrepareString(file);
     PrepareString(section);
-    PrepareString(key);
+    PrepareString(key, true);
 
     if (!IsFilePathSecure(file))
         return;
 
-    configFiles_[file].sections[section].keys[key] = value;
-    configFiles_[file].Save(GetContext(), GetFilePath(file));
+    WriteInternal(file, section, key, value, true);
+}
+
+void ConfigAPI::Write(String file, String section, HashMap<String, Variant> values)
+{
+    if (values.Empty())
+        return;
+    if (configFolder_.Empty())
+    {
+        LogError("ConfigAPI::Write: Config folder has not been prepared, can not write value to config.");
+        return;
+    }
+
+    PrepareString(file);
+    PrepareString(section);
+
+    if (!IsFilePathSecure(file))
+        return;
+
+    ConfigFile &f = configFiles_[file];
+    /* No-op after loading once. We must load first to ensure disk
+       stored values won't later overwrite the now set value. */
+    f.Load(GetContext(), GetFilePath(file)); 
+    f.Set(section, values);
+    f.Save(GetContext(), GetFilePath(file));
+}
+
+void ConfigAPI::WriteInternal(const String &file, const String &section, const String &key, const Variant &value, bool writeToDisk)
+{
+    if (file.Empty() || section.Empty() || key.Empty())
+        return;
+
+    ConfigFile &f = configFiles_[file];
+    /* No-op after loading once. We must load first to ensure disk
+       stored values won't later overwrite the now set value. */
+    f.Load(GetContext(), GetFilePath(file)); 
+
+    f.Set(section, key, value);
+    if (writeToDisk)
+        f.Save(GetContext(), GetFilePath(file));
+}
+
+ConfigFile &ConfigAPI::GetFile(String file)
+{
+    PrepareString(file);
+    ConfigFile &f = configFiles_[file];
+    /* No-op after loading once. We must load first to ensure disk
+       stored values won't later overwrite the now set value. */
+    f.Load(GetContext(), GetFilePath(file));
+    return f;
+}
+
+void ConfigAPI::WriteFile(String file)
+{
+    PrepareString(file);
+    ConfigFile &f = configFiles_[file];
+    /* No-op after loading once. We must load first to ensure disk
+       stored values won't later overwrite the now set value. */
+    f.Load(GetContext(), GetFilePath(file));
+    // No-op if ConfigFile::Set has not been invoked since last Save.
+    f.Save(GetContext(), GetFilePath(file));
 }
 
 Variant ConfigAPI::DeclareSetting(const String &file, const String &section, const String &key, const Variant &defaultValue)

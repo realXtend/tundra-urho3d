@@ -46,24 +46,56 @@ struct TUNDRACORE_API ConfigData
 };
 
 /// Structure for a config file section.
-struct ConfigSection
+struct TUNDRACORE_API ConfigSection
 {
     HashMap<String, Variant> keys;
 };
-
 /// Structure for sections contained within a config file.
-struct ConfigFile
+class TUNDRACORE_API ConfigFile
 {
+public:
     ConfigFile() :
-        loaded(false)
+        loaded_(false),
+        modified_(false)
     {
     }
 
-    HashMap<String, ConfigSection> sections;
-    bool loaded;
+    /// Returns if @c section contains @c key.
+    bool HasKey(const String &section, const String &key) const;
 
+    /// Set a value.
+    /** @note This function sets in memory data. You must call Save if you want
+        to serialize to a file. This is done automatically by ConfigAPI on exit.
+        These two steps are separated so that it is efficient to set new values
+        with high frequence during runtime. */
+    void Set(const String &section, const String &key, const Variant &value);
+
+    /** @overload @param values Section key to value map to write in a single batch. */
+    void Set(const String section, const HashMap<String, Variant> &values);
+
+    /// Get a value.
+    /** @note In the case of default value is returned a copy is created. This could
+        be avoided by moving the responsibility of checking HasKey to the caller.
+        This approach is a cleaner and safer API.
+        @return Config value if found, otherwise defaultValue instead */
+    Variant Get(const String &section, const String &key, const Variant &defaultValue);
+
+private:
+    friend class ConfigAPI;
+
+    /// Loads the config file from disk to memory.
+    /** @note It is safe to call this function multiple times, disk read is done
+        only once in the objects lifetime and after that operated on in memory. */
     void Load(Urho3D::Context* ctx, const String& fileName);
-    void Save(Urho3D::Context* ctx, const String& fileName);    
+
+    /// Save config file to disk.
+    /** @note Modifications to the config file are monitored with Set.
+        If there has not been any modifications after Load, disk serialization is skipped. */
+    void Save(Urho3D::Context* ctx, const String& fileName);
+
+    HashMap<String, ConfigSection> sections_;
+    bool loaded_;
+    bool modified_;   
 };
 
 /// Configuration API for accessing config files.
@@ -83,6 +115,7 @@ public:
     static String SECTION_FRAMEWORK;
     static String SECTION_SERVER;
     static String SECTION_CLIENT;
+    static String SECTION_GRAPHICS;
     static String SECTION_RENDERING;
     static String SECTION_UI;
     static String SECTION_SOUND;
@@ -116,6 +149,7 @@ public:
         @param value New value for the key.
         @note If setting value of type float, convert to double if you want the value to be human-readable in the file. */
     void Write(String file, String section, String key, const Variant &value);
+    void Write(String file, String section, HashMap<String, Variant> values); /**< @overload @param values Config key to value map to write in a single batch. */
     void Write(const ConfigData &data, String key, const Variant &value); /**< @overload @param data ConfigData object that has file and section filled. */
     void Write(const ConfigData &data, const Variant &value); /**< @overload @param data ConfigData object that has file, section and key filled. */
     void Write(const ConfigData &data); /**< @overload @param data Filled ConfigData object.*/
@@ -131,11 +165,33 @@ public:
     Variant DeclareSetting(const ConfigData &data);
     Variant DeclareSetting(const ConfigData &data, const String &key, const Variant &defaultValue); /**< @overload */
 
+    /// Returns config file.
+    /** This function can be used for  high frequency stores and more fine grained control over memory vs. disk writes.
+        By default you should use the Write functions instead. They guarantee that values are stored to disk immediately.
+
+        Using the returned ConfigFile::Set will operate on memory values. Writing to disk will only occur ConfigAPI is destroyed 
+        (Framework exit) or when WriteFile is explicitly called on @c file.
+
+        @param file Name of the file. For example: "foundation" or "foundation.ini" you can omit the .ini extension.
+        @see Write and GetFile */
+    ConfigFile &GetFile(String file);
+
+    /// Writes config file to disk.
+    /** This function can be used in conjunction with GetFile for more fine grained control over memory vs. disk writes.
+        @see GetFile */
+    void WriteFile(String file);
+
 private:
     friend class Framework;
 
     /// @note Framework takes ownership of the object.
     explicit ConfigAPI(Framework *framework);
+
+    /// @note Will save all pending modifications in known ConfigFiles to disk.
+    ~ConfigAPI();
+
+    /// Internal write function that can be used for batch writing by setting save to true only in the last write.
+    void WriteInternal(const String &file, const String &section, const String &key, const Variant &value, bool writeToDisk);
 
     /// Get absolute file path for file. Guarantees that it ends with .ini.
     String GetFilePath(const String &file) const;
@@ -145,9 +201,6 @@ private:
         does not go out of the confined ConfigAPI folder. For security reasons we cannot let
         eg. scripts open configs where they like. The whole operation will be canceled if this validation fails. */
     bool IsFilePathSecure(const String &file) const;
-
-    /// Prepare string for config usage. Removes spaces from end and start, replaces mid string spaces with '_' and forces to lower case.
-    void PrepareString(String &str) const;
 
     /// Opens up the Config API to the given data folder. This call will make sure that the required folders exist.
     /** @param configFolderName The name of the folder to store Tundra Config API data to. */
