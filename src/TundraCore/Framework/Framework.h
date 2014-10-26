@@ -194,6 +194,12 @@ private:
     /// Load a JSON map to startup options.
     void LoadStartupOptionMap(const JSONValue& value);
 
+    /// Save relevant TundraCore state to config.
+    void SaveConfig();
+
+    /// Load TundraCore state from config to @c engineInitMap.
+    void LoadConfig(Urho3D::VariantMap &engineInitMap);
+
     /// Urho3D engine
     SharedPtr<Urho3D::Engine> engine;
     /// Framework owns the memory of all the modules in the system. These are freed when Framework is exiting.

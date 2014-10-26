@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "Light.h"
 #include "IComponentFactory.h"
+#include "ConfigAPI.h"
 #include "SceneAPI.h"
 #include "Entity.h"
 #include "Scene/Scene.h"
@@ -16,6 +17,7 @@
 
 #include <Engine/Graphics/Camera.h>
 #include <Engine/Graphics/Graphics.h>
+#include <Engine/Graphics/GraphicsEvents.h>
 #include <Engine/Graphics/Renderer.h>
 #include <Engine/Graphics/Viewport.h>
 
@@ -56,6 +58,9 @@ void UrhoRenderer::Initialize()
         rend->SetNumViewports(1);
         rend->SetViewport(0, new Urho3D::Viewport(context_));
     }
+
+    if (!framework->IsHeadless())
+        SubscribeToEvent(Urho3D::E_SCREENMODE, HANDLER(UrhoRenderer, HandleScreenModeChange));
 }
 
 void UrhoRenderer::Uninitialize()
@@ -65,6 +70,26 @@ void UrhoRenderer::Uninitialize()
     // Let go of the viewport that we created. If done later at Urho Context destruction time, may cause a crash
     if (rend)
         rend->SetViewport(0, 0);
+}
+
+void UrhoRenderer::HandleScreenModeChange(StringHash /*eventType*/, Urho3D::VariantMap &eventData)
+{
+    ConfigAPI *config = framework->Config();
+    if (!config)
+        return;
+
+    HashMap<String, Variant> data;
+
+    Urho3D::Graphics* graphics = GetSubsystem<Urho3D::Graphics>();
+    if (graphics)
+        data["window position"] = graphics->GetWindowPosition();
+    data["window size"] = Urho3D::IntVector2(eventData[Urho3D::ScreenMode::P_WIDTH].GetInt(), eventData[Urho3D::ScreenMode::P_HEIGHT].GetInt());
+    data["window fullscreen"] = eventData[Urho3D::ScreenMode::P_FULLSCREEN].GetBool();
+
+    /* Store potentially frequent runtime changes in memory only.
+       The changes will be written to disk latest at a clean Framework exit. */
+    ConfigFile &f = config->GetFile(ConfigAPI::FILE_FRAMEWORK);
+    f.Set(ConfigAPI::SECTION_GRAPHICS, data);
 }
 
 Entity *UrhoRenderer::MainCamera()

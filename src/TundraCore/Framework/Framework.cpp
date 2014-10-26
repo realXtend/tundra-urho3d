@@ -12,14 +12,15 @@
 #include "LoggingFunctions.h"
 #include "IModule.h"
 
-#include <Context.h>
-#include <Engine.h>
-#include <FileSystem.h>
-#include <File.h>
-#include <XMLFile.h>
-#include <ProcessUtils.h>
-#include <Input.h>
-#include <Log.h>
+#include <Engine/Core/Context.h>
+#include <Engine/Engine.h>
+#include <Engine/IO/FileSystem.h>
+#include <Engine/IO/File.h>
+#include <Engine/IO/Log.h>
+#include <Engine/Resource/XMLFile.h>
+#include <Engine/Core/ProcessUtils.h>
+#include <Engine/Input/Input.h>
+#include <Engine/Graphics/Graphics.h>
 
 using namespace Urho3D;
 
@@ -99,8 +100,8 @@ void Framework::Initialize()
     // Urho engine initialization parameters
     VariantMap engineInitMap;
 
-    // Read options.
     ApplyStartupOptions(engineInitMap);
+    LoadConfig(engineInitMap);
 
     // Initialization prints
     LogInfo("Installation  " + InstallationDirectory());
@@ -116,11 +117,8 @@ void Framework::Initialize()
     // Initialize the Urho3D engine
     engineInitMap["ResourcePaths"] = GetSubsystem<FileSystem>()->GetProgramDir() + "Data";
     engineInitMap["AutoloadPaths"] = "";
-    engineInitMap["FullScreen"] = false;
     engineInitMap["Headless"] = headless;
     engineInitMap["WindowTitle"] = "Tundra";
-    engineInitMap["WindowWidth"] = 1024; /// \todo Read from config
-    engineInitMap["WindowHeight"] = 768;
     engineInitMap["WindowResizable"] = true;
     engineInitMap["LogName"] = "Tundra.log";
 
@@ -166,6 +164,8 @@ bool Framework::Pump()
 
 void Framework::Uninitialize()
 {
+    SaveConfig();
+
     // Delete scenes
     scene.Reset();
 
@@ -188,6 +188,36 @@ void Framework::Uninitialize()
 
     // Actually unload all DLL plugins from memory.
     plugin->UnloadPlugins();
+}
+
+void Framework::SaveConfig()
+{
+    if (!config)
+        return;
+
+    /* Add TundraCore related config value saves here.
+       This function is called on exit. Urho Engine is
+       valid at this point but some subsystems might have
+       already been partly destructed eg. Graphics window
+       has been closed. */
+}
+
+void Framework::LoadConfig(Urho3D::VariantMap &engineInitMap)
+{
+    if (!config)
+        return;
+
+    IntVector2 windowPosition = config->Read(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_GRAPHICS, "window position", IntVector2(Urho3D::M_MAX_INT,Urho3D::M_MAX_INT)).GetIntVector2();
+    IntVector2 windowSize = config->Read(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_GRAPHICS, "window size", IntVector2(1024,768)).GetIntVector2();
+
+    if (windowPosition.x_ != Urho3D::M_MAX_INT && windowPosition.y_ != Urho3D::M_MAX_INT)
+    {
+        engineInitMap["WindowPositionX"] = windowPosition.x_;
+        engineInitMap["WindowPositionY"] = windowPosition.y_;
+    }
+    engineInitMap["WindowWidth"] = windowSize.x_;
+    engineInitMap["WindowHeight"] = windowSize.y_;
+    engineInitMap["FullScreen"] = config->Read(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_GRAPHICS, "window fullscreen", false).GetBool();
 }
 
 void Framework::Exit()
