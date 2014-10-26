@@ -16,7 +16,7 @@
 set(TUNDRACORE_SHARED 1)
 
 option (ENABLE_BUILD_OPTIMIZATIONS
-    "Windows only: Enables certain build optimizations on the release builds" OFF
+    "MSVC-only: Enables certain build optimizations on the release builds" ON
 )
 option (ENABLE_TESTS
     "Enables building unit tests" ON
