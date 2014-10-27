@@ -44,20 +44,19 @@ void PrepareString(String &str, bool isKey = false)
     }
 }
 
-VariantType GetVariantTypeFromString(const String& in)
+VariantType GetVariantTypeFromString(String &value)
 {
-    if (in == "true" || in == "false")
-        return VAR_BOOL;
-    else if ((in.Length() && IsDigit(in[0])) || (in.Length() >= 2 && in[0] == '-' && IsDigit(in[1])))
-    {
-        uint num = in.Trimmed().Split(' ').Size();
-        if (in.Contains('.'))
-            return (num <= 1 ? VAR_FLOAT : (num == 2 ? VAR_VECTOR2 : (num == 3 ? VAR_VECTOR3 : VAR_VECTOR4)));
-        else
-            return (num <= 1 ? VAR_INT : VAR_INTVECTOR2);
-    }    
-    else
-        return VAR_STRING;
+    /* Empty values are ok, but if not prefixed with
+       type information it is an invalid config entry.
+       Type info is at minimum "@1" */
+    if (value.Length() < 2 || value[0] != '@')
+        return VAR_NONE;
+
+    // "@<VAR_TYPE_AS_INT> <value>
+    int valueLength = (!IsDigit(value[2]) ? 1 : 2);
+    int type = ToInt(value.Substring(1, valueLength));
+    value = value.Substring(1+valueLength).Trimmed();
+    return (type > VAR_NONE && type < MAX_VAR_TYPES ? static_cast<VariantType>(type) : VAR_NONE);
 }
 
 // ConfigFile
@@ -118,13 +117,32 @@ void ConfigFile::Load(Context* ctx, const String& fileName)
     while (!file->IsEof())
     {
         String line = file->ReadLine().Trimmed();
-        if (line.Length() && line[0] == ('['))
+        if (line.Length() == 0)
+            continue;
+
+        if (line[0] == ('['))
             currentSection = line.Substring(1, line.Length() - 2);
         else
         {
-            Vector<String> parts = line.Split('=');
-            if (parts.Size() == 2)
-                sections_[currentSection].keys[parts[0]].FromString(GetVariantTypeFromString(parts[1]), parts[1]);
+            // Find first '='. It is allowed characted in value of eg. the String type.
+            uint splitIndex = line.Find('=');
+            if (splitIndex != String::NPOS)
+            {
+                // Trim the parts if human has edited the config width indentation etc.
+                String key = line.Substring(0, splitIndex).Trimmed();
+                String value = line.Substring(splitIndex+1).Trimmed();
+                // Will remove the type information from value.
+                VariantType type = GetVariantTypeFromString(value);
+
+                if (type > VAR_NONE && type < MAX_VAR_TYPES)
+                    sections_[currentSection].keys[key].FromString(type, value);
+                else
+                    LogError(Urho3D::ToString("ConfigAPI: Failed to determine value type for '%s' in section '%s' of '%s'.",
+                        value.CString(), currentSection.CString(), fileName.CString()));
+            }
+            else
+                LogError(Urho3D::ToString("ConfigAPI: Invalid line '%s' in section '%s' of '%s'.",
+                    line.CString(), currentSection.CString(), fileName.CString()));
         }
     }
 }
@@ -144,7 +162,10 @@ void ConfigFile::Save(Context* ctx, const String& fileName)
         String sectionStr = "[" + i->first_ + "]";
         file->WriteLine(sectionStr);
         for (HashMap<String, Variant>::ConstIterator j = i->second_.keys.Begin(); j != i->second_.keys.End(); ++j)
-            file->WriteLine(j->first_ + "=" + j->second_.ToString());
+        {
+            String value = j->second_.ToString();
+            file->WriteLine(Urho3D::ToString("%s=@%d %s", j->first_ .CString(), static_cast<int>(j->second_.GetType()), value.CString()));
+        }
         file->WriteLine("");
     }
     modified_ = false;
