@@ -19,7 +19,7 @@ option (ENABLE_BUILD_OPTIMIZATIONS
     "MSVC-only: Enables certain build optimizations on the release builds" ON
 )
 option (ENABLE_TESTS
-    "Enables building unit tests" ON
+    "Enables building unit tests" OFF
 )
 
 # Enable solution folders. VS Express < 2012 doesn't support solution folders.
@@ -82,4 +82,5 @@ endif()
 if (ENABLE_TESTS)
     BeginSection("Configuring Tests")
     add_subdirectory(tests)
+elseif (GTEST_HOME) # Ref variable to remove warnings
 endif()
