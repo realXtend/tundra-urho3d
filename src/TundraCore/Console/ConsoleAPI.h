@@ -150,7 +150,7 @@ private:
     void Initialize();
 
     /// E_CONSOLECOMMAND handler
-    void HandleConsoleCommand(StringHash eventType, Urho3D::VariantMap &eventData);
+    void HandleConsoleCommand(StringHash eventType, VariantMap &eventData);
 
     /// Frame update handler
     void OnUpdate(float frametime);

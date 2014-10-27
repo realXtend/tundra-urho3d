@@ -61,24 +61,24 @@ public:
     }
 
     /// Returns if @c section contains @c key.
-    bool HasKey(const String &section, const String &key) const;
+    bool HasKey(String section, String key) const;
 
     /// Set a value.
     /** @note This function sets in memory data. You must call Save if you want
         to serialize to a file. This is done automatically by ConfigAPI on exit.
         These two steps are separated so that it is efficient to set new values
         with high frequence during runtime. */
-    void Set(const String &section, const String &key, const Variant &value);
+    void Set(String section, String key, const Variant &value);
 
     /** @overload @param values Section key to value map to write in a single batch. */
-    void Set(const String section, const HashMap<String, Variant> &values);
+    void Set(String ection, const HashMap<String, Variant> &values);
 
     /// Get a value.
     /** @note In the case of default value is returned a copy is created. This could
         be avoided by moving the responsibility of checking HasKey to the caller.
         This approach is a cleaner and safer API.
         @return Config value if found, otherwise defaultValue instead */
-    Variant Get(const String &section, const String &key, const Variant &defaultValue);
+    Variant Get(String section, String key, const Variant &defaultValue);
 
 private:
     friend class ConfigAPI;
@@ -124,7 +124,7 @@ public:
     /** @param file Name of the file. For example: "foundation" or "foundation.ini" you can omit the .ini extension.
         @param section The section in the config where key is. For example: "login".
         @param key Key to look for in the file under section. */
-    bool HasKey(String file, String section, String key) const;
+    bool HasKey(String file, const String &section, const String &key) const;
     bool HasKey(const ConfigData &data) const; /**< @overload @param data Filled ConfigData object */
     bool HasKey(const ConfigData &data, String key) const; /**< @overload */
 
@@ -136,11 +136,11 @@ public:
         @param key Key that value gets returned. For example: "username".
         @param defaultValue What you expect to get back if the file/section/key combination was not found.
         @return The value of key/section in file. */
-    Variant Read(String file, String section, String key, const Variant &defaultValue = Variant()) const;
-    Variant Read(const ConfigData &data) const; /**< @overload @param data Filled ConfigData object. */
-    /// @overload
-    /** @param data ConfigData object that has file and section filled, also may have defaultValue and it will be used if input defaultValue is null. */
-    Variant Read(const ConfigData &data, String key, const Variant &defaultValue = Variant()) const;
+    Variant Read(String file, const String &section, const String &key, const Variant &defaultValue = Variant()) const;
+    /** @overload @param data ConfigData object that has file and section filled, also may have defaultValue and it will be used if input defaultValue is null. */
+    Variant Read(const ConfigData &data, const String &key, const Variant &defaultValue = Variant()) const;
+    /** @overload @param data Filled ConfigData object. */
+    Variant Read(const ConfigData &data) const;
 
     /** Sets the value of key in a config file.
         @param file Name of the file. For example: "foundation" or "foundation.ini" you can omit the .ini extension.
@@ -148,11 +148,15 @@ public:
         @param key Key that value gets set. For example: "username".
         @param value New value for the key.
         @note If setting value of type float, convert to double if you want the value to be human-readable in the file. */
-    void Write(String file, String section, String key, const Variant &value);
-    void Write(String file, String section, HashMap<String, Variant> values); /**< @overload @param values Config key to value map to write in a single batch. */
-    void Write(const ConfigData &data, String key, const Variant &value); /**< @overload @param data ConfigData object that has file and section filled. */
-    void Write(const ConfigData &data, const Variant &value); /**< @overload @param data ConfigData object that has file, section and key filled. */
-    void Write(const ConfigData &data); /**< @overload @param data Filled ConfigData object.*/
+    bool Write(const String &file, const String &section, const String &key, const Variant &value);
+    /** @overload @param values Config key to value map to write in a single batch. */
+    bool Write(const String &file, const String &section, const HashMap<String, Variant> &values);
+    /**< @overload @param data ConfigData object that has file and section filled. */
+    bool Write(const ConfigData &data, const String &key, const Variant &value);
+    /**< @overload @param data ConfigData object that has file, section and key filled. */
+    bool Write(const ConfigData &data, const Variant &value);
+    /**< @overload @param data Filled ConfigData object.*/
+    bool Write(const ConfigData &data);
 
     /// Returns the absolute path to the config folder where configs are stored. Guaranteed to have a trailing forward slash '/'.
     String ConfigFolder() const { return configFolder_; }
@@ -191,7 +195,8 @@ private:
     ~ConfigAPI();
 
     /// Internal write function that can be used for batch writing by setting save to true only in the last write.
-    void WriteInternal(const String &file, const String &section, const String &key, const Variant &value, bool writeToDisk);
+    bool WriteInternal(String file, const String &section, const String &key, const Variant &value, bool writeToDisk);
+    bool WriteInternal(String file, const String &section, const HashMap<String, Variant> &values, bool writeToDisk);
 
     /// Get absolute file path for file. Guarantees that it ends with .ini.
     String GetFilePath(const String &file) const;

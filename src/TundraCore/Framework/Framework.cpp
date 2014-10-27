@@ -206,7 +206,7 @@ void Framework::SaveConfig()
        has been closed. */
 }
 
-void Framework::LoadConfig(Urho3D::VariantMap &engineInitMap)
+void Framework::LoadConfig(VariantMap &engineInitMap)
 {
     if (!config)
         return;

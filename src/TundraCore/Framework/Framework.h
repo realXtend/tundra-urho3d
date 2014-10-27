@@ -174,7 +174,7 @@ private:
     void ProcessStartupOptions();
 
     /// Read and apply startup options relevant for Framework/Urho engine.
-    void ApplyStartupOptions(Urho3D::VariantMap &engineInitMap);
+    void ApplyStartupOptions(VariantMap &engineInitMap);
 
     /// Prints to console all the used startup options.
     void PrintStartupOptions();
@@ -201,7 +201,7 @@ private:
     void SaveConfig();
 
     /// Load TundraCore state from config to @c engineInitMap.
-    void LoadConfig(Urho3D::VariantMap &engineInitMap);
+    void LoadConfig(VariantMap &engineInitMap);
 
     /// Urho3D engine
     SharedPtr<Urho3D::Engine> engine;

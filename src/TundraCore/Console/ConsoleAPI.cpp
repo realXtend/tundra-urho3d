@@ -120,7 +120,7 @@ void ConsoleAPI::ListCommands()
         LogInfo("  " + PadString(iter->first, longestName) + iter->second->Description());
 }
 
-void ConsoleAPI::HandleConsoleCommand(StringHash /*eventType*/, Urho3D::VariantMap &eventData)
+void ConsoleAPI::HandleConsoleCommand(StringHash /*eventType*/, VariantMap &eventData)
 {
     ExecuteCommand(eventData[Urho3D::ConsoleCommand::P_COMMAND].GetString());
 }

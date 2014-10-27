@@ -23,25 +23,20 @@ String ConfigAPI::SECTION_GRAPHICS      = "graphics";
 String ConfigAPI::SECTION_UI            = "ui";
 String ConfigAPI::SECTION_SOUND         = "sound";
 
-/* Prepare string for config usage. Removes spaces from end and start, replaces mid string spaces with '_' and forces to lower case.
-   @param str String to prepare.
-   @param isKey If true "[" and "]" are replaces by "(" and ")".
-   They are not allowed in keys as the parsing code will mistake them as sections */
-void PrepareString(String &str, bool isKey = false)
+/* Prepare string for config usage. Removes spaces from end and start, replaces mid string 
+   spaces with '_' and forces to lower case. Do not call this function with a config value.
+   @note This is an implementation detail, the user of ConfigAPI does not need to worry about getting the strings right.
+   @param str String to prepare. */
+void PrepareString(String &str)
 {
-    if (!str.Empty())
-    {
-        str = str.Trimmed().ToLower();   // Remove spaces from start/end, force to lower case
-        str = str.Replaced(" ", "_");    // Replace ' ' with '_', so we don't get %20 in the config as spaces
-        str = str.Replaced("=", "_");    // Replace '=' with '_', as = has special meaning in .ini files
-        str = str.Replaced("/", "_");    // Replace '/' with '_', as / has a special meaning in .ini file keys/sections. Also file name cannot have a forward slash.
-        if (isKey)
-        {
-            // Keys cannot contain the "[" or "]" tokens so they wont be mistaken as sections.
-            str = str.Replaced("[", "(");
-            str = str.Replaced("]", ")");
-        }
-    }
+    str = str.Trimmed().ToLower(); // Remove spaces from start/end, force to lower case
+    if (str.Empty())
+        return;
+    str = str.Replaced(" ", "_");  // Replace ' ', so we don't get %20 in the config as spaces
+    str = str.Replaced("/", "_");  // Replace '/', as / has a special meaning in .ini file keys/sections. Also file name cannot have a forward slash.
+    str = str.Replaced("=", "_");  // Replace '=', as = has special meaning in .ini files
+    str = str.Replaced("[", "(");  // Replace '[' and ']' as they have special meaning for a section.
+    str = str.Replaced("]", ")");  
 }
 
 VariantType GetVariantTypeFromString(String &value)
@@ -61,16 +56,23 @@ VariantType GetVariantTypeFromString(String &value)
 
 // ConfigFile
 
-bool ConfigFile::HasKey(const String &section, const String &key) const
+bool ConfigFile::HasKey(String section, String key) const
 {
+    PrepareString(section);
+    PrepareString(key);
+    if (section.Empty() || key.Empty())
+        return false;
+
     HashMap<String, ConfigSection>::ConstIterator iter = sections_.Find(section);
     if (iter != sections_.End())
         return iter->second_.keys.Contains(key);
     return false;
 }
 
-void ConfigFile::Set(const String &section, const String &key, const Variant &value)
+void ConfigFile::Set(String section, String key, const Variant &value)
 {
+    PrepareString(section);
+    PrepareString(key);
     if (section.Empty() || key.Empty())
         return;
 
@@ -78,24 +80,32 @@ void ConfigFile::Set(const String &section, const String &key, const Variant &va
     modified_ = true;
 }
 
-void ConfigFile::Set(const String section, const HashMap<String, Variant> &values)
+void ConfigFile::Set(String section, const HashMap<String, Variant> &values)
 {
+    PrepareString(section);
     if (section.Empty() || values.Empty())
         return;
-
+    
     ConfigSection &s = sections_[section];
     for(HashMap<String, Variant>::ConstIterator iter = values.Begin(); iter != values.End(); ++iter)
     {
         String key = iter->first_;
-        PrepareString(key, true);
+        PrepareString(key);
         s.keys[key] = iter->second_;
     }
     modified_ = true;
 }
 
-Variant ConfigFile::Get(const String &section, const String &key, const Variant &defaultValue)
+Variant ConfigFile::Get(String section, String key, const Variant &defaultValue)
 {
-    if (HasKey(section, key))
+    // Intentionally not using HasKey to reduce making copies.
+    PrepareString(section);
+    PrepareString(key);
+    if (section.Empty() || key.Empty())
+        return false;
+
+    HashMap<String, ConfigSection>::ConstIterator iter = sections_.Find(section);
+    if (iter != sections_.End())
         return sections_[section].keys[key];
     return defaultValue;
 }
@@ -236,36 +246,33 @@ bool ConfigAPI::IsFilePathSecure(const String &file) const
 
 bool ConfigAPI::HasKey(const ConfigData &data) const
 {
-    if (data.file.Empty() || data.section.Empty() || data.key.Empty())
-    {
-        LogWarning("ConfigAPI::HasKey: ConfigData does not have enough information (file, section, and key).");
-        return false;
-    }
     return HasKey(data.file, data.section, data.key);
 }
 
 bool ConfigAPI::HasKey(const ConfigData &data, String key) const
 {
-    if (data.file.Empty() || data.section.Empty())
-    {
-        LogWarning("ConfigAPI::HasKey: ConfigData does not have enough information (file, and section).");
-        return false;
-    }
     return HasKey(data.file, data.section, key);
 }
 
-bool ConfigAPI::HasKey(String file, String section, String key) const
+bool ConfigAPI::HasKey(String file, const String &section, const String &key) const
 {
     if (configFolder_.Empty())
     {
-        LogError("ConfigAPI::HasKey: Config folder has not been prepared, returning false.");
+        LogError("ConfigAPI::HasKey: Config folder has not been prepared.");
+        return false;
+    }
+    if (section.Empty())
+    {
+        LogError("ConfigAPI::HasKey: Section is empty for " + file);
+        return false;
+    }
+    if (key.Empty())
+    {
+        LogError("ConfigAPI::HasKey: Key is empty for section '" + section + "' in " + file);
         return false;
     }
 
     PrepareString(file);
-    PrepareString(section);
-    PrepareString(key, true);
-
     if (!IsFilePathSecure(file))
         return false;
     
@@ -276,129 +283,127 @@ bool ConfigAPI::HasKey(String file, String section, String key) const
 
 Variant ConfigAPI::Read(const ConfigData &data) const
 {
-    if (data.file.Empty() || data.section.Empty() || data.key.Empty())
-    {
-        LogWarning("ConfigAPI::Read: ConfigData does not have enough information (file, section, and key).");
-        return data.defaultValue;
-    }
     return Read(data.file, data.section, data.key, data.defaultValue);
 }
 
-Variant ConfigAPI::Read(const ConfigData &data, String key, const Variant &defaultValue) const
+Variant ConfigAPI::Read(const ConfigData &data, const String &key, const Variant &defaultValue) const
 {
-    if (data.file.Empty() || data.section.Empty())
-    {
-        LogWarning("ConfigAPI::Read: ConfigData does not have enough information (file and section).");
-        return data.defaultValue;
-    }
     if (defaultValue.IsEmpty())
         return Read(data.file, data.section, key, data.defaultValue);
     else
         return Read(data.file, data.section, key, defaultValue);
 }
 
-Variant ConfigAPI::Read(String file, String section, String key, const Variant &defaultValue) const
+Variant ConfigAPI::Read(String file, const String &section, const String &key, const Variant &defaultValue) const
 {
     if (configFolder_.Empty())
     {
         LogError("ConfigAPI::Read: Config folder has not been prepared, returning null Variant.");
-        return "";
+        return Variant::EMPTY;
     }
-
+    
     PrepareString(file);
-    PrepareString(section);
-    PrepareString(key, true);
-
-    // Don't return 'defaultValue' but null Variant
-    // as this is an error situation.
     if (!IsFilePathSecure(file))
-        return Variant();
+        return Variant::EMPTY;
+    if (section.Empty())
+    {
+        LogError("ConfigAPI::Read: Section not defined for " + file + ", returning null Variant.");
+        return Variant::EMPTY;
+    }
 
     ConfigFile &f = configFiles_[file];
     f.Load(GetContext(), GetFilePath(file)); // No-op after loading once
     return f.Get(section, key, defaultValue);
 }
 
-void ConfigAPI::Write(const ConfigData &data)
+bool ConfigAPI::Write(const ConfigData &data)
 {
-    if (data.file.Empty() || data.section.Empty() || data.key.Empty() || data.value.IsEmpty())
-    {
-        LogWarning("ConfigAPI::Write: ConfigData does not have enough information (file, section, key, and value).");
-        return;
-    }
-    Write(data.file, data.section, data.key, data.value);
+    return Write(data.file, data.section, data.key, data.value);
 }
 
-void ConfigAPI::Write(const ConfigData &data, const Variant &value)
+bool ConfigAPI::Write(const ConfigData &data, const Variant &value)
 {
-    Write(data, data.key, value);
+    return Write(data.file, data.section, data.key, value);
 }
 
-void ConfigAPI::Write(const ConfigData &data, String key, const Variant &value)
+bool ConfigAPI::Write(const ConfigData &data, const String &key, const Variant &value)
 {
-    if (data.file.Empty() || data.section.Empty())
-    {
-        LogWarning("ConfigAPI::Write: ConfigData does not have enough information (file and section).");
-        return;
-    }
-    Write(data.file, data.section, key, value);
+    return Write(data.file, data.section, key, value);
 }
 
-void ConfigAPI::Write(String file, String section, String key, const Variant &value)
+bool ConfigAPI::Write(const String &file, const String &section, const String &key, const Variant &value)
+{
+    return WriteInternal(file, section, key, value, true);
+}
+
+bool ConfigAPI::Write(const String &file, const String &section, const HashMap<String, Variant> &values)
+{
+    return WriteInternal(file, section, values, true);
+}
+
+bool ConfigAPI::WriteInternal(String file, const String &section, const String &key, const Variant &value, bool writeToDisk)
 {
     if (configFolder_.Empty())
     {
         LogError("ConfigAPI::Write: Config folder has not been prepared, can not write value to config.");
-        return;
+        return false;
     }
-
     PrepareString(file);
-    PrepareString(section);
-    PrepareString(key, true);
-
     if (!IsFilePathSecure(file))
-        return;
-
-    WriteInternal(file, section, key, value, true);
-}
-
-void ConfigAPI::Write(String file, String section, HashMap<String, Variant> values)
-{
-    if (values.Empty())
-        return;
-    if (configFolder_.Empty())
+        return false;
+    if (section.Empty())
     {
-        LogError("ConfigAPI::Write: Config folder has not been prepared, can not write value to config.");
-        return;
+        LogError("ConfigAPI::Write: Section is empty for " + file);
+        return false;
+    }
+    if (key.Empty())
+    {
+        LogError("ConfigAPI::Write: Value is empty for section '" + section + "' in " + file);
+        return false;
     }
 
-    PrepareString(file);
-    PrepareString(section);
-
-    if (!IsFilePathSecure(file))
-        return;
-
     ConfigFile &f = configFiles_[file];
+    String filepath = GetFilePath(file);
     /* No-op after loading once. We must load first to ensure disk
        stored values won't later overwrite the now set value. */
-    f.Load(GetContext(), GetFilePath(file)); 
-    f.Set(section, values);
-    f.Save(GetContext(), GetFilePath(file));
-}
-
-void ConfigAPI::WriteInternal(const String &file, const String &section, const String &key, const Variant &value, bool writeToDisk)
-{
-    if (file.Empty() || section.Empty() || key.Empty())
-        return;
-
-    ConfigFile &f = configFiles_[file];
-    /* No-op after loading once. We must load first to ensure disk
-       stored values won't later overwrite the now set value. */
-    f.Load(GetContext(), GetFilePath(file)); 
-
+    f.Load(GetContext(), filepath); 
     f.Set(section, key, value);
     if (writeToDisk)
-        f.Save(GetContext(), GetFilePath(file));
+        f.Save(GetContext(), filepath);
+    return true;
+}
+
+bool ConfigAPI::WriteInternal(String file, const String &section, const HashMap<String, Variant> &values, bool writeToDisk)
+{
+    if (configFolder_.Empty())
+    {
+        LogError("ConfigAPI::Write: Config folder has not been prepared, can not write value to config.");
+        return false;
+    }
+    PrepareString(file);
+    if (!IsFilePathSecure(file))
+        return false;
+    if (section.Empty())
+    {
+        LogError("ConfigAPI::Write: Section is empty for section '" + section + "' in " + file);
+        return false;
+    }
+
+    ConfigFile &f = configFiles_[file];
+    String filepath = GetFilePath(file);
+    /* No-op after loading once. We must load first to ensure disk
+       stored values won't later overwrite the now set value. */
+    f.Load(GetContext(), filepath); 
+    
+    for (HashMap<String, Variant>::ConstIterator iter = values.Begin(); iter != values.End(); ++iter)
+    {
+        String key = iter->first_;
+        if (!key.Empty())
+            f.Set(section, key, iter->second_);
+    }
+    if (writeToDisk)
+        f.Save(GetContext(), filepath);
+    return true;
 }
 
 ConfigFile &ConfigAPI::GetFile(String file)

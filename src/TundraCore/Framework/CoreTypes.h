@@ -44,6 +44,7 @@ namespace Tundra
     using Urho3D::Pair;
     typedef Vector<String> StringVector;
     typedef Vector<Variant> VariantList;
+    typedef HashMap<StringHash, Variant> VariantMap;
 
     // Floating-point types
     typedef float f32;

@@ -73,7 +73,7 @@ void UrhoRenderer::Uninitialize()
         rend->SetViewport(0, 0);
 }
 
-void UrhoRenderer::HandleScreenModeChange(StringHash /*eventType*/, Urho3D::VariantMap &eventData)
+void UrhoRenderer::HandleScreenModeChange(StringHash /*eventType*/, VariantMap &eventData)
 {
     ConfigAPI *config = framework->Config();
     if (!config)
