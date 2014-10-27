@@ -49,14 +49,9 @@ run_analysis=false
 run_tests=false
 
 build_type="Release"
+build_tests="OFF"
 build_64bit=false
 build_64bit_int=0
-
-if [ $(dpkg-architecture -qDEB_HOST_ARCH) = "amd64" ] ; then
-    build_64bit=true
-    build_64bit_int=1
-fi
-
 
 # Parse command line args
 
@@ -96,6 +91,14 @@ while [[ $1 = -* ]]; do
             ;;
     esac
 done
+
+if [ $(dpkg-architecture -qDEB_HOST_ARCH) = "amd64" ] ; then
+    build_64bit=true
+    build_64bit_int=1
+fi
+if [ $run_tests = true ] ; then
+    build_tests="ON"
+fi
 
 # Init
 
@@ -202,8 +205,11 @@ if [ $skip_deps = false ] ; then
 
         mark_built
     fi
+fi
 
-    #### Google C++ Test Framework
+# Build gtest if testing
+
+if [ $run_tests = true ] ; then
 
     start_target gtest
 
@@ -259,10 +265,12 @@ if [ $skip_cmake = false ] ; then
 
     cmake .. \
         -DCMAKE_CXX_FLAGS="-Wno-unused-parameter -Wno-unused-variable" \
+        -DCMAKE_BUILD_TYPE=$build_type \
         -DMATHGEOLIB_HOME=$DEPS \
         -DURHO3D_HOME=$DEPS_SRC/urho3d \
         -DKNET_HOME=$DEPS_SRC/kNet \
-        -DGTEST_HOME=$DEPS_SRC/gtest
+        -DGTEST_HOME=$DEPS_SRC/gtest \
+        -DENABLE_TESTS=$build_tests
 fi
 
 # Tundra build
