@@ -36,7 +36,7 @@
 using namespace Tundra;
 using namespace Tundra::Test;
 
-TEST_F(Runner, MathUrhoInterop)
+TEST_F(Runner, UrhoInterop)
 {
     math::LCG lcg;
     math::float2 mglFloat2 = float2::RandomDir(lcg);

@@ -1,2 +1,2 @@
 
-CreateTest(Scene main.cpp)
+CreateTest(Scene TestScene.cpp)

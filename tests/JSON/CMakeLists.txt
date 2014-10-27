@@ -1,2 +1,2 @@
 
-CreateTest(JSON main.cpp)
+CreateTest(JSON TestJSON.cpp)

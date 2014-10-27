@@ -1,0 +1,2 @@
+
+CreateTest(Math TestMath.cpp)

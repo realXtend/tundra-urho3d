@@ -1,2 +1,2 @@
 
-CreateTest(Config main.cpp)
+CreateTest(Config TestConfig.cpp)
