@@ -79,7 +79,7 @@ void ConfigFile::Set(const String &section, const String &key, const Variant &va
     modified_ = true;
 }
 
-void ConfigFile::Set(const String section, const HashMap<String, Variant> &values)
+void ConfigFile::Set(const String &section, const HashMap<String, Variant> &values)
 {
     if (section.Empty() || values.Empty())
         return;

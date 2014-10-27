@@ -2267,7 +2267,7 @@ void AssetAPI::OnAssetChanged(IAssetStorage* storage, String localName, String d
             if (asset && !diskSource.Empty())
             {
                 asset->SetDiskSource(diskSource);
-                //bool cached = (assetCache && diskSource.contains(Cache()->CacheDirectory(), Qt::CaseInsensitive));
+                //bool cached = (assetCache && diskSource.contains(Cache()->CacheDirectory(), false));
                 //asset->SetDiskSourceType(cached ? IAsset::Cached : IAsset::Original);
             }
         }

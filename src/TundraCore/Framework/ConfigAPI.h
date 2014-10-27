@@ -36,13 +36,9 @@ struct TUNDRACORE_API ConfigData
     /// Returns string presentation of the contained data.
     String ToString() const
     {
-        return Urho3D::ToString("ConfigData(file:%s section:%s key:%s value:%s defaultValue:%s)", file.CString(), section.CString(), value.ToString().CString(), defaultValue.ToString().CString());
+        return Urho3D::ToString("ConfigData(file:%s section:%s key:%s value:%s defaultValue:%s)",
+            file.CString(), section.CString(), value.ToString().CString(), defaultValue.ToString().CString());
     }
-
-    /// @cond PRIVATE
-    /// Same as ToString, exists for QtScript-compatibility.
-    String toString() const { return ToString(); }
-    /// @endcond
 };
 
 /// Structure for a config file section.
@@ -71,7 +67,7 @@ public:
     void Set(const String &section, const String &key, const Variant &value);
 
     /** @overload @param values Section key to value map to write in a single batch. */
-    void Set(const String section, const HashMap<String, Variant> &values);
+    void Set(const String &section, const HashMap<String, Variant> &values);
 
     /// Get a value.
     /** @note In the case of default value is returned a copy is created. This could
