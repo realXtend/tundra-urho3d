@@ -315,9 +315,6 @@ public:
     /** Syntax of the string: 'Entity ID <id>' or 'Entity "<name>" (ID: <id>)' if entity has a name. */
     String ToString() const;
 
-    /// Same as ToString. This function is implemented to facilitate the automatic QtScript QScriptValue to string conversion.
-    String toString() const { return ToString(); }
-
     /// Returns the unique id of this entity
     entity_id_t Id() const { return id_; }
 

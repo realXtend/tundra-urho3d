@@ -512,7 +512,7 @@ private:
 
     /// Stores a list of asset requests to assets that have already been downloaded into the system. These requests don't go to the asset providers
     /// to process, but are internally filled by the Asset API. This member vector is needed to be able to delay the requests and virtual completions
-    /// by one frame, so that the client gets a chance to connect his handler's Qt signals to the AssetTransferPtr slots.
+    /// by one frame, so that the client gets a chance to connect his handler's signals to the AssetTransferPtr slots.
     Vector<AssetTransferPtr> readyTransfers;
     
     // Stores a list of sub asset requests that are pending a load from a loaded asset bundle.

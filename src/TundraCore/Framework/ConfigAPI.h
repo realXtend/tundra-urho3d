@@ -36,13 +36,9 @@ struct TUNDRACORE_API ConfigData
     /// Returns string presentation of the contained data.
     String ToString() const
     {
-        return Urho3D::ToString("ConfigData(file:%s section:%s key:%s value:%s defaultValue:%s)", file.CString(), section.CString(), value.ToString().CString(), defaultValue.ToString().CString());
+        return Urho3D::ToString("ConfigData(file:%s section:%s key:%s value:%s defaultValue:%s)",
+            file.CString(), section.CString(), value.ToString().CString(), defaultValue.ToString().CString());
     }
-
-    /// @cond PRIVATE
-    /// Same as ToString, exists for QtScript-compatibility.
-    String toString() const { return ToString(); }
-    /// @endcond
 };
 
 /// Structure for a config file section.

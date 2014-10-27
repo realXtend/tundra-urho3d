@@ -224,9 +224,6 @@ public:
     /// Returns "Transform(Pos:(x,y,z)) Rot:(x,y,z) Scale:(x,y,z))".
     String ToString() const { return (String)*this; }
 
-    /// For QtScript-compatibility.
-    String toString() const { return (String)*this; }
-
     /// Returns "px,py,pz,rx,ry,rz,sx,sy,sz".
     /** This is the preferred format for the Transform if it has to be serialized to a string for machine transfer.
         @todo Remove commas from the string. */
@@ -240,4 +237,3 @@ public:
 };
 
 }
-
