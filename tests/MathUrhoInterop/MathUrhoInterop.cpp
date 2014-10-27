@@ -52,73 +52,63 @@ TEST_F(Runner, MathUrhoInterop)
     math::Sphere mglSphere(float3::RandomDir(lcg), lcg.Float());
     Tundra::Color tundraColor = float4::RandomDir(lcg);
 
-    Urho3D::PrintUnicodeLine("MGL -> Urho conversions...");
-    Urho3D::Vector2 urhoFloat2 = mglFloat2;
-    //Urho3D::PrintUnicodeLine(mglFloat2.ToString().c_str());
-    //Urho3D::PrintUnicodeLine(urhoFloat2.ToString());
-    ASSERT_TRUE(urhoFloat2.Equals(mglFloat2));
+    Log("Tundra Color");
 
-    Urho3D::Vector3 urhoFloat3 = mglFloat3;
-    //Urho3D::PrintUnicodeLine(mglFloat3.ToString().c_str());
-    //Urho3D::PrintUnicodeLine(urhoFloat3.ToString());
-    ASSERT_TRUE(urhoFloat3.Equals(mglFloat3));
-
-    Urho3D::Vector4 urhoFloat4 = mglFloat4;
-    //Urho3D::PrintUnicodeLine(mglFloat4.ToString().c_str());
-    //Urho3D::PrintUnicodeLine(urhoFloat4.ToString());
-    ASSERT_TRUE(urhoFloat4.Equals(mglFloat4));
-
-    Urho3D::Matrix3 urhoFloat3x3 = mglFloat3x3;
-    //Urho3D::PrintUnicodeLine(mglFloat3x3.ToString().c_str());
-    //Urho3D::PrintUnicodeLine(urhoFloat3x3.ToString());
-    ASSERT_TRUE(urhoFloat3x3.Equals(mglFloat3x3));
-
-    Urho3D::Matrix3x4 urhoFloat3x4 = mglFloat3x4;
-    //Urho3D::PrintUnicodeLine(mglFloat3x4.ToString().c_str());
-    //Urho3D::PrintUnicodeLine(urhoFloat3x4.ToString());
-    ASSERT_TRUE(urhoFloat3x4.Equals(mglFloat3x4));
-
-    Urho3D::Matrix4 urhoFloat4x4 = mglFloat4x4;
-    //Urho3D::PrintUnicodeLine(mglFloat4x4.ToString().c_str());
-    //Urho3D::PrintUnicodeLine(urhoFloat4x4.ToString());
-    ASSERT_TRUE(urhoFloat4x4.Equals(mglFloat4x4));
-
-    Urho3D::Quaternion urhoQuat = mglQuat;
-    //Urho3D::PrintUnicodeLine(mglQuat.ToString().c_str());
-    //Urho3D::PrintUnicodeLine(urhoQuat.ToString());
-    ASSERT_TRUE(urhoQuat.Equals(mglQuat));
-
-    Urho3D::BoundingBox urhoAabb = mglAabb;
-    //Urho3D::PrintUnicodeLine(mglAabb.ToString().c_str());
-    //Urho3D::PrintUnicodeLine(urhoAabb.ToString());
-    ASSERT_TRUE(urhoAabb.min_.Equals(mglAabb.minPoint)); ASSERT_TRUE(urhoAabb.max_.Equals(mglAabb.maxPoint));
-
-    Urho3D::Ray urhoRay = mglRay;
-    //Urho3D::PrintUnicodeLine(mglRay.ToString().c_str());
-    //Urho3D::PrintUnicodeLine(urhoRay.origin_.ToString() + " " + urhoRay.direction_.ToString());
-    ASSERT_TRUE(urhoRay.origin_.Equals(mglRay.pos)); ASSERT_TRUE(urhoRay.direction_.Equals(mglRay.dir));
-
-    Urho3D::Plane urhoPlane = mglPlane;
-    //Urho3D::PrintUnicodeLine(mglPlane.ToString().c_str());
-    //Urho3D::PrintUnicodeLine(urhoPlane.normal_.ToString() + " " + String(urhoPlane.d_));
-    ASSERT_TRUE(urhoPlane.normal_.Equals(mglPlane.normal)); ASSERT_TRUE(math::Equal(urhoPlane.d_, mglPlane.d));
-
-    Urho3D::Sphere urhoSphere = mglSphere;
-    //Urho3D::PrintUnicodeLine(mglSphere.ToString().c_str());
-    //Urho3D::PrintUnicodeLine(urhoSphere.center_.ToString() + " " + String(urhoSphere.radius_));
-    ASSERT_TRUE(urhoSphere.center_.Equals(mglSphere.pos)); ASSERT_TRUE(math::Equal(urhoSphere.radius_, mglSphere.r));
-
+    Log(PadString("Tundra::Color",16) + "Urho3D::Color", 2);
     Urho3D::Color urhoColor = tundraColor;
-    //Urho3D::PrintUnicodeLine(tundraColor.SerializeToString());
-    //Urho3D::PrintUnicodeLine(urhoColor.ToString());
     ASSERT_TRUE(urhoColor.Equals(tundraColor));
 
+    Log(PadString("Tundra::Color",16) + "math::float4", 2);
     math::float4 tundraColorFloat4 = tundraColor;
     ASSERT_TRUE(tundraColorFloat4.Equals(tundraColor));
 
-    Urho3D::PrintUnicodeLine("OK!");
+    Log("MGL > Urho");
 
-    Urho3D::PrintUnicodeLine("Urho -> MGL conversions...");
+    Log(PadString("math::float2",16) + "Urho3D::Vector2", 2);
+    Urho3D::Vector2 urhoFloat2 = mglFloat2;
+    ASSERT_TRUE(urhoFloat2.Equals(mglFloat2));
+
+    Log(PadString("math::float3",16) + "Urho3D::Vector3", 2);
+    Urho3D::Vector3 urhoFloat3 = mglFloat3;
+    ASSERT_TRUE(urhoFloat3.Equals(mglFloat3));
+
+    Log(PadString("math::float4",16) + "Urho3D::Vector4", 2);
+    Urho3D::Vector4 urhoFloat4 = mglFloat4;
+    ASSERT_TRUE(urhoFloat4.Equals(mglFloat4));
+
+    Log(PadString("math::float3x3",16) + "Urho3D::Matrix3", 2);
+    Urho3D::Matrix3 urhoFloat3x3 = mglFloat3x3;
+    ASSERT_TRUE(urhoFloat3x3.Equals(mglFloat3x3));
+
+    Log(PadString("math::float3x4",16) + "Urho3D::Matrix3x4", 2);
+    Urho3D::Matrix3x4 urhoFloat3x4 = mglFloat3x4;
+    ASSERT_TRUE(urhoFloat3x4.Equals(mglFloat3x4));
+
+    Log(PadString("math::float4x4",16) + "Urho3D::Matrix4", 2);
+    Urho3D::Matrix4 urhoFloat4x4 = mglFloat4x4;
+    ASSERT_TRUE(urhoFloat4x4.Equals(mglFloat4x4));
+
+    Log(PadString("math::Quat",16) + "Urho3D::Quaternion", 2);
+    Urho3D::Quaternion urhoQuat = mglQuat;
+    ASSERT_TRUE(urhoQuat.Equals(mglQuat));
+
+    Log(PadString("math::AABB",16) + "Urho3D::BoundingBox", 2);
+    Urho3D::BoundingBox urhoAabb = mglAabb;
+    ASSERT_TRUE(urhoAabb.min_.Equals(mglAabb.minPoint)); ASSERT_TRUE(urhoAabb.max_.Equals(mglAabb.maxPoint));
+
+    Log(PadString("math::Ray",16) + "Urho3D::Ray", 2);
+    Urho3D::Ray urhoRay = mglRay;
+    ASSERT_TRUE(urhoRay.origin_.Equals(mglRay.pos)); ASSERT_TRUE(urhoRay.direction_.Equals(mglRay.dir));
+
+    Log(PadString("math::Plane",16) + "Urho3D::Plane", 2);
+    Urho3D::Plane urhoPlane = mglPlane;
+    ASSERT_TRUE(urhoPlane.normal_.Equals(mglPlane.normal)); ASSERT_TRUE(math::Equal(urhoPlane.d_, mglPlane.d));
+
+    Log(PadString("math::Sphere",16) + "Urho3D::Sphere", 2);
+    Urho3D::Sphere urhoSphere = mglSphere;
+    ASSERT_TRUE(urhoSphere.center_.Equals(mglSphere.pos)); ASSERT_TRUE(math::Equal(urhoSphere.radius_, mglSphere.r));
+
+    Log("Urho > MGL");
     mglFloat2 = urhoFloat2;
     ASSERT_TRUE(mglFloat2.Equals(urhoFloat2));
     mglFloat3 = urhoFloat3;
@@ -143,8 +133,6 @@ TEST_F(Runner, MathUrhoInterop)
     ASSERT_TRUE(mglSphere.Equals(urhoSphere));
     tundraColor = tundraColor;
     ASSERT_TRUE(tundraColor.Equals(tundraColor));
-
-    Urho3D::PrintUnicodeLine("OK!");
 }
 
 TUNDRA_TEST_MAIN();
