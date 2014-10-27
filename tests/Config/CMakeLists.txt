@@ -1,0 +1,2 @@
+
+CreateTest(Config main.cpp)
