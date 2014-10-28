@@ -53,7 +53,7 @@ private:
     void Initialize() override;
     void Uninitialize() override;
 
-    // Handles Urho3D::Graphics E_SCREENMODE.
+    // Handles Urho3D::Graphics E_SCREENMODE & E_WINDOWPOS events.
     void HandleScreenModeChange(StringHash eventType, VariantMap &eventData);
 
     /// Creates GraphicsWorld for a Scene.
