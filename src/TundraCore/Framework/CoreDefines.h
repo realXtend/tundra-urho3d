@@ -1,18 +1,27 @@
-// For conditions of distribution and use, see copyright notice in LICENSE
+/**
+    For conditions of distribution and use, see copyright notice in LICENSE
+
+    @file   CoreDefines.h
+    @brief  Preprocessor macros. */
 
 #pragma once
 
 #include <cassert>
 
+/** @def DLLEXPORT(func)
+    __declspec(dllexport) for Windows, empty otherwise. */
 #ifdef WIN32
 #define DLLEXPORT __declspec(dllexport)
 #else
 #define DLLEXPORT
 #endif
 
+/// Uses operator delete to delete p and sets p to nullptr after that.
 #define SAFE_DELETE(p) { delete p; p = nullptr; }
+/// Uses operator delete[] to delete p and sets p to nullptr after that.
 #define SAFE_DELETE_ARRAY(p) { delete [] p; p = nullptr; }
 
+/// Specifies the number of elements in a C array.
 #define NUMELEMS(x) (sizeof(x)/sizeof(x[0]))
 
 /// Use this template to downcast from a base class to a derived class when you know by static code analysis what the derived 
@@ -40,6 +49,9 @@ inline Dst checked_static_cast(Src src)
 #else
 #define UNUSED_PARAM(x)
 #endif
+
+/// ARG is meant simply for documenting arguments of Signals.
+#define ARG(x)
 
 /// Use to suppress warning C4101 (unreferenced local variable)
 #define UNREFERENCED_PARAM(P) (void)(P);

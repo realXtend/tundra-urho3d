@@ -486,7 +486,7 @@ public:
         @param type Execution type.
 
         @note Use case-insensitive comparison for checking name of the @c action ! */
-    Signal4<Entity*, const String &, const StringVector &, EntityAction::ExecTypeField> ActionTriggered;
+    Signal4<Entity * ARG(entity), const String & ARG(action), const StringVector & ARG(params), EntityAction::ExecTypeField ARG(type)> ActionTriggered;
 
     /// Emitted when an entity is about to be modified:
     Signal3<ChangeRequest*, UserConnection*, Entity*> AboutToModifyEntity;
