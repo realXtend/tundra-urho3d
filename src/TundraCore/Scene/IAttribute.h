@@ -122,6 +122,49 @@ public:
     /// Acknowledges that the component owning this attribute has updated the component state to reflect the current value of this attribute.
     void ClearChangedFlag() { valueChanged = false; }
 
+    /// Attribute types supported by the system.
+    enum TypeId /* : u32 (could use C++11 strongly type enum here) */
+    {
+        NoneId = 0,
+        StringId = 1,
+        IntId = 2,
+        RealId = 3,
+        ColorId = 4,
+        Float2Id = 5,
+        Float3Id = 6,
+        Float4Id = 7,
+        BoolId = 8,
+        UIntId = 9,
+        QuatId = 10,
+        AssetReferenceId = 11,
+        AssetReferenceListId = 12,
+        EntityReferenceId = 13,
+        VariantId = 14,
+        VariantListId = 15,
+        TransformId = 16,
+        PointId = 17,
+        NumTypes = 18
+    };
+
+    static const String NoneTypeName;
+    static const String StringTypeName;
+    static const String IntTypeName;
+    static const String RealTypeName;
+    static const String ColorTypeName;
+    static const String Float2TypeName;
+    static const String Float3TypeName;
+    static const String Float4TypeName;
+    static const String BoolTypeName;
+    static const String UIntTypeName;
+    static const String QuatTypeName;
+    static const String AssetReferenceTypeName;
+    static const String AssetReferenceListTypeName;
+    static const String EntityReferenceTypeName;
+    static const String VariantTypeName;
+    static const String VariantListTypeName;
+    static const String TransformTypeName;
+    static const String PointTypeName;
+
 protected:
     friend class SceneAPI;
     friend class IComponent;
@@ -199,9 +242,8 @@ public:
         valueChanged = true; // Signal to IComponent owning this attribute that the value of this attribute has changed.
         Changed(change);
     }
-    
-    /// IAttribute override
-    virtual IAttribute* Clone() const
+
+    IAttribute* Clone() const override
     {
         Attribute<T>* new_attr = new Attribute<T>(0, name.CString());
         new_attr->metadata = metadata;
@@ -209,22 +251,21 @@ public:
         new_attr->Set(Get(), AttributeChange::Disconnected);
         return static_cast<IAttribute*>(new_attr);
     }
-    
-    /// IAttribute override
-    virtual void CopyValue(IAttribute* source, AttributeChange::Type change)
+
+    void CopyValue(IAttribute* source, AttributeChange::Type change) override
     {
         Attribute<T>* source_attr = dynamic_cast<Attribute<T>*>(source);
         if (source_attr)
             Set(source_attr->Get(), change);
     }
 
-    virtual String ToString() const; ///< IAttribute override
-    virtual void FromString(const String& str, AttributeChange::Type change); ///< IAttribute override
-    virtual void ToBinary(kNet::DataSerializer& dest) const; ///< IAttribute override
-    virtual void FromBinary(kNet::DataDeserializer& source, AttributeChange::Type change); ///< IAttribute override
-    virtual void Interpolate(IAttribute* start, IAttribute* end, float t, AttributeChange::Type change); ///< IAttribute override
-    virtual const String &TypeName() const; ///< IAttribute override
-    virtual u32 TypeId() const; ///< IAttribute override
+    String ToString() const override;
+    void FromString(const String& str, AttributeChange::Type change) override;
+    void ToBinary(kNet::DataSerializer& dest) const override;
+    void FromBinary(kNet::DataDeserializer& source, AttributeChange::Type change) override;
+    void Interpolate(IAttribute* start, IAttribute* end, float t, AttributeChange::Type change) override;
+    const String &TypeName() const override;
+    u32 TypeId() const override;
 
     /// Returns pre-defined default value for the attribute.
     /** Usually zero for primitive data types and for classes/structs that are collections of primitive data types (e.g. float3::zero), or the default consturctor. */
@@ -234,51 +275,10 @@ private:
     T value; ///< The value of this Attribute.
 };
 
-/// @todo Would these be nice as an enum within IAttribute, something like IAttribute::Float3TypeId
-static const u32 cAttributeNone = 0;
-static const u32 cAttributeString = 1;
-static const u32 cAttributeInt = 2;
-static const u32 cAttributeReal = 3;
-static const u32 cAttributeColor = 4;
-static const u32 cAttributeFloat2 = 5;
-static const u32 cAttributeFloat3 = 6;
-static const u32 cAttributeFloat4 = 7;
-static const u32 cAttributeBool = 8;
-static const u32 cAttributeUInt = 9;
-static const u32 cAttributeQuat = 10;
-static const u32 cAttributeAssetReference = 11;
-static const u32 cAttributeAssetReferenceList = 12;
-static const u32 cAttributeEntityReference = 13;
-static const u32 cAttributeVariant = 14;
-static const u32 cAttributeVariantList = 15;
-static const u32 cAttributeTransform = 16;
-static const u32 cAttributePoint = 17;
-static const u32 cNumAttributeTypes = 18;
-
-/// @todo Would these be nicer within IAttribute, something like IAttribute::Float3TypeName
-static const String cAttributeNoneTypeName = "";
-static const String cAttributeStringTypeName = "string";
-static const String cAttributeIntTypeName = "int";
-static const String cAttributeRealTypeName = "real";
-static const String cAttributeColorTypeName = "Color";
-static const String cAttributeFloat2TypeName = "float2";
-static const String cAttributeFloat3TypeName = "float3";
-static const String cAttributeFloat4TypeName = "float4";
-static const String cAttributeBoolTypeName = "bool";
-static const String cAttributeUIntTypeName = "uint";
-static const String cAttributeQuatTypeName = "Quat"; 
-static const String cAttributeAssetReferenceTypeName = "AssetReference";
-static const String cAttributeAssetReferenceListTypeName = "AssetReferenceList";
-static const String cAttributeEntityReferenceTypeName = "EntityReference";
-static const String cAttributeVariantTypeName = "Variant";
-static const String cAttributeVariantListTypeName = "VariantList";
-static const String cAttributeTransformTypeName = "Transform";
-static const String cAttributePointTypeName = "Point";
-
 /// Represents weak pointer to an attribute.
 struct AttributeWeakPtr
 {
-    AttributeWeakPtr() : attribute(0) {}
+    AttributeWeakPtr() : attribute(nullptr) {}
     /// Constructor.
     /** @param c Owner component.
         @param a The actual attribute. */
