@@ -290,7 +290,7 @@ AssetUploadTransferPtr LocalAssetProvider::UploadAssetFromFileInMemory(const u8 
         return AssetUploadTransferPtr();
     }
 
-    AssetUploadTransferPtr transfer(new IAssetUploadTransfer());
+    AssetUploadTransferPtr transfer(new IAssetUploadTransfer(GetContext()));
     transfer->sourceFilename = "";
     transfer->destinationName = assetName;
     transfer->destinationStorage = destination;
