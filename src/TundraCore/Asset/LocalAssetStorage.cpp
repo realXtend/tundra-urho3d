@@ -2,13 +2,12 @@
 
 #include "StableHeaders.h"
 
-#include "Application.h"
 #include "LocalAssetStorage.h"
 #include "LocalAssetProvider.h"
 #include "AssetAPI.h"
-#include "Profiler.h"
 #include "LoggingFunctions.h"
 
+#include <Profiler.h>
 #include <File.h>
 #include <FileSystem.h>
 #include <FileWatcher.h>

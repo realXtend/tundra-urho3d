@@ -17,10 +17,10 @@
 
 #include "Framework.h"
 #include "LoggingFunctions.h"
-#include "Application.h"
-#include "Profiler.h"
 #include "CoreStringUtils.h"
 
+#include <Context.h>
+#include <Profiler.h>
 #include <StringUtils.h>
 #include <FileSystem.h>
 #include <File.h>

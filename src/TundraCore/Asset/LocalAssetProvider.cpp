@@ -9,13 +9,12 @@
 #include "IAssetTransfer.h"
 #include "AssetAPI.h"
 #include "IAsset.h"
-#include "Profiler.h"
 
 #include "Framework.h"
 #include "LoggingFunctions.h"
 #include "CoreStringUtils.h"
-#include "Profiler.h"
 
+#include <Profiler.h>
 #include <FileSystem.h>
 #include <File.h>
 #include <Timer.h>
