@@ -112,7 +112,7 @@ namespace Tundra
                 config.clear();
             }
 
-            /// Call this function whenever you need Qt events, eg. signals, to be processed.
+            /// Call this function whenever you need framework to be processed.
             void ProcessEvents()
             {
                 framework->Pump();

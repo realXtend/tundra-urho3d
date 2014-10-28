@@ -123,7 +123,7 @@ public:
     void ClearChangedFlag() { valueChanged = false; }
 
     /// Attribute types supported by the system.
-    enum TypeId /* : u32 (could use C++11 strongly type enum here) */
+    enum TypeId : u32
     {
         NoneId = 0,
         StringId = 1,
