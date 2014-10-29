@@ -39,8 +39,8 @@ typedef WeakPtr<Mesh> MeshWeakPtr;
     <li>"SetAnimationTimePosition": @copydoc SetAnimationTimePosition
     <li>"SetAnimationAutoStop": @copydoc SetAnimationAutoStop
     <li>"SetAnimationNumLoops": @copydoc SetAnimationNumLoops
-    <li>"GetAvailableAnimations": @copydoc GetAvailableAnimations
-    <li>"GetActiveAnimations": @copydoc GetActiveAnimations
+    <li>"AvailableAnimations": @copydoc AvailableAnimations
+    <li>"ActiveAnimations": @copydoc ActiveAnimations
     </ul>
 
     <b>Reacts on the following actions:</b>
@@ -81,11 +81,11 @@ public:
     /// Enumeration of animation phase
     enum AnimationPhase
     {
-        PHASE_FADEIN = 0,
-        PHASE_PLAY,
-        PHASE_FADEOUT,
-        PHASE_STOP,
-        PHASE_FREE //in external control. for dynamiccomponent testing now
+        FadeInPhase = 0,
+        PlayPhase,
+        FadeOutPhase,
+        StopPhase,
+        FreePhase ///< In external control.
     };
 
     /// Structure for an ongoing animation
@@ -123,7 +123,7 @@ public:
             speed_factor_(1.0),
             num_repeats_(0),
             high_priority_(false),
-            phase_(PHASE_STOP)
+            phase_(StopPhase)
         {
         }
     };
@@ -166,7 +166,7 @@ public:
     /** @param name Animation name
         @param check_fade_out if true, also fade-out (until totally faded) phase is interpreted as "active"
         @return true if animation active */
-    bool IsAnimationActive(const String& name, bool checkFadeout = true);
+    bool IsAnimationActive(const String& name, bool checkFadeout = true) const;
 
     /// Disables animation with optional fade-out time
     /** @param name Animation name
@@ -225,25 +225,25 @@ public:
     bool SetAnimationNumLoops(const String& name, unsigned repeats);
 
     /// Get available animations
-    StringList GetAvailableAnimations();
+    StringList AvailableAnimations();
     
     /// Get active animations as a simple stringlist
-    StringList GetActiveAnimations() const;
+    StringList ActiveAnimations() const;
     
     /// Returns length of animation
     /** @param name Animation name
         @return length of animation in seconds, or 0 if no such animation */
-    float GetAnimationLength(const String& name);
+    float AnimationLength(const String& name);
     
     /// Returns time position of animation
     /** @param name Animation name
         @return time position of animation in seconds, or 0 if not active */
-    float GetAnimationTimePosition(const String& name);
+    float AnimationTimePosition(const String& name);
     
     /// Returns relative time position of animation
     /** @param name Animation name
         @return time position of animation between 0 - 1, or 0 if not active */
-    float GetAnimationRelativeTimePosition(const String& name);
+    float AnimationRelativeTimePosition(const String& name);
     
     /// Implements the PlayAnim action
     void PlayAnim(const String &name, const String &fadein, const String &exclusive);
@@ -279,7 +279,7 @@ private:
     /// Gets animationstate 
     /** @param name Animation name
         @return animationstate, or null if not found */
-    Urho3D::AnimationState* GetAnimationState(const String& name);
+    Urho3D::AnimationState* UrhoAnimationState(const String& name);
 
     /// Mesh component
     MeshWeakPtr mesh_;
