@@ -31,7 +31,8 @@ String IAssetUploadTransfer::AssetRef()
 
 String IAssetUploadTransfer::ReplyHeader(const String &header) const
 {
-    foreach(const String &name, replyHeaders.Keys())
+    StringVector keys = replyHeaders.Keys();
+    foreach(const String &name, keys)
     {
         if (name.Compare(header, false) == 0)
             return replyHeaders.Find(name)->second_;

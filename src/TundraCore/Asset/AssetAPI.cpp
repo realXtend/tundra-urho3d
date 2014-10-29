@@ -87,19 +87,22 @@ void AssetAPI::RegisterAssetProvider(AssetProviderPtr provider)
 
 AssetStoragePtr AssetAPI::AssetStorageByName(const String &name) const
 {
-    foreach(const AssetProviderPtr &provider, AssetProviders())
-        foreach(AssetStoragePtr storage, provider->GetStorages())
+    foreach(const AssetProviderPtr &provider, providers)
+    {
+        Vector<AssetStoragePtr> storages = provider->Storages();
+        foreach(AssetStoragePtr storage, storages)
             if (storage->Name().Compare(name, false) == 0)
                 return storage;
+    }
     return AssetStoragePtr();
 }
 
 AssetStoragePtr AssetAPI::StorageForAssetRef(const String &ref) const
 {
     PROFILE(AssetAPI_StorageForAssetRef);
-    foreach(const AssetProviderPtr &provider, AssetProviders())
+    foreach(const AssetProviderPtr &provider, providers)
     {
-        AssetStoragePtr storage = provider->GetStorageForAssetRef(ref);
+        AssetStoragePtr storage = provider->StorageForAssetRef(ref);
         if (storage)
             return storage;
     }
@@ -110,7 +113,7 @@ bool AssetAPI::RemoveAssetStorage(const String &name)
 {
     ///\bug Currently it is possible to have e.g. a local storage with name "Foo" and a http storage with name "Foo", and it will
     /// not be possible to specify which storage to delete.
-    foreach(const AssetProviderPtr &provider, AssetProviders())
+    foreach(const AssetProviderPtr &provider, providers)
         if (provider->RemoveAssetStorage(name))
             return true;
 
@@ -174,7 +177,7 @@ Vector<AssetStoragePtr> AssetAPI::AssetStorages() const
     Vector<AssetProviderPtr> providers = AssetProviders();
     for(size_t i = 0; i < providers.Size(); ++i)
     {
-        Vector<AssetStoragePtr> stores = providers[i]->GetStorages();
+        Vector<AssetStoragePtr> stores = providers[i]->Storages();
         storages.Push(stores);
     }
 

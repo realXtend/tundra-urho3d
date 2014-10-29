@@ -68,7 +68,7 @@ AssetTransferPtr LocalAssetProvider::RequestAsset(String assetRef, String assetT
 
     if (!enableRequestsOutsideStorages)
     {
-        AssetStoragePtr storage = GetStorageForAssetRef(assetRef);
+        AssetStoragePtr storage = StorageForAssetRef(assetRef);
         if (!storage)
         {
             LogError("LocalAssetProvider::RequestAsset: Discarding asset request to path \"" + assetRef +
@@ -437,7 +437,7 @@ String LocalAssetProvider::GenerateUniqueStorageName() const
 {
     String name = "Scene";
     int counter = 2;
-    while(GetStorageByName(name) != 0)
+    while(StorageByName(name) != 0)
         name = "Scene" + String(counter++);
     return name;
 }
@@ -558,7 +558,7 @@ void LocalAssetProvider::CheckForPendingFileSystemChanges()
             else
             {
                 // File was tracked and found from watched files: must've been modified.
-                bool existing = framework->Asset()->FindAsset(assetRef);
+                bool existing = framework->Asset()->FindAsset(assetRef) != nullptr;
                 if (existing)
                 {
                     LogInfo("Watched file " + file + " was modified. Asset ref: " + assetRef);

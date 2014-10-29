@@ -74,10 +74,6 @@ public:
     /// Reads the given storage string and tries to deserialize it to an asset storage in this provider.
     /** Returns a pointer to the newly created storage, or 0 if the storage string is not of the type of this asset provider. */
     virtual AssetStoragePtr TryDeserializeStorageFromString(const String &storage, bool fromNetwork) = 0;
-
-    Vector<AssetStoragePtr> GetStorages() const { return Storages(); }
-    AssetStoragePtr GetStorageByName(const String &name) const { return StorageByName(name); }
-    AssetStoragePtr GetStorageForAssetRef(const String &assetRef) const { return StorageForAssetRef(assetRef); }
 };
 
 }
