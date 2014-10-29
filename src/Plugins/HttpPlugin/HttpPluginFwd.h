@@ -1,0 +1,40 @@
+// For conditions of distribution and use, see copyright notice in LICENSE
+
+#pragma once
+
+#include "CoreTypes.h"
+#include "CoreStringUtils.h"
+
+#include <Engine/Container/Ptr.h>
+#include <Engine/Container/HashMap.h>
+
+#include <map>
+
+namespace Tundra
+{
+    class HttpPlugin;
+    class HttpWorkQueue;
+    class HttpClient;
+    class HttpRequest;
+
+    typedef SharedPtr<HttpWorkQueue> HttpWorkQueuePtr;
+    typedef SharedPtr<HttpClient> HttpClientPtr;
+    typedef SharedPtr<HttpRequest> HttpRequestPtr;
+    typedef Vector<HttpRequestPtr> HttpRequestPtrList;
+
+    typedef std::map<String, String, StringCompareCaseInsensitive> HttpHeaderMap;
+
+    namespace Curl
+    {
+        struct Option;
+        
+        typedef HashMap<String, Option> OptionMap;
+        typedef void RequestHandle;
+        typedef void EngineHandle;
+    }
+
+    /// @cond PRIVATE
+    class HttpWorkThread;
+    typedef Vector<HttpWorkThread*> HttpWorkThreadList;
+    /// @endcond
+}
