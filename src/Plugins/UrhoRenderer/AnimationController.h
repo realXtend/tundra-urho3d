@@ -130,7 +130,7 @@ public:
     typedef HashMap<String, Animation> AnimationMap;
 
     /// Returns all running animations
-    const AnimationMap& GetRunningAnimations() const { return animations_; }
+    const AnimationMap& RunningAnimations() const { return animations_; }
 
     /// Auto-associate mesh component if not yet set
     void AutoSetMesh();
@@ -160,7 +160,7 @@ public:
 
     /// Checks whether non-looping animation has finished. If looping, returns always false
     /* @return true if animation finished */
-    bool HasAnimationFinished(const String& name);
+    bool HasAnimationFinished(const String& name) const;
 
     /// Checks whether animation is active
     /** @param name Animation name
@@ -224,10 +224,10 @@ public:
         @return true if successful */
     bool SetAnimationNumLoops(const String& name, unsigned repeats);
 
-    /// Get available animations
+    /// Returns available animations
     StringList AvailableAnimations();
     
-    /// Get active animations as a simple stringlist
+    /// Returns active animations as a simple stringlist
     StringList ActiveAnimations() const;
     
     /// Returns length of animation
@@ -263,9 +263,9 @@ public:
     void SetAnimWeight(const String &name, const String &animweight);
 
     /// Emitted when a non-looping animation has finished
-    Signal1<String> AnimationFinished;
+    Signal1<const String & ARG(animationName)> AnimationFinished;
     /// Emitted when a looping animation has completed a cycle
-    Signal1<String> AnimationCycled;
+    Signal1<const String & ARG(animationName)> AnimationCycled;
 
 private:
     /// Called when the parent entity has been set.
@@ -276,10 +276,9 @@ private:
 
     void AttributesChanged() override;
 
-    /// Gets animationstate 
-    /** @param name Animation name
-        @return animationstate, or null if not found */
-    Urho3D::AnimationState* UrhoAnimationState(const String& name);
+    /// Returns Urho's animation state, or null if no animation found by the @c name.
+    /** @param name Animation name */
+    Urho3D::AnimationState* UrhoAnimationState(const String& name) const;
 
     /// Mesh component
     MeshWeakPtr mesh_;

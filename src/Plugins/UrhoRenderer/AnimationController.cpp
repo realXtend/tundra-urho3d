@@ -65,7 +65,7 @@ void AnimationController::AttributesChanged()
 
 }
 
-Urho3D::AnimationState* AnimationController::UrhoAnimationState(const String& name)
+Urho3D::AnimationState* AnimationController::UrhoAnimationState(const String& name) const
 {
     if (!mesh_)
         return 0;
@@ -172,7 +172,7 @@ bool AnimationController::EnableExclusiveAnimation(const String& name, bool loop
     return EnableAnimation(name, looped, fadein, high_priority);
 }
 
-bool AnimationController::HasAnimationFinished(const String& name)
+bool AnimationController::HasAnimationFinished(const String& name) const
 {
     Urho3D::AnimationState* animstate = UrhoAnimationState(name);
 
