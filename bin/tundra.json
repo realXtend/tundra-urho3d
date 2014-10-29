@@ -2,7 +2,8 @@
     {
         "--plugin" : [
 			"UrhoRenderer", 
-			"TundraLogic"
+			"TundraLogic",
+			"HttpPlugin"
 		]
     },
     {

@@ -205,6 +205,72 @@ cecho {0D}Building %BUILD_TYPE% Google C++ Testing Framework. Please be patient,
 MSBuild gtest.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
+:::::::::::::::::::::::: openssl
+:: For now only build openssl once in release mode
+
+IF NOT EXIST "%DEPS%\openssl\". (
+    cecho {0D}Cloning OpenSSL into "%DEPS%\openssl".{# #}{\n}
+    cd "%DEPS%"
+    git clone https://github.com/openssl/openssl.git openssl
+    IF NOT EXIST "%DEPS%\openssl\.git" GOTO :ERROR
+    cd openssl
+    git checkout OpenSSL_1_0_1j
+    IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+    cd "%DEPS%\openssl"
+    IF NOT EXIST "build" mkdir "build"
+
+    cecho {0D}Running pre build for OpenSSL.{# #}{\n}
+    IF %TARGET_ARCH%==x64 (
+        perl Configure VC-WIN64A --prefix="%DEPS%\openssl\build"
+        call ms\do_win64a.bat
+    ) ELSE (
+        perl Configure VC-WIN32 --prefix="%DEPS%\openssl\build"
+        call ms\do_masm.bat
+    )
+    IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+    cecho {0D}Building OpenSSL.{# #}{\n}
+    nmake -f ms\nt.mak
+    nmake -f ms\nt.mak install
+    IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+)
+
+:::::::::::::::::::::::: curl
+
+IF NOT EXIST "%DEPS%\curl\". (
+    cecho {0D}Cloning Curl into "%DEPS%\curl".{# #}{\n}
+    cd "%DEPS%"
+    git clone https://github.com/bagder/curl.git curl
+    IF NOT EXIST "%DEPS%\curl\.git" GOTO :ERROR
+    cd curl
+    git checkout curl-7_38_0
+    IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+)
+
+cd "%DEPS%\curl"
+IF NOT EXIST "build-src" mkdir "build-src"
+cd build-src
+
+:: pre build
+
+cecho {0D}Running CMake for Curl.{# #}{\n}
+cmake ../ -G %GENERATOR% ^
+    -DCMAKE_INSTALL_PREFIX="%DEPS%\curl\build" ^
+    -DCMAKE_DEBUG_POSTFIX=_d ^
+    -DOPENSSL_ROOT_DIR="%DEPS%\openssl\build" ^
+    -DBUILD_CURL_EXE=OFF -DBUILD_CURL_TESTS=OFF -DCURL_STATICLIB=ON
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+:: build
+
+cecho {0D}Building %BUILD_TYPE% Curl. Please be patient, this will take a while.{# #}{\n}
+MSBuild CURL.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+MSBUILD INSTALL.vcxproj /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo
+copy /Y "%DEPS%\openssl\build\lib\*.lib" "%DEPS%\curl\build\lib"
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
 :::::::::::::::::::::::: All done
 
 echo.
