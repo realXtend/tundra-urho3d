@@ -542,7 +542,7 @@ void LocalAssetProvider::CheckForPendingFileSystemChanges()
 
             String assetRef = file;
             uint lastSlash = assetRef.FindLast('/');
-            if (lastSlash != -1)
+            if (lastSlash != String::NPOS)
                 assetRef = assetRef.Substring(lastSlash + 1);
             assetRef = "local://" + assetRef;
 

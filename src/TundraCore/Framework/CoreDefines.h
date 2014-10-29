@@ -8,7 +8,7 @@
 
 #include <cassert>
 
-/** @def DLLEXPORT(func)
+/** @def DLLEXPORT
     __declspec(dllexport) for Windows, empty otherwise. */
 #ifdef WIN32
 #define DLLEXPORT __declspec(dllexport)
