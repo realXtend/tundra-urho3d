@@ -708,7 +708,7 @@ public:
 #if !defined(FASTDELEGATE_USESTATICFUNCTIONHACK)
         m_pStaticFunction = 0;
 #endif
-        m_pthisweak = pthis;
+        m_pthisweak = const_cast<X*>(pthis);
     }
     // For const member functions, we only need a const class pointer.
     // Since we know that the member function is const, it's safe to
@@ -721,7 +721,7 @@ public:
 #if !defined(FASTDELEGATE_USESTATICFUNCTIONHACK)
         m_pStaticFunction = 0;
 #endif
-        m_pthisweak = pthis;
+        m_pthisweak = const_cast<X*>(pthis);
     }
 #ifdef FASTDELEGATE_GCC_BUG_8271    // At present, GCC doesn't recognize constness of MFPs in templates
     template < class X, class XMemFunc>

@@ -28,7 +28,7 @@ template<typename T>
 SharedPtr<T> AssetAPI::AssetProvider() const
 {
     const Vector<AssetProviderPtr> providers = AssetProviders();
-    for(size_t i = 0; i < providers.Size(); ++i)
+    for(uint i = 0; i < providers.Size(); ++i)
     {
         SharedPtr<T> provider = Urho3D::DynamicCast<T>(providers[i]);
         if (provider)
@@ -38,4 +38,3 @@ SharedPtr<T> AssetAPI::AssetProvider() const
 }
 
 }
-

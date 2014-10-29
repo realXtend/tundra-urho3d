@@ -62,3 +62,9 @@ namespace Tundra
     typedef unsigned int component_id_t;
 }
 
+/// See http://urho3d.github.io/documentation/HEAD/annotated.html for Urho3D's class reference.
+namespace Urho3D {}
+/// Contains all of the core %Tundra features.
+namespace Tundra {}
+/// See http://clb.demon.fi/knet/annotated.html for kNet's class reference.
+namespace kNet {}

@@ -57,11 +57,11 @@ void UrhoRenderer::Initialize()
     {
         rend->SetNumViewports(1);
         rend->SetViewport(0, new Urho3D::Viewport(context_));
-    }
 
-    // @todo Is null 'rend' == our headless mode? Move this line inside above block?
-    if (!framework->IsHeadless())
+        // Track window position and screen mode changes to keep config up-to-date
+        SubscribeToEvent(Urho3D::E_WINDOWPOS, HANDLER(UrhoRenderer, HandleScreenModeChange));
         SubscribeToEvent(Urho3D::E_SCREENMODE, HANDLER(UrhoRenderer, HandleScreenModeChange));
+    }
 }
 
 void UrhoRenderer::Uninitialize()
@@ -73,7 +73,7 @@ void UrhoRenderer::Uninitialize()
         rend->SetViewport(0, 0);
 }
 
-void UrhoRenderer::HandleScreenModeChange(StringHash /*eventType*/, VariantMap &eventData)
+void UrhoRenderer::HandleScreenModeChange(StringHash /*eventType*/, VariantMap& /*eventData*/)
 {
     ConfigAPI *config = framework->Config();
     if (!config)
@@ -81,17 +81,18 @@ void UrhoRenderer::HandleScreenModeChange(StringHash /*eventType*/, VariantMap &
 
     HashMap<String, Variant> data;
 
-    /// @todo Read 'window position' from Urho3D::ScreenMode::P_POSITION_X/P_POSITION_Y if my pull request goes trough to Urho
     Urho3D::Graphics* graphics = GetSubsystem<Urho3D::Graphics>();
     if (graphics)
+    {
         data["window position"] = graphics->GetWindowPosition();
-    data["window size"] = Urho3D::IntVector2(eventData[Urho3D::ScreenMode::P_WIDTH].GetInt(), eventData[Urho3D::ScreenMode::P_HEIGHT].GetInt());
-    data["window fullscreen"] = eventData[Urho3D::ScreenMode::P_FULLSCREEN].GetBool();
-
-    /* Store potentially frequent runtime changes in memory only.
-       The changes will be written to disk latest at a clean Framework exit. */
-    ConfigFile &f = config->GetFile(ConfigAPI::FILE_FRAMEWORK);
-    f.Set(ConfigAPI::SECTION_GRAPHICS, data);
+        data["window size"] = Urho3D::IntVector2(graphics->GetWidth(), graphics->GetHeight());
+        data["window fullscreen"] = graphics->GetFullscreen();
+    
+        /* Store potentially frequent runtime changes in memory only.
+        The changes will be written to disk latest at a clean Framework exit. */
+        ConfigFile &f = config->GetFile(ConfigAPI::FILE_FRAMEWORK);
+        f.Set(ConfigAPI::SECTION_GRAPHICS, data);
+    }
 }
 
 Entity *UrhoRenderer::MainCamera()

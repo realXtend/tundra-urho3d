@@ -35,9 +35,9 @@ namespace Tundra
 IAttribute::IAttribute(IComponent* owner_, const char* id_) :
     id(id_),
     name(id_),
-    metadata(0),
+    metadata(nullptr),
     dynamic(false),
-    owner(0),
+    owner(nullptr),
     index(0),
     valueChanged(true)
 {
@@ -48,9 +48,9 @@ IAttribute::IAttribute(IComponent* owner_, const char* id_) :
 IAttribute::IAttribute(IComponent* owner_, const char* id_, const char* name_) :
     id(id_),
     name(name_),
-    metadata(0),
+    metadata(nullptr),
     dynamic(false),
-    owner(0),
+    owner(nullptr),
     index(0),
     valueChanged(true)
 {
@@ -89,25 +89,62 @@ AttributeMetadata *IAttribute::Metadata() const
 
 // Hide all template implementations from being included to public documentation
 /// @cond PRIVATE
+const String IAttribute::NoneTypeName = "";
+const String IAttribute::StringTypeName = "string";
+const String IAttribute::IntTypeName = "int";
+const String IAttribute::RealTypeName = "real";
+const String IAttribute::ColorTypeName = "Color";
+const String IAttribute::Float2TypeName = "float2";
+const String IAttribute::Float3TypeName = "float3";
+const String IAttribute::Float4TypeName = "float4";
+const String IAttribute::BoolTypeName = "bool";
+const String IAttribute::UIntTypeName = "uint";
+const String IAttribute::QuatTypeName = "Quat"; 
+const String IAttribute::AssetReferenceTypeName = "AssetReference";
+const String IAttribute::AssetReferenceListTypeName = "AssetReferenceList";
+const String IAttribute::EntityReferenceTypeName = "EntityReference";
+const String IAttribute::VariantTypeName = "Variant";
+const String IAttribute::VariantListTypeName = "VariantList";
+const String IAttribute::TransformTypeName = "Transform";
+const String IAttribute::PointTypeName = "Point";
 
-// TYPEID TEMPLATE IMPLEMENTATIONS
-template<> u32 TUNDRACORE_API Attribute<String>::TypeId() const { return cAttributeString; }
-template<> u32 TUNDRACORE_API Attribute<int>::TypeId() const { return cAttributeInt; }
-template<> u32 TUNDRACORE_API Attribute<float>::TypeId() const { return cAttributeReal; }
-template<> u32 TUNDRACORE_API Attribute<Color>::TypeId() const { return cAttributeColor; }
-template<> u32 TUNDRACORE_API Attribute<float2>::TypeId() const { return cAttributeFloat2; }
-template<> u32 TUNDRACORE_API Attribute<float3>::TypeId() const { return cAttributeFloat3; }
-template<> u32 TUNDRACORE_API Attribute<float4>::TypeId() const { return cAttributeFloat4; }
-template<> u32 TUNDRACORE_API Attribute<bool>::TypeId() const { return cAttributeBool; }
-template<> u32 TUNDRACORE_API Attribute<uint>::TypeId() const { return cAttributeUInt; }
-template<> u32 TUNDRACORE_API Attribute<Quat>::TypeId() const { return cAttributeQuat; }
-template<> u32 TUNDRACORE_API Attribute<AssetReference>::TypeId() const { return cAttributeAssetReference; }
-template<> u32 TUNDRACORE_API Attribute<AssetReferenceList>::TypeId() const { return cAttributeAssetReferenceList; }
-template<> u32 TUNDRACORE_API Attribute<EntityReference>::TypeId() const { return cAttributeEntityReference; }
-template<> u32 TUNDRACORE_API Attribute<Variant>::TypeId() const { return cAttributeVariant; }
-template<> u32 TUNDRACORE_API Attribute<VariantList>::TypeId() const { return cAttributeVariantList; }
-template<> u32 TUNDRACORE_API Attribute<Transform>::TypeId() const { return cAttributeTransform; }
-template<> u32 TUNDRACORE_API Attribute<Point>::TypeId() const { return cAttributePoint; }
+// TypeId implementations
+template<> u32 TUNDRACORE_API Attribute<String>::TypeId() const { return StringId; }
+template<> u32 TUNDRACORE_API Attribute<int>::TypeId() const { return IntId; }
+template<> u32 TUNDRACORE_API Attribute<float>::TypeId() const { return RealId; }
+template<> u32 TUNDRACORE_API Attribute<Color>::TypeId() const { return ColorId; }
+template<> u32 TUNDRACORE_API Attribute<float2>::TypeId() const { return Float2Id; }
+template<> u32 TUNDRACORE_API Attribute<float3>::TypeId() const { return Float3Id; }
+template<> u32 TUNDRACORE_API Attribute<float4>::TypeId() const { return Float4Id; }
+template<> u32 TUNDRACORE_API Attribute<bool>::TypeId() const { return BoolId; }
+template<> u32 TUNDRACORE_API Attribute<uint>::TypeId() const { return UIntId; }
+template<> u32 TUNDRACORE_API Attribute<Quat>::TypeId() const { return QuatId; }
+template<> u32 TUNDRACORE_API Attribute<AssetReference>::TypeId() const { return AssetReferenceId; }
+template<> u32 TUNDRACORE_API Attribute<AssetReferenceList>::TypeId() const { return AssetReferenceListId; }
+template<> u32 TUNDRACORE_API Attribute<EntityReference>::TypeId() const { return EntityReferenceId; }
+template<> u32 TUNDRACORE_API Attribute<Variant>::TypeId() const { return VariantId; }
+template<> u32 TUNDRACORE_API Attribute<VariantList>::TypeId() const { return VariantListId; }
+template<> u32 TUNDRACORE_API Attribute<Transform>::TypeId() const { return TransformId; }
+template<> u32 TUNDRACORE_API Attribute<Point>::TypeId() const { return PointId; }
+
+// TypeName implementations
+template<> const String TUNDRACORE_API & Attribute<int>::TypeName() const { return IntTypeName; }
+template<> const String TUNDRACORE_API & Attribute<uint>::TypeName() const { return IntTypeName; }
+template<> const String TUNDRACORE_API & Attribute<float>::TypeName() const { return RealTypeName; }
+template<> const String TUNDRACORE_API & Attribute<String>::TypeName() const { return StringTypeName; }
+template<> const String TUNDRACORE_API & Attribute<bool>::TypeName() const { return BoolTypeName; }
+template<> const String TUNDRACORE_API & Attribute<Quat>::TypeName() const { return QuatTypeName; }
+template<> const String TUNDRACORE_API & Attribute<float2>::TypeName() const { return Float2TypeName; }
+template<> const String TUNDRACORE_API & Attribute<float3>::TypeName() const { return Float3TypeName; }
+template<> const String TUNDRACORE_API & Attribute<float4>::TypeName() const { return Float4TypeName; }
+template<> const String TUNDRACORE_API & Attribute<Color>::TypeName() const { return ColorTypeName; }
+template<> const String TUNDRACORE_API & Attribute<AssetReference>::TypeName() const { return AssetReferenceTypeName; }
+template<> const String TUNDRACORE_API & Attribute<AssetReferenceList>::TypeName() const { return AssetReferenceListTypeName; }
+template<> const String TUNDRACORE_API & Attribute<EntityReference>::TypeName() const { return EntityReferenceTypeName; }
+template<> const String TUNDRACORE_API & Attribute<Variant>::TypeName() const { return VariantTypeName; }
+template<> const String TUNDRACORE_API & Attribute<VariantList >::TypeName() const { return VariantListTypeName; }
+template<> const String TUNDRACORE_API & Attribute<Transform>::TypeName() const { return TransformTypeName; }
+template<> const String TUNDRACORE_API & Attribute<Point>::TypeName() const { return PointTypeName; }
 
 // DefaultValue implementations
 template<> String TUNDRACORE_API Attribute<String>::DefaultValue() const { return String(); }
@@ -238,93 +275,6 @@ template<> String TUNDRACORE_API Attribute<VariantList>::ToString() const
 template<> String TUNDRACORE_API Attribute<Transform>::ToString() const
 {
     return Get().SerializeToString();
-}
-
-// TYPENAMETOSTRING TEMPLATE IMPLEMENTATIONS.
-
-template<> const String TUNDRACORE_API & Attribute<int>::TypeName() const
-{
-    return cAttributeIntTypeName;
-}
-
-template<> const String TUNDRACORE_API & Attribute<uint>::TypeName() const
-{
-    return cAttributeUIntTypeName;
-}
-
-template<> const String TUNDRACORE_API & Attribute<float>::TypeName() const
-{
-    return cAttributeRealTypeName;
-}
-
-template<> const String TUNDRACORE_API & Attribute<String>::TypeName() const
-{
-    return cAttributeStringTypeName;
-}
-
-template<> const String TUNDRACORE_API & Attribute<bool>::TypeName() const
-{
-    return cAttributeBoolTypeName;
-}
-
-template<> const String TUNDRACORE_API & Attribute<Quat>::TypeName() const
-{
-    return cAttributeQuatTypeName;
-}
-
-template<> const String TUNDRACORE_API & Attribute<float2>::TypeName() const
-{
-    return cAttributeFloat2TypeName;
-}
-
-template<> const String TUNDRACORE_API & Attribute<float3>::TypeName() const
-{
-    return cAttributeFloat3TypeName;
-}
-
-template<> const String TUNDRACORE_API & Attribute<float4>::TypeName() const
-{
-    return cAttributeFloat4TypeName;
-}
-
-template<> const String TUNDRACORE_API & Attribute<Color>::TypeName() const
-{
-    return cAttributeColorTypeName;
-}
-
-template<> const String TUNDRACORE_API & Attribute<AssetReference>::TypeName() const
-{
-    return cAttributeAssetReferenceTypeName;
-}
-
-template<> const String TUNDRACORE_API & Attribute<AssetReferenceList>::TypeName() const
-{
-    return cAttributeAssetReferenceListTypeName;
-}
-
-template<> const String TUNDRACORE_API & Attribute<EntityReference>::TypeName() const
-{
-    return cAttributeEntityReferenceTypeName;
-}
-
-template<> const String TUNDRACORE_API & Attribute<Variant>::TypeName() const
-{
-    return cAttributeVariantTypeName;
-}
-
-template<> const String TUNDRACORE_API & Attribute<VariantList >::TypeName() const
-{
-    return cAttributeVariantListTypeName;
-}
-
-template<> const String TUNDRACORE_API & Attribute<Transform>::TypeName() const
-{
-    return cAttributeTransformTypeName;
-}
-
-template<> const String TUNDRACORE_API & Attribute<Point>::TypeName() const
-{
-    return cAttributePointTypeName;
 }
 
 // FROMSTRING TEMPLATE IMPLEMENTATIONS.

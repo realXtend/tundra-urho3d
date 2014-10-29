@@ -33,7 +33,7 @@ public:
     void UnloadPlugins();
 
     /// Prints the list of loaded plugins to the console.
-    void ListPlugins();
+    void ListPlugins() const;
 
 private:
     friend class Framework;

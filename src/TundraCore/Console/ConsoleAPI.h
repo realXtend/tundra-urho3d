@@ -76,12 +76,9 @@ public:
         @param memberFunc A function of the @c receiver that is to be called when this command is executed.
         @see UnregisterCommand */
     template<class X, class Y>
-    void RegisterCommand(const String &name, const String &desc, Y *receiver, void (X::*memberFunc)())
-    {
-        ConsoleCommand *cmd = RegisterCommand(name, desc);
-        if (cmd)
-            cmd->Executed.Connect(receiver, memberFunc);
-    }
+    void RegisterCommand(const String &name, const String &desc, Y *receiver, void (X::*memberFunc)());
+    template<class X, class Y>
+    void RegisterCommand(const String &name, const String &desc, Y *receiver, void (X::*memberFunc)() const); /**< @overload For const functions.*/
 
     /// Registers a new console command which triggers a signal when executed.
     /** param name The function name to use for this command.
@@ -160,5 +157,21 @@ private:
     u32 enabledLogChannels;     ///< Stores the set of currently active log channels.
     FrameLimiter pollInput_;    ///< Frame limiter for polling shell input.
 };
+
+template<class X, class Y>
+void ConsoleAPI::RegisterCommand(const String &name, const String &desc, Y *receiver, void (X::*memberFunc)())
+{
+    ConsoleCommand *cmd = RegisterCommand(name, desc);
+    if (cmd)
+        cmd->Executed.Connect(receiver, memberFunc);
+}
+
+template<class X, class Y>
+void ConsoleAPI::RegisterCommand(const String &name, const String &desc, Y *receiver, void (X::*memberFunc)() const)
+{
+    ConsoleCommand *cmd = RegisterCommand(name, desc);
+    if (cmd)
+        cmd->Executed.Connect(receiver, memberFunc);
+}
 
 }

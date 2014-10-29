@@ -115,8 +115,9 @@ endif()
 # Set compiler warning levels.
 if (MSVC)
     add_definitions(/W4)
-    if (MSVC10) # We are using 'override' but it's a nonstandard extension in VC10 causing a warning.
-        add_definitions(/wd4481)
+    if (MSVC_VERSION LESS 1700)
+        # We are using 'override' and strongly typed enums but those are nonstandard extensions in VC < 11 causing a warning.
+        add_definitions(/wd4481 /wd4480)
     endif()
 else ()
     add_definitions (-Wall -Wextra -Wno-unknown-pragmas -Wno-unused -Wno-reorder -Wno-switch -Wno-write-strings)

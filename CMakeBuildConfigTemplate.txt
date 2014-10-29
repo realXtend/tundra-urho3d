@@ -24,7 +24,7 @@ option (ENABLE_TESTS
 
 # Enable solution folders. VS Express < 2012 doesn't support solution folders.
 # Use set(PROJECT_TYPE "My Plugins") to set solution folders.
-if (NOT MSVC10)
+if (MSVC_VERSION LESS 1700)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif()
 

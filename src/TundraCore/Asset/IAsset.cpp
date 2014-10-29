@@ -167,7 +167,7 @@ bool IAsset::LoadFromFile(String filename)
     return LoadFromFileInMemory(&fileData[0], fileData.Size(), false);
 }
 
-bool IAsset::LoadFromFileInMemory(const u8 *data, size_t numBytes, bool allowAsynchronous)
+bool IAsset::LoadFromFileInMemory(const u8 *data, uint numBytes, bool allowAsynchronous)
 {
     PROFILE(IAsset_LoadFromFileInMemory);
     if (!data || numBytes == 0)
@@ -272,6 +272,15 @@ AssetProviderPtr IAsset::AssetProvider() const
 String IAsset::ToString() const
 { 
     return (Name().Empty() ? "(noname)" : Name()) + " (" + (Type().Empty() ? "notype" : Type()) + ")";
+}
+
+Vector<u8> IAsset::RawData(const String serializationParameters) const
+{ 
+    Vector<u8> data; 
+    if (SerializeTo(data, serializationParameters) && data.Size() > 0) 
+        return data;
+    else 
+        return Vector<u8>();
 }
 
 }

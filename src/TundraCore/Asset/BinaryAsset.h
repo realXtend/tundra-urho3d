@@ -25,12 +25,12 @@ public:
         Unload();
     }
 
-    virtual void DoUnload()
+    void DoUnload() override
     {
         data.Clear();
     }
 
-    virtual bool DeserializeFromData(const u8 *data_, size_t numBytes, bool /*allowAsynchronous*/)
+    bool DeserializeFromData(const u8 *data_, uint numBytes, bool /*allowAsynchronous*/) override
     {
         data.Resize(numBytes);
         if (numBytes && data_)
@@ -39,13 +39,14 @@ public:
         return true;
     }
 
-    virtual bool SerializeTo(Vector<u8> &dst, const String &/*serializationParameters*/) const
+    bool SerializeTo(Vector<u8> &dst, const String &/*serializationParameters*/) const override
     {
         dst = data;
         return true;
     }
 
-    virtual Vector<AssetReference> FindReferences() const
+    /// Binary assets have no references.
+    Vector<AssetReference> FindReferences() const override
     {
         return Vector<AssetReference>();
     }

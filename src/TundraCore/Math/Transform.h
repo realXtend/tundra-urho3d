@@ -217,12 +217,8 @@ public:
         return !(*this == rhs);
     }
 
-    /// Implicit conversion to string.
-    /** @see ToString */
-    operator String() const;
-
     /// Returns "Transform(Pos:(x,y,z)) Rot:(x,y,z) Scale:(x,y,z))".
-    String ToString() const { return (String)*this; }
+    String ToString() const;
 
     /// Returns "px,py,pz,rx,ry,rz,sx,sy,sz".
     /** This is the preferred format for the Transform if it has to be serialized to a string for machine transfer.

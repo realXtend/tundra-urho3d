@@ -35,24 +35,24 @@ SceneAPI::SceneAPI(Framework *owner) :
     framework(owner)
 {
     attributeTypeNames.Clear();
-    attributeTypeNames.Push(cAttributeStringTypeName);
-    attributeTypeNames.Push(cAttributeIntTypeName);
-    attributeTypeNames.Push(cAttributeRealTypeName);
-    attributeTypeNames.Push(cAttributeColorTypeName);
-    attributeTypeNames.Push(cAttributeFloat2TypeName);
-    attributeTypeNames.Push(cAttributeFloat3TypeName);
-    attributeTypeNames.Push(cAttributeFloat4TypeName);
-    attributeTypeNames.Push(cAttributeBoolTypeName);
-    attributeTypeNames.Push(cAttributeUIntTypeName);
-    attributeTypeNames.Push(cAttributeQuatTypeName);
-    attributeTypeNames.Push(cAttributeAssetReferenceTypeName);
-    attributeTypeNames.Push(cAttributeAssetReferenceListTypeName);
-    attributeTypeNames.Push(cAttributeEntityReferenceTypeName);
-    attributeTypeNames.Push(cAttributeVariantTypeName);
-    attributeTypeNames.Push(cAttributeVariantListTypeName);
-    attributeTypeNames.Push(cAttributeTransformTypeName);
-    attributeTypeNames.Push(cAttributePointTypeName);
-    assert(attributeTypeNames.Size() == cNumAttributeTypes - 1 && "Attribute type registration mismatch!"); // -1 as cAttributeNoneTypeName is not in the list.
+    attributeTypeNames.Push(IAttribute::StringTypeName);
+    attributeTypeNames.Push(IAttribute::IntTypeName);
+    attributeTypeNames.Push(IAttribute::RealTypeName);
+    attributeTypeNames.Push(IAttribute::ColorTypeName);
+    attributeTypeNames.Push(IAttribute::Float2TypeName);
+    attributeTypeNames.Push(IAttribute::Float3TypeName);
+    attributeTypeNames.Push(IAttribute::Float4TypeName);
+    attributeTypeNames.Push(IAttribute::BoolTypeName);
+    attributeTypeNames.Push(IAttribute::UIntTypeName);
+    attributeTypeNames.Push(IAttribute::QuatTypeName);
+    attributeTypeNames.Push(IAttribute::AssetReferenceTypeName);
+    attributeTypeNames.Push(IAttribute::AssetReferenceListTypeName);
+    attributeTypeNames.Push(IAttribute::EntityReferenceTypeName);
+    attributeTypeNames.Push(IAttribute::VariantTypeName);
+    attributeTypeNames.Push(IAttribute::VariantListTypeName);
+    attributeTypeNames.Push(IAttribute::TransformTypeName);
+    attributeTypeNames.Push(IAttribute::PointTypeName);
+    assert(attributeTypeNames.Size() == IAttribute::NumTypes - 1 && "Attribute type registration mismatch!"); // -1 as IAttributeNoneTypeName is not in the list.
 
     // Name and DynamicComponent are always available
     RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Name>()));
@@ -293,39 +293,39 @@ IAttribute* SceneAPI::CreateAttribute(u32 attributeTypeId, const String& newAttr
     IAttribute *attribute = 0;
     switch(attributeTypeId)
     {
-    case cAttributeString:
+    case IAttribute::StringId:
         attribute = new Attribute<String>(0, newAttributeId.CString()); break;
-    case cAttributeInt:
+    case IAttribute::IntId:
         attribute = new Attribute<int>(0, newAttributeId.CString()); break;
-    case cAttributeReal:
+    case IAttribute::RealId:
         attribute = new Attribute<float>(0, newAttributeId.CString()); break;
-    case cAttributeColor:
+    case IAttribute::ColorId:
         attribute = new Attribute<Color>(0, newAttributeId.CString()); break;
-    case cAttributeFloat2:
+    case IAttribute::Float2Id:
         attribute = new Attribute<float2>(0, newAttributeId.CString()); break;
-    case cAttributeFloat3:
+    case IAttribute::Float3Id:
         attribute = new Attribute<float3>(0, newAttributeId.CString()); break;
-    case cAttributeFloat4:
+    case IAttribute::Float4Id:
         attribute = new Attribute<float4>(0, newAttributeId.CString()); break;
-    case cAttributeBool:
+    case IAttribute::BoolId:
         attribute = new Attribute<bool>(0, newAttributeId.CString()); break;
-    case cAttributeUInt:
+    case IAttribute::UIntId:
         attribute = new Attribute<uint>(0, newAttributeId.CString()); break;
-    case cAttributeQuat:
+    case IAttribute::QuatId:
         attribute = new Attribute<Quat>(0, newAttributeId.CString()); break;
-    case cAttributeAssetReference:
+    case IAttribute::AssetReferenceId:
         attribute = new Attribute<AssetReference>(0, newAttributeId.CString());break;
-    case cAttributeAssetReferenceList:
+    case IAttribute::AssetReferenceListId:
         attribute = new Attribute<AssetReferenceList>(0, newAttributeId.CString());break;
-    case cAttributeEntityReference:
+    case IAttribute::EntityReferenceId:
         attribute = new Attribute<EntityReference>(0, newAttributeId.CString());break;
-    case cAttributeVariant:
+    case IAttribute::VariantId:
         attribute = new Attribute<Variant>(0, newAttributeId.CString()); break;
-    case cAttributeVariantList:
+    case IAttribute::VariantListId:
         attribute = new Attribute<VariantList>(0, newAttributeId.CString()); break;
-    case cAttributeTransform:
+    case IAttribute::TransformId:
         attribute = new Attribute<Transform>(0, newAttributeId.CString()); break;
-    case cAttributePoint:
+    case IAttribute::PointId:
         attribute = new Attribute<Point>(0, newAttributeId.CString()); break;
     default:
         LogError("SceneAPI::CreateAttribute: unknown attribute type ID \"" + String(attributeTypeId) + "\" when creating attribute \"" + newAttributeId + "\")!");

@@ -515,13 +515,25 @@ void Framework::ApplyStartupOptions(VariantMap &engineInitMap)
     {
         String logLevel = logLevelParam.Front();
         if (logLevel.Compare("debug", false) == 0 || logLevel.Compare("verbose", false) == 0)
+        {
             engineInitMap["LogLevel"] = Urho3D::LOG_DEBUG;
+            console->SetLogLevel("debug");
+        }
         else if (logLevel.Compare("warn", false) == 0 || logLevel.Compare("warning", false) == 0)
+        {
             engineInitMap["LogLevel"] = Urho3D::LOG_WARNING;
+            console->SetLogLevel("warning");
+        }
         else if (logLevel.Compare("error", false) == 0)
+        {
             engineInitMap["LogLevel"] = Urho3D::LOG_ERROR;
+            console->SetLogLevel("error");
+        }
         else if (logLevel.Compare("none", false) == 0 || logLevel.Compare("disabled", false) == 0)
+        {
             engineInitMap["LogLevel"] = Urho3D::LOG_NONE;
+            console->SetLogLevel("quiet");
+        }
         else
             LogWarning("Erroneous --loglevel: " + logLevelParam.Front() + ". Ignoring.");
 
@@ -536,9 +548,7 @@ void Framework::ApplyStartupOptions(VariantMap &engineInitMap)
         engineInitMap["LogQuiet"] = true;
         Log* log = engine->GetSubsystem<Log>();
         if (log)
-        {
             log->SetQuiet(true);
-        }
     }
 
     // Prepare ConfigAPI data folder

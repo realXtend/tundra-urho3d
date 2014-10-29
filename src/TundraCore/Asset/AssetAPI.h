@@ -27,7 +27,7 @@ bool TUNDRACORE_API LoadFileToVector(const String &filename, Vector<u8> &dst);
 bool TUNDRACORE_API CopyAssetFile(const String &sourceFile, const String &destFile);
 
 /// Saves the given raw data buffer to destFile. Returns true on success.
-bool TUNDRACORE_API SaveAssetFromMemoryToFile(const u8 *data, size_t numBytes, const String &destFile);
+bool TUNDRACORE_API SaveAssetFromMemoryToFile(const u8 *data, uint numBytes, const String &destFile);
 
 /// Given a string of form "someString?param1=value1&param2=value2", returns a map of key-value pairs.
 /// @param body [out] If specified, the part 'someString' is returned here.
@@ -365,7 +365,7 @@ public:
         @param destination The asset storage to upload the asset to.
         @param assetName The name to give to the asset in the storage.
         @return The returned IAssetUploadTransfer pointer represents the ongoing asset upload process, or null if passed data is invalid. */
-    AssetUploadTransferPtr UploadAssetFromFileInMemory(const u8 *data, size_t numBytes, AssetStoragePtr destination, const String &assetName);
+    AssetUploadTransferPtr UploadAssetFromFileInMemory(const u8 *data, uint numBytes, AssetStoragePtr destination, const String &assetName);
 
     /// Unloads all known assets, and removes them from the list of internal assets known to the Asset API.
     /** Use this to clear the client's memory from all assets.

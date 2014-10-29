@@ -65,7 +65,7 @@ public:
 
     /// Starts an asset upload from the given file in memory to the given storage.
     /** The default implementation fails all upload attempts and returns 0 immediately. */
-    virtual AssetUploadTransferPtr UploadAssetFromFileInMemory(const u8 * UNUSED_PARAM(data), size_t UNUSED_PARAM(numBytes),
+    virtual AssetUploadTransferPtr UploadAssetFromFileInMemory(const u8 * UNUSED_PARAM(data), uint UNUSED_PARAM(numBytes),
         AssetStoragePtr UNUSED_PARAM(destination), const String & UNUSED_PARAM(assetName))
     {
         return AssetUploadTransferPtr();
@@ -74,10 +74,6 @@ public:
     /// Reads the given storage string and tries to deserialize it to an asset storage in this provider.
     /** Returns a pointer to the newly created storage, or 0 if the storage string is not of the type of this asset provider. */
     virtual AssetStoragePtr TryDeserializeStorageFromString(const String &storage, bool fromNetwork) = 0;
-
-    Vector<AssetStoragePtr> GetStorages() const { return Storages(); }
-    AssetStoragePtr GetStorageByName(const String &name) const { return StorageByName(name); }
-    AssetStoragePtr GetStorageForAssetRef(const String &assetRef) const { return StorageForAssetRef(assetRef); }
 };
 
 }

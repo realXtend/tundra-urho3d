@@ -14,13 +14,14 @@
 #include "IAssetUploadTransfer.h"
 #include "GenericAssetFactory.h"
 #include "NullAssetFactory.h"
+#include "LocalAssetProvider.h"
 
 #include "Framework.h"
 #include "LoggingFunctions.h"
-#include "Application.h"
-#include "Profiler.h"
 #include "CoreStringUtils.h"
 
+#include <Context.h>
+#include <Profiler.h>
 #include <StringUtils.h>
 #include <FileSystem.h>
 #include <File.h>
@@ -34,9 +35,8 @@ AssetAPI::AssetAPI(Framework *framework, bool headless) :
     isHeadless(headless),
     assetCache(0)
 {
-    /// \todo Implement LocalAssetProvider
-    //LocalAssetProviderPtr local = MAKE_SHARED(LocalAssetProvider, fw);
-    //RegisterAssetProvider(local);
+    AssetProviderPtr local(new LocalAssetProvider(fw));
+    RegisterAssetProvider(local);
 
     // The Asset API always understands at least this single built-in asset type "Binary".
     // You can use this type to request asset data as binary, without generating any kind of in-memory representation or loading for it.
@@ -74,7 +74,7 @@ Vector<AssetProviderPtr> AssetAPI::AssetProviders() const
 
 void AssetAPI::RegisterAssetProvider(AssetProviderPtr provider)
 {
-    for(size_t i = 0; i < providers.Size(); ++i)
+    for(uint i = 0; i < providers.Size(); ++i)
     {
         if (providers[i]->Name() == provider->Name())
         {
@@ -87,19 +87,22 @@ void AssetAPI::RegisterAssetProvider(AssetProviderPtr provider)
 
 AssetStoragePtr AssetAPI::AssetStorageByName(const String &name) const
 {
-    foreach(const AssetProviderPtr &provider, AssetProviders())
-        foreach(AssetStoragePtr storage, provider->GetStorages())
+    foreach(const AssetProviderPtr &provider, providers)
+    {
+        Vector<AssetStoragePtr> storages = provider->Storages();
+        foreach(AssetStoragePtr storage, storages)
             if (storage->Name().Compare(name, false) == 0)
                 return storage;
+    }
     return AssetStoragePtr();
 }
 
 AssetStoragePtr AssetAPI::StorageForAssetRef(const String &ref) const
 {
     PROFILE(AssetAPI_StorageForAssetRef);
-    foreach(const AssetProviderPtr &provider, AssetProviders())
+    foreach(const AssetProviderPtr &provider, providers)
     {
-        AssetStoragePtr storage = provider->GetStorageForAssetRef(ref);
+        AssetStoragePtr storage = provider->StorageForAssetRef(ref);
         if (storage)
             return storage;
     }
@@ -110,7 +113,7 @@ bool AssetAPI::RemoveAssetStorage(const String &name)
 {
     ///\bug Currently it is possible to have e.g. a local storage with name "Foo" and a http storage with name "Foo", and it will
     /// not be possible to specify which storage to delete.
-    foreach(const AssetProviderPtr &provider, AssetProviders())
+    foreach(const AssetProviderPtr &provider, providers)
         if (provider->RemoveAssetStorage(name))
             return true;
 
@@ -119,7 +122,7 @@ bool AssetAPI::RemoveAssetStorage(const String &name)
 
 AssetStoragePtr AssetAPI::DeserializeAssetStorageFromString(const String &storage, bool fromNetwork)
 {
-    for(size_t i = 0; i < providers.Size(); ++i)
+    for(uint i = 0; i < providers.Size(); ++i)
     {
         AssetStoragePtr assetStorage = providers[i]->TryDeserializeStorageFromString(storage, fromNetwork);
         // The above function will call back to AssetAPI::EmitAssetStorageAdded.
@@ -172,9 +175,9 @@ Vector<AssetStoragePtr> AssetAPI::AssetStorages() const
     Vector<AssetStoragePtr> storages;
 
     Vector<AssetProviderPtr> providers = AssetProviders();
-    for(size_t i = 0; i < providers.Size(); ++i)
+    for(uint i = 0; i < providers.Size(); ++i)
     {
-        Vector<AssetStoragePtr> stores = providers[i]->GetStorages();
+        Vector<AssetStoragePtr> stores = providers[i]->Storages();
         storages.Push(stores);
     }
 
@@ -279,7 +282,7 @@ AssetAPI::AssetRefType AssetAPI::ParseAssetRef(String assetRef, String *outProto
     */
 
     assetRef = assetRef.Trimmed();
-    assetRef.Replace("\\", "/"); // Normalize all path separators to use forward slashes.
+    assetRef.Replace('\\', '/'); // Normalize all path separators to use forward slashes.
 
     String fullPath; // Contains the url without the "protocolPart://" prefix.
     AssetRefType refType = AssetRefInvalid;
@@ -325,7 +328,7 @@ AssetAPI::AssetRefType AssetAPI::ParseAssetRef(String assetRef, String *outProto
         refType = AssetRefLocalPath;
         fullPath = assetRef;
     }
-    else if ((pos = assetRef.Find(":")) != String::NPOS)
+    else if ((pos = assetRef.Find(':')) != String::NPOS)
     {
         refType = AssetRefNamedStorage;
         String storage = assetRef.Substring(0, pos);
@@ -353,7 +356,11 @@ AssetAPI::AssetRefType AssetAPI::ParseAssetRef(String assetRef, String *outProto
     // Parse subAssetName if it exists.
     String subAssetName = "";
 
-    if ((pos = fullPath.Contains(",")) != String::NPOS)
+    pos = fullPath.Find(',');
+    if (pos == String::NPOS)
+        pos = fullPath.Find('#');
+    
+    if (pos != String::NPOS)
     {
         String assetRef = fullPath.Substring(0, pos);
         subAssetName = fullPath.Substring(pos + 1).Trimmed();
@@ -370,8 +377,8 @@ AssetAPI::AssetRefType AssetAPI::ParseAssetRef(String assetRef, String *outProto
         *outPath_Filename = fullPath;
 
     // Now the only thing that is left is to split the base filename and the path for the asset.
-    unsigned lastPeriodIndex = fullPath.FindLast(".");
-    unsigned directorySeparatorIndex = fullPath.FindLast("/");
+    unsigned lastPeriodIndex = fullPath.FindLast('.');
+    unsigned directorySeparatorIndex = fullPath.FindLast('/');
     if (lastPeriodIndex == String::NPOS || lastPeriodIndex < directorySeparatorIndex)
     {
         /** Don't do anything, use the last dir separator as is. The old code below
@@ -648,7 +655,7 @@ AssetUploadTransferPtr AssetAPI::UploadAssetFromFile(const String &filename, Ass
     return UploadAssetFromFileInMemory(&data[0], data.Size(), destination, assetName);
 }
 
-AssetUploadTransferPtr AssetAPI::UploadAssetFromFileInMemory(const u8 *data, size_t numBytes, AssetStoragePtr destination, const String &assetName)
+AssetUploadTransferPtr AssetAPI::UploadAssetFromFileInMemory(const u8 *data, uint numBytes, AssetStoragePtr destination, const String &assetName)
 {
     if (!data || numBytes == 0)
     {
@@ -762,7 +769,7 @@ AssetTransferPtr AssetAPI::PendingTransfer(String assetRef) const
     AssetTransferMap::const_iterator iter = currentTransfers.find(assetRef);
     if (iter != currentTransfers.end())
         return iter->second;
-    for(size_t i = 0; i < readyTransfers.Size(); ++i)
+    for(uint i = 0; i < readyTransfers.Size(); ++i)
         if (readyTransfers[i]->source.ref == assetRef)
             return readyTransfers[i];
 
@@ -916,7 +923,7 @@ AssetTransferPtr AssetAPI::RequestAsset(String assetRef, String assetType, bool 
         if (bundleIter != assetBundles.end())
         {
             // Return existing loader transfer
-            for(size_t i = 0; i < readySubTransfers.Size(); ++i)
+            for(uint i = 0; i < readySubTransfers.Size(); ++i)
             {
                 AssetTransferPtr subTransfer = readySubTransfers[i].subAssetTransfer;
                 if (subTransfer.Get() && subTransfer->source.ref.Compare(fullAssetRef, false) == 0)
@@ -1058,7 +1065,7 @@ AssetProviderPtr AssetAPI::ProviderForAssetRef(String assetRef, String assetType
     }
 
     Vector<AssetProviderPtr> providers = AssetProviders();
-    for(size_t i = 0; i < providers.Size(); ++i)
+    for(uint i = 0; i < providers.Size(); ++i)
         if (providers[i]->IsValidRef(assetRef, assetType))
             return providers[i];
 
@@ -1420,7 +1427,7 @@ bool AssetAPI::LoadSubAssetToTransfer(AssetTransferPtr transfer, IAssetBundle *b
 AssetTypeFactoryPtr AssetAPI::AssetTypeFactory(const String &typeName) const
 {
     PROFILE(AssetAPI_AssetTypeFactory);
-    for(size_t i = 0; i < assetTypeFactories.Size(); ++i)
+    for(uint i = 0; i < assetTypeFactories.Size(); ++i)
         if (assetTypeFactories[i]->Type().Compare(typeName, false) == 0)
             return assetTypeFactories[i];
 
@@ -1430,7 +1437,7 @@ AssetTypeFactoryPtr AssetAPI::AssetTypeFactory(const String &typeName) const
 AssetBundleTypeFactoryPtr AssetAPI::AssetBundleTypeFactory(const String &typeName) const
 {
     PROFILE(AssetAPI_AssetBundleTypeFactory);
-    for(size_t i = 0; i < assetBundleTypeFactories.Size(); ++i)
+    for(uint i = 0; i < assetBundleTypeFactories.Size(); ++i)
         if (assetBundleTypeFactories[i]->Type().Compare(typeName, false) == 0)
             return assetBundleTypeFactories[i];
 
@@ -1473,7 +1480,7 @@ void AssetAPI::Update(float frametime)
 {
     PROFILE(AssetAPI_Update);
 
-    for(size_t i = 0; i < providers.Size(); ++i)
+    for(uint i = 0; i < providers.Size(); ++i)
         providers[i]->Update(frametime);
 
     // Proceed with ready transfers.
@@ -1486,7 +1493,7 @@ void AssetAPI::Update(float frametime)
         // 2) We found the asset from disk cache. No need to ask an assetprovider
 
         // Call AssetTransferCompleted manually for any asset that doesn't have an AssetProvider serving it. ("virtual transfers").
-        for(size_t i = 0; i < readyTransfers.Size(); ++i)
+        for(uint i = 0; i < readyTransfers.Size(); ++i)
             AssetTransferCompleted(readyTransfers[i].Get());
         readyTransfers.Clear();
     }
@@ -1497,7 +1504,7 @@ void AssetAPI::Update(float frametime)
         // readySubTransfers contains sub asset transfers to loaded bundles. The sub asset loading cannot be completed in RequestAsset
         // as it would trigger signals before the calling code can receive and hook to the AssetTransfer. We delay calling LoadSubAssetToTransfer
         // into this function so that all is hooked and loading can be done normally. This is very similar to the above case for readyTransfers.
-        for(size_t i = 0; i < readySubTransfers.Size(); ++i)
+        for(uint i = 0; i < readySubTransfers.Size(); ++i)
         {
             AssetTransferPtr subTransfer = readySubTransfers[i].subAssetTransfer;
             LoadSubAssetToTransfer(subTransfer, readySubTransfers[i].parentBundleRef, subTransfer->source.ref);
@@ -1736,7 +1743,7 @@ void AssetAPI::AssetTransferFailed(IAssetTransfer *transfer, String reason)
 
     // Propagate the failure of this asset transfer to all assets which depend on this asset.
     Vector<AssetPtr> dependents = FindDependents(transfer->source.ref);
-    for(size_t i = 0; i < dependents.Size(); ++i)
+    for(uint i = 0; i < dependents.Size(); ++i)
     {
         AssetTransferPtr dependentTransfer = PendingTransfer(dependents[i]->Name());
         if (dependentTransfer)
@@ -1764,7 +1771,7 @@ void AssetAPI::AssetTransferAborted(IAssetTransfer *transfer)
 
     // Propagate the failure of this asset transfer to all assets which depend on this asset.
     Vector<AssetPtr> dependents = FindDependents(transfer->source.ref);
-    for(size_t i = 0; i < dependents.Size(); ++i)
+    for(uint i = 0; i < dependents.Size(); ++i)
     {
         AssetTransferPtr dependentTransfer = PendingTransfer(dependents[i]->Name());
         if (dependentTransfer)
@@ -1973,7 +1980,7 @@ void AssetAPI::NotifyAssetDependenciesChanged(AssetPtr asset)
     RemoveAssetDependencies(asset->Name());
 
     Vector<AssetReference> refs = asset->FindReferences();
-    for(size_t i = 0; i < refs.Size(); ++i)
+    for(uint i = 0; i < refs.Size(); ++i)
     {
         // Turn named storage (and default storage) specifiers to absolute specifiers.
         String ref = refs[i].ref;
@@ -1992,7 +1999,7 @@ void AssetAPI::RequestAssetDependencies(AssetPtr asset)
     NotifyAssetDependenciesChanged(asset);
 
     Vector<AssetReference> refs = asset->FindReferences();
-    for(size_t i = 0; i < refs.Size(); ++i)
+    for(uint i = 0; i < refs.Size(); ++i)
     {
         AssetReference ref = refs[i];
         if (ref.ref.Empty())
@@ -2010,7 +2017,7 @@ void AssetAPI::RequestAssetDependencies(AssetPtr asset)
 void AssetAPI::RemoveAssetDependencies(String asset)
 {
     PROFILE(AssetAPI_RemoveAssetDependencies);
-    for(size_t i = 0; i < assetDependencies.Size(); ++i)
+    for(uint i = 0; i < assetDependencies.Size(); ++i)
         if (String::Compare(assetDependencies[i].first_.CString(), asset.CString(), false) == 0)
         {
             assetDependencies.Erase(assetDependencies.Begin() + i);
@@ -2023,7 +2030,7 @@ Vector<AssetPtr> AssetAPI::FindDependents(String dependee)
     PROFILE(AssetAPI_FindDependents);
 
     Vector<AssetPtr> dependents;
-    for(size_t i = 0; i < assetDependencies.Size(); ++i)
+    for(uint i = 0; i < assetDependencies.Size(); ++i)
     {
         if (String::Compare(assetDependencies[i].second_.CString(), dependee.CString(), false) == 0)
         {
@@ -2041,7 +2048,7 @@ int AssetAPI::NumPendingDependencies(AssetPtr asset) const
     int numDependencies = 0;
 
     Vector<AssetReference> refs = asset->FindReferences();
-    for(size_t i = 0; i < refs.Size(); ++i)
+    for(uint i = 0; i < refs.Size(); ++i)
     {
         String ref = refs[i].ref;
         if (ref.Empty())
@@ -2082,7 +2089,7 @@ bool AssetAPI::HasPendingDependencies(AssetPtr asset) const
     PROFILE(AssetAPI_HasPendingDependencies);
 
     Vector<AssetReference> refs = asset->FindReferences();
-    for(size_t i = 0; i < refs.Size(); ++i)
+    for(uint i = 0; i < refs.Size(); ++i)
     {
         if (refs[i].ref.Empty())
             continue;
@@ -2194,7 +2201,7 @@ void AssetAPI::OnAssetLoaded(AssetPtr asset)
     PROFILE(AssetAPI_OnAssetLoaded);
 
     Vector<AssetPtr> dependents = FindDependents(asset->Name());
-    for(size_t i = 0; i < dependents.Size(); ++i)
+    for(uint i = 0; i < dependents.Size(); ++i)
     {
         AssetPtr dependent = dependents[i];
 
@@ -2358,7 +2365,7 @@ String AssetAPI::ResourceTypeForAssetRef(String assetRef) const
     String filename = filenameParsed.Trimmed();
 
     // Query all registered asset factories if they provide this asset type.
-    for(size_t i=0; i<assetTypeFactories.Size(); ++i)
+    for(uint i=0; i<assetTypeFactories.Size(); ++i)
     {
         // Note that we cannot ask endsWith from 'Binary' factory as the extension
         // is an empty string. It will always return true and this factory should 
@@ -2372,7 +2379,7 @@ String AssetAPI::ResourceTypeForAssetRef(String assetRef) const
     }
 
     // Query all registered bundle factories if they provide this asset type.
-    for(size_t i=0; i<assetBundleTypeFactories.Size(); ++i)
+    for(uint i=0; i<assetBundleTypeFactories.Size(); ++i)
         foreach (String extension, assetBundleTypeFactories[i]->TypeExtensions())
             if (filename.EndsWith(extension, false))
                 return assetBundleTypeFactories[i]->Type();
@@ -2382,6 +2389,7 @@ String AssetAPI::ResourceTypeForAssetRef(String assetRef) const
         Where ever the code might be, remove these once the providers have been updated to return
         the type extensions correctly. */
     /// @todo We don't support QML, remove the following
+    /*
     if (filename.EndsWith(".qml", false) || filename.EndsWith(".qmlzip", false))
         return "QML";
     if (filename.EndsWith(".pdf", false))
@@ -2389,6 +2397,7 @@ String AssetAPI::ResourceTypeForAssetRef(String assetRef) const
     const char *openDocFileTypes[] = { ".odt", ".doc", ".rtf", ".txt", ".docx", ".docm", ".ods", ".xls", ".odp", ".ppt", ".odg" };
     if (IsFileOfType(filename, openDocFileTypes, NUMELEMS(openDocFileTypes)))
         return "DocAsset";
+    */
 
     // Could not resolve the asset extension to any registered asset factory. Return Binary type.
     return "Binary";
@@ -2450,7 +2459,7 @@ bool CopyAssetFile(const String &sourceFile, const String &destFile)
     return fileSystem->Copy(sourceFile, destFile);
 }
 
-bool SaveAssetFromMemoryToFile(const u8 *data, size_t numBytes, const String &destFile)
+bool SaveAssetFromMemoryToFile(const u8 *data, uint numBytes, const String &destFile)
 {
     // To open Urho files, need access to the Context. Abuse Framework static accessor
     Urho3D::Context* context = Framework::Instance()->GetContext();

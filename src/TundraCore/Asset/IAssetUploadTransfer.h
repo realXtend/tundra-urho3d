@@ -16,7 +16,7 @@ class TUNDRACORE_API IAssetUploadTransfer : public Object
     OBJECT(IAssetUploadTransfer);
 
 public:
-    IAssetUploadTransfer(Urho3D::Context* context);
+    IAssetUploadTransfer(Urho3D::Context* context) : Object(context) {}
 
     virtual ~IAssetUploadTransfer();
 

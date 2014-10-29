@@ -65,7 +65,7 @@ void AnimationController::AttributesChanged()
 
 }
 
-Urho3D::AnimationState* AnimationController::GetAnimationState(const String& name)
+Urho3D::AnimationState* AnimationController::UrhoAnimationState(const String& name) const
 {
     if (!mesh_)
         return 0;
@@ -116,7 +116,7 @@ void AnimationController::DrawSkeleton(float frametime)
 
 bool AnimationController::EnableAnimation(const String& name, bool looped, float fadein, bool high_priority)
 {
-    Urho3D::AnimationState* animstate = GetAnimationState(name);
+    Urho3D::AnimationState* animstate = UrhoAnimationState(name);
     if (!animstate) 
         return false;
 
@@ -126,7 +126,7 @@ bool AnimationController::EnableAnimation(const String& name, bool looped, float
     auto i = animations_.Find(name);
     if (i != animations_.End())
     {
-        i->second_.phase_ = PHASE_FADEIN;
+        i->second_.phase_ = FadeInPhase;
         i->second_.num_repeats_ = (looped ? 0: 1);
         i->second_.fade_period_ = fadein;
         i->second_.high_priority_ = high_priority;
@@ -143,7 +143,7 @@ bool AnimationController::EnableAnimation(const String& name, bool looped, float
     animstate->SetTime(0.0f);
     
     Animation newanim;
-    newanim.phase_ = PHASE_FADEIN;
+    newanim.phase_ = FadeInPhase;
     newanim.num_repeats_ = (looped ? 0: 1); // if looped, repeat 0 times (loop indefinetly) otherwise repeat one time.
     newanim.fade_period_ = fadein;
     newanim.high_priority_ = high_priority;
@@ -162,7 +162,7 @@ bool AnimationController::EnableExclusiveAnimation(const String& name, bool loop
         const String& other_name = i->first_;
         if (other_name.Compare(name, false) == 0)
         {
-            i->second_.phase_ = PHASE_FADEOUT;
+            i->second_.phase_ = FadeOutPhase;
             i->second_.fade_period_ = fadeout;
         }
         ++i;
@@ -172,9 +172,9 @@ bool AnimationController::EnableExclusiveAnimation(const String& name, bool loop
     return EnableAnimation(name, looped, fadein, high_priority);
 }
 
-bool AnimationController::HasAnimationFinished(const String& name)
+bool AnimationController::HasAnimationFinished(const String& name) const
 {
-    Urho3D::AnimationState* animstate = GetAnimationState(name);
+    Urho3D::AnimationState* animstate = UrhoAnimationState(name);
 
     if (!animstate) 
         return true;
@@ -193,7 +193,7 @@ bool AnimationController::HasAnimationFinished(const String& name)
     return true;
 }
 
-bool AnimationController::IsAnimationActive(const String& name, bool check_fadeout)
+bool AnimationController::IsAnimationActive(const String& name, bool check_fadeout) const
 {
     auto i = animations_.Find(name);
     if (i != animations_.End())
@@ -202,7 +202,7 @@ bool AnimationController::IsAnimationActive(const String& name, bool check_fadeo
             return true;
         else 
         {
-            if (i->second_.phase_ != PHASE_FADEOUT)
+            if (i->second_.phase_ != FadeOutPhase)
                 return true;
             else
                 return false;
@@ -237,7 +237,7 @@ bool AnimationController::SetAnimationNumLoops(const String& name, uint repeats)
     return false;
 }
 
-StringList AnimationController::GetAvailableAnimations()
+StringList AnimationController::AvailableAnimations()
 {
     //Ogre::Entity* entity = GetEntity();
     //if (!entity) 
@@ -245,7 +245,7 @@ StringList AnimationController::GetAvailableAnimations()
     //Ogre::AnimationStateSet* anims = entity->getAllAnimationStates();
     //if (!anims) 
     //    return availableList;
-    //Ogre::AnimationStateIterator i = anims->getAnimationStateIterator();
+    //Ogre::AnimationStateIterator i = anims->UrhoAnimationStateIterator();
     //while(i.hasMoreElements()) 
     //{
     //    Ogre::AnimationState *animstate = i.getNext();
@@ -267,13 +267,13 @@ StringList AnimationController::GetAvailableAnimations()
     return availableList;
 }
 
-StringList AnimationController::GetActiveAnimations() const
+StringList AnimationController::ActiveAnimations() const
 {
     StringList activeList;
 
     for(auto i = animations_.Begin(); i != animations_.End(); ++i)
     {
-        if (i->second_.phase_ != PHASE_STOP)
+        if (i->second_.phase_ != StopPhase)
             activeList.Push(i->first_);
     }
     
@@ -285,7 +285,7 @@ bool AnimationController::DisableAnimation(const String& name, float fadeout)
     auto i = animations_.Find(name);
     if (i != animations_.End())
     {
-        i->second_.phase_ = PHASE_FADEOUT;
+        i->second_.phase_ = FadeOutPhase;
         i->second_.fade_period_ = fadeout;
         return true;
     }
@@ -298,7 +298,7 @@ void AnimationController::DisableAllAnimations(float fadeout)
     auto i = animations_.Begin();
     while(i != animations_.End())
     {
-        i->second_.phase_ = PHASE_FADEOUT;
+        i->second_.phase_ = FadeOutPhase;
         i->second_.fade_period_ = fadeout;
         ++i;
     }
@@ -306,7 +306,7 @@ void AnimationController::DisableAllAnimations(float fadeout)
 
 void AnimationController::SetAnimationToEnd(const String& name)
 {
-    Urho3D::AnimationState* animstate = GetAnimationState(name);
+    Urho3D::AnimationState* animstate = UrhoAnimationState(name);
     if (!animstate)
         return;
         
@@ -354,7 +354,7 @@ bool AnimationController::SetAnimationPriority(const String& name, bool high_pri
 
 bool AnimationController::SetAnimationTimePosition(const String& name, float newPosition)
 {
-    Urho3D::AnimationState* animstate = GetAnimationState(name);
+    Urho3D::AnimationState* animstate = UrhoAnimationState(name);
     if (!animstate) 
         return false;
         
@@ -371,7 +371,7 @@ bool AnimationController::SetAnimationTimePosition(const String& name, float new
 
 bool AnimationController::SetAnimationRelativeTimePosition(const String& name, float newPosition)
 {
-    Urho3D::AnimationState* animstate = GetAnimationState(name);
+    Urho3D::AnimationState* animstate = UrhoAnimationState(name);
     if (!animstate) 
         return false;
         
@@ -386,18 +386,18 @@ bool AnimationController::SetAnimationRelativeTimePosition(const String& name, f
     return false;
 }
 
-float AnimationController::GetAnimationLength(const String& name)
+float AnimationController::AnimationLength(const String& name)
 {
-    Urho3D::AnimationState* animstate = GetAnimationState(name);
+    Urho3D::AnimationState* animstate = UrhoAnimationState(name);
     if (!animstate)
         return 0.0f;
     else
         return animstate->GetLength();
 }
 
-float AnimationController::GetAnimationTimePosition(const String& name)
+float AnimationController::AnimationTimePosition(const String& name)
 {
-    Urho3D::AnimationState* animstate = GetAnimationState(name);
+    Urho3D::AnimationState* animstate = UrhoAnimationState(name);
     if (!animstate)
         return 0.0f;
     
@@ -408,9 +408,9 @@ float AnimationController::GetAnimationTimePosition(const String& name)
     else return 0.0f;
 }
 
-float AnimationController::GetAnimationRelativeTimePosition(const String& name)
+float AnimationController::AnimationRelativeTimePosition(const String& name)
 {
-    Urho3D::AnimationState* animstate = GetAnimationState(name);
+    Urho3D::AnimationState* animstate = UrhoAnimationState(name);
     if (!animstate)
         return 0.0f;
     
@@ -446,7 +446,7 @@ void AnimationController::PlayAnim(const String &name, const String &fadein, con
         success = EnableAnimation(name, false, fadein_, false);
     if (!success)
     {
-        StringList anims = GetAvailableAnimations();
+        StringList anims = AvailableAnimations();
         void (*log)(const String &) = LogDebug; if (anims.Size() > 0) log = LogWarning;
         log("Failed to play animation \"" + name + "\" on entity " + ParentEntity()->Name());
         log("The entity has " + String(anims.Size()) + " animations available: " + Join(anims,","));
@@ -478,7 +478,7 @@ void AnimationController::PlayLoopedAnim(const String &name, const String &fadei
         success = EnableAnimation(name, true, fadein_, false);
     if (!success)
     {
-        StringList anims = GetAvailableAnimations();
+        StringList anims = AvailableAnimations();
         void (*log)(const String &) = LogDebug; if (anims.Size() > 0) log = LogWarning;
         log("Failed to play looped animation \"" + name + "\" on entity " + ParentEntity()->Name());
         log("The entity has " + String(anims.Size()) + " animations available: " + Join(anims, ","));
@@ -509,7 +509,7 @@ void AnimationController::PlayReverseAnim(const String &name, const String &fade
         success = EnableExclusiveAnimation(name, true, fadein_, fadein_, false);
     if (!success)
     {
-        StringList anims = GetAvailableAnimations();
+        StringList anims = AvailableAnimations();
         void (*log)(const String &) = LogDebug; if (anims.Size() > 0) log = LogWarning;
         log("Failed to play animation \"" + name + "\" in reverse on entity " + ParentEntity()->Name());
         log("The entity has " + String(anims.Size()) + " animations available: " + Join(anims, ","));
@@ -541,7 +541,7 @@ void AnimationController::PlayAnimAutoStop(const String &name, const String &fad
 
     if (!success)
     {
-        StringList anims = GetAvailableAnimations();
+        StringList anims = AvailableAnimations();
         void (*log)(const String &) = LogDebug; if (anims.Size() > 0) log = LogWarning;
         log("Failed to play animation \"" + name + "\" on entity " + ParentEntity()->Name());
         log("The entity has " + String(anims.Size()) + " animations available: " + Join(anims, ","));
