@@ -16,7 +16,7 @@
 namespace Tundra
 {
 
-Transform::operator String() const
+String Transform::ToString() const
 {
     return "Transform(Pos:(" + String(pos.x) + "," + String(pos.y) + "," + String(pos.z) + ") Rot:(" +
         String(rot.x) + "," + String(rot.y) + "," + String(rot.z) + ") Scale:(" +
