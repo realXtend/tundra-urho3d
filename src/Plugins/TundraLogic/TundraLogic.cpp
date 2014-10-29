@@ -8,6 +8,9 @@
 #include "SceneAPI.h"
 #include "Scene/Scene.h"
 #include "LoggingFunctions.h"
+#include "AssetAPI.h"
+#include "LocalAssetProvider.h"
+#include "LocalAssetStorage.h"
 
 #include <Timer.h>
 
@@ -31,6 +34,12 @@ void TundraLogic::Load()
 void TundraLogic::Initialize()
 {
     framework->Frame()->Updated.Connect(this, &TundraLogic::OnUpdate);
+
+    // Add the System asset storage
+    String systemAssetDir = framework->InstallationDirectory() + "Data/Assets";
+    IAssetStorage* storage = framework->Asset()->AssetProvider<LocalAssetProvider>()->AddStorageDirectory(systemAssetDir, "System", true, false);
+    storage->SetReplicated(false); // If we are a server, don't pass this storage to the client.
+
 }
 
 void TundraLogic::Uninitialize()

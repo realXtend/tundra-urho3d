@@ -221,6 +221,8 @@ LocalAssetStoragePtr LocalAssetProvider::AddStorageDirectory(String directory, S
         return LocalAssetStoragePtr();
     }
     directory = Urho3D::GetInternalPath(GuaranteeTrailingSlash(directory));
+    if (!Urho3D::IsAbsolutePath(directory))
+        directory = GetSubsystem<Urho3D::FileSystem>()->GetCurrentDir() + directory;
 
     storageName = storageName.Trimmed();
     if (storageName.Empty())
@@ -443,6 +445,8 @@ String LocalAssetProvider::GenerateUniqueStorageName() const
 LocalAssetStoragePtr LocalAssetProvider::FindStorageForPath(const String &path) const
 {
     String normalizedPath = Urho3D::GetInternalPath(GuaranteeTrailingSlash(path));
+    if (!IsAbsolutePath(normalizedPath))
+        normalizedPath = GetSubsystem<Urho3D::FileSystem>()->GetCurrentDir() + normalizedPath;
 
     for(size_t i = 0; i < storages.Size(); ++i)
         if (normalizedPath.Contains(GuaranteeTrailingSlash(storages[i]->directory)))
@@ -528,6 +532,8 @@ void LocalAssetProvider::CheckForPendingFileSystemChanges()
         String file;
         while (storage->changeWatcher->GetNextChange(file))
         {
+            file = storage->directory + file;
+            LogInfo(file);
             if (!storage->AutoDiscoverable())
             {
                 LogWarning("Received file change notification for storage of which auto-discovery is false.");
@@ -543,6 +549,7 @@ void LocalAssetProvider::CheckForPendingFileSystemChanges()
             bool exists = fileSystem->FileExists(file);
             if (!exists)
             {
+                /// \todo Currently it seems that we do not get delete notifications at all
                 // Tracked file was not found from the list of tracked files and it doesn't exist so 
                 // it must be deleted (info about new files is retrieved by directoryChanged signal).
                 LogInfo("Watched file " + file + " was deleted.");
@@ -551,8 +558,17 @@ void LocalAssetProvider::CheckForPendingFileSystemChanges()
             else
             {
                 // File was tracked and found from watched files: must've been modified.
-                LogInfo("Watched file " + file + " was modified. Asset ref: " + assetRef);
-                storage->EmitAssetChanged(file, IAssetStorage::AssetModify);
+                bool existing = framework->Asset()->FindAsset(assetRef);
+                if (existing)
+                {
+                    LogInfo("Watched file " + file + " was modified. Asset ref: " + assetRef);
+                    storage->EmitAssetChanged(file, IAssetStorage::AssetModify);
+                }
+                else
+                {
+                    LogInfo("New file " + file + " added to storage " + storage->ToString());
+                    storage->EmitAssetChanged(file, IAssetStorage::AssetCreate);
+                }
             }
         }
     }

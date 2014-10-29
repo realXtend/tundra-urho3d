@@ -59,7 +59,7 @@ void LocalAssetStorage::RefreshAssetRefs()
     {
         if (!(str.Contains(".git") || str.Contains(".svn") || str.Contains(".hg")))
         {
-            String diskSource = GuaranteeTrailingSlash(directory) + str;
+            String diskSource = directory + str;
             uint lastSlash = str.FindLast('/');
             if (lastSlash != String::NPOS)
                 str = str.Substring(lastSlash + 1);
@@ -85,7 +85,7 @@ void LocalAssetStorage::CacheStorageContents()
     {
         if (!(str.Contains(".git") || str.Contains(".svn") || str.Contains(".hg")))
         {
-            String diskSource = GuaranteeTrailingSlash(directory) + str;
+            String diskSource = directory + str;
             uint lastSlash = str.FindLast('/');
             if (lastSlash != String::NPOS)
                 str = str.Substring(lastSlash + 1);
@@ -105,7 +105,7 @@ void LocalAssetStorage::CacheStorageContents()
 String LocalAssetStorage::GetFullPathForAsset(const String &assetname, bool recursiveLookup)
 {
     Urho3D::FileSystem* fileSystem = GetSubsystem<Urho3D::FileSystem>();
-    if (fileSystem->FileExists(GuaranteeTrailingSlash(directory) + assetname))
+    if (fileSystem->FileExists(directory + assetname))
         return directory;
 
     std::map<String, String, StringCompareCaseInsensitive>::iterator iter = cachedFiles.find(assetname);

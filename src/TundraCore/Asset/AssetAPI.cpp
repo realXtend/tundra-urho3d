@@ -14,6 +14,7 @@
 #include "IAssetUploadTransfer.h"
 #include "GenericAssetFactory.h"
 #include "NullAssetFactory.h"
+#include "LocalAssetProvider.h"
 
 #include "Framework.h"
 #include "LoggingFunctions.h"
@@ -34,9 +35,8 @@ AssetAPI::AssetAPI(Framework *framework, bool headless) :
     isHeadless(headless),
     assetCache(0)
 {
-    /// \todo Implement LocalAssetProvider
-    //LocalAssetProviderPtr local = MAKE_SHARED(LocalAssetProvider, fw);
-    //RegisterAssetProvider(local);
+    AssetProviderPtr local(new LocalAssetProvider(fw));
+    RegisterAssetProvider(local);
 
     // The Asset API always understands at least this single built-in asset type "Binary".
     // You can use this type to request asset data as binary, without generating any kind of in-memory representation or loading for it.
@@ -279,7 +279,7 @@ AssetAPI::AssetRefType AssetAPI::ParseAssetRef(String assetRef, String *outProto
     */
 
     assetRef = assetRef.Trimmed();
-    assetRef.Replace("\\", "/"); // Normalize all path separators to use forward slashes.
+    assetRef.Replace('\\', '/'); // Normalize all path separators to use forward slashes.
 
     String fullPath; // Contains the url without the "protocolPart://" prefix.
     AssetRefType refType = AssetRefInvalid;
@@ -325,7 +325,7 @@ AssetAPI::AssetRefType AssetAPI::ParseAssetRef(String assetRef, String *outProto
         refType = AssetRefLocalPath;
         fullPath = assetRef;
     }
-    else if ((pos = assetRef.Find(":")) != String::NPOS)
+    else if ((pos = assetRef.Find(':')) != String::NPOS)
     {
         refType = AssetRefNamedStorage;
         String storage = assetRef.Substring(0, pos);
@@ -353,7 +353,11 @@ AssetAPI::AssetRefType AssetAPI::ParseAssetRef(String assetRef, String *outProto
     // Parse subAssetName if it exists.
     String subAssetName = "";
 
-    if ((pos = fullPath.Contains(",")) != String::NPOS)
+    pos = fullPath.Find(',');
+    if (pos == String::NPOS)
+        pos = fullPath.Find('#');
+    
+    if (pos != String::NPOS)
     {
         String assetRef = fullPath.Substring(0, pos);
         subAssetName = fullPath.Substring(pos + 1).Trimmed();
@@ -370,8 +374,8 @@ AssetAPI::AssetRefType AssetAPI::ParseAssetRef(String assetRef, String *outProto
         *outPath_Filename = fullPath;
 
     // Now the only thing that is left is to split the base filename and the path for the asset.
-    unsigned lastPeriodIndex = fullPath.FindLast(".");
-    unsigned directorySeparatorIndex = fullPath.FindLast("/");
+    unsigned lastPeriodIndex = fullPath.FindLast('.');
+    unsigned directorySeparatorIndex = fullPath.FindLast('/');
     if (lastPeriodIndex == String::NPOS || lastPeriodIndex < directorySeparatorIndex)
     {
         /** Don't do anything, use the last dir separator as is. The old code below
@@ -2382,6 +2386,7 @@ String AssetAPI::ResourceTypeForAssetRef(String assetRef) const
         Where ever the code might be, remove these once the providers have been updated to return
         the type extensions correctly. */
     /// @todo We don't support QML, remove the following
+    /*
     if (filename.EndsWith(".qml", false) || filename.EndsWith(".qmlzip", false))
         return "QML";
     if (filename.EndsWith(".pdf", false))
@@ -2389,6 +2394,7 @@ String AssetAPI::ResourceTypeForAssetRef(String assetRef) const
     const char *openDocFileTypes[] = { ".odt", ".doc", ".rtf", ".txt", ".docx", ".docm", ".ods", ".xls", ".odp", ".ppt", ".odg" };
     if (IsFileOfType(filename, openDocFileTypes, NUMELEMS(openDocFileTypes)))
         return "DocAsset";
+    */
 
     // Could not resolve the asset extension to any registered asset factory. Return Binary type.
     return "Binary";
