@@ -142,7 +142,7 @@ public:
             Typically large sized asset types want to ignore the parameter data and load from a cached disk file if possible and notify AssetAPI when its done.
             This should be set to false if you are expecting the asset to be loaded when this function returns like in LoadFromFile and LoadFromCache.
         @return true if loading succeeded, false otherwise. */
-    bool LoadFromFileInMemory(const u8 *data, size_t numBytes, bool allowAsynchronous = true);
+    bool LoadFromFileInMemory(const u8 *data, uint numBytes, bool allowAsynchronous = true);
 
     /// Called when this asset is loaded by AssetAPI::AssetLoadCompleted and DependencyLoaded functions.
     /// Emits Loaded() signal if all the dependencies have been loaded, otherwise does nothing.
@@ -181,7 +181,7 @@ protected:
         @note Implementation has to call AssetAPI::AssetLoadCompleted after loaded succesfully (both synchronous and asynchronous).
         AssetAPI::AssetLoadCompleted can be called inside this function, how ever just returning true is not enough.
         AssetAPI::AssetLoadFailed will be called automatically if false is returned. */
-    virtual bool DeserializeFromData(const u8 *data, size_t numBytes, bool allowAsynchronous) = 0;
+    virtual bool DeserializeFromData(const u8 *data, uint numBytes, bool allowAsynchronous) = 0;
 
     /// Private-implementation of the unloading of an asset.
     virtual void DoUnload() = 0;

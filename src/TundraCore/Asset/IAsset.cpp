@@ -167,7 +167,7 @@ bool IAsset::LoadFromFile(String filename)
     return LoadFromFileInMemory(&fileData[0], fileData.Size(), false);
 }
 
-bool IAsset::LoadFromFileInMemory(const u8 *data, size_t numBytes, bool allowAsynchronous)
+bool IAsset::LoadFromFileInMemory(const u8 *data, uint numBytes, bool allowAsynchronous)
 {
     PROFILE(IAsset_LoadFromFileInMemory);
     if (!data || numBytes == 0)

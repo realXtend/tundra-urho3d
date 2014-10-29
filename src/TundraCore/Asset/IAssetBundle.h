@@ -41,7 +41,7 @@ public:
     /** @return Return true if loading can be done from data, false otherwise.
         @note Implementations need to emit Loaded when completed. Do not emit Failed if you return false, Failed signal is reserved
         when this function return true and asynch loading fails. */
-    virtual bool DeserializeFromData(const u8 *data, size_t numBytes) = 0;
+    virtual bool DeserializeFromData(const u8 *data, uint numBytes) = 0;
 
     /// Provides a sub asset data from this bundle.
     /** This function returns the raw data of the sub asset. If the asset cannot be found 

@@ -118,7 +118,7 @@ String LocalAssetProvider::GetPathForAsset(const String &assetRef, LocalAssetSto
         // However, lookup also the storage if wanted
         if (storage)
         {
-            for (size_t i = 0; i < storages.Size(); ++i)
+            for (uint i = 0; i < storages.Size(); ++i)
             {
                 if (path.StartsWith(storages[i]->directory, false))
                 {
@@ -131,7 +131,7 @@ String LocalAssetProvider::GetPathForAsset(const String &assetRef, LocalAssetSto
         return path;
     }
     // Check first all subdirs without recursion, because recursion is potentially slow
-    for (size_t i = 0; i < storages.Size(); ++i)
+    for (uint i = 0; i < storages.Size(); ++i)
     {
         String path = storages[i]->GetFullPathForAsset(path_filename, false);
         if (path != "")
@@ -142,7 +142,7 @@ String LocalAssetProvider::GetPathForAsset(const String &assetRef, LocalAssetSto
         }
     }
 
-    for (size_t i = 0; i < storages.Size(); ++i)
+    for (uint i = 0; i < storages.Size(); ++i)
     {
         String path = storages[i]->GetFullPathForAsset(path_filename, true);
         if (path != "")
@@ -202,7 +202,7 @@ void LocalAssetProvider::DeleteAssetFromStorage(String assetRef)
 
 bool LocalAssetProvider::RemoveAssetStorage(String storageName)
 {
-    for(size_t i = 0; i < storages.Size(); ++i)
+    for(uint i = 0; i < storages.Size(); ++i)
         if (storages[i]->name.Compare(storageName, false) == 0)
         {
             storages.Erase(storages.Begin() + i);
@@ -232,7 +232,7 @@ LocalAssetStoragePtr LocalAssetProvider::AddStorageDirectory(String directory, S
     }
 
     // Test if we already have a storage registered with this name.
-    for(size_t i = 0; i < storages.Size(); ++i)
+    for(uint i = 0; i < storages.Size(); ++i)
         if (storages[i]->name.Compare(storageName, false) == 0)
         {
             if (storages[i]->directory != directory)
@@ -270,12 +270,12 @@ LocalAssetStoragePtr LocalAssetProvider::AddStorageDirectory(String directory, S
 Vector<AssetStoragePtr> LocalAssetProvider::Storages() const
 {
     Vector<AssetStoragePtr> stores;
-    for(size_t i = 0; i < storages.Size(); ++i)
+    for(uint i = 0; i < storages.Size(); ++i)
         stores.Push(AssetStoragePtr(storages[i]));
     return stores;
 }
 
-AssetUploadTransferPtr LocalAssetProvider::UploadAssetFromFileInMemory(const u8 *data, size_t numBytes, AssetStoragePtr destination, const String &assetName)
+AssetUploadTransferPtr LocalAssetProvider::UploadAssetFromFileInMemory(const u8 *data, uint numBytes, AssetStoragePtr destination, const String &assetName)
 {
     assert(data);
     if (!data)
@@ -448,7 +448,7 @@ LocalAssetStoragePtr LocalAssetProvider::FindStorageForPath(const String &path) 
     if (!IsAbsolutePath(normalizedPath))
         normalizedPath = GetSubsystem<Urho3D::FileSystem>()->GetCurrentDir() + normalizedPath;
 
-    for(size_t i = 0; i < storages.Size(); ++i)
+    for(uint i = 0; i < storages.Size(); ++i)
         if (normalizedPath.Contains(GuaranteeTrailingSlash(storages[i]->directory)))
             return storages[i];
     return LocalAssetStoragePtr();
@@ -456,7 +456,7 @@ LocalAssetStoragePtr LocalAssetProvider::FindStorageForPath(const String &path) 
 
 AssetStoragePtr LocalAssetProvider::StorageByName(const String &name) const
 {
-    for(size_t i = 0; i < storages.Size(); ++i)
+    for(uint i = 0; i < storages.Size(); ++i)
         if (storages[i]->name.Compare(name, false) == 0)
             return AssetStoragePtr(storages[i]);
 
@@ -524,7 +524,7 @@ void LocalAssetProvider::CheckForPendingFileSystemChanges()
     PROFILE(LocalAssetProvider_CheckForPendingFileSystemChanges);
     Urho3D::FileSystem* fileSystem = GetSubsystem<Urho3D::FileSystem>();
 
-    for(size_t i = 0; i < storages.Size(); ++i)
+    for(uint i = 0; i < storages.Size(); ++i)
     {
         LocalAssetStorage* storage = storages[i];
         if (!storage->changeWatcher)

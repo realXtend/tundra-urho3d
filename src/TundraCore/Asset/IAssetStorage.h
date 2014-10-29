@@ -82,7 +82,7 @@ public:
     /// Starts a new asset upload to this storage. If the given asset exists already in the storage, it is replaced.
     /// @param url The desired name for the asset.
     /// @return A pointer to the newly created transfer.
-//    virtual IAssetTransfer *UploadAsset(const char *data, size_t numBytes, String url) { return 0; }
+//    virtual IAssetTransfer *UploadAsset(const char *data, uint numBytes, String url) { return 0; }
 
     /// Specifies whether data can be uploaded to this asset storage.
     virtual bool Writable() const { return writable; }

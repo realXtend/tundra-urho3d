@@ -65,7 +65,7 @@ public:
 
     /// Starts an asset upload from the given file in memory to the given storage.
     /** The default implementation fails all upload attempts and returns 0 immediately. */
-    virtual AssetUploadTransferPtr UploadAssetFromFileInMemory(const u8 * UNUSED_PARAM(data), size_t UNUSED_PARAM(numBytes),
+    virtual AssetUploadTransferPtr UploadAssetFromFileInMemory(const u8 * UNUSED_PARAM(data), uint UNUSED_PARAM(numBytes),
         AssetStoragePtr UNUSED_PARAM(destination), const String & UNUSED_PARAM(assetName))
     {
         return AssetUploadTransferPtr();

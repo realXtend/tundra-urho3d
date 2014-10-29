@@ -17,30 +17,30 @@ class TUNDRACORE_API LocalAssetProvider : public IAssetProvider
 public:
     explicit LocalAssetProvider(Framework* framework);
     
-    virtual ~LocalAssetProvider();
+    ~LocalAssetProvider();
     
     /// Returns name of asset provider
-    virtual String Name() const;
+    String Name() const override;
     
     /// Checks an asset id for validity
     /** @return true if this asset provider can handle the id */
-    virtual bool IsValidRef(String assetRef, String assetType) const;
+    bool IsValidRef(String assetRef, String assetType) const override;
      
     /// Requests a local asset, returns resulted transfer.
-    virtual AssetTransferPtr RequestAsset(String assetRef, String assetType);
+    AssetTransferPtr RequestAsset(String assetRef, String assetType) override;
     
     /// Aborts the ongoing local transfer.
-    virtual bool AbortTransfer(IAssetTransfer *transfer);
+    bool AbortTransfer(IAssetTransfer *transfer) override;
 
     /// Performs time-based update 
     /** @param frametime Seconds since last frame */
-    virtual void Update(float frametime);
+    void Update(float frametime) override;
 
     /// Deletes this asset from file.
-    virtual void DeleteAssetFromStorage(String assetRef);
+    void DeleteAssetFromStorage(String assetRef) override;
 
     /// @param storageName An identifier for the storage. Remember that Asset Storage names are case-insensitive.
-    virtual bool RemoveAssetStorage(String storageName);
+    bool RemoveAssetStorage(String storageName) override;
 
     /// Adds the given directory as an asset storage.
     /** @param directory The path name for the directory to add.
@@ -52,15 +52,15 @@ public:
         Returns the newly created storage, or 0 if a storage with the given name already existed, or if some other error occurred. */
     LocalAssetStoragePtr AddStorageDirectory(String directory, String storageName, bool recursive, bool writable = true, bool liveUpdate = true, bool autoDiscoverable = true);
 
-    virtual Vector<AssetStoragePtr> Storages() const;
+    Vector<AssetStoragePtr> Storages() const override;
 
-    virtual AssetStoragePtr StorageByName(const String &name) const;
+    AssetStoragePtr StorageByName(const String &name) const override;
 
-    virtual AssetStoragePtr StorageForAssetRef(const String &assetRef) const;
+    AssetStoragePtr StorageForAssetRef(const String &assetRef) const override;
 
-    virtual AssetUploadTransferPtr UploadAssetFromFileInMemory(const u8 *data, size_t numBytes, AssetStoragePtr destination, const String &assetName);
+    AssetUploadTransferPtr UploadAssetFromFileInMemory(const u8 *data, uint numBytes, AssetStoragePtr destination, const String &assetName) override;
 
-    virtual AssetStoragePtr TryDeserializeStorageFromString(const String &storage, bool fromNetwork);
+    AssetStoragePtr TryDeserializeStorageFromString(const String &storage, bool fromNetwork);
 
     String GenerateUniqueStorageName() const;
 
