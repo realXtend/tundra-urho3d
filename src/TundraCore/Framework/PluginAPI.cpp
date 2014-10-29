@@ -141,7 +141,7 @@ void PluginAPI::UnloadPlugins()
     plugins.Clear();
 }
 
-void PluginAPI::ListPlugins()
+void PluginAPI::ListPlugins() const
 {
     LogInfo("Loaded Plugins");
     foreach(const Plugin &plugin, plugins)
