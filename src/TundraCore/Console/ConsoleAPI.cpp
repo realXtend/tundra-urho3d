@@ -161,7 +161,9 @@ void ConsoleAPI::ClearConsole()
 
 void ConsoleAPI::SetLogLevel(const String &level)
 {
-    if (level.Compare("error", false))
+    if (level.Compare("quiet", false))
+        SetEnabledLogChannels(LogLevelQuiet);
+    else if (level.Compare("error", false))
         SetEnabledLogChannels(LogLevelErrorsOnly);
     else if (level.Compare("warning", false))
         SetEnabledLogChannels(LogLevelErrorWarning);

@@ -29,8 +29,10 @@ void PrintLogMessage(u32 logChannel, const String &str)
     HANDLE stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
     if (stdoutHandle == INVALID_HANDLE_VALUE)
         return;
-    if ((logChannel & LogChannelError) != 0) SetConsoleTextAttribute(stdoutHandle, FOREGROUND_RED | FOREGROUND_INTENSITY);
-    else if ((logChannel & LogChannelWarning) != 0) SetConsoleTextAttribute(stdoutHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+    if ((logChannel & LogChannelError) != 0)
+        SetConsoleTextAttribute(stdoutHandle, FOREGROUND_RED | FOREGROUND_INTENSITY);
+    else if ((logChannel & LogChannelWarning) != 0)
+        SetConsoleTextAttribute(stdoutHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 #endif
     // The console and stdout prints are equivalent.
     if (console)
