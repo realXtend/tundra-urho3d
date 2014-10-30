@@ -24,7 +24,7 @@ HttpClient::HttpClient(Framework *framework) :
         //Get("http://meshmoon.data.s3.amazonaws.com/avatars/kate/kate.png"); //->SetVerbose(true);
     }
     else
-        LogError(String("HttpClient: Failed to initialize curl: ") + curl_easy_strerror(err));
+        LogErrorF("[HttpClient] Failed to initialize curl: %s", curl_easy_strerror(err));
 }
 
 HttpClient::~HttpClient()

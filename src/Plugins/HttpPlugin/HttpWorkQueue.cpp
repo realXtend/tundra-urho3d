@@ -5,7 +5,6 @@
 #include "HttpRequest.h"
 
 #include "Framework.h"
-#include "LoggingFunctions.h"
 #include "Math/MathFunc.h"
 
 #include <Engine/Core/ProcessUtils.h>
@@ -19,13 +18,14 @@ namespace Tundra
 const float DurationKeepAliveThreads = 10.f;
 
 HttpWorkQueue::HttpWorkQueue() :
+    log("HttpWorkQueue"),
     durationNoWork_(0.f)
 {
     uint numCPUs = Urho3D::GetNumPhysicalCPUs();
     numMaxThreads_ = FloorInt(static_cast<float>(numCPUs) / 2.f);
     if (numMaxThreads_ < 1) numMaxThreads_ = 1;         // Need at least one worker. @todo Main thread only implementation!
     else if (numMaxThreads_ > 8) numMaxThreads_ = 8;    // 8 is plenty
-    LogDebug(Urho3D::ToString("HttpWorkQueue: Maximum number of threads %d detected CPUs %d", numMaxThreads_, numCPUs));
+    log.DebugF("Maximum number of threads %d detected CPUs %d", numMaxThreads_, numCPUs);
 }
 
 HttpWorkQueue::~HttpWorkQueue()
@@ -99,12 +99,12 @@ void HttpWorkQueue::StartThreads(uint max)
             threads_.Push(thread);
         else
         {
-            LogError("HttpWorkQueue: Failed to start worker thread.");
+            log.Error("Failed to start worker thread.");
             delete thread;
             break;
         }
     }
-    LogDebug("HttpWorkQueue:Thread count now " + String(threads_.Size()));
+    log.DebugF("Thread count now %d", threads_.Size());
 }
 
 void HttpWorkQueue::StopThreads()
@@ -114,7 +114,7 @@ void HttpWorkQueue::StopThreads()
         HttpWorkThread *thread = threads_.Back();
         threads_.Pop();
 
-        LogDebug("HttpWorkQueue: Stopping thread " + String(threads_.Size() + 1));
+        log.DebugF("Stopping thread %d", threads_.Size()+1);
         thread->Stop();
         delete thread;
     }
@@ -143,7 +143,7 @@ HttpWorkThread::HttpWorkThread(HttpWorkQueue *queue) :
 
 void HttpWorkThread::ThreadFunction()
 {
-    LogDebug("HttpWorkThread: Starting " + String(GetCurrentThreadID()));
+    LogDebug("[HttpWorkThread] Starting " + String(GetCurrentThreadID()));
 
     while(shouldRun_)
     {
@@ -157,7 +157,7 @@ void HttpWorkThread::ThreadFunction()
             Urho3D::Time::Sleep(16);
     }
 
-    LogDebug("HttpWorkThread: Stopping" + String(GetCurrentThreadID()));
+    LogDebug("[HttpWorkThread] Stopping " + String(GetCurrentThreadID()));
 }
 
 }

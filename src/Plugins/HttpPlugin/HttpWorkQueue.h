@@ -6,6 +6,8 @@
 #include "HttpPluginFwd.h"
 #include "FrameworkFwd.h"
 
+#include "LoggingFunctions.h"
+
 #include <Engine/Container/RefCounted.h>
 #include <Engine/Core/Thread.h>
 #include <Engine/Core/Mutex.h>
@@ -49,6 +51,8 @@ private:
 
     Urho3D::Mutex mutexRequests_;
     HttpRequestPtrList requests_;
+
+    Logger log;
 };
 
 /// @cond PRIVATE

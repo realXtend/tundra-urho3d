@@ -5,6 +5,8 @@
 #include "HttpPluginApi.h"
 #include "HttpDefines.h"
 
+#include "LoggingFunctions.h"
+
 #include <Engine/Core/Mutex.h>
 #include <Engine/Container/Str.h>
 #include <Engine/Container/HashMap.h>
@@ -117,6 +119,8 @@ private:
     Urho3D::Mutex mutexPerforming_;
     bool performing_;
     bool verbose_;
+
+    Logger log;
 };
 
 }
