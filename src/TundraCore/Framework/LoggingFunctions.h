@@ -16,6 +16,7 @@
 namespace Tundra
 {
 
+/// Available log levels. Each log level includes all the output from the levels above it.
 enum LogLevel
 {
     LogLevelDebug    = 0, // Urho3D::LOG_DEBUG
@@ -25,9 +26,12 @@ enum LogLevel
     LogLevelNone     = 4  // Urho3D::LOG_NONE
 };
 
-const String Newline = "\n";
+namespace
+{
+    const String Newline = "\n";
+}
 
-/// Outputs a message to the log to the given channel (if the level is enabled) to both stdout and ConsoleAPI.
+/// Outputs a message to the log to the given channel (if @c level is enabled) to both stdout and ConsoleAPI.
 /** On Windows, yellow and red text colors are used for warning and error prints. */
 void TUNDRACORE_API PrintLogMessage(LogLevel level, const String &str);
 
@@ -37,18 +41,18 @@ bool TUNDRACORE_API IsLogLevelEnabled(LogLevel level);
 /// Outputs a string to the stdout.
 void TUNDRACORE_API PrintRaw(const String &str);
 
-/// Outputs an error message to the log (if the channel is enabled), both stdout and ConsoleAPI, with "Error: " prefix and with newline appended.
+/// Outputs an error message to the log (if LogLevelError is enabled), both stdout and ConsoleAPI, with "Error: " prefix and with newline appended.
 /** On Windows, red text color is used for the stdout print. */
 static inline void LogError(const String &msg)                          { if (IsLogLevelEnabled(LogLevelError))   PrintLogMessage(LogLevelError, "Error: " + msg + Newline);}
 
-/// Outputs a warning message to the log (if the channel is enabled), both stdout and ConsoleAPI, with "Warning: " prefix and with newline appended.
+/// Outputs a warning message to the log (if LogLevelWarning is enabled), both stdout and ConsoleAPI, with "Warning: " prefix and with newline appended.
 /** On Windows, yellow text color is used for the stdout print. */
 static inline void LogWarning(const String &msg)                        { if (IsLogLevelEnabled(LogLevelWarning)) PrintLogMessage(LogLevelWarning, "Warning: " + msg + Newline);}
 
-/// Outputs an information message to the log (if the channel is enabled), both stdout and ConsoleAPI, with newline appended.
+/// Outputs an information message to the log (if LogLevelInfo is enabled), both stdout and ConsoleAPI, with newline appended.
 static inline void LogInfo(const String &msg)                           { if (IsLogLevelEnabled(LogLevelInfo))    PrintLogMessage(LogLevelInfo, msg + Newline);}
 
-/// Outputs a debug message to the log (if the channel is enabled), both stdout and ConsoleAPI, with "Debug: " prefix and with newline appended.
+/// Outputs a debug message to the log (if LogLevelDebug is enabled), both stdout and ConsoleAPI, with "Debug: " prefix and with newline appended.
 static inline void LogDebug(const String &msg)                          { if (IsLogLevelEnabled(LogLevelDebug))   PrintLogMessage(LogLevelDebug, "Debug: " + msg + Newline);}
 
 static inline void LogError(const std::string &msg)   /**< @overload */ { if (IsLogLevelEnabled(LogLevelError))   PrintLogMessage(LogLevelError, "Error: " + String(msg.c_str()) + Newline); }
@@ -61,7 +65,7 @@ static inline void LogWarning(const char *msg)        /**< @overload */ { if (Is
 static inline void LogInfo(const char *msg)           /**< @overload */ { if (IsLogLevelEnabled(LogLevelInfo))    PrintLogMessage(LogLevelInfo, String(msg) + Newline); }
 static inline void LogDebug(const char *msg)          /**< @overload */ { if (IsLogLevelEnabled(LogLevelDebug))   PrintLogMessage(LogLevelDebug, "Debug: " + String(msg) + Newline); }
 
-// Simple logger that provide a prefix 'name' to each line.
+/// Simple logger that provide a prefix 'name' to each line.
 struct Logger
 {
     /// Creates new Logger with name.
