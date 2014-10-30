@@ -531,26 +531,26 @@ void Framework::ApplyStartupOptions(VariantMap &engineInitMap)
         LogWarning("Multiple --loglevel parameters specified! Using " + logLevelParam.Front() + " as the value.");
     if (logLevelParam.Size() > 0)
     {
-        String logLevel = logLevelParam.Front();
-        if (logLevel.Compare("debug", false) == 0 || logLevel.Compare("verbose", false) == 0)
+        String level = logLevelParam.Front();
+        if (level.Compare("debug", false) == 0 || level.Compare("verbose", false) == 0)
         {
             engineInitMap["LogLevel"] = Urho3D::LOG_DEBUG;
-            console->SetLogLevel("debug");
+            console->SetLogLevel(level);
         }
-        else if (logLevel.Compare("warn", false) == 0 || logLevel.Compare("warning", false) == 0)
+        else if (level.Compare("warn", false) == 0 || level.Compare("warning", false) == 0)
         {
             engineInitMap["LogLevel"] = Urho3D::LOG_WARNING;
-            console->SetLogLevel("warning");
+            console->SetLogLevel(level);
         }
-        else if (logLevel.Compare("error", false) == 0)
+        else if (level.Compare("error", false) == 0)
         {
             engineInitMap["LogLevel"] = Urho3D::LOG_ERROR;
-            console->SetLogLevel("error");
+            console->SetLogLevel(level);
         }
-        else if (logLevel.Compare("none", false) == 0 || logLevel.Compare("disabled", false) == 0)
+        else if (level.Compare("none", false) == 0 || level.Compare("disabled", false) == 0)
         {
             engineInitMap["LogLevel"] = Urho3D::LOG_NONE;
-            console->SetLogLevel("quiet");
+            console->SetLogLevel(level);
         }
         else
             LogWarning("Erroneous --loglevel: " + logLevelParam.Front() + ". Ignoring.");
