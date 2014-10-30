@@ -9,6 +9,8 @@
 #include "UrhoRenderer.h"
 #include "Scene/Scene.h"
 #include "LoggingFunctions.h"
+#include "FrameAPI.h"
+#include "Framework.h"
 
 #include <Engine/Scene/Node.h>
 #include <Engine/Scene/Scene.h>
@@ -115,7 +117,7 @@ void AnimationController::Update(float frametime)
     /// \todo implement
 }
 
-void AnimationController::DrawSkeleton(float frametime)
+void AnimationController::DrawSkeleton(float /*frametime*/)
 {
     if (!world_ || !mesh_)
         return;
