@@ -20,8 +20,6 @@ AssetCache::AssetCache(AssetAPI *owner, String assetCacheDirectory) :
     assetAPI(owner),
     cacheDirectory(GuaranteeTrailingSlash(Urho3D::GetInternalPath(assetCacheDirectory)))
 {
-    LogInfo("* Asset cache directory  : " + cacheDirectory);
-
     Urho3D::FileSystem* fileSystem = GetSubsystem<Urho3D::FileSystem>();
     if (!Urho3D::IsAbsolutePath(cacheDirectory))
         cacheDirectory = fileSystem->GetCurrentDir() + cacheDirectory;

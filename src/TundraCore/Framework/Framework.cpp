@@ -9,6 +9,7 @@
 #include "SceneAPI.h"
 #include "ConsoleAPI.h"
 #include "AssetAPI.h"
+#include "AssetCache.h"
 #include "TundraVersionInfo.h"
 #include "LoggingFunctions.h"
 #include "IModule.h"
@@ -121,6 +122,7 @@ void Framework::Initialize()
     LogInfo("Working       " + CurrentWorkingDirectory());
     LogInfo("Data          " + UserDataDirectory());
     LogInfo("Config        " + config->ConfigFolder());
+    LogInfo("Asset cache   " + (asset->Cache() ? asset->Cache()->CacheDirectory() : "Disabled"));
 
     PrintStartupOptions();
 
