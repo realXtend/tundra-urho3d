@@ -43,6 +43,7 @@ namespace Tundra
     using Urho3D::List;
     using Urho3D::Pair;
     typedef Vector<String> StringVector;
+    typedef Vector<String> StringList;
     typedef Vector<Variant> VariantList;
     typedef HashMap<StringHash, Variant> VariantMap;
 

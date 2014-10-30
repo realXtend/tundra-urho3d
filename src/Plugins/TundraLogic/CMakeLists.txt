@@ -10,11 +10,11 @@ set (SOURCE_FILES ${CPP_FILES} ${H_FILES})
 add_definitions(-DTUNDRALOGIC_EXPORTS)
 
 UseTundraCore()
-use_modules(TundraCore)
+use_modules(TundraCore Plugins/UrhoRenderer)
 
 build_library(${TARGET_NAME} SHARED ${SOURCE_FILES})
 
-link_modules(TundraCore)
+link_modules(TundraCore UrhoRenderer)
 link_package(URHO3D)
 link_package(MATHGEOLIB)
 

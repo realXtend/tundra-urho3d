@@ -2,15 +2,23 @@
 
 #include "StableHeaders.h"
 #include "TundraLogic.h"
+#include "KristalliProtocol.h"
+#include "SyncManager.h"
 #include "Framework.h"
 #include "FrameAPI.h"
+#include "ConsoleAPI.h"
 #include "IRenderer.h"
 #include "SceneAPI.h"
 #include "Scene/Scene.h"
 #include "LoggingFunctions.h"
+
 #include "AssetAPI.h"
 #include "LocalAssetProvider.h"
 #include "LocalAssetStorage.h"
+
+#include "Client.h"
+#include "Server.h"
+
 
 #include <Timer.h>
 
@@ -29,21 +37,47 @@ TundraLogic::~TundraLogic()
 
 void TundraLogic::Load()
 {
+    kristalliProtocol_ = SharedPtr<KristalliProtocol>(new KristalliProtocol(this));
+    kristalliProtocol_->Load();
 }
 
 void TundraLogic::Initialize()
 {
     framework->Frame()->Updated.Connect(this, &TundraLogic::OnUpdate);
 
+
     // Add the System asset storage
     String systemAssetDir = framework->InstallationDirectory() + "Data/Assets";
     IAssetStorage* storage = framework->Asset()->AssetProvider<LocalAssetProvider>()->AddStorageDirectory(systemAssetDir, "System", true, false);
     storage->SetReplicated(false); // If we are a server, don't pass this storage to the client.
 
+
+    client_ = SharedPtr<Tundra::Client>(new Tundra::Client(this));
+    server_ = SharedPtr<Tundra::Server>(new Tundra::Server(this));
+    syncManager_ = SharedPtr<Tundra::SyncManager>(new Tundra::SyncManager(this)); // Syncmanager expects client (and server) to exist
+    
+   // // Expose client and server to everyone
+   //// framework->RegisterDynamicObject("client", client_.get());
+   // framework->Console()->RegisterCommand("connect",
+   //     "Connects to a server. Usage: connect(address,port,username,password,protocol)", client_.Get(), Client::Login );
+   // 
+   // //framework->Console()->RegisterCommand("connect",
+   // //    "Connects to a server. Usage: connect(address,port,username,password,protocol)",
+   // //    client_.get(), SLOT(Login(const QString &, unsigned short, const QString &, const QString&, const QString &)));
+
+    framework->Console()->RegisterCommand("disconnect", "Disconnects from a server.", client_.Get(), &Client::Logout);
+
+    kristalliProtocol_->Initialize();
+
 }
 
 void TundraLogic::Uninitialize()
 {
+    kristalliProtocol_->Uninitialize();
+    kristalliProtocol_.Reset();
+    syncManager_.Reset();
+    client_.Reset();
+    server_.Reset();
 }
 
 void TundraLogic::OnUpdate(float /*frametime*/)
