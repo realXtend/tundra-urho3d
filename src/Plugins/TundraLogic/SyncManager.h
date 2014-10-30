@@ -20,12 +20,13 @@
 
 namespace Tundra
 {
+
 /// Performs synchronization of the changes in a scene between the server and the client.
 /** SyncManager and SceneSyncState combined can be used to implement prioritization logic on how and when
     a sync state is filled per client connection. SyncManager object is only exposed to scripting on the server. */
 class TUNDRALOGIC_API SyncManager : public Object
 {
-    OBJECT(Client);
+    OBJECT(SyncManager);
 
 public:
     explicit SyncManager(TundraLogic* owner);

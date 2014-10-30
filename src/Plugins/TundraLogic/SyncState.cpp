@@ -1,9 +1,8 @@
 // For conditions of distribution and use, see copyright notice in license.txt
 
 #include "StableHeaders.h"
-#define _WINSOCKAPI_
+#include <kNet.h>
 #include "SyncState.h"
-
 #include "UserConnection.h"
 #include "Scene/Scene.h"
 #include "Entity.h"
@@ -38,7 +37,6 @@ SceneSyncState::SceneSyncState(UserConnection* owner, u32 userConnectionID, bool
     clientLocation(float3::nan),
     initialLocation(float3::nan)
 {
-    //changeRequest_ = StateChangeRequest(this, userConnectionID);
     Clear();
 }
 

@@ -3,15 +3,15 @@
 #pragma once
 
 #include "IModule.h"
-#include "TundraLogicFwd.h"
 #include "TundraLogicApi.h"
+#include "TundraLogicFwd.h"
 #include "Signals.h"
-#include "Server.h"
-#include "Client.h"
 
 namespace Tundra
 {
 
+typedef SharedPtr<Tundra::Client> ClientPtr;
+typedef SharedPtr<Tundra::Server> ServerPtr;
 
 /// Top-level scene and network protocol handling logic.
 class TUNDRALOGIC_API TundraLogic : public IModule
@@ -25,15 +25,17 @@ public:
     /// \todo hardcoded because no server functionality implemented
     bool IsServer() { return false; }
 
-    /// Returns pointer to KristalliProtocolModule for convenience
-    KristalliProtocol *GetKristalliModule() const { return kristalliProtocol_; }
+    /// Returns pointer to KristalliProtocolModule
+    SharedPtr<KristalliProtocol> KristalliProtocol() const;
 
-    SyncManager *SyncManager() const { return syncManager_; }
+    /// Returns pointer to sync manager
+    SharedPtr<SyncManager> SyncManager() const;
 
     /// Returns client pointer
-    SharedPtr<Client> Client() const { return client_; }
+    ClientPtr Client() const;
+
     /// Returns server pointer
-    SharedPtr<Server> GetServer() const { return server_; }
+    ServerPtr Server() const;
 
 private:
     void Load() override;
@@ -54,11 +56,10 @@ private:
     /// The sync manager
     SharedPtr<Tundra::SyncManager> syncManager_;
     /// The client
-    SharedPtr<Tundra::Client> client_;
+    ClientPtr client_;
     // The server
-    SharedPtr<Tundra::Server> server_;
+    ServerPtr server_;
     /// The kristalli protocol
- //   KristalliProtocol *kristalliModule_;
     SharedPtr<Tundra::KristalliProtocol> kristalliProtocol_;
 };
 

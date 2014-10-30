@@ -76,8 +76,7 @@ public:
     UserConnectionList AuthenticatedUsers() const { return UserConnectionList(); }
 
     /// Returns connection corresponding to a connection ID.
-    /** @todo Rename to UserConnection or UserConnectionById. */
-    UserConnectionPtr GetUserConnection(u32 connectionID) const { UNREFERENCED_PARAM(connectionID); return UserConnectionPtr(); }
+    UserConnectionPtr UserConnectionById(u32 connectionID) const { UNREFERENCED_PARAM(connectionID); return UserConnectionPtr(); }
 
     /// Returns current sender of an action.
     /** Valid (non-null) only while an action packet is being handled. Null if it was invoked by server */
@@ -131,3 +130,4 @@ private:
 };
 
 }
+

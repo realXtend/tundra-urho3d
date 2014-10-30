@@ -3,8 +3,9 @@
 #pragma once
 
 #include <kNet.h>
-#include "TundraLogicFwd.h"
+
 #include "TundraLogicApi.h"
+#include "TundraLogicFwd.h"
 #include "FrameworkFwd.h"
 #include "MsgCameraOrientationRequest.h"
 #include "Signals.h"

@@ -1,7 +1,7 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
-#define _WINSOCKAPI_
+
 #include "Server.h"
 #include "TundraLogic.h"
 #include "KristalliProtocol.h"
@@ -17,6 +17,6 @@ Server::Server(TundraLogic* owner) :
 
 UserConnectionList& Server::UserConnections() const
 {
-    return owner_->GetKristalliModule()->GetUserConnections();
+    return owner_->KristalliProtocol()->UserConnections();
 }
 }

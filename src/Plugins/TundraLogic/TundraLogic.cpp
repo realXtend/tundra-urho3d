@@ -4,6 +4,8 @@
 #include "TundraLogic.h"
 #include "KristalliProtocol.h"
 #include "SyncManager.h"
+#include "Client.h"
+#include "Server.h"
 #include "Framework.h"
 #include "FrameAPI.h"
 #include "ConsoleAPI.h"
@@ -15,10 +17,6 @@
 #include "AssetAPI.h"
 #include "LocalAssetProvider.h"
 #include "LocalAssetStorage.h"
-
-#include "Client.h"
-#include "Server.h"
-
 
 #include <Timer.h>
 
@@ -37,7 +35,7 @@ TundraLogic::~TundraLogic()
 
 void TundraLogic::Load()
 {
-    kristalliProtocol_ = SharedPtr<KristalliProtocol>(new KristalliProtocol(this));
+    kristalliProtocol_ = SharedPtr<Tundra::KristalliProtocol>(new Tundra::KristalliProtocol(this));
     kristalliProtocol_->Load();
 }
 
@@ -151,6 +149,26 @@ bool TundraLogic::LoadScene(String filename, bool clearScene, bool useEntityIDsF
         entities = scene->LoadSceneXML(filename, clearScene, useEntityIDsFromFile, AttributeChange::Default);
     LogInfo("Loading of startup scene finished. " + String(entities.Size()) + " entities created in " + String((int)(timer.GetUSec(true) / 1000)) + " msecs.");
     return entities.Size() > 0;
+}
+
+SharedPtr<KristalliProtocol> TundraLogic::KristalliProtocol() const
+{
+    return kristalliProtocol_;
+}
+
+SharedPtr<SyncManager> TundraLogic::SyncManager() const
+{
+    return syncManager_;
+}
+
+ClientPtr TundraLogic::Client() const
+{
+    return client_;
+}
+
+ServerPtr TundraLogic::Server() const
+{
+    return server_;
 }
 
 extern "C"

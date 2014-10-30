@@ -23,11 +23,6 @@
 #include <Engine/Resource/XMLElement.h>
 #include <Engine/Core/StringUtils.h>
 
-//#include <kNet.h>
-//#include <kNet/IMessageHandler.h>
-//#include <kNet/INetworkServerListener.h>
-//#include <kNet/Network.h>
-
 using namespace kNet;
 
 namespace Tundra
@@ -90,7 +85,7 @@ void Client::Login(const String& address, unsigned short port, kNet::SocketTrans
 
     reconnect_ = false;
     
-    KristalliProtocol *kristalli = owner_->GetKristalliModule();
+    KristalliProtocol *kristalli = owner_->KristalliProtocol();
 
     if (protocol == kNet::InvalidTransportLayer)
     {
@@ -137,7 +132,7 @@ void Client::DoLogout(bool fail)
     {
         if (MessageConnection())
         {
-            owner_->GetKristalliModule()->Disconnect();
+            owner_->KristalliProtocol()->Disconnect();
             LogInfo("Disconnected");
         }
         
@@ -164,7 +159,7 @@ void Client::DoLogout(bool fail)
         properties_.Clear();
     }
 
-    KristalliProtocol *kristalli = owner_->GetKristalliModule();
+    SharedPtr<KristalliProtocol> kristalli = owner_->KristalliProtocol();
     kristalli->NetworkMessageReceived.Disconnect(this, &Client::HandleKristalliMessage);
    // disconnect(kristalli, SIGNAL(NetworkMessageReceived(kNet::MessageConnection *, kNet::packet_id_t, kNet::message_id_t, const char *, size_t)), 
    //     this, SLOT(HandleKristalliMessage(kNet::MessageConnection*, kNet::packet_id_t, kNet::message_id_t, const char*, size_t)));
@@ -323,7 +318,7 @@ void Client::GetCameraOrientation()
 
 kNet::MessageConnection* Client::MessageConnection()
 {
-    return owner_->GetKristalliModule()->MessageConnection();
+    return owner_->KristalliProtocol()->MessageConnection();
 }
 
 KNetUserConnectionPtr Client::ServerUserConnection() const

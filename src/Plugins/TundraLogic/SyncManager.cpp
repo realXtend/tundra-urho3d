@@ -157,7 +157,7 @@ void SyncManager::SendCameraUpdateRequest(UserConnectionPtr conn, bool enabled)
 //    if(framework_->HasCommandLineParameter("--server"))
 //    {
 //        // Loop through all connections and send the CameraOrientationRequest messages to the clients.
-//        UserConnectionList &users = owner_->GetServer()->UserConnections();
+//        UserConnectionList &users = owner_->Server()->UserConnections();
 //
 //        for(UserConnectionList::iterator i = users.begin(); i != users.end(); ++i)
 //            if ((*i)->syncState)
@@ -256,7 +256,7 @@ SceneSyncState* SyncManager::SceneState(u32 connectionId) const
 {
     if (!owner_->IsServer())
         return 0;
-    return SceneState(owner_->GetServer()->GetUserConnection(connectionId));
+    return SceneState(owner_->Server()->UserConnectionById(connectionId));
 }
 
 SceneSyncState* SyncManager::SceneState(const UserConnectionPtr &connection) const
@@ -476,7 +476,7 @@ void SyncManager::OnAttributeChanged(IComponent* comp, IAttribute* attr, Attribu
     {
         // For each client connected to this server, mark this attribute dirty, so it will be updated to the
         // clients on the next network sync iteration.
-        UserConnectionList& users = owner_->GetServer()->UserConnections();
+        UserConnectionList& users = owner_->Server()->UserConnections();
         for(auto i = users.Begin(); i != users.End(); ++i)
         {
             if ((*i)->syncState)
@@ -521,7 +521,7 @@ void SyncManager::OnAttributeAdded(IComponent* comp, IAttribute* attr, Attribute
     
     if (isServer)
     {
-        UserConnectionList& users = owner_->GetServer()->UserConnections();
+        UserConnectionList& users = owner_->Server()->UserConnections();
         for(auto i = users.Begin(); i != users.End(); ++i)
             if ((*i)->syncState) (*i)->syncState->MarkAttributeCreated(entity->Id(), comp->Id(), attr->Index());
     }
@@ -550,7 +550,7 @@ void SyncManager::OnAttributeRemoved(IComponent* comp, IAttribute* attr, Attribu
     
     if (isServer)
     {
-        UserConnectionList& users = owner_->GetServer()->UserConnections();
+        UserConnectionList& users = owner_->Server()->UserConnections();
         for(auto i = users.Begin(); i != users.End(); ++i)
             if ((*i)->syncState) (*i)->syncState->MarkAttributeRemoved(entity->Id(), comp->Id(), attr->Index());
     }
@@ -573,7 +573,7 @@ void SyncManager::OnComponentAdded(Entity* entity, IComponent* comp, AttributeCh
     
     if (owner_->IsServer())
     {
-        UserConnectionList& users = owner_->GetServer()->UserConnections();
+        UserConnectionList& users = owner_->Server()->UserConnections();
         for(auto i = users.Begin(); i != users.End(); ++i)
             if ((*i)->syncState) (*i)->syncState->MarkComponentDirty(entity->Id(), comp->Id());
     }
@@ -595,7 +595,7 @@ void SyncManager::OnComponentRemoved(Entity* entity, IComponent* comp, Attribute
     
     if (owner_->IsServer())
     {
-        UserConnectionList& users = owner_->GetServer()->UserConnections();
+        UserConnectionList& users = owner_->Server()->UserConnections();
         for(auto i = users.Begin(); i != users.End(); ++i)
             if ((*i)->syncState) (*i)->syncState->MarkComponentRemoved(entity->Id(), comp->Id());
     }
@@ -615,7 +615,7 @@ void SyncManager::OnEntityCreated(Entity* entity, AttributeChange::Type change)
 
     if (owner_->IsServer())
     {
-        UserConnectionList& users = owner_->GetServer()->UserConnections();
+        UserConnectionList& users = owner_->Server()->UserConnections();
         for(auto i = users.Begin(); i != users.End(); ++i)
         {
             if ((*i)->syncState)
@@ -647,7 +647,7 @@ void SyncManager::OnEntityRemoved(Entity* entity, AttributeChange::Type change)
     
     if (owner_->IsServer())
     {
-        UserConnectionList& users = owner_->GetServer()->UserConnections();
+        UserConnectionList& users = owner_->Server()->UserConnections();
         for(auto i = users.Begin(); i != users.End(); ++i)
             if ((*i)->syncState) (*i)->syncState->MarkEntityRemoved(entity->Id());
     }
@@ -688,7 +688,7 @@ void SyncManager::OnActionTriggered(Entity *entity, const String &action, const 
         msg.executionType = (u8)EntityAction::Local; // Propagate as local actions.
         // On server, queue the actions and send after entity sync
         /// \todo Making copy is inefficient, consider storing pointers
-        foreach(UserConnectionPtr c, owner_->GetServer()->UserConnections())
+        foreach(UserConnectionPtr c, owner_->Server()->UserConnections())
         {
             if (c->properties["authenticated"].GetBool() == true)
                 c->syncState->queuedActions.push_back(msg);
@@ -730,7 +730,7 @@ void SyncManager::OnEntityPropertiesChanged(Entity* entity, AttributeChange::Typ
 
     if (owner_->IsServer())
     {
-        UserConnectionList& users = owner_->GetServer()->UserConnections();
+        UserConnectionList& users = owner_->Server()->UserConnections();
         for(auto i = users.Begin(); i != users.End(); ++i)
         {
             if ((*i)->syncState)
@@ -758,7 +758,7 @@ void SyncManager::OnEntityParentChanged(Entity* entity, Entity* newParent, Attri
 
     if (owner_->IsServer())
     {
-        UserConnectionList& users = owner_->GetServer()->UserConnections();
+        UserConnectionList& users = owner_->Server()->UserConnections();
         for(auto i = users.Begin(); i != users.End(); ++i)
         {
             if ((*i)->syncState)
@@ -784,7 +784,7 @@ void SyncManager::OnPlaceholderComponentTypeRegistered(u32 typeId, const String&
 void SyncManager::ReplicateComponentType(u32 typeId, UserConnection* connection)
 {
     SceneAPI* sceneAPI = framework_->Scene();
-    const SceneAPI::PlaceholderComponentTypeMap& descs = sceneAPI->GetPlaceholderComponentTypes();
+    const SceneAPI::PlaceholderComponentTypeMap& descs = sceneAPI->PlaceholderComponentTypes();
     auto it = descs.Find(typeId);
     if (it == descs.End())
     {
@@ -811,7 +811,7 @@ void SyncManager::ReplicateComponentType(u32 typeId, UserConnection* connection)
     {
         if (owner_->IsServer())
         {
-            UserConnectionList users = owner_->GetServer()->AuthenticatedUsers();
+            UserConnectionList users = owner_->Server()->AuthenticatedUsers();
             for(auto i = users.Begin(); i != users.End(); ++i)
             {
                 if ((*i)->ProtocolVersion() >= ProtocolCustomComponents && (*i).get() != componentTypeSender_)
@@ -992,7 +992,7 @@ void SyncManager::Update(f64 frametime)
         // If we are server, process all authenticated users
 
         // Then send out changes to other attributes via the generic sync mechanism.
-        UserConnectionList& users = owner_->GetServer()->UserConnections();
+        UserConnectionList& users = owner_->Server()->UserConnections();
         for(auto i = users.Begin(); i != users.End(); ++i)
             if ((*i)->syncState)
             {
@@ -1623,7 +1623,7 @@ void SyncManager::ProcessSyncState(UserConnection* user)
     if (user->ProtocolVersion() >= ProtocolCustomComponents && state->NeedSendPlaceholderComponents())
     {
         SceneAPI* sceneAPI = framework_->Scene();
-        const SceneAPI::PlaceholderComponentTypeMap& descs = sceneAPI->GetPlaceholderComponentTypes();
+        const SceneAPI::PlaceholderComponentTypeMap& descs = sceneAPI->PlaceholderComponentTypes();
         for (auto i = descs.Begin(); i != descs.End(); ++i)
         {
             if (isServer || componentTypesFromServer_.find(i->first_) == componentTypesFromServer_.end())
@@ -3047,7 +3047,7 @@ void SyncManager::HandleEntityAction(UserConnection* source, MsgEntityAction& ms
     // If we are server, get the user who sent the action, so it can be queried
     if (isServer)
     {
-        Server* server = owner_->GetServer().Get();
+        Server* server = owner_->Server().Get();
         if (server)
         {
             server->SetActionSender(source->shared_from_this());
@@ -3073,7 +3073,7 @@ void SyncManager::HandleEntityAction(UserConnection* source, MsgEntityAction& ms
     if (isServer && (type & EntityAction::Peers) != 0)
     {
         msg.executionType = (u8)EntityAction::Local;
-        foreach(UserConnectionPtr userConn, owner_->GetServer()->UserConnections())
+        foreach(UserConnectionPtr userConn, owner_->Server()->UserConnections())
             if (userConn.get() != source) // The EC action will not be sent to the machine that originated the request to send an action to all peers.
                 userConn->syncState->queuedActions.push_back(msg);
         handled = true;
@@ -3083,7 +3083,7 @@ void SyncManager::HandleEntityAction(UserConnection* source, MsgEntityAction& ms
         LogWarning("SyncManager: Received MsgEntityAction message \"" + action + "\", but it went unhandled because of its type=" + String(type));
 
     // Clear the action sender after action handling
-    Server *server = owner_->GetServer().Get();
+    Server *server = owner_->Server().Get();
     if (server)
         server->SetActionSender(UserConnectionPtr());
 }

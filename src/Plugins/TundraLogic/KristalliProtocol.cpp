@@ -4,7 +4,6 @@
 #include <kNet.h>
 #include <kNet/UDPMessageConnection.h>
 
-#define _WINSOCKAPI_
 #include "KristalliProtocol.h"
 #include "TundraLogic.h"
 #include "Framework.h"
@@ -325,7 +324,7 @@ u32 KristalliProtocol::AllocateNewConnectionID() const
     return newID;
 }
 
-UserConnectionPtr KristalliProtocol::GetUserConnection(kNet::MessageConnection* source) const
+UserConnectionPtr KristalliProtocol::UserConnectionBySource(kNet::MessageConnection* source) const
 {
     for(auto iter = connections.Begin(); iter != connections.End(); ++iter)
         if ((*iter)->ConnectionType() == "knet" && std::tr1::static_pointer_cast<KNetUserConnection>(*iter)->connection == source)
@@ -334,7 +333,7 @@ UserConnectionPtr KristalliProtocol::GetUserConnection(kNet::MessageConnection* 
     return UserConnectionPtr();
 }
 
-UserConnectionPtr KristalliProtocol::GetUserConnection(u32 id) const
+UserConnectionPtr KristalliProtocol::UserConnectionById(u32 id) const
 {
     for(auto iter = connections.Begin(); iter != connections.End(); ++iter)
         if ((*iter)->userID == id)

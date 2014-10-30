@@ -1,6 +1,7 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
+#include <kNet.h>
 
 #include "UserConnection.h"
 #include "Entity.h"

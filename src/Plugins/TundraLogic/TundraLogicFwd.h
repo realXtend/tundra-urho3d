@@ -12,7 +12,7 @@ namespace Tundra
     class SyncManager;
     class InterestManager;
     class Client;
-//    class Server;
+    class Server;
     class UserConnection;
     class KNetUserConnection;
     class SceneSyncState;
@@ -31,3 +31,4 @@ namespace Tundra
 
     typedef Urho3D::HashMap<String, Variant> LoginPropertyMap;
 }
+

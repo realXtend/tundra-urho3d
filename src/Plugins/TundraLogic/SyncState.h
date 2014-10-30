@@ -7,10 +7,8 @@
 
 #include "TundraLogicApi.h"
 #include "TundraLogicFwd.h"
-
 #include "CoreTypes.h"
 #include "SceneFwd.h"
-
 
 #include "Math/Transform.h"
 #include "Math/float3.h"
