@@ -84,8 +84,13 @@ Framework::Framework(Context* ctx) :
     scene = new SceneAPI(this);
     asset = new AssetAPI(this, headless);
 
-    // Prepare asset cache, if used.
-    String assetCacheDir = UserDataDirectory() + "assetcache";
+    // Prepare main cache directory
+    String cacheDir = UserDataDirectory() + "cache";
+    if (!GetSubsystem<Urho3D::FileSystem>()->DirExists(cacheDir))
+        GetSubsystem<Urho3D::FileSystem>()->CreateDir(cacheDir);
+
+    // Prepare asset cache if enabled.
+    String assetCacheDir = cacheDir + "/assets";
     if (CommandLineParameters("--assetCacheDir").Size() > 0)
         assetCacheDir = ParseWildCardFilename(CommandLineParameters("--assetCacheDir").Back());
     if (CommandLineParameters("--assetCacheDir").Size() > 1)

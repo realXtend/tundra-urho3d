@@ -28,11 +28,6 @@ AssetCache::AssetCache(AssetAPI *owner, String assetCacheDirectory) :
     if (!fileSystem->DirExists(cacheDirectory))
         fileSystem->CreateDir(cacheDirectory);
 
-    // Check that the needed subfolders exist
-    assetDataDir = cacheDirectory + "data";
-    if (!fileSystem->DirExists(assetDataDir))
-        fileSystem->CreateDir(assetDataDir);
-
     // Check --clearAssetCache start param
     if (owner->GetFramework()->HasCommandLineParameter("--clearAssetCache") ||
         owner->GetFramework()->HasCommandLineParameter("--clear-asset-cache")) /**< @todo Remove support for the deprecated parameter version at some point. */
@@ -56,12 +51,12 @@ String AssetCache::DiskSourceByRef(const String &assetRef)
 {
     // Return the path where the given asset ref would be stored, if it was saved in the cache
     // (regardless of whether it now exists in the cache).
-    return assetDataDir + "/" + AssetAPI::SanitateAssetRef(assetRef);
+    return cacheDirectory + "/" + AssetAPI::SanitateAssetRef(assetRef);
 }
 
 String AssetCache::CacheDirectory() const
 {
-    return GuaranteeTrailingSlash(assetDataDir);
+    return GuaranteeTrailingSlash(cacheDirectory);
 }
 
 String AssetCache::StoreAsset(AssetPtr asset)
@@ -110,9 +105,9 @@ void AssetCache::ClearAssetCache()
 {
     Urho3D::FileSystem* fileSystem = GetSubsystem<Urho3D::FileSystem>();
     StringVector filenames;
-    fileSystem->ScanDir(filenames, assetDataDir, "*.*", Urho3D::SCAN_FILES, true);
+    fileSystem->ScanDir(filenames, cacheDirectory, "*.*", Urho3D::SCAN_FILES, true);
     foreach(String file, filenames)
-        fileSystem->Delete(assetDataDir + "/" + file);
+        fileSystem->Delete(cacheDirectory + "/" + file);
 }
 
 }

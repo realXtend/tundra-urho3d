@@ -72,9 +72,6 @@ private:
 
     /// AssetAPI ptr.
     AssetAPI *assetAPI;
-
-    /// Asset data dir.
-    String assetDataDir;
 };
 
 }
