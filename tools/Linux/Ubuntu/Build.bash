@@ -48,6 +48,7 @@ skip_build=false
 run_analysis=false
 run_tests=false
 
+build_debug=false
 build_type="Release"
 build_tests="OFF"
 build_64bit=false
@@ -79,6 +80,7 @@ while [[ $1 = -* ]]; do
             run_tests=true
             ;;
         --debug|-d)
+            build_debug=true
             build_type="Debug"
             ;;
         --help|-h)
@@ -124,6 +126,10 @@ if [ $skip_pkg = false ] ; then
     sudo apt-get -y --quiet install \
         libx11-dev libxrandr-dev libasound2-dev \
         libgl1-mesa-dev
+
+    print_subtitle "Curl"
+    sudo apt-get -y --quiet install \
+        openssl autoconf libtool
 fi
 
 if [ $skip_deps = false ] ; then
@@ -205,6 +211,31 @@ if [ $skip_deps = false ] ; then
 
         mark_built
     fi
+
+    #### curl
+
+    start_target curl
+
+    if ! is_cloned ; then
+        git clone https://github.com/bagder/curl.git curl
+        cd curl
+        git checkout curl-7_38_0
+    fi
+
+    if ! is_built ; then
+        ./buildconf
+
+        if [ $build_debug = true ] ; then
+            ./configure --prefix=$PWD/build --enable-debug
+        else
+            ./configure --prefix=$PWD/build --enable-optimize
+        fi
+
+        make -j $num_cpu -S
+        make install
+
+        mark_built
+    fi
 fi
 
 # Build gtest if testing
@@ -269,6 +300,7 @@ if [ $skip_cmake = false ] ; then
         -DURHO3D_HOME=$DEPS_SRC/urho3d \
         -DKNET_HOME=$DEPS_SRC/kNet \
         -DGTEST_HOME=$DEPS_SRC/gtest \
+        -DCURL_HOME=$DEPS_SRC/curl/build \
         -DENABLE_TESTS=$build_tests
 fi
 
