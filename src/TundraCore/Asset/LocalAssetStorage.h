@@ -8,11 +8,6 @@
 
 #include <map>
 
-namespace Urho3D
-{
-    class FileWatcher;
-}
-
 namespace Tundra
 {
 

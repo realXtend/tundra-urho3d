@@ -83,6 +83,15 @@ Framework::Framework(Context* ctx) :
     scene = new SceneAPI(this);
     asset = new AssetAPI(this, headless);
 
+    // Prepare asset cache, if used.
+    String assetCacheDir = UserDataDirectory() + "assetcache";
+    if (CommandLineParameters("--assetCacheDir").Size() > 0)
+        assetCacheDir = ParseWildCardFilename(CommandLineParameters("--assetCacheDir").Back());
+    if (CommandLineParameters("--assetCacheDir").Size() > 1)
+        LogWarning("Multiple --assetCacheDir parameters specified! Using \"" + CommandLineParameters("--assetCacheDir").Back() + "\" as the asset cache directory.");
+    if (!HasCommandLineParameter("--noAssetCache"))
+        asset->OpenAssetCache(assetCacheDir);
+
     // Open console window if necessary
     if (headless)
         OpenConsoleWindow();

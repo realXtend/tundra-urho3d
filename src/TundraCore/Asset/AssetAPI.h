@@ -551,7 +551,7 @@ private:
     Vector<AssetProviderPtr> providers;
 
     Framework *fw;
-    AssetCache *assetCache;
+    SharedPtr<AssetCache> assetCache;
 };
 
 }

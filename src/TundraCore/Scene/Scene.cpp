@@ -15,6 +15,7 @@
 #include "Framework.h"
 #include "FrameAPI.h"
 #include "LoggingFunctions.h"
+#include "AssetAPI.h"
 
 #include <kNet/DataDeserializer.h>
 #include <kNet/DataSerializer.h>
@@ -600,10 +601,7 @@ Vector<Entity *> Scene::CreateContentFromXml(Urho3D::XMLFile &xml, bool useEntit
     Urho3D::XMLElement storage_elem = scene_elem.GetChild("storage");
     while(storage_elem)
     {
-        /// \todo Implement Asset API
-        /*
-        framework_->Asset()->DeserializeAssetStorageFromString(Application::ParseWildCardFilename(storage_elem.GetAttribute("specifier")), false);
-        */
+        framework_->Asset()->DeserializeAssetStorageFromString(framework_->ParseWildCardFilename(storage_elem.GetAttribute("specifier")), false);
         storage_elem = storage_elem.GetNext("storage");
     }
     
@@ -1186,12 +1184,9 @@ void Scene::CreateEntityDescFromXml(SceneDesc& sceneDesc, Vector<EntityDesc>& de
                     // Resolve absolute file path for asset reference and the destination name (just the filename).
                     if (!sceneDesc.assetCache.Fill(assetRef, ad))
                     {
-                        /// \todo Implement AssetApí
-                        /*
                         framework_->Asset()->ResolveLocalAssetPath(assetRef, sceneDesc.assetCache.basePath, ad.source);
                         ad.destinationName = AssetAPI::ExtractFilenameFromAssetRef(ad.source);
                         sceneDesc.assetCache.Add(assetRef, ad);
-                        */
                     }
 
                     sceneDesc.assets[MakePair(ad.source, ad.subname)] = ad;
@@ -1323,9 +1318,8 @@ SceneDesc Scene::CreateSceneDescFromBinary(PODVector<unsigned char> &data, Scene
                                         // Resolve absolute file path for asset reference and the destination name (just the filename).
                                         if (!sceneDesc.assetCache.Fill(assetRef, ad))
                                         {
-                                            /// \todo Implement AssetAPI
-                                            //framework_->Asset()->ResolveLocalAssetPath(assetRef, sceneDesc.assetCache.basePath, ad.source);
-                                            //ad.destinationName = AssetAPI::ExtractFilenameFromAssetRef(ad.source);
+                                            framework_->Asset()->ResolveLocalAssetPath(assetRef, sceneDesc.assetCache.basePath, ad.source);
+                                            ad.destinationName = AssetAPI::ExtractFilenameFromAssetRef(ad.source);
                                             sceneDesc.assetCache.Add(assetRef, ad);
                                         }
 
