@@ -20,10 +20,10 @@ public:
     ~MeshAsset();
 
     /// Load mesh from memory. IAsset override.
-    virtual bool DeserializeFromData(const u8 *data_, size_t numBytes, bool allowAsynchronous);
+    bool DeserializeFromData(const u8 *data_, uint numBytes, bool allowAsynchronous) override;
 
     /// IAsset override.
-    virtual bool IsLoaded() const;
+    bool IsLoaded() const override;
 
     /// Returns submesh count.
     size_t NumSubmeshes() const;
@@ -33,7 +33,7 @@ public:
 
 private:
     /// Unload mesh. IAsset override.
-    virtual void DoUnload();
+    void DoUnload() override;
 
     /// Urho model resource.
     SharedPtr<Urho3D::Model> model;

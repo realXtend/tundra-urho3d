@@ -25,7 +25,7 @@ MeshAsset::~MeshAsset()
     Unload();
 }
 
-bool MeshAsset::DeserializeFromData(const u8 *data_, size_t numBytes, bool /*allowAsynchronous*/)
+bool MeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*allowAsynchronous*/)
 {
     PROFILE(MeshAsset_LoadFromFileInMemory);
 
