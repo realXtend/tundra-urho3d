@@ -182,7 +182,7 @@ private:
     /** @param owner Owner Framework. */
     explicit SceneAPI(Framework *owner);
 
-    /// Frees all known scene and the scene interact object.
+    /// Frees all known scenes and factories
     /** Called by Framework during application shutdown. */
     void Reset();
 

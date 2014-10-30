@@ -10,6 +10,7 @@ namespace Urho3D
     class AnimatedModel;
     class Light;
     class AnimationState;
+    class Model;
 }
 
 namespace Tundra

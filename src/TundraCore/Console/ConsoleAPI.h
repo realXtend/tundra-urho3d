@@ -10,6 +10,7 @@
 #include "CoreTypes.h"
 #include "FrameworkFwd.h"
 #include "Signals.h"
+#include "LoggingFunctions.h"
 
 #include "CoreStringUtils.h"
 #include "CoreTimeUtils.h"
@@ -127,13 +128,11 @@ public:
     /// @note This function calls SetEnabledLogChannels with one of the above four predefined combinations. It is possible to further customize the set of 
     /// active log channels by directly calling the SetEnabledLogChannels function with an appropriate bitset.
     void SetLogLevel(const String &level);
-
-    /// Sets the new currently enabled log channels. Messages at the given channels will be printed, and others channels will be disabled.
-    void SetEnabledLogChannels(u32 newChannels);
     /// Returns true if the given log channel is enabled.
-    bool IsLogChannelEnabled(u32 logChannel) const;
-    /// Returns the bitset of currently enabled log channels.
-    u32 EnabledLogChannels() const;
+    bool IsLogLevelEnabled(LogLevel logChannel) const;
+    /// Returns the currnet log level.
+    /** @see SetLogLevel and IsLogLevelEnabled. */
+    LogLevel CurrentLogLevel() const;
 
 private:
     friend class Framework;
@@ -153,9 +152,9 @@ private:
     void OnUpdate(float frametime);
 
     Framework *framework_;
-    CommandMap commands_;       ///< Currently registered console commands.
-    u32 enabledLogChannels;     ///< Stores the set of currently active log channels.
-    FrameLimiter pollInput_;    ///< Frame limiter for polling shell input.
+    CommandMap commands_;        ///< Currently registered console commands.
+    LogLevel logLevel_; ///< Stores the set of currently active log channels. Maps to Urho3d::Log channel level defines.
+    FrameLimiter pollInput_;     ///< Frame limiter for polling shell input.
 };
 
 template<class X, class Y>

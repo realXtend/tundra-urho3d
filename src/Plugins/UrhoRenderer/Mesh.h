@@ -11,7 +11,7 @@
 #include "Geometry/AABB.h"
 #include "Math/Transform.h"
 #include "AssetReference.h"
-//#include "AssetRefListener.h"
+#include "AssetRefListener.h"
 
 namespace Tundra
 {
@@ -121,6 +121,9 @@ private:
     /// React to attribute changes
     void AttributesChanged() override;
 
+    /// Mesh asset has been loaded
+    void OnMeshAssetLoaded(AssetPtr asset);
+
     /// Adjustment scene node (scaling/offset/orientation modifications)
     SharedPtr<Urho3D::Node> adjustmentNode_;
     /// Urho mesh component. Always an AnimatedModel; this does not hurt in case the model is non-skeletal instead
@@ -131,6 +134,9 @@ private:
 
     /// Graphics world ptr
     GraphicsWorldWeakPtr world_;
+
+    /// Manages mesh asset requests for EC_Mesh.
+    AssetRefListenerPtr meshAsset;
 };
 
 COMPONENT_TYPEDEFS(Mesh)

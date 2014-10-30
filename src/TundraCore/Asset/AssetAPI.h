@@ -50,11 +50,12 @@ class TUNDRACORE_API AssetAPI : public Object
 {
     OBJECT(AssetAPI);
 
+    friend class Framework;
+
 public:
     AssetAPI(Framework *fw, bool headless);
     ~AssetAPI();
 
-public:
     /// Returns the given asset by full URL ref if it exists casted to the correct type T, or null otherwise.
     /** @note The "name" of an asset is in most cases the URL ref of the asset, so use this function to query an asset by name. */
     template<typename T>
@@ -374,11 +375,6 @@ public:
         @note Do not dereference any asset pointers that might have been left over after calling this function. */
     void ForgetAllAssets();
 
-    /// Cleans up everything in the Asset API.
-    /** Forgets all assets, kills all asset transfers, frees all storages, providers, and type factories.
-        Deletes the asset cache and the disk watcher. */
-    void Reset();
-
     /// Returns a pointer to an existing asset transfer if one is in-progress for the given assetRef.
     /** Returns a null pointer if no transfer exists, in which case the asset may already have been loaded to the system (or not).
         It can be that an asset is loaded to the system, but one or more of its dependencies have not, in which case there exists
@@ -479,6 +475,11 @@ private:
     AssetTransferMap::iterator FindTransferIterator(IAssetTransfer *transfer);
     AssetTransferMap::const_iterator FindTransferIterator(IAssetTransfer *transfer) const;
 
+    /// Cleans up everything in the Asset API.
+    /** Forgets all assets, kills all asset transfers, frees all storages, providers, and type factories.
+        Deletes the asset cache and the disk watcher. Called by Framework. */
+    void Reset();
+
     /// Removes from AssetDependenciesMap all dependencies the given asset has.
     void RemoveAssetDependencies(String asset);
 
@@ -551,7 +552,7 @@ private:
     Vector<AssetProviderPtr> providers;
 
     Framework *fw;
-    AssetCache *assetCache;
+    SharedPtr<AssetCache> assetCache;
 };
 
 }

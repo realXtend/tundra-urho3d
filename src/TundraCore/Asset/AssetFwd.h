@@ -4,6 +4,11 @@
 
 #include "CoreTypes.h"
 
+namespace Urho3D
+{
+class FileWatcher;
+}
+
 namespace Tundra
 {
 

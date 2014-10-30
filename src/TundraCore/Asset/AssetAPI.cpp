@@ -15,6 +15,7 @@
 #include "GenericAssetFactory.h"
 #include "NullAssetFactory.h"
 #include "LocalAssetProvider.h"
+#include "AssetCache.h"
 
 #include "Framework.h"
 #include "LoggingFunctions.h"
@@ -25,6 +26,7 @@
 #include <StringUtils.h>
 #include <FileSystem.h>
 #include <File.h>
+#include <FileWatcher.h>
 
 namespace Tundra
 {
@@ -60,11 +62,11 @@ AssetAPI::~AssetAPI()
     Reset();
 }
 
-void AssetAPI::OpenAssetCache(String /*directory*/)
+void AssetAPI::OpenAssetCache(String directory)
 {
-    /// \todo Implement AssetCache
-    //SAFE_DELETE(assetCache);
-    // assetCache = new AssetCache(this, directory);
+    /// \todo Change watcher for asset cache is currently not implemented. LocalAssetStorage implements change watcher for its own storages
+    assetCache.Reset();
+    assetCache = new AssetCache(this, directory);
 }
 
 Vector<AssetProviderPtr> AssetAPI::AssetProviders() const
@@ -484,14 +486,8 @@ bool AssetAPI::ForgetAsset(AssetPtr asset, bool removeDiskSource)
     if (removeDiskSource && !asset->DiskSource().Empty())
     {
         DiskSourceAboutToBeRemoved.Emit(asset);
-        // Remove disk watcher before deleting the file. Otherwise we get tons of spam and not wanted reload tries.
-        /*
-        /// \todo Implement DiskSourceChangeWatcher & AssetCache
-        if (diskSourceChangeWatcher)
-            diskSourceChangeWatcher->removePath(asset->DiskSource());
         if (assetCache)
             assetCache->DeleteAsset(asset->Name());
-        */
         asset->SetDiskSource("");
     }
 
@@ -512,11 +508,6 @@ bool AssetAPI::ForgetAsset(AssetPtr asset, bool removeDiskSource)
         return false;
     }
 
-    // Remove file from disk watcher.
-    /*
-    if (diskSourceChangeWatcher && !asset->DiskSource().isEmpty())
-        diskSourceChangeWatcher->removePath(asset->DiskSource());
-    */
     assets.erase(iter);
     return true;
 }
@@ -538,13 +529,8 @@ bool AssetAPI::ForgetBundle(AssetBundlePtr bundle, bool removeDiskSource)
     {
         BundleDiskSourceAboutToBeRemoved.Emit(bundle);
 
-        // Remove disk watcher before deleting the file. Otherwise we get tons of spam and not wanted reload tries.
-        /*
-        if (diskSourceChangeWatcher)
-            diskSourceChangeWatcher->removePath(bundle->DiskSource());
         if (assetCache)
             assetCache->DeleteAsset(bundle->Name());
-        */
         bundle->SetDiskSource("");
     }
 
@@ -558,10 +544,6 @@ bool AssetAPI::ForgetBundle(AssetBundlePtr bundle, bool removeDiskSource)
         LogError("AssetAPI::ForgetBundle called on asset \"" + bundle->Name() + "\", which does not exist in AssetAPI!");
         return false;
     }
-    /*
-    if (diskSourceChangeWatcher && !bundle->DiskSource().Empty())
-        diskSourceChangeWatcher->removePath(bundle->DiskSource());
-    */
     assetBundles.erase(iter);
     return true;
 }
@@ -736,9 +718,7 @@ void AssetAPI::ForgetAllAssets()
 void AssetAPI::Reset()
 {
     ForgetAllAssets();
-    /// \todo Implement DiskSourceChangeWatcher & AssetCache
-    // SAFE_DELETE(assetCache);
-    // SAFE_DELETE(diskSourceChangeWatcher);
+    assetCache.Reset();
     assets.clear();
     assetBundles.clear();
     bundleMonitors.clear();
@@ -1211,10 +1191,9 @@ String AssetAPI::GenerateTemporaryNonexistingAssetFilename(String filenameSuffix
     // Create this file path into the cache dir to avoid
     // windows non-admin users having no write permission to the run folder
     String cacheDir;
-    /// \todo Implement AssetCache
-    //if (assetCache)
-    //    cacheDir = assetCache->CacheDirectory());
-    //else
+    if (assetCache)
+        cacheDir = assetCache->CacheDirectory();
+    else
         cacheDir = fw->UserDataDirectory();
 
     if (fileSystem->DirExists(cacheDir))
@@ -1632,9 +1611,8 @@ void AssetAPI::AssetTransferCompleted(IAssetTransfer *transfer_)
 
             // Cache the bundle.
             String bundleDiskSource = transfer->DiskSource(); // The asset provider may have specified an explicit filename to use as a disk source.
-            /// \todo Implement AssetCache
-            //if (transfer->CachingAllowed() && transfer->rawAssetData.Size() > 0 && assetCache)
-            //    bundleDiskSource = assetCache->StoreAsset(&transfer->rawAssetData[0], transfer->rawAssetData.Size(), transfer->source.ref);
+            if (transfer->CachingAllowed() && transfer->rawAssetData.Size() > 0 && assetCache)
+                bundleDiskSource = assetCache->StoreAsset(&transfer->rawAssetData[0], transfer->rawAssetData.Size(), transfer->source.ref);
             assetBundle->SetDiskSource(bundleDiskSource);
 
             // The bundle has now been downloaded and cached (if allowed by policy).
@@ -1692,13 +1670,12 @@ void AssetAPI::AssetTransferCompleted(IAssetTransfer *transfer_)
 
         // Save this asset to cache, and find out which file will represent a cached version of this asset.
         String assetDiskSource = transfer->DiskSource(); // The asset provider may have specified an explicit filename to use as a disk source.
-        /// \todo Implement AssetCache
-        //if (transfer->CachingAllowed() && transfer->rawAssetData.Size() > 0 && assetCache)
-        //    assetDiskSource = assetCache->StoreAsset(&transfer->rawAssetData[0], transfer->rawAssetData.Size(), transfer->source.ref);
+        if (transfer->CachingAllowed() && transfer->rawAssetData.Size() > 0 && assetCache)
+            assetDiskSource = assetCache->StoreAsset(&transfer->rawAssetData[0], transfer->rawAssetData.Size(), transfer->source.ref);
 
         // If disksource is still empty, forcibly look up if the asset exists in the cache now.
-        //if (assetDiskSource.Empty() && assetCache)
-        //    assetDiskSource = assetCache->FindInCache(transfer->source.ref);
+        if (assetDiskSource.Empty() && assetCache)
+            assetDiskSource = assetCache->FindInCache(transfer->source.ref);
         
         // Save for the asset the storage and provider it came from.
         transfer->asset->SetDiskSource(assetDiskSource.Trimmed());
@@ -1813,36 +1790,6 @@ void AssetAPI::AssetLoadCompleted(const String assetRef)
         // so we should not be having duplicate paths and/or double emits on changes.
         const String diskSource = asset->DiskSource();
 
-        /// \todo Implement DiskSourceChangeWatcher
-        /*
-        if (diskSourceChangeWatcher && !diskSource.Empty())
-        {
-            // If available, check the storage whether assets loaded from it should be live-updated.
-            PROFILE(AssetAPI_AssetLoadCompleted_DiskWatcherSetup);
-            // By default disable liveupdate for all assets which come outside any known Tundra asset storage.
-            // This is because the feature is most likely not used, and setting up the watcher below consumes
-            // system resources and CPU time. To enable the disk watcher, make sure that the asset comes from
-            // a storage known to Tundra and set liveupdate==true for that asset storage.
-            // Note that this means that also local assets outside all storages with absolute path names like 
-            // 'C:\mypath\asset.png' will always have liveupdate disabled.
-            AssetStoragePtr storage = asset->AssetStorage();
-            if (storage)
-            {
-                bool shouldLiveUpdate = storage->HasLiveUpdate();
-
-                // Localassetprovider implements its own watcher. Therefore only add paths which refer to the assetcache to the AssetAPI watcher
-                if (shouldLiveUpdate && (!assetCache || !diskSource.StartsWith(assetCache->CacheDirectory(), false)))
-                    shouldLiveUpdate = false;
-
-                if (shouldLiveUpdate)
-                {
-                    diskSourceChangeWatcher->removePath(diskSource);
-                    diskSourceChangeWatcher->addPath(diskSource);
-                }
-            }
-        }
-        */
-
         {
             PROFILE(AssetAPI_AssetLoadCompleted_ProcessDependencies);
 
@@ -1923,9 +1870,8 @@ void AssetAPI::AssetUploadTransferCompleted(IAssetUploadTransfer *uploadTransfer
     // Clear our cache of this data.
     /// @note We could actually update our cache with the same version of the asset that we just uploaded,
     /// to avoid downloading what we just uploaded. That can be implemented later.
-    /// \todo Implement AssetCache
-    //if (assetCache)
-    //    assetCache->DeleteAsset(assetRef);
+    if (assetCache)
+        assetCache->DeleteAsset(assetRef);
     
     // If we have the asset (with possible old contents) in memory, unload it now
     {

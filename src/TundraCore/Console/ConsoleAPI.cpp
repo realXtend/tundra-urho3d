@@ -9,7 +9,6 @@
 #include "ConsoleAPI.h"
 #include "Framework.h"
 #include "FrameAPI.h"
-#include "LoggingFunctions.h"
 #include "Win.h"
 
 #include <CoreEvents.h>
@@ -18,14 +17,13 @@
 #include <Console.h>
 #include <Log.h>
 
-
 namespace Tundra
 {
 
 ConsoleAPI::ConsoleAPI(Framework *framework) :
     Object(framework->GetContext()),
     framework_(framework),
-    enabledLogChannels(LogLevelErrorWarnInfo),
+    logLevel_(LogLevelInfo),
     pollInput_(1.f/30.f)
 {
     SubscribeToEvent(Urho3D::E_CONSOLECOMMAND, HANDLER(ConsoleAPI, HandleConsoleCommand));
@@ -161,33 +159,28 @@ void ConsoleAPI::ClearConsole()
 
 void ConsoleAPI::SetLogLevel(const String &level)
 {
-    if (level.Compare("quiet", false))
-        SetEnabledLogChannels(LogLevelQuiet);
-    else if (level.Compare("error", false))
-        SetEnabledLogChannels(LogLevelErrorsOnly);
-    else if (level.Compare("warning", false))
-        SetEnabledLogChannels(LogLevelErrorWarning);
-    else if (level.Compare("info", false))
-        SetEnabledLogChannels(LogLevelErrorWarnInfo);
-    else if (level.Compare("debug", false))
-        SetEnabledLogChannels(LogLevelErrorWarnInfoDebug);
+    if (level.Compare("none", false) == 0 || level.Compare("disabled", false) == 0)
+        logLevel_ = LogLevelNone;
+    else if (level.Compare("error", false) == 0)
+        logLevel_ = LogLevelError;
+    else if (level.Compare("warn", false) == 0 || level.Compare("warning", false) == 0)
+        logLevel_ = LogLevelWarning;
+    else if (level.Compare("info", false) == 0)
+        logLevel_ = LogLevelInfo;
+    else if (level.Compare("debug", false) == 0 || level.Compare("verbose", false) == 0)
+        logLevel_ = LogLevelDebug;
     else
-        LogError("Unknown parameter \"" + level + "\" specified to ConsoleAPI::SetLogLevel!");
+        LogError("ConsoleAPI::SetLogLevel: Not supported log level '" + level + "'");
 }
 
-void ConsoleAPI::SetEnabledLogChannels(u32 newChannels)
+bool ConsoleAPI::IsLogLevelEnabled(LogLevel level) const
 {
-    enabledLogChannels = newChannels;
+    return (level >= logLevel_);
 }
 
-bool ConsoleAPI::IsLogChannelEnabled(u32 logChannel) const
+LogLevel ConsoleAPI::CurrentLogLevel() const
 {
-    return (enabledLogChannels & logChannel) != 0;
-}
-
-u32 ConsoleAPI::EnabledLogChannels() const
-{
-    return enabledLogChannels;
+    return logLevel_;
 }
 
 void ConsoleAPI::Print(const String &message)

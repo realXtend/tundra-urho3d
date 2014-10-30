@@ -9,6 +9,7 @@
 #include "SceneAPI.h"
 #include "ConsoleAPI.h"
 #include "AssetAPI.h"
+#include "AssetCache.h"
 #include "TundraVersionInfo.h"
 #include "LoggingFunctions.h"
 #include "IModule.h"
@@ -83,6 +84,20 @@ Framework::Framework(Context* ctx) :
     scene = new SceneAPI(this);
     asset = new AssetAPI(this, headless);
 
+    // Prepare main cache directory
+    String cacheDir = UserDataDirectory() + "cache";
+    if (!GetSubsystem<Urho3D::FileSystem>()->DirExists(cacheDir))
+        GetSubsystem<Urho3D::FileSystem>()->CreateDir(cacheDir);
+
+    // Prepare asset cache if enabled.
+    String assetCacheDir = cacheDir + "/assets";
+    if (CommandLineParameters("--assetCacheDir").Size() > 0)
+        assetCacheDir = ParseWildCardFilename(CommandLineParameters("--assetCacheDir").Back());
+    if (CommandLineParameters("--assetCacheDir").Size() > 1)
+        LogWarning("Multiple --assetCacheDir parameters specified! Using \"" + CommandLineParameters("--assetCacheDir").Back() + "\" as the asset cache directory.");
+    if (!HasCommandLineParameter("--noAssetCache"))
+        asset->OpenAssetCache(assetCacheDir);
+
     // Open console window if necessary
     if (headless)
         OpenConsoleWindow();
@@ -112,6 +127,7 @@ void Framework::Initialize()
     LogInfo("Working       " + CurrentWorkingDirectory());
     LogInfo("Data          " + UserDataDirectory());
     LogInfo("Config        " + config->ConfigFolder());
+    LogInfo("Asset cache   " + (asset->Cache() ? asset->Cache()->CacheDirectory() : "Disabled"));
 
     PrintStartupOptions();
 
@@ -170,9 +186,6 @@ void Framework::Uninitialize()
 {
     SaveConfig();
 
-    // Delete scenes
-    scene.Reset();
-
     LogDebug("");
     LogDebug("Uninitializing");
     for(uint i = 0; i < modules.Size(); ++i)
@@ -180,6 +193,11 @@ void Framework::Uninitialize()
         LogDebug("  " + modules[i]->Name());
         modules[i]->Uninitialize();
     }
+
+    // Delete scenes, assets and factories before unloading modules
+    scene->Reset();
+    asset->Reset();
+
     LogDebug("Unloading");
     for(uint i = 0; i < modules.Size(); ++i)
     {
@@ -513,26 +531,26 @@ void Framework::ApplyStartupOptions(VariantMap &engineInitMap)
         LogWarning("Multiple --loglevel parameters specified! Using " + logLevelParam.Front() + " as the value.");
     if (logLevelParam.Size() > 0)
     {
-        String logLevel = logLevelParam.Front();
-        if (logLevel.Compare("debug", false) == 0 || logLevel.Compare("verbose", false) == 0)
+        String level = logLevelParam.Front();
+        if (level.Compare("debug", false) == 0 || level.Compare("verbose", false) == 0)
         {
             engineInitMap["LogLevel"] = Urho3D::LOG_DEBUG;
-            console->SetLogLevel("debug");
+            console->SetLogLevel(level);
         }
-        else if (logLevel.Compare("warn", false) == 0 || logLevel.Compare("warning", false) == 0)
+        else if (level.Compare("warn", false) == 0 || level.Compare("warning", false) == 0)
         {
             engineInitMap["LogLevel"] = Urho3D::LOG_WARNING;
-            console->SetLogLevel("warning");
+            console->SetLogLevel(level);
         }
-        else if (logLevel.Compare("error", false) == 0)
+        else if (level.Compare("error", false) == 0)
         {
             engineInitMap["LogLevel"] = Urho3D::LOG_ERROR;
-            console->SetLogLevel("error");
+            console->SetLogLevel(level);
         }
-        else if (logLevel.Compare("none", false) == 0 || logLevel.Compare("disabled", false) == 0)
+        else if (level.Compare("none", false) == 0 || level.Compare("disabled", false) == 0)
         {
             engineInitMap["LogLevel"] = Urho3D::LOG_NONE;
-            console->SetLogLevel("quiet");
+            console->SetLogLevel(level);
         }
         else
             LogWarning("Erroneous --loglevel: " + logLevelParam.Front() + ". Ignoring.");
