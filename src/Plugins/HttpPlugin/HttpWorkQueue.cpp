@@ -9,7 +9,7 @@
 #include "Math/MathFunc.h"
 
 #include <Engine/Core/ProcessUtils.h>
-#include <Engine/Core/Timer.h>
+#include <Engine/Core/StringUtils.h>
 
 namespace Tundra
 {
@@ -21,9 +21,11 @@ const float DurationKeepAliveThreads = 10.f;
 HttpWorkQueue::HttpWorkQueue() :
     durationNoWork_(0.f)
 {
-    numMaxThreads_ = FloorInt(static_cast<float>(Urho3D::GetNumPhysicalCPUs()) / 2.f);
-    if (numMaxThreads_ < 1) numMaxThreads_ = 1;
-    else if (numMaxThreads_ > 8) numMaxThreads_ = 8;
+    uint numCPUs = Urho3D::GetNumPhysicalCPUs();
+    numMaxThreads_ = FloorInt(static_cast<float>(numCPUs) / 2.f);
+    if (numMaxThreads_ < 1) numMaxThreads_ = 1;         // Need at least one worker. @todo Main thread only implementation!
+    else if (numMaxThreads_ > 8) numMaxThreads_ = 8;    // 8 is plenty
+    LogDebug(Urho3D::ToString("HttpWorkQueue: Maximum number of threads %d detected CPUs %d", numMaxThreads_, numCPUs));
 }
 
 HttpWorkQueue::~HttpWorkQueue()

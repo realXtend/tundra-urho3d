@@ -9,15 +9,66 @@
 
 namespace Tundra
 {
+namespace Http
+{
 
-HttpRequestData::HttpRequestData() :
+// Method
+
+int MethodCurlOption(Method method)
+{
+    switch(method)
+    {
+        case MethodPatch:
+        case MethodOptions:
+        case MethodDelete:
+            static_cast<int>(CURLOPT_CUSTOMREQUEST);
+        case MethodHead:
+            return static_cast<int>(CURLOPT_NOBODY);
+        case MethodGet:
+            return static_cast<int>(CURLOPT_HTTPGET);
+        case MethodPut:
+            return static_cast<int>(CURLOPT_PUT);
+        case MethodPost:
+            return static_cast<int>(CURLOPT_POST);
+        default:
+            break;
+    }
+    LogError(Urho3D::ToString("Http: Unknown HTTP::Method '%s'", static_cast<int>(method)));
+    return 0;
+}
+
+Variant MethodCurlOptionValue(Method method)
+{
+    switch(method)
+    {
+        case MethodPatch:
+            return Variant(String("PATCH"));
+        case MethodOptions:
+            return Variant(String("OPTIONS"));
+        case MethodDelete:
+            return Variant(String("DELETE"));
+        case MethodHead:
+        case MethodGet:
+        case MethodPut:
+        case MethodPost:
+            return Variant(1L);
+        default:
+            break;
+    }
+    LogError(Urho3D::ToString("Http: Unknown HTTP::Method '%s'", static_cast<int>(method)));
+    return Variant();
+}
+
+// RequestData
+
+RequestData::RequestData() :
     curlHandle(0),
     curlHeaders(0),
     msecSpent(0)
 {
 }
 
-curl_slist *HttpRequestData::CreateCurlHeaders(bool print)
+curl_slist *RequestData::CreateCurlHeaders(bool print)
 {
     if (curlHeaders)
     {
@@ -40,7 +91,7 @@ curl_slist *HttpRequestData::CreateCurlHeaders(bool print)
     return curlHeaders;
 }
 
-String HttpRequestData::OptionValueString(const String &name)
+String RequestData::OptionValueString(const String &name)
 {
     Curl::OptionMap::ConstIterator option = options.Find(name);
     if (option != options.End())
@@ -52,11 +103,14 @@ String HttpRequestData::OptionValueString(const String &name)
     return "";
 }
 
-HttpResponseData::HttpResponseData() :
-    HttpVersionMajor(-1),
-    HttpVersionMinor(-1),
-    Status(-1)
+// ResponseData
+
+ResponseData::ResponseData() :
+    httpVersionMajor(-1),
+    httpVersionMinor(-1),
+    status(-1)
 {
 }
 
+}
 }

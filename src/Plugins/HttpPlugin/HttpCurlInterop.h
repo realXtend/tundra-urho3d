@@ -16,7 +16,8 @@ namespace Tundra
 {
     namespace Options
     {
-        const String Url = "Url";
+        const String Url    = "Url";
+        const String Method = "Method";
     }
 
     namespace Curl

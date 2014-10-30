@@ -12,46 +12,67 @@ struct curl_slist;
 
 namespace Tundra
 {
-    struct HttpRequestData
-    {
-        Curl::RequestHandle *curlHandle;
-        Curl::OptionMap options;
+namespace Http
+{
 
-        HttpHeaderMap headers;
-        curl_slist *curlHeaders;
+enum Method 
+{
+    MethodUnknown = 0,
+    MethodHead,
+    MethodOptions,
+    MethodGet,
+    MethodPut,
+    MethodPatch,
+    MethodPost,
+    MethodDelete
+};
 
-        Vector<u8> bodyBytes;
-        Vector<u8> headersBytes;
+int MethodCurlOption(Method method);
+Variant MethodCurlOptionValue(Method method);
 
-        // Time spent executing request and processing data.
-        uint msecSpent;
+struct RequestData
+{
+    Curl::RequestHandle *curlHandle;
+    Curl::OptionMap options;
 
-        // Defalt ctor
-        HttpRequestData();
+    HttpHeaderMap headers;
+    curl_slist *curlHeaders;
 
-        // Create curl object from current headers
-        curl_slist *CreateCurlHeaders(bool print);
+    Vector<u8> bodyBytes;
+    Vector<u8> headersBytes;
 
-        // Return option value as string
-        String OptionValueString(const String &name);
-    };
+    // Time spent executing request and processing data.
+    uint msecSpent;
 
-    struct HttpResponseData
-    {
-        int HttpVersionMajor;
-        int HttpVersionMinor;
+    // Defalt ctor
+    RequestData();
 
-        int Status;
-        String StatusText;
+    // Create curl object from current headers
+    curl_slist *CreateCurlHeaders(bool print);
 
-        HttpHeaderMap Headers;
-        String LastHeaderField;
+    // Return option value as string
+    String OptionValueString(const String &name);
+};
 
-        Vector<u8> BodyBytes;
-        Vector<u8> HeadersBytes;
+struct ResponseData
+{
+    int httpVersionMajor;
+    int httpVersionMinor;
 
-        HttpResponseData();
-    };
+    int status;
+    String statusText;
+
+    HttpHeaderMap headers;
+    String lastHeaderField;
+
+    Vector<u8> bodyBytes;
+    Vector<u8> headersBytes;
+
+    // Default ctor
+    ResponseData();
+};
+
+}
 }
 
 /// @endcond

@@ -18,11 +18,12 @@ namespace Tundra
 
 // HttpRequest
 
-HttpRequest::HttpRequest(const String &url) :
+HttpRequest::HttpRequest(Http::Method method, const String &url) :
     performing_(false),
     verbose_(false)
 {
-    requestData_.options[Options::Url] = Curl::Option(CURLOPT_URL, url);
+    requestData_.options[Options::Url] = Curl::Option(CURLOPT_URL, Variant(url));
+    requestData_.options[Options::Url] = Curl::Option(static_cast<CURLoption>(Http::MethodCurlOption(method)), Http::MethodCurlOptionValue(method));
 }
 
 HttpRequest::~HttpRequest()
@@ -32,35 +33,119 @@ HttpRequest::~HttpRequest()
 
 // Public API
 
-bool HttpRequest::HasHeader(const String &name)
-{
-    return HasHeaderInternal(name);
-}
-
-String HttpRequest::Header(const String &name)
-{
-    return Header(name);
-}
-
-int HttpRequest::HeaderInt(const String &name, int defaultValue)
-{
-    return HeaderIntInternal(name, defaultValue);
-}
-
-uint HttpRequest::HeaderUInt(const String &name, uint defaultValue)
-{
-    return HeaderUIntInternal(name, defaultValue);
-}
-
 void HttpRequest::SetVerbose(bool enabled)
 {
     Urho3D::MutexLock m(mutexPerforming_);
     if (performing_)
     {
-        LogError("HttpRequest::SetVerbose: Cannot set verbose on a running request.");
+        LogError("HttpRequest::SetVerbose: Cannot set verbose to a running request.");
         return;
     }
     verbose_ = enabled;
+}
+
+// Request API
+
+bool HttpRequest::SetBody(const Vector<u8> &body, const String &contentType)
+{
+    {
+        Urho3D::MutexLock m(mutexPerforming_);
+        if (performing_)
+        {
+            LogError("HttpRequest::SetBody: Cannot set body to a running request.");
+            return false;
+        }
+        requestData_.bodyBytes = body;
+    }
+    return SetHeader("Content-Type", contentType);
+}
+
+bool HttpRequest::ClearBody()
+{
+    {
+        Urho3D::MutexLock m(mutexPerforming_);
+        if (performing_)
+        {
+            LogError("HttpRequest::ClearBody: Cannot set body to a running request.");
+            return false;
+        }
+        requestData_.bodyBytes.Clear();
+    }
+    RemoveHeader("Content-Type");
+    return true;
+}
+
+bool HttpRequest::SetBody(const String &body, const String &contentType)
+{
+    Vector<u8> data((const u8*)body.CString(), body.Length());
+    return SetBody(data, contentType);
+}
+
+bool HttpRequest::SetHeader(const String &name, const String &value)
+{
+    return SetHeaderInternal(name, value, false);
+}
+
+bool HttpRequest::SetHeader(const String &name, int value)
+{
+    return SetHeader(name, Urho3D::ToString("%d", value));
+}
+
+bool HttpRequest::SetHeader(const String &name, uint value)
+{
+    return SetHeader(name, Urho3D::ToString("%d", value));
+}
+
+bool HttpRequest::AppendHeaders(const HttpHeaderMap &headers)
+{
+    Urho3D::MutexLock m(mutexPerforming_);
+    if (performing_)
+    {
+        LogError("HttpRequest::AppendHeaders: Cannot append headers to a running request.");
+        return false;
+    }
+    for(HttpHeaderMap::const_iterator iter = headers.begin(); iter != headers.end(); ++iter)
+        SetHeaderInternal(iter->first, iter->second, false, false); // Do not lock inside SetHeaderInternal, already aquired above.
+    return true;
+}
+
+bool HttpRequest::ClearHeaders()
+{
+    Urho3D::MutexLock m(mutexPerforming_);
+    if (performing_)
+    {
+        LogError("HttpRequest::ClearHeaders: Cannot clear headers in a running request.");
+        return false;
+    }
+    requestData_.headers.clear();
+    return true;
+}
+
+bool HttpRequest::RemoveHeader(const String &name)
+{
+    return RemoveHeaderInternal(name, false);
+}
+
+// Response API
+
+bool HttpRequest::HasResponseHeader(const String &name)
+{
+    return HasHeaderInternal(name, true);
+}
+
+String HttpRequest::ResponseHeader(const String &name)
+{
+    return HeaderInternal(name, true);
+}
+
+int HttpRequest::ResponseHeaderInt(const String &name, int defaultValue)
+{
+    return HeaderIntInternal(name, defaultValue, true);
+}
+
+uint HttpRequest::ResponseHeaderUInt(const String &name, uint defaultValue)
+{
+    return HeaderUIntInternal(name, defaultValue, true);
 }
 
 // Curl callbacks
@@ -119,85 +204,130 @@ void InitHttpParserSettings(http_parser_settings *settings)
 
 // Private API
 
-bool HttpRequest::HasHeaderInternal(const String &name, bool lock)
+bool HttpRequest::SetHeaderInternal(const String &name, const String &value, bool respose, bool lock)
 {
     if (lock)
     {
         Urho3D::MutexLock m(mutexPerforming_);
         if (performing_)
         {
-            LogError("HttpRequest::HasHeader: Not completed yet");
+            // @note Atm this function cant be invoked for a response
+            LogError(String("HttpRequest::") + (respose ? "SetResponseHeader: Request is not completed yet" : "SetHeader: Cannot set a running requests headers"));
             return false;
         }
     }
-    return (responseData_.Headers.find(name.CString()) != responseData_.Headers.end());
+    HttpHeaderMap &headers = (respose ? responseData_.headers : requestData_.headers);
+    headers[name] = value;
+    return true;
 }
 
-String HttpRequest::HeaderInternal(const String &name, bool lock)
+bool HttpRequest::RemoveHeaderInternal(const String &name, bool respose, bool lock)
 {
     if (lock)
     {
         Urho3D::MutexLock m(mutexPerforming_);
         if (performing_)
         {
-            LogError("HttpRequest::Header: Not completed yet");
+            // @note Atm this function cant be invoked for a response
+            LogError(String("HttpRequest::") + (respose ? "RemoveResponseHeader: Request is not completed yet" : "RemoveHeader: Cannot remove a running requests headers"));
+            return false;
+        }
+    }
+    HttpHeaderMap &headers = (respose ? responseData_.headers : requestData_.headers);
+    HttpHeaderMap::iterator found = headers.find(name);
+    while (found != headers.end())
+    {
+        headers.erase(found);
+        return true;
+    }
+    return false;
+}
+
+bool HttpRequest::HasHeaderInternal(const String &name, bool respose, bool lock)
+{
+    if (lock)
+    {
+        Urho3D::MutexLock m(mutexPerforming_);
+        if (performing_)
+        {
+            LogError(String("HttpRequest::") + (respose ? "HasResponseHeader: Request is not completed yet" : "HasHeader: Cannot access a running requests headers"));
+            return false;
+        }
+    }
+    const HttpHeaderMap &headers = (respose ? responseData_.headers : requestData_.headers);
+    return (headers.find(name.CString()) != headers.end());
+}
+
+String HttpRequest::HeaderInternal(const String &name, bool respose, bool lock)
+{
+    if (lock)
+    {
+        Urho3D::MutexLock m(mutexPerforming_);
+        if (performing_)
+        {
+            LogError(String("HttpRequest::") + (respose ? "ResponseHeader: Request is not completed yet" : "Header: Cannot access a running requests headers"));
             return "";
         }
     }
-    HttpHeaderMap::const_iterator header = responseData_.Headers.find(name.CString());
-    if (header != responseData_.Headers.end())
+    const HttpHeaderMap &headers = (respose ? responseData_.headers : requestData_.headers);
+    HttpHeaderMap::const_iterator header = headers.find(name.CString());
+    if (header != headers.end())
         return header->second;
     return "";
 }
 
-int HttpRequest::HeaderIntInternal(const String &name, int defaultValue, bool lock)
+int HttpRequest::HeaderIntInternal(const String &name, int defaultValue, bool respose, bool lock)
 {
     if (lock)
     {
         Urho3D::MutexLock m(mutexPerforming_);
         if (performing_)
         {
-            LogError("HttpRequest::HeaderInt: Not completed yet");
+            LogError(String("HttpRequest::") + (respose ? "ResponseHeaderInt: Request is not completed yet" : "HeaderInt: Cannot access a running requests headers"));
             return 0;
         }
     }
-    HttpHeaderMap::const_iterator header = responseData_.Headers.find(name.CString());
-    if (header != responseData_.Headers.end())
-    {
-        if (header->second.Empty())
-            return defaultValue;
-        int value = Urho3D::ToInt(header->second);
-        // 0 is can also mean error in parsing a int
-        if (value == 0 && header->second[0] != '0')
-            return defaultValue;
-        return value;
-    }
-    return defaultValue;
+    const HttpHeaderMap &headers = (respose ? responseData_.headers : requestData_.headers);
+
+    String valueStr;
+    HttpHeaderMap::const_iterator header = headers.find(name.CString());
+    if (header != headers.end())
+        valueStr = header->second;
+
+    if (valueStr.Empty())
+        return defaultValue;
+    int value = Urho3D::ToInt(valueStr);
+    // 0 is can also mean error in parsing a int
+    if (value == 0 && valueStr[0] != '0')
+        return defaultValue;
+    return value;
 }
 
-uint HttpRequest::HeaderUIntInternal(const String &name, uint defaultValue, bool lock)
+uint HttpRequest::HeaderUIntInternal(const String &name, uint defaultValue, bool respose, bool lock)
 {
     if (lock)
     {
         Urho3D::MutexLock m(mutexPerforming_);
         if (performing_)
         {
-            LogError("HttpRequest::HeaderUInt: Not completed yet");
+            LogError(String("HttpRequest::") + (respose ? "ResponseHeaderUInt: Request is not completed yet" : "HeaderUInt: Cannot access a running requests headers"));
             return 0;
         }
     }
-    HttpHeaderMap::const_iterator header = responseData_.Headers.find(name.CString());
-    if (header != responseData_.Headers.end())
-    {
-        if (header->second.Empty())
-            return defaultValue;
-        uint value = Urho3D::ToUInt(header->second);
-        // 0 is can also mean error in parsing a uint
-        if (value == 0 && header->second[0] != '0')
-            return defaultValue;
-        return value;
-    }
-    return defaultValue;
+    const HttpHeaderMap &headers = (respose ? responseData_.headers : requestData_.headers);
+
+    String valueStr;
+    HttpHeaderMap::const_iterator header = headers.find(name.CString());
+    if (header != headers.end())
+        valueStr = header->second;
+
+    if (valueStr.Empty())
+        return defaultValue;
+    uint value = Urho3D::ToUInt(valueStr);
+    // 0 is can also mean error in parsing a uint
+    if (value == 0 && valueStr[0] != '0')
+        return defaultValue;
+    return value;
 }
 
 bool HttpRequest::Prepare()
@@ -273,8 +403,8 @@ void HttpRequest::Perform()
     requestData_.msecSpent = timer.GetMSec(false);
 
     // Compact unused bytes from input buffers
-    responseData_.HeadersBytes.Compact();
-    responseData_.BodyBytes.Compact();
+    responseData_.headersBytes.Compact();
+    responseData_.bodyBytes.Compact();
 
     if (verbose_)
         DumpResponse(true, true);
@@ -303,16 +433,20 @@ void HttpRequest::Cleanup()
 void HttpRequest::DumpResponse(bool headers, bool body)
 {
     if (headers || body)
-        PrintRaw(Urho3D::ToString("\nHttpRequest: %s\n\n", requestData_.OptionValueString(Options::Url).CString()));
+    {
+        String str;
+        str.AppendWithFormat("\nHttpRequest:\n  Url: %s\n  Completed in: %d msec\n\n", requestData_.OptionValueString(Options::Url).CString(), requestData_.msecSpent);
+        PrintRaw(str);
+    }
 
     if (headers)
     {
         String str;
-        str.AppendWithFormat("HEADERS %d bytes", responseData_.HeadersBytes.Size());
+        str.AppendWithFormat("HEADERS %d bytes", responseData_.headersBytes.Size());
         str.Append("\n-------------------------------------------------------------------------------\n");
         //str.Append((const char*)&responseData_.HeadersBytes[0], responseData_.HeadersBytes.Size());
         //str.Append("\nPARSED HEADERS\n");
-        for (HttpHeaderMap::const_iterator iter = responseData_.Headers.begin(); iter != responseData_.Headers.end(); ++iter)
+        for (HttpHeaderMap::const_iterator iter = responseData_.headers.begin(); iter != responseData_.headers.end(); ++iter)
             str.AppendWithFormat("'%s' '%s'\n", iter->first.CString(), iter->second.CString());
         str.Append("\n");
         PrintRaw(str);
@@ -320,9 +454,9 @@ void HttpRequest::DumpResponse(bool headers, bool body)
     if (body)
     {
         String str;
-        str.AppendWithFormat("BODY %d bytes", responseData_.BodyBytes.Size());
+        str.AppendWithFormat("BODY %d bytes", responseData_.bodyBytes.Size());
         str.Append("\n-------------------------------------------------------------------------------\n");
-        str.Append((const char*)&responseData_.BodyBytes[0], responseData_.BodyBytes.Size());
+        str.Append((const char*)&responseData_.bodyBytes[0], responseData_.bodyBytes.Size());
         str.Append("\n\n");
         PrintRaw(str);
     }
@@ -332,7 +466,7 @@ size_t HttpRequest::ReadBody(void *buffer, uint size)
 {
     /* First body bytes are being received. Parse headers to determine exact size of
        incoming data. This way we don't have to resize the body buffer mid flight. */
-    if (responseData_.BodyBytes.Empty())
+    if (responseData_.bodyBytes.Empty() && !responseData_.headersBytes.Empty())
     {
         http_parser_settings settings;
         InitHttpParserSettings(&settings);
@@ -341,7 +475,7 @@ size_t HttpRequest::ReadBody(void *buffer, uint size)
         parser.data = this;
 
         http_parser_init(&parser, HTTP_RESPONSE);
-        http_parser_execute(&parser, &settings, (const char*)&responseData_.HeadersBytes[0], (size_t)responseData_.HeadersBytes.Size());
+        http_parser_execute(&parser, &settings, (const char*)&responseData_.headersBytes[0], (size_t)responseData_.headersBytes.Size());
 
         http_errno err = HTTP_PARSER_ERRNO(&parser);
         if (err != HPE_OK)
@@ -350,45 +484,45 @@ size_t HttpRequest::ReadBody(void *buffer, uint size)
             return 0; // Propagates a CURLE_WRITE_ERROR and aborts transfer
         }
         // Headers have been parsed. Reserve bodyBytes_ to "Content-Length" size.
-        responseData_.BodyBytes.Reserve(HeaderUIntInternal("Content-Length", HTTP_INITIAL_BODY_SIZE, false));
+        responseData_.bodyBytes.Reserve(HeaderUIntInternal("Content-Length", HTTP_INITIAL_BODY_SIZE, false));
     }
 
     Vector<u8> data(static_cast<u8*>(buffer), size);
-    responseData_.BodyBytes.Push(data);
+    responseData_.bodyBytes.Push(data);
     return size;
 }
 
 size_t HttpRequest::ReadHeaders(void *buffer, uint size)
 {
-    if (responseData_.HeadersBytes.Empty())
-        responseData_.HeadersBytes.Reserve(HTTP_MAX_HEADER_SIZE);
+    if (responseData_.headersBytes.Empty())
+        responseData_.headersBytes.Reserve(HTTP_MAX_HEADER_SIZE);
 
     Vector<u8> data(static_cast<u8*>(buffer), size);
-    responseData_.HeadersBytes.Push(data);
+    responseData_.headersBytes.Push(data);
     return size;
 }
 
 int HttpRequest::ReadStatus(const char *buffer, uint size)
 {
-    responseData_.StatusText = String(buffer, size);   
+    responseData_.statusText = String(buffer, size);   
     return 0; // http parser 0 = no error, continue parsing
 }
 
 int HttpRequest::ReadHeaderField(const char *buffer, uint size)
 {
-    responseData_.LastHeaderField = String(buffer, size);
+    responseData_.lastHeaderField = String(buffer, size);
     return 0; // http parser 0 = no error, continue parsing
 }
 
 int HttpRequest::ReadHeaderValue(const char *buffer, uint size)
 {
-    if (responseData_.LastHeaderField.Empty())
+    if (responseData_.lastHeaderField.Empty())
     {
         LogError("HttpRequest: Header parsing error. Value streamed prior to field.");
         return 1;
     }
-    responseData_.Headers[responseData_.LastHeaderField] = String(buffer, size);
-    responseData_.LastHeaderField = "";
+    responseData_.headers[responseData_.lastHeaderField] = String(buffer, size);
+    responseData_.lastHeaderField = "";
     return 0; // http parser 0 = no error, continue parsing
 }
 
