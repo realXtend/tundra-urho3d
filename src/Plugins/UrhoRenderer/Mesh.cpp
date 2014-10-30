@@ -4,10 +4,11 @@
 #include "Mesh.h"
 #include "GraphicsWorld.h"
 #include "Placeable.h"
-
 #include "Scene/Scene.h"
 #include "AttributeMetadata.h"
 #include "LoggingFunctions.h"
+#include "AssetRefListener.h"
+#include "MeshAsset.h"
 
 #include <Engine/Scene/Scene.h>
 #include <Engine/Scene/Node.h>
@@ -36,6 +37,7 @@ Mesh::Mesh(Urho3D::Context* context, Scene* scene) :
     static AttributeMetadata materialMetadata;
     materialMetadata.elementType = "AssetReference";
     materialRefs.SetMetadata(&materialMetadata);
+    meshAsset = new AssetRefListener();
 
     ParentEntitySet.Connect(this, &Mesh::UpdateSignals);
 }
@@ -111,9 +113,7 @@ void Mesh::UpdateSignals()
         Urho3D::Scene* urhoScene = world_->UrhoScene();
         adjustmentNode_ = urhoScene->CreateChild("AdjustmentNode");
         mesh_ = adjustmentNode_->CreateComponent<Urho3D::AnimatedModel>();
-
-        // Until we have proper asset support, just render something
-        mesh_->SetModel(GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Model>("Models/Box.mdl"));
+        meshAsset->Loaded.Connect(this, &Mesh::OnMeshAssetLoaded);
     }
 
     // Make sure we attach to the Placeable if exists.
@@ -188,7 +188,9 @@ void Mesh::AttributesChanged()
     }
     if (meshRef.ValueChanged())
     {
-        /// \todo Implement
+        if (meshRef.Get().ref.Trimmed().Empty())
+            LogDebug("Warning: Mesh \"" + this->parentEntity->Name() + "\" mesh ref was set to an empty reference!");
+        meshAsset->HandleAssetRefChange(&meshRef);
     }
     if (materialRefs.ValueChanged())
     {
@@ -198,6 +200,19 @@ void Mesh::AttributesChanged()
     {
         /// \todo Implement
     }
+}
+
+void Mesh::OnMeshAssetLoaded(AssetPtr asset)
+{
+    MeshAsset* meshAsset = dynamic_cast<MeshAsset*>(asset.Get());
+    if (!meshAsset)
+    {
+        LogError(String("EC_Mesh::CreateMesh: Mesh asset load finished for '" + asset->Name() + "', but downloaded asset was not of type MeshAsset!"));
+        return;
+    }
+
+    if (meshAsset && mesh_)
+        mesh_->SetModel(meshAsset->UrhoModel());
 }
 
 }

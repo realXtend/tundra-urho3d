@@ -16,7 +16,7 @@
 		</component>
 		<component type="Mesh" typeId="17" sync="true" temporary="false">
 			<attribute name="Transform" id="nodeTransformation" value="0,0,0,0,0,0,1,1,1" type="Transform" />
-			<attribute name="Mesh ref" id="meshRef" value="" type="AssetReference" />
+			<attribute name="Mesh ref" id="meshRef" value="Box.mdl" type="AssetReference" />
 			<attribute name="Skeleton ref" id="skeletonRef" value="" type="AssetReference" />
 			<attribute name="Material refs" id="materialRefs" value="" type="AssetReferenceList" />
 			<attribute name="Draw distance" id="drawDistance" value="0" type="real" />

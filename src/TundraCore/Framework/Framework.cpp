@@ -186,9 +186,6 @@ void Framework::Uninitialize()
 {
     SaveConfig();
 
-    // Delete scenes
-    scene.Reset();
-
     LogDebug("");
     LogDebug("Uninitializing");
     for(uint i = 0; i < modules.Size(); ++i)
@@ -196,6 +193,11 @@ void Framework::Uninitialize()
         LogDebug("  " + modules[i]->Name());
         modules[i]->Uninitialize();
     }
+
+    // Delete scenes, assets and factories before unloading modules
+    scene->Reset();
+    asset->Reset();
+
     LogDebug("Unloading");
     for(uint i = 0; i < modules.Size(); ++i)
     {
