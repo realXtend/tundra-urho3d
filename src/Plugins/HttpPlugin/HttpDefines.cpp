@@ -12,51 +12,76 @@ namespace Tundra
 namespace Http
 {
 
-// Method
-
-int MethodCurlOption(Method method)
+namespace Method
 {
-    switch(method)
+    int CurlOption(int method)
     {
-        case MethodPatch:
-        case MethodOptions:
-        case MethodDelete:
-            static_cast<int>(CURLOPT_CUSTOMREQUEST);
-        case MethodHead:
-            return static_cast<int>(CURLOPT_NOBODY);
-        case MethodGet:
-            return static_cast<int>(CURLOPT_HTTPGET);
-        case MethodPut:
-            return static_cast<int>(CURLOPT_PUT);
-        case MethodPost:
-            return static_cast<int>(CURLOPT_POST);
-        default:
-            break;
+        switch(method)
+        {
+            case Method::Patch:
+            case Method::Options:
+            case Method::Delete:
+                static_cast<int>(CURLOPT_CUSTOMREQUEST);
+            case Method::Head:
+                return static_cast<int>(CURLOPT_NOBODY);
+            case Method::Get:
+                return static_cast<int>(CURLOPT_HTTPGET);
+            case Method::Put:
+                return static_cast<int>(CURLOPT_PUT);
+            case Method::Post:
+                return static_cast<int>(CURLOPT_POST);
+            default:
+                break;
+        }
+        LogError(Urho3D::ToString("Http: Unknown HTTP::Method '%s'", static_cast<int>(method)));
+        return 0;
     }
-    LogError(Urho3D::ToString("Http: Unknown HTTP::Method '%s'", static_cast<int>(method)));
-    return 0;
-}
 
-Variant MethodCurlOptionValue(Method method)
-{
-    switch(method)
+    Variant CurlOptionValue(int method)
     {
-        case MethodPatch:
-            return Variant(String("PATCH"));
-        case MethodOptions:
-            return Variant(String("OPTIONS"));
-        case MethodDelete:
-            return Variant(String("DELETE"));
-        case MethodHead:
-        case MethodGet:
-        case MethodPut:
-        case MethodPost:
-            return Variant(1L);
-        default:
-            break;
+        switch(method)
+        {
+            case Method::Patch:
+                return Variant(String("PATCH"));
+            case Method::Options:
+                return Variant(String("OPTIONS"));
+            case Method::Delete:
+                return Variant(String("DELETE"));
+            case Method::Head:
+            case Method::Get:
+            case Method::Put:
+            case Method::Post:
+                return Variant(1);
+            default:
+                break;
+        }
+        LogError(Urho3D::ToString("Http: Unknown HTTP::Method '%s'", static_cast<int>(method)));
+        return Variant();
     }
-    LogError(Urho3D::ToString("Http: Unknown HTTP::Method '%s'", static_cast<int>(method)));
-    return Variant();
+
+    String ToString(int method)
+    {
+        switch(method)
+        {
+            case Method::Patch:
+                return "PATCH";
+            case Method::Options:
+                return "OPTIONS";
+            case Method::Delete:
+                return "DELETE";
+            case Method::Head:
+                return "HEAD";
+            case Method::Get:
+                return "GET";
+            case Method::Put:
+                return "PUT";
+            case Method::Post:
+                return "POST";
+            default:
+                break;
+        }
+        return "";
+    }
 }
 
 // RequestData
@@ -108,7 +133,8 @@ String RequestData::OptionValueString(const String &name)
 ResponseData::ResponseData() :
     httpVersionMajor(-1),
     httpVersionMinor(-1),
-    status(-1)
+    status(-1),
+    bytesPerSec(0.0)
 {
 }
 

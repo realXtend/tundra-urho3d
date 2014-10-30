@@ -5,6 +5,7 @@
 #include "HttpPluginApi.h"
 #include "HttpDefines.h"
 
+#include "Signals.h"
 #include "LoggingFunctions.h"
 
 #include <Engine/Core/Mutex.h>
@@ -19,11 +20,15 @@ struct http_parser;
 namespace Tundra
 {
 
+class JSONValue;
+
 /// HTTP request
 class TUNDRA_HTTP_API HttpRequest : public Urho3D::RefCounted
 {
     /// @cond PRIVATE
+    friend class HttpClient;
     friend class HttpWorkThread;
+    friend class HttpWorkQueue;
     friend size_t CurlReadBody(void *buffer, size_t size, size_t items, void *data);
     friend size_t CurlReadHeaders(char *buffer, size_t size, size_t items, void *data);
     friend int HttpParserStatus(http_parser *p, const char *buf, size_t len);
@@ -32,18 +37,44 @@ class TUNDRA_HTTP_API HttpRequest : public Urho3D::RefCounted
     /// @endcond
 
 public:
-    HttpRequest(Http::Method method, const String &url);
-    ~HttpRequest();
+    /// Returns if the request has started execution.
+    /** @see Finished. */
+    bool HasStarted();
+
+    /// Returns if the request is currently executing. Meaning started but not yet completed.
+    /** @see Finished. */
+    bool IsExecuting();
+
+    /// Returns if the request has completed execution.
+    /** @see Finished. */
+    bool HasCompleted();
 
     /// Sets verbose stdout logging for this request.
     /** Useful when you want to inspect outgoing and incoming headers and data. */
     void SetVerbose(bool enabled);
 
-    ///////////////////////// REQUEST
+    ///////////////////////// REQUEST API
 
-    /// Set request body and "Content-Type" header.
-    bool SetBody(const Vector<u8> &body, const String &contentType = "application/octet-stream");
-    bool SetBody(const String &body, const String &contentType = "text/plain"); ///< @overload
+    /// Returns the requests HTTP method as string.
+    /** Return string is uppercased, eg. "GET", "POST", "DELETE". */
+    String Method() const;
+
+    /// Returns the requests target URL.
+    String Url() const;
+
+    /// Return error string.
+    /** Empty string if no errors and request completed succesfully
+        or if request has not completed yet.
+        @see HasCompleted and Finished. */
+    String Error();
+
+    /// Set request body and Content-Type header.
+    bool SetBody(const Vector<u8> &body, const String &contentType = Http::ContentType::Binary);
+    bool SetBody(const String &body, const String &contentType = Http::ContentType::Text); ///< @overload
+
+    /// Set request body to @c json with Conten-Type header application/json.
+    bool SetBodyJSON(const JSONValue &json);
+    bool SetBodyJSON(const String &json); ///< @overload
 
     /// Clears any previously set body and "Content-Type" header.
     bool ClearBody();
@@ -66,7 +97,36 @@ public:
     /// Removes request header @c name.
     bool RemoveHeader(const String &name);
 
-    ///////////////////////// RESPONSE
+    ///////////////////////// RESPONSE API
+
+    /// Returns status code eg, 200 if request has completed successfully, otherwise -1.
+    int StatusCode();
+
+    /// Returns status text eg. "OK" if request has completed, otherwise empty string.
+    String Status();
+
+    /// Returns spent time in networking in milliseconds. 0 if request not completed yet.
+    uint DurationMSec();
+
+    /// Returns averate download speed in bytes/second. 0.f if request not completed yet.
+    float AvertageDownloadSpeed();
+
+    /// Returns the response body by reference if request has completed.
+    /** This function should be preferred to avoid copies of large data chunks.
+        @return Body if request has completed, otherwise an empty vector.*/
+    const Vector<u8> &ResponseBody();
+
+    /// Copies the response body to @c dest if request has completed.
+    /** This function useu memcpy and resizes @c dest. @see ResponseBody.
+        @return False if request has not completed or response body is empty. */
+    bool ResponseBodyCopyTo(Vector<u8> &dest);
+
+    /// Returns a copy of the response body if request has completed.
+    /** This function should be avoided. @see ResponseBody(). */
+    Vector<u8> ResponseBodyCopy();
+
+    /// @todo Implement response body to JSONValue and JSON string.
+    //JSONValue ResponseJSON();
 
     /// Returns if response contained header @c name.
     bool HasResponseHeader(const String &name);
@@ -82,10 +142,18 @@ public:
     /** @note If cannot be parsed to uint @c defaultValue is returned. */
     uint ResponseHeaderUInt(const String &name, uint defaultValue = 0);
 
-private:
-    void Cleanup();
+    ///////////////////////// SIGNALS
 
-    void DumpResponse(bool headers, bool body);
+    /// Emitted on completion.
+    /** @param Request pointer. You can store this to keep the ptr alive but it is not recommended.
+        @param HTTP response status code. -1 if request failed.
+        @param Error string. Empty string if request failed. */
+    Signal3<HttpRequestPtr&, int, const String&> Finished;
+
+private:
+    /// Constructed by HttpClient.
+    HttpRequest(int method, const String &url);
+    ~HttpRequest();
 
     /* Internal functions that let threaded code decide about mutex locking.
        Also act as common functions to set/get either response or request headers. */
@@ -96,10 +164,17 @@ private:
     int HeaderIntInternal(const String &name, int defaultValue, bool respose, bool lock = true);
     uint HeaderUIntInternal(const String &name, uint defaultValue, bool respose, bool lock = true);
 
-    /// Called by HttpWorkThread
-    bool Prepare();
-    /// Called by HttpWorkThread
+    /// Called by HttpWorkThread in worker thread context.
     void Perform();
+    /// Invoked in worker thread context.
+    bool Prepare();
+    /// Invoked in worker thread context.
+    void Cleanup();
+    
+    /// Called by HttpWorkQueue in main thread context.
+    void EmitCompletion(HttpRequestPtr &self);
+    /// Invoked in main threa context if verbose is enabled.
+    void DumpResponse(bool headers, bool body);
 
     /// Called by CurlReadBody
     size_t ReadBody(void *buffer, uint size);
@@ -116,8 +191,9 @@ private:
     Http::RequestData requestData_;
     Http::ResponseData responseData_;
 
-    Urho3D::Mutex mutexPerforming_;
-    bool performing_;
+    Urho3D::Mutex mutexExecute_;
+    bool executing_;
+    bool completed_;
     bool verbose_;
 
     Logger log;

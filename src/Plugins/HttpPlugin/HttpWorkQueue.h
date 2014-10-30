@@ -28,12 +28,13 @@ public:
     ~HttpWorkQueue();
 
     void Schedule(const HttpRequestPtr &request);
+    /// @todo Aborting ongoing/scheduled requests
 
     uint NumPending();
 
 private:
-    void Erase(HttpRequestPtr request);
-    void Erase(HttpRequest *request);
+    /// @note You have to ensure mutexCompleted_ is locked prior to calling this function.
+    HttpRequestPtrList::Iterator FindExecuting(HttpRequest *request);
 
     void StartThreads(uint max);
     void StopThreads();
@@ -42,15 +43,35 @@ private:
     void Update(float frametime);
 
     /// Called by HttpWorkThread
-    HttpRequest *Next();
-    void Completed(HttpRequest *request);
+    HttpRequestPtr Next();
+    void Completed(HttpRequestPtr request);
 
     float durationNoWork_;
     uint numMaxThreads_;
     HttpWorkThreadList threads_;
 
     Urho3D::Mutex mutexRequests_;
+    Urho3D::Mutex mutexCompleted_;
+
+    /// Waiting requests.
+    /** Accessed from multiple thread,
+        protected by mutexRequests_. */
     HttpRequestPtrList requests_;
+
+    /// Completed requests.
+    /** Accessed from multiple thread,
+        protected by mutexCompleted_. */
+    HttpRequestPtrList completed_;
+
+    /// Currently executing requests.
+    HttpRequestPtrList executing_;
+
+    /** Newly created requests that will be moved
+        to requests_ in the next frame update.
+        This protects worker threads from starting
+        the request while main thread is still
+        setting body/headers etc. */
+    HttpRequestPtrList created_;
 
     Logger log;
 };

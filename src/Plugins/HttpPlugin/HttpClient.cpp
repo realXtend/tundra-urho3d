@@ -17,12 +17,7 @@ HttpClient::HttpClient(Framework *framework) :
 {
     CURLcode err = curl_global_init(CURL_GLOBAL_DEFAULT);
     if (err == CURLE_OK)
-    {
         queue_ = new HttpWorkQueue();
-
-        // Debug
-        //Get("http://meshmoon.data.s3.amazonaws.com/avatars/kate/kate.png"); //->SetVerbose(true);
-    }
     else
         LogErrorF("[HttpClient] Failed to initialize curl: %s", curl_easy_strerror(err));
 }
@@ -40,22 +35,22 @@ HttpClient::~HttpClient()
 
 HttpRequestPtr HttpClient::Get(const String &url)
 {
-    return Shedule(Http::MethodGet, url);
+    return Shedule(Http::Method::Get, url);
 }
 
 HttpRequestPtr HttpClient::Head(const String &url)
 {
-    return Shedule(Http::MethodHead, url);
+    return Shedule(Http::Method::Head, url);
 }
 
 HttpRequestPtr HttpClient::Options(const String &url)
 {
-    return Shedule(Http::MethodOptions, url);
+    return Shedule(Http::Method::Options, url);
 }
 
 HttpRequestPtr HttpClient::Post(const String &url, const Vector<u8> &body, const String &contentType)
 {
-    return Shedule(Http::MethodPost, url, body, contentType);
+    return Shedule(Http::Method::Post, url, body, contentType);
 }
 
 HttpRequestPtr HttpClient::Post(const String &url, const String &body, const String &contentType)
@@ -66,7 +61,7 @@ HttpRequestPtr HttpClient::Post(const String &url, const String &body, const Str
 
 HttpRequestPtr HttpClient::Put(const String &url, const Vector<u8> &body, const String &contentType)
 {
-    return Shedule(Http::MethodPost, url, body, contentType);
+    return Shedule(Http::Method::Post, url, body, contentType);
 }
 
 HttpRequestPtr HttpClient::Put(const String &url, const String &body, const String &contentType)
@@ -77,7 +72,7 @@ HttpRequestPtr HttpClient::Put(const String &url, const String &body, const Stri
 
 HttpRequestPtr HttpClient::Patch(const String &url, const Vector<u8> &body, const String &contentType)
 {
-    return Shedule(Http::MethodPost, url, body, contentType);
+    return Shedule(Http::Method::Post, url, body, contentType);
 }
 
 HttpRequestPtr HttpClient::Patch(const String &url, const String &body, const String &contentType)
@@ -88,12 +83,12 @@ HttpRequestPtr HttpClient::Patch(const String &url, const String &body, const St
 
 HttpRequestPtr HttpClient::Delete(const String &url)
 {
-    return Shedule(Http::MethodDelete, url);
+    return Shedule(Http::Method::Delete, url);
 }
 
 // Private API
 
-HttpRequestPtr HttpClient::Shedule(Http::Method method, const String &url)
+HttpRequestPtr HttpClient::Shedule(int method, const String &url)
 {
     if (!queue_)
         return HttpRequestPtr();
@@ -103,7 +98,7 @@ HttpRequestPtr HttpClient::Shedule(Http::Method method, const String &url)
     return request;
 }
 
-HttpRequestPtr HttpClient::Shedule(Http::Method method, const String &url, const Vector<u8> &body, const String &contentType)
+HttpRequestPtr HttpClient::Shedule(int method, const String &url, const Vector<u8> &body, const String &contentType)
 {
     if (!queue_)
         return HttpRequestPtr();
