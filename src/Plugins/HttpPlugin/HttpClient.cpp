@@ -61,7 +61,7 @@ HttpRequestPtr HttpClient::Post(const String &url, const String &body, const Str
 
 HttpRequestPtr HttpClient::Put(const String &url, const Vector<u8> &body, const String &contentType)
 {
-    return Shedule(Http::Method::Post, url, body, contentType);
+    return Shedule(Http::Method::Put, url, body, contentType);
 }
 
 HttpRequestPtr HttpClient::Put(const String &url, const String &body, const String &contentType)
@@ -72,7 +72,7 @@ HttpRequestPtr HttpClient::Put(const String &url, const String &body, const Stri
 
 HttpRequestPtr HttpClient::Patch(const String &url, const Vector<u8> &body, const String &contentType)
 {
-    return Shedule(Http::Method::Post, url, body, contentType);
+    return Shedule(Http::Method::Patch, url, body, contentType);
 }
 
 HttpRequestPtr HttpClient::Patch(const String &url, const String &body, const String &contentType)
