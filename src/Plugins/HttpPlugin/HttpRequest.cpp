@@ -245,7 +245,7 @@ bool HttpRequest::Prepare()
             CURLcode res = curl_easy_setopt(requestData_.curlHandle, iter->second_.option, iter->second_.value.GetString().CString());
             if (res != CURLE_OK)
             {
-                LogError(Urho3D::ToString("HttpRequest: Failed to initialze request option '%s'='%s': %s", iter->first_.CString(), iter->second_.value.GetString(), curl_easy_strerror(res)));
+                LogError(Urho3D::ToString("HttpRequest: Failed to initialze request option '%s'='%s': %s", iter->first_.CString(), iter->second_.value.GetString().CString(), curl_easy_strerror(res)));
                 return false;
             }
             else if (verbose_)
