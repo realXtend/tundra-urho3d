@@ -233,7 +233,7 @@ void KristalliProtocol::StopServer()
         // We may have connections registered by other server modules. Only clear native connections
         for(auto iter = connections.Begin(); iter != connections.End();)
         {
-            if (dynamic_cast<KNetUserConnection*>(iter->get()))
+            if (dynamic_cast<KNetUserConnection*>(iter->Get()))
                 iter = connections.Erase(iter);
             else
                 ++iter;
@@ -256,7 +256,7 @@ void KristalliProtocol::NewConnectionEstablished(kNet::MessageConnection *source
     
     UserConnectionPtr connection = UserConnectionPtr(new KNetUserConnection(this));
     connection->userID = AllocateNewConnectionID();
-    std::tr1::static_pointer_cast<KNetUserConnection>(connection)->connection = source;
+    static_cast<KNetUserConnection*>(connection.Get())->connection = source;
     connections.Push(connection);
 
     // For TCP mode sockets, set the TCP_NODELAY option to improve latency for the messages we send.
@@ -265,7 +265,7 @@ void KristalliProtocol::NewConnectionEstablished(kNet::MessageConnection *source
 
     LogInfo(String("User connected from ") + String(source->RemoteEndPoint().ToString().c_str()) + String(", connection ID ") + String(connection->userID));
 
-    ClientConnectedEvent.Emit(connection.get());
+    ClientConnectedEvent.Emit(connection.Get());
 }
 
 void KristalliProtocol::ClientDisconnected(kNet::MessageConnection *source)
@@ -273,9 +273,9 @@ void KristalliProtocol::ClientDisconnected(kNet::MessageConnection *source)
     // Delete from connection list if it was a known user
     for(auto iter = connections.Begin(); iter != connections.End(); ++iter)
     {
-        if ((*iter)->ConnectionType() == "knet" && std::tr1::static_pointer_cast<KNetUserConnection>(*iter)->connection == source)
+        if ((*iter)->ConnectionType() == "knet" && static_cast<KNetUserConnection*>(iter->Get())->connection == source)
         {
-            ClientDisconnectedEvent.Emit(iter->get());
+            ClientDisconnectedEvent.Emit(iter->Get());
             
             LogInfo("User disconnected, connection ID " + String((*iter)->userID));
             connections.Erase(iter);
@@ -326,7 +326,7 @@ u32 KristalliProtocol::AllocateNewConnectionID() const
 UserConnectionPtr KristalliProtocol::UserConnectionBySource(kNet::MessageConnection* source) const
 {
     for(auto iter = connections.Begin(); iter != connections.End(); ++iter)
-        if ((*iter)->ConnectionType() == "knet" && std::tr1::static_pointer_cast<KNetUserConnection>(*iter)->connection == source)
+        if ((*iter)->ConnectionType() == "knet" && static_cast<KNetUserConnection*>(iter->Get())->connection == source)
             return *iter;
 
     return UserConnectionPtr();

@@ -26,10 +26,10 @@ public:
     bool IsServer() { return false; }
 
     /// Returns pointer to KristalliProtocolModule
-    SharedPtr<KristalliProtocol> KristalliProtocol() const;
+    SharedPtr<Tundra::KristalliProtocol> KristalliProtocol() const;
 
     /// Returns pointer to sync manager
-    SharedPtr<SyncManager> SyncManager() const;
+    SharedPtr<Tundra::SyncManager> SyncManager() const;
 
     /// Returns client pointer
     ClientPtr Client() const;

@@ -12,6 +12,7 @@
 
 namespace Tundra
 {
+
 /// Implements Tundra server functionality.
 /// \todo Implement
 class TUNDRALOGIC_API Server : public Object
@@ -34,7 +35,7 @@ public:
     UserConnectionList& UserConnections() const;
 
     /// Set current action sender. Called by SyncManager
-    void SetActionSender(const UserConnectionPtr &user) { UNREFERENCED_PARAM(user); };
+    void SetActionSender(UserConnection *user) { UNREFERENCED_PARAM(user); };
 
     /// Returns the backend server object.
     /** Use this object to Broadcast messages to all currently connected clients.

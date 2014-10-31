@@ -25,7 +25,7 @@ namespace Tundra
     struct MsgEntityAction;
     struct UserConnectedResponseData;
 
-    typedef std::tr1::shared_ptr<UserConnection> UserConnectionPtr;
+    typedef Urho3D::SharedPtr<UserConnection> UserConnectionPtr;
     typedef Urho3D::Vector<UserConnectionPtr> UserConnectionList;
     typedef Urho3D::SharedPtr<KNetUserConnection> KNetUserConnectionPtr;
 

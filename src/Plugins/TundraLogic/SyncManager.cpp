@@ -424,14 +424,14 @@ void SyncManager::NewUserConnected(const UserConnectionPtr &user)
     //    this, SLOT(HandleNetworkMessage(UserConnection*, kNet::packet_id_t, kNet::message_id_t, const char *, size_t)));
 
     // Mark all entities in the sync state as new so we will send them
-    user->syncState = SharedPtr<SceneSyncState>(new SceneSyncState(user.get(), user->ConnectionId(), owner_->IsServer()));
+    user->syncState = SharedPtr<SceneSyncState>(new SceneSyncState(user.Get(), user->ConnectionId(), owner_->IsServer()));
     user->syncState->SetParentScene(scene_);
 
     if(interestmanager_) //If the server is running InterestManager, inform the connected user that the server wants camera updates
         SendCameraUpdateRequest(user, true);
 
     if (owner_->IsServer())
-        SceneStateCreated.Emit(user.get(), user->syncState.Get());
+        SceneStateCreated.Emit(user.Get(), user->syncState.Get());
      //   emit SceneStateCreated(user.get(), user->syncState.get());
 
     for(auto iter = scene->Begin(); iter != scene->End(); ++iter)
@@ -814,7 +814,7 @@ void SyncManager::ReplicateComponentType(u32 typeId, UserConnection* connection)
             UserConnectionList users = owner_->Server()->AuthenticatedUsers();
             for(auto i = users.Begin(); i != users.End(); ++i)
             {
-                if ((*i)->ProtocolVersion() >= ProtocolCustomComponents && (*i).get() != componentTypeSender_)
+                if ((*i)->ProtocolVersion() >= ProtocolCustomComponents && (*i).Get() != componentTypeSender_)
                     (*i)->Send(cRegisterComponentTypeMessage, true, true, ds);
             }
         }
@@ -998,14 +998,14 @@ void SyncManager::Update(f64 frametime)
             {
                 // As of now only native clients understand the optimized rigid body sync message.
                 // This may change with future protocol versions
-                if (dynamic_cast<KNetUserConnection*>(i->get()))
+                if (dynamic_cast<KNetUserConnection*>(i->Get()))
                 { 
                     // First send out all changes to rigid bodies.
                     // After processing this function, the bits related to rigid body states have been cleared,
                     // so the generic sync will not double-replicate the rigid body positions and velocities.
-                    ReplicateRigidBodyChanges((*i).get());
+                    ReplicateRigidBodyChanges((*i).Get());
                 }
-                ProcessSyncState((*i).get());
+                ProcessSyncState((*i).Get());
             }
     }
     else
@@ -3050,7 +3050,7 @@ void SyncManager::HandleEntityAction(UserConnection* source, MsgEntityAction& ms
         Server* server = owner_->Server().Get();
         if (server)
         {
-            server->SetActionSender(source->shared_from_this());
+            server->SetActionSender(source);
         }
     }
     
@@ -3074,7 +3074,7 @@ void SyncManager::HandleEntityAction(UserConnection* source, MsgEntityAction& ms
     {
         msg.executionType = (u8)EntityAction::Local;
         foreach(UserConnectionPtr userConn, owner_->Server()->UserConnections())
-            if (userConn.get() != source) // The EC action will not be sent to the machine that originated the request to send an action to all peers.
+            if (userConn.Get() != source) // The EC action will not be sent to the machine that originated the request to send an action to all peers.
                 userConn->syncState->queuedActions.push_back(msg);
         handled = true;
     }
