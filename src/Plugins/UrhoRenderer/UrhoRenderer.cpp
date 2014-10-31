@@ -13,7 +13,7 @@
 #include "SceneAPI.h"
 #include "AssetAPI.h"
 #include "Entity.h"
-#include "MeshAsset.h"
+#include "UrhoMeshAsset.h"
 #include "Scene/Scene.h"
 #include "LoggingFunctions.h"
 #include "GenericAssetFactory.h"
@@ -45,12 +45,7 @@ void UrhoRenderer::Load()
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Camera>()));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Light>()));
 
-    StringVector meshExtensions;
-    /// \todo Add Assimp types
-    meshExtensions.Push(".mdl");
-    meshExtensions.Push(".mesh");
-
-    framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<MeshAsset>("Mesh", meshExtensions)));
+    framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<UrhoMeshAsset>("UrhoMesh", ".mdl")));
 }
 
 void UrhoRenderer::Initialize()
