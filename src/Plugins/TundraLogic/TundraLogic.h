@@ -37,8 +37,8 @@ public:
     /// Returns server pointer
     ServerPtr Server() const;
 
-    /// Connect to server, for testing/debugging only.
-    void ServerConnectDebugTest();
+    /// For console command
+    void HandleLogin(const StringVector &params) const;
 
 private:
     void Load() override;

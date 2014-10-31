@@ -19,6 +19,7 @@
 #include "LocalAssetStorage.h"
 
 #include <Timer.h>
+#include <StringUtils.h>
 
 namespace Tundra
 {
@@ -54,25 +55,33 @@ void TundraLogic::Initialize()
     server_ = SharedPtr<Tundra::Server>(new Tundra::Server(this));
     syncManager_ = SharedPtr<Tundra::SyncManager>(new Tundra::SyncManager(this)); // Syncmanager expects client (and server) to exist
     
-    framework->Console()->RegisterCommand("connect", "Test connect to server", this, &TundraLogic::ServerConnectDebugTest);
-
-   // // Expose client and server to everyone
-   //// framework->RegisterDynamicObject("client", client_.get());
-   // framework->Console()->RegisterCommand("connect",
-   //     "Connects to a server. Usage: connect(address,port,username,password,protocol)", client_.Get(), Client::Login );
-   // 
-   // //framework->Console()->RegisterCommand("connect",
-   // //    "Connects to a server. Usage: connect(address,port,username,password,protocol)",
-   // //    client_.get(), SLOT(Login(const QString &, unsigned short, const QString &, const QString&, const QString &)));
+    framework->Console()->RegisterCommand("connect", "Connects to a server. Usage: connect(address,port,username,password,protocol)")->ExecutedWith.Connect(
+        this, &TundraLogic::HandleLogin);
 
     framework->Console()->RegisterCommand("disconnect", "Disconnects from a server.", client_.Get(), &Client::Logout);
 
     kristalliProtocol_->Initialize();
 }
 
-void TundraLogic::ServerConnectDebugTest()
+void TundraLogic::HandleLogin(const StringVector &params) const
 {
-    client_->Login("localhost", 30000, "tundram", "", "tcp");
+    String address = "localhost";
+    if (params.Size() >= 1)
+        address = params[0];
+    unsigned short port = 3456;
+    if (params.Size() >= 2)
+        port = (unsigned short)Urho3D::ToUInt(params[1]);
+    String username = "TundraM";
+    if (params.Size() >= 3)
+        username = params[2];
+    String password = "";
+    if (params.Size() >= 4)
+        password = params[3];
+    String protocol = "upd";
+    if (params.Size() >= 5)
+        protocol = params[4];
+
+    client_->Login(address, port, username, password, protocol);
 }
 
 void TundraLogic::Uninitialize()
