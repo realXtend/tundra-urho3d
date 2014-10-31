@@ -54,6 +54,8 @@ void TundraLogic::Initialize()
     server_ = SharedPtr<Tundra::Server>(new Tundra::Server(this));
     syncManager_ = SharedPtr<Tundra::SyncManager>(new Tundra::SyncManager(this)); // Syncmanager expects client (and server) to exist
     
+    framework->Console()->RegisterCommand("connect", "Test connect to server", this, &TundraLogic::ServerConnectDebugTest);
+
    // // Expose client and server to everyone
    //// framework->RegisterDynamicObject("client", client_.get());
    // framework->Console()->RegisterCommand("connect",
@@ -66,7 +68,11 @@ void TundraLogic::Initialize()
     framework->Console()->RegisterCommand("disconnect", "Disconnects from a server.", client_.Get(), &Client::Logout);
 
     kristalliProtocol_->Initialize();
+}
 
+void TundraLogic::ServerConnectDebugTest()
+{
+    client_->Login("localhost", 30000, "tundram", "", "tcp");
 }
 
 void TundraLogic::Uninitialize()
@@ -78,7 +84,7 @@ void TundraLogic::Uninitialize()
     server_.Reset();
 }
 
-void TundraLogic::OnUpdate(float /*frametime*/)
+void TundraLogic::OnUpdate(float frametime)
 {
     // Load startup scene on first round of the main loop, as all modules are initialized
     if (!startupSceneLoaded)
@@ -87,6 +93,19 @@ void TundraLogic::OnUpdate(float /*frametime*/)
         startupSceneLoaded = true;
     }
 
+    kristalliProtocol_->Update(frametime);
+    if (client_)
+        client_->Update(frametime);
+    if (server_)
+        server_->Update(frametime);
+    // Run scene sync
+    if (syncManager_)
+        syncManager_->Update(frametime);
+    // Run scene interpolation
+    Scene *scene = GetFramework()->Scene()->MainCameraScene();
+    if (scene)
+        scene->UpdateAttributeInterpolations(frametime);
+    
 }
 
 void TundraLogic::LoadStartupScene()

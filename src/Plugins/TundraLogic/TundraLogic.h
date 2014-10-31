@@ -37,6 +37,9 @@ public:
     /// Returns server pointer
     ServerPtr Server() const;
 
+    /// Connect to server, for testing/debugging only.
+    void ServerConnectDebugTest();
+
 private:
     void Load() override;
     void Initialize() override;

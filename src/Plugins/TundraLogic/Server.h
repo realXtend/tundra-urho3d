@@ -24,7 +24,7 @@ public:
     ~Server() {};
 
     /// Perform any per-frame processing
-    void Update(f64 frametime);
+    void Update(float frametime) { };
 
     /// Get matching userconnection from a messageconnection, or null if unknown
     /// @todo Rename to UserConnection(ForMessageConnection) or similar.

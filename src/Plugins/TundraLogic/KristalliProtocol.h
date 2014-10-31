@@ -30,7 +30,7 @@ public:
     void Load();
     void Initialize();
     void Uninitialize();
-    void Update(f64 frametime);
+    void Update(float frametime);
 
     /// Connects to the Kristalli server at the given address.
     void Connect(const char *ip, unsigned short port, kNet::SocketTransportLayer transport);

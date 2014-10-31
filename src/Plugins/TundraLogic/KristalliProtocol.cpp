@@ -90,7 +90,7 @@ void KristalliProtocol::OpenKNetLogWindow()
     LogError("Cannot open kNet logging window - kNet was not built with Qt enabled!");
 }
 
-void KristalliProtocol::Update(f64 /*frametime*/)
+void KristalliProtocol::Update(float /*frametime*/)
 {
     // Pulls all new inbound network messages and calls the message handler we've registered
     // for each of them.
@@ -298,7 +298,6 @@ void KristalliProtocol::HandleMessage(kNet::MessageConnection *source, kNet::pac
     try
     {
         NetworkMessageReceived.Emit(source, packetId, messageId, data, numBytes);
-       // emit NetworkMessageReceived(source, packetId, messageId, data, numBytes);
     }
     catch(std::exception &e)
     {
