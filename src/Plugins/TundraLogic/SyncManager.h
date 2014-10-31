@@ -14,7 +14,6 @@
 #include "SceneFwd.h"
 #include "AttributeChangeType.h"
 #include "EntityAction.h"
-//#include "InterestManager.h"
 
 #include <Object.h>
 
@@ -40,11 +39,6 @@ public:
     
     /// Create new replication state for user and dirty it (server operation only)
     void NewUserConnected(const UserConnectionPtr &user);
-
-    /// Get and Set the IM
-    InterestManager* GetInterestManager();
-
-    void SetInterestManager(InterestManager* im);
 
     // slots
 
@@ -213,9 +207,6 @@ private:
     char removeEntityBuffer_[1024];
     char removeAttrsBuffer_[1024];
     std::vector<u8> changedAttributes_;
-
-    /// Interest manager currently in use, null if none
-    InterestManager *interestmanager_;
 
     /// The sender of a component type. Used to avoid sending component description back to sender
     UserConnection* componentTypeSender_;

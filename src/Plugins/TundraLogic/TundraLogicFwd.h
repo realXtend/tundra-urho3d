@@ -10,7 +10,6 @@ namespace Tundra
     class TundraLogic;
     class KristalliProtocol;
     class SyncManager;
-    class InterestManager;
     class Client;
     class Server;
     class UserConnection;

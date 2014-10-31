@@ -23,10 +23,7 @@
 #include "Profiler.h"
 #include "Placeable.h"
 
-
-//#include <Engine/Container/ForEach.h>
-#include <Engine/Core/StringUtils.h>
-
+#include <StringUtils.h>
 
 #include <cstring>
 
@@ -112,7 +109,6 @@ SyncManager::SyncManager(TundraLogic* owner) :
     owner_(owner),
     framework_(owner->GetFramework()),
     updatePeriod_(1.0f / 20.0f),
-    interestmanager_(0),
     updateAcc_(0.0),
     maxLinExtrapTime_(3.0f),
     noClientPhysicsHandoff_(false),
@@ -120,20 +116,16 @@ SyncManager::SyncManager(TundraLogic* owner) :
 {
     if (framework_->HasCommandLineParameter("--noclientphysics"))
         noClientPhysicsHandoff_ = true;
-
-    /// \todo Interest Management parameters
     
     GetClientExtrapolationTime();
 
     // Connect to network messages from the server
     serverConnection_ = owner_->Client()->ServerUserConnection();
     serverConnection_->NetworkMessageReceived.Connect(this, &SyncManager::HandleNetworkMessage);
-    //connect(serverConnection_.get(), SIGNAL(NetworkMessageReceived(UserConnection*, kNet::packet_id_t, kNet::message_id_t, const char *, size_t)), this, SLOT(HandleNetworkMessage(UserConnection*, kNet::packet_id_t, kNet::message_id_t, const char *, size_t)));
-
+    
     // Connect to SceneAPI's PlaceholderComponentTypeRegistered signal
     framework_->Scene()->PlaceholderComponentTypeRegistered.Connect(this, &SyncManager::OnPlaceholderComponentTypeRegistered);
-   
-    //connect(framework_->Scene(), SIGNAL(PlaceholderComponentTypeRegistered(u32, const QString&, AttributeChange::Type)), this, SLOT(OnPlaceholderComponentTypeRegistered(u32, const QString&, AttributeChange::Type)));
+  
 }
 
 SyncManager::~SyncManager()
@@ -151,83 +143,6 @@ void SyncManager::SendCameraUpdateRequest(UserConnectionPtr conn, bool enabled)
     conn->Send(cCameraOrientationRequest, true, true, ds);
 }
 
-///\ todo interest management
-//void SyncManager::UpdateInterestManagerSettings(bool enabled, bool eucl, bool ray, bool rel, int critrange, int relrange, int updateint, int raycastint)
-//{
-//    if(framework_->HasCommandLineParameter("--server"))
-//    {
-//        // Loop through all connections and send the CameraOrientationRequest messages to the clients.
-//        UserConnectionList &users = owner_->Server()->UserConnections();
-//
-//        for(UserConnectionList::iterator i = users.begin(); i != users.end(); ++i)
-//            if ((*i)->syncState)
-//            {
-//                SendCameraUpdateRequest((*i), enabled);
-//                (*i)->syncState->visibleEntities.clear();
-//                (*i)->syncState->relevanceFactors.clear();
-//                (*i)->syncState->lastUpdatedEntitys_.clear();
-//                (*i)->syncState->lastRaycastedEntitys_.clear();
-//            }
-//
-//        InterestManager *IM = 0;
-//        MessageFilter *filter = 0;
-//
-//        if(enabled == false)    //If IM is not enabled, delete the IM
-//        {
-//            SetInterestManager(0);
-//            return;
-//        }
-//
-//        IM = GetInterestManager();
-//
-//        if(eucl && ray && rel)          //In other words the EA3 algorithm
-//        {
-//            if(framework_->IsHeadless())    //If running in headless mode, do not enable EA3. Instead, use A3. Raycasting cannot be done in headless mode at the moment.
-//            {
-//                LogError("[InterestManager] EA3 algorithm cannot be used in headless mode. Fallbacking to A3 algorithm.");
-//                filter = new A3Filter(IM, critrange, relrange, updateint, true);
-//            }
-//            else
-//                filter = new EA3Filter(IM, critrange, relrange, raycastint, updateint, true);
-//        }
-//        else if(eucl && rel && !ray)    //Combination that the A3 uses
-//            filter = new A3Filter(IM, critrange, relrange, updateint, true);
-//
-//        else                            //As a last resort enable Euclidean Distance Filter
-//            filter = new EuclideanDistanceFilter(IM, critrange, true);
-//
-//        IM->AssignFilter(filter);
-//
-//        SetInterestManager(IM);
-//
-//        LogInfo("[InterestManager] Settings Updated. Using " + filter->ToString() + " to filter out unnecessary network messages.");
-//    }
-//}
-
-//InterestManager* SyncManager::GetInterestManager()
-//{
-//    if(!interestmanager_)
-//        interestmanager_ = InterestManager::getInstance();
-//
-//    return interestmanager_;
-//}
-
-void SyncManager::SetInterestManager(InterestManager *im)
-{
-    if(!im && !interestmanager_)
-        return;
-
-    else if(!im && interestmanager_)
-    {
-        /// \todo Uncomment after interest manager implemented
-        //delete interestmanager_;
-        interestmanager_ = 0;
-    }
-
-    else
-        interestmanager_ = im;
-}
-
 void SyncManager::SetUpdatePeriod(float period)
 {
     // Allow max 100fps
@@ -243,7 +158,7 @@ void SyncManager::GetClientExtrapolationTime()
     StringList extrapTimeParam = framework_->CommandLineParameters("--clientextrapolationtime");
     if (extrapTimeParam.Size() > 0)
     {
-        float newExtrapTime = ToFloat(extrapTimeParam.Front());//.toFloat(&ok);
+        float newExtrapTime = ToFloat(extrapTimeParam.Front());
         if (newExtrapTime >= 0.0f)
         {
             // First update period is always interpolation, and extrapolation time is in addition to that
@@ -312,25 +227,6 @@ void SyncManager::RegisterToScene(ScenePtr scene)
     sceneptr->ActionTriggered.Connect(this, &SyncManager::OnActionTriggered);
     sceneptr->EntityTemporaryStateToggled.Connect(this, &SyncManager::OnEntityPropertiesChanged);
     sceneptr->EntityParentChanged.Connect(this, &SyncManager::OnEntityParentChanged);
-
-    //connect(sceneptr, SIGNAL( AttributeChanged(IComponent*, IAttribute*, AttributeChange::Type) ),
-    //    SLOT( OnAttributeChanged(IComponent*, IAttribute*, AttributeChange::Type) ));
-    //connect(sceneptr, SIGNAL( AttributeAdded(IComponent*, IAttribute*, AttributeChange::Type) ),
-    //    SLOT( OnAttributeAdded(IComponent*, IAttribute*, AttributeChange::Type) ));
-    //connect(sceneptr, SIGNAL( AttributeRemoved(IComponent*, IAttribute*, AttributeChange::Type) ),
-    //    SLOT( OnAttributeRemoved(IComponent*, IAttribute*, AttributeChange::Type) ));
-    //connect(sceneptr, SIGNAL( ComponentAdded(Entity*, IComponent*, AttributeChange::Type) ),
-    //    SLOT( OnComponentAdded(Entity*, IComponent*, AttributeChange::Type) ));
-    //connect(sceneptr, SIGNAL( ComponentRemoved(Entity*, IComponent*, AttributeChange::Type) ),
-    //    SLOT( OnComponentRemoved(Entity*, IComponent*, AttributeChange::Type) ));
-    //connect(sceneptr, SIGNAL( EntityCreated(Entity*, AttributeChange::Type) ),
-    //    SLOT( OnEntityCreated(Entity*, AttributeChange::Type) ));
-    //connect(sceneptr, SIGNAL( EntityRemoved(Entity*, AttributeChange::Type) ),
-    //    SLOT( OnEntityRemoved(Entity*, AttributeChange::Type) ));
-    //connect(sceneptr, SIGNAL( ActionTriggered(Entity *, const QString &, const QStringList &, EntityAction::ExecTypeField) ),
-    //    SLOT( OnActionTriggered(Entity *, const QString &, const QStringList &, EntityAction::ExecTypeField)));
-    //connect(sceneptr, SIGNAL( EntityTemporaryStateToggled(Entity *, AttributeChange::Type) ), SLOT( OnEntityPropertiesChanged(Entity *, AttributeChange::Type) ));
-    //connect(sceneptr, SIGNAL( EntityParentChanged(Entity *, Entity*, AttributeChange::Type) ), SLOT( OnEntityParentChanged(Entity *, Entity *, AttributeChange::Type) ));
 }
 
 void SyncManager::HandleNetworkMessage(UserConnection* user, kNet::packet_id_t packetId, kNet::message_id_t messageId, const char* data, size_t numBytes)
@@ -416,23 +312,12 @@ void SyncManager::NewUserConnected(const UserConnectionPtr &user)
     // Connect to network messages from this user
     user->NetworkMessageReceived.Connect(this, &SyncManager::HandleNetworkMessage);
 
-    //// Connect to actions sent to specifically to this user
-    //connect(user.get(), SIGNAL(ActionTriggered(UserConnection*, Entity*, const QString&, const QStringList&)),
-    //    this, SLOT(OnUserActionTriggered(UserConnection*, Entity*, const QString&, const QStringList&)));
-    //// Connect to network messages from this user
-    //connect(user.get(), SIGNAL(NetworkMessageReceived(UserConnection*, kNet::packet_id_t, kNet::message_id_t, const char *, size_t)), 
-    //    this, SLOT(HandleNetworkMessage(UserConnection*, kNet::packet_id_t, kNet::message_id_t, const char *, size_t)));
-
     // Mark all entities in the sync state as new so we will send them
     user->syncState = SharedPtr<SceneSyncState>(new SceneSyncState(user.Get(), user->ConnectionId(), owner_->IsServer()));
     user->syncState->SetParentScene(scene_);
 
-    if(interestmanager_) //If the server is running InterestManager, inform the connected user that the server wants camera updates
-        SendCameraUpdateRequest(user, true);
-
     if (owner_->IsServer())
         SceneStateCreated.Emit(user.Get(), user->syncState.Get());
-     //   emit SceneStateCreated(user.get(), user->syncState.get());
 
     for(auto iter = scene->Begin(); iter != scene->End(); ++iter)
     {
@@ -478,21 +363,8 @@ void SyncManager::OnAttributeChanged(IComponent* comp, IAttribute* attr, Attribu
         // clients on the next network sync iteration.
         UserConnectionList& users = owner_->Server()->UserConnections();
         for(auto i = users.Begin(); i != users.End(); ++i)
-        {
             if ((*i)->syncState)
-            {
-                /// Check here if the attribute should be updated to which client?
-                /// @remarks InterestManager functionality
-                /// \bug The attribute should be marked dirty, but sending should be deferred until entity is relevant
-                /// With this logic, the dirty attributes from the non-relevant period will simply be forgotten
-                /// \todo Interest manager, enable after implemented
-                //if(interestmanager_ && !interestmanager_->CheckRelevance((*i), entity, scene_, framework_->IsHeadless()))
-                //    continue;
-
-                //else    //If IM is not available, accept the update
-                    (*i)->syncState->MarkAttributeDirty(entity->Id(), comp->Id(), attr->Index());
-            }
-        }
+                (*i)->syncState->MarkAttributeDirty(entity->Id(), comp->Id(), attr->Index());
     }
     else
     {
