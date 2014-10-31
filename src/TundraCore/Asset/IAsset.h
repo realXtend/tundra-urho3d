@@ -118,7 +118,7 @@ public:
     String ToString() const;
 
     // Returns a copy of the raw data in this asset.
-    Vector<u8> RawData(const String serializationParameters = "") const;
+    Vector<u8> RawData(const String &serializationParameters = "") const;
 
     /// This signal is emitted when the contents of this asset is unloaded.
     /** It might be due to an explicit call by client code to IAsset::Unload, or it could be just prior to removing this asset from the system (perhaps in dtor at shutdown).
@@ -132,7 +132,7 @@ public:
         @param asset A pointer to this will be passed in. The signature of this signal deliberately contains this member to be unified with AssetAPI. */
     Signal1<AssetPtr> Loaded;
 
-    /// Asset properties have changed. Emitted whenever the modified flag, disksource, or disksourcetype changes.
+    /// Asset properties have changed. Emitted whenever the modified flag, disk source, or disk source type changes.
     Signal1<IAsset*> PropertyStatusChanged;
     
     /// Loads this asset from the specified file data in memory.
@@ -178,7 +178,7 @@ protected:
     /** The data pointer that is passed in is never null, and numBytes is always greater than zero.
         The allowAsynchronous boolean must be respected, if it is false you should not do asynchronous even if you have a code path for it.
         The parameter is set to false when the requesting code is expecting the asset to be loaded when this function returns.
-        @note Implementation has to call AssetAPI::AssetLoadCompleted after loaded succesfully (both synchronous and asynchronous).
+        @note Implementation has to call AssetAPI::AssetLoadCompleted after loaded successfully (both synchronous and asynchronous).
         AssetAPI::AssetLoadCompleted can be called inside this function, how ever just returning true is not enough.
         AssetAPI::AssetLoadFailed will be called automatically if false is returned. */
     virtual bool DeserializeFromData(const u8 *data, uint numBytes, bool allowAsynchronous) = 0;
@@ -211,4 +211,3 @@ protected:
 };
 
 }
-

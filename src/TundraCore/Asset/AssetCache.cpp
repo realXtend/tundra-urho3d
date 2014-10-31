@@ -66,7 +66,7 @@ String AssetCache::StoreAsset(AssetPtr asset)
     return StoreAsset(&data[0], data.Size(), asset->Name());
 }
 
-String AssetCache::StoreAsset(const u8 *data, size_t numBytes, const String &assetName)
+String AssetCache::StoreAsset(const u8 *data, uint numBytes, const String &assetName)
 {
     String absolutePath = DiskSourceByRef(assetName);
     bool success = SaveAssetFromMemoryToFile(data, numBytes, absolutePath);

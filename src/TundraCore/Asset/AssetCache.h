@@ -36,11 +36,11 @@ public:
 
     /// Saves the specified data to the asset cache.
     /// @return String the absolute path name to the asset cache entry. If not successful returns an empty string.
-    String StoreAsset(const u8 *data, size_t numBytes, const String &assetName);
+    String StoreAsset(const u8 *data, uint numBytes, const String &assetName);
 
     /// Return the last modified time for assetRefs cache file as seconds since 1.1.1970.
     /// If cache file does not exist for assetRef return invalid QDateTime. You can check return value with QDateTime::isValid().
-    /// @param String assetRef Asset reference thats cache file last modified date and time will be returned.
+    /// @param String assetRef Asset reference of which cache file last modified date and time will be returned.
     /// @return QDateTime Last modified date and time of the cache file.
     unsigned LastModified(const String &assetRef);
 

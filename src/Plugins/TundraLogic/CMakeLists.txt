@@ -17,6 +17,7 @@ build_library(${TARGET_NAME} SHARED ${SOURCE_FILES})
 link_modules(TundraCore UrhoRenderer)
 link_package(URHO3D)
 link_package(MATHGEOLIB)
+link_package(KNET)
 
 SetupCompileFlagsWithPCH()
 
