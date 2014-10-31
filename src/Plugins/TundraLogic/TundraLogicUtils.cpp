@@ -18,7 +18,7 @@ std::vector<s8> StringToBuffer(const String& str)
 String BufferToString(const std::vector<s8>& buffer)
 {
     if (!buffer.empty())
-        return String((const char*)&buffer[0], buffer.size());
+        return String((const char*)&buffer[0], static_cast<uint>(buffer.size()));
     else
         return String();
 }

@@ -30,7 +30,7 @@ enum NetworkProtocolVersion
 const NetworkProtocolVersion cHighestSupportedProtocolVersion = ProtocolHierarchicScene;
 
 /// Represents a client connection on the server side. Subclassed by networking implementations.
-class TUNDRALOGIC_API UserConnection : public Object, public std::tr1::enable_shared_from_this<UserConnection>
+class TUNDRALOGIC_API UserConnection : public Object
 {
     OBJECT(UserConnection);
     //Q_PROPERTY(u32 id READ ConnectionId)
