@@ -124,15 +124,18 @@ bool AssetAPI::RemoveAssetStorage(const String &name)
 
 AssetStoragePtr AssetAPI::DeserializeAssetStorageFromString(const String &storage, bool fromNetwork)
 {
+    HashMap<String, String> storageParams = ParseAssetStorageString(storage);
+    if (!storageParams.Contains("src"))
+        return AssetStoragePtr();
+
     for(uint i = 0; i < providers.Size(); ++i)
     {
-        AssetStoragePtr assetStorage = providers[i]->TryDeserializeStorageFromString(storage, fromNetwork);
-        // The above function will call back to AssetAPI::EmitAssetStorageAdded.
+        // TryCreateStorage will call AssetAPI::EmitAssetStorageAdded
+        AssetStoragePtr assetStorage = providers[i]->TryCreateStorage(storageParams, fromNetwork);
         if (assetStorage)
         {
-            // Make this storage the default storage if it was requested so.
-            HashMap<String, String> s = AssetAPI::ParseAssetStorageString(storage);
-            if (s.Contains("default") && Urho3D::ToBool(s["default"]))
+            // Make this storage the default storage if it was requested so
+            if (storageParams.Contains("default") && Urho3D::ToBool(storageParams["default"]))
                 SetDefaultAssetStorage(assetStorage);
             return assetStorage;
         }
@@ -2132,12 +2135,12 @@ HashMap<String, String> AssetAPI::ParseAssetStorageString(String storageString)
         StringVector keyValue = str.Split('=');
         if (keyValue.Size() > 2 || keyValue.Size() == 0)
         {
-            LogError("Failed to parse asset storage string \"" + str + "\"!");
+            LogError("Failed to parse asset storage string '" + str + "'. Format is 'attributeName1=value1;attributeName2=value2'.");
             return HashMap<String, String>();
         }
         if (keyValue.Size() == 1)
             keyValue.Push("1");
-        m[keyValue[0]] = keyValue[1];
+        m[keyValue[0].ToLower().Trimmed()] = keyValue[1].Trimmed();
     }
     return m;
 }

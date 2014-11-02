@@ -44,12 +44,9 @@ void TundraLogic::Initialize()
 {
     framework->Frame()->Updated.Connect(this, &TundraLogic::OnUpdate);
 
-
     // Add the System asset storage
     String systemAssetDir = framework->InstallationDirectory() + "Data/Assets";
     IAssetStorage* storage = framework->Asset()->AssetProvider<LocalAssetProvider>()->AddStorageDirectory(systemAssetDir, "System", true, false);
-    storage->SetReplicated(false); // If we are a server, don't pass this storage to the client.
-
 
     client_ = SharedPtr<Tundra::Client>(new Tundra::Client(this));
     server_ = SharedPtr<Tundra::Server>(new Tundra::Server(this));

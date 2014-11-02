@@ -162,6 +162,15 @@ void Framework::Initialize()
         LogInfo("  " + modules[i]->Name());
         modules[i]->Initialize();
     }
+
+    // Add storages from --file first then --storage. First one passed will be set as default (if non have default=true;)
+    StringVector storageSources = CommandLineParameters("--file") + CommandLineParameters("--storage");
+    foreach(const String &storageSource, storageSources)
+    {
+        AssetStoragePtr storage = asset->DeserializeAssetStorageFromString(storageSource.Trimmed(), false);
+        if (storage && !asset->DefaultAssetStorage())
+            asset->SetDefaultAssetStorage(storage);
+    }
 }
 
 void Framework::Go()
