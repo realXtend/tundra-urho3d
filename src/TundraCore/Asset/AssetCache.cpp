@@ -51,7 +51,7 @@ String AssetCache::DiskSourceByRef(const String &assetRef)
 {
     // Return the path where the given asset ref would be stored, if it was saved in the cache
     // (regardless of whether it now exists in the cache).
-    return cacheDirectory + "/" + AssetAPI::SanitateAssetRef(assetRef);
+    return cacheDirectory + AssetAPI::SanitateAssetRef(assetRef);
 }
 
 String AssetCache::CacheDirectory() const
@@ -107,7 +107,7 @@ void AssetCache::ClearAssetCache()
     StringVector filenames;
     fileSystem->ScanDir(filenames, cacheDirectory, "*.*", Urho3D::SCAN_FILES, true);
     foreach(String file, filenames)
-        fileSystem->Delete(cacheDirectory + "/" + file);
+        fileSystem->Delete(cacheDirectory + file);
 }
 
 }
