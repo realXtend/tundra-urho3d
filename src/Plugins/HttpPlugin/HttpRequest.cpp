@@ -2,13 +2,17 @@
 
 #include "StableHeaders.h"
 #include "HttpRequest.h"
+
+#include "Framework.h"
 #include "JSON.h"
 
 #include <Engine/Core/WorkQueue.h>
 #include <Engine/Core/StringUtils.h>
+#include <Engine/IO/FileSystem.h>
+#include <Engine/IO/File.h>
 
 #include <curl/curl.h>
-#include "http-parser/http_parser.h"
+#include "HttpParser/http_parser.h"
 
 namespace Tundra
 {
@@ -17,7 +21,8 @@ namespace Tundra
 
 // HttpRequest
 
-HttpRequest::HttpRequest(int method, const String &url) :
+HttpRequest::HttpRequest(Framework* framework, int method, const String &url) :
+    framework_(framework),
     log("HttpRequest"),
     executing_(false),
     verbose_(false),
@@ -172,7 +177,7 @@ bool HttpRequest::ClearHeaders()
     Urho3D::MutexLock m(mutexExecute_);
     if (executing_)
     {
-        log.Error("ClearHeaders: Cannot clear headers in a running request.");
+        log.Error("ClearHeaders: Cannot clear headers from a running request.");
         return false;
     }
     requestData_.headers.clear();
@@ -182,6 +187,42 @@ bool HttpRequest::ClearHeaders()
 bool HttpRequest::RemoveHeader(const String &name)
 {
     return RemoveHeaderInternal(name, false);
+}
+
+bool HttpRequest::SetCacheFile(const String &filepath, bool useLastModified)
+{
+    Urho3D::MutexLock m(mutexExecute_);
+    if (executing_)
+    {
+        log.Error("SetCacheFile: Cannot set cache file to a running request.");
+        return false;
+    }
+    requestData_.cacheFile = Urho3D::GetInternalPath(filepath);
+
+    // Read 'If-Modified-Since' from cache file
+    if (useLastModified && framework_->GetSubsystem<Urho3D::FileSystem>()->FileExists(requestData_.cacheFile))
+    {
+        uint epoch = framework_->GetSubsystem<Urho3D::FileSystem>()->GetLastModifiedTime(requestData_.cacheFile);
+        String lastModifiedHttpDate = Http::EpochToHttpDate(static_cast<time_t>(epoch));
+        if (!lastModifiedHttpDate.Empty())
+            SetHeaderInternal(Http::Header::IfModifiedSince, lastModifiedHttpDate, false, false); // Do not lock inside SetHeaderInternal, already aquired above.
+    }
+    return true;
+}
+
+bool HttpRequest::SetCacheFile(const String &filepath, const String &lastModifiedHttpDate)
+{
+    Urho3D::MutexLock m(mutexExecute_);
+    if (executing_)
+    {
+        log.Error("SetCacheFile: Cannot set cache file to a running request.");
+        return false;
+    }
+    requestData_.cacheFile = Urho3D::GetInternalPath(filepath);
+
+    if (!lastModifiedHttpDate.Empty())
+        SetHeaderInternal(Http::Header::IfModifiedSince, lastModifiedHttpDate, false, false); // Do not lock inside SetHeaderInternal, already aquired above.
+    return true;
 }
 
 // Response API
@@ -483,7 +524,32 @@ void HttpRequest::Perform()
             uint contentLenght = HeaderUIntInternal(Http::Header::ContentLength, 0, true, false);
             if (contentLenght > 0 && responseData_.bodyBytes.Size() != contentLenght)
                 log.WarningF("Content-Lenght %d header does not match size of %d read bytes for %s. Data might be incomplete.", contentLenght, responseData_.bodyBytes.Size(), requestData_.options[Options::Url].value.GetString().CString());
+
+            // Write cache file if designated. File will be written regardless if server sent a 'Last-Modified' header.
+            if (!requestData_.cacheFile.Empty())
+            {
+                String lastModified = HeaderInternal(Http::Header::LastModified, true, false);
+
+                /** @todo Check if this is safe. We are in a secondary thread here. But it *should* be guaranteed by AssetAPI and the HttpClient that
+                    one request is ongoing at a time to a unique URL. The URL designates the filepath where we are writing. Framework and Urho3D
+                    Engine and its subsystem are guaranteed to be up while any worker thread is running (exit blocks waiting for workers to finish).
+                    Still this is dicy, it would be nice to execute the disk write in thread but if not safe it can be moved to main thread. */
+                SharedPtr<Urho3D::File> file(new Urho3D::File(framework_->GetContext(), requestData_.cacheFile, Urho3D::FILE_WRITE));
+                if (file->IsOpen())
+                {
+                    uint bodySize = responseData_.bodyBytes.Size();
+                    if (file->Write(&responseData_.bodyBytes[0], bodySize) == bodySize)
+                    {
+                        file->Close(); // File shared ptr will close when gets out of scope. Lets just do it here before modifying below last modified on the file.
+                        time_t epoch = Http::HttpDateToEpoch(lastModified);
+                        if (epoch > 0)
+                            framework_->GetSubsystem<Urho3D::FileSystem>()->SetLastModifiedTime(requestData_.cacheFile, static_cast<uint>(epoch));
+                    }
+                }
+            }
         }
+        else if (responseData_.status == 304)
+            ParseHeaders();
     }
 
     Cleanup();
@@ -594,12 +660,12 @@ void HttpRequest::EmitCompletion(HttpRequestPtr &self)
     if (verbose_)
         DumpResponse(true, true);
 
-    Finished.Emit(self, StatusCode(), requestData_.error);
+    Finished.Emit(self, responseData_.status, requestData_.error);
 }
 
 bool ShouldPrintBody(const String &contentType)
 {
-    return (!contentType.Empty() && (contentType.StartsWith("text", false) || contentType.StartsWith("xml")));
+    return (!contentType.Empty() && (contentType.Contains("text", false) || contentType.Contains("xml") || contentType.Contains("json")));
 }
 
 void HttpRequest::DumpResponse(bool headers, bool body)
@@ -630,7 +696,7 @@ void HttpRequest::DumpResponse(bool headers, bool body)
         str.Append("\n");
         PrintRaw(str);
     }
-    if (body)
+    if (body && responseData_.status != 304)
     {
         String str;
         String contentType = HeaderInternal(Http::Header::ContentType, true, false);
@@ -652,21 +718,9 @@ size_t HttpRequest::ReadBody(void *buffer, uint size)
        incoming data. This way we don't have to resize the body buffer mid flight. */
     if (responseData_.bodyBytes.Empty() && !responseData_.headersBytes.Empty())
     {
-        http_parser_settings settings;
-        InitHttpParserSettings(&settings);
-
-        http_parser parser;
-        parser.data = this;
-
-        http_parser_init(&parser, HTTP_RESPONSE);
-        http_parser_execute(&parser, &settings, (const char*)&responseData_.headersBytes[0], (size_t)responseData_.headersBytes.Size());
-
-        http_errno err = HTTP_PARSER_ERRNO(&parser);
-        if (err != HPE_OK)
-        {
-            log.ErrorF("Error while parsing headers: %s %s", http_errno_name(err), http_errno_description(err));
+        if (!ParseHeaders())
             return 0; // Propagates a CURLE_WRITE_ERROR and aborts transfer
-        }
+
         // Headers have been parsed. Reserve bodyBytes_ to "Content-Length" size.
         responseData_.bodyBytes.Reserve(HeaderUIntInternal(Http::Header::ContentLength, HTTP_INITIAL_BODY_SIZE, true, false));
     }
@@ -674,6 +728,30 @@ size_t HttpRequest::ReadBody(void *buffer, uint size)
     Vector<u8> data(static_cast<u8*>(buffer), size);
     responseData_.bodyBytes.Push(data);
     return size;
+}
+
+bool HttpRequest::ParseHeaders()
+{
+    if (responseData_.headersBytes.Empty())
+        return false;
+
+    http_parser_settings settings;
+    InitHttpParserSettings(&settings);
+
+    http_parser parser;
+    parser.data = this;
+
+    http_parser_init(&parser, HTTP_RESPONSE);
+    http_parser_execute(&parser, &settings, (const char*)&responseData_.headersBytes[0], (size_t)responseData_.headersBytes.Size());
+
+    http_errno err = HTTP_PARSER_ERRNO(&parser);
+    if (err != HPE_OK)
+    {
+        requestData_.error = Urho3D::ToString("%s %s", http_errno_name(err), http_errno_description(err));
+        log.Error("Error while parsing headers: " + requestData_.error);
+        return false; // Propagates a CURLE_WRITE_ERROR and aborts transfer
+    }
+    return true;
 }
 
 size_t HttpRequest::ReadHeaders(void *buffer, uint size)

@@ -12,6 +12,12 @@
 
 namespace Tundra
 {
+    class HttpAssetProvider;
+    class HttpAssetTransfer;
+
+    typedef SharedPtr<HttpAssetProvider> HttpAssetProviderPtr;
+    typedef SharedPtr<HttpAssetTransfer> HttpAssetTransferPtr;
+
     class HttpPlugin;
     class HttpWorkQueue;
     class HttpClient;

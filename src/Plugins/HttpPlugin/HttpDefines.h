@@ -6,6 +6,8 @@
 
 #include <Engine/Core/Timer.h>
 
+#include <time.h>
+
 /// @cond PRIVATE
 
 struct curl_slist;
@@ -116,6 +118,14 @@ namespace Http
     };
     /// @endcond
 
+    /// Converts epoch seconds to HTTP date
+    /** @see http://tools.ietf.org/html/rfc2616#page-134 */
+    String EpochToHttpDate(time_t epoch);
+
+    /// Converts HTTP date to epoch seconds.
+    /** @see http://tools.ietf.org/html/rfc2616#page-134 */
+    time_t HttpDateToEpoch(const String &date);
+
     struct RequestData
     {
         Curl::RequestHandle *curlHandle;
@@ -126,6 +136,8 @@ namespace Http
 
         Vector<u8> bodyBytes;
         Vector<u8> headersBytes;
+
+        String cacheFile;
 
         String error;
 

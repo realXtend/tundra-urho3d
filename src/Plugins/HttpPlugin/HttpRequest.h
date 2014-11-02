@@ -20,6 +20,7 @@ struct http_parser;
 namespace Tundra
 {
 
+class Framework;
 class JSONValue;
 
 /// HTTP request
@@ -97,6 +98,20 @@ public:
     /// Removes request header @c name.
     bool RemoveHeader(const String &name);
 
+    /// Sets the source and destination @c filepath for HTTP cache mechanisms.
+    /** @param Filepath to used as the response data if '304 Not Modified' without a body is returned by the server.
+        Or in the case of '200 OK' with a body response, the data is written to this file prior to completion signals.
+        @param If true the reqeusts 'If-Modified-Since' header is set from the files last modification date and time.
+        And in the case of writing to the file the responses 'Last-Modified' header is used to set the written files
+        last modified timestamp on the operating system level.
+        @note This feature simplifies the common HTTP use case of Tundras AssetAPI and the HttpAssetProvider. Additionally
+        the disk read/write operations can be executed in the HTTP worker thread without blocking the main thread. */
+    bool SetCacheFile(const String &filepath, bool useLastModified);
+
+    /// @overload
+    /** @param 'If-Modified-Since' header will be written to the provided @c lastModifiedHttpDate if non empty string. */
+    bool SetCacheFile(const String &filepath, const String &lastModifiedHttpDate);
+
     ///////////////////////// RESPONSE API
 
     /// Returns status code eg, 200 if request has completed successfully, otherwise -1.
@@ -152,7 +167,7 @@ public:
 
 private:
     /// Constructed by HttpClient.
-    HttpRequest(int method, const String &url);
+    HttpRequest(Framework *framework, int method, const String &url);
     ~HttpRequest();
 
     /* Internal functions that let threaded code decide about mutex locking.
@@ -170,6 +185,9 @@ private:
     bool Prepare();
     /// Invoked in worker thread context.
     void Cleanup();
+
+    /// Parse headers from response raw bytes.
+    bool ParseHeaders();
     
     /// Called by HttpWorkQueue in main thread context.
     void EmitCompletion(HttpRequestPtr &self);
@@ -186,6 +204,9 @@ private:
     int ReadHeaderField(const char *buffer, uint size);
     // Called by HttpParserHeaderValue
     int ReadHeaderValue(const char *buffer, uint size);
+
+    // Framework for API/Urho access.
+    Framework *framework_;
 
     // Outgoing/incomfing data structures
     Http::RequestData requestData_;

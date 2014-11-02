@@ -84,6 +84,129 @@ namespace Method
     }
 }
 
+String EpochToHttpDate(time_t epoch)
+{
+    char buf[80];
+    struct tm timeFormat = *gmtime(&epoch);
+    strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &timeFormat);
+    return String(buf);
+}
+
+int HttpWeekDay(String &day)
+{
+    // 0   1   2   3   4   5   6
+    // Sun Mon Tue Wed Thu Fri Sat
+    const char d0 = day[0];
+    const char d1 = day[1];
+    if (d0 == 'S')
+        return (d1 == 'u' ? 0 : 6); // Sun|Sat
+    else if (d0 == 'M')
+        return 1; // Mon
+    else if (d0 == 'T')
+        return (d1 == 'u' ? 2 : 4); // Tue|Thu
+    else if (d0 == 'W')
+        return 3; // Wed
+    else if (d0 == 'F')
+        return 5; // Fri
+    return -1;
+}
+
+int HttpMonthDay(String &day)
+{
+    if (day[0] == '0')
+        return Urho3D::ToInt(&day[1]);
+    return Urho3D::ToInt(day);
+}
+
+int HttpMonth(String &month)
+{
+    // 0   1   2   3   4   5    6    7   8    9   10  11
+    // Jan Feb Mar Apr May June July Aug Sept Oct Nov Dec
+    const char m0 = month[0];
+    const char m1 = month[1];
+    const char m2 = month[1];
+    if (m0 == 'J')
+        return (m1 == 'a' ? 0 : (m2 == 'n' ? 5 : 6)); // Jan|June|July
+    else if (m0 == 'F')
+        return 1; // Feb
+    else if (m0 == 'M')
+        return (m2 == 'r' ? 2 : 4); // Mar/May
+    else if (m0 == 'A')
+        return (m1 == 'p' ? 3 : 7); // Apr/Aug
+    else if (m0 == 'S')
+        return 8; // Sept
+    else if (m0 == 'O')
+        return 9; // Oct
+    else if (m0 == 'N')
+        return 10; // Nov
+    else if (m0 == 'D')
+        return 11; // Dec
+    return -1;
+}
+
+int HttpYear(String &year)
+{
+    if (year.Length() != 4)
+        return -1;
+    return Urho3D::ToInt(year) - 1900;
+}
+
+void HttpTime(String &time, int *hours, int *minutes, int *seconds)
+{
+    StringVector parts = time.Trimmed().Split(':');
+    if (parts.Size() != 3)
+        return;
+    *hours = Urho3D::ToInt(parts[0]);
+}
+
+time_t HttpDateToEpoch(const String &date)
+{
+    StringVector parts = date.Trimmed().Split(' ');
+    if (parts.Size() != 6)
+    {
+        LogErrorF("Invalid date '%s' format. Expecting 'Tue, 15 Nov 2010 08:12:31 GMT'.", date.CString());
+        return 0;
+    }
+
+    /* Tue, 15 Nov 2010 08:12:31 GMT
+       http://www.cplusplus.com/reference/ctime/tm/
+       http://www.cplusplus.com/reference/ctime/mktime/ */
+    struct tm timeFormat;
+    timeFormat.tm_yday = 0;
+    timeFormat.tm_wday = 0;
+    timeFormat.tm_isdst = 0;
+    timeFormat.tm_wday = HttpWeekDay(parts[0]); // Handles trailing ','
+    timeFormat.tm_mday = HttpMonthDay(parts[1]);
+    timeFormat.tm_mon = HttpMonth(parts[2]);
+    timeFormat.tm_year = HttpYear(parts[3]);
+
+    StringVector timeParts = parts[4].Trimmed().Split(':');
+    if (timeParts.Size() != 3)
+    {
+        LogErrorF("Invalid time '%s' format. Expecting '08:12:31'.", parts[4].CString());
+        return 0;
+    }
+    timeFormat.tm_hour = Urho3D::ToInt(timeParts[0]);
+    timeFormat.tm_min = Urho3D::ToInt(timeParts[1]);
+    timeFormat.tm_sec = Urho3D::ToInt(timeParts[2]);
+
+    if (timeFormat.tm_wday == -1 || timeFormat.tm_mday == -1 || timeFormat.tm_mon == -1 || timeFormat.tm_year == -1)
+    {
+        LogErrorF("Failed to parse time format struct from date '%s'", date.CString());
+        return 0;
+    }
+#ifdef WIN32
+    return _mkgmtime(&timeFormat);
+#else
+    // @todo Is this portable for platforms we are targetting?
+    // http://man7.org/linux/man-pages/man3/timegm.3.html
+    // mktime will return the local timezone epoch which is not what we want,
+    // the env variable hack described in the above will probably be slow.
+    //return mktime(&timeFormat);
+    return timegm(&timeFormat);
+#endif
+}
+
 // RequestData
 
 RequestData::RequestData() :

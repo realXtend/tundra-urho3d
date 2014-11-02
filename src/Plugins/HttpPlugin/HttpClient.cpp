@@ -93,7 +93,7 @@ HttpRequestPtr HttpClient::Shedule(int method, const String &url)
     if (!queue_)
         return HttpRequestPtr();
 
-    HttpRequestPtr request(new HttpRequest(method, url));
+    HttpRequestPtr request(new HttpRequest(framework_, method, url));
     queue_->Schedule(request);
     return request;
 }
@@ -103,7 +103,7 @@ HttpRequestPtr HttpClient::Shedule(int method, const String &url, const Vector<u
     if (!queue_)
         return HttpRequestPtr();
 
-    HttpRequestPtr request(new HttpRequest(method, url));
+    HttpRequestPtr request(new HttpRequest(framework_, method, url));
     if (!body.Empty())
         request->SetBody(body, contentType);
     queue_->Schedule(request);

@@ -25,6 +25,7 @@ private:
     void Update(float frametime) override;
 
     HttpClientPtr client_;
+    HttpAssetProviderPtr provider_;
 };
 
 }
