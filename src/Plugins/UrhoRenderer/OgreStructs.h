@@ -309,7 +309,10 @@ typedef Vector<VertexElement> VertexElementList;
 /// Ogre Vertex Bone Assignment
 struct VertexBoneAssignment
 {
-    VertexBoneAssignment()
+    VertexBoneAssignment() :
+        vertexIndex(0),
+        boneIndex(0),
+        weight(0.f)
     {
     }
 
