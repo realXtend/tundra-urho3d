@@ -53,6 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Profiler.h>
 #include <MemoryBuffer.h>
 
+#include <stdexcept>
+
 namespace Tundra
 {
 
@@ -223,8 +225,7 @@ void ReadMeshLodInfo(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
     {
         u16 id = ReadHeader(stream);
         if (id != M_MESH_LOD_USAGE) {
-            LogError("M_MESH_LOD does not contain a M_MESH_LOD_USAGE for each LOD level");
-            return;
+            throw std::exception("M_MESH_LOD does not contain a M_MESH_LOD_USAGE for each LOD level");
         }
 
         SkipBytes(stream, sizeof(float)); // User value
@@ -233,8 +234,7 @@ void ReadMeshLodInfo(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
         {
             id = ReadHeader(stream);
             if (id != M_MESH_LOD_MANUAL) {
-                LogError("Manual M_MESH_LOD_USAGE does not contain M_MESH_LOD_MANUAL");
-                return;
+                throw std::exception("Manual M_MESH_LOD_USAGE does not contain M_MESH_LOD_MANUAL");
             }
                 
             ReadLine(stream); // manual mesh name (ref to another mesh)
@@ -245,8 +245,7 @@ void ReadMeshLodInfo(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
             {
                 id = ReadHeader(stream);
                 if (id != M_MESH_LOD_GENERATED) {
-                    LogError("Generated M_MESH_LOD_USAGE does not contain M_MESH_LOD_GENERATED");
-                    return;
+                    throw std::exception("Generated M_MESH_LOD_USAGE does not contain M_MESH_LOD_GENERATED");
                 }
 
                 uint indexCount = stream.ReadUInt();
@@ -285,8 +284,7 @@ void ReadMeshExtremes(Urho3D::Deserializer& stream, Ogre::Mesh * /*mesh*/)
 void ReadBoneAssignment(Urho3D::Deserializer& stream, VertexData *dest)
 {
     if (!dest) {
-        LogError("Cannot read bone assignments, vertex data is null.");
-        return;
+        throw std::exception("Cannot read bone assignments, vertex data is null.");
     }
         
     VertexBoneAssignment ba;
@@ -315,7 +313,7 @@ void ReadSubMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
         uint numBytes = submesh->indexData->count * (submesh->indexData->is32bit ? sizeof(uint) : sizeof(u16));
         submesh->indexData->buffer.Resize(numBytes);
         if (numBytes)
-            stream.Read(&submesh->indexData[0], numBytes);
+            stream.Read(&submesh->indexData->buffer[0], numBytes);
     }
     
     // Vertex buffer if not referencing the shared geometry
@@ -323,8 +321,7 @@ void ReadSubMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
     {
         id = ReadHeader(stream);
         if (id != M_GEOMETRY) {
-            LogError("M_SUBMESH does not contain M_GEOMETRY, but shared geometry is set to false");
-            return;
+            throw std::exception("M_SUBMESH does not contain M_GEOMETRY, but shared geometry is set to false");
         }
 
         submesh->vertexData = new VertexData();
@@ -431,8 +428,7 @@ void ReadSubMeshNames(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
             submeshIndex = stream.ReadUShort();
             SubMesh *submesh = mesh->GetSubMesh(submeshIndex);
             if (!submesh) {
-                LogError("Ogre Mesh does not include submesh " + String(submeshIndex) + " referenced in M_SUBMESH_NAME_TABLE_ELEMENT. Invalid mesh file.");
-                return;
+                throw std::exception("Ogre Mesh does not include submesh referenced in M_SUBMESH_NAME_TABLE_ELEMENT. Invalid mesh file.");
             }
 
             submesh->name = ReadLine(stream);
@@ -515,13 +511,11 @@ void ReadGeometryVertexBuffer(Urho3D::Deserializer& stream, VertexData *dest)
     u16 id = ReadHeader(stream);
     if (id != M_GEOMETRY_VERTEX_BUFFER_DATA)
     {
-        LogError("M_GEOMETRY_VERTEX_BUFFER_DATA not found in M_GEOMETRY_VERTEX_BUFFER");
-        return;
+        throw std::exception("M_GEOMETRY_VERTEX_BUFFER_DATA not found in M_GEOMETRY_VERTEX_BUFFER");
     }
     if (dest->VertexSize(bindIndex) != vertexSize)
     {
-        LogError("Vertex buffer size does not agree with vertex declaration in M_GEOMETRY_VERTEX_BUFFER");
-        return;
+        throw std::exception("Vertex buffer size does not agree with vertex declaration in M_GEOMETRY_VERTEX_BUFFER");
     }
     uint numBytes = dest->count * vertexSize;
     dest->vertexBindings[bindIndex].Resize(numBytes);
@@ -553,8 +547,7 @@ void ReadEdgeList(Urho3D::Deserializer& stream, Ogre::Mesh * /*mesh*/)
                     u16 id = ReadHeader(stream);
                     if (id != M_EDGE_GROUP)
                     {
-                        LogError("M_EDGE_GROUP not found in M_EDGE_LIST_LOD");
-                        return;
+                        throw std::exception("M_EDGE_GROUP not found in M_EDGE_LIST_LOD");
                     }
                         
                     SkipBytes(stream, sizeof(uint) * 3);
@@ -748,7 +741,7 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
 
     Urho3D::MemoryBuffer buffer(data_, numBytes);
 
-    u16 id = ReadHeader(buffer);
+    u16 id = ReadHeader(buffer, false);
     if (id != HEADER_CHUNK_ID)
     {
         LogError("OgreMeshAsset::DeserializeFromData: Invalid Ogre Mesh file header in " + Name());
@@ -757,11 +750,13 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
 
     /// @todo Check what we can actually support.
     String version = ReadLine(buffer);
+    /*
     if (version != MESH_VERSION_1_8)
     {
         LogError("OgreMeshAsset::DeserializeFromData: mesh version " + version + " not supported in " + Name());
         return false;
     }
+    */
 
     id = ReadHeader(buffer);
     if (id != M_MESH)
@@ -771,7 +766,18 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
     }
 
     SharedPtr<Ogre::Mesh> mesh(new Ogre::Mesh());
-    ReadMesh(buffer, mesh);
+    try
+    {
+        ReadMesh(buffer, mesh);
+    }
+    catch (std::exception& e)
+    {
+        LogError("OgreMeshAsset::DeserializeFromData: " + String(e.what()));
+        return false;
+    }
+
+    /// \todo Stuff the Ogre data into an Urho model
+
     assetAPI->AssetLoadCompleted(Name());
     return true;
 }
