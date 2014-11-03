@@ -145,7 +145,8 @@ if [ $skip_deps = false ] ; then
         cmake .. \
             -DCMAKE_INSTALL_PREFIX=$DEPS \
             -DCMAKE_BUILD_TYPE=$build_type \
-            -DCMAKE_CXX_FLAGS="-fPIC"
+            -DCMAKE_CXX_FLAGS="-fPIC" \
+            -DCMAKE_C_FLAGS="-fPIC"
 
         make -j $num_cpu -S
         make install
