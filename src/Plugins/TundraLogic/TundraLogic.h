@@ -3,12 +3,15 @@
 #pragma once
 
 #include "IModule.h"
-#include "TundraLogicFwd.h"
 #include "TundraLogicApi.h"
+#include "TundraLogicFwd.h"
 #include "Signals.h"
 
 namespace Tundra
 {
+
+typedef SharedPtr<Tundra::Client> ClientPtr;
+typedef SharedPtr<Tundra::Server> ServerPtr;
 
 /// Top-level scene and network protocol handling logic.
 class TUNDRALOGIC_API TundraLogic : public IModule
@@ -18,6 +21,24 @@ class TUNDRALOGIC_API TundraLogic : public IModule
 public:
     TundraLogic(Framework* owner);
     ~TundraLogic();
+
+    /// \todo hardcoded because no server functionality implemented
+    bool IsServer() { return false; }
+
+    /// Returns pointer to KristalliProtocolModule
+    SharedPtr<Tundra::KristalliProtocol> KristalliProtocol() const;
+
+    /// Returns pointer to sync manager
+    SharedPtr<Tundra::SyncManager> SyncManager() const;
+
+    /// Returns client pointer
+    ClientPtr Client() const;
+
+    /// Returns server pointer
+    ServerPtr Server() const;
+
+    /// For console command
+    void HandleLogin(const StringVector &params) const;
 
 private:
     void Load() override;
@@ -34,6 +55,15 @@ private:
     bool LoadScene(String filename, bool clearScene, bool useEntityIDsFromFile);
 
     bool startupSceneLoaded;
+
+    /// The sync manager
+    SharedPtr<Tundra::SyncManager> syncManager_;
+    /// The client
+    ClientPtr client_;
+    // The server
+    ServerPtr server_;
+    /// The kristalli protocol
+    SharedPtr<Tundra::KristalliProtocol> kristalliProtocol_;
 };
 
 }

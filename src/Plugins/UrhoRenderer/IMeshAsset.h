@@ -10,17 +10,17 @@
 namespace Tundra
 {
 
-/// Represents a mesh loaded to the GPU.
-class URHO_MODULE_API MeshAsset : public IAsset
+/// Represents a mesh loaded to the GPU. Base class for varying format implementations (Urho mesh, Ogre mesh, Assimp mesh..)
+class URHO_MODULE_API IMeshAsset : public IAsset
 {
-    OBJECT(MeshAsset);
+    OBJECT(IMeshAsset);
 
 public:
-    MeshAsset(AssetAPI *owner, const String &type_, const String &name_);
-    ~MeshAsset();
+    IMeshAsset(AssetAPI *owner, const String &type_, const String &name_);
+    ~IMeshAsset();
 
-    /// Load mesh from memory. IAsset override.
-    bool DeserializeFromData(const u8 *data_, uint numBytes, bool allowAsynchronous) override;
+    /// Returns the Urho model resource
+    Urho3D::Model* UrhoModel() const;
 
     /// IAsset override.
     bool IsLoaded() const override;
@@ -28,14 +28,11 @@ public:
     /// Returns submesh count.
     size_t NumSubmeshes() const;
 
-    /// Returns the Urho model resource
-    Urho3D::Model* UrhoModel() const;
-
-private:
+protected:
     /// Unload mesh. IAsset override.
     void DoUnload() override;
 
-    /// Urho model resource.
+    /// Urho model resource. Filled by the loading implementations in subclasses.
     SharedPtr<Urho3D::Model> model;
 };
 

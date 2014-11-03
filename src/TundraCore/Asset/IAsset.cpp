@@ -274,14 +274,13 @@ String IAsset::ToString() const
     return (Name().Empty() ? "(noname)" : Name()) + " (" + (Type().Empty() ? "notype" : Type()) + ")";
 }
 
-Vector<u8> IAsset::RawData(const String serializationParameters) const
+Vector<u8> IAsset::RawData(const String &serializationParameters) const
 { 
-    Vector<u8> data; 
-    if (SerializeTo(data, serializationParameters) && data.Size() > 0) 
+    Vector<u8> data;
+    if (SerializeTo(data, serializationParameters) && data.Size() > 0)
         return data;
-    else 
+    else
         return Vector<u8>();
 }
 
 }
-

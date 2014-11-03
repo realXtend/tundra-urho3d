@@ -278,8 +278,23 @@ public:
     bool RemoveAssetStorage(const String &name);
 
     /// Creates an asset storage from the given serialized string form.
-    /// Returns a null pointer if the given storage could not be added.
-    /// @param fromNetwork If true, treats the storage specifier as if the storage had been received from the network, and not from the local computer.
+    /** Returns a null pointer if the given storage could not be added.
+        @param fromNetwork If true, treats the storage specifier as if the storage had been received from the network, and not from the local computer.
+        @code
+        The string needs to be in the form of "param1=value1;param2=value2;" or a single string value to the storage source
+        "http://my.storage.com/assets" that will be auto converted to "src=<value>".
+        Following parameters are supported:
+            src=[string];
+            name=[string];
+            recursive=[bool-as-string];
+            readonly=[bool-as-string];
+            liveupdate=[bool-as-string];
+            autodiscoverable=[bool-as-string];
+            replicated=[bool-as-string];
+            trusted=[true|ask|untrusted];
+        Valid boolean values are "true", "1", "false", "0". 
+        All parameters may not apply to all storage implementations.
+        @endcode */
     AssetStoragePtr DeserializeAssetStorageFromString(const String &storage, bool fromNetwork);
 
     /// Returns the AssetStorage that should be used by default when assets are requested by their local name only, e.g. when an assetRef only contains

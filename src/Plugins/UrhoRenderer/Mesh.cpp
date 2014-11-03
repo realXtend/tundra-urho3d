@@ -8,7 +8,7 @@
 #include "AttributeMetadata.h"
 #include "LoggingFunctions.h"
 #include "AssetRefListener.h"
-#include "MeshAsset.h"
+#include "IMeshAsset.h"
 
 #include <Engine/Scene/Scene.h>
 #include <Engine/Scene/Node.h>
@@ -204,10 +204,10 @@ void Mesh::AttributesChanged()
 
 void Mesh::OnMeshAssetLoaded(AssetPtr asset)
 {
-    MeshAsset* meshAsset = dynamic_cast<MeshAsset*>(asset.Get());
+    IMeshAsset* meshAsset = dynamic_cast<IMeshAsset*>(asset.Get());
     if (!meshAsset)
     {
-        LogError(String("EC_Mesh::CreateMesh: Mesh asset load finished for '" + asset->Name() + "', but downloaded asset was not of type MeshAsset!"));
+        LogError(String("Mesh::CreateMesh: Mesh asset load finished for '" + asset->Name() + "', but downloaded asset was not of type IMeshAsset!"));
         return;
     }
 

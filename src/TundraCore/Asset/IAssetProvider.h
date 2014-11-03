@@ -25,6 +25,10 @@ public:
         Object(context)
     {}
 
+    /// @cond PRIVATE
+    friend class AssetAPI;
+    /// @endcond
+
     virtual ~IAssetProvider() {}
 
     /// Returns name of asset provider for identification purposes
@@ -71,9 +75,11 @@ public:
         return AssetUploadTransferPtr();
     }
 
+private:
     /// Reads the given storage string and tries to deserialize it to an asset storage in this provider.
-    /** Returns a pointer to the newly created storage, or 0 if the storage string is not of the type of this asset provider. */
-    virtual AssetStoragePtr TryDeserializeStorageFromString(const String &storage, bool fromNetwork) = 0;
+    /** Returns a pointer to the newly created storage, or 0 if the storage string is not of the type of this asset provider.
+        @note If you want to add storages from code use AssetAPI::DeserializeAssetStorageFromString. */
+    virtual AssetStoragePtr TryCreateStorage(HashMap<String, String> &storageParams, bool fromNetwork) = 0;
 };
 
 }

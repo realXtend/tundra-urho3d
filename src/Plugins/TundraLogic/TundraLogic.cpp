@@ -2,17 +2,24 @@
 
 #include "StableHeaders.h"
 #include "TundraLogic.h"
+#include "KristalliProtocol.h"
+#include "SyncManager.h"
+#include "Client.h"
+#include "Server.h"
 #include "Framework.h"
 #include "FrameAPI.h"
+#include "ConsoleAPI.h"
 #include "IRenderer.h"
 #include "SceneAPI.h"
 #include "Scene/Scene.h"
 #include "LoggingFunctions.h"
+
 #include "AssetAPI.h"
 #include "LocalAssetProvider.h"
 #include "LocalAssetStorage.h"
 
 #include <Timer.h>
+#include <StringUtils.h>
 
 namespace Tundra
 {
@@ -29,6 +36,8 @@ TundraLogic::~TundraLogic()
 
 void TundraLogic::Load()
 {
+    kristalliProtocol_ = SharedPtr<Tundra::KristalliProtocol>(new Tundra::KristalliProtocol(this));
+    kristalliProtocol_->Load();
 }
 
 void TundraLogic::Initialize()
@@ -38,15 +47,50 @@ void TundraLogic::Initialize()
     // Add the System asset storage
     String systemAssetDir = framework->InstallationDirectory() + "Data/Assets";
     IAssetStorage* storage = framework->Asset()->AssetProvider<LocalAssetProvider>()->AddStorageDirectory(systemAssetDir, "System", true, false);
-    storage->SetReplicated(false); // If we are a server, don't pass this storage to the client.
 
+    client_ = SharedPtr<Tundra::Client>(new Tundra::Client(this));
+    server_ = SharedPtr<Tundra::Server>(new Tundra::Server(this));
+    syncManager_ = SharedPtr<Tundra::SyncManager>(new Tundra::SyncManager(this)); // Syncmanager expects client (and server) to exist
+    
+    framework->Console()->RegisterCommand("connect", "Connects to a server. Usage: connect(address,port,username,password,protocol)")->ExecutedWith.Connect(
+        this, &TundraLogic::HandleLogin);
+
+    framework->Console()->RegisterCommand("disconnect", "Disconnects from a server.", client_.Get(), &Client::Logout);
+
+    kristalliProtocol_->Initialize();
+}
+
+void TundraLogic::HandleLogin(const StringVector &params) const
+{
+    String address = "localhost";
+    if (params.Size() >= 1)
+        address = params[0];
+    unsigned short port = 3456;
+    if (params.Size() >= 2)
+        port = (unsigned short)Urho3D::ToUInt(params[1]);
+    String username = "TundraM";
+    if (params.Size() >= 3)
+        username = params[2];
+    String password = "";
+    if (params.Size() >= 4)
+        password = params[3];
+    String protocol = "upd";
+    if (params.Size() >= 5)
+        protocol = params[4];
+
+    client_->Login(address, port, username, password, protocol);
 }
 
 void TundraLogic::Uninitialize()
 {
+    kristalliProtocol_->Uninitialize();
+    kristalliProtocol_.Reset();
+    syncManager_.Reset();
+    client_.Reset();
+    server_.Reset();
 }
 
-void TundraLogic::OnUpdate(float /*frametime*/)
+void TundraLogic::OnUpdate(float frametime)
 {
     // Load startup scene on first round of the main loop, as all modules are initialized
     if (!startupSceneLoaded)
@@ -55,6 +99,19 @@ void TundraLogic::OnUpdate(float /*frametime*/)
         startupSceneLoaded = true;
     }
 
+    kristalliProtocol_->Update(frametime);
+    if (client_)
+        client_->Update(frametime);
+    if (server_)
+        server_->Update(frametime);
+    // Run scene sync
+    if (syncManager_)
+        syncManager_->Update(frametime);
+    // Run scene interpolation
+    Scene *scene = GetFramework()->Scene()->MainCameraScene();
+    if (scene)
+        scene->UpdateAttributeInterpolations(frametime);
+    
 }
 
 void TundraLogic::LoadStartupScene()
@@ -117,6 +174,26 @@ bool TundraLogic::LoadScene(String filename, bool clearScene, bool useEntityIDsF
         entities = scene->LoadSceneXML(filename, clearScene, useEntityIDsFromFile, AttributeChange::Default);
     LogInfo("Loading of startup scene finished. " + String(entities.Size()) + " entities created in " + String((int)(timer.GetUSec(true) / 1000)) + " msecs.");
     return entities.Size() > 0;
+}
+
+SharedPtr<KristalliProtocol> TundraLogic::KristalliProtocol() const
+{
+    return kristalliProtocol_;
+}
+
+SharedPtr<SyncManager> TundraLogic::SyncManager() const
+{
+    return syncManager_;
+}
+
+ClientPtr TundraLogic::Client() const
+{
+    return client_;
+}
+
+ServerPtr TundraLogic::Server() const
+{
+    return server_;
 }
 
 extern "C"

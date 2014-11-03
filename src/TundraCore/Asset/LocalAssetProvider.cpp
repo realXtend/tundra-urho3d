@@ -212,7 +212,8 @@ bool LocalAssetProvider::RemoveAssetStorage(String storageName)
     return false;
 }
 
-LocalAssetStoragePtr LocalAssetProvider::AddStorageDirectory(String directory, String storageName, bool recursive, bool writable, bool liveUpdate, bool autoDiscoverable)
+LocalAssetStoragePtr LocalAssetProvider::AddStorageDirectory(String directory, String storageName, bool recursive, bool writable, 
+    bool liveUpdate, bool autoDiscoverable, bool replicated, const String &trustedStateStr)
 {
     directory = directory.Trimmed();
     if (directory.Empty())
@@ -233,6 +234,7 @@ LocalAssetStoragePtr LocalAssetProvider::AddStorageDirectory(String directory, S
 
     // Test if we already have a storage registered with this name.
     for(uint i = 0; i < storages.Size(); ++i)
+    {
         if (storages[i]->name.Compare(storageName, false) == 0)
         {
             if (storages[i]->directory != directory)
@@ -240,16 +242,26 @@ LocalAssetStoragePtr LocalAssetProvider::AddStorageDirectory(String directory, S
                 LogWarning("LocalAssetProvider: Storage '" + storageName + "' already exist in '" + storages[i]->directory + "', not adding with '" + directory + "'.");
                 return LocalAssetStoragePtr();
             }
-            else // We already have a storage with that name and target directory registered, just return that.
+            // We already have a storage with that name and target directory registered, just return that.
+            else
+            {
+                storages[i]->SetReplicated(replicated);
+                if (!trustedStateStr.Empty())
+                    storages[i]->trustState = IAssetStorage::TrustStateFromString(trustedStateStr);
                 return storages[i];
+            }
         }
+    }
 
-    //LogInfo("LocalAssetProvider::AddStorageDirectory " + directory);
     LocalAssetStoragePtr storage(new LocalAssetStorage(GetContext(), writable, liveUpdate, autoDiscoverable));
+    storage->provider = this;
     storage->directory = directory;
     storage->name = storageName;
     storage->recursive = recursive;
-    storage->provider = this;
+    storage->SetReplicated(replicated);
+    if (!trustedStateStr.Empty())
+        storage->trustState = IAssetStorage::TrustStateFromString(trustedStateStr);
+
 // On Android, we get spurious file change notifications. Disable watcher for now.
 #ifndef ANDROID
     if (!framework->HasCommandLineParameter("--noFileWatcher"))
@@ -379,20 +391,18 @@ void LocalAssetProvider::CompletePendingFileDownloads()
     }
 }
 
-AssetStoragePtr LocalAssetProvider::TryDeserializeStorageFromString(const String &storage, bool /*fromNetwork*/)
+AssetStoragePtr LocalAssetProvider::TryCreateStorage(HashMap<String, String> &storageParams, bool /*fromNetwork*/)
 {
-    Urho3D::FileSystem* fileSystem = GetSubsystem<Urho3D::FileSystem>();
-
-    HashMap<String, String> s = AssetAPI::ParseAssetStorageString(storage);
-    if (s.Contains("type") && s["type"].Compare("LocalAssetStorage", false) != 0)
+    if (!storageParams.Contains("src"))
         return AssetStoragePtr();
-    if (!s.Contains("src"))
+    if (storageParams.Contains("type") && storageParams["type"].Compare("LocalAssetStorage", false) != 0)
         return AssetStoragePtr();
 
     String path;
     String protocolPath;
-    AssetAPI::AssetRefType refType = AssetAPI::ParseAssetRef(s["src"], 0, 0, &protocolPath, 0, 0, &path);
+    AssetAPI::AssetRefType refType = AssetAPI::ParseAssetRef(storageParams["src"], 0, 0, &protocolPath, 0, 0, &path);
 
+    Urho3D::FileSystem* fileSystem = GetSubsystem<Urho3D::FileSystem>();
     if (refType == AssetAPI::AssetRefRelativePath)
     {
         path = GuaranteeTrailingSlash(fileSystem->GetCurrentDir()) + path;
@@ -401,34 +411,17 @@ AssetStoragePtr LocalAssetProvider::TryDeserializeStorageFromString(const String
     if (refType != AssetAPI::AssetRefLocalPath)
         return AssetStoragePtr();
 
-    String name = (s.Contains("name") ? s["name"] : GenerateUniqueStorageName());
+    String name = (storageParams.Contains("name") ? storageParams["name"] : GenerateUniqueStorageName());
 
-    bool recursive = true;
-    bool writable = true;
-    bool liveUpdate = true;
-    bool autoDiscoverable = true;
-    if (s.Contains("recursive"))
-        recursive = Urho3D::ToBool(s["recursive"]);
+    bool recursive          = (storageParams.Contains("recursive") ? Urho3D::ToBool(storageParams["recursive"]) : true);
+    bool writable           = (storageParams.Contains("readonly") ? !Urho3D::ToBool(storageParams["readonly"]) : true);
+    bool liveUpdate         = (storageParams.Contains("liveupdate") ? Urho3D::ToBool(storageParams["liveupdate"]) : true);
+    bool autoDiscoverable   = (storageParams.Contains("autodiscoverable") ? Urho3D::ToBool(storageParams["autodiscoverable"]) : true);
+    bool replicated         = (storageParams.Contains("replicated") ? Urho3D::ToBool(storageParams["replicated"]) : false);
+    String trusted          = (storageParams.Contains("trusted") ? storageParams["trusted"] : "");
 
-    if (s.Contains("readonly"))
-        writable = !Urho3D::ToBool(s["readonly"]);
-
-    if (s.Contains("liveupdate"))
-        liveUpdate = Urho3D::ToBool(s["liveupdate"]);
-    
-    if (s.Contains("autodiscoverable"))
-        autoDiscoverable = Urho3D::ToBool(s["autodiscoverable"]);
-
-    LocalAssetStoragePtr storagePtr = AddStorageDirectory(path, name, recursive, writable, liveUpdate, autoDiscoverable);
-
-    ///\bug Refactor these sets to occur inside AddStorageDirectory so that when the NewStorageAdded signal is emitted, these values are up to date.
-    if (storagePtr)
-    {
-        if (s.Contains("replicated"))
-            storagePtr->SetReplicated(Urho3D::ToBool(s["replicated"]));
-        if (s.Contains("trusted"))
-            storagePtr->trustState = IAssetStorage::TrustStateFromString(s["trusted"]);
-    }
+    LocalAssetStoragePtr storagePtr = AddStorageDirectory(path, name, recursive, writable, 
+        liveUpdate, autoDiscoverable, replicated, trusted);
 
     return AssetStoragePtr(storagePtr);
 }
