@@ -1,20 +1,18 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
-#include <kNet.h>
-#include <kNet/UDPMessageConnection.h>
-
 #include "KristalliProtocol.h"
 #include "TundraLogic.h"
+
 #include "Framework.h"
-#include "Profiler.h"
 #include "CoreStringUtils.h"
 #include "ConsoleAPI.h"
 #include "LoggingFunctions.h"
-#include "Win.h"
 
-#include <algorithm>
-#include <utility>
+#include <Engine/Core/Profiler.h>
+
+#include <kNet.h>
+#include <kNet/UDPMessageConnection.h>
 
 namespace Tundra
 {
@@ -29,7 +27,6 @@ KristalliProtocol::KristalliProtocol(TundraLogic* owner) :
     reconnectAttempts(0),
     serverPort(0)
 {
-    
 }
 
 KristalliProtocol::~KristalliProtocol()
@@ -318,7 +315,7 @@ u32 KristalliProtocol::AllocateNewConnectionID() const
 {
     u32 newID = 1;
     for(auto iter = connections.Begin(); iter != connections.End(); ++iter)
-        newID = std::max(newID, (*iter)->userID+1);
+        newID = Max(newID, (*iter)->userID+1);
     
     return newID;
 }

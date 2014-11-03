@@ -2,16 +2,13 @@
 
 #pragma once
 
-#include <kNet.h>
-
 #include "TundraLogicApi.h"
 #include "TundraLogicFwd.h"
 #include "FrameworkFwd.h"
-#include "MsgCameraOrientationRequest.h"
 #include "Signals.h"
-#include <Math/Quat.h>
-#include <Object.h>
 
+#include <Object.h>
+#include <kNet/Socket.h>
 
 namespace Tundra
 {
@@ -89,10 +86,6 @@ public:
     /// Deletes all set login properties.
     void ClearLoginProperties() { properties_.Clear(); }
 
-    /// Get the current camera orientation
-    /// @todo SyncManager/InterestManager functionality. Move away from here.
-    void GetCameraOrientation();
-
     /// This signal is emitted right before this client is starting to connect to a Tundra server.
     /** Any script or other piece of code can listen to this signal, and as at this point, fill in any internal
         custom data (called "login properties") they need to add to the connection handshake. The server will get 
@@ -125,10 +118,6 @@ private:
     /// Actually perform a delayed logout
     void DelayedLogout();
 
-    /// Handles a camera orientation request message
-    /// @todo SyncManager/InterestManager functionality. Move away from here.
-    void HandleCameraOrientationRequest(kNet::MessageConnection* source, const MsgCameraOrientationRequest& msg);
-
     /// Handles a loginreply message
     void HandleLoginReply(kNet::MessageConnection* source, const char *data, size_t numBytes);
 
@@ -145,16 +134,6 @@ private:
 
     TundraLogic* owner_;
     Framework* framework_;
-
-    // Current camera orientation
-    /// @todo SyncManager/InterestManager functionality. Move away from here.
-    Quat currentcameraorientation_;
-    // Current camera location
-    /// @todo SyncManager/InterestManager functionality. Move away from here.
-    float3 currentcameralocation_;
-
-    bool sendCameraUpdates_;
-    bool firstCameraUpdateSent_;
 
     /// "Virtual" user connection representing the server and its syncstate (client only)
     KNetUserConnectionPtr serverUserConnection_;
