@@ -15,6 +15,8 @@
 #include "LoggingFunctions.h"
 
 #include "AssetAPI.h"
+#include "IAsset.h"
+
 #include "LocalAssetProvider.h"
 #include "LocalAssetStorage.h"
 
@@ -128,11 +130,18 @@ void TundraLogic::LoadStartupScene()
         LogError("TundraLogicModule: --file specified without a value.");
 
     bool loaded = false;
-
-    foreach(String file, files)
+    foreach(const String &file, files)
     {
-        /// \todo File asset handling. Now just loaded from the filesystem.
-        loaded |= LoadScene(file, false, false);
+        AssetAPI::AssetRefType refType = AssetAPI::ParseAssetRef(file.Trimmed());
+        if (refType != AssetAPI::AssetRefExternalUrl)
+            loaded |= LoadScene(file, false, false);
+        else
+        {
+            AssetTransferPtr transfer = framework->Asset()->RequestAsset(file, "Binary", true);
+            if (transfer)
+                transfer->Succeeded.Connect(this, &TundraLogic::StartupSceneLoaded);
+            loaded = true; // hack for below, assume later success. Camera creation should be somewhere more sensible...
+        }
     }
 
     if (loaded)
@@ -146,6 +155,11 @@ void TundraLogic::LoadStartupScene()
         if (renderer)
             renderer->SetMainCamera(entity);
     }
+}
+
+void TundraLogic::StartupSceneLoaded(AssetPtr sceneAsset)
+{
+    LoadScene(sceneAsset->DiskSource(), false, false);
 }
 
 bool TundraLogic::LoadScene(String filename, bool clearScene, bool useEntityIDsFromFile)

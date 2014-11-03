@@ -5,6 +5,7 @@
 #include "IModule.h"
 #include "TundraLogicApi.h"
 #include "TundraLogicFwd.h"
+#include "AssetFwd.h"
 #include "Signals.h"
 
 namespace Tundra
@@ -50,6 +51,9 @@ private:
 
     /// Load startup scene if necessary. Return true on success.
     void LoadStartupScene();
+
+    /// Handler for asset request of scene file.
+    void StartupSceneLoaded(AssetPtr sceneAsset);
 
     /// Load a scene file into the active (main camera) scene. Return true on success.
     bool LoadScene(String filename, bool clearScene, bool useEntityIDsFromFile);
