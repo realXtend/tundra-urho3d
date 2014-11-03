@@ -225,7 +225,7 @@ void ReadMeshLodInfo(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
     {
         u16 id = ReadHeader(stream);
         if (id != M_MESH_LOD_USAGE) {
-            throw std::exception("M_MESH_LOD does not contain a M_MESH_LOD_USAGE for each LOD level");
+            throw std::runtime_error("M_MESH_LOD does not contain a M_MESH_LOD_USAGE for each LOD level");
         }
 
         SkipBytes(stream, sizeof(float)); // User value
@@ -234,7 +234,7 @@ void ReadMeshLodInfo(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
         {
             id = ReadHeader(stream);
             if (id != M_MESH_LOD_MANUAL) {
-                throw std::exception("Manual M_MESH_LOD_USAGE does not contain M_MESH_LOD_MANUAL");
+                throw std::runtime_error("Manual M_MESH_LOD_USAGE does not contain M_MESH_LOD_MANUAL");
             }
                 
             ReadLine(stream); // manual mesh name (ref to another mesh)
@@ -245,7 +245,7 @@ void ReadMeshLodInfo(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
             {
                 id = ReadHeader(stream);
                 if (id != M_MESH_LOD_GENERATED) {
-                    throw std::exception("Generated M_MESH_LOD_USAGE does not contain M_MESH_LOD_GENERATED");
+                    throw std::runtime_error("Generated M_MESH_LOD_USAGE does not contain M_MESH_LOD_GENERATED");
                 }
 
                 uint indexCount = stream.ReadUInt();
@@ -284,7 +284,7 @@ void ReadMeshExtremes(Urho3D::Deserializer& stream, Ogre::Mesh * /*mesh*/)
 void ReadBoneAssignment(Urho3D::Deserializer& stream, VertexData *dest)
 {
     if (!dest) {
-        throw std::exception("Cannot read bone assignments, vertex data is null.");
+        throw std::runtime_error("Cannot read bone assignments, vertex data is null.");
     }
         
     VertexBoneAssignment ba;
@@ -321,7 +321,7 @@ void ReadSubMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
     {
         id = ReadHeader(stream);
         if (id != M_GEOMETRY) {
-            throw std::exception("M_SUBMESH does not contain M_GEOMETRY, but shared geometry is set to false");
+            throw std::runtime_error("M_SUBMESH does not contain M_GEOMETRY, but shared geometry is set to false");
         }
 
         submesh->vertexData = new VertexData();
@@ -428,7 +428,7 @@ void ReadSubMeshNames(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
             submeshIndex = stream.ReadUShort();
             SubMesh *submesh = mesh->GetSubMesh(submeshIndex);
             if (!submesh) {
-                throw std::exception("Ogre Mesh does not include submesh referenced in M_SUBMESH_NAME_TABLE_ELEMENT. Invalid mesh file.");
+                throw std::runtime_error("Ogre Mesh does not include submesh referenced in M_SUBMESH_NAME_TABLE_ELEMENT. Invalid mesh file.");
             }
 
             submesh->name = ReadLine(stream);
@@ -511,11 +511,11 @@ void ReadGeometryVertexBuffer(Urho3D::Deserializer& stream, VertexData *dest)
     u16 id = ReadHeader(stream);
     if (id != M_GEOMETRY_VERTEX_BUFFER_DATA)
     {
-        throw std::exception("M_GEOMETRY_VERTEX_BUFFER_DATA not found in M_GEOMETRY_VERTEX_BUFFER");
+        throw std::runtime_error("M_GEOMETRY_VERTEX_BUFFER_DATA not found in M_GEOMETRY_VERTEX_BUFFER");
     }
     if (dest->VertexSize(bindIndex) != vertexSize)
     {
-        throw std::exception("Vertex buffer size does not agree with vertex declaration in M_GEOMETRY_VERTEX_BUFFER");
+        throw std::runtime_error("Vertex buffer size does not agree with vertex declaration in M_GEOMETRY_VERTEX_BUFFER");
     }
     uint numBytes = dest->count * vertexSize;
     dest->vertexBindings[bindIndex].Resize(numBytes);
@@ -547,7 +547,7 @@ void ReadEdgeList(Urho3D::Deserializer& stream, Ogre::Mesh * /*mesh*/)
                     u16 id = ReadHeader(stream);
                     if (id != M_EDGE_GROUP)
                     {
-                        throw std::exception("M_EDGE_GROUP not found in M_EDGE_LIST_LOD");
+                        throw std::runtime_error("M_EDGE_GROUP not found in M_EDGE_LIST_LOD");
                     }
                         
                     SkipBytes(stream, sizeof(uint) * 3);
