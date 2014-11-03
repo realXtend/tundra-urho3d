@@ -129,19 +129,19 @@ bool HttpRequest::SetBodyFromFile(const String &filepath, const String &contentT
     String filepathClean = Urho3D::GetInternalPath(filepath.Trimmed());
     if (!framework_->GetSubsystem<Urho3D::FileSystem>()->FileExists(filepathClean))
     {
-        log.ErrorF("SetBodyFromFile: Input file '%s' does not exist.", filepath);
+        log.ErrorF("SetBodyFromFile: Input file '%s' does not exist.", filepath.CString());
         return false;
     }
     Urho3D::File file(framework_->GetContext(), filepathClean, Urho3D::FILE_READ);
     if (!file.IsOpen())
     {
-        log.ErrorF("SetBodyFromFile: Failed to open input file '%s'.", filepath);
+        log.ErrorF("SetBodyFromFile: Failed to open input file '%s'.", filepath.CString());
         return false;
     }
     uint fileSize = file.GetSize();
     if (fileSize <= 0)
     {
-        log.ErrorF("SetBodyFromFile: Input file '%s' is empty.", filepath);
+        log.ErrorF("SetBodyFromFile: Input file '%s' is empty.", filepath.CString());
         return false;
     }
     Vector<u8> data(fileSize);
@@ -149,7 +149,7 @@ bool HttpRequest::SetBodyFromFile(const String &filepath, const String &contentT
     file.Close();
     if (num != fileSize)
     {
-        log.ErrorF("SetBodyFromFile: Failed to read all %d bytes from file '%s'. Instead read %d bytes.", fileSize, filepath, num);
+        log.ErrorF("SetBodyFromFile: Failed to read all %d bytes from file '%s'. Instead read %d bytes.", fileSize, filepath.CString(), num);
         return false;
     }
     return SetBody(data, contentType);
