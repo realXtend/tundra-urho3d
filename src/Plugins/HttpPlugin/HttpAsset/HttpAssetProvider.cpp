@@ -60,7 +60,7 @@ String HttpAssetProvider::UniqueName(String prefix) const
         }
         if (!reserved)
             return prefix;
-        prefix = Urho3D::ToString("%s %d", prefix, counter++);
+        prefix = Urho3D::ToString("%s %d", prefix.CString(), counter++);
     }
     return "";
 }
