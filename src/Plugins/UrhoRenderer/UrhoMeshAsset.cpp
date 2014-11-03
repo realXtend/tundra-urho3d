@@ -40,7 +40,6 @@ bool UrhoMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
         model.Reset();
         return false;
     }
-
 }
 
 }

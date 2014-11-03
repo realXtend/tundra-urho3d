@@ -8,4 +8,5 @@
 #include "CoreDefines.h"
 /// @todo More essential Urho #includes
 #include <Str.h>
+#include <kNet.h>
 #endif

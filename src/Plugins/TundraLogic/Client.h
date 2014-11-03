@@ -2,16 +2,13 @@
 
 #pragma once
 
-#include <kNet.h>
-
 #include "TundraLogicApi.h"
 #include "TundraLogicFwd.h"
 #include "FrameworkFwd.h"
-#include "MsgCameraOrientationRequest.h"
 #include "Signals.h"
-#include <Math/Quat.h>
-#include <Object.h>
 
+#include <Object.h>
+#include <kNet/Socket.h>
 
 namespace Tundra
 {
@@ -89,10 +86,6 @@ public:
     /// Deletes all set login properties.
     void ClearLoginProperties() { properties_.Clear(); }
 
-    /// Get the current camera orientation
-    /// @todo SyncManager/InterestManager functionality. Move away from here.
-    void GetCameraOrientation();
-
     /// This signal is emitted right before this client is starting to connect to a Tundra server.
     /** Any script or other piece of code can listen to this signal, and as at this point, fill in any internal
         custom data (called "login properties") they need to add to the connection handshake. The server will get 
@@ -102,17 +95,16 @@ public:
 
     /// This signal is emitted immediately after this client has successfully connected to a server.
     /// @param responseData This is the data that the server sent back to the client related to the connection.
-    Signal1<UserConnectedResponseData*> Connected;
+    Signal1<UserConnectedResponseData* ARG(responseData)> Connected;
 
     /// Triggered whenever a new message is received from the network.
-    //void NetworkMessageReceived(kNet::packet_id_t, kNet::message_id_t id, const char *data, size_t numBytes);
-    Signal4<kNet::packet_id_t, kNet::message_id_t, const char*, size_t> NetworkMessageReceived;
+    Signal4<kNet::packet_id_t, kNet::message_id_t ARG(id), const char* ARG(data), size_t ARG(numBytes)> NetworkMessageReceived;
 
     /// This signal is emitted when the client has disconnected from the server.
     Signal0<void> Disconnected;
 
     /// Emitted when a login attempt failed to a server.
-    Signal1<const String&> LoginFailed;
+    Signal1<const String& ARG(reason)> LoginFailed;
 
 private:
     /// Handles a Kristalli protocol message
@@ -125,10 +117,6 @@ private:
 
     /// Actually perform a delayed logout
     void DelayedLogout();
-
-    /// Handles a camera orientation request message
-    /// @todo SyncManager/InterestManager functionality. Move away from here.
-    void HandleCameraOrientationRequest(kNet::MessageConnection* source, const MsgCameraOrientationRequest& msg);
 
     /// Handles a loginreply message
     void HandleLoginReply(kNet::MessageConnection* source, const char *data, size_t numBytes);
@@ -146,16 +134,6 @@ private:
 
     TundraLogic* owner_;
     Framework* framework_;
-
-    // Current camera orientation
-    /// @todo SyncManager/InterestManager functionality. Move away from here.
-    Quat currentcameraorientation_;
-    // Current camera location
-    /// @todo SyncManager/InterestManager functionality. Move away from here.
-    float3 currentcameralocation_;
-
-    bool sendCameraUpdates_;
-    bool firstCameraUpdateSent_;
 
     /// "Virtual" user connection representing the server and its syncstate (client only)
     KNetUserConnectionPtr serverUserConnection_;

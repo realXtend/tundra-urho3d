@@ -66,7 +66,7 @@ public:
 
     /// Returns all assetrefs currently known in this asset storage. Does not load the assets
     /// @deprecated Do not call this. Rather query for assets through AssetAPI.
-    StringList GetAllAssetRefs() override { return assetRefs; }
+    StringVector GetAllAssetRefs() override { return assetRefs; }
     
     /// Refresh asset refs. Issues a directory query and emits AssetChanged signals immediately
     void RefreshAssetRefs() override;

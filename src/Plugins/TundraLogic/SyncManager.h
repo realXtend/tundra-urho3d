@@ -14,7 +14,6 @@
 #include "SceneFwd.h"
 #include "AttributeChangeType.h"
 #include "EntityAction.h"
-//#include "InterestManager.h"
 
 #include <Object.h>
 
@@ -40,11 +39,6 @@ public:
     
     /// Create new replication state for user and dirty it (server operation only)
     void NewUserConnected(const UserConnectionPtr &user);
-
-    /// Get and Set the IM
-    InterestManager* GetInterestManager();
-
-    void SetInterestManager(InterestManager* im);
 
     // slots
 
@@ -77,8 +71,7 @@ public:
     // signals
     /// This signal is emitted when a new user connects and a new SceneSyncState is created for the connection.
     /// @note See signals of the SceneSyncState object to build prioritization logic how the sync state is filled.
- //   void SceneStateCreated(UserConnection *user, SceneSyncState *state);
-    Signal2<UserConnection*, SceneSyncState*> SceneStateCreated;
+    Signal2<UserConnection* ARG(user), SceneSyncState* ARG(state)> SceneStateCreated;
     
 private:
     /// Network message received from an user connection
@@ -106,10 +99,10 @@ private:
     void OnEntityRemoved(Entity* entity, AttributeChange::Type change);
 
     /// Trigger sync of entity action.
-    void OnActionTriggered(Entity *entity, const String &action, const StringList &params, EntityAction::ExecTypeField type);
+    void OnActionTriggered(Entity *entity, const String &action, const StringVector &params, EntityAction::ExecTypeField type);
 
     /// Trigger sync of entity action to specific user
-    void OnUserActionTriggered(UserConnection* user, Entity *entity, const String &action, const StringList &params);
+    void OnUserActionTriggered(UserConnection* user, Entity *entity, const String &action, const StringVector &params);
 
     /// Trigger sync of entity properties (temporary status) change
     void OnEntityPropertiesChanged(Entity* entity, AttributeChange::Type change);
@@ -213,9 +206,6 @@ private:
     char removeEntityBuffer_[1024];
     char removeAttrsBuffer_[1024];
     std::vector<u8> changedAttributes_;
-
-    /// Interest manager currently in use, null if none
-    InterestManager *interestmanager_;
 
     /// The sender of a component type. Used to avoid sending component description back to sender
     UserConnection* componentTypeSender_;

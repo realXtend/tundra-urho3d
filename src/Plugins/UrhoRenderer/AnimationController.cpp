@@ -254,7 +254,7 @@ bool AnimationController::SetAnimationNumLoops(const String& name, uint repeats)
     return false;
 }
 
-StringList AnimationController::AvailableAnimations()
+StringVector AnimationController::AvailableAnimations()
 {
     //Ogre::Entity* entity = GetEntity();
     //if (!entity) 
@@ -269,7 +269,7 @@ StringList AnimationController::AvailableAnimations()
     //    availableList << String(animstate->getAnimationName().c_str());
     //}
 
-    StringList availableList;
+    StringVector availableList;
     if (!mesh_ || !mesh_->UrhoMesh())
         return availableList;
 
@@ -284,9 +284,9 @@ StringList AnimationController::AvailableAnimations()
     return availableList;
 }
 
-StringList AnimationController::ActiveAnimations() const
+StringVector AnimationController::ActiveAnimations() const
 {
-    StringList activeList;
+    StringVector activeList;
 
     for(auto i = animations_.Begin(); i != animations_.End(); ++i)
     {
@@ -463,7 +463,7 @@ void AnimationController::PlayAnim(const String &name, const String &fadein, con
         success = EnableAnimation(name, false, fadein_, false);
     if (!success)
     {
-        StringList anims = AvailableAnimations();
+        StringVector anims = AvailableAnimations();
         void (*log)(const String &) = LogDebug; if (anims.Size() > 0) log = LogWarning;
         log("Failed to play animation \"" + name + "\" on entity " + ParentEntity()->Name());
         log("The entity has " + String(anims.Size()) + " animations available: " + Join(anims,","));
@@ -495,7 +495,7 @@ void AnimationController::PlayLoopedAnim(const String &name, const String &fadei
         success = EnableAnimation(name, true, fadein_, false);
     if (!success)
     {
-        StringList anims = AvailableAnimations();
+        StringVector anims = AvailableAnimations();
         void (*log)(const String &) = LogDebug; if (anims.Size() > 0) log = LogWarning;
         log("Failed to play looped animation \"" + name + "\" on entity " + ParentEntity()->Name());
         log("The entity has " + String(anims.Size()) + " animations available: " + Join(anims, ","));
@@ -526,7 +526,7 @@ void AnimationController::PlayReverseAnim(const String &name, const String &fade
         success = EnableExclusiveAnimation(name, true, fadein_, fadein_, false);
     if (!success)
     {
-        StringList anims = AvailableAnimations();
+        StringVector anims = AvailableAnimations();
         void (*log)(const String &) = LogDebug; if (anims.Size() > 0) log = LogWarning;
         log("Failed to play animation \"" + name + "\" in reverse on entity " + ParentEntity()->Name());
         log("The entity has " + String(anims.Size()) + " animations available: " + Join(anims, ","));
@@ -558,7 +558,7 @@ void AnimationController::PlayAnimAutoStop(const String &name, const String &fad
 
     if (!success)
     {
-        StringList anims = AvailableAnimations();
+        StringVector anims = AvailableAnimations();
         void (*log)(const String &) = LogDebug; if (anims.Size() > 0) log = LogWarning;
         log("Failed to play animation \"" + name + "\" on entity " + ParentEntity()->Name());
         log("The entity has " + String(anims.Size()) + " animations available: " + Join(anims, ","));

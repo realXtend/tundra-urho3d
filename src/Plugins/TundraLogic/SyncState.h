@@ -315,7 +315,7 @@ public:
     /// otherwise it will be added to the pending entities list. 
     /// @note See also HasPendingEntity and MarkPendingEntityDirty.
     /// @param request StateChangeRequest object.
-    Signal1<StateChangeRequest*> AboutToDirtyEntity;
+    Signal1<StateChangeRequest* ARG(request)> AboutToDirtyEntity;
 
     /// Removes the entity from the sync state and puts it to the pending list.
     /// @remark Enables a 'pending' logic in SyncManager, with which a script can throttle the sending of entities to clients.

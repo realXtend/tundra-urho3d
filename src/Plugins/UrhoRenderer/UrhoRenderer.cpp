@@ -15,6 +15,7 @@
 #include "AssetAPI.h"
 #include "Entity.h"
 #include "UrhoMeshAsset.h"
+#include "OgreMeshAsset.h"
 #include "Scene/Scene.h"
 #include "LoggingFunctions.h"
 #include "GenericAssetFactory.h"
@@ -47,6 +48,7 @@ void UrhoRenderer::Load()
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Light>()));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<AnimationController>()));
     framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<UrhoMeshAsset>("UrhoMesh", ".mdl")));
+    framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<OgreMeshAsset>("OgreMesh", ".mesh")));
 }
 
 void UrhoRenderer::Initialize()

@@ -27,7 +27,7 @@ void UserConnection::EmitNetworkMessageReceived(kNet::packet_id_t packetId, kNet
     NetworkMessageReceived.Emit(this, packetId, messageId, data, numBytes);
 }
 
-void UserConnection::Exec(Entity *entity, const String &action, const StringList &params)
+void UserConnection::Exec(Entity *entity, const String &action, const StringVector &params)
 {
     if (entity)
         ActionTriggered.Emit(this, entity, action, params);
@@ -38,7 +38,7 @@ void UserConnection::Exec(Entity *entity, const String &action, const StringList
 
 void UserConnection::Exec(Entity *entity, const String &action, const String &p1, const String &p2, const String &p3)
 {
-    StringList params(3);
+    StringVector params(3);
     params[0] = p1;
     params[1] = p2;
     params[2] = p3;

@@ -1,20 +1,18 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
-#include <kNet.h>
-#include <kNet/UDPMessageConnection.h>
-
 #include "KristalliProtocol.h"
 #include "TundraLogic.h"
+
 #include "Framework.h"
-#include "Profiler.h"
 #include "CoreStringUtils.h"
 #include "ConsoleAPI.h"
 #include "LoggingFunctions.h"
-#include "Win.h"
 
-#include <algorithm>
-#include <utility>
+#include <Engine/Core/Profiler.h>
+
+#include <kNet.h>
+#include <kNet/UDPMessageConnection.h>
 
 namespace Tundra
 {
@@ -29,7 +27,6 @@ KristalliProtocol::KristalliProtocol(TundraLogic* owner) :
     reconnectAttempts(0),
     serverPort(0)
 {
-    
 }
 
 KristalliProtocol::~KristalliProtocol()
@@ -47,7 +44,7 @@ void KristalliProtocol::Load()
     if (framework->HasCommandLineParameter("--loglevel") || framework->HasCommandLineParameter("--loglevelnetwork"))
     {
         // --loglevelnetwork overrides --loglevel.
-        StringList params = framework->CommandLineParameters("--loglevel");
+        StringVector params = framework->CommandLineParameters("--loglevel");
         String logLevel = (!params.Empty() ? params.Front().ToLower() : "info");
         if (framework->HasCommandLineParameter("--loglevelnetwork"))
         {
@@ -71,7 +68,7 @@ void KristalliProtocol::Initialize()
     Framework* framework = owner->GetFramework();
 
     defaultTransport = kNet::SocketOverUDP;
-    StringList cmdLineParams = framework->CommandLineParameters("--protocol");
+    StringVector cmdLineParams = framework->CommandLineParameters("--protocol");
     if (cmdLineParams.Size() > 0)
     {
         kNet::SocketTransportLayer transportLayer = kNet::StringToSocketTransportLayer(cmdLineParams.Front().Trimmed().CString());
@@ -256,7 +253,7 @@ void KristalliProtocol::NewConnectionEstablished(kNet::MessageConnection *source
     
     UserConnectionPtr connection = UserConnectionPtr(new KNetUserConnection(this));
     connection->userID = AllocateNewConnectionID();
-    static_cast<KNetUserConnection*>(connection.Get())->connection = source;
+    Urho3D::StaticCast<KNetUserConnection>(connection)->connection = source;
     connections.Push(connection);
 
     // For TCP mode sockets, set the TCP_NODELAY option to improve latency for the messages we send.
@@ -273,7 +270,7 @@ void KristalliProtocol::ClientDisconnected(kNet::MessageConnection *source)
     // Delete from connection list if it was a known user
     for(auto iter = connections.Begin(); iter != connections.End(); ++iter)
     {
-        if ((*iter)->ConnectionType() == "knet" && static_cast<KNetUserConnection*>(iter->Get())->connection == source)
+        if ((*iter)->ConnectionType() == "knet" && Urho3D::StaticCast<KNetUserConnection>(*iter)->connection == source)
         {
             ClientDisconnectedEvent.Emit(iter->Get());
             
@@ -318,7 +315,7 @@ u32 KristalliProtocol::AllocateNewConnectionID() const
 {
     u32 newID = 1;
     for(auto iter = connections.Begin(); iter != connections.End(); ++iter)
-        newID = std::max(newID, (*iter)->userID+1);
+        newID = Max(newID, (*iter)->userID+1);
     
     return newID;
 }
@@ -326,7 +323,7 @@ u32 KristalliProtocol::AllocateNewConnectionID() const
 UserConnectionPtr KristalliProtocol::UserConnectionBySource(kNet::MessageConnection* source) const
 {
     for(auto iter = connections.Begin(); iter != connections.End(); ++iter)
-        if ((*iter)->ConnectionType() == "knet" && static_cast<KNetUserConnection*>(iter->Get())->connection == source)
+        if ((*iter)->ConnectionType() == "knet" && Urho3D::StaticCast<KNetUserConnection>(*iter)->connection == source)
             return *iter;
 
     return UserConnectionPtr();

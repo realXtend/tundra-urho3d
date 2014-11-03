@@ -7,6 +7,6 @@
 		]
     },
     {
-        "--file" : "Scenes/Test.txml"
+        "--file" : "Scenes/Test/Test.txml"
     }
 ]
