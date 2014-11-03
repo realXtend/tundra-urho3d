@@ -6,7 +6,7 @@ setlocal EnableDelayedExpansion
 
 :: Make sure we're running in Visual Studio Command Prompt
 IF "%VSINSTALLDIR%"=="" (
-   Utils\cecho {0C}Batch file not executed from Visual Studio Command Prompt - cannot proceed!{# #}{\n}
+   cecho {0C}Batch file not executed from Visual Studio Command Prompt - cannot proceed!{# #}{\n}
    GOTO :ERROR
 )
 
@@ -24,11 +24,11 @@ set BUILD_TYPE_DEBUG=Debug
 set BUILD_TYPE_DEFAULT=%BUILD_TYPE_RELWITHDEBINFO%
 IF "!BUILD_TYPE!"=="" (
     set BUILD_TYPE=%BUILD_TYPE_DEFAULT%
-    Utils\cecho {0E}VSConfig.cmd: Warning: BUILD_TYPE not specified - using the default %BUILD_TYPE_DEFAULT%{# #}{\n}
+    cecho {0E}VSConfig.cmd: Warning: BUILD_TYPE not specified - using the default %BUILD_TYPE_DEFAULT%{# #}{\n}
     pause
 )
 IF NOT !BUILD_TYPE!==%BUILD_TYPE_MINSIZEREL% IF NOT !BUILD_TYPE!==%BUILD_TYPE_RELEASE% IF NOT !BUILD_TYPE!==%BUILD_TYPE_RELWITHDEBINFO% IF NOT !BUILD_TYPE!==%BUILD_TYPE_DEBUG% (
-    Utils\cecho {0C}VSConfig.cmd: Invalid or unsupported CMake build type passed: !BUILD_TYPE!. Cannot proceed, aborting!{# #}{\n}
+    cecho {0C}VSConfig.cmd: Invalid or unsupported CMake build type passed: !BUILD_TYPE!. Cannot proceed, aborting!{# #}{\n}
     pause
     GOTO :EOF
 )
@@ -225,8 +225,14 @@ IF NOT EXIST "%DEPS%\openssl\". (
         perl Configure VC-WIN64A --prefix="%DEPS%\openssl\build"
         call ms\do_win64a.bat
     ) ELSE (
+        IF NOT EXIST "%TOOLS%\Utils\nasm-2.11.06". (
+            curl -o "%TOOLS%\Utils\nasm.zip" http://www.nasm.us/pub/nasm/releasebuilds/2.11.06/win32/nasm-2.11.06-win32.zip
+            7za x -y -o"%TOOLS%\Utils" "%TOOLS%\Utils\nasm.zip"
+            del /Q "%TOOLS%\Utils\nasm.zip"
+        )
+        set PATH=!PATH!;%TOOLS%\Utils\nasm-2.11.06
         perl Configure VC-WIN32 --prefix="%DEPS%\openssl\build"
-        call ms\do_masm.bat
+        call ms\do_nasm.bat
     )
     IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 

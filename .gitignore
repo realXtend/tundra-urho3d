@@ -75,7 +75,7 @@ bin/Tundra.log
 bin/Data/Shaders/*/Cache
 build-*/
 install/
-
+tools/Windows/Utils/nasm*
 
 # SVN admin
 *.svn-base
