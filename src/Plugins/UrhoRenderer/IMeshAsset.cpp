@@ -23,7 +23,7 @@ IMeshAsset::~IMeshAsset()
     Unload();
 }
 
-size_t IMeshAsset::NumSubmeshes() const
+uint IMeshAsset::NumSubmeshes() const
 {
     return model ? model->GetNumGeometries() : 0;
 }

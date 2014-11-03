@@ -26,7 +26,7 @@ public:
     bool IsLoaded() const override;
 
     /// Returns submesh count.
-    size_t NumSubmeshes() const;
+    uint NumSubmeshes() const;
 
 protected:
     /// Unload mesh. IAsset override.
