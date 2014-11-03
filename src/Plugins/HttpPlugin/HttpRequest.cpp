@@ -534,13 +534,13 @@ void HttpRequest::Perform()
                     one request is ongoing at a time to a unique URL. The URL designates the filepath where we are writing. Framework and Urho3D
                     Engine and its subsystem are guaranteed to be up while any worker thread is running (exit blocks waiting for workers to finish).
                     Still this is dicy, it would be nice to execute the disk write in thread but if not safe it can be moved to main thread. */
-                SharedPtr<Urho3D::File> file(new Urho3D::File(framework_->GetContext(), requestData_.cacheFile, Urho3D::FILE_WRITE));
-                if (file->IsOpen())
+                Urho3D::File file(framework_->GetContext(), requestData_.cacheFile, Urho3D::FILE_WRITE);
+                if (file.IsOpen())
                 {
                     uint bodySize = responseData_.bodyBytes.Size();
-                    if (file->Write(&responseData_.bodyBytes[0], bodySize) == bodySize)
+                    if (file.Write(&responseData_.bodyBytes[0], bodySize) == bodySize)
                     {
-                        file->Close(); // File shared ptr will close when gets out of scope. Lets just do it here before modifying below last modified on the file.
+                        file.Close(); // File shared ptr will close when gets out of scope. Lets just do it here before modifying below last modified on the file.
                         time_t epoch = Http::HttpDateToUtcEpoch(lastModified);
                         if (epoch > 0) // SetLastModifiedTime converts utc epoch correctly to local
                             framework_->GetSubsystem<Urho3D::FileSystem>()->SetLastModifiedTime(requestData_.cacheFile, static_cast<uint>(epoch));
@@ -549,7 +549,22 @@ void HttpRequest::Perform()
             }
         }
         else if (responseData_.status == 304)
+        {
             ParseHeaders();
+
+            /// See above 200 OK file access comment
+            Urho3D::File file(framework_->GetContext(), requestData_.cacheFile, Urho3D::FILE_READ);
+            if (file.IsOpen())
+            {
+                uint fileSize = file.GetSize();
+                responseData_.bodyBytes.Resize(fileSize);
+                if (file.Read(&responseData_.bodyBytes[0], fileSize) != fileSize)
+                {
+                    log.Error("Failed to read cached disk source for '304 not Modified' response.");
+                    responseData_.bodyBytes.Clear();
+                }
+            }
+        }
     }
 
     Cleanup();
