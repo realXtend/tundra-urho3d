@@ -11,7 +11,9 @@ namespace Tundra
 
 Server::Server(TundraLogic* owner) :
     Object(owner->GetContext()),
-    userConnectionList_()
+    owner_(owner),
+    framework_(owner->Fw()),
+    current_port_(-1)
 {
 }
 

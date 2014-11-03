@@ -22,10 +22,11 @@ static const int cReconnectAttempts = 0;
 KristalliProtocol::KristalliProtocol(TundraLogic* owner) :
     Object(owner->GetContext()),
     owner(owner),
-    serverConnection(0),
     server(0),
-    reconnectAttempts(0),
-    serverPort(0)
+    serverPort(0),
+    serverConnection(0),
+    connectionPending(false),
+    reconnectAttempts(0)
 {
 }
 
