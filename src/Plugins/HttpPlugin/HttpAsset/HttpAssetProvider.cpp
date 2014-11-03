@@ -26,17 +26,14 @@ HttpAssetProvider::HttpAssetProvider(Framework *framework, const HttpClientPtr &
 
 HttpAssetProvider::~HttpAssetProvider()
 {
+    httpStorages_.Clear();
 }
 
 AssetStoragePtr HttpAssetProvider::StorageForBaseURL(const String &url) const
 {
-    AssetStorageVector storages = framework_->Asset()->AssetStorages();
-    foreach(const AssetStoragePtr &storage, storages)
-    {
-        HttpAssetStorage *httpStorage = dynamic_cast<HttpAssetStorage*>(storage.Get());
-        if (httpStorage && httpStorage->BaseURL().Compare(url, true) == 0)
-            return storage;
-    }
+    foreach(const AssetStoragePtr &httpStorage, httpStorages_)
+        if (httpStorage->BaseURL().Compare(url, true) == 0)
+            return httpStorage;
     return AssetStoragePtr();
 }
 
@@ -52,11 +49,13 @@ String HttpAssetProvider::UniqueName(String prefix) const
         bool reserved = false;
         foreach(const AssetStoragePtr &storage, storages)
         {
-            HttpAssetStorage *httpStorage = dynamic_cast<HttpAssetStorage*>(storage.Get());
-            if (httpStorage && httpStorage->Name().Compare(prefix, false) == 0)
+            foreach(const AssetStoragePtr &httpStorage, httpStorages_)
             {
-                reserved = true;
-                break;
+                if (httpStorage->Name().Compare(prefix, false) == 0)
+                {
+                    reserved = true;
+                    break;
+                }
             }
         }
         if (!reserved)
@@ -99,34 +98,50 @@ bool HttpAssetProvider::AbortTransfer(IAssetTransfer *transfer)
      return false; /// @todo
 }
 
-void HttpAssetProvider::Update(float UNUSED_PARAM(frametime))
-{
-     /// @todo
-}
-
 void HttpAssetProvider::DeleteAssetFromStorage(String assetRef)
 {
      /// @todo
 }
 
-bool HttpAssetProvider::RemoveAssetStorage(String storageName)
+bool HttpAssetProvider::RemoveAssetStorage(String name)
 {
-    return false; /// @todo
+    for(auto iter = httpStorages_.Begin(); iter != httpStorages_.End(); ++iter)
+    {
+        if ((*iter)->Name().Compare(name, true) == 0)
+        {
+            httpStorages_.Erase(iter);
+            return true;
+        }
+    }
+    return false;
 }
 
 Vector<AssetStoragePtr> HttpAssetProvider::Storages() const
 {
-    return Vector<AssetStoragePtr>(); /// @todo
+    return httpStorages_;
 }
 
 AssetStoragePtr HttpAssetProvider::StorageByName(const String &name) const
 {
-    return AssetStoragePtr(); /// @todo
+    foreach(const AssetStoragePtr &httpStorage, httpStorages_)
+    {
+        if (httpStorage->Name() == name)
+            return httpStorage;
+    }
+    return AssetStoragePtr();
 }
 
 AssetStoragePtr HttpAssetProvider::StorageForAssetRef(const String &assetRef) const
 {
-    return AssetStoragePtr(); /// @todo
+    if (!IsValidRef(assetRef, ""))
+        return AssetStoragePtr();
+
+    foreach(const AssetStoragePtr &httpStorage, httpStorages_)
+    {
+        if (assetRef.StartsWith(httpStorage->BaseURL(), true))
+            return httpStorage;
+    }
+    return AssetStoragePtr();
 }
 
 AssetUploadTransferPtr HttpAssetProvider::UploadAssetFromFileInMemory(const u8 *data, uint numBytes,
@@ -153,7 +168,10 @@ AssetStoragePtr HttpAssetProvider::TryCreateStorage(HashMap<String, String> &sto
     // @todo liveupdate, liveupload, autodiscoverable etc. when actually needed
     AssetStoragePtr storage = StorageForBaseURL(baseUrl);
     if (!storage)
+    {
         storage = AssetStoragePtr(new HttpAssetStorage(framework_->GetContext(), name, baseUrl, storageParams["localdir"]));
+        httpStorages_.Push(storage);
+    }
 
     storage->SetReplicated(Urho3D::ToBool(storageParams["replicated"]));
     return storage;

@@ -39,6 +39,13 @@ String HttpAssetStorage::BaseURL() const
     return baseUrl_;
 }
 
+String HttpAssetStorage::GetFullAssetURL(const String &localName)
+{
+    if (localName.StartsWith("/", true))
+        return baseUrl_ + localName.Substring(1);
+    return baseUrl_ + localName;
+}
+
 String HttpAssetStorage::SerializeToString(bool networkTransfer) const
 {
     String serialized =

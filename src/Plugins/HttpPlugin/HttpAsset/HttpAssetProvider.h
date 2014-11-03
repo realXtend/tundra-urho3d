@@ -30,8 +30,6 @@ public:
     /// IAssetProvider override.
     bool AbortTransfer(IAssetTransfer *transfer) override;
     /// IAssetProvider override.
-    void Update(float UNUSED_PARAM(frametime)) override;
-    /// IAssetProvider override.
     void DeleteAssetFromStorage(String assetRef) override;
     /// IAssetProvider override.
     bool RemoveAssetStorage(String storageName) override;
@@ -57,6 +55,8 @@ private:
 
     Framework *framework_;
     HttpClientPtr client_;
+
+    Vector<AssetStoragePtr> httpStorages_;
 };
 
 }

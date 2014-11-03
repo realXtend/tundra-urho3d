@@ -23,6 +23,8 @@ public:
     /// IAssetStorage override.
     String BaseURL() const override;
     /// IAssetStorage override.
+    String GetFullAssetURL(const String &localName) override;
+    /// IAssetStorage override.
     String SerializeToString(bool networkTransfer = false) const override;
 
 private:
