@@ -21,7 +21,7 @@ namespace Method
             case Method::Patch:
             case Method::Options:
             case Method::Delete:
-                static_cast<int>(CURLOPT_CUSTOMREQUEST);
+                return static_cast<int>(CURLOPT_CUSTOMREQUEST);
             case Method::Head:
                 return static_cast<int>(CURLOPT_NOBODY);
             case Method::Get:
@@ -204,7 +204,8 @@ time_t HttpDateToUtcEpoch(const String &date)
 RequestData::RequestData() :
     curlHandle(0),
     curlHeaders(0),
-    msecSpent(0)
+    msecSpent(0),
+    bodyWritePos(0)
 {
 }
 
@@ -224,10 +225,8 @@ curl_slist *RequestData::CreateCurlHeaders(bool print)
         String value = Urho3D::ToString("%s: %s", iter->first.CString(), iter->second.CString());
         curlHeaders = curl_slist_append(curlHeaders, value.CString());
         if (print)
-            PrintRaw(value + "\n");
+            PrintRaw(Urho3D::ToString("  '%s': '%s'\n", iter->first.CString(), iter->second.CString()));
     }
-    if (print)
-        PrintRaw("\n");
     return curlHeaders;
 }
 
@@ -249,7 +248,9 @@ ResponseData::ResponseData() :
     httpVersionMajor(-1),
     httpVersionMinor(-1),
     status(-1),
-    bytesPerSec(0.0)
+    downloadBytesPerSec(0.0),
+    uploadBytesPerSec(0.0),
+    headersParsed(false)
 {
 }
 

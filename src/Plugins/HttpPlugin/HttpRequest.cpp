@@ -28,6 +28,7 @@ HttpRequest::HttpRequest(Framework* framework, int method, const String &url) :
     verbose_(false),
     completed_(false)
 {
+    requestData_.method = method;
     requestData_.options[Options::Url] = Curl::Option(CURLOPT_URL, Variant(url));
     requestData_.options[Options::Method] = Curl::Option(static_cast<CURLoption>(Http::Method::CurlOption(method)), Http::Method::CurlOptionValue(method));
 }
@@ -72,11 +73,7 @@ void HttpRequest::SetVerbose(bool enabled)
 
 String HttpRequest::Method() const
 {
-    // Options are read but not written to in the work thread. Don't lock.
-    Curl::OptionMap::ConstIterator option = requestData_.options.Find(Options::Method);
-    if (option != requestData_.options.End() && option->second_.value.GetType() == Urho3D::VAR_INT)
-        return Http::Method::ToString(option->second_.value.GetInt());
-    return "";
+    return Http::Method::ToString(requestData_.method);
 }
 
 String HttpRequest::Url() const
@@ -97,19 +94,17 @@ String HttpRequest::Error()
 
 bool HttpRequest::SetBody(const Vector<u8> &body, const String &contentType)
 {
+    Urho3D::MutexLock m(mutexExecute_);
+    if (executing_)
     {
-        Urho3D::MutexLock m(mutexExecute_);
-        if (executing_)
-        {
-            log.Error("SetBody: Cannot set body to a running request.");
-            return false;
-        }
-        /* @note We allow setting empty body with a Content-Type
-           as it might be perfectly valid situation for POS/PUT etc.
-           for certain servers/applications. */
-        requestData_.bodyBytes = body;
+        log.Error("SetBody: Cannot set body to a running request.");
+        return false;
     }
-    return SetHeader(Http::Header::ContentType, contentType);
+    /* @note We allow setting empty body with a Content-Type
+       It might be a valid situation for certain applications. */
+    requestData_.bodyBytes = body;   
+    SetHeaderInternal(Http::Header::ContentType, contentType, false, false); // Do not lock inside SetHeaderInternal, already aquired above.
+    return true;
 }
 
 bool HttpRequest::SetBody(const String &body, const String &contentType)
@@ -118,29 +113,61 @@ bool HttpRequest::SetBody(const String &body, const String &contentType)
     return SetBody(data, contentType);
 }
 
-bool HttpRequest::SetBodyJSON(const JSONValue &json)
+bool HttpRequest::SetBodyFromJSON(const JSONValue &json)
 {
     String data = json.ToString(0);
-    return SetBodyJSON(data);
+    return SetBodyFromJSON(data);
 }
 
-bool HttpRequest::SetBodyJSON(const String &json)
+bool HttpRequest::SetBodyFromJSON(const String &json)
 {
     return SetBody(json, Http::ContentType::JSON);
 }
 
+bool HttpRequest::SetBodyFromFile(const String &filepath, const String &contentType)
+{
+    String filepathClean = Urho3D::GetInternalPath(filepath.Trimmed());
+    if (!framework_->GetSubsystem<Urho3D::FileSystem>()->FileExists(filepathClean))
+    {
+        log.ErrorF("SetBodyFromFile: Input file '%s' does not exist.", filepath);
+        return false;
+    }
+    Urho3D::File file(framework_->GetContext(), filepathClean, Urho3D::FILE_READ);
+    if (!file.IsOpen())
+    {
+        log.ErrorF("SetBodyFromFile: Failed to open input file '%s'.", filepath);
+        return false;
+    }
+    uint fileSize = file.GetSize();
+    if (fileSize <= 0)
+    {
+        log.ErrorF("SetBodyFromFile: Input file '%s' is empty.", filepath);
+        return false;
+    }
+    Vector<u8> data(fileSize);
+    uint num = file.Read(&data[0], fileSize);
+    file.Close();
+    if (num != fileSize)
+    {
+        log.ErrorF("SetBodyFromFile: Failed to read all %d bytes from file '%s'. Instead read %d bytes.", fileSize, filepath, num);
+        return false;
+    }
+    return SetBody(data, contentType);
+}
+
 bool HttpRequest::ClearBody()
 {
+    Urho3D::MutexLock m(mutexExecute_);
+    if (executing_)
     {
-        Urho3D::MutexLock m(mutexExecute_);
-        if (executing_)
-        {
-            log.Error("ClearBody: Cannot set body to a running request.");
-            return false;
-        }
-        requestData_.bodyBytes.Clear();
+        log.Error("ClearBody: Cannot set body to a running request.");
+        return false;
     }
-    RemoveHeader(Http::Header::ContentType);
+    requestData_.bodyBytes.Clear();
+
+    // Do not lock inside RemoveHeaderInternal, already aquired above.
+    RemoveHeaderInternal(Http::Header::ContentLength, false, false);
+    RemoveHeaderInternal(Http::Header::ContentType, false, false);
     return true;
 }
 
@@ -248,11 +275,18 @@ uint HttpRequest::DurationMSec()
     return requestData_.msecSpent;
 }
 
-float HttpRequest::AvertageDownloadSpeed()
+float HttpRequest::AverageDownloadSpeed()
 {
     if (!HasCompleted())
         return 0.f;
-    return static_cast<float>(responseData_.bytesPerSec);
+    return static_cast<float>(responseData_.downloadBytesPerSec);
+}
+
+float HttpRequest::AverageUploadSpeed()
+{
+    if (!HasCompleted())
+        return 0.f;
+    return static_cast<float>(responseData_.uploadBytesPerSec);
 }
 
 const Vector<u8> bodyNotReady;
@@ -264,7 +298,14 @@ const Vector<u8> &HttpRequest::ResponseBody()
     return responseData_.bodyBytes;
 }
 
-bool HttpRequest::ResponseBodyCopyTo(Vector<u8> &dest)
+uint HttpRequest::ResponseBodySize()
+{
+    if (!HasCompleted())
+        return 0;
+    return responseData_.bodyBytes.Size();
+}
+
+bool HttpRequest::CopyResponseBodyTo(Vector<u8> &dest)
 {
     if (!HasCompleted() || responseData_.bodyBytes.Empty())
         return false;
@@ -275,7 +316,7 @@ bool HttpRequest::ResponseBodyCopyTo(Vector<u8> &dest)
     return true; //(dest.Size() == responseData_.bodyBytes.Size());
 }
 
-Vector<u8> HttpRequest::ResponseBodyCopy()
+Vector<u8> HttpRequest::CloneResponseBody()
 {
     if (!HasCompleted())
         return Vector<u8>();
@@ -303,6 +344,12 @@ uint HttpRequest::ResponseHeaderUInt(const String &name, uint defaultValue)
 }
 
 // Curl callbacks
+
+size_t CurlWriteBody(void *buffer, size_t size, size_t items, void *data)
+{
+    HttpRequest* transfer = reinterpret_cast<HttpRequest*>(data);
+    return transfer->WriteBody(buffer, static_cast<uint>(size * items));
+}
 
 size_t CurlReadBody(void *buffer, size_t size, size_t items, void *data)
 {
@@ -515,8 +562,13 @@ void HttpRequest::Perform()
         // Read response information
         if (curl_easy_getinfo(requestData_.curlHandle, CURLINFO_RESPONSE_CODE, &responseData_.status) != CURLE_OK)
             log.ErrorF("Failed to read response status code");
-        if (curl_easy_getinfo(requestData_.curlHandle, CURLINFO_SPEED_DOWNLOAD, &responseData_.bytesPerSec) != CURLE_OK)
+        if (curl_easy_getinfo(requestData_.curlHandle, CURLINFO_SPEED_DOWNLOAD, &responseData_.downloadBytesPerSec) != CURLE_OK)
             log.ErrorF("Failed to read response download speed");
+        if (curl_easy_getinfo(requestData_.curlHandle, CURLINFO_SPEED_UPLOAD, &responseData_.uploadBytesPerSec) != CURLE_OK)
+            log.ErrorF("Failed to read response upload speed");
+
+        // Parse headers if not done yet.
+        ParseHeaders();
 
         // Only perform this sanity check for 200 OK. As eg. Not Modified might not return the true bytes in header.
         if (responseData_.status == 200)
@@ -550,8 +602,6 @@ void HttpRequest::Perform()
         }
         else if (responseData_.status == 304)
         {
-            ParseHeaders();
-
             /// See above 200 OK file access comment
             Urho3D::File file(framework_->GetContext(), requestData_.cacheFile, Urho3D::FILE_READ);
             if (file.IsOpen())
@@ -589,35 +639,41 @@ bool HttpRequest::Prepare()
         return false;
 
     if (verbose_)
-        PrintRaw("HttpRequest::Prepare\n");
-
-    // Reading response stream
-    curl_easy_setopt(requestData_.curlHandle, CURLOPT_WRITEFUNCTION, CurlReadBody);
-    curl_easy_setopt(requestData_.curlHandle, CURLOPT_WRITEDATA, this);
-    curl_easy_setopt(requestData_.curlHandle, CURLOPT_HEADERFUNCTION, CurlReadHeaders);
-    curl_easy_setopt(requestData_.curlHandle, CURLOPT_HEADERDATA, this);
+    {
+        String str;
+        str.Append("\nHttpRequest preparation\n");
+        str.Append("-------------------------------------------------------------------------------\n");
+        PrintRaw(str);
+    }
 
     // Logging to stdout. Only do this when loglevel is debug, it gets pretty messy.
     if (verbose_ && IsLogLevelEnabled(LogLevelDebug))
         curl_easy_setopt(requestData_.curlHandle, CURLOPT_VERBOSE, 1L);
 
+    // Reading from response
+    curl_easy_setopt(requestData_.curlHandle, CURLOPT_WRITEFUNCTION, CurlReadBody);
+    curl_easy_setopt(requestData_.curlHandle, CURLOPT_WRITEDATA, this);
+    curl_easy_setopt(requestData_.curlHandle, CURLOPT_HEADERFUNCTION, CurlReadHeaders);
+    curl_easy_setopt(requestData_.curlHandle, CURLOPT_HEADERDATA, this);
+
+    // Writing to request
+    if (requestData_.bodyBytes.Size() > 0)
+    {
+        curl_easy_setopt(requestData_.curlHandle, CURLOPT_READFUNCTION, CurlWriteBody);
+        curl_easy_setopt(requestData_.curlHandle, CURLOPT_READDATA, this);
+
+        // Force disable "form" data type for POST, we want to use CurlWriteBody callback instead.
+        if (Method() == "POST")
+        {
+            curl_easy_setopt(requestData_.curlHandle, CURLOPT_POSTFIELDS, NULL);
+            curl_easy_setopt(requestData_.curlHandle, CURLOPT_POSTFIELDSIZE, static_cast<int>(requestData_.bodyBytes.Size())); // CURLOPT_POSTFIELDSIZE_LARGE available for >2GB uploads
+        }
+    }
+
     // Standard options
     curl_easy_setopt(requestData_.curlHandle, CURLOPT_TCP_KEEPALIVE, 1L);
     curl_easy_setopt(requestData_.curlHandle, CURLOPT_FOLLOWLOCATION, 1L);
-
-    // Write custom headers
-    curl_slist *headers = requestData_.CreateCurlHeaders(verbose_);
-    if (headers)
-    {
-        CURLcode res = curl_easy_setopt(requestData_.curlHandle, CURLOPT_HTTPHEADER, headers);
-        if (res != CURLE_OK)
-        {
-            requestData_.error = curl_easy_strerror(res);
-            log.ErrorF("Failed to initialze custom request headers: %s", requestData_.error.CString());
-            return false;
-        }
-    }
-    
+  
     // Write custom options
     for(Curl::OptionMap::ConstIterator iter = requestData_.options.Begin(); iter != requestData_.options.End(); ++iter)
     {
@@ -649,6 +705,22 @@ bool HttpRequest::Prepare()
         if (verbose_)
             PrintRaw(Urho3D::ToString("  %s: %s\n", iter->first_.CString(), value.ToString().CString()));
     }
+
+    // Write custom headers
+    curl_slist *headers = requestData_.CreateCurlHeaders(verbose_);
+    if (headers)
+    {
+        CURLcode res = curl_easy_setopt(requestData_.curlHandle, CURLOPT_HTTPHEADER, headers);
+        if (res != CURLE_OK)
+        {
+            requestData_.error = curl_easy_strerror(res);
+            log.ErrorF("Failed to initialze custom request headers: %s", requestData_.error.CString());
+            return false;
+        }
+    }
+
+    if (verbose_)
+        PrintRaw("\n");
     return true;
 }
 
@@ -688,17 +760,20 @@ void HttpRequest::DumpResponse(bool headers, bool body)
     if (headers || body)
     {
         String str;
-        str.Append("\nHttpRequest\n");
+        str.Append("\nHttpRequest response received\n");
         str.Append("-------------------------------------------------------------------------------\n");
-        str.AppendWithFormat("  Url     : %s\n", requestData_.OptionValueString(Options::Url).CString());
-        str.AppendWithFormat("  Status  : %d %s\n", responseData_.status, responseData_.statusText.CString());
-        str.AppendWithFormat("  Headers : %d bytes\n", responseData_.headersBytes.Size());
-        str.AppendWithFormat("  Body    : %d bytes\n", responseData_.bodyBytes.Size());
-        str.AppendWithFormat("  Spent   : %d msec\n", requestData_.msecSpent);
-        if (responseData_.bytesPerSec > 1.0)
-        str.AppendWithFormat("  Speed   : %f kb/sec\n", responseData_.bytesPerSec / 1024);
+        str.AppendWithFormat("  Method   : %s\n", Http::Method::ToString(requestData_.method).CString());
+        str.AppendWithFormat("  Url      : %s\n", requestData_.OptionValueString(Options::Url).CString());
+        str.AppendWithFormat("  Status   : %d %s\n", responseData_.status, responseData_.statusText.CString());
+        str.AppendWithFormat("  Headers  : %d bytes\n", responseData_.headersBytes.Size());
+        str.AppendWithFormat("  Body     : %d bytes\n", responseData_.bodyBytes.Size());
+        str.AppendWithFormat("  Spent    : %d msec\n", requestData_.msecSpent);
+        if (responseData_.downloadBytesPerSec > 1.0)
+            str.AppendWithFormat("  DL Speed : %f kb/sec\n", responseData_.downloadBytesPerSec / 1024);
+        if (responseData_.uploadBytesPerSec > 1.0)
+            str.AppendWithFormat("  UL Speed : %f kb/sec\n", responseData_.uploadBytesPerSec / 1024);
         if (!requestData_.error.Empty())
-            str.AppendWithFormat("  Error   : %s\n", requestData_.error.CString());
+        str.AppendWithFormat("  Error    : %s\n", requestData_.error.CString());
         str.Append("\n");
         PrintRaw(str);
     }
@@ -711,7 +786,7 @@ void HttpRequest::DumpResponse(bool headers, bool body)
         str.Append("\n");
         PrintRaw(str);
     }
-    if (body && responseData_.status != 304)
+    if (body && responseData_.bodyBytes.Size() > 0 && responseData_.status != 304)
     {
         String str;
         String contentType = HeaderInternal(Http::Header::ContentType, true, false);
@@ -725,6 +800,20 @@ void HttpRequest::DumpResponse(bool headers, bool body)
         str.Append("\n");
         PrintRaw(str);
     }
+}
+
+size_t HttpRequest::WriteBody(void *buffer, uint size)
+{
+    LogInfoF("body size %d read size %d", requestData_.bodyBytes.Size(), size);
+    uint bodySize = requestData_.bodyBytes.Size();
+    if (bodySize == 0 || requestData_.bodyWritePos >= bodySize)
+        return 0;
+    uint num = size;
+    if (requestData_.bodyWritePos + num > bodySize)
+        num = bodySize - requestData_.bodyWritePos;
+    memcpy(buffer, &requestData_.bodyBytes[requestData_.bodyWritePos], num);
+    requestData_.bodyWritePos += num;
+    return num;
 }
 
 size_t HttpRequest::ReadBody(void *buffer, uint size)
@@ -747,8 +836,9 @@ size_t HttpRequest::ReadBody(void *buffer, uint size)
 
 bool HttpRequest::ParseHeaders()
 {
-    if (responseData_.headersBytes.Empty())
-        return false;
+    if (responseData_.headersParsed || responseData_.headersBytes.Empty())
+        return true;
+    responseData_.headersParsed = true;
 
     http_parser_settings settings;
     InitHttpParserSettings(&settings);

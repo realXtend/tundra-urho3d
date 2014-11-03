@@ -30,6 +30,7 @@ class TUNDRA_HTTP_API HttpRequest : public Urho3D::RefCounted
     friend class HttpClient;
     friend class HttpWorkThread;
     friend class HttpWorkQueue;
+    friend size_t CurlWriteBody(void *buffer, size_t size, size_t items, void *data);
     friend size_t CurlReadBody(void *buffer, size_t size, size_t items, void *data);
     friend size_t CurlReadHeaders(char *buffer, size_t size, size_t items, void *data);
     friend int HttpParserStatus(http_parser *p, const char *buf, size_t len);
@@ -73,9 +74,12 @@ public:
     bool SetBody(const Vector<u8> &body, const String &contentType = Http::ContentType::Binary);
     bool SetBody(const String &body, const String &contentType = Http::ContentType::Text); ///< @overload
 
-    /// Set request body to @c json with Conten-Type header application/json.
-    bool SetBodyJSON(const JSONValue &json);
-    bool SetBodyJSON(const String &json); ///< @overload
+    /// Set request body from @c json with Conten-Type header application/json.
+    bool SetBodyFromJSON(const JSONValue &json);
+    bool SetBodyFromJSON(const String &json); ///< @overload
+
+    /// Set request body from @c filepath with Content-Type header @c contentType.
+    bool SetBodyFromFile(const String &filepath, const String &contentType = Http::ContentType::Binary);
 
     /// Clears any previously set body and "Content-Type" header.
     bool ClearBody();
@@ -123,8 +127,16 @@ public:
     /// Returns spent time in networking in milliseconds. 0 if request not completed yet.
     uint DurationMSec();
 
-    /// Returns averate download speed in bytes/second. 0.f if request not completed yet.
-    float AvertageDownloadSpeed();
+    /// Returns average download speed in bytes/second. 0.f if request not completed yet.
+    float AverageDownloadSpeed();
+
+    /// Returns average upload speed in bytes/second. 0.f if request not completed yet.
+    float AverageUploadSpeed();
+
+    /// Returns the response body size in bytes if request has completed.
+    /** @return Returns 0 if body is empty or if request has not completed yet.
+        Verify completion before calling this function with HasCompleted(). */
+    uint ResponseBodySize();
 
     /// Returns the response body by reference if request has completed.
     /** This function should be preferred to avoid copies of large data chunks.
@@ -132,13 +144,13 @@ public:
     const Vector<u8> &ResponseBody();
 
     /// Copies the response body to @c dest if request has completed.
-    /** This function useu memcpy and resizes @c dest. @see ResponseBody.
+    /** This function uses memcpy and resizes @c dest. @see ResponseBody.
         @return False if request has not completed or response body is empty. */
-    bool ResponseBodyCopyTo(Vector<u8> &dest);
+    bool CopyResponseBodyTo(Vector<u8> &dest);
 
-    /// Returns a copy of the response body if request has completed.
-    /** This function should be avoided. @see ResponseBody(). */
-    Vector<u8> ResponseBodyCopy();
+    /// Returns a copy/clone of the response body if request has completed.
+    /** This function should be avoided for large body sizes. @see ResponseBody(). */
+    Vector<u8> CloneResponseBody();
 
     /// @todo Implement response body to JSONValue and JSON string.
     //JSONValue ResponseJSON();
@@ -194,6 +206,8 @@ private:
     /// Invoked in main threa context if verbose is enabled.
     void DumpResponse(bool headers, bool body);
 
+    /// Called by CurlWriteBody
+    size_t WriteBody(void *buffer, uint size);
     /// Called by CurlReadBody
     size_t ReadBody(void *buffer, uint size);
     /// Called by CurlReadHeaders

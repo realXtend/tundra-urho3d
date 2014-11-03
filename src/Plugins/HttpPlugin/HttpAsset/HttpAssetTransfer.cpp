@@ -61,7 +61,7 @@ void HttpAssetTransfer::OnFinished(HttpRequestPtr &request, int status, const St
         if (status == 304)
             diskSourceType = IAsset::Cached;
 
-        request->ResponseBodyCopyTo(rawAssetData);
+        request->CopyResponseBodyTo(rawAssetData);
 
         provider_->Fw()->Asset()->AssetTransferCompleted(this);
     }

@@ -44,7 +44,7 @@ public:
     HttpRequestPtr Put(const String &url, const String &body, const String &contentType = "text/plain"); ///< @overload
 
     /// Execute PATCH
-    /** @see https://tools.ietf.org/html/rfc2068 and https://tools.ietf.org/html/rfc5789 */
+    /** @see https://tools.ietf.org/html/rfc2068#section-19.6.1.1 and https://tools.ietf.org/html/rfc5789 */
     HttpRequestPtr Patch(const String &url, const Vector<u8> &body = Vector<u8>(), const String &contentType = "application/octet-stream");
     HttpRequestPtr Patch(const String &url, const String &body, const String &contentType = "text/plain"); ///< @overload
 

@@ -104,8 +104,7 @@ HttpRequestPtr HttpClient::Shedule(int method, const String &url, const Vector<u
         return HttpRequestPtr();
 
     HttpRequestPtr request(new HttpRequest(framework_, method, url));
-    if (!body.Empty())
-        request->SetBody(body, contentType);
+    request->SetBody(body, contentType);
     queue_->Schedule(request);
     return request;
 }

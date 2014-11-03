@@ -100,8 +100,18 @@ namespace Http
         const String ImageGIF                   = "image/gif";
     }
 
+    /// Converts local timezoned epoch seconds to HTTP date
+    /** @see http://tools.ietf.org/html/rfc2616#page-134 */
+    String LocalEpochToHttpDate(time_t epoch);
+
+    /// Converts HTTP date to UTC timezoned epoch seconds.
+    /** @see http://tools.ietf.org/html/rfc2616#page-134 */
+    time_t HttpDateToUtcEpoch(const String &date);
+
     /// @cond PRIVATE
-    /// Implementation detail. Not visible in the API.
+    // Everything below is an implementation detail.
+
+    // Method defines to Curl options
     namespace Method 
     {
         const int Head      = 1;
@@ -116,29 +126,31 @@ namespace Http
         Variant CurlOptionValue(int method);
         String ToString(int method);
     };
-    /// @endcond
 
-    /// Converts local timezoned epoch seconds to HTTP date
-    /** @see http://tools.ietf.org/html/rfc2616#page-134 */
-    String LocalEpochToHttpDate(time_t epoch);
-
-    /// Converts HTTP date to UTC timezoned epoch seconds.
-    /** @see http://tools.ietf.org/html/rfc2616#page-134 */
-    time_t HttpDateToUtcEpoch(const String &date);
-
+    // Request information
     struct RequestData
     {
+        // Curl request handle
         Curl::RequestHandle *curlHandle;
+
+        // Curl facing option enums mapped to a user defined value
         Curl::OptionMap options;
 
+        // Method identifier
+        int method;
+
+        // Outgoing headers
         HttpHeaderMap headers;
         curl_slist *curlHeaders;
 
+        // Outgoing body bytes
         Vector<u8> bodyBytes;
-        Vector<u8> headersBytes;
+        uint bodyWritePos;
 
+        // File to read and write cache entry to
         String cacheFile;
 
+        // Error occurred during threaded run.
         String error;
 
         // Time spent executing request and processing data.
@@ -154,25 +166,36 @@ namespace Http
         String OptionValueString(const String &name);
     };
 
+    // Response information
     struct ResponseData
     {
+        // Response "HTTP/<marjor>.<minor>" version
         int httpVersionMajor;
         int httpVersionMinor;
 
+        // Response status code
         int status;
+        // Response status text
         String statusText;
 
+        // Response headers
         HttpHeaderMap headers;
         String lastHeaderField;
 
+        // Received body and header bytes
         Vector<u8> bodyBytes;
         Vector<u8> headersBytes;
+        bool headersParsed;
 
-        double bytesPerSec;
+        // Response download speed
+        double downloadBytesPerSec;
+        double uploadBytesPerSec;
 
         // Default ctor
         ResponseData();
     };
+
+    /// @endcond
 }
 }
 
