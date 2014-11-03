@@ -44,10 +44,17 @@ public:
     /// IAssetProvider override.
     AssetUploadTransferPtr UploadAssetFromFileInMemory(const u8 *data, uint numBytes,
         AssetStoragePtr destination, const String &assetName) override;
-    /// IAssetProvider override.
-    AssetStoragePtr TryDeserializeStorageFromString(const String &storage, bool fromNetwork) override;
 
 private:
+    /// IAssetProvider override.
+    AssetStoragePtr TryCreateStorage(HashMap<String, String> &storageParams, bool fromNetwork) override;
+
+    /// Returns existing HTTP storage for base URL.
+    AssetStoragePtr StorageForBaseURL(const String &url) const;
+
+    /// Returns a uniqeu HTTP storage name.
+    String HttpAssetProvider::UniqueName(String prefix = "Web") const;
+
     Framework *framework_;
     HttpClientPtr client_;
 };

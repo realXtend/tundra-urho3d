@@ -3,7 +3,9 @@
 #include "StableHeaders.h"
 #include "HttpClient.h"
 #include "HttpRequest.h"
+
 #include "HttpAssetProvider.h"
+#include "HttpAssetStorage.h"
 #include "HttpAssetTransfer.h"
 
 #include "AssetAPI.h"
@@ -24,6 +26,44 @@ HttpAssetProvider::HttpAssetProvider(Framework *framework, const HttpClientPtr &
 
 HttpAssetProvider::~HttpAssetProvider()
 {
+}
+
+AssetStoragePtr HttpAssetProvider::StorageForBaseURL(const String &url) const
+{
+    AssetStorageVector storages = framework_->Asset()->AssetStorages();
+    foreach(const AssetStoragePtr &storage, storages)
+    {
+        HttpAssetStorage *httpStorage = dynamic_cast<HttpAssetStorage*>(storage.Get());
+        if (httpStorage && httpStorage->BaseURL().Compare(url, true) == 0)
+            return storage;
+    }
+    return AssetStoragePtr();
+}
+
+String HttpAssetProvider::UniqueName(String prefix) const
+{
+    if (prefix.Empty())
+        prefix = "Web";
+    int counter = 0;
+
+    AssetStorageVector storages = framework_->Asset()->AssetStorages();
+    while(counter < 1000)
+    {
+        bool reserved = false;
+        foreach(const AssetStoragePtr &storage, storages)
+        {
+            HttpAssetStorage *httpStorage = dynamic_cast<HttpAssetStorage*>(storage.Get());
+            if (httpStorage && httpStorage->Name().Compare(prefix, false) == 0)
+            {
+                reserved = true;
+                break;
+            }
+        }
+        if (!reserved)
+            return prefix;
+        prefix = Urho3D::ToString("%s %d", prefix, counter++);
+    }
+    return "";
 }
 
 // IAssetProvider implementaion
@@ -95,9 +135,28 @@ AssetUploadTransferPtr HttpAssetProvider::UploadAssetFromFileInMemory(const u8 *
     return AssetUploadTransferPtr(); /// @todo
 }
 
-AssetStoragePtr HttpAssetProvider::TryDeserializeStorageFromString(const String &storage, bool fromNetwork)
+AssetStoragePtr HttpAssetProvider::TryCreateStorage(HashMap<String, String> &storageParams, bool fromNetwork)
 {
-    return AssetStoragePtr(); /// @todo
+    if (!storageParams.Contains("src") || !IsValidRef(storageParams["src"], ""))
+        return AssetStoragePtr();
+    if (storageParams.Contains("type") && storageParams["type"].Compare("HttpAssetStorage", false) != 0)
+        return AssetStoragePtr();
+
+    String baseUrl = storageParams["src"];
+    if (!baseUrl.EndsWith("/") && baseUrl.Contains("/"))
+        baseUrl = baseUrl.Substring(0, baseUrl.FindLast('/')+1);
+    if (!baseUrl.EndsWith("/"))
+        return AssetStoragePtr();
+
+    String name = UniqueName(storageParams["name"]);
+
+    // @todo liveupdate, liveupload, autodiscoverable etc. when actually needed
+    AssetStoragePtr storage = StorageForBaseURL(baseUrl);
+    if (!storage)
+        storage = AssetStoragePtr(new HttpAssetStorage(framework_->GetContext(), name, baseUrl, storageParams["localdir"]));
+
+    storage->SetReplicated(Urho3D::ToBool(storageParams["replicated"]));
+    return storage;
 }
 
 }
