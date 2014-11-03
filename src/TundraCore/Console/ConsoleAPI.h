@@ -128,11 +128,17 @@ public:
     /// @note This function calls SetEnabledLogChannels with one of the above four predefined combinations. It is possible to further customize the set of 
     /// active log channels by directly calling the SetEnabledLogChannels function with an appropriate bitset.
     void SetLogLevel(const String &level);
+
     /// Returns true if the given log channel is enabled.
     bool IsLogLevelEnabled(LogLevel logChannel) const;
+
     /// Returns the currnet log level.
     /** @see SetLogLevel and IsLogLevelEnabled. */
     LogLevel CurrentLogLevel() const;
+
+    // Returns a LogLevel for a string.
+    /** Useful to convert valid --loglevel <str> values to LogLevel. */
+    static LogLevel LogLevelFromString(const String &level);
 
 private:
     friend class Framework;
