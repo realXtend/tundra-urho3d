@@ -51,7 +51,7 @@ private:
     AssetStoragePtr StorageForBaseURL(const String &url) const;
 
     /// Returns a uniqeu HTTP storage name.
-    String HttpAssetProvider::UniqueName(String prefix = "Web") const;
+    String UniqueName(String prefix = "Web") const;
 
     Framework *framework_;
     HttpClientPtr client_;

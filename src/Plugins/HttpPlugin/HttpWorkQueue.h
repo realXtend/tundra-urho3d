@@ -88,8 +88,6 @@ public:
 
 private:
     HttpWorkQueue *queue_;
-
-    bool process_;
 };
 
 /// @endcond

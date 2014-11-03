@@ -205,7 +205,8 @@ RequestData::RequestData() :
     curlHandle(0),
     curlHeaders(0),
     msecSpent(0),
-    bodyWritePos(0)
+    bodyWritePos(0),
+    method(-1)
 {
 }
 
