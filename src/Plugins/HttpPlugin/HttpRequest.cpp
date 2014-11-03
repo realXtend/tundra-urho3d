@@ -17,7 +17,7 @@
 namespace Tundra
 {
 
-#define HTTP_INITIAL_BODY_SIZE (256*1024*1024)
+#define HTTP_INITIAL_BODY_SIZE (256*1024)
 
 // HttpRequest
 
