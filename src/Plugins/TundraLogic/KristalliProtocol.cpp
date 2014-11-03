@@ -44,7 +44,7 @@ void KristalliProtocol::Load()
     if (framework->HasCommandLineParameter("--loglevel") || framework->HasCommandLineParameter("--loglevelnetwork"))
     {
         // --loglevelnetwork overrides --loglevel.
-        StringList params = framework->CommandLineParameters("--loglevel");
+        StringVector params = framework->CommandLineParameters("--loglevel");
         String logLevel = (!params.Empty() ? params.Front().ToLower() : "info");
         if (framework->HasCommandLineParameter("--loglevelnetwork"))
         {
@@ -68,7 +68,7 @@ void KristalliProtocol::Initialize()
     Framework* framework = owner->GetFramework();
 
     defaultTransport = kNet::SocketOverUDP;
-    StringList cmdLineParams = framework->CommandLineParameters("--protocol");
+    StringVector cmdLineParams = framework->CommandLineParameters("--protocol");
     if (cmdLineParams.Size() > 0)
     {
         kNet::SocketTransportLayer transportLayer = kNet::StringToSocketTransportLayer(cmdLineParams.Front().Trimmed().CString());

@@ -225,10 +225,10 @@ public:
     bool SetAnimationNumLoops(const String& name, unsigned repeats);
 
     /// Returns available animations
-    StringList AvailableAnimations();
+    StringVector AvailableAnimations();
     
     /// Returns active animations as a simple stringlist
-    StringList ActiveAnimations() const;
+    StringVector ActiveAnimations() const;
     
     /// Returns length of animation
     /** @param name Animation name

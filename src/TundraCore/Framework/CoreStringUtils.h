@@ -41,6 +41,6 @@ String PadString(T val, int pad)
     return PadString(String(val), pad);
 }
 
-String TUNDRACORE_API Join(const StringList &list, const String &sseparator);
+String TUNDRACORE_API Join(const StringVector &list, const String &sseparator);
 
 }

@@ -99,10 +99,10 @@ private:
     void OnEntityRemoved(Entity* entity, AttributeChange::Type change);
 
     /// Trigger sync of entity action.
-    void OnActionTriggered(Entity *entity, const String &action, const StringList &params, EntityAction::ExecTypeField type);
+    void OnActionTriggered(Entity *entity, const String &action, const StringVector &params, EntityAction::ExecTypeField type);
 
     /// Trigger sync of entity action to specific user
-    void OnUserActionTriggered(UserConnection* user, Entity *entity, const String &action, const StringList &params);
+    void OnUserActionTriggered(UserConnection* user, Entity *entity, const String &action, const StringVector &params);
 
     /// Trigger sync of entity properties (temporary status) change
     void OnEntityPropertiesChanged(Entity* entity, AttributeChange::Type change);

@@ -84,7 +84,7 @@ String PadString(String str, int pad)
     return str;
 }
 
-String Join(const StringList &list, const String &separator)
+String Join(const StringVector &list, const String &separator)
 {
     String joined = "";
     for (unsigned int i=0 ; i<list.Size() ; ++i)

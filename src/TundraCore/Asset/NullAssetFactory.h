@@ -26,7 +26,7 @@ public:
         assetTypeExtensions.Push(assetTypeExtension);
     }
     
-    explicit NullAssetFactory(const String &assetType_, const StringList &assetTypeExtensions_) :
+    explicit NullAssetFactory(const String &assetType_, const StringVector &assetTypeExtensions_) :
         assetType(assetType_.Trimmed()),
         assetTypeExtensions(assetTypeExtensions_)
     {
@@ -36,7 +36,7 @@ public:
 
     virtual const String &Type() const { return assetType; }
     
-    virtual const StringList &TypeExtensions() const { return assetTypeExtensions; }
+    virtual const StringVector &TypeExtensions() const { return assetTypeExtensions; }
 
     virtual AssetPtr CreateEmptyAsset(AssetAPI *, const String &) { return AssetPtr(); }
 

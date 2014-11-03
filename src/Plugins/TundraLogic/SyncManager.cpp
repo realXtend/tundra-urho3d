@@ -155,7 +155,7 @@ void SyncManager::SetUpdatePeriod(float period)
 
 void SyncManager::GetClientExtrapolationTime()
 {
-    StringList extrapTimeParam = framework_->CommandLineParameters("--clientextrapolationtime");
+    StringVector extrapTimeParam = framework_->CommandLineParameters("--clientextrapolationtime");
     if (extrapTimeParam.Size() > 0)
     {
         float newExtrapTime = ToFloat(extrapTimeParam.Front());
@@ -529,7 +529,7 @@ void SyncManager::OnEntityRemoved(Entity* entity, AttributeChange::Type change)
     }
 }
 
-void SyncManager::OnActionTriggered(Entity *entity, const String &action, const StringList &params, EntityAction::ExecTypeField type)
+void SyncManager::OnActionTriggered(Entity *entity, const String &action, const StringVector &params, EntityAction::ExecTypeField type)
 {
     // If we are the server and the local script on this machine has requested a script to be executed on the server, it
     // means we just execute the action locally here, without sending to network.
@@ -568,7 +568,7 @@ void SyncManager::OnActionTriggered(Entity *entity, const String &action, const 
     }
 }
 
-void SyncManager::OnUserActionTriggered(UserConnection* user, Entity *entity, const String &action, const StringList &params)
+void SyncManager::OnUserActionTriggered(UserConnection* user, Entity *entity, const String &action, const StringVector &params)
 {
     assert(user && entity);
     if (!entity || !user)
@@ -1558,7 +1558,7 @@ void SyncManager::ProcessEntitySyncState(bool isServer, UserConnection* user, Sc
         // If we have both new & removed flags on the entity, it will probably result in buggy behaviour
         if (entityState->isNew)
         {
-            LogWarning("Entity " + QString::number(entityState->id) + " queued for both deletion and creation. Buggy behaviour will possibly result!");
+            LogWarning("Entity " + String::number(entityState->id) + " queued for both deletion and creation. Buggy behaviour will possibly result!");
             // The delete has been processed. Do not remember it anymore, but requeue the state for creation
             entityState->removed = false;
             removeState = false;
@@ -2927,7 +2927,7 @@ void SyncManager::HandleEntityAction(UserConnection* source, MsgEntityAction& ms
     }
     
     String action = String(BufferToString(msg.name));
-    StringList params;
+    StringVector params;
     for(uint i = 0; i < msg.parameters.size(); ++i)
         params.Push(String(BufferToString(msg.parameters[i].parameter)));
 

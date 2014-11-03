@@ -75,7 +75,7 @@ public:
     void EmitNetworkMessageReceived(kNet::packet_id_t packetId, kNet::message_id_t messageId, const char* data, size_t numBytes);
 
     /// Execute an action on an entity, sent only to the specific user
-    void Exec(Entity *entity, const String &action, const StringList &params);
+    void Exec(Entity *entity, const String &action, const StringVector &params);
     void Exec(Entity *entity, const String &action, const String &p1 = "", const String &p2 = "", const String &p3 = "");  /**< @overload */
 
     /// Returns raw login data
@@ -105,7 +105,7 @@ public:
     // signals:
     
     /// Emitted when action has been triggered for this specific user connection.
-    Signal4<UserConnection* ARG(connection), Entity* ARG(entity), const String& ARG(action), const StringList& ARG(params)> ActionTriggered;
+    Signal4<UserConnection* ARG(connection), Entity* ARG(entity), const String& ARG(action), const StringVector& ARG(params)> ActionTriggered;
     /// Emitted when the client has sent a network message. PacketId will be 0 if not supported by the networking implementation.
     Signal5<UserConnection* ARG(connection), kNet::packet_id_t ARG(packetId), kNet::message_id_t ARG(messageId), const char* ARG(data), size_t ARG(numBytes)> NetworkMessageReceived;
 };
