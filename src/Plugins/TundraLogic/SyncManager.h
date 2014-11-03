@@ -71,8 +71,7 @@ public:
     // signals
     /// This signal is emitted when a new user connects and a new SceneSyncState is created for the connection.
     /// @note See signals of the SceneSyncState object to build prioritization logic how the sync state is filled.
- //   void SceneStateCreated(UserConnection *user, SceneSyncState *state);
-    Signal2<UserConnection*, SceneSyncState*> SceneStateCreated;
+    Signal2<UserConnection* ARG(user), SceneSyncState* ARG(state)> SceneStateCreated;
     
 private:
     /// Network message received from an user connection

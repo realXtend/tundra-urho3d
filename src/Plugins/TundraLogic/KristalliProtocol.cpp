@@ -256,7 +256,7 @@ void KristalliProtocol::NewConnectionEstablished(kNet::MessageConnection *source
     
     UserConnectionPtr connection = UserConnectionPtr(new KNetUserConnection(this));
     connection->userID = AllocateNewConnectionID();
-    static_cast<KNetUserConnection*>(connection.Get())->connection = source;
+    Urho3D::StaticCast<KNetUserConnection>(connection)->connection = source;
     connections.Push(connection);
 
     // For TCP mode sockets, set the TCP_NODELAY option to improve latency for the messages we send.
@@ -273,7 +273,7 @@ void KristalliProtocol::ClientDisconnected(kNet::MessageConnection *source)
     // Delete from connection list if it was a known user
     for(auto iter = connections.Begin(); iter != connections.End(); ++iter)
     {
-        if ((*iter)->ConnectionType() == "knet" && static_cast<KNetUserConnection*>(iter->Get())->connection == source)
+        if ((*iter)->ConnectionType() == "knet" && Urho3D::StaticCast<KNetUserConnection>(*iter)->connection == source)
         {
             ClientDisconnectedEvent.Emit(iter->Get());
             
@@ -326,7 +326,7 @@ u32 KristalliProtocol::AllocateNewConnectionID() const
 UserConnectionPtr KristalliProtocol::UserConnectionBySource(kNet::MessageConnection* source) const
 {
     for(auto iter = connections.Begin(); iter != connections.End(); ++iter)
-        if ((*iter)->ConnectionType() == "knet" && static_cast<KNetUserConnection*>(iter->Get())->connection == source)
+        if ((*iter)->ConnectionType() == "knet" && Urho3D::StaticCast<KNetUserConnection>(*iter)->connection == source)
             return *iter;
 
     return UserConnectionPtr();

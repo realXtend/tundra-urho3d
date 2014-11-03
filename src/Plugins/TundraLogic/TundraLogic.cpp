@@ -74,7 +74,7 @@ void TundraLogic::HandleLogin(const StringVector &params) const
     String password = "";
     if (params.Size() >= 4)
         password = params[3];
-    String protocol = "upd";
+    String protocol = "udp";
     if (params.Size() >= 5)
         protocol = params[4];
 

@@ -33,9 +33,6 @@ const NetworkProtocolVersion cHighestSupportedProtocolVersion = ProtocolHierarch
 class TUNDRALOGIC_API UserConnection : public Object
 {
     OBJECT(UserConnection);
-    //Q_PROPERTY(u32 id READ ConnectionId)
-    //Q_PROPERTY(int protocolVersion READ ProtocolVersion)
-    //Q_PROPERTY(QString connectionType READ ConnectionType)
 
 public:
     UserConnection(Object* owner);
@@ -105,18 +102,12 @@ public:
     /// Forcibly kills this connection without notifying the peer.
     virtual void Close() = 0;
 
-    //u32 GetConnectionID() const { return ConnectionId(); }  /**< @deprecated Use ConnectionId or 'id' @todo Add warning print */
-    //String GetLoginData() const { return LoginData(); }  /**< @deprecated Use LoginData @todo Add warning print */
-    //String GetProperty(const QString& key) const { return Property(key).toString(); } /**< @deprecated Use Property @todo Add warning print */
-
     // signals:
     
     /// Emitted when action has been triggered for this specific user connection.
-    //void ActionTriggered(UserConnection* connection, Entity* entity, const String& action, const StringList& params);
-    Signal4<UserConnection*, Entity*, const String&, const StringList&> ActionTriggered;
+    Signal4<UserConnection* ARG(connection), Entity* ARG(entity), const String& ARG(action), const StringList& ARG(params)> ActionTriggered;
     /// Emitted when the client has sent a network message. PacketId will be 0 if not supported by the networking implementation.
-    //void NetworkMessageReceived(UserConnection* connection, kNet::packet_id_t packetId, kNet::message_id_t messageId, const char* data, size_t numBytes);
-    Signal5<UserConnection*, kNet::packet_id_t, kNet::message_id_t, const char*, size_t> NetworkMessageReceived;
+    Signal5<UserConnection* ARG(connection), kNet::packet_id_t ARG(packetId), kNet::message_id_t ARG(messageId), const char* ARG(data), size_t ARG(numBytes)> NetworkMessageReceived;
 };
 
 /// A kNet user connection.

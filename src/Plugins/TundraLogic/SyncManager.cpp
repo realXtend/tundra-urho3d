@@ -691,7 +691,7 @@ void SyncManager::ReplicateComponentType(u32 typeId, UserConnection* connection)
             }
         }
         else if (serverConnection_ && serverConnection_->ProtocolVersion() >= ProtocolCustomComponents)
-            static_cast<UserConnection*>(serverConnection_.Get())->Send(cRegisterComponentTypeMessage, true, true, ds);
+            Urho3D::StaticCast<UserConnection>(serverConnection_)->Send(cRegisterComponentTypeMessage, true, true, ds);
     }
     else
     {
@@ -883,7 +883,7 @@ void SyncManager::Update(f64 frametime)
     else
     {
         // If we are client and the connection is current, process just the server sync state
-        if (static_cast<KNetUserConnection*>(serverConnection_.Get())->connection)
+        if (Urho3D::StaticCast<KNetUserConnection>(serverConnection_)->connection)
             ProcessSyncState(serverConnection_.Get());
     }
 }

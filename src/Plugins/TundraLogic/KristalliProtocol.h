@@ -85,13 +85,13 @@ public:
 
     /// Triggered whenever a new message is received rom the network.
     //void NetworkMessageReceived(kNet::MessageConnection *source, kNet::packet_id_t packetId, kNet::message_id_t messageId, const char *data, size_t numBytes);
-    Signal5<kNet::MessageConnection*, kNet::packet_id_t, kNet::message_id_t, const char*, size_t> NetworkMessageReceived;
+    Signal5<kNet::MessageConnection* ARG(source), kNet::packet_id_t, kNet::message_id_t ARG(messageId), const char* ARG(data), size_t ARG(numBytes)> NetworkMessageReceived;
 
     /// Triggered on the server side when a new user connects.
-    Signal1<UserConnection*> ClientConnectedEvent;
+    Signal1<UserConnection* ARG(connection)> ClientConnectedEvent;
 
     /// Triggered on the server side when a user disconnects.
-    Signal1<UserConnection*> ClientDisconnectedEvent;
+    Signal1<UserConnection* ARG(connection)> ClientDisconnectedEvent;
 
     /// Triggered on the client side when a server connection attempt has failed.
     Signal0<void> ConnectionAttemptFailed;

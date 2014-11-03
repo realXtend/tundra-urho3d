@@ -102,17 +102,16 @@ public:
 
     /// This signal is emitted immediately after this client has successfully connected to a server.
     /// @param responseData This is the data that the server sent back to the client related to the connection.
-    Signal1<UserConnectedResponseData*> Connected;
+    Signal1<UserConnectedResponseData* ARG(responseData)> Connected;
 
     /// Triggered whenever a new message is received from the network.
-    //void NetworkMessageReceived(kNet::packet_id_t, kNet::message_id_t id, const char *data, size_t numBytes);
-    Signal4<kNet::packet_id_t, kNet::message_id_t, const char*, size_t> NetworkMessageReceived;
+    Signal4<kNet::packet_id_t, kNet::message_id_t ARG(id), const char* ARG(data), size_t ARG(numBytes)> NetworkMessageReceived;
 
     /// This signal is emitted when the client has disconnected from the server.
     Signal0<void> Disconnected;
 
     /// Emitted when a login attempt failed to a server.
-    Signal1<const String&> LoginFailed;
+    Signal1<const String& ARG(reason)> LoginFailed;
 
 private:
     /// Handles a Kristalli protocol message
