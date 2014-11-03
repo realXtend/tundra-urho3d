@@ -203,7 +203,7 @@ bool HttpRequest::SetCacheFile(const String &filepath, bool useLastModified)
     if (useLastModified && framework_->GetSubsystem<Urho3D::FileSystem>()->FileExists(requestData_.cacheFile))
     {
         uint epoch = framework_->GetSubsystem<Urho3D::FileSystem>()->GetLastModifiedTime(requestData_.cacheFile);
-        String lastModifiedHttpDate = Http::EpochToHttpDate(static_cast<time_t>(epoch));
+        String lastModifiedHttpDate = Http::LocalEpochToHttpDate(static_cast<time_t>(epoch)); // GetLastModifiedTime returns local timezoned epoch
         if (!lastModifiedHttpDate.Empty())
             SetHeaderInternal(Http::Header::IfModifiedSince, lastModifiedHttpDate, false, false); // Do not lock inside SetHeaderInternal, already aquired above.
     }
@@ -541,8 +541,8 @@ void HttpRequest::Perform()
                     if (file->Write(&responseData_.bodyBytes[0], bodySize) == bodySize)
                     {
                         file->Close(); // File shared ptr will close when gets out of scope. Lets just do it here before modifying below last modified on the file.
-                        time_t epoch = Http::HttpDateToEpoch(lastModified);
-                        if (epoch > 0)
+                        time_t epoch = Http::HttpDateToUtcEpoch(lastModified);
+                        if (epoch > 0) // SetLastModifiedTime converts utc epoch correctly to local
                             framework_->GetSubsystem<Urho3D::FileSystem>()->SetLastModifiedTime(requestData_.cacheFile, static_cast<uint>(epoch));
                     }
                 }

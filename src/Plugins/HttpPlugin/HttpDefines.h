@@ -118,13 +118,13 @@ namespace Http
     };
     /// @endcond
 
-    /// Converts epoch seconds to HTTP date
+    /// Converts local timezoned epoch seconds to HTTP date
     /** @see http://tools.ietf.org/html/rfc2616#page-134 */
-    String EpochToHttpDate(time_t epoch);
+    String LocalEpochToHttpDate(time_t epoch);
 
-    /// Converts HTTP date to epoch seconds.
+    /// Converts HTTP date to UTC timezoned epoch seconds.
     /** @see http://tools.ietf.org/html/rfc2616#page-134 */
-    time_t HttpDateToEpoch(const String &date);
+    time_t HttpDateToUtcEpoch(const String &date);
 
     struct RequestData
     {

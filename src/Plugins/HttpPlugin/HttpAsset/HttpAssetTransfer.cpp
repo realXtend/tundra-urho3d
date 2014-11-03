@@ -51,13 +51,13 @@ void HttpAssetTransfer::OnFinished(HttpRequestPtr &request, int status, const St
     {
         /* 304 Not Modified
            1) HttpRequest has already written file to asset cache file set with HttpRequest::SetCacheFile()
-           2) Mark disk source as cache and tell AssetAPI not to write disk file from raw data (even if not filled)
+           2) Mark disk source as cached. Previous SetCachingBehavior already marked so that AssetAPI wont
+              rewrite the disk file even if we provide rawAssetData.
            3) If we do not load 'rawAssetData' with a valid disk source. AssetAPI will do the right thing and load
               bytes from disk. This was desirable with Ogre as its threading mechanisms let us pass a filepath.
-              If it was a certain type of Ogre asset, the disk read was skipped. With Urho it is more efficient 
+              If it was a certain type of Ogre asset, the disk read was skipped and path was used. With Urho it is more efficient 
               to do a memcpy here and not re-read from disk, which is slower as we already have the file in memory here.
-              
-              @todo In other works for above: AssetAPI and its 'data shuffling' needs to rethinked with Urho. */
+              @todo In other works for above: AssetAPI and its 'data shuffling' could be re-thinked with Urho. */
         if (status == 304)
             diskSourceType = IAsset::Cached;
 
@@ -66,7 +66,7 @@ void HttpAssetTransfer::OnFinished(HttpRequestPtr &request, int status, const St
         provider_->Fw()->Asset()->AssetTransferCompleted(this);
     }
     else
-        provider_->Fw()->Asset()->AssetTransferFailed(this, (!error.Empty() ? error : Urho3D::ToString("%d %s", request->StatusCode(), request->Status().CString())));
+        provider_->Fw()->Asset()->AssetTransferFailed(this, (!error.Empty() ? error : Urho3D::ToString("%d %s", status, request->Status().CString())));
 }
 
 }

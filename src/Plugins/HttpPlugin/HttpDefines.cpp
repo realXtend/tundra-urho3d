@@ -84,14 +84,6 @@ namespace Method
     }
 }
 
-String EpochToHttpDate(time_t epoch)
-{
-    char buf[80];
-    struct tm timeFormat = *gmtime(&epoch);
-    strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &timeFormat);
-    return String(buf);
-}
-
 int HttpWeekDay(String &day)
 {
     // 0   1   2   3   4   5   6
@@ -151,15 +143,15 @@ int HttpYear(String &year)
     return Urho3D::ToInt(year) - 1900;
 }
 
-void HttpTime(String &time, int *hours, int *minutes, int *seconds)
+String LocalEpochToHttpDate(time_t epoch)
 {
-    StringVector parts = time.Trimmed().Split(':');
-    if (parts.Size() != 3)
-        return;
-    *hours = Urho3D::ToInt(parts[0]);
+    char buf[80];
+    struct tm timeFormat = *gmtime(&epoch);
+    strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &timeFormat);
+    return String(buf);
 }
 
-time_t HttpDateToEpoch(const String &date)
+time_t HttpDateToUtcEpoch(const String &date)
 {
     StringVector parts = date.Trimmed().Split(' ');
     if (parts.Size() != 6)
