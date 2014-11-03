@@ -157,20 +157,26 @@ void ConsoleAPI::ClearConsole()
 #endif
 }
 
-void ConsoleAPI::SetLogLevel(const String &level)
+LogLevel ConsoleAPI::LogLevelFromString(const String &level)
 {
     if (level.Compare("none", false) == 0 || level.Compare("disabled", false) == 0)
-        logLevel_ = LogLevelNone;
+        return LogLevelNone;
     else if (level.Compare("error", false) == 0)
-        logLevel_ = LogLevelError;
+        return LogLevelError;
     else if (level.Compare("warn", false) == 0 || level.Compare("warning", false) == 0)
-        logLevel_ = LogLevelWarning;
+        return LogLevelWarning;
     else if (level.Compare("info", false) == 0)
-        logLevel_ = LogLevelInfo;
+        return LogLevelInfo;
     else if (level.Compare("debug", false) == 0 || level.Compare("verbose", false) == 0)
-        logLevel_ = LogLevelDebug;
+        return LogLevelDebug;
     else
-        LogError("ConsoleAPI::SetLogLevel: Not supported log level '" + level + "'");
+        LogError("ConsoleAPI::LogLevelFromString: Unsupported log level '" + level + "'. Returning LogLevelInfo.");
+    return LogLevelInfo;
+}
+
+void ConsoleAPI::SetLogLevel(const String &level)
+{
+    logLevel_ = LogLevelFromString(level);
 }
 
 bool ConsoleAPI::IsLogLevelEnabled(LogLevel level) const

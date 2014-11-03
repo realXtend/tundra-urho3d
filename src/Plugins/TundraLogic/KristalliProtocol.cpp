@@ -38,30 +38,35 @@ KristalliProtocol::~KristalliProtocol()
 void KristalliProtocol::Load()
 {
     Framework* framework = owner->GetFramework();
-    // Enable log channels according to Tundras --loglevel input param.
-    // For 'info' that is the most usable mode remove some of the spam from kNet.
-    // If the log level is not given default to more information (even if default is 'info').
-    // @todo Remove kNet::LogInfo from the default mode when the info is no longer needed for tundra console.
+
+    // Reflect --loglevel to kNet
     if (framework->HasCommandLineParameter("--loglevel") || framework->HasCommandLineParameter("--loglevelnetwork"))
     {
-        // --loglevelnetwork overrides --loglevel.
-        StringVector params = framework->CommandLineParameters("--loglevel");
-        String logLevel = (!params.Empty() ? params.Front().ToLower() : "info");
+        LogLevel level = framework->Console()->CurrentLogLevel();
         if (framework->HasCommandLineParameter("--loglevelnetwork"))
         {
-            params = framework->CommandLineParameters("--loglevelnetwork");
-            logLevel = (!params.Empty() ? params.Front().ToLower() : logLevel);
+            // --loglevelnetwork overrides --loglevel.
+            StringVector llNetwork = framework->CommandLineParameters("--loglevelnetwork");
+            level = (!llNetwork.Empty() ? ConsoleAPI::LogLevelFromString(llNetwork.Front()) : level);
         }
-        if (logLevel == "info")
+        if (level == LogLevelNone || level == LogLevelWarning || level == LogLevelError)
+            kNet::SetLogChannels(kNet::LogError);
+        else if (level == LogLevelInfo)
             kNet::SetLogChannels(kNet::LogError | kNet::LogUser);
-        else if (logLevel == "debug")
+        else if (level == LogLevelDebug)
             kNet::SetLogChannels(kNet::LogInfo | kNet::LogError | kNet::LogUser | kNet::LogVerbose); 
-        else // info
+        else
             kNet::SetLogChannels(kNet::LogInfo | kNet::LogError | kNet::LogUser); 
     }
-    // Enable all log channels.
+    // Enable all non verbose channels.
     else
-        kNet::SetLogChannels(kNet::LogInfo | kNet::LogError | kNet::LogUser); 
+        kNet::SetLogChannels(kNet::LogInfo | kNet::LogError | kNet::LogUser);
+
+    /* There seems to be no quiet mode for kNet logging, set to errors only.
+       This needs to be set explicitly as kNet does not log via Urho, which
+       will automatically suppress anything below LogLevelError. */
+    if (framework->HasCommandLineParameter("--quiet"))
+        kNet::SetLogChannels(kNet::LogError);
 }
 
 void KristalliProtocol::Initialize()
