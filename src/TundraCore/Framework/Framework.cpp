@@ -168,7 +168,7 @@ void Framework::Initialize()
     foreach(const String &storageSource, storageSources)
     {
         AssetStoragePtr storage = asset->DeserializeAssetStorageFromString(storageSource.Trimmed(), false);
-        if (storage && !asset->DefaultAssetStorage())
+        if (storage && (!asset->DefaultAssetStorage() || asset->AssetStorages().Size() <= 1))
             asset->SetDefaultAssetStorage(storage);
     }
 }

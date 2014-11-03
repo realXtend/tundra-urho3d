@@ -47,10 +47,9 @@ public:
     SharedPtr<Urho3D::FileWatcher> changeWatcher;
 
     /// Local storages are always trusted.
-    virtual bool Trusted() const { return true; }
-
-    // Returns the current trust state of this storage.
-    virtual TrustState GetTrustState() const { return StorageTrusted; }
+    bool Trusted() const override { return true; }
+    /// Local storages are always trusted.
+    TrustState GetTrustState() const override { return StorageTrusted; }
 
     /// Returns the full local filesystem path name of the given asset in this storage, if it exists.
     /// Example: GetFullPathForAsset("my.mesh", true) might return "C:\Projects\Tundra\bin\data\assets".
@@ -67,10 +66,10 @@ public:
 
     /// Returns all assetrefs currently known in this asset storage. Does not load the assets
     /// @deprecated Do not call this. Rather query for assets through AssetAPI.
-    virtual StringList GetAllAssetRefs() { return assetRefs; }
+    StringList GetAllAssetRefs() override { return assetRefs; }
     
     /// Refresh asset refs. Issues a directory query and emits AssetChanged signals immediately
-    virtual void RefreshAssetRefs();
+    void RefreshAssetRefs() override;
 
     String Name() const { return name; }
 
@@ -80,7 +79,7 @@ public:
     String ToString() const { return Name() + " (" + directory + ")"; }
 
     /// Serializes this storage to a string for machine transfer.
-    virtual String SerializeToString(bool networkTransfer = false) const;
+    String SerializeToString(bool networkTransfer = false) const override;
 
     /// If @c change is IAssetStorage::AssetCreate, adds file to the list of asset refs and signal
     void EmitAssetChanged(String absoluteFilename, IAssetStorage::ChangeType change);
