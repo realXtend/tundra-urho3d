@@ -870,7 +870,7 @@ SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre:
             *dest++ = ((float*)sources[Urho3D::ELEMENT_TANGENT].src)[1];
             *dest++ = ((float*)sources[Urho3D::ELEMENT_TANGENT].src)[2];
             *dest++ = ((float*)sources[Urho3D::ELEMENT_TANGENT].src)[3];
-            sources[Urho3D::ELEMENT_TANGENT].src += sources[Urho3D::ELEMENT_TANGENT].stride;
+            sources[Urho3D::ELEMENT_TANGENT].MoveToNext();
         }
     }
 
