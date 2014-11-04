@@ -339,7 +339,7 @@ IndexData::IndexData() :
 
 IndexData::~IndexData()
 {
-    Reset();    
+    Reset();
 }
 
 void IndexData::Reset()

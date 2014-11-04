@@ -52,7 +52,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Model.h>
 #include <Profiler.h>
 #include <MemoryBuffer.h>
+#include <VertexBuffer.h>
+#include <IndexBuffer.h>
+#include <Geometry.h>
 
+#include <cstring>
 #include <stdexcept>
 
 namespace Tundra
@@ -727,6 +731,154 @@ void ReadAnimationKeyFrames(Urho3D::Deserializer& stream, Animation *anim, Verte
     }
 }
 
+Urho3D::PrimitiveType ConvertPrimitiveType(Ogre::ISubMesh::OperationType type)
+{
+    switch (type)
+    {
+    case Ogre::ISubMesh::OT_POINT_LIST:
+        return Urho3D::POINT_LIST;
+    case Ogre::ISubMesh::OT_LINE_LIST:
+        return Urho3D::LINE_LIST;
+    case Ogre::ISubMesh::OT_LINE_STRIP:
+        return Urho3D::LINE_STRIP;
+    case Ogre::ISubMesh::OT_TRIANGLE_LIST:
+        return Urho3D::TRIANGLE_LIST;
+    case Ogre::ISubMesh::OT_TRIANGLE_STRIP:
+        return Urho3D::TRIANGLE_STRIP;
+    case Ogre::ISubMesh::OT_TRIANGLE_FAN:
+        return Urho3D::TRIANGLE_FAN;
+    default:
+        return Urho3D::TRIANGLE_LIST;
+    }
+}
+
+struct VertexElementSource
+{
+    VertexElementSource() :
+        enabled(false),
+        src(0),
+        stride(0)
+    {
+    }
+
+    void MoveToNext()
+    {
+        src += (size_t)stride;
+    }
+
+    bool enabled;
+    u8* src;
+    uint stride;
+};
+
+void CheckVertexElement(unsigned& elementMask, VertexElementSource* sources, Ogre::VertexData* vertexData, Urho3D::VertexElement urhoElement, Ogre::VertexElement::Semantic ogreSemantic, Ogre::VertexElement::Type ogreType, uint ogreIndex = 0)
+{
+    VertexElementSource* desc = &sources[urhoElement];
+
+    Ogre::VertexElement* ogreDesc = vertexData->GetVertexElement(ogreSemantic, (u16)ogreIndex);
+    if (!ogreDesc)
+        return;
+
+    if (ogreDesc->type != ogreType)
+    {
+        LogWarning("Vertex element " + ogreDesc->SemanticToString() + " found, but type is " + ogreDesc->TypeToString() + " so can not use include in mesh asset");
+        return;
+    }
+
+    Vector<u8>* ogreVb = vertexData->VertexBuffer(ogreDesc->source);
+    if (!ogreVb || !ogreVb->Size())
+    {
+        LogWarning("Missing or zero-sized Ogre vertex buffer for source " + String(ogreDesc->source) + " used for semantic " + ogreDesc->SemanticToString());
+        return;
+    }
+
+    elementMask |= 1 << ((uint)urhoElement);
+    desc->enabled = true;
+    desc->src = &ogreVb->At(0) + (size_t)(ogreDesc->offset);
+    desc->stride = 0;
+
+    // To find out the stride in this Ogre source buffer we need to iterate all the vertex elements in that particular buffer
+    /// \todo Includes some repetitive work, however is only done once for each vertex element, not for each source
+    for (VertexElementList::Iterator iter = vertexData->vertexElements.Begin(), end = vertexData->vertexElements.End(); iter != end; ++iter)
+    {
+        if (iter->source == ogreDesc->source)
+            desc->stride += iter->Size();
+    }
+}
+
+SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre::VertexData* vertexData)
+{
+    SharedPtr<Urho3D::VertexBuffer> ret;
+    if (!vertexData || !vertexData->count)
+        return ret;
+
+    ret = new Urho3D::VertexBuffer(context);
+    ret->SetShadowed(true); // Allow CPU raycasts and auto-restore on GPU context loss
+
+    unsigned elementMask = 0; // All Ogre's vertex buffers will be combined into one with the proper element order
+    VertexElementSource sources[Urho3D::MAX_VERTEX_ELEMENTS];
+    /// \todo Check rest, like blend weights / indices
+    CheckVertexElement(elementMask, sources, vertexData, Urho3D::ELEMENT_POSITION, Ogre::VertexElement::VES_POSITION, Ogre::VertexElement::VET_FLOAT3);
+    CheckVertexElement(elementMask, sources, vertexData, Urho3D::ELEMENT_NORMAL, Ogre::VertexElement::VES_NORMAL, Ogre::VertexElement::VET_FLOAT3);
+    CheckVertexElement(elementMask, sources, vertexData, Urho3D::ELEMENT_TEXCOORD1, Ogre::VertexElement::VES_TEXTURE_COORDINATES, Ogre::VertexElement::VET_FLOAT2, 0);
+    CheckVertexElement(elementMask, sources, vertexData, Urho3D::ELEMENT_TEXCOORD2, Ogre::VertexElement::VES_TEXTURE_COORDINATES, Ogre::VertexElement::VET_FLOAT2, 1);
+    CheckVertexElement(elementMask, sources, vertexData, Urho3D::ELEMENT_TANGENT, Ogre::VertexElement::VES_TANGENT, Ogre::VertexElement::VET_FLOAT4);
+    CheckVertexElement(elementMask, sources, vertexData, Urho3D::ELEMENT_COLOR, Ogre::VertexElement::VES_DIFFUSE, Ogre::VertexElement::VET_COLOUR);
+    
+    ret->SetSize(vertexData->count, elementMask);
+    void* data = ret->Lock(0, vertexData->count, true);
+    uint count = vertexData->count;
+
+    // Fill all enabled elements with source data, forming interleaved Urho vertices
+    float* dest = (float*)data;
+    while (count--)
+    {
+        if (elementMask & Urho3D::MASK_POSITION)
+        {
+            *dest++ = ((float*)sources[Urho3D::ELEMENT_POSITION].src)[0];
+            *dest++ = ((float*)sources[Urho3D::ELEMENT_POSITION].src)[1];
+            *dest++ = ((float*)sources[Urho3D::ELEMENT_POSITION].src)[2];
+            sources[Urho3D::ELEMENT_POSITION].MoveToNext();
+        }
+        if (elementMask & Urho3D::MASK_NORMAL)
+        {
+            *dest++ = ((float*)sources[Urho3D::ELEMENT_NORMAL].src)[0];
+            *dest++ = ((float*)sources[Urho3D::ELEMENT_NORMAL].src)[1];
+            *dest++ = ((float*)sources[Urho3D::ELEMENT_NORMAL].src)[2];
+            sources[Urho3D::ELEMENT_NORMAL].MoveToNext();
+        }
+        if (elementMask & Urho3D::MASK_COLOR)
+        {
+            *dest++ = ((float*)sources[Urho3D::ELEMENT_COLOR].src)[0];
+            sources[Urho3D::ELEMENT_COLOR].MoveToNext();
+        }
+        if (elementMask & Urho3D::MASK_TEXCOORD1)
+        {
+            *dest++ = ((float*)sources[Urho3D::ELEMENT_TEXCOORD1].src)[0];
+            *dest++ = ((float*)sources[Urho3D::ELEMENT_TEXCOORD1].src)[1];
+            sources[Urho3D::ELEMENT_TEXCOORD1].MoveToNext();
+        }
+        if (elementMask & Urho3D::MASK_TEXCOORD2)
+        {
+            *dest++ = ((float*)sources[Urho3D::ELEMENT_TEXCOORD2].src)[0];
+            *dest++ = ((float*)sources[Urho3D::ELEMENT_TEXCOORD2].src)[1];
+            sources[Urho3D::ELEMENT_TEXCOORD2].MoveToNext();
+        }
+        if (elementMask & Urho3D::MASK_TANGENT)
+        {
+            *dest++ = ((float*)sources[Urho3D::ELEMENT_TANGENT].src)[0];
+            *dest++ = ((float*)sources[Urho3D::ELEMENT_TANGENT].src)[1];
+            *dest++ = ((float*)sources[Urho3D::ELEMENT_TANGENT].src)[2];
+            *dest++ = ((float*)sources[Urho3D::ELEMENT_TANGENT].src)[3];
+            sources[Urho3D::ELEMENT_TANGENT].src += sources[Urho3D::ELEMENT_TANGENT].stride;
+        }
+    }
+
+    ret->Unlock();
+    return ret;
+}
+
+
 OgreMeshAsset::OgreMeshAsset(AssetAPI *owner, const String &type_, const String &name_) :
     IMeshAsset(owner, type_, name_)
 {
@@ -776,7 +928,36 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
         return false;
     }
 
-    /// \todo Stuff the Ogre data into an Urho model
+    model = new Urho3D::Model(GetContext());
+    uint subMeshCount = mesh->NumSubMeshes();
+    model->SetNumGeometries(subMeshCount);
+    model->SetBoundingBox(Urho3D::BoundingBox(mesh->min, mesh->max));
+
+    SharedPtr<Urho3D::VertexBuffer> sharedVb = MakeVertexBuffer(GetContext(), mesh->sharedVertexData);
+
+    for (uint i = 0; i < subMeshCount; ++i)
+    {
+        Ogre::SubMesh* subMesh = mesh->subMeshes[i];
+        if (!subMesh->indexData)
+        {
+            LogWarning("OgreMeshAsset::DeserializeFromData: missing index data on submesh " + String(i) + " in " + Name());
+            continue;
+        }
+
+        SharedPtr<Urho3D::Geometry> geom(new Urho3D::Geometry(GetContext()));
+        SharedPtr<Urho3D::IndexBuffer> ib(new Urho3D::IndexBuffer(GetContext()));
+        ib->SetShadowed(true); // Allow CPU-side raycasts and auto-restore on GPU context loss
+        ib->SetSize(subMesh->indexData->count, subMesh->indexData->is32bit);
+        if (ib->GetIndexCount())
+            ib->SetData(&subMesh->indexData->buffer[0]);
+        geom->SetIndexBuffer(ib);
+        geom->SetVertexBuffer(0, subMesh->usesSharedVertexData ? sharedVb : MakeVertexBuffer(GetContext(), subMesh->vertexData));
+        geom->SetDrawRange(ConvertPrimitiveType(subMesh->operationType), 0, ib->GetIndexCount());
+        model->SetNumGeometryLodLevels(i, 1);
+        model->SetGeometry(i, 0, geom);
+    }
+
+    /// \todo Handle skinning data, morphs etc.
 
     assetAPI->AssetLoadCompleted(Name());
     return true;
