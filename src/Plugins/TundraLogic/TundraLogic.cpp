@@ -114,42 +114,22 @@ void TundraLogic::OnUpdate(float frametime)
 
 void TundraLogic::LoadStartupScene()
 {
-    Scene *scene = framework->Scene()->MainCameraScene();
-    if (!scene)
-    {
-        scene = framework->Scene()->CreateScene("TundraServer", true, true).Get();
-    }
-
     bool hasFile = framework->HasCommandLineParameter("--file");
     StringVector files = framework->CommandLineParameters("--file");
     if (hasFile && files.Empty())
         LogError("TundraLogicModule: --file specified without a value.");
 
-    bool loaded = false;
     foreach(const String &file, files)
     {
         AssetAPI::AssetRefType refType = AssetAPI::ParseAssetRef(file.Trimmed());
         if (refType != AssetAPI::AssetRefExternalUrl)
-            loaded |= LoadScene(file, false, false);
+            LoadScene(file, false, false);
         else
         {
             AssetTransferPtr transfer = framework->Asset()->RequestAsset(file, "Binary", true);
             if (transfer)
                 transfer->Succeeded.Connect(this, &TundraLogic::StartupSceneLoaded);
-            loaded = true; // hack for below, assume later success. Camera creation should be somewhere more sensible...
         }
-    }
-
-    if (loaded)
-    {
-        // Create a camera at 0,0,0 to show something
-        /// \todo Do not do here, rather should be done by CameraApplication
-        Entity* entity = scene->CreateEntity();
-        entity->CreateComponent(20); // Placeable
-        entity->CreateComponent(15); // Camera
-        IRenderer* renderer = framework->Renderer();
-        if (renderer)
-            renderer->SetMainCamera(entity);
     }
 }
 
@@ -160,12 +140,6 @@ void TundraLogic::StartupSceneLoaded(AssetPtr sceneAsset)
 
 bool TundraLogic::LoadScene(String filename, bool clearScene, bool useEntityIDsFromFile)
 {
-    Scene *scene = framework->Scene()->MainCameraScene();
-    if (!scene)
-    {
-        LogError("TundraLogicModule::LoadScene: No active scene found!");
-        return false;
-    }
     filename = filename.Trimmed();
     if (filename.Empty())
     {
@@ -173,6 +147,11 @@ bool TundraLogic::LoadScene(String filename, bool clearScene, bool useEntityIDsF
         return false;
     }
 
+    // If a scene does not exist yet for loading, create it now
+    Scene *scene = framework->Scene()->MainCameraScene();
+    if (!scene)
+        scene = framework->Scene()->CreateScene("TundraServer", true, true).Get();
+    
     LogInfo("Loading startup scene from " + filename + " ...");
     Urho3D::HiresTimer timer;
 
@@ -183,6 +162,18 @@ bool TundraLogic::LoadScene(String filename, bool clearScene, bool useEntityIDsF
     else
         entities = scene->LoadSceneXML(filename, clearScene, useEntityIDsFromFile, AttributeChange::Default);
     LogInfo("Loading of startup scene finished. " + String(entities.Size()) + " entities created in " + String((int)(timer.GetUSec(true) / 1000)) + " msecs.");
+
+    IRenderer* renderer = framework->Renderer();
+    if (renderer && !renderer->MainCamera() && !framework->IsHeadless())
+    {
+        // Create a camera at 0,0,0 to show something
+        /// \todo Do not do here, rather should be done by CameraApplication
+        Entity* entity = scene->CreateEntity();
+        entity->CreateComponent(20); // Placeable
+        entity->CreateComponent(15); // Camera
+        renderer->SetMainCamera(entity);
+    }
+
     return entities.Size() > 0;
 }
 
