@@ -30,11 +30,18 @@ HttpWorkQueue::HttpWorkQueue() :
 
 HttpWorkQueue::~HttpWorkQueue()
 {
+    // Stop all threads first. They hold raw ptrs to our queues.
     StopThreads();
-
-    Urho3D::Mutex mutexRequests_;
-    created_.Clear();
-    requests_.Clear();
+    {
+        Urho3D::MutexLock m(mutexRequests_);
+        created_.Clear();
+        requests_.Clear();
+    }
+    {
+        Urho3D::MutexLock m(mutexCompleted_);
+        completed_.Clear();
+        executing_.Clear();
+    }
 }
 
 void HttpWorkQueue::Schedule(const HttpRequestPtr &request)
@@ -129,16 +136,18 @@ void HttpWorkQueue::StopThreads()
     }
 }
 
-HttpRequestPtr HttpWorkQueue::Next()
+HttpRequest* HttpWorkQueue::Next()
 {
     mutexRequests_.Acquire();
     if (requests_.Size() > 0)
-    {  
+    {
+        // Remove from pending
         HttpRequestPtrList::Iterator iter = requests_.Begin();
         HttpRequestPtr next = *iter;
         requests_.Erase(iter);
         mutexRequests_.Release();
 
+        // Add to executing
         {
             Urho3D::MutexLock m(mutexCompleted_);
             executing_.Push(next);
@@ -146,7 +155,7 @@ HttpRequestPtr HttpWorkQueue::Next()
         return next;
     }
     mutexRequests_.Release();
-    return HttpRequestPtr();
+    return nullptr;
 }
 
 HttpRequestPtrList::Iterator HttpWorkQueue::FindExecuting(HttpRequest *request)
@@ -159,18 +168,20 @@ HttpRequestPtrList::Iterator HttpWorkQueue::FindExecuting(HttpRequest *request)
     return executing_.End();
 }
 
-void HttpWorkQueue::Completed(HttpRequestPtr request)
+void HttpWorkQueue::Completed(HttpRequest *request)
 {
     Urho3D::MutexLock m(mutexCompleted_);
 
     HttpRequestPtrList::Iterator done = FindExecuting(request);
     if (done != executing_.End())
+    {
+        // Push to completed list. Main thread will signal completed/failed.
+        HttpRequestPtr doneShared = *done;
+        completed_.Push(doneShared);
         executing_.Erase(done);
+    }
     else
         log.ErrorF("Failed to remove completed request from executing list: %s", request->Url().CString());
-
-    // Push to completed list. Main thread will signal completed/failed.
-    completed_.Push(request);
 }
 
 // HttpWorkThread
@@ -186,7 +197,7 @@ void HttpWorkThread::ThreadFunction()
 
     while(shouldRun_)
     {
-        HttpRequestPtr request = queue_->Next();
+        HttpRequest  *request = queue_->Next();
         if (request)
         {
             request->Perform();

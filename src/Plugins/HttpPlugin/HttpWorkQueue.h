@@ -43,8 +43,8 @@ private:
     void Update(float frametime);
 
     /// Called by HttpWorkThread
-    HttpRequestPtr Next();
-    void Completed(HttpRequestPtr request);
+    HttpRequest *Next();
+    void Completed(HttpRequest *request);
 
     float durationNoWork_;
     uint numMaxThreads_;
