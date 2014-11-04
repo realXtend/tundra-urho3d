@@ -129,7 +129,7 @@ if [ $skip_pkg = false ] ; then
 
     print_subtitle "Curl"
     sudo apt-get -y --quiet install \
-        openssl autoconf libtool
+        openssl zlib1g-dev autoconf libtool
 fi
 
 if [ $skip_deps = false ] ; then
@@ -213,6 +213,36 @@ if [ $skip_deps = false ] ; then
         mark_built
     fi
 
+    #### polarssl
+    # alternative for openssl for curl that should allow static linking
+    # but currently libpolarssl.a(ctr_drbg.c.o) has problems even with -fPIC
+    #
+    #start_target polarssl
+    #
+    #if ! is_cloned ; then
+    #    git clone https://github.com/polarssl/polarssl.git polarssl
+    #    cd polarssl
+    #    git checkout polarssl-1.3.9
+    #fi
+    #
+    #if ! is_built ; then
+    #
+    #    env CFLAGS="-fPIC" cmake . \
+    #        -DCMAKE_INSTALL_PREFIX=$PWD/build \
+    #        -DCMAKE_BUILD_TYPE=$build_type \
+    #        -DCMAKE_CXX_FLAGS="-fPIC" \
+    #        -DCMAKE_C_FLAGS="-fPIC" \
+    #        -DENABLE_PROGRAMS=OFF \
+    #        -DENABLE_TESTING=OFF \
+    #        -DENABLE_ZLIB_SUPPORT=OFF \
+    #        -DUSE_STATIC_POLARSSL_LIBRARY=ON
+    #
+    #    make -j $num_cpu -S
+    #    make install
+    #
+    #    mark_built
+    #fi
+
     #### curl
 
     start_target curl
@@ -226,14 +256,13 @@ if [ $skip_deps = false ] ; then
     if ! is_built ; then
         ./buildconf
 
-        if [ $build_debug = true ] ; then
-            ./configure --prefix=$PWD/build --enable-debug
-        else
-            ./configure --prefix=$PWD/build --enable-optimize
-        fi
+        ./configure --prefix=$PWD/build --disable-shared --enable-optimize
+            #--without-ssl --with-polarssl=$DEPS_SRC/polarssl/build
 
         make -j $num_cpu -S
         make install
+
+        #cp $DEPS_SRC/polarssl/build/lib/*.a $DEPS_SRC/curl/build/lib/
 
         mark_built
     fi
