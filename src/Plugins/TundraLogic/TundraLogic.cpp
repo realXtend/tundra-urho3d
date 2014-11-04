@@ -56,46 +56,6 @@ void TundraLogic::Initialize()
     framework->Console()->RegisterCommand("disconnect", "Disconnects from a server.", client_.Get(), &Client::Logout);
 
     kristalliProtocol_->Initialize();
-
-    SetupAssetStorages();
-}
-
-void TundraLogic::SetupAssetStorages()
-{
-    // Add the System asset storage
-    String systemAssetDir = framework->InstallationDirectory() + "Data/Assets";
-    framework->Asset()->AssetProvider<LocalAssetProvider>()->AddStorageDirectory(systemAssetDir, "System", true, false);
-
-    bool hasStorage = framework->HasCommandLineParameter("--storage");
-    StringVector files = framework->CommandLineParameters("--file");
-    StringVector storages = framework->CommandLineParameters("--storage");
-    if (hasStorage && storages.Empty())
-        LogError("TundraLogic: --storage specified without a value.");
-    foreach(const String &file, files)
-    {
-        AssetStoragePtr storage = framework->Asset()->DeserializeAssetStorageFromString(file.Trimmed(), false);
-        framework->Asset()->SetDefaultAssetStorage(storage);
-    }
-    foreach(const String &storageName, storages)
-    {
-        AssetStoragePtr storage = framework->Asset()->DeserializeAssetStorageFromString(storageName.Trimmed(), false);
-        if (files.Empty()) // If "--file" was not specified, then use "--storage" as the default. (If both are specified, "--file" takes precedence over "--storage").
-            framework->Asset()->SetDefaultAssetStorage(storage);
-    }
-    if (framework->HasCommandLineParameter("--defaultstorage"))
-    {
-        StringVector defaultStorages = framework->CommandLineParameters("--defaultstorage");
-        if (defaultStorages.Size() == 1)
-        {
-            AssetStoragePtr defaultStorage = framework->Asset()->AssetStorageByName(defaultStorages[0]);
-            if (!defaultStorage)
-                LogError("Cannot set storage \"" + defaultStorages[0] + "\" as the default storage, since it doesn't exist!");
-            else
-                framework->Asset()->SetDefaultAssetStorage(defaultStorage);
-        }
-        else
-            LogError("Parameter --defaultstorage may be specified exactly once, and must contain a single value!");
-    }
 }
 
 void TundraLogic::HandleLogin(const StringVector &params) const

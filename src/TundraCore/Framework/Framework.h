@@ -179,6 +179,9 @@ private:
     /// Prints to console all the used startup options.
     void PrintStartupOptions();
 
+    /// Setup asset storages specifed on the command line.
+    void SetupAssetStorages();
+
     /// Adds new command line parameter (option | value pair)
     void AddCommandLineParameter(const String &command, const String &parameter = "");
 

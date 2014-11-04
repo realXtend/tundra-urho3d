@@ -10,6 +10,8 @@
 #include "ConsoleAPI.h"
 #include "AssetAPI.h"
 #include "AssetCache.h"
+#include "LocalAssetProvider.h"
+#include "LocalAssetStorage.h"
 #include "TundraVersionInfo.h"
 #include "LoggingFunctions.h"
 #include "IModule.h"
@@ -163,13 +165,40 @@ void Framework::Initialize()
         modules[i]->Initialize();
     }
 
-    // Add storages from --file first then --storage. First one passed will be set as default (later ones with default=true will override)
+    // Set storages from command line options
+    SetupAssetStorages();
+}
+
+void Framework::SetupAssetStorages()
+{
+    // Add the System asset storage
+    /// @todo See if actually needed
+    String systemAssetDir = InstallationDirectory() + "Data/Assets";
+    asset->AssetProvider<LocalAssetProvider>()->AddStorageDirectory(systemAssetDir, "System", true, false);
+
+    // Add storages from --file first then --storage. First one passed will be set as default (if non have default=true;)
     StringVector storageSources = CommandLineParameters("--file") + CommandLineParameters("--storage");
     for (int si=0; si<storageSources.Size(); ++si)
     {
         AssetStoragePtr storage = asset->DeserializeAssetStorageFromString(storageSources[si].Trimmed(), false);
         if (si == 0)
             asset->SetDefaultAssetStorage(storage);
+    }
+
+    // Set default storage if specified
+    if (HasCommandLineParameter("--defaultstorage"))
+    {
+        StringVector defaultStorages = CommandLineParameters("--defaultstorage");
+        if (defaultStorages.Size() == 1)
+        {
+            AssetStoragePtr defaultStorage = asset->AssetStorageByName(defaultStorages[0]);
+            if (!defaultStorage)
+                LogError("Cannot set storage \"" + defaultStorages[0] + "\" as the default storage, since it doesn't exist!");
+            else
+                asset->SetDefaultAssetStorage(defaultStorage);
+        }
+        else
+            LogError("Parameter --defaultstorage may be specified exactly once, and must contain a single value!");
     }
 }
 

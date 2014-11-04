@@ -49,9 +49,6 @@ private:
     /// Frame update handler
     void OnUpdate(float frametime);
 
-    /// Setup asset storages from command line options, and the system asset storage.
-    void SetupAssetStorages();
-
     /// Load startup scene if necessary. Return true on success.
     void LoadStartupScene();
 
