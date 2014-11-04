@@ -21,11 +21,10 @@ HttpWorkQueue::HttpWorkQueue() :
     log("HttpWorkQueue"),
     durationNoWork_(0.f)
 {
-    uint numCPUs = Urho3D::GetNumPhysicalCPUs();
-    numMaxThreads_ = FloorInt(static_cast<float>(numCPUs) / 2.f);
-    if (numMaxThreads_ < 1) numMaxThreads_ = 1;         // Need at least one worker. @todo Main thread only implementation!
-    else if (numMaxThreads_ > 8) numMaxThreads_ = 8;    // 8 is plenty
-    log.DebugF("Maximum number of threads %d detected %d CPUs", numMaxThreads_, numCPUs);
+    numMaxThreads_ = Urho3D::GetNumLogicalCPUs();
+    if (numMaxThreads_ < 1) numMaxThreads_ = 1;         // Need at least one worker
+    else if (numMaxThreads_ > 32) numMaxThreads_ = 32;  // Cap to something sensible
+    log.DebugF("Maximum number of threads %d detected from %d physical and %d logical CPUs", numMaxThreads_, Urho3D::GetNumPhysicalCPUs(), Urho3D::GetNumLogicalCPUs());
 }
 
 HttpWorkQueue::~HttpWorkQueue()
