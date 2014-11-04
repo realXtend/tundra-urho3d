@@ -177,15 +177,16 @@ void Framework::SetupAssetStorages()
     asset->AssetProvider<LocalAssetProvider>()->AddStorageDirectory(systemAssetDir, "System", true, false);
 
     // Add storages from --file first then --storage. First one passed will be set as default (if non have default=true;)
+    /// @todo Should the first --storage take priority over --file. Can be used to override the base url for the --file
     StringVector storageSources = CommandLineParameters("--file") + CommandLineParameters("--storage");
-    for (int si=0; si<storageSources.Size(); ++si)
+    for (uint si=0; si<storageSources.Size(); ++si)
     {
         AssetStoragePtr storage = asset->DeserializeAssetStorageFromString(storageSources[si].Trimmed(), false);
-        if (si == 0)
+        if (si == 0) // We can't ask if default storage is already set, first storage is returned if not set
             asset->SetDefaultAssetStorage(storage);
     }
 
-    // Set default storage if specified
+    // Set default storage by name if specified
     if (HasCommandLineParameter("--defaultstorage"))
     {
         StringVector defaultStorages = CommandLineParameters("--defaultstorage");
