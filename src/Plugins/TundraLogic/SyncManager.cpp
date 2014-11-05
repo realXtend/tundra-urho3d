@@ -94,13 +94,14 @@ bool SyncManager::ValidateAttributeBuffer(bool fatal, kNet::DataSerializer& ds, 
         String ex = String("SyncManager::ValidateAttributeBuffer: Buffer overflow while processing ") + entityIdentifier + " Component id="
             + String(comp->Id()) + " typeid=" + String(comp->TypeId()) + ". Written " + String(ds.BytesFilled()) + " bytes to buffer of " + String(maxBytes) + " bytes.";
            
-        /// \todo Check what to do here
-        //if (fatal)
-        //    throw Exception(ex.c_str());
-        //else
+        if (fatal)
+            /// \todo Better way to handle this?
+            throw std::runtime_error(ex.CString());
+        else
             LogError(ex);
         return false;
     }
+
     return true;
 }
 
@@ -1809,7 +1810,7 @@ void SyncManager::ProcessEntitySyncState(bool isServer, UserConnection* user, Sc
                         {
                             if (comp->TypeId() == Placeable::TypeIdStatic() && changedAttributes_.size() == 1 && changedAttributes_[0] == 0)
                             {
-                                // EC_Placeable::Transform is the only change!
+                                // Placeable::Transform is the only change!
                                 Placeable *placeable = dynamic_cast<Placeable*>(comp.Get());
                                 if (placeable)
                                 {
@@ -2186,7 +2187,7 @@ void SyncManager::HandleCreateEntity(UserConnection* source, const char* data, s
     {
         LogError("Failed to deserialize the creation of a new entity from the peer. Deleting the partially crafted entity!");
         scene->RemoveEntity(entity->Id(), AttributeChange::Disconnected);
-        /// \todo remove exceptions
+        // Rethrowing knet exception up should be fine here, they get handled further up again
         throw; // Propagate the exception up, to handle a peer which is sending us bad protocol bits.
     }
     
@@ -2358,7 +2359,7 @@ void SyncManager::HandleCreateComponents(UserConnection* source, const char* dat
         LogError("Failed to deserialize the creation of new component(s) from the peer. Deleting the partially crafted components!");
         for(size_t i = 0; i < addedComponents.size(); ++i)
             entity->RemoveComponent(addedComponents[i], AttributeChange::Disconnected);
-        /// \todo Remove exceptions
+        // Rethrowing knet exception up should be fine here, they get handled further up again
         throw; // Propagate the exception up, to handle a peer which is sending us bad protocol bits.
     }
     

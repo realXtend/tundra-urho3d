@@ -215,7 +215,6 @@ bool KristalliProtocol::StartServer(unsigned short port, kNet::SocketTransportLa
         LogError(error);
         LogError("Please make sure that the port is free and not used by another application.");
         return false;
-     //   throw Exception((error + "Please make sure that the port is free and not used by another application. The program will now abort.").toStdString().c_str());
     }
 
     Framework* framework = owner->GetFramework();
@@ -311,7 +310,6 @@ void KristalliProtocol::HandleMessage(kNet::MessageConnection *source, kNet::pac
 #ifndef _DEBUG
         source->Disconnect(0);
         source->Close(0);
-        /// \todo Check that this happens
         // kNet will call back to KristalliProtocolModule::ClientDisconnected() to clean up the high-level Tundra UserConnection object.
 #endif
     }

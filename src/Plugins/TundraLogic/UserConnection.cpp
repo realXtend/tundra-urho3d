@@ -31,7 +31,6 @@ void UserConnection::Exec(Entity *entity, const String &action, const StringVect
 {
     if (entity)
         ActionTriggered.Emit(this, entity, action, params);
-        //emit ActionTriggered(this, entity, action, params);
     else
         LogWarning("UserConnection::Exec: null entity passed!");
 }
