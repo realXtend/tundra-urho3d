@@ -3,7 +3,8 @@
         "--plugin" : [
 			"UrhoRenderer", 
 			"TundraLogic",
-			"HttpPlugin"
+			"HttpPlugin",
+			"CameraApplication"
 		]
     }
 ]

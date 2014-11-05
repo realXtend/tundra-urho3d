@@ -41,7 +41,6 @@ UrhoRenderer::~UrhoRenderer()
 
 void UrhoRenderer::Load()
 {
-    /// \todo Register component & asset factories
     SceneAPI* scene = framework->Scene();
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Placeable>()));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Mesh>()));

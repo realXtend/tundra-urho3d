@@ -201,7 +201,8 @@ endmacro()
 # include local module libraries
 macro (link_modules)
     foreach (module_ ${ARGN})
-        target_link_libraries (${TARGET_NAME} ${module_})
+        get_filename_component(libraryName ${module_} NAME)
+        target_link_libraries (${TARGET_NAME} ${libraryName})
     endforeach ()
 endmacro (link_modules)
 

@@ -163,17 +163,6 @@ bool TundraLogic::LoadScene(String filename, bool clearScene, bool useEntityIDsF
         entities = scene->LoadSceneXML(filename, clearScene, useEntityIDsFromFile, AttributeChange::Default);
     LogInfo("Loading of startup scene finished. " + String(entities.Size()) + " entities created in " + String((int)(timer.GetUSec(true) / 1000)) + " msecs.");
 
-    IRenderer* renderer = framework->Renderer();
-    if (renderer && !renderer->MainCamera() && !framework->IsHeadless())
-    {
-        // Create a camera at 0,0,0 to show something
-        /// \todo Do not do here, rather should be done by CameraApplication
-        Entity* entity = scene->CreateEntity();
-        entity->CreateComponent(20); // Placeable
-        entity->CreateComponent(15); // Camera
-        renderer->SetMainCamera(entity);
-    }
-
     return entities.Size() > 0;
 }
 
