@@ -1,6 +1,6 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
-#include "StableHeaders.h"
+//#include "StableHeaders.h"
 #include "HttpPlugin.h"
 #include "HttpClient.h"
 #include "HttpAsset/HttpAssetProvider.h"
@@ -27,7 +27,7 @@ void HttpPlugin::Load()
     client_ = new HttpClient(framework);
     provider_ = new HttpAssetProvider(framework, client_);
 
-    framework->Asset()->RegisterAssetProvider(Urho3D::DynamicCast<IAssetProvider>(provider_));
+    framework->Asset()->RegisterAssetProvider(Urho3D::StaticCast<IAssetProvider>(provider_));
 }
 
 void HttpPlugin::Initialize()
@@ -57,4 +57,3 @@ DLLEXPORT void TundraPluginMain(Tundra::Framework *fw)
 }
 
 }
-

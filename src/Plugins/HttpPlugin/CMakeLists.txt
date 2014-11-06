@@ -22,8 +22,13 @@ use_package(CURL)
 build_library(${TARGET_NAME} SHARED ${SOURCE_FILES})
 
 link_modules(TundraCore)
+link_package(URHO3D)
 link_package(CURL)
+if (WIN32)
+    target_link_libraries(${TARGET_NAME} ws2_32.lib)
+endif()
 
+# TODO WithPCH() when probs with http_parser.c are fixed.
 SetupCompileFlags()
 
 final_target()

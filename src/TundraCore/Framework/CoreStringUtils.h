@@ -5,6 +5,8 @@
 #include "TundraCoreApi.h"
 #include "CoreTypes.h"
 
+#include <Engine/Container/Str.h>
+
 namespace kNet { class DataSerializer; class DataDeserializer; }
 
 namespace Tundra

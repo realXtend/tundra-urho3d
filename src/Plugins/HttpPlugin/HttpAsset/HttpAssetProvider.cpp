@@ -1,6 +1,6 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
-#include "StableHeaders.h"
+//#include "StableHeaders.h"
 #include "HttpClient.h"
 #include "HttpRequest.h"
 
@@ -43,21 +43,18 @@ String HttpAssetProvider::UniqueName(String prefix) const
         prefix = "Web";
     int counter = 0;
 
-    AssetStorageVector storages = framework_->Asset()->AssetStorages();
     while(counter < 1000)
     {
         bool reserved = false;
-        foreach(const AssetStoragePtr &storage, storages)
+        foreach(const AssetStoragePtr &httpStorage, httpStorages_)
         {
-            foreach(const AssetStoragePtr &httpStorage, httpStorages_)
+            if (httpStorage->Name().Compare(prefix, false) == 0)
             {
-                if (httpStorage->Name().Compare(prefix, false) == 0)
-                {
-                    reserved = true;
-                    break;
-                }
+                reserved = true;
+                break;
             }
         }
+
         if (!reserved)
             return prefix;
         prefix = Urho3D::ToString("%s %d", prefix.CString(), counter++);
