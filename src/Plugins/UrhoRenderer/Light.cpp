@@ -112,6 +112,8 @@ void Light::AttributesChanged()
         light_->SetCastShadows(castShadows.Get());
     if (range.ValueChanged())
         light_->SetRange(range.Get());
+    if (outerAngle.ValueChanged())
+        light_->SetFov(outerAngle.Get() * 2.0f);
     if (brightness.ValueChanged())
         light_->SetBrightness(brightness.Get());
 }
@@ -152,6 +154,7 @@ void Light::AttachLight()
     light_->SetSpecularIntensity(specColor.Get().ToFloat4().AverageOfElements());
     light_->SetCastShadows(castShadows.Get());
     light_->SetRange(range.Get());
+    light_->SetFov(outerAngle.Get() * 2.0f);
     light_->SetBrightness(brightness.Get());
 }
 
