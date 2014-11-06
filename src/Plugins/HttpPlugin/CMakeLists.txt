@@ -7,11 +7,12 @@ init_target(HttpPlugin OUTPUT Plugins)
 # Define source files
 file(GLOB CPP_FILES *.cpp)
 file(GLOB H_FILES *.h)
+file(GLOB C_FILES *.h)
 
 AddSourceFolder(HttpAsset)
 AddSourceFolder(HttpParser)
 
-set (SOURCE_FILES ${CPP_FILES} ${H_FILES})
+set(SOURCE_FILES ${CPP_FILES} ${C_FILES} ${H_FILES})
 
 add_definitions(-DTUNDRA_HTTP_EXPORTS -DCURL_STATICLIB)
 
@@ -28,7 +29,6 @@ if (WIN32)
     target_link_libraries(${TARGET_NAME} ws2_32.lib)
 endif()
 
-# TODO WithPCH() when probs with http_parser.c are fixed.
-SetupCompileFlags()
+SetupCompileFlagsWithPCH()
 
 final_target()
