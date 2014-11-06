@@ -152,6 +152,9 @@ private:
     void SetFarClipDistance(float distance);
     void SetFovY(float fov);
 
+    /// Handle Urho's view update event to prepare for rendering
+    void HandleBeginViewUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+
     /// placeable component 
     PlaceableWeakPtr placeable_;
 

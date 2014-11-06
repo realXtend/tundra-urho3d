@@ -82,6 +82,15 @@ void CameraApplication::CreateCamera()
         return;
     }
     renderer->SetMainCamera(cameraEntity);
+
+    // If scene has an entity called FreeLookCameraSpawnPos, copy its transform
+    Entity* cameraPosEntity = lastScene->EntityByName("FreeLookCameraSpawnPos");
+    if (cameraPosEntity)
+    {
+        Placeable* cameraPosPlaceable = cameraPosEntity->Component<Placeable>();
+        if (cameraPosPlaceable)
+            cameraEntity->Component<Placeable>()->transform.Set(cameraPosPlaceable->transform.Get());
+    }
 }
 
 void CameraApplication::MoveCamera(Entity* cameraEntity, float frameTime)
@@ -104,17 +113,18 @@ void CameraApplication::MoveCamera(Entity* cameraEntity, float frameTime)
 
     if (input->GetMouseButtonDown(Urho3D::MOUSEB_RIGHT))
     {
-        t.rot.x += input->GetMouseMoveY() * cameraRotateSpeed;
-        t.rot.y += input->GetMouseMoveX() * cameraRotateSpeed;
+        t.rot.x -= input->GetMouseMoveY() * cameraRotateSpeed;
+        t.rot.y -= input->GetMouseMoveX() * cameraRotateSpeed;
         t.rot.x = Clamp(t.rot.x, -90.0f, 90.0f);
         changed = true;
     }
 
     float3 moveVector = float3::zero;
+    // Note right-handed coordinate system
     if (input->GetKeyDown(Urho3D::KEY_W))
-        moveVector += float3(0.0f, 0.0f, 1.0f);
-    if (input->GetKeyDown(Urho3D::KEY_S))
         moveVector += float3(0.0f, 0.0f, -1.0f);
+    if (input->GetKeyDown(Urho3D::KEY_S))
+        moveVector += float3(0.0f, 0.0f, 1.0f);
     if (input->GetKeyDown(Urho3D::KEY_A))
         moveVector += float3(-1.0f, 0.0f, 0.0f);
     if (input->GetKeyDown(Urho3D::KEY_D))

@@ -19,6 +19,8 @@
 #include <Engine/Scene/Scene.h>
 #include <Engine/Graphics/Graphics.h>
 #include <Engine/Graphics/Camera.h>
+#include <Engine/Graphics/GraphicsEvents.h>
+#include <Engine/Graphics/Renderer.h>
 #include <Engine/Core/Profiler.h>
 #include <Geometry/Plane.h>
 
@@ -227,6 +229,10 @@ void Camera::UpdateSignals()
         SetFarClipDistance(farPlane.Get());
         SetFovY(verticalFov.Get());
         SetAspectRatio(AspectRatio());
+
+        Urho3D::Renderer* urhoRenderer = GetSubsystem<Urho3D::Renderer>();
+        if (urhoRenderer)
+            SubscribeToEvent(urhoRenderer, Urho3D::E_BEGINVIEWUPDATE, HANDLER(Camera, HandleBeginViewUpdate));
     }
 
     // Make sure we attach to the Placeable if exists.
@@ -336,6 +342,21 @@ void Camera::SetFovY(float fov)
 {
     if (camera_ && !world_.Expired())
         camera_->SetFov(fov);
+}
+
+void Camera::HandleBeginViewUpdate(Urho3D::StringHash /*eventType*/, Urho3D::VariantMap& eventData)
+{
+    using namespace Urho3D::BeginViewUpdate;
+    if (!cameraNode_ || !camera_ || eventData[P_CAMERA].GetPtr() != camera_)
+        return;
+
+    // Setup a reflection plane to convert to Tundra's right-handed coordinate system
+    Urho3D::Plane zPlane;
+    Urho3D::Vector3 cameraPosition = cameraNode_->GetWorldPosition();
+    Urho3D::Vector3 cameraDir = cameraNode_->GetWorldDirection();
+    zPlane.Define(cameraDir, cameraPosition + cameraDir);
+    camera_->SetUseReflection(true);
+    camera_->SetReflectionPlane(zPlane);
 }
 
 }
