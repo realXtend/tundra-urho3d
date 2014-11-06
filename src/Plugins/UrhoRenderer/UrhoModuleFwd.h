@@ -12,6 +12,7 @@ namespace Urho3D
     class AnimationState;
     class Model;
     class Texture2D;
+    class Zone;
 }
 
 namespace Tundra

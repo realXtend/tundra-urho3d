@@ -106,7 +106,7 @@ void CameraApplication::MoveCamera(Entity* cameraEntity, float frameTime)
     {
         t.rot.x += input->GetMouseMoveY() * cameraRotateSpeed;
         t.rot.y += input->GetMouseMoveX() * cameraRotateSpeed;
-        t.rot.y = Clamp(t.rot.y, -90.0f, 90.0f);
+        t.rot.x = Clamp(t.rot.x, -90.0f, 90.0f);
         changed = true;
     }
 

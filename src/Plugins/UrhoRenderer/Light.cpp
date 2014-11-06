@@ -11,7 +11,7 @@
 
 #include <Engine/Scene/Node.h>
 #include <Engine/Scene/Scene.h>
-#include <Engine/Graphics/Graphics.h>
+#include <Engine/Graphics/GraphicsDefs.h>
 #include <Engine/Graphics/Light.h>
 
 namespace Tundra

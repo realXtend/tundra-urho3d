@@ -180,6 +180,11 @@ bool GraphicsWorld::IsEntityVisible(Entity* entity) const
     return false;
 }
 
+Urho3D::Zone* GraphicsWorld::UrhoZone() const
+{
+    return urhoScene_->GetComponent<Urho3D::Zone>();
+}
+
 EntityVector GraphicsWorld::VisibleEntities() const
 {
     /// \todo Implement

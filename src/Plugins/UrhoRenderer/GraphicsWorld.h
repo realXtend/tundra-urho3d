@@ -120,7 +120,10 @@ public:
     /// Returns the Urho3D engine scene
     Urho3D::Scene* UrhoScene() const { return urhoScene_; }
 
-    /// Returns the parent scene
+    /// Returns the Zone used for ambient light and fog settings.
+    Urho3D::Zone* UrhoZone() const;
+
+    /// Returns the parent Tundra scene
     ScenePtr ParentScene() const { return scene_.Lock(); }
 
     /// Renders an axis-aligned bounding box.
