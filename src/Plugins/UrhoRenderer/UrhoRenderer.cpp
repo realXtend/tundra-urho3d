@@ -16,6 +16,7 @@
 #include "Entity.h"
 #include "UrhoMeshAsset.h"
 #include "OgreMeshAsset.h"
+#include "TextureAsset.h"
 #include "Scene/Scene.h"
 #include "LoggingFunctions.h"
 #include "GenericAssetFactory.h"
@@ -47,8 +48,21 @@ void UrhoRenderer::Load()
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Camera>()));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Light>()));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<AnimationController>()));
+
+    /// \todo Check and add new supported texture extensions
+    StringList textureExtensions;
+    textureExtensions.Push(".dds");
+    textureExtensions.Push(".png");
+    textureExtensions.Push(".jpeg");
+    textureExtensions.Push(".jpg");
+    textureExtensions.Push(".gif");
+    textureExtensions.Push(".bmp");
+    textureExtensions.Push(".tga");
+    textureExtensions.Push(".psd");
+
     framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<UrhoMeshAsset>("UrhoMesh", ".mdl")));
     framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<OgreMeshAsset>("OgreMesh", ".mesh")));
+    framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<TextureAsset>("Texture", textureExtensions)));
 }
 
 void UrhoRenderer::Initialize()
