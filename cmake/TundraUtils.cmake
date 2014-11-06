@@ -2,9 +2,8 @@
 # Start section. Prints a title that must be passed.
 macro(BeginSection title)
     EndSection()
-    string(TOUPPER ${title} title_upper)
-    string(REGEX REPLACE "." "-" title_line ${title_upper})
-    message("\n${title_upper}")
+    string(REGEX REPLACE "." "-" title_line ${title})
+    message("\n${title}")
     message("${title_line}\n")
     set(_SECTION_ENDED FALSE)
 endmacro()
