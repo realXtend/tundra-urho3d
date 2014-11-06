@@ -35,22 +35,22 @@ HttpClient::~HttpClient()
 
 HttpRequestPtr HttpClient::Get(const String &url)
 {
-    return Shedule(Http::Method::Get, url);
+    return Schedule(Http::Method::Get, url);
 }
 
 HttpRequestPtr HttpClient::Head(const String &url)
 {
-    return Shedule(Http::Method::Head, url);
+    return Schedule(Http::Method::Head, url);
 }
 
 HttpRequestPtr HttpClient::Options(const String &url)
 {
-    return Shedule(Http::Method::Options, url);
+    return Schedule(Http::Method::Options, url);
 }
 
 HttpRequestPtr HttpClient::Post(const String &url, const Vector<u8> &body, const String &contentType)
 {
-    return Shedule(Http::Method::Post, url, body, contentType);
+    return Schedule(Http::Method::Post, url, body, contentType);
 }
 
 HttpRequestPtr HttpClient::Post(const String &url, const String &body, const String &contentType)
@@ -61,7 +61,7 @@ HttpRequestPtr HttpClient::Post(const String &url, const String &body, const Str
 
 HttpRequestPtr HttpClient::Put(const String &url, const Vector<u8> &body, const String &contentType)
 {
-    return Shedule(Http::Method::Put, url, body, contentType);
+    return Schedule(Http::Method::Put, url, body, contentType);
 }
 
 HttpRequestPtr HttpClient::Put(const String &url, const String &body, const String &contentType)
@@ -72,7 +72,7 @@ HttpRequestPtr HttpClient::Put(const String &url, const String &body, const Stri
 
 HttpRequestPtr HttpClient::Patch(const String &url, const Vector<u8> &body, const String &contentType)
 {
-    return Shedule(Http::Method::Patch, url, body, contentType);
+    return Schedule(Http::Method::Patch, url, body, contentType);
 }
 
 HttpRequestPtr HttpClient::Patch(const String &url, const String &body, const String &contentType)
@@ -83,12 +83,12 @@ HttpRequestPtr HttpClient::Patch(const String &url, const String &body, const St
 
 HttpRequestPtr HttpClient::Delete(const String &url)
 {
-    return Shedule(Http::Method::Delete, url);
+    return Schedule(Http::Method::Delete, url);
 }
 
 // Private API
 
-HttpRequestPtr HttpClient::Shedule(int method, const String &url)
+HttpRequestPtr HttpClient::Schedule(int method, const String &url)
 {
     if (!queue_)
         return HttpRequestPtr();
@@ -98,7 +98,7 @@ HttpRequestPtr HttpClient::Shedule(int method, const String &url)
     return request;
 }
 
-HttpRequestPtr HttpClient::Shedule(int method, const String &url, const Vector<u8> &body, const String &contentType)
+HttpRequestPtr HttpClient::Schedule(int method, const String &url, const Vector<u8> &body, const String &contentType)
 {
     if (!queue_)
         return HttpRequestPtr();

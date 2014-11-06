@@ -53,8 +53,8 @@ public:
     HttpRequestPtr Delete(const String &url);
 
 private:
-    HttpRequestPtr Shedule(int method, const String &url);
-    HttpRequestPtr Shedule(int method, const String &url, const Vector<u8> &body, const String &contentType);
+    HttpRequestPtr Schedule(int method, const String &url);
+    HttpRequestPtr Schedule(int method, const String &url, const Vector<u8> &body, const String &contentType);
 
     friend class HttpPlugin;
     void Update(float frametime);
