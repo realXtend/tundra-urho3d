@@ -26,13 +26,16 @@
 #include <Geometry/Circle.h>
 #include <Geometry/Sphere.h>
 
-#include <Input.h>
 #include <Profiler.h>
 #include <Engine/Scene/Scene.h>
 #include <Engine/Graphics/Camera.h>
 #include <Engine/Graphics/DebugRenderer.h>
+#include <Engine/Graphics/Drawable.h>
 #include <Engine/Graphics/Octree.h>
 #include <Engine/Graphics/OctreeQuery.h>
+#include <Engine/Graphics/Renderer.h>
+#include <Engine/Graphics/View.h>
+#include <Engine/Graphics/Viewport.h>
 #include <Engine/Graphics/Zone.h>
 
 namespace Tundra
@@ -73,7 +76,62 @@ void GraphicsWorld::OnUpdated(float /*timeStep*/)
 {
     PROFILE(GraphicsWorld_OnUpdated);
 
-    /// \todo Implement visibility tracking
+    visibleEntities_.Clear();
+
+    Urho3D::Renderer* renderer = GetSubsystem<Urho3D::Renderer>();
+    Camera* cameraComp = renderer_->MainCameraComponent();
+
+    if (IsActive() && renderer)
+    {
+        Urho3D::Camera* cam = cameraComp ? cameraComp->UrhoCamera() : nullptr;
+        Urho3D::Viewport* vp = renderer->GetViewport(0);
+        Urho3D::View* view = vp ? vp->GetView() : nullptr;
+        if (view)
+        {
+            const Urho3D::PODVector<Urho3D::Drawable*>& geometries = view->GetGeometries();
+            for (uint i = 0; i < geometries.Size(); ++i)
+            {
+                // Verify that the geometry is in main camera view, as also eg. shadow geometries get listed
+                Urho3D::Drawable* dr = geometries[i];
+                if (!dr || !dr->IsInView(cam))
+                    continue;
+                EntityWeakPtr ent(static_cast<Entity*>(dr->GetNode()->GetVar(entityLink).GetPtr()));
+                if (!ent)
+                    continue;
+                
+                visibleEntities_.Insert(ent);
+            }
+        }
+    }
+
+    // Perform visibility change tracking
+    for (HashMap<EntityWeakPtr, bool>::Iterator i = visibilityTrackedEntities_.Begin(); i != visibilityTrackedEntities_.End();)
+    {
+        // Check whether entity has expired
+        if (!i->first_)
+            i = visibilityTrackedEntities_.Erase(i);
+        else
+        {
+            bool current = visibleEntities_.Contains(i->first_);
+            bool prev = i->second_;
+            if (current != prev)
+            {
+                i->second_ = current;
+                if (current)
+                {
+                    i->first_->EmitEnterView(cameraComp);
+                    EntityEnterView.Emit(i->first_.Get());
+                }
+                else
+                {
+                    i->first_->EmitLeaveView(cameraComp);
+                    EntityLeaveView.Emit(i->first_.Get());
+                }
+            }
+
+            ++i;
+        }
+    }
 }
 
 Color GraphicsWorld::DefaultSceneAmbientLightColor()
@@ -113,16 +171,10 @@ RayQueryResult GraphicsWorld::Raycast(const Ray& ray, unsigned layerMask)
 
 RayQueryResult GraphicsWorld::Raycast(int x, int y, unsigned layerMask, float maxDistance)
 {
-    int width = renderer_->WindowWidth();
-    int height = renderer_->WindowHeight();
-
-    float screenx = x / (float)width;
-    float screeny = y / (float)height;
-
     Ray ray;
     Camera* camera = renderer_->MainCameraComponent();
-    if (camera && camera->UrhoCamera())
-        ray = camera->UrhoCamera()->GetScreenRay(screenx, screeny);
+    if (camera)
+        ray = camera->ScreenPointToRay(x, y);
 
     RaycastInternal(ray, layerMask, maxDistance, false);
 
@@ -160,16 +212,10 @@ Vector<RayQueryResult> GraphicsWorld::RaycastAll(const Ray& ray, unsigned layerM
 
 Vector<RayQueryResult> GraphicsWorld::RaycastAll(int x, int y, unsigned layerMask, float maxDistance)
 {
-    int width = renderer_->WindowWidth();
-    int height = renderer_->WindowHeight();
-
-    float screenx = x / (float)width;
-    float screeny = y / (float)height;
-
     Ray ray;
     Camera* camera = renderer_->MainCameraComponent();
-    if (camera && camera->UrhoCamera())
-        ray = camera->UrhoCamera()->GetScreenRay(screenx, screeny);
+    if (camera)
+        ray = camera->ScreenPointToRay(x, y);
 
     RaycastInternal(ray, layerMask, maxDistance, true);
     
@@ -226,21 +272,33 @@ EntityVector GraphicsWorld::FrustumQuery(Urho3D::IntRect & /*viewrect*/) const
     return EntityVector();
 }
 
-bool GraphicsWorld::IsEntityVisible(Entity* /*entity*/) const
+bool GraphicsWorld::IsEntityVisible(Entity* entity) const
 {
-    /// \todo Implement
-    return false;
+    return entity ? visibleEntities_.Contains(EntityWeakPtr(entity)) : false;
+}
+
+EntityVector GraphicsWorld::VisibleEntities() const
+{
+    EntityVector ret;
+
+    for (HashSet<EntityWeakPtr>::ConstIterator i = visibleEntities_.Begin(); i != visibleEntities_.End(); ++i)
+    {
+        if (*i)
+            ret.Push(i->Lock());
+    }
+
+    return ret;
+}
+
+bool GraphicsWorld::IsActive() const
+{
+    Entity* mainCamera = renderer_->MainCamera();
+    return mainCamera && mainCamera->ParentScene() == scene_;
 }
 
 Urho3D::Zone* GraphicsWorld::UrhoZone() const
 {
     return urhoScene_->GetComponent<Urho3D::Zone>();
-}
-
-EntityVector GraphicsWorld::VisibleEntities() const
-{
-    /// \todo Implement
-    return EntityVector();
 }
 
 void GraphicsWorld::DebugDrawAABB(const AABB &aabb, const Color &clr, bool depthTest)
@@ -404,6 +462,18 @@ void GraphicsWorld::DebugDrawSoundSource(const float3 &soundPos, float soundInne
 
     DebugDrawSphere(soundPos, soundInnerRadius, 384, 1, 0, 0, depthTest);
     DebugDrawSphere(soundPos, soundOuterRadius, 384, 0, 1, 0, depthTest);
+}
+
+void GraphicsWorld::StartViewTracking(Entity* entity)
+{
+    if (entity && entity->ParentScene() == scene_.Get())
+        visibilityTrackedEntities_[EntityWeakPtr(entity)] = IsEntityVisible(entity);
+}
+
+/// Stop tracking an entity's visibility
+void GraphicsWorld::StopViewTracking(Entity* entity)
+{
+    visibilityTrackedEntities_.Erase(EntityWeakPtr(entity));
 }
 
 }

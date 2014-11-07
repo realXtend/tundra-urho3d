@@ -111,7 +111,7 @@ public:
     /// Returns visible entities in the currently active camera
     EntityVector VisibleEntities() const;
     
-    /// Returns  whether the currently active camera is in this scene
+    /// Returns whether the currently active camera is in this scene
     bool IsActive() const;
     
     /// Returns the Renderer instance
@@ -172,6 +172,13 @@ public:
     void DebugDrawSphere(const float3& center, float radius, int vertices, const Color &clr, bool depthTest = true);
     void DebugDrawSphere(const float3& center, float radius, int vertices, float r, float g, float b, bool depthTest = true) { DebugDrawSphere(center, radius, vertices, Color(r, g, b), depthTest); } /**< @overload */
 
+    /// Start tracking an entity's visibility within this scene, using any camera(s)
+    /** After this, connect either to the EntityEnterView and EntityLeaveView signals,
+    or the entity's EnterView & LeaveView signals, to be notified of the visibility change(s). */
+    void StartViewTracking(Entity* entity);
+    /// Stop tracking an entity's visibility
+    void StopViewTracking(Entity* entity);
+
     /// An entity has entered the view
     Signal1<Entity*> EntityEnterView;
 
@@ -206,11 +213,11 @@ private:
     /// Urho3D scene
     SharedPtr<Urho3D::Scene> urhoScene_;
     
-    /// Visible entity ID's during this frame. Acquired from the active camera. Not updated if no entities are tracked for visibility.
-    HashSet<entity_id_t> visibleEntities_;
-    
-    /// Visible entity ID's during last frame. Acquired from the active camera. Not updated if no entities are tracked for visibility.
-    HashSet<entity_id_t> lastVisibleEntities_;
+    /// Visible entities during this frame. Acquired from the active camera
+    HashSet<EntityWeakPtr> visibleEntities_;
+
+    /// Entities that are being tracked for visiblity changes and their last stored visibility status.
+    HashMap<EntityWeakPtr, bool> visibilityTrackedEntities_;
     
     /// Current raycast results
     Vector<RayQueryResult> rayHits_;
