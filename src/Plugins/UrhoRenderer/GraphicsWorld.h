@@ -178,6 +178,12 @@ public:
     /// An entity has left the view
     Signal1<Entity*> EntityLeaveView;
 
+    /// Static userdata identifier for linking Urho scene nodes to Tundra entities for raycasting
+    static StringHash entityLink;
+
+    /// Static userdata identifier for linking Urho scene nodes to Tundra components for raycasting
+    static StringHash componentLink;
+
 private:
     /// Handle frame update. Used for entity visibility tracking
     void OnUpdated(float timeStep);

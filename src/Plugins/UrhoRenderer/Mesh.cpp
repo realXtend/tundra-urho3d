@@ -112,6 +112,11 @@ void Mesh::UpdateSignals()
     {
         Urho3D::Scene* urhoScene = world_->UrhoScene();
         adjustmentNode_ = urhoScene->CreateChild("AdjustmentNode");
+        
+        // Make the entity & component links for identifying raycasts
+        adjustmentNode_->SetVar(GraphicsWorld::entityLink, Variant(WeakPtr<RefCounted>(parent)));
+        adjustmentNode_->SetVar(GraphicsWorld::componentLink, Variant(WeakPtr<RefCounted>(this)));
+
         mesh_ = adjustmentNode_->CreateComponent<Urho3D::AnimatedModel>();
         meshAsset->Loaded.Connect(this, &Mesh::OnMeshAssetLoaded);
     }

@@ -9,6 +9,9 @@
 #include "ConfigAPI.h"
 #include "FrameAPI.h"
 #include "LoggingFunctions.h"
+#include "Camera.h"
+#include "Placeable.h"
+#include "Framework.h"
 #include "Math/Transform.h"
 #include "Math/Color.h"
 
@@ -23,14 +26,20 @@
 #include <Geometry/Circle.h>
 #include <Geometry/Sphere.h>
 
+#include <Input.h>
 #include <Profiler.h>
 #include <Engine/Scene/Scene.h>
+#include <Engine/Graphics/Camera.h>
 #include <Engine/Graphics/DebugRenderer.h>
 #include <Engine/Graphics/Octree.h>
+#include <Engine/Graphics/OctreeQuery.h>
 #include <Engine/Graphics/Zone.h>
 
 namespace Tundra
 {
+
+StringHash GraphicsWorld::entityLink("ENTITY");
+StringHash GraphicsWorld::componentLink("COMPONENT");
 
 GraphicsWorld::GraphicsWorld(UrhoRenderer* owner, Scene* scene) :
     Object(owner->GetContext()),
@@ -48,11 +57,23 @@ GraphicsWorld::GraphicsWorld(UrhoRenderer* owner, Scene* scene) :
     /// \todo The octree size is not adjusted yet, so objects outside the default octree range always end up in the root octqant
     zone->SetBoundingBox(Urho3D::BoundingBox(-100000.0f, 100000.0f));
     zone->SetAmbientColor(DefaultSceneAmbientLightColor());
+    
+    SetDefaultSceneFog();
+
+    // Connect to frame update to handle time-based update
+    framework_->Frame()->Updated.Connect(this, &GraphicsWorld::OnUpdated);
 }
 
 GraphicsWorld::~GraphicsWorld()
 {
     urhoScene_.Reset();
+}
+
+void GraphicsWorld::OnUpdated(float /*timeStep*/)
+{
+    PROFILE(GraphicsWorld_OnUpdated);
+
+    /// \todo Implement visibility tracking
 }
 
 Color GraphicsWorld::DefaultSceneAmbientLightColor()
@@ -62,12 +83,12 @@ Color GraphicsWorld::DefaultSceneAmbientLightColor()
 
 void GraphicsWorld::SetDefaultSceneFog()
 {
-    /*
-    if (sceneManager_)
-        sceneManager_->setFog(Ogre::FOG_LINEAR, Ogre::ColourValue::White, 0.001f, 2000.0f, 4000.0f);
-    if (renderer_->MainViewport())
-        renderer_->MainViewport()->setBackgroundColour(Color::Black);
-    */
+    Urho3D::Zone* zone = UrhoZone();
+    if (!zone)
+        return;
+    zone->SetFogStart(2000.0f);
+    zone->SetFogEnd(4000.0f);
+    zone->SetFogColor(Urho3D::Color::BLACK);
 }
 
 RayQueryResult GraphicsWorld::Raycast(int x, int y)
@@ -92,16 +113,17 @@ RayQueryResult GraphicsWorld::Raycast(const Ray& ray, unsigned layerMask)
 
 RayQueryResult GraphicsWorld::Raycast(int x, int y, unsigned layerMask, float maxDistance)
 {
-    /// \todo Implement
-    /*
     int width = renderer_->WindowWidth();
     int height = renderer_->WindowHeight();
 
     float screenx = x / (float)width;
     float screeny = y / (float)height;
-    */
 
     Ray ray;
+    Camera* camera = renderer_->MainCameraComponent();
+    if (camera && camera->UrhoCamera())
+        ray = camera->UrhoCamera()->GetScreenRay(screenx, screeny);
+
     RaycastInternal(ray, layerMask, maxDistance, false);
 
     // Return the closest hit, or a cleared raycastresult if no hits
@@ -138,15 +160,17 @@ Vector<RayQueryResult> GraphicsWorld::RaycastAll(const Ray& ray, unsigned layerM
 
 Vector<RayQueryResult> GraphicsWorld::RaycastAll(int x, int y, unsigned layerMask, float maxDistance)
 {
-    /// \todo Implement
-    /*
     int width = renderer_->WindowWidth();
     int height = renderer_->WindowHeight();
 
     float screenx = x / (float)width;
     float screeny = y / (float)height;
-    */
+
     Ray ray;
+    Camera* camera = renderer_->MainCameraComponent();
+    if (camera && camera->UrhoCamera())
+        ray = camera->UrhoCamera()->GetScreenRay(screenx, screeny);
+
     RaycastInternal(ray, layerMask, maxDistance, true);
     
     return rayHits_;
@@ -163,18 +187,46 @@ void GraphicsWorld::RaycastInternal(const Ray& ray, unsigned layerMask, float ma
 {
     PROFILE(GraphicsWorld_Raycast);
     
-    /// \todo Implement
     rayHits_.Clear();
+
+    Urho3D::PODVector<Urho3D::RayQueryResult> result;
+    Urho3D::Octree* octree = urhoScene_->GetComponent<Urho3D::Octree>();
+    Urho3D::RayOctreeQuery query(result, ray, Urho3D::RAY_TRIANGLE, maxDistance, Urho3D::DRAWABLE_GEOMETRY);
+    octree->Raycast(query);
+
+    for (Urho3D::PODVector<Urho3D::RayQueryResult>::ConstIterator i = result.Begin(); i != result.End(); ++i)
+    {
+        if (!i->node_)
+            continue;
+        Entity* entity = static_cast<Entity*>(i->node_->GetVar(entityLink).GetPtr());
+        if (!entity)
+            continue; // Not a drawable associated with Tundra entity
+        Placeable* placeable = entity->Component<Placeable>();
+        if (placeable && (placeable->selectionLayer.Get() & layerMask) == 0)
+            continue;
+        IComponent* component = static_cast<IComponent*>(i->node_->GetVar(componentLink).GetPtr());
+        
+        RayQueryResult res;
+        res.component = component;
+        res.entity = entity;
+        res.pos = i->position_;
+        res.normal = i->normal_;
+        /// \todo Fill the rest, like submesh information
+
+        rayHits_.Push(res);
+        if (!getAllResults)
+            break;
+    }
 }
 
-EntityVector GraphicsWorld::FrustumQuery(Urho3D::IntRect &viewrect) const
+EntityVector GraphicsWorld::FrustumQuery(Urho3D::IntRect & /*viewrect*/) const
 {
     PROFILE(GraphicsWorld_FrustumQuery);
     /// \todo Implement
     return EntityVector();
 }
 
-bool GraphicsWorld::IsEntityVisible(Entity* entity) const
+bool GraphicsWorld::IsEntityVisible(Entity* /*entity*/) const
 {
     /// \todo Implement
     return false;
@@ -189,13 +241,6 @@ EntityVector GraphicsWorld::VisibleEntities() const
 {
     /// \todo Implement
     return EntityVector();
-}
-
-void GraphicsWorld::OnUpdated(float timeStep)
-{
-    PROFILE(GraphicsWorld_OnUpdated);
-
-    /// \todo Implement visibility tracking
 }
 
 void GraphicsWorld::DebugDrawAABB(const AABB &aabb, const Color &clr, bool depthTest)
@@ -351,11 +396,11 @@ void GraphicsWorld::DebugDrawCamera(const float3x4 &t, float size, const Color &
     DebugDrawOBB(obb2, clr, depthTest);
 }
 
-void GraphicsWorld::DebugDrawSoundSource(const float3 &soundPos, float soundInnerRadius, float soundOuterRadius, const Color &clr, bool depthTest)
+void GraphicsWorld::DebugDrawSoundSource(const float3 &soundPos, float soundInnerRadius, float soundOuterRadius, const Color & /*clr*/, bool depthTest)
 {
     // Draw three concentric diamonds as a visual cue
     for (int i = 2; i < 5; ++i)
-        DebugDrawSphere(soundPos, i/3.f, 24, i==2?1:0, i==3?1:0, i==4?1:0, depthTest);
+        DebugDrawSphere(soundPos, i/3.f, 24, i==2?1.0f:0.0f, i==3?1.0f:0.0f, i==4?1.0f:0.0f, depthTest);
 
     DebugDrawSphere(soundPos, soundInnerRadius, 384, 1, 0, 0, depthTest);
     DebugDrawSphere(soundPos, soundOuterRadius, 384, 0, 1, 0, depthTest);
