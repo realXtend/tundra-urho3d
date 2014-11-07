@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Profiler.h"
 #include "LoggingFunctions.h"
 #include "OgreMeshAsset.h"
-#include "OgreStructs.h"
+#include "OgreMeshDefines.h"
 
 #include <Model.h>
 #include <Profiler.h>

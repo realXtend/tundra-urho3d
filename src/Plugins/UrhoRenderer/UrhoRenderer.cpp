@@ -15,11 +15,12 @@
 #include "SceneAPI.h"
 #include "AssetAPI.h"
 #include "Entity.h"
-#include "UrhoMeshAsset.h"
-#include "OgreMeshAsset.h"
-#include "TextureAsset.h"
 #include "Scene/Scene.h"
 #include "LoggingFunctions.h"
+
+#include "TextureAsset.h"
+#include "UrhoMeshAsset.h"
+#include "Ogre/OgreMeshAsset.h"
 #include "GenericAssetFactory.h"
 
 #include <Engine/Graphics/Camera.h>

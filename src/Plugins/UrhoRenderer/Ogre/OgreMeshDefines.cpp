@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "StableHeaders.h"
-#include "OgreStructs.h"
+#include "OgreMeshDefines.h"
 #include "CoreDefines.h"
 #include "LoggingFunctions.h"
 #include "Math/float3x3.h"

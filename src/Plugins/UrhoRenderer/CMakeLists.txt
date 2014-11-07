@@ -5,6 +5,8 @@ init_target(UrhoRenderer OUTPUT Plugins)
 file(GLOB CPP_FILES *.cpp)
 file(GLOB H_FILES *.h)
 
+AddSourceFolder(Ogre)
+
 set (SOURCE_FILES ${CPP_FILES} ${H_FILES})
 
 add_definitions(-DURHO_MODULE_EXPORTS)
