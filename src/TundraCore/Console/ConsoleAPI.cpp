@@ -5,11 +5,10 @@
     @brief  Console core API. */
 
 #include "StableHeaders.h"
-
+#include "Win.h"
 #include "ConsoleAPI.h"
 #include "Framework.h"
 #include "FrameAPI.h"
-#include "Win.h"
 
 #include <CoreEvents.h>
 #include <EngineEvents.h>

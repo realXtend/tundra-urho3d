@@ -7,7 +7,7 @@
 #include "PluginAPI.h"
 #include "ConfigAPI.h"
 #include "SceneAPI.h"
-#include "ConsoleAPI.h"
+#include "Console/ConsoleAPI.h"
 #include "AssetAPI.h"
 #include "AssetCache.h"
 #include "LocalAssetProvider.h"

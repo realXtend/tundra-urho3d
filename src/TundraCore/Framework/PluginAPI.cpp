@@ -1,21 +1,20 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
+#include "Win.h"
 #include "PluginAPI.h"
-#include "ConsoleAPI.h"
+#include "Console/ConsoleAPI.h"
 #include "Framework.h"
 #include "LoggingFunctions.h"
-
-#ifdef WIN32
-#include "Win.h"
-#else
-#include <dlfcn.h>
-#endif
 
 #include <File.h>
 #include <FileSystem.h>
 #include <ProcessUtils.h>
 #include <XMLFile.h>
+
+#ifndef WIN32
+#include <dlfcn.h>
+#endif
 
 using namespace Urho3D;
 

@@ -5,11 +5,10 @@
     @brief  Tundra logging utility functions. */
 
 #include "StableHeaders.h"
-
+#include "Win.h"
 #include "LoggingFunctions.h"
 #include "Framework.h"
-#include "ConsoleAPI.h"
-#include "Win.h"
+#include "Console/ConsoleAPI.h"
 
 #include <Engine/Core/ProcessUtils.h>
 
