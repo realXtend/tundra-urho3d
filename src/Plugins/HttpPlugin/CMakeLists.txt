@@ -7,7 +7,7 @@ init_target(HttpPlugin OUTPUT Plugins)
 # Define source files
 file(GLOB CPP_FILES *.cpp)
 file(GLOB H_FILES *.h)
-file(GLOB C_FILES *.h)
+file(GLOB C_FILES *.c)
 
 AddSourceFolder(HttpAsset)
 AddSourceFolder(HttpParser)
