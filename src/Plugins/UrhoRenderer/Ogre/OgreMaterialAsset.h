@@ -20,7 +20,7 @@ public:
     /// IAsset override.
     bool DeserializeFromData(const u8 *data_, uint numBytes, bool allowAsynchronous) override;
     /// IAsset override.
-    Vector<AssetReference> OgreMaterialAsset::FindReferences() const override;
+    Vector<AssetReference> FindReferences() const override;
     /// IAsset override.
     void DependencyLoaded(AssetPtr dependee) override;
 

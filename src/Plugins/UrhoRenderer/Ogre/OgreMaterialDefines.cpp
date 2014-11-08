@@ -23,7 +23,7 @@ MaterialBlock::MaterialBlock(MaterialBlock *parent_, MaterialPart part_, int t, 
 
 MaterialBlock::~MaterialBlock()
 {
-    for(int i=0; i<blocks.Size(); ++i)
+    for(uint i=0; i<blocks.Size(); ++i)
         delete blocks[i];
     blocks.Clear();
 }
@@ -63,7 +63,7 @@ MaterialBlock *MaterialBlock::Technique(uint index) const
 {
     foreach(MaterialBlock *block, blocks)
     {
-        if (block->part == MP_Technique && block->technique == index)
+        if (block->part == MP_Technique && block->technique == static_cast<int>(index))
             return block;
     }
     return nullptr;
@@ -73,7 +73,7 @@ MaterialBlock *MaterialBlock::Pass(uint index) const
 {
     foreach(MaterialBlock *block, blocks)
     {
-        if (block->part == MP_Pass && block->pass == index)
+        if (block->part == MP_Pass && block->pass == static_cast<int>(index))
             return block;
     }
     return nullptr;
@@ -83,7 +83,7 @@ MaterialBlock *MaterialBlock::TextureUnit(uint index) const
 {
     foreach(MaterialBlock *block, blocks)
     {
-        if (block->part == MP_TextureUnit && block->textureUnit == index)
+        if (block->part == MP_TextureUnit && block->textureUnit == static_cast<int>(index))
             return block;
     }
     return nullptr;
