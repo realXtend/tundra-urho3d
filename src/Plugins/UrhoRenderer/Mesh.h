@@ -124,6 +124,15 @@ private:
     /// Mesh asset has been loaded
     void OnMeshAssetLoaded(AssetPtr asset);
 
+    /// Material asset refs changed.
+    void OnMaterialAssetRefsChanged(const AssetReferenceList &materialRefs);
+
+    /// Material asset load failed.
+    void OnMaterialAssetFailed(int index, IAssetTransfer *transfer, String error);
+
+    /// Material asset has been loaded.
+    void OnMaterialAssetLoaded(int index, AssetPtr asset);
+
     /// Adjustment scene node (scaling/offset/orientation modifications)
     SharedPtr<Urho3D::Node> adjustmentNode_;
     /// Urho mesh component. Always an AnimatedModel; this does not hurt in case the model is non-skeletal instead
@@ -135,8 +144,11 @@ private:
     /// Graphics world ptr
     GraphicsWorldWeakPtr world_;
 
-    /// Manages mesh asset requests for EC_Mesh.
-    AssetRefListenerPtr meshAsset;
+    /// Manages mesh asset requests.
+    AssetRefListenerPtr meshRefListener_;
+
+    /// Manager material asset requests.
+    AssetRefListListenerPtr materialRefListListener_;
 };
 
 COMPONENT_TYPEDEFS(Mesh)

@@ -2,6 +2,7 @@
 
 #include "StableHeaders.h"
 #include "Mesh.h"
+#include "Framework.h"
 #include "GraphicsWorld.h"
 #include "Placeable.h"
 #include "Scene/Scene.h"
@@ -9,6 +10,7 @@
 #include "LoggingFunctions.h"
 #include "AssetRefListener.h"
 #include "IMeshAsset.h"
+#include "IMaterialAsset.h"
 
 #include <Engine/Scene/Scene.h>
 #include <Engine/Scene/Node.h>
@@ -37,7 +39,6 @@ Mesh::Mesh(Urho3D::Context* context, Scene* scene) :
     static AttributeMetadata materialMetadata;
     materialMetadata.elementType = "AssetReference";
     materialRefs.SetMetadata(&materialMetadata);
-    meshAsset = new AssetRefListener();
 
     ParentEntitySet.Connect(this, &Mesh::UpdateSignals);
 }
@@ -101,6 +102,9 @@ void Mesh::UpdateSignals()
     // If scene is not view-enabled, no further action
     if (!ViewEnabled())
         return;
+
+    meshRefListener_ = new AssetRefListener();
+    materialRefListListener_ = new AssetRefListListener(framework->Asset());
     
     parent->ComponentAdded.Connect(this, &Mesh::OnComponentStructureChanged);
     parent->ComponentRemoved.Connect(this, &Mesh::OnComponentStructureChanged);
@@ -118,7 +122,12 @@ void Mesh::UpdateSignals()
         adjustmentNode_->SetVar(GraphicsWorld::componentLink, Variant(WeakPtr<RefCounted>(this)));
 
         mesh_ = adjustmentNode_->CreateComponent<Urho3D::AnimatedModel>();
-        meshAsset->Loaded.Connect(this, &Mesh::OnMeshAssetLoaded);
+
+        // Connect ref listeners
+        meshRefListener_->Loaded.Connect(this, &Mesh::OnMeshAssetLoaded);
+        materialRefListListener_->Changed.Connect(this, &Mesh::OnMaterialAssetRefsChanged);
+        materialRefListListener_->Failed.Connect(this, &Mesh::OnMaterialAssetFailed);
+        materialRefListListener_->Loaded.Connect(this, &Mesh::OnMaterialAssetLoaded);
     }
 
     // Make sure we attach to the Placeable if exists.
@@ -191,15 +200,18 @@ void Mesh::AttributesChanged()
         adjustmentNode_->SetRotation(newTransform.Orientation());
         adjustmentNode_->SetScale(newTransform.scale);
     }
-    if (meshRef.ValueChanged())
+    if (meshRef.ValueChanged() && meshRefListener_)
     {
+        /// @todo Why is this warning here? Pretty normal to clear mesh ref...
         if (meshRef.Get().ref.Trimmed().Empty())
             LogDebug("Warning: Mesh \"" + this->parentEntity->Name() + "\" mesh ref was set to an empty reference!");
-        meshAsset->HandleAssetRefChange(&meshRef);
+        meshRefListener_->HandleAssetRefChange(&meshRef);
     }
-    if (materialRefs.ValueChanged())
+    if (materialRefs.ValueChanged() && materialRefListListener_)
     {
-        /// \todo Implement
+        /* Let the listener resolve and cleanup the refs, while us keeping the originals intact.
+           Changes are handled in OnMaterialAssetRefsChanged/Failed/Loaded. */
+        materialRefListListener_->HandleChange(materialRefs.Get());
     }
     if (skeletonRef.ValueChanged())
     {
@@ -209,15 +221,79 @@ void Mesh::AttributesChanged()
 
 void Mesh::OnMeshAssetLoaded(AssetPtr asset)
 {
-    IMeshAsset* meshAsset = dynamic_cast<IMeshAsset*>(asset.Get());
-    if (!meshAsset)
+    IMeshAsset* mAsset = dynamic_cast<IMeshAsset*>(asset.Get());
+    if (!mAsset)
     {
-        LogError(String("Mesh::CreateMesh: Mesh asset load finished for '" + asset->Name() + "', but downloaded asset was not of type IMeshAsset!"));
+        LogErrorF("Mesh: Mesh asset load finished for '%s', but downloaded asset was not of type IMeshAsset!", asset->Name().CString());
         return;
     }
 
-    if (meshAsset && mesh_)
-        mesh_->SetModel(meshAsset->UrhoModel());
+    if (mesh_)
+    {
+        mesh_->SetModel(mAsset->UrhoModel());
+
+        // Apply all materials that have been loaded so far.
+        // OnMaterialAssetLoaded will do the right thing once model has been set.
+        Vector<AssetPtr> materialAssets = materialRefListListener_->Assets();
+        for(uint mi=0; mi<materialAssets.Size(); ++mi)
+        {
+            AssetPtr &materialAssetPtr = materialAssets[mi];
+            IMaterialAsset *materialAsset = dynamic_cast<IMaterialAsset*>(materialAssetPtr.Get());
+            if (materialAsset && materialAsset->IsLoaded())
+            {
+                if (mi < mesh_->GetNumGeometries())
+                    mesh_->SetMaterial(mi, materialAsset->UrhoMaterial());
+                else
+                    LogWarningF("Mesh: Illegal submesh index %d for material %s. Target mesh %s has %d submeshes.", mi, materialAsset->Name().CString(), meshRef.Get().ref.CString(), mesh_->GetNumGeometries());
+            }
+        }
+    }
+    else
+        LogWarningF("Mesh: Model asset loaded but target mesh has not been created yet in %s", ParentEntity()->ToString().CString());
+}
+
+void Mesh::OnMaterialAssetRefsChanged(const AssetReferenceList &mRefs)
+{
+    if (!mesh_ || !mesh_->GetModel())
+        return;
+
+    for (uint gi=0; gi<mesh_->GetNumGeometries(); ++gi)
+    {
+        /** @todo Set empty material to these indexes!
+            For Lasse to fill.
+
+        if (gi >= mRefs.Size() || mRefs.refs[gi].ref.Empty())
+            mesh_->SetMaterial(index, <default_empty_material> or nullptr?);
+        */
+    }
+}
+
+void Mesh::OnMaterialAssetFailed(int index, IAssetTransfer* /*transfer*/, String /*error*/)
+{
+    /** @todo Set error material to these indexes!
+        For Lasse to fill.
+
+    if (mesh_ && mesh_->GetModel())
+        mesh_->SetMaterial(index, <default_error_material>);
+    */
+}
+
+void Mesh::OnMaterialAssetLoaded(int index, AssetPtr asset)
+{
+    IMaterialAsset* mAsset = dynamic_cast<IMaterialAsset*>(asset.Get());
+    if (!mAsset)
+    {
+        LogErrorF("Mesh: Material asset load finished for '%s', but downloaded asset was not of type IMaterialAsset!", asset->Name().CString());
+        return;
+    }
+
+    if (mesh_ && mesh_->GetModel())
+    {
+        if (index < mesh_->GetNumGeometries())
+            mesh_->SetMaterial(index, mAsset->UrhoMaterial());
+        else
+            LogWarningF("Mesh: Illegal submesh index %d for material %s. Target mesh %s has %d submeshes.", index, mAsset->Name().CString(), meshRef.Get().ref.CString(), mesh_->GetNumGeometries());
+    }
 }
 
 }

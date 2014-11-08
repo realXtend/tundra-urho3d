@@ -56,6 +56,9 @@ typedef SharedPtr<IAssetBundleTypeFactory> AssetBundleTypeFactoryPtr;
 class AssetRefListener;
 typedef SharedPtr<AssetRefListener> AssetRefListenerPtr;
 
+class AssetRefListListener;
+typedef SharedPtr<AssetRefListListener> AssetRefListListenerPtr;
+
 class Framework;
 class BinaryAsset;
 typedef SharedPtr<BinaryAsset> BinaryAssetPtr;

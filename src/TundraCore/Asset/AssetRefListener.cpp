@@ -16,6 +16,8 @@
 namespace Tundra
 {
 
+// AssetRefListener
+
 AssetRefListener::AssetRefListener() : 
     myAssetAPI(0), 
     currentWaitingRef("")
@@ -159,6 +161,137 @@ void AssetRefListener::EmitLoaded(float /*time*/)
     AssetPtr currentAsset = asset.Lock();
     if (currentAsset.Get())
         Loaded.Emit(currentAsset);
+}
+
+// AssetRefListListener
+
+AssetRefListListener::AssetRefListListener(AssetAPI *assetAPI) :
+    assetAPI_(assetAPI)
+{
+    if (!assetAPI_)
+        LogError("AssetRefListListener: Null AssetAPI* given to ctor!");
+}
+
+void AssetRefListListener::HandleChange(const AssetReferenceList &refs)
+{
+    if (!assetAPI_)
+        return;
+
+    // Does a size check and compares each element with case-sensitive compare.
+    if (refs == current_)
+        return;
+
+    AssetReferenceList prev = current_;
+    AssetReferenceList in = refs;
+
+    // Set current internal refs
+    current_ = refs;
+    uint numRefs = current_.Size();
+
+    // Trim and resolve internal refs
+    for (uint i=0; i<numRefs; ++i)
+    {
+        AssetReference &ref = current_.refs[i];
+        ref.ref = ref.ref.Trimmed();
+        if (!ref.ref.Empty())
+            ref.ref = assetAPI_->ResolveAssetRef("", ref.ref);
+    }
+
+    // Changed
+    Changed.Emit(current_);
+
+    // Cleared
+    for (uint i=0; i<numRefs; ++i)
+    {
+        const AssetReference &ref = current_.refs[i];
+        const AssetReference &prevRef = (i < prev.Size() ? prev.refs[i] : AssetReference());
+        if (ref.ref.Empty() && !prevRef.ref.Empty())
+            Cleared.Emit(static_cast<int>(i));
+    }
+    for (uint i=numRefs; i<prev.Size(); ++i)
+        Cleared.Emit(static_cast<int>(i));
+
+    // Request
+    while(listeners_.Size() > numRefs)
+        listeners_.Pop();
+    while(listeners_.Size() < numRefs)
+    {
+        // Connect to signals once on creation. AssetRefListeners
+        // are reusable for multiple refs/requests.
+        AssetRefListenerPtr listener(new AssetRefListener());
+        listener->TransferFailed.Connect(this, &AssetRefListListener::OnAssetFailed);
+        listener->Loaded.Connect(this, &AssetRefListListener::OnAssetLoaded);
+        listeners_.Push(listener);
+    }
+    for (uint i=0; i<numRefs; ++i)
+    {
+        const AssetReference &ref = current_.refs[i];
+        if (!ref.ref.Empty())
+            listeners_[i]->HandleAssetRefChange(assetAPI_, ref.ref, ref.type);
+    }
+}
+
+Vector<AssetPtr> AssetRefListListener::Assets() const
+{
+    Vector<AssetPtr> assets;
+    for (uint i=0; i<current_.Size(); ++i)
+    {
+        const AssetReference &ref = current_.refs[i];
+        if (!ref.ref.Empty())
+            assets.Push(assetAPI_->FindAsset(ref.ref));
+        else
+            assets.Push(AssetPtr());
+    }
+    return assets;
+}
+
+AssetPtr AssetRefListListener::Asset(int index) const
+{
+    if (index < current_.Size() && !current_.refs[index].ref.Empty())
+        return assetAPI_->FindAsset(current_.refs[index].ref);
+    return AssetPtr();
+}
+
+void AssetRefListListener::OnAssetFailed(IAssetTransfer *transfer, String reason)
+{
+    if (!transfer)
+        return;
+
+    bool signaled = false;
+    String failedRef = transfer->SourceUrl();
+    for (uint i=0; i<current_.Size(); ++i)
+    {
+        const AssetReference &ref = current_.refs[i];
+        if (ref.ref.Compare(failedRef) == 0)
+        {
+            // Don't break/return. Same asset might be in multiple indexes!
+            Failed.Emit(static_cast<int>(i), transfer, reason);
+            signaled = true;
+        }
+    }
+    if (!signaled)
+        LogWarning("AssetRefListListener: Failed to signal completion of " + failedRef + ". The asset ref is unknown to the local state.");
+}
+
+void AssetRefListListener::OnAssetLoaded(AssetPtr asset)
+{
+    if (!asset)
+        return;
+
+    bool signaled = false;
+    String completedRef = asset->Name();
+    for (uint i=0; i<current_.Size(); ++i)
+    {
+        const AssetReference &ref = current_.refs[i];
+        if (ref.ref.Compare(completedRef) == 0)
+        {
+            // Don't break/return. Same asset might be in multiple indexes!
+            Loaded.Emit(static_cast<int>(i), asset);
+            signaled = true;
+        }
+    }
+    if (!signaled)
+        LogWarning("AssetRefListListener: Failed to signal completion of " + completedRef + ". The asset ref is unknown to the local state.");
 }
 
 }
