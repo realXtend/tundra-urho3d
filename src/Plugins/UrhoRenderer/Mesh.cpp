@@ -268,7 +268,7 @@ void Mesh::OnMaterialAssetRefsChanged(const AssetReferenceList &mRefs)
     }
 }
 
-void Mesh::OnMaterialAssetFailed(int index, IAssetTransfer* /*transfer*/, String /*error*/)
+void Mesh::OnMaterialAssetFailed(uint index, IAssetTransfer* /*transfer*/, String /*error*/)
 {
     /** @todo Set error material to these indexes!
         For Lasse to fill.
@@ -278,7 +278,7 @@ void Mesh::OnMaterialAssetFailed(int index, IAssetTransfer* /*transfer*/, String
     */
 }
 
-void Mesh::OnMaterialAssetLoaded(int index, AssetPtr asset)
+void Mesh::OnMaterialAssetLoaded(uint index, AssetPtr asset)
 {
     IMaterialAsset* mAsset = dynamic_cast<IMaterialAsset*>(asset.Get());
     if (!mAsset)

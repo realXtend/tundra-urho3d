@@ -128,10 +128,10 @@ private:
     void OnMaterialAssetRefsChanged(const AssetReferenceList &materialRefs);
 
     /// Material asset load failed.
-    void OnMaterialAssetFailed(int index, IAssetTransfer *transfer, String error);
+    void OnMaterialAssetFailed(uint index, IAssetTransfer *transfer, String error);
 
     /// Material asset has been loaded.
-    void OnMaterialAssetLoaded(int index, AssetPtr asset);
+    void OnMaterialAssetLoaded(uint index, AssetPtr asset);
 
     /// Adjustment scene node (scaling/offset/orientation modifications)
     SharedPtr<Urho3D::Node> adjustmentNode_;

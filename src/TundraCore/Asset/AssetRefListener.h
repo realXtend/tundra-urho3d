@@ -74,19 +74,19 @@ public:
     Vector<AssetPtr> Assets() const;
 
     /// Returns Asset for index.
-    AssetPtr Asset(int index) const;
+    AssetPtr Asset(uint index) const;
 
     /// Emitted when list changes.
     Signal1<const AssetReferenceList&> Changed;
 
     /// Emitted when a previously non-empty index was cleared to a empty string.
     /** @note Fired after Changed. */
-    Signal1<int> Cleared;
+    Signal1<uint> Cleared;
 
     /// Corresponding AssetRefListener signals with additional asset index.
     //Signal2<int, IAssetTransfer*> Downloaded; /// @todo Implement when there is need for this
-    Signal2<int, AssetPtr> Loaded;
-    Signal3<int, IAssetTransfer*, String> Failed;
+    Signal2<uint, AssetPtr> Loaded;
+    Signal3<uint, IAssetTransfer*, String> Failed;
 
 private:
     void OnAssetFailed(IAssetTransfer *transfer, String reason);
