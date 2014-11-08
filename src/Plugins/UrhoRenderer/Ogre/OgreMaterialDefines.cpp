@@ -171,7 +171,7 @@ bool MaterialParser::Parse(const char *data_, uint lenght_)
 void MaterialParser::Advance()
 {
     uint endPos = data.Find('\n', pos);
-    if (endPos == String::NPOS || endPos <= pos)
+    if (endPos == String::NPOS || endPos < pos)
     {
         pos = String::NPOS;
         return;
@@ -184,7 +184,7 @@ void MaterialParser::Advance()
 void MaterialParser::SkipBlock()
 {
     uint endPos = data.Find('}', pos);
-    if (endPos == String::NPOS || endPos <= pos)
+    if (endPos == String::NPOS || endPos < pos)
     {
         state.error = Urho3D::ToString("Failed to find Block scope end '}', started looking from index %d", pos);
         pos = String::NPOS;
