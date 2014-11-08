@@ -189,14 +189,20 @@ Ray Camera::ViewportPointToRay(float x, float y) const
     if (fabs(x) >= 10.f || fabs(y) >= 10.f || !IsFinite(x) || !IsFinite(y))
         LogError("Camera::ViewportPointToRay takes input (x,y) coordinates normalized in the range [0,1]! (You inputted x=" + String(x) + ", y=" + String(y));
 
-    /// \todo Implement
-    return Ray();
+    if (camera_)
+        return camera_->GetScreenRay(x, y);
+    else
+        return Ray();
 }
 
 Ray Camera::ScreenPointToRay(uint x, uint y) const
 {
-    /// \todo Implement
-    return Ray();
+    Urho3D::Graphics* graphics = GetSubsystem<Urho3D::Graphics>();
+
+    if (graphics && camera_)
+        return camera_->GetScreenRay((float)x / (float)graphics->GetWidth(), (float)y / (float)graphics->GetHeight());
+    else
+        return Ray();
 }
 
 void Camera::UpdateSignals()

@@ -26,13 +26,16 @@
 #include <Geometry/Circle.h>
 #include <Geometry/Sphere.h>
 
-#include <Input.h>
 #include <Profiler.h>
 #include <Engine/Scene/Scene.h>
 #include <Engine/Graphics/Camera.h>
 #include <Engine/Graphics/DebugRenderer.h>
+#include <Engine/Graphics/Drawable.h>
 #include <Engine/Graphics/Octree.h>
 #include <Engine/Graphics/OctreeQuery.h>
+#include <Engine/Graphics/Renderer.h>
+#include <Engine/Graphics/View.h>
+#include <Engine/Graphics/Viewport.h>
 #include <Engine/Graphics/Zone.h>
 
 namespace Tundra
@@ -73,7 +76,62 @@ void GraphicsWorld::OnUpdated(float /*timeStep*/)
 {
     PROFILE(GraphicsWorld_OnUpdated);
 
-    /// \todo Implement visibility tracking
+    visibleEntities_.Clear();
+
+    Urho3D::Renderer* renderer = GetSubsystem<Urho3D::Renderer>();
+    Camera* cameraComp = renderer_->MainCameraComponent();
+
+    if (IsActive() && renderer)
+    {
+        Urho3D::Camera* cam = cameraComp ? cameraComp->UrhoCamera() : nullptr;
+        Urho3D::Viewport* vp = renderer->GetViewport(0);
+        Urho3D::View* view = vp ? vp->GetView() : nullptr;
+        if (view)
+        {
+            const Urho3D::PODVector<Urho3D::Drawable*>& geometries = view->GetGeometries();
+            for (uint i = 0; i < geometries.Size(); ++i)
+            {
+                // Verify that the geometry is in main camera view, as also eg. shadow geometries get listed
+                Urho3D::Drawable* dr = geometries[i];
+                if (!dr || !dr->IsInView(cam))
+                    continue;
+                EntityWeakPtr ent(static_cast<Entity*>(dr->GetNode()->GetVar(entityLink).GetPtr()));
+                if (!ent)
+                    continue;
+                
+                visibleEntities_.Insert(ent);
+            }
+        }
+    }
+
+    // Perform visibility change tracking
+    for (HashMap<EntityWeakPtr, bool>::Iterator i = visibilityTrackedEntities_.Begin(); i != visibilityTrackedEntities_.End();)
+    {
+        // Check whether entity has expired
+        if (!i->first_)
+            i = visibilityTrackedEntities_.Erase(i);
+        else
+        {
+            bool current = visibleEntities_.Contains(i->first_);
+            bool prev = i->second_;
+            if (current != prev)
+            {
+                i->second_ = current;
+                if (current)
+                {
+                    i->first_->EmitEnterView(cameraComp);
+                    EntityEnterView.Emit(i->first_.Get());
+                }
+                else
+                {
+                    i->first_->EmitLeaveView(cameraComp);
+                    EntityLeaveView.Emit(i->first_.Get());
+                }
+            }
+
+            ++i;
+        }
+    }
 }
 
 Color GraphicsWorld::DefaultSceneAmbientLightColor()
@@ -113,16 +171,10 @@ RayQueryResult GraphicsWorld::Raycast(const Ray& ray, unsigned layerMask)
 
 RayQueryResult GraphicsWorld::Raycast(int x, int y, unsigned layerMask, float maxDistance)
 {
-    int width = renderer_->WindowWidth();
-    int height = renderer_->WindowHeight();
-
-    float screenx = x / (float)width;
-    float screeny = y / (float)height;
-
     Ray ray;
     Camera* camera = renderer_->MainCameraComponent();
-    if (camera && camera->UrhoCamera())
-        ray = camera->UrhoCamera()->GetScreenRay(screenx, screeny);
+    if (camera)
+        ray = camera->ScreenPointToRay(x, y);
 
     RaycastInternal(ray, layerMask, maxDistance, false);
 
@@ -160,16 +212,10 @@ Vector<RayQueryResult> GraphicsWorld::RaycastAll(const Ray& ray, unsigned layerM
 
 Vector<RayQueryResult> GraphicsWorld::RaycastAll(int x, int y, unsigned layerMask, float maxDistance)
 {
-    int width = renderer_->WindowWidth();
-    int height = renderer_->WindowHeight();
-
-    float screenx = x / (float)width;
-    float screeny = y / (float)height;
-
     Ray ray;
     Camera* camera = renderer_->MainCameraComponent();
-    if (camera && camera->UrhoCamera())
-        ray = camera->UrhoCamera()->GetScreenRay(screenx, screeny);
+    if (camera)
+        ray = camera->ScreenPointToRay(x, y);
 
     RaycastInternal(ray, layerMask, maxDistance, true);
     
@@ -219,28 +265,82 @@ void GraphicsWorld::RaycastInternal(const Ray& ray, unsigned layerMask, float ma
     }
 }
 
-EntityVector GraphicsWorld::FrustumQuery(Urho3D::IntRect & /*viewrect*/) const
+EntityVector GraphicsWorld::FrustumQuery(const Urho3D::IntRect &viewrect) const
 {
     PROFILE(GraphicsWorld_FrustumQuery);
-    /// \todo Implement
-    return EntityVector();
+    
+    EntityVector ret;
+    Camera* cameraComp = renderer_->MainCameraComponent();
+    if (!cameraComp || cameraComp->ParentScene() != scene_)
+        return ret;
+     Urho3D::Camera* cam = cameraComp->UrhoCamera();
+     if (!cam)
+        return ret;
+
+    int width = renderer_->WindowWidth();
+    int height = renderer_->WindowHeight();
+    float w = (float)width;
+    float h = (float)height;
+    float left = (float)(viewrect.left_) / w, right = (float)(viewrect.right_) / w;
+    float top = (float)(viewrect.top_) / h, bottom = (float)(viewrect.bottom_) / h;
+    if (left > right) std::swap(left, right);
+    if (top > bottom) std::swap(top, bottom);
+    // don't do selection if box is too small
+    if ((right - left) * (bottom - top) < 0.0001)
+        return ret;
+
+    Urho3D::Frustum fr;
+    fr.vertices_[0] = cam->ScreenToWorldPoint(Urho3D::Vector3(right, top, cam->GetNearClip()));
+    fr.vertices_[1] = cam->ScreenToWorldPoint(Urho3D::Vector3(right, bottom, cam->GetNearClip()));
+    fr.vertices_[2] = cam->ScreenToWorldPoint(Urho3D::Vector3(left, bottom, cam->GetNearClip()));
+    fr.vertices_[3] = cam->ScreenToWorldPoint(Urho3D::Vector3(left, top, cam->GetNearClip()));
+    fr.vertices_[4] = cam->ScreenToWorldPoint(Urho3D::Vector3(right, top, cam->GetFarClip()));
+    fr.vertices_[5] = cam->ScreenToWorldPoint(Urho3D::Vector3(right, bottom, cam->GetFarClip()));
+    fr.vertices_[6] = cam->ScreenToWorldPoint(Urho3D::Vector3(left, bottom, cam->GetFarClip()));
+    fr.vertices_[7] = cam->ScreenToWorldPoint(Urho3D::Vector3(left, top, cam->GetFarClip()));
+    fr.UpdatePlanes();
+
+    Urho3D::PODVector<Urho3D::Drawable*> result;
+    Urho3D::FrustumOctreeQuery query(result, fr, Urho3D::DRAWABLE_GEOMETRY);
+    urhoScene_->GetComponent<Urho3D::Octree>()->GetDrawables(query);
+
+    for (Urho3D::PODVector<Urho3D::Drawable*>::ConstIterator i = result.Begin(); i != result.End(); ++i)
+    {
+        Entity* entity = static_cast<Entity*>((*i)->GetNode()->GetVar(entityLink).GetPtr());
+        if (entity)
+            ret.Push(EntityPtr(entity));
+    }
+
+    return ret;
 }
 
-bool GraphicsWorld::IsEntityVisible(Entity* /*entity*/) const
+bool GraphicsWorld::IsEntityVisible(Entity* entity) const
 {
-    /// \todo Implement
-    return false;
+    return entity ? visibleEntities_.Contains(EntityWeakPtr(entity)) : false;
+}
+
+EntityVector GraphicsWorld::VisibleEntities() const
+{
+    EntityVector ret;
+
+    for (HashSet<EntityWeakPtr>::ConstIterator i = visibleEntities_.Begin(); i != visibleEntities_.End(); ++i)
+    {
+        if (*i)
+            ret.Push(i->Lock());
+    }
+
+    return ret;
+}
+
+bool GraphicsWorld::IsActive() const
+{
+    Entity* mainCamera = renderer_->MainCamera();
+    return mainCamera && mainCamera->ParentScene() == scene_;
 }
 
 Urho3D::Zone* GraphicsWorld::UrhoZone() const
 {
     return urhoScene_->GetComponent<Urho3D::Zone>();
-}
-
-EntityVector GraphicsWorld::VisibleEntities() const
-{
-    /// \todo Implement
-    return EntityVector();
 }
 
 void GraphicsWorld::DebugDrawAABB(const AABB &aabb, const Color &clr, bool depthTest)
@@ -404,6 +504,18 @@ void GraphicsWorld::DebugDrawSoundSource(const float3 &soundPos, float soundInne
 
     DebugDrawSphere(soundPos, soundInnerRadius, 384, 1, 0, 0, depthTest);
     DebugDrawSphere(soundPos, soundOuterRadius, 384, 0, 1, 0, depthTest);
+}
+
+void GraphicsWorld::StartViewTracking(Entity* entity)
+{
+    if (entity && entity->ParentScene() == scene_.Get())
+        visibilityTrackedEntities_[EntityWeakPtr(entity)] = IsEntityVisible(entity);
+}
+
+/// Stop tracking an entity's visibility
+void GraphicsWorld::StopViewTracking(Entity* entity)
+{
+    visibilityTrackedEntities_.Erase(EntityWeakPtr(entity));
 }
 
 }
