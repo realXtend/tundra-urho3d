@@ -35,7 +35,7 @@ bool MaterialBlock::IsSupported()
 
 uint MaterialBlock::NumChildren(MaterialPart part) const
 {
-    uint num;
+    uint num = 0;
     foreach(const MaterialBlock *block, blocks)
     {
         if (block->part == part)
@@ -113,7 +113,7 @@ uint MaterialBlock::Num(const StringHash &name) const
 {
     MaterialProperties::ConstIterator iter = properties.Find(name);
     if (iter != properties.End())
-        iter->second_.Size();
+        return iter->second_.Size();
     return 0;
 }
 
@@ -191,6 +191,7 @@ void MaterialParser::SkipBlock()
         return;
     }
     // There is a newline after found '}' advance over it.
+    pos = endPos + 1;
     Advance();
 }
 
