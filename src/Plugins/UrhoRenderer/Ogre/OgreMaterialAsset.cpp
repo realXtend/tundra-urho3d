@@ -52,7 +52,7 @@ bool OgreMaterialAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
             assetAPI->AssetLoadFailed(Name());
             return false;
         }
-        Ogre::MaterialBlock *tu   = (pass ? pass->TextureUnit(0) : 0);
+        Ogre::MaterialBlock *tu = (pass ? pass->TextureUnit(0) : 0);
         String textureRef = (tu ? tu->Value(Ogre::Material::TextureUnit::Texture) : "");
         // No textures.
         /// @todo Should this be a failure? Does urho have some suitable shader for solid color rendering via Ogre diffuse, ambient, specular and emissive.

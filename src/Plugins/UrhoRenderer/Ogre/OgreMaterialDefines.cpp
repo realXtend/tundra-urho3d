@@ -176,6 +176,13 @@ void MaterialParser::Advance()
         pos = String::NPOS;
         return;
     }
+    // Empty line with only \n at the start
+    else if (endPos == pos)
+    {
+        pos += 1;
+        line = "";
+        return;
+    }
     line = data.Substring(pos, endPos - pos - (data[endPos-1] == '\r' ? 1 : 0)).Trimmed();
     pos = endPos + 1;
     lineNum++;
