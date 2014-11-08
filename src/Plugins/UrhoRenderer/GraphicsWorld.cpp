@@ -273,7 +273,7 @@ EntityVector GraphicsWorld::FrustumQuery(const Urho3D::IntRect &viewrect) const
     Camera* cameraComp = renderer_->MainCameraComponent();
     if (!cameraComp || cameraComp->ParentScene() != scene_)
         return ret;
-     Urho3D::Camera* cam = cameraComp ? cameraComp->UrhoCamera() : nullptr;
+     Urho3D::Camera* cam = cameraComp->UrhoCamera();
      if (!cam)
         return ret;
 
