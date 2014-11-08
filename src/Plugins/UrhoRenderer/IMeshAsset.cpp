@@ -8,7 +8,7 @@
 #include "LoggingFunctions.h"
 #include "IMeshAsset.h"
 
-#include <Model.h>
+#include <Engine/Graphics/Model.h>
 
 namespace Tundra
 {

@@ -10,7 +10,8 @@
 namespace Tundra
 {
 
-/// Represents a mesh loaded to the GPU. Base class for varying format implementations (Urho mesh, Ogre mesh, Assimp mesh..)
+/// Represents a mesh loaded to the GPU.
+/** Base class for varying format implementations (Urho mesh, Ogre mesh, Assimp mesh etc.) */
 class URHO_MODULE_API IMeshAsset : public IAsset
 {
     OBJECT(IMeshAsset);

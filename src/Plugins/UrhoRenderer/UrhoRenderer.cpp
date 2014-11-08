@@ -21,6 +21,7 @@
 #include "TextureAsset.h"
 #include "UrhoMeshAsset.h"
 #include "Ogre/OgreMeshAsset.h"
+#include "Ogre/OgreMaterialAsset.h"
 #include "GenericAssetFactory.h"
 
 #include <Engine/Graphics/Camera.h>
@@ -64,6 +65,7 @@ void UrhoRenderer::Load()
 
     framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<UrhoMeshAsset>("UrhoMesh", ".mdl")));
     framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<OgreMeshAsset>("OgreMesh", ".mesh")));
+    framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<OgreMaterialAsset>("OgreMaterial", ".material")));
     framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<TextureAsset>("Texture", textureExtensions)));
 }
 
