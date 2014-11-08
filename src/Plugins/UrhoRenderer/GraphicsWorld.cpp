@@ -265,11 +265,53 @@ void GraphicsWorld::RaycastInternal(const Ray& ray, unsigned layerMask, float ma
     }
 }
 
-EntityVector GraphicsWorld::FrustumQuery(Urho3D::IntRect & /*viewrect*/) const
+EntityVector GraphicsWorld::FrustumQuery(const Urho3D::IntRect &viewrect) const
 {
     PROFILE(GraphicsWorld_FrustumQuery);
-    /// \todo Implement
-    return EntityVector();
+    
+    EntityVector ret;
+    Camera* cameraComp = renderer_->MainCameraComponent();
+    if (!cameraComp || cameraComp->ParentScene() != scene_)
+        return ret;
+     Urho3D::Camera* cam = cameraComp ? cameraComp->UrhoCamera() : nullptr;
+     if (!cam)
+        return ret;
+
+    int width = renderer_->WindowWidth();
+    int height = renderer_->WindowHeight();
+    float w = (float)width;
+    float h = (float)height;
+    float left = (float)(viewrect.left_) / w, right = (float)(viewrect.right_) / w;
+    float top = (float)(viewrect.top_) / h, bottom = (float)(viewrect.bottom_) / h;
+    if (left > right) std::swap(left, right);
+    if (top > bottom) std::swap(top, bottom);
+    // don't do selection if box is too small
+    if ((right - left) * (bottom - top) < 0.0001)
+        return ret;
+
+    Urho3D::Frustum fr;
+    fr.vertices_[0] = cam->ScreenToWorldPoint(Urho3D::Vector3(right, top, cam->GetNearClip()));
+    fr.vertices_[1] = cam->ScreenToWorldPoint(Urho3D::Vector3(right, bottom, cam->GetNearClip()));
+    fr.vertices_[2] = cam->ScreenToWorldPoint(Urho3D::Vector3(left, bottom, cam->GetNearClip()));
+    fr.vertices_[3] = cam->ScreenToWorldPoint(Urho3D::Vector3(left, top, cam->GetNearClip()));
+    fr.vertices_[4] = cam->ScreenToWorldPoint(Urho3D::Vector3(right, top, cam->GetFarClip()));
+    fr.vertices_[5] = cam->ScreenToWorldPoint(Urho3D::Vector3(right, bottom, cam->GetFarClip()));
+    fr.vertices_[6] = cam->ScreenToWorldPoint(Urho3D::Vector3(left, bottom, cam->GetFarClip()));
+    fr.vertices_[7] = cam->ScreenToWorldPoint(Urho3D::Vector3(left, top, cam->GetFarClip()));
+    fr.UpdatePlanes();
+
+    Urho3D::PODVector<Urho3D::Drawable*> result;
+    Urho3D::FrustumOctreeQuery query(result, fr, Urho3D::DRAWABLE_GEOMETRY);
+    urhoScene_->GetComponent<Urho3D::Octree>()->GetDrawables(query);
+
+    for (Urho3D::PODVector<Urho3D::Drawable*>::ConstIterator i = result.Begin(); i != result.End(); ++i)
+    {
+        Entity* entity = static_cast<Entity*>((*i)->GetNode()->GetVar(entityLink).GetPtr());
+        if (entity)
+            ret.Push(EntityPtr(entity));
+    }
+
+    return ret;
 }
 
 bool GraphicsWorld::IsEntityVisible(Entity* entity) const

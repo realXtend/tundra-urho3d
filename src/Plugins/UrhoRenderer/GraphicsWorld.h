@@ -103,7 +103,7 @@ public:
     /// Does a frustum query to the world from viewport coordinates.
     /** @param viewRect The query rectangle in 2d window coords.
         @return List of entities within the frustrum. */
-    EntityVector FrustumQuery(Urho3D::IntRect &viewRect) const;
+    EntityVector FrustumQuery(const Urho3D::IntRect &viewRect) const;
 
     /// Returns whether a single entity is visible in the currently active camera
     bool IsEntityVisible(Entity* entity) const;
