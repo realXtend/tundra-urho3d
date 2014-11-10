@@ -54,20 +54,12 @@ bool OgreMaterialAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
         }
         Ogre::MaterialBlock *tu = (pass ? pass->TextureUnit(0) : 0);
         String textureRef = (tu ? tu->StringValue(Ogre::Material::TextureUnit::Texture, "") : "");
-        // No textures.
-        /// @todo Should this be a failure? Does urho have some suitable shader for solid color rendering via Ogre diffuse, ambient, specular and emissive.
-        /// @todo Support multiple textures to multiple UV coords. Does Urho have something built-in for this?
-        if (textureRef.Empty())
-        {
-            LogError("OgreMaterialAsset: No textures found in " + Name());
-            material.Reset();
-            assetAPI->AssetLoadFailed(Name());
-            return false;
-        }
-        textures_.Push(AssetReference(assetAPI->ResolveAssetRef(Name(), textureRef), "Texture"));
-
-        material->SetTechnique(0, GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Technique>("Techniques/Diff.xml"));
-
+        if (!textureRef.Empty())
+            textures_.Push(AssetReference(assetAPI->ResolveAssetRef(Name(), textureRef), "Texture"));
+        
+        String techniqueName = textures_.Size() ? "Diff.xml" : "NoTexture.xml";
+        material->SetTechnique(0, GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Technique>("Techniques/" + techniqueName));
+        
         assetAPI->AssetLoadCompleted(Name());
     }
     else
