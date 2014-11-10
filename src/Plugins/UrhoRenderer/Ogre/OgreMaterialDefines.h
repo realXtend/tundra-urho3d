@@ -180,8 +180,8 @@ struct MaterialBlock
     /// If @c name property exists
     bool Has(const StringHash &name) const;
 
-    /// Return @c name property as a string for @c index. If not defined empty string is returned.
-    String StringValue(const StringHash &name, uint index = 0) const;
+    /// Return @c name property as a string for @c index. If not defined @c defaultValue is returned.
+    String StringValue(const StringHash &name, const String &defaultValue, uint index = 0) const;
 
     /// Return @c name property as a string for @c index. If not defined a empty vector is returned.
     /** All values are trimmed separately and whitespace is removed between values. */

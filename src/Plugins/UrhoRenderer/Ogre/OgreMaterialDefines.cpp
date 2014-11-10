@@ -124,17 +124,17 @@ bool MaterialBlock::Has(const StringHash &name) const
     return (properties.Find(name) != properties.End());
 }
 
-String MaterialBlock::StringValue(const StringHash &name, uint index) const
+String MaterialBlock::StringValue(const StringHash &name, const String &defaultValue, uint index) const
 {
     MaterialProperties::ConstIterator iter = properties.Find(name);
     if (iter != properties.End() && index < iter->second_.Size())
         return iter->second_[index];
-    return "";
+    return defaultValue;
 }
 
 StringVector MaterialBlock::StringVectorValue(const StringHash &name, uint index) const
 {
-    String value = StringValue(name, index).Trimmed();
+    String value = StringValue(name, "", index).Trimmed();
     StringVector parts = (!value.Empty() ? value.Split(' ') : StringVector());
     // Remove empty parts to correctly parse "1.0   1.0  1.0 1.0" type of values
     for(auto iter = parts.Begin(); iter != parts.End();)
@@ -187,7 +187,7 @@ Urho3D::Color MaterialBlock::ColorValue(const StringHash &name, const Urho3D::Co
 
 bool MaterialBlock::BooleanValue(const StringHash &name, bool defaultValue, uint index) const
 {
-    String value = StringValue(name, index).Trimmed();
+    String value = StringValue(name, "", index).Trimmed();
     if (value.Compare("on", false) == 0 || value.Compare("enabled", false) == 0 || value.Compare("true", false) == 0 || value.Compare("1", false) == 0)
         return true;
     else if (value.Compare("off", false) == 0 || value.Compare("disabled", false) == 0 || value.Compare("false", false) == 0 || value.Compare("0", false) == 0)

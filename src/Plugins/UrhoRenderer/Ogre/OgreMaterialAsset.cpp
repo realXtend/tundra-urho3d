@@ -53,7 +53,7 @@ bool OgreMaterialAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
             return false;
         }
         Ogre::MaterialBlock *tu = (pass ? pass->TextureUnit(0) : 0);
-        String textureRef = (tu ? tu->StringValue(Ogre::Material::TextureUnit::Texture) : "");
+        String textureRef = (tu ? tu->StringValue(Ogre::Material::TextureUnit::Texture, "") : "");
         // No textures.
         /// @todo Should this be a failure? Does urho have some suitable shader for solid color rendering via Ogre diffuse, ambient, specular and emissive.
         /// @todo Support multiple textures to multiple UV coords. Does Urho have something built-in for this?
