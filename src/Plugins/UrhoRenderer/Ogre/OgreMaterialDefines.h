@@ -25,8 +25,8 @@ namespace Material
         const StringHash Pass                       = "pass";
         const StringHash VertexProgram              = "vertex_program_ref";
         const StringHash FragmentProgram            = "fragment_program_ref";
-        const StringHash TextureUnit                = "texture_unit";
         const StringHash DefaultParameters          = "default_params";
+        const StringHash TextureUnit                = "texture_unit";
     }
 
     namespace Pass
@@ -124,8 +124,24 @@ enum MaterialPart
     MP_TextureUnit
 };
 
+static String MaterialPartToString(MaterialPart part)
+{
+    switch(part)
+    {
+        case MP_Material:           return "material";
+        case MP_Technique:          return "technique";
+        case MP_Pass:               return "pass";
+        case MP_VertexProgram:      return "vertex_program_ref";
+        case MP_FragmentProgram:    return "fragment_program_ref";
+        case MP_DefaultParameters:  return "default_params";
+        case MP_TextureUnit:        return "texture_unit";
+    }
+    return "Invalid MaterialPart enum " + String(static_cast<int>(part));
+}
+
 /// Material properties
 typedef HashMap<StringHash, Vector<String> > MaterialProperties;
+typedef HashMap<StringHash, String> MaterialPropertyNames;
 
 /// Material block
 struct MaterialBlock
@@ -141,6 +157,7 @@ struct MaterialBlock
 
     /// Properties
     MaterialProperties properties;
+    MaterialPropertyNames propertyNames;
 
     /// Block indexes
     int technique;
@@ -204,6 +221,9 @@ struct MaterialBlock
     /// Returns if this block is supported.
     /** If false no properties have been parsed for the block scope. */
     bool IsSupported();
+
+    /// Dump material to stdout.
+    void Dump(bool recursive = true, uint indentation = 0);
 };
 
 /// Material parser

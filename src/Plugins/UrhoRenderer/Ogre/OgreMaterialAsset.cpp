@@ -36,23 +36,25 @@ bool OgreMaterialAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
     if (success)
     {
         material = new Urho3D::Material(GetContext());
-        material->SetNumTechniques(1); // parser.root->NumTechniques();
+        material->SetNumTechniques(1);
 
-        /** @todo Support multiple techs/passes. This is initial code to get something to render.
-            Might make most sense to only support single tech/pass/texture fixed pipeline via "Techniques/Diff.xml"
-            and rex/meshmoon shaders with proper Urho shaders (these source materials are never multi pass/tech) */
-        //for (uint ti=0, tinum=parser.root->NumTechniques(); ti<tinum; ++ti) etc..
-        
+        //LogInfo(Name().CString());
+        //parser.root->Dump();
+
+        // Pass
         Ogre::MaterialBlock *tech = parser.root->Technique(0);
         Ogre::MaterialBlock *pass = (tech ? tech->Pass(0) : 0);
-        // Nothing to push to Urho
         if (!tech || !pass)
         {
-            LogError("OgreMaterialAsset: No technique with a pass found in " + Name());
+            LogError("OgreMaterialAsset::DeserializeFromData: No technique with a pass found in " + Name());
             material.Reset();
             assetAPI->AssetLoadFailed(Name());
             return false;
         }
+        if (pass->Has(Ogre::Material::Pass::Diffuse))
+            material->SetShaderParameter("MatDiffColor", pass->ColorValue(Ogre::Material::Pass::Diffuse, Urho3D::Color::WHITE));
+
+        // Texture unit
         Ogre::MaterialBlock *tu = pass->TextureUnit(0);
         if (tu)
         {
@@ -60,21 +62,19 @@ bool OgreMaterialAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
             if (!textureRef.Empty())
                 textures_.Push(AssetReference(assetAPI->ResolveAssetRef(Name(), textureRef), "Texture"));
         }
-        String diffuse = pass->StringValue(Ogre::Material::Pass::Diffuse, "");
-        if (!diffuse.Empty())
-            material->SetShaderParameter("MatDiffColor", pass->ColorValue(Ogre::Material::Pass::Diffuse, Urho3D::Color::WHITE));
 
-        String techniqueName = textures_.Size() ? "Diff.xml" : "NoTexture.xml";
+        // Set fitting techinique
+        String techniqueName = (textures_.Size() ? "Diff.xml" : "NoTexture.xml");
         material->SetTechnique(0, GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Technique>("Techniques/" + techniqueName));
-        
+
+        // Inform load has finished. Triggering any textures_ to be fetched.
         assetAPI->AssetLoadCompleted(Name());
     }
     else
     {
+        LogError("OgreMaterialAsset::DeserializeFromData: " + parser.Error());
         assetAPI->AssetLoadFailed(Name());
-        LogError("OgreMaterialAsset: " + parser.Error());
     }
-    
     return success;
 }
 

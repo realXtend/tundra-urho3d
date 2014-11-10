@@ -2,6 +2,7 @@
 
 #include "StableHeaders.h"
 #include "OgreMaterialDefines.h"
+#include "CoreStringUtils.h"
 #include "LoggingFunctions.h"
 
 #include <Engine/Core/StringUtils.h>
@@ -121,7 +122,7 @@ uint MaterialBlock::Num(const StringHash &name) const
 
 bool MaterialBlock::Has(const StringHash &name) const
 {
-    return (properties.Find(name) != properties.End());
+    return (Num(name) > 0);
 }
 
 String MaterialBlock::StringValue(const StringHash &name, const String &defaultValue, uint index) const
@@ -193,6 +194,42 @@ bool MaterialBlock::BooleanValue(const StringHash &name, bool defaultValue, uint
     else if (value.Compare("off", false) == 0 || value.Compare("disabled", false) == 0 || value.Compare("false", false) == 0 || value.Compare("0", false) == 0)
         return false;
     return defaultValue;
+}
+
+void MaterialBlock::Dump(bool recursive, uint indentation)
+{
+    String ind = "";
+    while(ind.Length() < indentation) ind += " ";
+
+    LogInfoF("%s%s '%s'", ind.CString(), MaterialPartToString(part).CString(), id.CString());
+
+    indentation += 2;
+    while(ind.Length() < indentation) ind += " ";
+
+    for (auto iter = properties.Begin(); iter != properties.End(); ++iter)
+    {
+        const StringVector &values = iter->second_;
+        if (!values.Empty())
+        {
+            for (int vi=0; vi<values.Size(); ++vi)
+            {
+                if (vi == 0)
+                    LogInfoF("%s%s '%s'", ind.CString(), PadString(propertyNames[iter->first_], 20).CString(), values[vi].CString());
+                else
+                    LogInfoF("%s%s '%s'", ind.CString(), propertyNames[iter->first_].CString(), values[vi].CString());
+            }
+        }
+    }
+
+    if (recursive)
+    {
+        for (auto iter = blocks.Begin(); iter != blocks.End(); ++iter)
+            (*iter)->Dump(recursive, indentation);
+    }
+
+    indentation -= 2;
+    if (indentation == 0)
+        LogInfo("");
 }
 
 // MaterialParser
@@ -322,7 +359,8 @@ bool MaterialParser::ProcessLine()
     // Split to "<key> <value>" from the first space.
     // Note that value can contain spaces, it is stored as is.
     uint splitPos = line.Find(' ');
-    StringHash key = (splitPos == String::NPOS ? line : line.Substring(0, splitPos).ToLower());
+    String keyStr = (splitPos == String::NPOS ? line : line.Substring(0, splitPos).ToLower());
+    StringHash key(keyStr);
     String value = (splitPos == String::NPOS ? "" : line.Substring(splitPos+1));
     
     // Is this a new block scope identifier?
@@ -381,6 +419,7 @@ bool MaterialParser::ProcessLine()
     }
 
     // Add property to current block
+    state.block->propertyNames[key] = keyStr;
     state.block->properties[key].Push(value);
     return true;
 }
