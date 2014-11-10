@@ -152,7 +152,7 @@ Urho3D::Vector2 MaterialBlock::Vector2Value(const StringHash &name, const Urho3D
 {
     StringVector parts = StringVectorValue(name, index);
     if (parts.Size() >= 2)
-        return Urho3D::Vector2(Urho3D::ToFloat(parts[0].Trimmed()), Urho3D::ToFloat(parts[1]));
+        return Urho3D::Vector2(Urho3D::ToFloat(parts[0]), Urho3D::ToFloat(parts[1]));
     return defaultValue;
 }
 
@@ -160,7 +160,7 @@ Urho3D::Vector3 MaterialBlock::Vector3Value(const StringHash &name, const Urho3D
 {
     StringVector parts = StringVectorValue(name, index);
     if (parts.Size() >= 3)
-        return Urho3D::Vector3(Urho3D::ToFloat(parts[0].Trimmed()), Urho3D::ToFloat(parts[1]), Urho3D::ToFloat(parts[2]));
+        return Urho3D::Vector3(Urho3D::ToFloat(parts[0]), Urho3D::ToFloat(parts[1]), Urho3D::ToFloat(parts[2]));
     return defaultValue;
 }
 
@@ -168,7 +168,7 @@ Urho3D::Vector4 MaterialBlock::Vector4Value(const StringHash &name, const Urho3D
 {
     StringVector parts = StringVectorValue(name, index);
     if (parts.Size() >= 4)
-        return Urho3D::Vector4(Urho3D::ToFloat(parts[0].Trimmed()), Urho3D::ToFloat(parts[1]), Urho3D::ToFloat(parts[2]), Urho3D::ToFloat(parts[3]));
+        return Urho3D::Vector4(Urho3D::ToFloat(parts[0]), Urho3D::ToFloat(parts[1]), Urho3D::ToFloat(parts[2]), Urho3D::ToFloat(parts[3]));
     return defaultValue;
 }
 
@@ -177,7 +177,7 @@ Urho3D::Color MaterialBlock::ColorValue(const StringHash &name, const Urho3D::Co
     StringVector parts = StringVectorValue(name, index);
     if (parts.Size() >= 3)
     {
-        Urho3D::Color color(Urho3D::ToFloat(parts[0].Trimmed()), Urho3D::ToFloat(parts[1]), Urho3D::ToFloat(parts[2]), 1.f);
+        Urho3D::Color color(Urho3D::ToFloat(parts[0]), Urho3D::ToFloat(parts[1]), Urho3D::ToFloat(parts[2]));
         if (parts.Size() >= 4)
             color.a_ = Urho3D::ToFloat(parts[3]);
         return color;
