@@ -123,7 +123,7 @@ void UrhoRenderer::HandleScreenModeChange(StringHash /*eventType*/, VariantMap& 
 
 Entity *UrhoRenderer::MainCamera()
 {
-    Entity *mainCameraEntity = activeMainCamera.Lock().Get();
+    Entity *mainCameraEntity = activeMainCamera.Get();
     if (!mainCameraEntity)
         return nullptr;
 

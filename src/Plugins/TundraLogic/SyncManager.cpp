@@ -232,7 +232,7 @@ void SyncManager::RegisterToScene(ScenePtr scene)
 
 void SyncManager::HandleNetworkMessage(UserConnection* user, kNet::packet_id_t packetId, kNet::message_id_t messageId, const char* data, size_t numBytes)
 {
-    if (!user || !scene_.Lock().Get())
+    if (!user || !scene_.Get())
         return;
 
     try

@@ -757,7 +757,7 @@ void Entity::SetParent(EntityPtr parent, AttributeChange::Type change)
         ChildEntityVector& children = oldParent->children_;
         for (uint i = 0; i < children.Size(); ++i)
         {
-            if (children[i].Lock().Get() == this)
+            if (children[i].Get() == this)
             {
                 children.Erase(children.Begin() + i);
                 break;

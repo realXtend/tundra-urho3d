@@ -375,7 +375,7 @@ void Scene::EmitEntityCreated(Entity *entity, AttributeChange::Type change)
     // Remove from the create signalling queue
     for (unsigned i = 0; i < entitiesCreatedThisFrame_.Size(); ++i)
     {
-        if (entitiesCreatedThisFrame_[i].first_.Lock().Get() == entity)
+        if (entitiesCreatedThisFrame_[i].first_.Get() == entity)
         {
             entitiesCreatedThisFrame_.Erase(entitiesCreatedThisFrame_.Begin() + i);
             break;
@@ -636,10 +636,10 @@ Vector<Entity *> Scene::CreateContentFromXml(Urho3D::XMLFile &xml, bool useEntit
 
         // On a client start tracking of the server ack messages.
         if (!IsAuthority() && !weakEnt.Expired())
-            parentTracker_.Track(weakEnt.Lock().Get());
+            parentTracker_.Track(weakEnt.Get());
 
         if (!weakEnt.Expired())
-            EmitEntityCreated(weakEnt.Lock().Get(), change);
+            EmitEntityCreated(weakEnt.Get(), change);
         if (!weakEnt.Expired())
         {
             EntityPtr entityShared = weakEnt.Lock();
@@ -655,7 +655,7 @@ Vector<Entity *> Scene::CreateContentFromXml(Urho3D::XMLFile &xml, bool useEntit
     for(int i=0, len=sortedDescEntities.Size(); i<len; ++i)
     {
         if (!sortedDescEntities[i].Expired())
-            ret.Push(sortedDescEntities[i].Lock().Get());
+            ret.Push(sortedDescEntities[i].Get());
     }
     
     return ret;
@@ -803,10 +803,10 @@ Vector<Entity *> Scene::CreateContentFromBinary(const char *data, int numBytes, 
 
         // On a client start tracking of the server ack messages.
         if (!IsAuthority() && !weakEnt.Expired())
-            parentTracker_.Track(weakEnt.Lock().Get());
+            parentTracker_.Track(weakEnt.Get());
 
         if (!weakEnt.Expired())
-            EmitEntityCreated(weakEnt.Lock().Get(), change);
+            EmitEntityCreated(weakEnt.Get(), change);
         if (!weakEnt.Expired())
         {
             EntityPtr entityShared = weakEnt.Lock();
@@ -821,7 +821,7 @@ Vector<Entity *> Scene::CreateContentFromBinary(const char *data, int numBytes, 
     ret.Reserve(entities.Size());
     for(u32 i = 0; i < entities.Size(); ++i)
         if (!entities[i].Expired())
-            ret.Push(entities[i].Lock().Get());
+            ret.Push(entities[i].Get());
 
     return ret;
 }
@@ -1487,7 +1487,7 @@ void Scene::OnUpdated(float /*frameTime*/)
     // Signal queued entity creations now
     for (unsigned i = 0; i < entitiesCreatedThisFrame_.Size(); ++i)
     {
-        Entity* entity = entitiesCreatedThisFrame_[i].first_.Lock().Get();
+        Entity* entity = entitiesCreatedThisFrame_[i].first_.Get();
         if (!entity)
             continue;
         
@@ -1641,14 +1641,14 @@ Vector<EntityWeakPtr> Scene::SortEntities(const Vector<EntityWeakPtr> &entities)
             LogError("Scene::SortEntities: Input contained an expired WeakPtr at index " + String(ei) + ". Aborting sort and returning original list.");
             return entities;
         }
-        rawEntities.Push(weakEnt.Lock().Get());
+        rawEntities.Push(weakEnt.Get());
     }
 
     Vector<EntityWeakPtr> sortedEntities;
     for (int ei=0, eilen=entities.Size(); ei<eilen; ++ei)
     {
         EntityWeakPtr weakEnt = entities[ei];
-        int insertIndex = EntityInsertIndex(this, weakEnt.Lock().Get(), rawEntities);
+        int insertIndex = EntityInsertIndex(this, weakEnt.Get(), rawEntities);
         if (insertIndex == -1 || insertIndex >= (int)sortedEntities.Size())
             sortedEntities.Push(weakEnt);
         else
@@ -1820,7 +1820,7 @@ uint Scene::FixPlaceableParentIds(const Vector<EntityWeakPtr> &entities, const E
     for (int i=0, len=entities.Size(); i<len; ++i)
     {
         if (!entities[i].Expired())
-            rawEntities.Push(entities[i].Lock().Get());
+            rawEntities.Push(entities[i].Get());
     }
     return FixPlaceableParentIds(rawEntities, oldToNewIds, change, printStats);
 }

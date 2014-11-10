@@ -600,7 +600,7 @@ bool Placeable::HasAttachedChild(IComponent *placeable)
     for (u32 i=0, len=childPlaceables_.Size(); i<len; ++i)
     {
         const ComponentWeakPtr &weak = childPlaceables_[i];
-        if (!weak.Expired() && weak.Lock().Get() == placeable)
+        if (!weak.Expired() && weak.Get() == placeable)
             return true;
     }
     return false;
@@ -622,7 +622,7 @@ void Placeable::ChildDetached(IComponent *placeable)
         for (u32 i=0, len=childPlaceables_.Size(); i<len; ++i)
         {
             ComponentWeakPtr &weak = childPlaceables_[i];
-            if (!weak.Expired() && weak.Lock().Get() == placeable)
+            if (!weak.Expired() && weak.Get() == placeable)
             {
                 weak.Reset();
                 childPlaceables_.Erase(i);

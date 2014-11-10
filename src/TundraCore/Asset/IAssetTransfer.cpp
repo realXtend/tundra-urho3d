@@ -52,7 +52,7 @@ void IAssetTransfer::EmitAssetFailed(IAssetTransfer* transfer, String reason)
 
 bool IAssetTransfer::Abort()
 {
-    if (provider.Lock().Get())
+    if (provider.Get())
         return provider.Lock()->AbortTransfer(this);
     else
     {    

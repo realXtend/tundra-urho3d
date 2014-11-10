@@ -46,7 +46,7 @@ void AssetRefListener::HandleAssetRefChange(AssetAPI *assetApi, String assetRef,
     // Disconnect from any previous transfer we might be listening to
     if (!currentTransfer.Expired())
     {
-        IAssetTransfer* current = currentTransfer.Lock().Get();
+        IAssetTransfer* current = currentTransfer.Get();
         current->Succeeded.Disconnect(this, &AssetRefListener::OnTransferSucceeded);
         current->Failed.Disconnect(this, &AssetRefListener::OnTransferFailed);
         currentTransfer.Reset();
