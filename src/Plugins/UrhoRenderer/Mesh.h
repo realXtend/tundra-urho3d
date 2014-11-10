@@ -147,7 +147,7 @@ private:
     /// Manages mesh asset requests.
     AssetRefListenerPtr meshRefListener_;
 
-    /// Manager material asset requests.
+    /// Manages material asset requests.
     AssetRefListListenerPtr materialRefListListener_;
 };
 

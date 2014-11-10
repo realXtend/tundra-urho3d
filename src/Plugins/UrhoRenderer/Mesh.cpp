@@ -15,6 +15,7 @@
 #include <Engine/Scene/Scene.h>
 #include <Engine/Scene/Node.h>
 #include <Engine/Graphics/AnimatedModel.h>
+#include <Engine/Graphics/Material.h>
 #include <Engine/Resource/ResourceCache.h>
 
 namespace Tundra
@@ -231,6 +232,10 @@ void Mesh::OnMeshAssetLoaded(AssetPtr asset)
     if (mesh_)
     {
         mesh_->SetModel(mAsset->UrhoModel());
+        // Apply default material first to every submesh to match Tundra behavior
+        Urho3D::ResourceCache* cache = GetSubsystem<Urho3D::ResourceCache>();
+        for (uint gi=0; gi<mesh_->GetNumGeometries(); ++gi)
+            mesh_->SetMaterial(gi, cache->GetResource<Urho3D::Material>("Materials/DefaultGrey.xml"));
 
         // Apply all materials that have been loaded so far.
         // OnMaterialAssetLoaded will do the right thing once model has been set.
@@ -257,26 +262,22 @@ void Mesh::OnMaterialAssetRefsChanged(const AssetReferenceList &mRefs)
     if (!mesh_ || !mesh_->GetModel())
         return;
 
+    Urho3D::ResourceCache* cache = GetSubsystem<Urho3D::ResourceCache>();
+
     for (uint gi=0; gi<mesh_->GetNumGeometries(); ++gi)
     {
-        /** @todo Set empty material to these indexes!
-            For Lasse to fill.
-
-        if (gi >= mRefs.Size() || mRefs.refs[gi].ref.Empty())
-            mesh_->SetMaterial(gi, <default_empty_material> or nullptr?);
-        */
+        if (gi >= (uint)mRefs.Size() || mRefs.refs[gi].ref.Empty())
+            mesh_->SetMaterial(gi, cache->GetResource<Urho3D::Material>("Materials/DefaultGrey.xml"));
     }
 }
 
 void Mesh::OnMaterialAssetFailed(uint index, IAssetTransfer* /*transfer*/, String /*error*/)
 {
-    /** @todo Set error material to these indexes!
-        For Lasse to fill.
+    Urho3D::ResourceCache* cache = GetSubsystem<Urho3D::ResourceCache>();
 
     // Don't log an warning on load failure if index is out of submesh range.
     if (mesh_ && mesh_->GetModel() && index < mesh_->GetNumGeometries())
-        mesh_->SetMaterial(index, <default_error_material>);
-    */
+        mesh_->SetMaterial(index, cache->GetResource<Urho3D::Material>("Materials/AssetLoadError.xml"));
 }
 
 void Mesh::OnMaterialAssetLoaded(uint index, AssetPtr asset)
