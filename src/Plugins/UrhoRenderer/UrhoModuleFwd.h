@@ -8,6 +8,7 @@ namespace Urho3D
     class Scene;
     class Camera;
     class AnimatedModel;
+    class StaticModel;
     class Light;
     class AnimationState;
     class Model;
@@ -23,10 +24,12 @@ namespace Tundra
     class Placeable;
     class Mesh;
     class Camera;
+    class TextureAsset;
     class IOgreMaterialProcessor;
 
     typedef SharedPtr<GraphicsWorld> GraphicsWorldPtr;
     typedef WeakPtr<GraphicsWorld> GraphicsWorldWeakPtr;
+    typedef SharedPtr<TextureAsset> TextureAssetPtr;
 
     namespace Ogre
     {
