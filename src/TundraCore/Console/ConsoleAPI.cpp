@@ -12,8 +12,13 @@
 
 #include <CoreEvents.h>
 #include <EngineEvents.h>
+#include <Engine.h>
+#include <DebugHud.h>
 #include <ProcessUtils.h>
+#include <ResourceCache.h>
+#include <XMLFile.h>
 #include <Console.h>
+#include <UI/Text.h>
 #include <Log.h>
 
 namespace Tundra
@@ -28,6 +33,7 @@ ConsoleAPI::ConsoleAPI(Framework *framework) :
     SubscribeToEvent(Urho3D::E_CONSOLECOMMAND, HANDLER(ConsoleAPI, HandleConsoleCommand));
 
     RegisterCommand("help", "Lists all registered commands.", this, &ConsoleAPI::ListCommands);
+    RegisterCommand("prof", "Toggle profiling HUD.", this, &ConsoleAPI::ToggleDebugHud);
 }
 
 void ConsoleAPI::Initialize()
@@ -105,7 +111,7 @@ void ConsoleAPI::ExecuteCommand(const String &command)
     existing->second->Invoke(parameters);
 }
 
-void ConsoleAPI::ListCommands()
+void ConsoleAPI::ListCommands() const
 {
     LogInfo("Available Console Commands (case-insensitive)");
     uint longestName = 0;
@@ -115,6 +121,22 @@ void ConsoleAPI::ListCommands()
     longestName += 2;
     for(auto iter = commands_.begin(); iter != commands_.end(); ++iter)
         LogInfo("  " + PadString(iter->first, longestName) + iter->second->Description());
+}
+
+void ConsoleAPI::ToggleDebugHud() const
+{
+    Urho3D::DebugHud *hud = framework_->GetSubsystem<Urho3D::DebugHud>();
+    if (!hud)
+    {
+        hud = framework_->Engine()->CreateDebugHud();
+        if (!hud)
+            return;
+        hud->SetDefaultStyle(framework_->GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("UI/DefaultStyle.xml"));
+        hud->GetStatsText()->SetFont("Fonts/SourceCodePro.ttf", 13);
+        hud->GetModeText()->SetFont("Fonts/SourceCodePro.ttf", 13);
+        hud->GetProfilerText()->SetFont("Fonts/SourceCodePro.ttf", 13);
+    }
+    hud->ToggleAll();
 }
 
 void ConsoleAPI::HandleConsoleCommand(StringHash /*eventType*/, VariantMap &eventData)

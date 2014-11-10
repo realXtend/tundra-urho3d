@@ -103,7 +103,10 @@ public:
 
     /// Lists all console commands and their descriptions to the log.
     /** This command is invoked by typing 'help' to the console. */
-    void ListCommands();
+    void ListCommands() const;
+
+    /// Toggle debug hud visibility.
+    void ToggleDebugHud() const;
 
     /// Returns names of the available console commands.
     /** @note The names are exactly the strings they were originally registered with.
