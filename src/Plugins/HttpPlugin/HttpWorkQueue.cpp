@@ -19,7 +19,8 @@ const float DurationKeepAliveThreads = 10.f;
 
 HttpWorkQueue::HttpWorkQueue() :
     log("HttpWorkQueue"),
-    durationNoWork_(0.f)
+    durationNoWork_(0.f),
+    stats_(new Http::Stats())
 {
     numMaxThreads_ = Urho3D::GetNumLogicalCPUs();
     if (numMaxThreads_ < 1) numMaxThreads_ = 1;         // Need at least one worker
@@ -41,6 +42,7 @@ HttpWorkQueue::~HttpWorkQueue()
         completed_.Clear();
         executing_.Clear();
     }
+    SAFE_DELETE(stats_);
 }
 
 void HttpWorkQueue::Schedule(const HttpRequestPtr &request)
@@ -65,7 +67,10 @@ void HttpWorkQueue::Update(float frametime)
     {
         Urho3D::MutexLock m(mutexCompleted_);
         for (auto iter = completed_.Begin(); iter != completed_.End(); ++iter)
+        {
+            (*iter)->WriteStats(stats_);
             (*iter)->EmitCompletion(*iter);
+        }
         completed_.Clear();
         numExecuting = executing_.Size();
     }

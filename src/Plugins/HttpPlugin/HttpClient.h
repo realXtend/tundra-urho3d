@@ -52,12 +52,17 @@ public:
     /** @see https://tools.ietf.org/html/rfc2616#section-9.7 */
     HttpRequestPtr Delete(const String &url);
 
+    /// HTTP client stats.
+    Http::Stats *Stats() const;
+
 private:
     HttpRequestPtr Schedule(int method, const String &url);
     HttpRequestPtr Schedule(int method, const String &url, const Vector<u8> &body, const String &contentType);
 
     friend class HttpPlugin;
     void Update(float frametime);
+
+    void DumpStats() const;
 
     Framework *framework_;
     HttpWorkQueuePtr queue_;    

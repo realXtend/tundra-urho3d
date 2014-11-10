@@ -271,21 +271,21 @@ String HttpRequest::Status()
 uint HttpRequest::DurationMSec()
 {
     if (!HasCompleted())
-        return 0;
-    return requestData_.msecSpent;
+        return -1;
+    return requestData_.msecNetwork;
 }
 
 float HttpRequest::AverageDownloadSpeed()
 {
     if (!HasCompleted())
-        return 0.f;
+        return -1.f;
     return static_cast<float>(responseData_.downloadBytesPerSec);
 }
 
 float HttpRequest::AverageUploadSpeed()
 {
     if (!HasCompleted())
-        return 0.f;
+        return -1.f;
     return static_cast<float>(responseData_.uploadBytesPerSec);
 }
 
@@ -549,7 +549,7 @@ void HttpRequest::Perform()
         requestData_.error = curl_easy_strerror(res);
         log.ErrorF("Failed to initialze request: %s", requestData_.error.CString());
     }
-    requestData_.msecSpent = timer.GetMSec(false);
+    requestData_.msecNetwork = timer.GetMSec(false);
 
     /* Compact unused bytes from input buffers. bodyBytes should not have any free
        capacity if Content-Lenght header was provided by the server and correct. */
@@ -589,6 +589,7 @@ void HttpRequest::Perform()
                 Urho3D::File file(framework_->GetContext(), requestData_.cacheFile, Urho3D::FILE_WRITE);
                 if (file.IsOpen())
                 {
+                    Urho3D::Timer t;
                     uint bodySize = responseData_.bodyBytes.Size();
                     if (file.Write(&responseData_.bodyBytes[0], bodySize) == bodySize)
                     {
@@ -597,6 +598,7 @@ void HttpRequest::Perform()
                         if (epoch > 0) // SetLastModifiedTime converts utc epoch correctly to local
                             framework_->GetSubsystem<Urho3D::FileSystem>()->SetLastModifiedTime(requestData_.cacheFile, static_cast<uint>(epoch));
                     }
+                    requestData_.msecDiskWrite = t.GetMSec(false);
                 }
             }
         }
@@ -606,6 +608,7 @@ void HttpRequest::Perform()
             Urho3D::File file(framework_->GetContext(), requestData_.cacheFile, Urho3D::FILE_READ);
             if (file.IsOpen())
             {
+                Urho3D::Timer t;
                 uint fileSize = file.GetSize();
                 responseData_.bodyBytes.Resize(fileSize);
                 if (file.Read(&responseData_.bodyBytes[0], fileSize) != fileSize)
@@ -613,6 +616,7 @@ void HttpRequest::Perform()
                     log.Error("Failed to read cached disk source for '304 not Modified' response.");
                     responseData_.bodyBytes.Clear();
                 }
+                requestData_.msecDiskRead = t.GetMSec(false);
             }
         }
     }
@@ -740,6 +744,93 @@ void HttpRequest::Cleanup()
     }
 }
 
+void HttpRequest::WriteStats(Http::Stats *stats)
+{
+    // @note Invoked in main thread context
+
+    if (requestData_.error.Empty())
+    {
+        if (requestData_.msecNetwork > -1)
+            stats->requests++;
+
+        // Disk write
+        if (requestData_.msecDiskWrite > -1)
+        {
+            stats->diskWrites += 1;
+            stats->totals.diskWriteBytes += responseData_.bodyBytes.Size();
+            stats->totals.msecDiskWrite += requestData_.msecDiskWrite;
+            if (stats->averages.msecDiskWrite < 0.0)
+                stats->averages.msecDiskWrite = static_cast<double>(requestData_.msecDiskWrite);
+            else
+                stats->averages.msecDiskWrite = (stats->averages.msecDiskWrite + static_cast<double>(requestData_.msecDiskWrite)) / 2.0;
+        }
+        /* Disk read and network download exclude each other.
+           Disk is only read on "304 Not Modified" responses. */
+        if (requestData_.msecDiskRead > -1)
+        {
+            stats->diskReads += 1;
+            stats->totals.diskReadBytes += responseData_.bodyBytes.Size();
+            stats->totals.msecDiskRead += requestData_.msecDiskRead;
+            if (stats->averages.msecDiskRead < 0.0)
+                stats->averages.msecDiskRead = static_cast<double>(requestData_.msecDiskRead);
+            else
+                stats->averages.msecDiskRead = (stats->averages.msecDiskRead + static_cast<double>(requestData_.msecDiskRead)) / 2.0;
+        }
+        // Download
+        else
+        {
+            stats->downloads += 1;
+            stats->totals.downloadBytes += responseData_.bodyBytes.Size();
+            if (responseData_.downloadBytesPerSec > -1.0)
+            {
+                if (stats->averages.bestDownloadBytesPerSec < responseData_.downloadBytesPerSec)
+                    stats->averages.bestDownloadBytesPerSec = responseData_.downloadBytesPerSec;
+                if (stats->averages.downloadBytesPerSec < 0.0)
+                    stats->averages.downloadBytesPerSec = responseData_.downloadBytesPerSec;
+                else
+                    stats->averages.downloadBytesPerSec = (stats->averages.downloadBytesPerSec + responseData_.downloadBytesPerSec) / 2.0;
+            }
+
+            /// @todo We don't have separate info about upload/download timings
+            if (requestData_.msecNetwork > -1)
+            {
+                stats->totals.msecDownload += requestData_.msecNetwork;
+                if (stats->averages.msecDownload < 0.0)
+                    stats->averages.msecDownload = static_cast<double>(requestData_.msecNetwork);
+                else
+                    stats->averages.msecDownload = (stats->averages.msecDownload + static_cast<double>(requestData_.msecNetwork)) / 2.0;
+            }
+        }
+        // Upload
+        if (!requestData_.bodyBytes.Empty())
+        {
+            stats->uploads += 1;
+            stats->totals.uploadBytes += requestData_.bodyBytes.Size();
+            if (responseData_.uploadBytesPerSec > -1.0)
+            {
+                if (stats->averages.bestUploadBytesPerSec < responseData_.uploadBytesPerSec)
+                    stats->averages.bestUploadBytesPerSec = responseData_.uploadBytesPerSec;
+                if (stats->averages.uploadBytesPerSec < 0.0)
+                    stats->averages.uploadBytesPerSec = responseData_.uploadBytesPerSec;
+                else
+                    stats->averages.uploadBytesPerSec = (stats->averages.uploadBytesPerSec + responseData_.uploadBytesPerSec) / 2.0;
+            }
+
+            /// @todo We don't have separate info about upload/download timings
+            if (requestData_.msecNetwork > -1)
+            {
+                stats->totals.msecUpload += requestData_.msecNetwork;
+                if (stats->averages.msecUpload < 0.0)
+                    stats->averages.msecUpload = static_cast<double>(requestData_.msecNetwork);
+                else
+                    stats->averages.msecUpload = (stats->averages.msecUpload + static_cast<double>(requestData_.msecNetwork)) / 2.0;
+            }
+        }
+    }
+    else
+        stats->errors++;
+}
+
 void HttpRequest::EmitCompletion(HttpRequestPtr &self)
 {
     // @note Invoked in main thread context
@@ -767,10 +858,15 @@ void HttpRequest::DumpResponse(bool headers, bool body)
         str.AppendWithFormat("  Status   : %d %s\n", responseData_.status, responseData_.statusText.CString());
         str.AppendWithFormat("  Headers  : %d bytes\n", responseData_.headersBytes.Size());
         str.AppendWithFormat("  Body     : %d bytes\n", responseData_.bodyBytes.Size());
-        str.AppendWithFormat("  Spent    : %d msec\n", requestData_.msecSpent);
-        if (responseData_.downloadBytesPerSec > 1.0)
+        if (requestData_.msecNetwork > -1)
+            str.AppendWithFormat("  Spent    : %d msec\n", requestData_.msecNetwork);
+        if (requestData_.msecDiskRead > -1)
+            str.AppendWithFormat("  Disk R   : %d msec\n", requestData_.msecDiskRead);
+        if (requestData_.msecDiskWrite > -1)
+            str.AppendWithFormat("  Disk W   : %d msec\n", requestData_.msecDiskWrite);
+        if (responseData_.downloadBytesPerSec > -1.0)
             str.AppendWithFormat("  DL Speed : %f kb/sec\n", responseData_.downloadBytesPerSec / 1024);
-        if (responseData_.uploadBytesPerSec > 1.0)
+        if (responseData_.uploadBytesPerSec > -1.0)
             str.AppendWithFormat("  UL Speed : %f kb/sec\n", responseData_.uploadBytesPerSec / 1024);
         if (!requestData_.error.Empty())
         str.AppendWithFormat("  Error    : %s\n", requestData_.error.CString());

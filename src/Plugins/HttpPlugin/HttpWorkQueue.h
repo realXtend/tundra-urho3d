@@ -73,6 +73,9 @@ private:
         setting body/headers etc. */
     HttpRequestPtrList created_;
 
+    /// Stats
+    Http::Stats *stats_;
+
     Logger log;
 };
 

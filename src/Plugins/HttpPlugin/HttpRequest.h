@@ -124,13 +124,16 @@ public:
     /// Returns status text eg. "OK" if request has completed, otherwise empty string.
     String Status();
 
-    /// Returns spent time in networking in milliseconds. 0 if request not completed yet.
+    /// Returns time spent in networking in milliseconds.
+    /** @return -1 if request not completed yet or did not perform any networking. */
     uint DurationMSec();
 
-    /// Returns average download speed in bytes/second. 0.f if request not completed yet.
+    /// Returns average download speed in bytes/second.
+    /** @return -1.f if request not completed yet or did not perform any downloading. */
     float AverageDownloadSpeed();
 
-    /// Returns average upload speed in bytes/second. 0.f if request not completed yet.
+    /// Returns average upload speed in bytes/second.
+    /** @return -1.f if request not completed yet or did not perform any uploading. */
     float AverageUploadSpeed();
 
     /// Returns the response body size in bytes if request has completed.
@@ -203,6 +206,8 @@ private:
     
     /// Called by HttpWorkQueue in main thread context.
     void EmitCompletion(HttpRequestPtr &self);
+    /// Called by HttpWorkQueue in main thread context.
+    void WriteStats(Http::Stats *stats);
     /// Invoked in main threa context if verbose is enabled.
     void DumpResponse(bool headers, bool body);
 
