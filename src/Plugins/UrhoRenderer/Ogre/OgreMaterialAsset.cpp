@@ -14,6 +14,7 @@
 #include <Graphics/Texture.h>
 #include <Graphics/Texture2D.h>
 #include <Resource/ResourceCache.h>
+#include <StringUtils.h>
 
 namespace Tundra
 {
@@ -52,11 +53,23 @@ bool OgreMaterialAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
             assetAPI->AssetLoadFailed(Name());
             return false;
         }
-        Ogre::MaterialBlock *tu = (pass ? pass->TextureUnit(0) : 0);
-        String textureRef = (tu ? tu->StringValue(Ogre::Material::TextureUnit::Texture, "") : "");
-        if (!textureRef.Empty())
-            textures_.Push(AssetReference(assetAPI->ResolveAssetRef(Name(), textureRef), "Texture"));
-        
+        Ogre::MaterialBlock *tu = pass->TextureUnit(0);
+        if (tu)
+        {
+            String textureRef = tu->StringValue(Ogre::Material::TextureUnit::Texture, "");
+            if (!textureRef.Empty())
+                textures_.Push(AssetReference(assetAPI->ResolveAssetRef(Name(), textureRef), "Texture"));
+        }
+        String diffuse = pass->StringValue(Ogre::Material::Pass::Diffuse, "");
+        if (!diffuse.Empty())
+        {
+            Variant color = Urho3D::ToVectorVariant(diffuse);
+            if (color.GetType() == Urho3D::VAR_VECTOR3)
+                color = Urho3D::Vector4(color.GetVector3(), 1.0f);
+            if (color.GetType() == Urho3D::VAR_VECTOR4)
+                material->SetShaderParameter("MatDiffColor", color);
+        }
+
         String techniqueName = textures_.Size() ? "Diff.xml" : "NoTexture.xml";
         material->SetTechnique(0, GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Technique>("Techniques/" + techniqueName));
         
