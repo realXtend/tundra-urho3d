@@ -263,7 +263,7 @@ void Mesh::OnMaterialAssetRefsChanged(const AssetReferenceList &mRefs)
             For Lasse to fill.
 
         if (gi >= mRefs.Size() || mRefs.refs[gi].ref.Empty())
-            mesh_->SetMaterial(index, <default_empty_material> or nullptr?);
+            mesh_->SetMaterial(gi, <default_empty_material> or nullptr?);
         */
     }
 }
@@ -273,7 +273,8 @@ void Mesh::OnMaterialAssetFailed(uint index, IAssetTransfer* /*transfer*/, Strin
     /** @todo Set error material to these indexes!
         For Lasse to fill.
 
-    if (mesh_ && mesh_->GetModel())
+    // Don't log an warning on load failure if index is out of submesh range.
+    if (mesh_ && mesh_->GetModel() && index < mesh_->GetNumGeometries())
         mesh_->SetMaterial(index, <default_error_material>);
     */
 }
