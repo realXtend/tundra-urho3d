@@ -360,7 +360,7 @@ void Camera::HandleBeginViewUpdate(Urho3D::StringHash /*eventType*/, Urho3D::Var
     Urho3D::Plane zPlane;
     Urho3D::Vector3 cameraPosition = cameraNode_->GetWorldPosition();
     Urho3D::Vector3 cameraDir = cameraNode_->GetWorldDirection();
-    zPlane.Define(cameraDir, cameraPosition + cameraDir);
+    zPlane.Define(cameraDir, cameraPosition);
     camera_->SetUseReflection(true);
     camera_->SetReflectionPlane(zPlane);
 }
