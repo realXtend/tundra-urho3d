@@ -4,8 +4,9 @@
 
 #include "CoreTypes.h"
 
-#include <Container/HashMap.h>
-#include <Math/StringHash.h>
+#include <Engine/Container/HashMap.h>
+#include <Engine/Math/StringHash.h>
+#include <Engine/Math/Color.h>
 
 /// @cond PRIVATE
 
@@ -179,8 +180,26 @@ struct MaterialBlock
     /// If @c name property exists
     bool Has(const StringHash &name) const;
 
-    /// Return @c name property value for @c index
-    String Value(const StringHash &name, uint index = 0) const;
+    /// Return @c name property as a string for @c index. If not defined empty string is returned.
+    String StringValue(const StringHash &name, uint index = 0) const;
+
+    /// Return @c name property as a string for @c index. If not defined a empty vector is returned.
+    /** All values are trimmed separately and whitespace is removed between values. */
+    StringVector StringVectorValue(const StringHash &name, uint index = 0) const;
+
+    /// Return @c name property as a VectorN for @c index. If not defined or not enough components @c defaultValue is returned.
+    Urho3D::Vector2 Vector2Value(const StringHash &name, const Urho3D::Vector2 &defaultValue, uint index = 0) const;
+    Urho3D::Vector3 Vector3Value(const StringHash &name, const Urho3D::Vector3 &defaultValue, uint index = 0) const;
+    Urho3D::Vector4 Vector4Value(const StringHash &name, const Urho3D::Vector4 &defaultValue, uint index = 0) const;
+
+    /// Return @c name property as a Color for @c index. If not defined or valid color @c defaultValue is returned.
+    Urho3D::Color ColorValue(const StringHash &name, const Urho3D::Color &defaultValue, uint index = 0) const;
+
+    /// Return @c name property as a boolean for @c index. If not defined or valid boolean @c defaultValue is returned.
+    bool BooleanValue(const StringHash &name, bool defaultValue, uint index = 0) const;
+
+    /** @todo Specialized value getters for param_named for "param_named <param_name> float4 1 2 3 4" etc.
+        where <param_name> can be provided and 'float4' etc. indentifiers are chopped from the beginning. */
 
     /// Returns if this block is supported.
     /** If false no properties have been parsed for the block scope. */

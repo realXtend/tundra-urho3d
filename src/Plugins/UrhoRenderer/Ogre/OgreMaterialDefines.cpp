@@ -4,6 +4,8 @@
 #include "OgreMaterialDefines.h"
 #include "LoggingFunctions.h"
 
+#include <Engine/Core/StringUtils.h>
+
 namespace Tundra
 {
 
@@ -122,12 +124,75 @@ bool MaterialBlock::Has(const StringHash &name) const
     return (properties.Find(name) != properties.End());
 }
 
-String MaterialBlock::Value(const StringHash &name, uint index) const
+String MaterialBlock::StringValue(const StringHash &name, uint index) const
 {
     MaterialProperties::ConstIterator iter = properties.Find(name);
     if (iter != properties.End() && index < iter->second_.Size())
         return iter->second_[index];
     return "";
+}
+
+StringVector MaterialBlock::StringVectorValue(const StringHash &name, uint index) const
+{
+    String value = StringValue(name, index).Trimmed();
+    StringVector parts = (!value.Empty() ? value.Split(' ') : StringVector());
+    // Remove empty parts to correctly parse "1.0   1.0  1.0 1.0" type of values
+    for(auto iter = parts.Begin(); iter != parts.End();)
+    {
+        *iter = iter->Trimmed();
+        if (iter->Empty())
+            iter = parts.Erase(iter);
+        else
+            iter++;
+    }
+    return parts;
+}
+
+Urho3D::Vector2 MaterialBlock::Vector2Value(const StringHash &name, const Urho3D::Vector2 &defaultValue, uint index) const
+{
+    StringVector parts = StringVectorValue(name, index);
+    if (parts.Size() >= 2)
+        return Urho3D::Vector2(Urho3D::ToFloat(parts[0].Trimmed()), Urho3D::ToFloat(parts[1]));
+    return defaultValue;
+}
+
+Urho3D::Vector3 MaterialBlock::Vector3Value(const StringHash &name, const Urho3D::Vector3 &defaultValue, uint index) const
+{
+    StringVector parts = StringVectorValue(name, index);
+    if (parts.Size() >= 3)
+        return Urho3D::Vector3(Urho3D::ToFloat(parts[0].Trimmed()), Urho3D::ToFloat(parts[1]), Urho3D::ToFloat(parts[2]));
+    return defaultValue;
+}
+
+Urho3D::Vector4 MaterialBlock::Vector4Value(const StringHash &name, const Urho3D::Vector4 &defaultValue, uint index) const
+{
+    StringVector parts = StringVectorValue(name, index);
+    if (parts.Size() >= 4)
+        return Urho3D::Vector4(Urho3D::ToFloat(parts[0].Trimmed()), Urho3D::ToFloat(parts[1]), Urho3D::ToFloat(parts[2]), Urho3D::ToFloat(parts[3]));
+    return defaultValue;
+}
+
+Urho3D::Color MaterialBlock::ColorValue(const StringHash &name, const Urho3D::Color &defaultValue, uint index) const
+{
+    StringVector parts = StringVectorValue(name, index);
+    if (parts.Size() >= 3)
+    {
+        Urho3D::Color color(Urho3D::ToFloat(parts[0].Trimmed()), Urho3D::ToFloat(parts[1]), Urho3D::ToFloat(parts[2]), 1.f);
+        if (parts.Size() >= 4)
+            color.a_ = Urho3D::ToFloat(parts[3]);
+        return color;
+    }
+    return defaultValue;
+}
+
+bool MaterialBlock::BooleanValue(const StringHash &name, bool defaultValue, uint index) const
+{
+    String value = StringValue(name, index).Trimmed();
+    if (value.Compare("on", false) == 0 || value.Compare("enabled", false) == 0 || value.Compare("true", false) == 0 || value.Compare("1", false) == 0)
+        return true;
+    else if (value.Compare("off", false) == 0 || value.Compare("disabled", false) == 0 || value.Compare("false", false) == 0 || value.Compare("0", false) == 0)
+        return false;
+    return defaultValue;
 }
 
 // MaterialParser
