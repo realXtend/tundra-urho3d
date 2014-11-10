@@ -208,7 +208,10 @@ void AssetRefListListener::HandleChange(const AssetReferenceList &refs)
             Cleared.Emit(i);
     }
     for (int i=numRefs; i<prev.Size(); ++i)
-        Cleared.Emit(i);
+    {
+        if (!prev.refs[i].ref.Empty())
+            Cleared.Emit(static_cast<uint>(i));
+    }
 
     // Request
     while(listeners_.Size() > numRefs)
