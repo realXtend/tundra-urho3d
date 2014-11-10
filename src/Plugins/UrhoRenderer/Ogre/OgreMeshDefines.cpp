@@ -574,7 +574,7 @@ void Bone::CalculateWorldMatrixAndDefaultPose(Skeleton *skeleton)
         worldMatrix = parent->worldMatrix * worldMatrix;
 
     // Recursively for all children now that the parent matrix has been calculated.
-    for (uint i=0, len=children.size(); i<len; ++i)
+    for (size_t i=0, len=children.size(); i<len; ++i)
     {
         Bone *child = skeleton->BoneById(children[i]);
         if (!child) {

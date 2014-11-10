@@ -57,5 +57,44 @@ private:
     String currentWaitingRef;
 };
 
-}
+/// Tracks and notifies about asset change events.
+class TUNDRACORE_API AssetRefListListener : public RefCounted
+{
+public:
+    AssetRefListListener(AssetAPI *assetAPI);
 
+    /// Handles change to refs.
+    /** Checks if there are actual changes against last change.
+        Requests Assets and emits signals. */
+    void HandleChange(const AssetReferenceList &refs);
+
+    /// Returns current known states assets.
+    /** Returned vector will match in size with known state.
+        If index is still loading a null AssePtr is assigned to the index. */
+    Vector<AssetPtr> Assets() const;
+
+    /// Returns Asset for index.
+    AssetPtr Asset(uint index) const;
+
+    /// Emitted when list changes.
+    Signal1<const AssetReferenceList&> Changed;
+
+    /// Emitted when a previously non-empty index was cleared to a empty string.
+    /** @note Fired after Changed. */
+    Signal1<uint> Cleared;
+
+    /// Corresponding AssetRefListener signals with additional asset index.
+    //Signal2<int, IAssetTransfer*> Downloaded; /// @todo Implement when there is need for this
+    Signal2<uint, AssetPtr> Loaded;
+    Signal3<uint, IAssetTransfer*, String> Failed;
+
+private:
+    void OnAssetFailed(IAssetTransfer *transfer, String reason);
+    void OnAssetLoaded(AssetPtr asset);
+
+    AssetAPI *assetAPI_;
+    AssetReferenceList current_;
+    Vector<AssetRefListenerPtr > listeners_;
+};
+
+}

@@ -11,6 +11,7 @@ namespace Urho3D
     class Light;
     class AnimationState;
     class Model;
+    class Material;
     class Texture2D;
     class Zone;
 }
