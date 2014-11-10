@@ -5,6 +5,7 @@
 #include "HttpRequest.h"
 
 #include "Framework.h"
+#include "ConsoleAPI.h"
 #include "LoggingFunctions.h"
 
 #include <curl/curl.h>
@@ -17,7 +18,12 @@ HttpClient::HttpClient(Framework *framework) :
 {
     CURLcode err = curl_global_init(CURL_GLOBAL_DEFAULT);
     if (err == CURLE_OK)
+    {
         queue_ = new HttpWorkQueue();
+
+        if (Stats())
+            framework->Console()->RegisterCommand("httpStats", "Dump HTTP statistics to stdout", this, &HttpClient::DumpStats);
+    }
     else
         LogErrorF("[HttpClient] Failed to initialize curl: %s", curl_easy_strerror(err));
 }
@@ -86,6 +92,11 @@ HttpRequestPtr HttpClient::Delete(const String &url)
     return Schedule(Http::Method::Delete, url);
 }
 
+Http::Stats *HttpClient::Stats() const
+{
+    return (queue_ ? queue_->stats_ : nullptr);
+}
+
 // Private API
 
 HttpRequestPtr HttpClient::Schedule(int method, const String &url)
@@ -113,6 +124,12 @@ void HttpClient::Update(float frametime)
 {
     if (queue_)
         queue_->Update(frametime);
+}
+
+void HttpClient::DumpStats() const
+{
+    if (Stats())
+        Stats()->Dump();
 }
 
 }

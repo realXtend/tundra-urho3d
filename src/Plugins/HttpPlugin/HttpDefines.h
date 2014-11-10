@@ -154,7 +154,9 @@ namespace Http
         String error;
 
         // Time spent executing request and processing data.
-        uint msecSpent;
+        int msecNetwork;
+        int msecDiskRead;
+        int msecDiskWrite;
 
         // Defalt ctor
         RequestData();
@@ -193,6 +195,53 @@ namespace Http
 
         // Default ctor
         ResponseData();
+    };
+
+    struct Stats
+    {
+        struct Totals
+        {
+            uint msecDownload;
+            uint msecUpload;
+            uint msecDiskRead;
+            uint msecDiskWrite;
+
+            uint downloadBytes;
+            uint uploadBytes;
+            uint diskReadBytes;
+            uint diskWriteBytes;
+
+            Totals();
+        }; 
+        struct Averages
+        {
+            double msecDownload;
+            double msecUpload;
+            double msecDiskRead;
+            double msecDiskWrite;
+
+            double downloadBytesPerSec;
+            double uploadBytesPerSec;
+            double bestDownloadBytesPerSec;
+            double bestUploadBytesPerSec;
+
+            Averages();
+        };
+
+        uint requests;
+        uint errors;
+
+        uint downloads;
+        uint uploads;
+        uint diskReads;
+        uint diskWrites;
+
+        Totals totals;
+        Averages averages;
+
+        Stats();
+
+        void Dump(bool io_ = true, bool averages_ = true);
     };
 
     /// @endcond

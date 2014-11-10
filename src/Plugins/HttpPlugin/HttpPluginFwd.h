@@ -40,6 +40,10 @@ namespace Tundra
     }
 
     /// @cond PRIVATE
+    namespace Http
+    {
+        struct Stats;
+    }
     class HttpWorkThread;
     typedef Vector<HttpWorkThread*> HttpWorkThreadList;
     /// @endcond

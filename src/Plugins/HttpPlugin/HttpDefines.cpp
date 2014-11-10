@@ -204,7 +204,9 @@ time_t HttpDateToUtcEpoch(const String &date)
 RequestData::RequestData() :
     curlHandle(0),
     curlHeaders(0),
-    msecSpent(0),
+    msecNetwork(-1),
+    msecDiskRead(-1),
+    msecDiskWrite(-1),
     bodyWritePos(0),
     method(-1)
 {
@@ -249,9 +251,111 @@ ResponseData::ResponseData() :
     httpVersionMajor(-1),
     httpVersionMinor(-1),
     status(-1),
-    downloadBytesPerSec(0.0),
-    uploadBytesPerSec(0.0),
+    downloadBytesPerSec(-1.0),
+    uploadBytesPerSec(-1.0),
     headersParsed(false)
+{
+}
+
+// Stats
+
+Stats::Stats() :
+    requests(0),
+    errors(0),
+    downloads(0),
+    uploads(0),
+    diskReads(0),
+    diskWrites(0)
+{   
+}
+
+String PadDouble(double value, int pad)
+{
+    String v = PadString(Urho3D::ToString("%f", value), pad);
+    if (v.Length() >= pad) // cut digits
+        v = v.Substring(0, 12);
+    return v; 
+}
+
+void Stats::Dump(bool io_, bool averages_)
+{
+    Logger l("HttpStats");
+    l.InfoF("%s %s %s %s %s",
+        PadString("", 14).CString(),
+        PadString("Download", 12).CString(),
+        PadString("Upload", 12).CString(),
+        PadString("Cache Read", 12).CString(),
+        PadString("Cache Write", 12).CString()
+    );
+    l.InfoF("%s %s %s %s %s",
+        PadString("Count", 14).CString(),
+        PadString(downloads, 12).CString(),
+        PadString(uploads, 12).CString(),
+        PadString(diskReads, 12).CString(),
+        PadString(diskWrites, 12).CString()
+    );
+    l.InfoF("%s %s %s %s %s MB",
+        PadString("Size", 14).CString(),
+        PadDouble((totals.downloadBytes / 1024.0) / 1024.0, 12).CString(),
+        PadDouble((totals.uploadBytes / 1024.0) / 1024.0, 12).CString(),
+        PadDouble((totals.diskReadBytes / 1024.0) / 1024.0, 12).CString(),
+        PadDouble((totals.diskWriteBytes / 1024.0) / 1024.0, 12).CString()
+    );
+    l.InfoF("%s %s %s %s %s msec",
+        PadString("Avg. time", 14).CString(),
+        PadDouble(averages.msecDownload > -1.0 ? averages.msecDownload : 0.0, 12).CString(),
+        PadDouble(averages.msecUpload > -1.0 ? averages.msecUpload : 0.0, 12).CString(),
+        PadDouble(averages.msecDiskRead > -1.0 ? averages.msecDiskRead : 0.0, 12).CString(),
+        PadDouble(averages.msecDiskWrite > -1.0 ? averages.msecDiskWrite : 0.0, 12).CString()
+    );
+    l.InfoF("%s %s %s %s %s seconds",
+        PadString("Total time", 14).CString(),
+        PadDouble(totals.msecDownload / 1000.0, 12).CString(),
+        PadDouble(totals.msecUpload / 1000.0, 12).CString(),
+        PadDouble(totals.msecDiskRead / 1000.0, 12).CString(),
+        PadDouble(totals.msecDiskWrite / 1000.0, 12).CString()
+    );
+    l.InfoF("%s %s %s %s %s kB/sec",
+        PadString("Avg. speed", 14).CString(),
+        PadDouble(averages.downloadBytesPerSec > -1.0 ? averages.downloadBytesPerSec / 1024.0 : 0.0, 12).CString(),
+        PadDouble(averages.uploadBytesPerSec > -1.0 ? averages.uploadBytesPerSec / 1024.0 : 0.0, 12).CString(),
+        PadString("", 12).CString(),
+        PadString("", 12).CString()
+    );
+    l.InfoF("%s %s %s %s %s kB/sec",
+        PadString("Best speed", 14).CString(),
+        PadDouble(averages.bestDownloadBytesPerSec > -1.0 ? averages.bestDownloadBytesPerSec / 1024.0 : 0.0, 12).CString(),
+        PadDouble(averages.bestUploadBytesPerSec > -1.0 ? averages.bestUploadBytesPerSec / 1024.0 : 0.0, 12).CString(),
+        PadString("", 12).CString(),
+        PadString("", 12).CString()
+    );
+}
+
+// Stats::IO
+
+Stats::Totals::Totals() :
+    msecDownload(0),
+    msecUpload(0),
+    msecDiskRead(0),
+    msecDiskWrite(0),
+    downloadBytes(0),
+    uploadBytes(0),
+    diskReadBytes(0),
+    diskWriteBytes(0)
+{
+}
+
+// Stats::Averages
+
+Stats::Averages::Averages() :
+    msecDownload(-1.0),
+    msecUpload(-1.0),
+    msecDiskRead(-1.0),
+    msecDiskWrite(-1.0),
+    downloadBytesPerSec(-1.0),
+    uploadBytesPerSec(-1.0),
+    bestDownloadBytesPerSec(-1.0),
+    bestUploadBytesPerSec(-1.0)
 {
 }
 
