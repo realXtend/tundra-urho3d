@@ -62,13 +62,7 @@ bool OgreMaterialAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
         }
         String diffuse = pass->StringValue(Ogre::Material::Pass::Diffuse, "");
         if (!diffuse.Empty())
-        {
-            Variant color = Urho3D::ToVectorVariant(diffuse);
-            if (color.GetType() == Urho3D::VAR_VECTOR3)
-                color = Urho3D::Vector4(color.GetVector3(), 1.0f);
-            if (color.GetType() == Urho3D::VAR_VECTOR4)
-                material->SetShaderParameter("MatDiffColor", color);
-        }
+            material->SetShaderParameter("MatDiffColor", pass->ColorValue(Ogre::Material::Pass::Diffuse, Urho3D::Color::WHITE));
 
         String techniqueName = textures_.Size() ? "Diff.xml" : "NoTexture.xml";
         material->SetTechnique(0, GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Technique>("Techniques/" + techniqueName));
