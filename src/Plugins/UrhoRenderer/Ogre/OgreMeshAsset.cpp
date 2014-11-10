@@ -757,7 +757,8 @@ struct VertexElementSource
     VertexElementSource() :
         enabled(false),
         src(0),
-        stride(0)
+        stride(0),
+        ogreType(Ogre::VertexElement::VET_FLOAT1)
     {
     }
 
@@ -768,6 +769,7 @@ struct VertexElementSource
 
     bool enabled;
     u8* src;
+    Ogre::VertexElement::Type ogreType;
     uint stride;
 };
 
@@ -781,8 +783,16 @@ void CheckVertexElement(unsigned& elementMask, VertexElementSource* sources, Ogr
 
     if (ogreDesc->type != ogreType)
     {
-        LogWarning("Vertex element " + ogreDesc->SemanticToString() + " found, but type is " + ogreDesc->TypeToString() + " so can not use include in mesh asset");
-        return;
+        bool typeChangeOk = false;
+        // Allow tangents to also be FLOAT3 if needed
+        if (ogreDesc->semantic == Ogre::VertexElement::VES_TANGENT && ogreDesc->type == Ogre::VertexElement::VET_FLOAT3)
+            typeChangeOk = true;
+
+        if (!typeChangeOk)
+        {
+            LogWarning("Vertex element " + ogreDesc->SemanticToString() + " found, but type is " + ogreDesc->TypeToString() + " so can not use include in mesh asset");
+            return;
+        }
     }
 
     Vector<u8>* ogreVb = vertexData->VertexBuffer(ogreDesc->source);
@@ -795,6 +805,7 @@ void CheckVertexElement(unsigned& elementMask, VertexElementSource* sources, Ogr
     elementMask |= 1 << ((uint)urhoElement);
     desc->enabled = true;
     desc->src = &ogreVb->At(0) + (size_t)(ogreDesc->offset);
+    desc->ogreType = ogreType;
     desc->stride = 0;
 
     // To find out the stride in this Ogre source buffer we need to iterate all the vertex elements in that particular buffer
@@ -806,7 +817,7 @@ void CheckVertexElement(unsigned& elementMask, VertexElementSource* sources, Ogr
     }
 }
 
-SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre::VertexData* vertexData)
+SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre::VertexData* vertexData, Urho3D::BoundingBox& outBox)
 {
     SharedPtr<Urho3D::VertexBuffer> ret;
     if (!vertexData || !vertexData->count)
@@ -831,6 +842,7 @@ SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre:
 
     // Fill all enabled elements with source data, forming interleaved Urho vertices
     float* dest = (float*)data;
+    bool tangentIsFloat4 = sources[Urho3D::ELEMENT_TANGENT].ogreType == Ogre::VertexElement::VET_FLOAT4;
     while (count--)
     {
         if (elementMask & Urho3D::MASK_POSITION)
@@ -838,6 +850,7 @@ SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre:
             *dest++ = ((float*)sources[Urho3D::ELEMENT_POSITION].src)[0];
             *dest++ = ((float*)sources[Urho3D::ELEMENT_POSITION].src)[1];
             *dest++ = ((float*)sources[Urho3D::ELEMENT_POSITION].src)[2];
+            outBox.Merge(*(reinterpret_cast<Urho3D::Vector3*>(sources[Urho3D::ELEMENT_POSITION].src)));
             sources[Urho3D::ELEMENT_POSITION].MoveToNext();
         }
         if (elementMask & Urho3D::MASK_NORMAL)
@@ -869,7 +882,10 @@ SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre:
             *dest++ = ((float*)sources[Urho3D::ELEMENT_TANGENT].src)[0];
             *dest++ = ((float*)sources[Urho3D::ELEMENT_TANGENT].src)[1];
             *dest++ = ((float*)sources[Urho3D::ELEMENT_TANGENT].src)[2];
-            *dest++ = ((float*)sources[Urho3D::ELEMENT_TANGENT].src)[3];
+            if (tangentIsFloat4)
+                *dest++ = ((float*)sources[Urho3D::ELEMENT_TANGENT].src)[3];
+            else
+                *dest++ = 1.0f;
             sources[Urho3D::ELEMENT_TANGENT].MoveToNext();
         }
     }
@@ -931,9 +947,9 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
     model = new Urho3D::Model(GetContext());
     uint subMeshCount = mesh->NumSubMeshes();
     model->SetNumGeometries(subMeshCount);
-    model->SetBoundingBox(Urho3D::BoundingBox(mesh->min, mesh->max));
+    Urho3D::BoundingBox bounds;
 
-    SharedPtr<Urho3D::VertexBuffer> sharedVb = MakeVertexBuffer(GetContext(), mesh->sharedVertexData);
+    SharedPtr<Urho3D::VertexBuffer> sharedVb = MakeVertexBuffer(GetContext(), mesh->sharedVertexData, bounds);
 
     for (uint i = 0; i < subMeshCount; ++i)
     {
@@ -951,11 +967,13 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
         if (ib->GetIndexCount())
             ib->SetData(&subMesh->indexData->buffer[0]);
         geom->SetIndexBuffer(ib);
-        geom->SetVertexBuffer(0, subMesh->usesSharedVertexData ? sharedVb : MakeVertexBuffer(GetContext(), subMesh->vertexData));
+        geom->SetVertexBuffer(0, subMesh->usesSharedVertexData ? sharedVb : MakeVertexBuffer(GetContext(), subMesh->vertexData, bounds));
         geom->SetDrawRange(ConvertPrimitiveType(subMesh->operationType), 0, ib->GetIndexCount());
         model->SetNumGeometryLodLevels(i, 1);
         model->SetGeometry(i, 0, geom);
     }
+
+    model->SetBoundingBox(bounds);
 
     /// \todo Handle skinning data, morphs etc.
 
