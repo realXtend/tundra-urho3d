@@ -651,6 +651,11 @@ void Framework::ApplyStartupOptions(VariantMap &engineInitMap)
         else
             LogWarning("Erroneous FPS limit given with --fpsLimit: " + fpsLimitInactiveParam.Front() + ". Ignoring.");
     }
+
+    if (CommandLineParameters("--antialias").Size() > 0) // "Full screen antialiasing factor"
+        engineInitMap["MultiSample"] = Urho3D::ToInt(CommandLineParameters("--antialias").Front());
+    else if (Config()->HasKey(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_RENDERING, "antialias"))
+        engineInitMap["MultiSample"] = Config()->Read(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_RENDERING, "antialias").GetInt();
 }
 
 void Framework::PrintStartupOptions()
