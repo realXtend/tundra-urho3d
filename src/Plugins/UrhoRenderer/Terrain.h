@@ -13,7 +13,7 @@
 #include "Math/Transform.h"
 
 #include <Math/float3.h>
-#include <StaticModel.h>
+#include <Model.h>
 
 namespace Tundra
 {
@@ -104,7 +104,7 @@ public:
         - fully loaded. The GPU data is also loaded and the node, entity and meshGeometryName fields specify the used GPU resources. */
     struct Patch
     {
-        Patch():x(0), y(0), node(0), urhoMesh(0), patch_geometry_dirty(true) {}
+        Patch():x(0), y(0), node(0), patch_geometry_dirty(true) {}
 
         /// X-coordinate on the grid of patches. In the range [0, Terrain::PatchWidth()].
         uint x;
@@ -118,11 +118,9 @@ public:
 
         /// Urho3D -specific: Store a reference to the actual render hierarchy node.
         Urho3D::Node *node;
-    //    Ogre::SceneNode *node;
 
         /// Urho3D -specific: Store a reference to the mesh that is attached to the above SceneNode.
-        SharedPtr<Urho3D::StaticModel> urhoMesh;
-    //    Ogre::Entity *entity;
+        SharedPtr<Urho3D::Model> urhoModel;
 
         /// The name of the Mesh resource that contains the GPU geometry data for this patch.
         String meshGeometryName;
@@ -241,7 +239,7 @@ private:
     void AttachTerrainRootNode();
 
     /// Creates the patch parent/root node if it does not exist.
-    /** After this function returns, the 'root' member node will exist, unless Ogre rendering subsystem fails. */
+    /** After this function returns, the 'root' member node will exist. */
     void CreateRootNode();
 
     Urho3D::Node* CreateUrhoTerrainPatchNode(Urho3D::Node* parent, uint patchX, uint patchY) const;
@@ -265,6 +263,9 @@ private:
     /** Preserves as much of the terrain height data as possible. Dirties the patches, but does not regenerate them.
         @note This function does not adjust the xPatches or yPatches attributes. */
     void ResizeTerrain(uint newPatchWidth, uint newPatchHeight);
+
+    /// Releases all resources used for the given patch.
+    void DestroyPatch(uint x, uint y);
 
     /// Updates the terrain material with the new texture on the given texture unit index.
     /// @param index The texture unit index to set the new texture to.

@@ -55,12 +55,14 @@ Terrain::~Terrain()
         return;
     }
 
+    
+    rootNode_->Remove();
+    rootNode_.Reset();
+
     foreach (Patch patch, patches_)
     {
-        patch.urhoMesh.Reset();
+        patch.urhoModel.Reset();
     }
-    
-    rootNode_.Reset();
 }
 
 void Terrain::UpdateSignals()
@@ -98,27 +100,103 @@ void Terrain::CreateRootNode()
         assert(rootNode_);
 
         // Add the newly created node to scene or to a parent EC_Placeable.
-        AttachTerrainRootNode();
+        if (rootNode_)
+            AttachTerrainRootNode();
 
-        //UpdateRootNodeTransform();
+        UpdateRootNodeTransform();
     }
 }
 
-//void Terrain::UpdateRootNodeTransform()
-//{
-//    if (!rootNode)
-//        return;
-//
-//    const Transform &tm = nodeTransformation.Get();
-//
-//    Ogre::Matrix3 rot_new;
-//    rot_new.FromEulerAnglesXYZ(Ogre::Degree(tm.rot.x), Ogre::Degree(tm.rot.y), Ogre::Degree(tm.rot.z));
-//    Ogre::Quaternion q_new(rot_new);
-//
-//    rootNode->setOrientation(Ogre::Quaternion(rot_new));
-//    rootNode->setPosition(tm.pos.x, tm.pos.y, tm.pos.z);
-//    rootNode->setScale(tm.scale.x, tm.scale.y, tm.scale.z);
-//}
+void Terrain::UpdateRootNodeTransform()
+{
+    if (!rootNode_)
+        return;
+
+    const Transform &tm = nodeTransformation.Get();
+
+    rootNode_->SetRotation(Urho3D::Quaternion(tm.Orientation()));
+    rootNode_->SetPosition(Urho3D::Vector3(tm.pos));
+    rootNode_->SetScale(Urho3D::Vector3(tm.scale));
+}
+
+void Terrain::ResizeTerrain(uint newPatchWidth, uint newPatchHeight)
+{
+    PROFILE(Terrain_ResizeTerrain);
+
+    const uint maxPatchSize = 256;
+    // Do an artificial limit to a preset N patches per side. (This limit is way too large already for the current terrain vertex LOD management.)
+    newPatchWidth = Max(1U, Min(maxPatchSize, newPatchWidth));
+    newPatchHeight = Max(1U, Min(maxPatchSize, newPatchHeight));
+
+    if (newPatchWidth == patchWidth_ && newPatchHeight == patchHeight_)
+        return;
+
+    // If the width changes, we need to also regenerate the old right-most column to generate the new seams. (If we are shrinking, this is not necessary)
+    if (patchWidth_ < newPatchWidth)
+        for(uint y = 0; y < patchHeight_; ++y)
+            GetPatch(patchWidth_ - 1, y).patch_geometry_dirty = true;
+
+    // If the height changes, we need to also regenerate the old top-most row to generate the new seams. (If we are shrinking, this is not necessary)
+    if (patchHeight_ < newPatchHeight)
+        for(uint x = 0; x < patchWidth_; ++x)
+            GetPatch(x, patchHeight_ - 1).patch_geometry_dirty = true;
+
+    // First delete all the patches that will not be part of the newly-sized terrain (user shrinked the terrain in one or two dimensions)
+    for(uint y = newPatchHeight; y < patchHeight_; ++y)
+        for(uint x = 0; x < patchWidth_; ++x)
+            DestroyPatch(x, y);
+    for(uint x = newPatchWidth; x < patchWidth_; ++x) // We hav esome overlap here with above, but it's ok since DestroyPatch is benign.
+        for(uint y = 0; y < patchHeight_; ++y)
+            DestroyPatch(x, y);
+
+    // Now create the new terrain patch storage and copy the old height values over.
+    Vector<Patch> newPatches(newPatchWidth * newPatchHeight);
+    for(uint y = 0; y < Min(patchHeight_, newPatchHeight); ++y)
+        for(uint x = 0; x < Min(patchWidth_, newPatchWidth); ++x)
+            newPatches[y * newPatchWidth + x] = GetPatch(x, y);
+    patches_ = newPatches;
+    uint oldPatchWidth = patchWidth_;
+    uint oldPatchHeight = patchHeight_;
+    patchWidth_ = newPatchWidth;
+    patchHeight_ = newPatchHeight;
+
+    // Init any new patches to flat planes with the given fixed height.
+
+    const float initialPatchHeight = 0.f;
+
+    for(uint y = oldPatchHeight; y < newPatchHeight; ++y)
+        for(uint x = 0; x < patchWidth_; ++x)
+            MakePatchFlat(x, y, initialPatchHeight);
+    for(uint x = oldPatchWidth; x < newPatchWidth; ++x) // We have some overlap here with above, but it's ok since DestroyPatch is benign.
+        for(uint y = 0; y < patchHeight_; ++y)
+            MakePatchFlat(x, y, initialPatchHeight);
+
+    // Tell each patch which coordinate in the grid they lie in.
+    for(uint y = 0; y < patchHeight_; ++y)
+        for(uint x = 0; x < patchWidth_; ++x)
+        {
+            GetPatch(x,y).x = x;
+            GetPatch(x,y).y = y;
+        }
+}
+
+void Terrain::DestroyPatch(uint x, uint y)
+{
+    if (x >= patchWidth_ || y >= patchHeight_)
+        return;
+
+    if (!GetFramework() || world_.Expired()) // Already destroyed or not initialized at all.
+        return;
+    
+    Terrain::Patch &patch = GetPatch(x, y);
+
+    if (patch.node)
+    {
+        patch.node->Remove();
+        patch.urhoModel.Reset();
+        patch.node = 0;
+    }
+}
 
 void Terrain::MakePatchFlat(uint x, uint y, float heightValue)
 {
@@ -142,26 +220,27 @@ void Terrain::AttributesChanged()
     if (!rootNode_)
         return;
 
+    bool sizeChanged = xPatches.ValueChanged() || yPatches.ValueChanged();
+    bool needFullRecreate = uScale.ValueChanged() || vScale.ValueChanged();
+    bool needIncrementalRecreate = needFullRecreate || sizeChanged;
+
+    // If the height map source has changed, we are going to request the new terrain asset,
+    // which means that any changes to the current terrain attributes (size, scale, etc.) can
+    // be ignored - we will be doing a full reload of the terrain from the asset when it completes loading.
+    if (heightMap.ValueChanged())
+        sizeChanged = needFullRecreate = needIncrementalRecreate = false;
    
     if (nodeTransformation.ValueChanged())
-    {
-        const Transform &newTransform = nodeTransformation.Get();
-        rootNode_->SetPosition(newTransform.pos);
-        rootNode_->SetRotation(newTransform.Orientation());
-        rootNode_->SetScale(newTransform.scale);
-    }
-    //if (xPatches.ValueChanged())
-    //    mesh_->SetDrawDistance(drawDistance.Get());
-    //if (xPatches.ValueChanged())
-    //    mesh_->SetCastShadows(castShadows.Get());
-    if (uScale.ValueChanged())
-    {
-        /// \todo Implement
-    }
-    if (vScale.ValueChanged())
-    {
-        /// \todo Implement
-    }
+        UpdateRootNodeTransform();
+    
+    if (needFullRecreate)
+        DirtyAllTerrainPatches();
+    if (sizeChanged)
+        ResizeTerrain(xPatches.Get(), yPatches.Get());
+    if (needIncrementalRecreate)
+        RegenerateDirtyTerrainPatches();
+    
+    
     if (heightMap.ValueChanged())
     {
         if (heightMap.Get().ref.Trimmed().Empty())
@@ -245,7 +324,7 @@ float3 Terrain::CalculateNormal(uint x, uint y, uint xinside, uint yinside) cons
         y_slope *= 2;
 
     // Note: heightmap X & Y correspond to X & Z world axes, while height is world Y
-    return float3(x_slope, 2.0, y_slope).Normalized();
+    return float3(x_slope, 2.0f, y_slope).Normalized();
 }
 
 u32 ReadU32(const char *dataPtr, size_t numBytes, int &offset)
@@ -319,6 +398,12 @@ bool Terrain::LoadFromDataInMemory(const char *data, size_t numBytes)
     return true;
 }
 
+void Terrain::DirtyAllTerrainPatches()
+{
+    for(size_t i = 0; i < patches_.Size(); ++i)
+        patches_[i].patch_geometry_dirty = true;
+}
+
 void Terrain::RegenerateDirtyTerrainPatches()
 {
     PROFILE(Terrain_RegenerateDirtyTerrainPatches);
@@ -326,6 +411,7 @@ void Terrain::RegenerateDirtyTerrainPatches()
     Entity *parentEntity = ParentEntity();
     if (!parentEntity)
         return;
+
     Placeable *position = parentEntity->Component<Placeable>().Get();
     if (!GetFramework()->IsHeadless() && (!position || position->visible.Get())) // Only need to create GPU resources if the placeable itself is visible.
     {
@@ -375,32 +461,27 @@ void Terrain::AttachTerrainRootNode()
     if (world_.Expired()) 
         return;
 
-    //if (!rootNode)
-    //{
-    //    // CreateRootNode calls this function once the root node has been created.
-    //    CreateRootNode();
-    //    return;
-    //}
+    if (!rootNode_)
+    {
+        // CreateRootNode calls this function once the root node has been created.
+        CreateRootNode();
+        return;
+    }
 
-    //Ogre::SceneManager *sceneMgr = world_.lock()->OgreSceneManager();
+    Urho3D::Scene* urhoScene = world_.Lock()->UrhoScene();
 
-    //// Detach the terrain root node from any previous EC_Placeable scenenode.
-    //if (rootNode->getParentSceneNode())
-    //    rootNode->getParentSceneNode()->removeChild(rootNode);
-
-    // If this entity has an EC_Placeable, make sure it is the parent of this terrain component.
+    // If this entity has a Placeable, make sure it is the parent of this terrain component.
     SharedPtr<Placeable> pos = (ParentEntity() ? ParentEntity()->Component<Placeable>() : SharedPtr<Placeable>());
     if (pos != nullptr)
     {
-        //Ogre::SceneNode *parent = pos->GetSceneNode();
-        //parent->addChild(rootNode);
+        pos->UrhoSceneNode()->AddChild(rootNode_);
         rootNode_->SetEnabled(pos->visible.Get()); // Re-apply visibility on all the geometry.
     }
-    //else
-    //{
-    //    // No EC_Placeable: the root node is attached to the scene directly.
-    //    sceneMgr->getRootSceneNode()->addChild(rootNode);
-    //}
+    else
+    {
+        // No Placeable: the root node is attached to the scene directly.
+        urhoScene->AddChild(rootNode_);
+    }
 }
 
 Urho3D::Node* Terrain::CreateUrhoTerrainPatchNode(Urho3D::Node* parent, uint patchX, uint patchY) const
@@ -411,7 +492,7 @@ Urho3D::Node* Terrain::CreateUrhoTerrainPatchNode(Urho3D::Node* parent, uint pat
 
     String name = String("Terrain_Patch_") + String(patchX) + "_" + String(patchY);
     node = parent->CreateChild(name);
-      //  sceneMgr->createSceneNode(world->GetUniqueObjectName(name));
+     
     if (!node)
         return node;
 
@@ -436,31 +517,27 @@ void Terrain::GenerateTerrainGeometryForOnePatch(uint patchX, uint patchY)
         return;
     if (world_.Expired())
         return;
-//    GraphicsWorldPtr world = world_.Lock();
-//    Urho3D::Scene *scene = world->UrhoScene();
 
-    //Urho3D::Node *node = patch.node;
-    //bool firstTimeFill = (node == 0);
-    //UNREFERENCED_PARAM(firstTimeFill);
-    //if (!node)
-    //{
-    //    CreateOgreTerrainPatchNode(node, patch.x, patch.y);
-    //    patch.node = node;
-    //}
-    //assert(node);
+
+    if (patch.node)
+    {
+        patch.node->Remove();
+        patch.node = 0;
+        patch.urhoModel.Reset();
+    }
+
+    patch.node = CreateUrhoTerrainPatchNode(rootNode_, patch.x, patch.y);
+    assert(patch.node);
 
     /// \todo material
     //Ogre::MaterialPtr terrainMaterial = Ogre::MaterialManager::getSingleton().getByName(currentMaterial.toStdString().c_str());
     //if (!terrainMaterial.get()) // If we could not find the material we were supposed to use, just use the default system terrain material.
     //    terrainMaterial = OgreRenderer::GetOrCreateLitTexturedMaterial("Rex/TerrainPCF");
-
-    if (patch.node)
-        rootNode_->RemoveChild(patch.node);
-    patch.node = CreateUrhoTerrainPatchNode(rootNode_, patch.x, patch.y);//rootNode_->CreateChild("Terrain_patch");
-    assert(patch.node);
-    patch.urhoMesh = patch.node->CreateComponent<Urho3D::StaticModel>();
-    patch.urhoMesh->SetCastShadows(false);
-    Urho3D::Model *manual = new Urho3D::Model(GetContext());
+    
+    Urho3D::StaticModel* staticModel = patch.node->CreateComponent<Urho3D::StaticModel>();
+    staticModel->SetCastShadows(false);
+    SharedPtr<Urho3D::Model> manual = SharedPtr<Urho3D::Model>(new Urho3D::Model(GetContext()));
+    patch.urhoModel = manual;
     manual->SetNumGeometries(1);
 
     Urho3D::Vector<unsigned short> indexData;
@@ -561,21 +638,7 @@ void Terrain::GenerateTerrainGeometryForOnePatch(uint patchX, uint patchY)
         }
     }
     int numVertices = curIndex;
-    //LogInfo("numInd " + String(indexData.Size()) + " " + String(cPatchVertexWidth) + " " + String(cPatchVertexHeight) + " skip " + String(skip));
-    //LogInfo("numVertices " + String(numVertices));
-    //LogInfo(String("min ") + String(boundsMin.ToString().c_str()) + "  " + String(boundsMax.ToString().c_str()));
 
-    /// \todo is cleanup necessary?
-    // If there exists a previously generated GPU Mesh resource, delete it before creating a new one.
-    //if (patch.meshGeometryName.Length() > 0)
-    //{
-
-    //    try
-    //    {
-    //        Ogre::MeshManager::getSingleton().remove(patch.meshGeometryName);
-    //    }
-    //    catch(...) {}
-    //}
 
     SharedPtr<Urho3D::Geometry> geom(new Urho3D::Geometry(GetContext()));
     SharedPtr<Urho3D::IndexBuffer> ib(new Urho3D::IndexBuffer(GetContext()));
@@ -596,37 +659,11 @@ void Terrain::GenerateTerrainGeometryForOnePatch(uint patchX, uint patchY)
     manual->SetGeometry(0, 0, geom);
     manual->SetBoundingBox(Urho3D::BoundingBox(Urho3D::Vector3(boundsMin), Urho3D::Vector3(boundsMax)));
 
-    patch.urhoMesh->SetModel(manual);
+    staticModel->SetModel(manual);
 
-//    LogInfo("index counct " + String(ib->GetIndexCount()));
-
-    /// \todo Add reference to entity and component to Urho node user vars (patch.node->SetVar)
-    //patch.node->SetVar("key", Urho3D::Variant(static_cast<IComponent *>(this)));
-
-    //patch.meshGeometryName = world->GetUniqueObjectName("EC_Terrain_patchmesh");
-    //Ogre::MeshPtr terrainMesh = manual->convertToMesh(patch.meshGeometryName);
-
-    // Odd: destroyManualObject seems to leave behind a memory leak if we don't call manualObject->clear first.
-    //manual->clear();
-    //sceneMgr->destroyManualObject(manual);
-
-    /*patch.entity = sceneMgr->createEntity(world->GetUniqueObjectName("EC_Terrain_patchentity"), patch.meshGeometryName);
-    patch.entity->setUserAny(Ogre::Any(static_cast<IComponent *>(this)));
-    patch.entity->setCastShadows(false);*/
-    // Set UserAny also on subentities
-    //for(uint i = 0; i < patch.entity->getNumSubEntities(); ++i)
-    //    patch.entity->getSubEntity(i)->setUserAny(patch.entity->getUserAny());
-
-    // Explicitly destroy all attached MovableObjects previously bound to this terrain node.
-    //Ogre::SceneNode::ObjectIterator iter = node->getAttachedObjectIterator();
-    //while(iter.hasMoreElements())
-    //{
-    //    Ogre::MovableObject *obj = iter.getNext();
-    //    sceneMgr->destroyMovableObject(obj);
-    //}
-    //node->detachAllObjects();
-    //// Now attach the new built terrain mesh.
-    //node->attachObject(patch.entity);
+    // Make the entity & component links for identifying raycasts
+    patch.node->SetVar(GraphicsWorld::entityLink, Variant(WeakPtr<RefCounted>(ParentEntity())));
+    patch.node->SetVar(GraphicsWorld::componentLink, Variant(WeakPtr<RefCounted>(this)));
 
     patch.patch_geometry_dirty = false;
 
