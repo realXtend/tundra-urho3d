@@ -23,11 +23,18 @@ echo.
 cecho {0A}Requirements for a successful execution:{# #}{\n}
 echo    1. Install Git and make sure 'git' is accessible from PATH.
 echo     - http://code.google.com/p/tortoisegit/
-echo    2. Install Android SDK and NDK and make sure they are accessible from PATH
+echo    2. Install Android SDK and NDK and Apache Ant. Make sure Ant and the
+echo       following Android SDK directories are accessible from PATH.
+echo     - YourAndroidSDKInstallDir\tools
+echo     - YourAndroidSDKInstallDir\platform-tools
 echo    3. Setup ANDROID_NDK environment variable to point to the root of the
 echo       Android NDK.
-echo    4. Have a make utility accessible from PATH, for example Android NDK or
-echo       MinGW make
+echo    4. Setup ANDROID_SDK environment variable to point to the root of the
+echo       Android SDK.
+echo    5. Have a make utility accessible from PATH, for example Android NDK or
+echo       MinGW make. You can eg. copy the make utility to a directory that
+echo       is already accessible from PATH; the NDK does not otherwise need to
+echo       be accessible.
 echo If you are not ready with the above, press Ctrl-C to abort!
 pause
 echo.
