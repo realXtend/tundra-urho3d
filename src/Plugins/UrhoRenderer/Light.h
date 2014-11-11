@@ -137,6 +137,9 @@ private:
     /// Detaches light from placeable
     void DetachLight();
 
+    /// Updates light type & shadow resolution
+    void SetLightType();
+
     /// placeable component 
     PlaceableWeakPtr placeable_;
 

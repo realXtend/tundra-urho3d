@@ -94,15 +94,7 @@ void Light::AttributesChanged()
         return;
 
     if (type.ValueChanged())
-    {
-        int tundraType = type.Get();
-        Urho3D::LightType urhoType = Urho3D::LIGHT_DIRECTIONAL;
-        if (tundraType == PointLight)
-            urhoType = Urho3D::LIGHT_POINT;
-        else if (tundraType == Spotlight)
-            urhoType = Urho3D::LIGHT_SPOT;
-        light_->SetLightType(urhoType);
-    }
+        SetLightType();
     if (diffColor.ValueChanged())
         light_->SetColor(diffColor.Get());
     // Specular color value ignored, only use intensity
@@ -143,13 +135,7 @@ void Light::AttachLight()
     
     light_ = placeableNode->CreateComponent<Urho3D::Light>();
 
-    int tundraType = type.Get();
-    Urho3D::LightType urhoType = Urho3D::LIGHT_DIRECTIONAL;
-    if (tundraType == PointLight)
-        urhoType = Urho3D::LIGHT_POINT;
-    else if (tundraType == Spotlight)
-        urhoType = Urho3D::LIGHT_SPOT;
-    light_->SetLightType(urhoType);
+    SetLightType();
     light_->SetColor(diffColor.Get());
     light_->SetSpecularIntensity(specColor.Get().ToFloat4().AverageOfElements());
     light_->SetCastShadows(castShadows.Get());
@@ -175,6 +161,25 @@ void Light::DetachLight()
         light_.Reset();
         placeable_.Reset();
     }
+}
+
+void Light::SetLightType()
+{
+    int tundraType = type.Get();
+    float shadowResolution = 1.0f;
+
+    Urho3D::LightType urhoType = Urho3D::LIGHT_DIRECTIONAL;
+    if (tundraType == PointLight)
+    {
+        shadowResolution = 0.5f;
+        urhoType = Urho3D::LIGHT_POINT;
+    }
+    else if (tundraType == Spotlight)
+    {
+        urhoType = Urho3D::LIGHT_SPOT;
+    }
+    light_->SetShadowResolution(shadowResolution);
+    light_->SetLightType(urhoType);
 }
 
 }
