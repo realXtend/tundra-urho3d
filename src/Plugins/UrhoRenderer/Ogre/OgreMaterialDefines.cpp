@@ -211,7 +211,7 @@ void MaterialBlock::Dump(bool recursive, uint indentation)
         const StringVector &values = iter->second_;
         if (!values.Empty())
         {
-            for (int vi=0; vi<values.Size(); ++vi)
+            for (uint vi=0; vi<values.Size(); ++vi)
             {
                 if (vi == 0)
                     LogInfoF("%s%s '%s'", ind.CString(), PadString(propertyNames[iter->first_], 20).CString(), values[vi].CString());

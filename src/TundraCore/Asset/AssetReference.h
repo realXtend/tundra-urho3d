@@ -43,7 +43,7 @@ public:
     /** Not all asset types can support this kind of interpretation. For example, avatar assets are of type .xml, which can
         only be distinguished from generic xml files by explicitly specifying the type here.
 
-        @sa AssetAPI::GetResourceTypeForAssetRef() */
+        @sa AssetAPI::ResourceTypeForAssetRef() */
     String type;
 
     unsigned ToHash() const { return ref.ToHash() | type.ToHash(); }
@@ -80,7 +80,7 @@ struct TUNDRACORE_API AssetReferenceList
     }
 
     /// Return size of the list.
-    int Size() const { return refs.Size(); }
+    uint Size() const { return refs.Size(); }
 
     /// Inserts @ref at the end of the list.
     void Append(const AssetReference &ref) { refs.Push(ref); }
@@ -91,38 +91,26 @@ struct TUNDRACORE_API AssetReferenceList
     /// Sets new value in the list.
     /** @param i Index.
         @ref New asset reference value. */
-    void Set(int i, const AssetReference& ref)
+    void Set(uint i, const AssetReference& ref)
     {
-        if (i >= 0 && i < (int)refs.Size())
+        if (i < refs.Size())
             refs[i] = ref;
     }
 
     /// Subscript operator. If index @c i is invalid and empty AssetReference is returned.
-    /** @note Doesn't return reference for script-compatibility/safety.*/
-    const AssetReference operator[] (int i)
-    {
-        if (i < 0 || i >= (int)refs.Size())
-            return AssetReference();
-        else
-            return refs[i];
-    }
+    /** @todo Add (script-compatible) safe At() function, if needed. */
+    AssetReference &operator[] (uint i) { return refs[i]; }
 
     /// @overload
-    /** @note Doesn't return reference for script-compatibility/safety. */
-    const AssetReference operator[] (int i) const
-    {
-        if (i < 0 || i >= (int)refs.Size())
-            return AssetReference();
-        else
-            return refs[i];
-    }
+    /** @todo Add (script-compatible) safe At() function, if needed. */
+    const AssetReference &operator[] (uint i) const { return refs[i]; }
 
     /// Returns true if @c rhs is equal to this list, otherwise false.
     bool operator ==(const AssetReferenceList &rhs) const 
     {
         if (this->refs.Size() != rhs.refs.Size())
             return false;
-        for(uint i = 0; i < (uint)this->refs.Size(); ++i)
+        for(uint i = 0; i < this->refs.Size(); ++i)
             if (this->refs[i].ref != rhs.refs[i].ref)
                 return false;
         return true;
@@ -136,7 +124,7 @@ struct TUNDRACORE_API AssetReferenceList
 
     /// Preferred type for asset refs in the list
     /** @sa AssetReference::type;
-        @sa AssetAPI::GetResourceTypeForAssetRef() */
+        @sa AssetAPI::ResourceTypeForAssetRef() */
     String type;
 };
 

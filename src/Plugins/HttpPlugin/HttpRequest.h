@@ -126,7 +126,7 @@ public:
 
     /// Returns time spent in networking in milliseconds.
     /** @return -1 if request not completed yet or did not perform any networking. */
-    uint DurationMSec();
+    int DurationMSec();
 
     /// Returns average download speed in bytes/second.
     /** @return -1.f if request not completed yet or did not perform any downloading. */
@@ -175,10 +175,10 @@ public:
     ///////////////////////// SIGNALS
 
     /// Emitted on completion.
-    /** @param Request pointer. You can store this to keep the ptr alive but it is not recommended.
-        @param HTTP response status code. -1 if request failed.
-        @param Error string. Empty string if request failed. */
-    Signal3<HttpRequestPtr&, int, const String&> Finished;
+    /** @param request Request pointer. You can store this to keep the ptr alive but it is not recommended.
+        @param statusCode HTTP response status code. -1 if request failed.
+        @param errorMsg Error string. Empty string if request failed. */
+    Signal3<HttpRequestPtr & ARG(request), int ARG(statusCode), const String & ARG(errorMsg)> Finished;
 
 private:
     /// Constructed by HttpClient.

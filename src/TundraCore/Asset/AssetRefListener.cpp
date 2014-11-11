@@ -185,12 +185,12 @@ void AssetRefListListener::HandleChange(const AssetReferenceList &refs)
 
     // Set current internal refs
     current_ = refs;
-    uint numRefs = static_cast<uint>(current_.Size());
+    uint numRefs = current_.Size();
 
     // Trim and resolve internal refs
     for (uint i=0; i<numRefs; ++i)
     {
-        AssetReference &ref = current_.refs[i];
+        AssetReference &ref = current_[i];
         ref.ref = ref.ref.Trimmed();
         if (!ref.ref.Empty())
             ref.ref = assetAPI_->ResolveAssetRef("", ref.ref);
@@ -202,15 +202,15 @@ void AssetRefListListener::HandleChange(const AssetReferenceList &refs)
     // Cleared
     for (uint i=0; i<numRefs; ++i)
     {
-        const AssetReference &ref = current_.refs[i];
-        const AssetReference &prevRef = (i < static_cast<uint>(prev.Size()) ? prev.refs[i] : AssetReference());
+        const AssetReference &ref = current_[i];
+        const AssetReference &prevRef = (i < prev.Size() ? prev[i] : AssetReference());
         if (ref.ref.Empty() && !prevRef.ref.Empty())
             Cleared.Emit(i);
     }
-    for (int i=numRefs; i<prev.Size(); ++i)
+    for(uint i = numRefs; i < prev.Size(); ++i)
     {
-        if (!prev.refs[i].ref.Empty())
-            Cleared.Emit(static_cast<uint>(i));
+        if (!prev[i].ref.Empty())
+            Cleared.Emit(i);
     }
 
     // Request
@@ -227,7 +227,7 @@ void AssetRefListListener::HandleChange(const AssetReferenceList &refs)
     }
     for (uint i=0; i<numRefs; ++i)
     {
-        const AssetReference &ref = current_.refs[i];
+        const AssetReference &ref = current_[i];
         if (!ref.ref.Empty())
             listeners_[i]->HandleAssetRefChange(assetAPI_, ref.ref, ref.type);
     }
@@ -236,9 +236,9 @@ void AssetRefListListener::HandleChange(const AssetReferenceList &refs)
 Vector<AssetPtr> AssetRefListListener::Assets() const
 {
     Vector<AssetPtr> assets;
-    for (int i=0; i<current_.Size(); ++i)
+    for (uint i = 0; i < current_.Size(); ++i)
     {
-        const AssetReference &ref = current_.refs[i];
+        const AssetReference &ref = current_[i];
         if (!ref.ref.Empty())
             assets.Push(assetAPI_->FindAsset(ref.ref));
         else
@@ -249,8 +249,8 @@ Vector<AssetPtr> AssetRefListListener::Assets() const
 
 AssetPtr AssetRefListListener::Asset(uint index) const
 {
-    if (index < static_cast<uint>(current_.Size()) && !current_.refs[index].ref.Empty())
-        return assetAPI_->FindAsset(current_.refs[index].ref);
+    if (index < current_.Size() && !current_[index].ref.Empty())
+        return assetAPI_->FindAsset(current_[index].ref);
     return AssetPtr();
 }
 
@@ -261,13 +261,13 @@ void AssetRefListListener::OnAssetFailed(IAssetTransfer *transfer, String reason
 
     bool signaled = false;
     String failedRef = transfer->SourceUrl();
-    for (int i=0; i<current_.Size(); ++i)
+    for(uint i = 0; i < current_.Size(); ++i)
     {
-        const AssetReference &ref = current_.refs[i];
+        const AssetReference &ref = current_[i];
         if (ref.ref.Compare(failedRef) == 0)
         {
             // Don't break/return. Same asset might be in multiple indexes!
-            Failed.Emit(static_cast<uint>(i), transfer, reason);
+            Failed.Emit(i, transfer, reason);
             signaled = true;
         }
     }
@@ -282,13 +282,13 @@ void AssetRefListListener::OnAssetLoaded(AssetPtr asset)
 
     bool signaled = false;
     String completedRef = asset->Name();
-    for (int i=0; i<current_.Size(); ++i)
+    for(uint i = 0; i < current_.Size(); ++i)
     {
-        const AssetReference &ref = current_.refs[i];
+        const AssetReference &ref = current_[i];
         if (ref.ref.Compare(completedRef) == 0)
         {
             // Don't break/return. Same asset might be in multiple indexes!
-            Loaded.Emit(static_cast<uint>(i), asset);
+            Loaded.Emit(i, asset);
             signaled = true;
         }
     }

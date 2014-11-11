@@ -268,7 +268,7 @@ String HttpRequest::Status()
     return responseData_.statusText;
 }
 
-uint HttpRequest::DurationMSec()
+int HttpRequest::DurationMSec()
 {
     if (!HasCompleted())
         return -1;

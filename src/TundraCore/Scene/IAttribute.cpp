@@ -238,7 +238,7 @@ template<> String TUNDRACORE_API Attribute<AssetReferenceList>::ToString() const
 {
     String stringValue;
     const AssetReferenceList &values = Get();
-    for(int i = 0; i < values.Size(); ++i)
+    for(uint i = 0; i < values.Size(); ++i)
     {
         stringValue += values[i].ref;
         if (i < values.Size() - 1)
@@ -455,7 +455,7 @@ template<> void TUNDRACORE_API Attribute<AssetReference>::ToBinary(kNet::DataSer
 template<> void TUNDRACORE_API Attribute<AssetReferenceList>::ToBinary(kNet::DataSerializer& dest) const
 {
     dest.Add<u8>((u8)value.Size()); /**< @todo Use VLE, allow more than 255 refs */
-    for(int i = 0; i < value.Size(); ++i)
+    for(uint i = 0; i < value.Size(); ++i)
         dest.AddString(value[i].ref.CString()); /**< @todo Allow longer strings than 255 chars */
 }
 
@@ -676,7 +676,7 @@ template<> void TUNDRACORE_API Attribute<VariantList>::Interpolate(IAttribute* /
 
 template<> void TUNDRACORE_API Attribute<int>::Interpolate(IAttribute* start, IAttribute* end, float t, AttributeChange::Type change)
 {
-    Attribute<int>* startInt = dynamic_cast<Attribute<int>*>(start);
+    Attribute<int>* startInt = dynamic_cast<Attribute<int>*>(start); /**< @todo (checked_)static_cast for all of these? */
     Attribute<int>* endInt = dynamic_cast<Attribute<int>*>(end);
     if (startInt && endInt)
         Set(RoundInt(Lerp((float)startInt->Get(), (float)endInt->Get(), t)), change);
