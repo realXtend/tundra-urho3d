@@ -6,7 +6,7 @@ setlocal EnableDelayedExpansion
 
 :: Make sure we're running in Visual Studio Command Prompt
 IF "%VSINSTALLDIR%"=="" (
-   cecho {0C}Batch file not executed from Visual Studio Command Prompt - cannot proceed!{# #}{\n}
+   %TOOLS%\Utils\cecho {0C}Batch file not executed from Visual Studio Command Prompt - cannot proceed!{# #}{\n}
    GOTO :ERROR
 )
 
