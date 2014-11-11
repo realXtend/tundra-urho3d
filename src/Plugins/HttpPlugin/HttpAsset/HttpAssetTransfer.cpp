@@ -15,7 +15,8 @@ namespace Tundra
 {
 
 HttpAssetTransfer::HttpAssetTransfer(HttpAssetProvider *provider, HttpRequestPtr &request, const String &assetRef_, const String &assetType_) :
-    provider_(provider)
+    provider_(provider),
+    request_(request)
 {
     // Prepare IAssetTransfer
     source.ref = assetRef_;
@@ -36,7 +37,7 @@ HttpAssetTransfer::HttpAssetTransfer(HttpAssetProvider *provider, HttpRequestPtr
     }
 
     // Connect to finished signal
-    request->Finished.Connect(this, &HttpAssetTransfer::OnFinished);
+    request_->Finished.Connect(this, &HttpAssetTransfer::OnFinished);
 }
 
 HttpAssetTransfer::~HttpAssetTransfer()
@@ -45,6 +46,9 @@ HttpAssetTransfer::~HttpAssetTransfer()
 
 void HttpAssetTransfer::OnFinished(HttpRequestPtr &request, int status, const String &error)
 {
+    // Clear out reference.
+    request_.Reset();
+
     // We can consider 200 and 304 as success. Other 3xx codes may represent redirects to the real location,
     // but these redirects are automatically detected and executed by HttpRequest.
     if ((status == 200 || status == 304) && error.Empty())

@@ -27,6 +27,11 @@ typedef WeakPtr<IAssetBundle> AssetBundleWeakPtr;
 class IAssetTransfer;
 typedef SharedPtr<IAssetTransfer> AssetTransferPtr;
 typedef WeakPtr<IAssetTransfer> AssetTransferWeakPtr;
+typedef Vector<AssetTransferPtr > AssetTransferPtrVector;
+
+class IAssetTransferPrioritizer;
+typedef SharedPtr<IAssetTransferPrioritizer> AssetTransferPrioritizerPtr;
+typedef WeakPtr<IAssetTransferPrioritizer> AssetTransferPrioritizerWeakPtr;
 
 class AssetBundleMonitor;
 typedef SharedPtr<AssetBundleMonitor> AssetBundleMonitorPtr;

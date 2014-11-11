@@ -4,7 +4,9 @@
 
 #include "AssetAPI.h"
 #include "CoreDefines.h"
+
 #include "IAssetTransfer.h"
+#include "IAssetTransferPrioritizer.h"
 #include "IAsset.h"
 #include "IAssetBundle.h"
 #include "IAssetStorage.h"
@@ -12,6 +14,8 @@
 #include "IAssetTypeFactory.h"
 #include "IAssetBundleTypeFactory.h"
 #include "IAssetUploadTransfer.h"
+
+#include "DefaultAssetTransferPrioritizer.h"
 #include "GenericAssetFactory.h"
 #include "NullAssetFactory.h"
 #include "LocalAssetProvider.h"
@@ -37,6 +41,8 @@ AssetAPI::AssetAPI(Framework *framework, bool headless) :
     isHeadless(headless),
     assetCache(0)
 {
+    transferPrioritizer_ = new DefaultAssetTransferPrioritizer();
+
     AssetProviderPtr local(new LocalAssetProvider(fw));
     RegisterAssetProvider(local);
 
@@ -72,6 +78,16 @@ void AssetAPI::OpenAssetCache(String directory)
 Vector<AssetProviderPtr> AssetAPI::AssetProviders() const
 {
     return providers;
+}
+
+void AssetAPI::SetAssetTransferPrioritizer(AssetTransferPrioritizerPtr prioritizer)
+{
+    transferPrioritizer_ = prioritizer;
+}
+
+AssetTransferPrioritizerWeakPtr AssetAPI::AssetTransferPrioritizer() const
+{
+    return AssetTransferPrioritizerWeakPtr(transferPrioritizer_);
 }
 
 void AssetAPI::RegisterAssetProvider(AssetProviderPtr provider)
@@ -952,7 +968,7 @@ AssetTransferPtr AssetAPI::RequestAsset(String assetRef, String assetType, bool 
     }
 
     // Perform the actual request from the provider.
-    AssetTransferPtr transfer = provider->RequestAsset(assetRef, assetType);
+    AssetTransferPtr transfer = provider->CreateTransfer(assetRef, assetType);
     if (!transfer)
     {
         LogError("AssetAPI::RequestAsset: Failed to request asset \"" + assetRef + "\", type: \"" + assetType + "\"");
@@ -968,6 +984,9 @@ AssetTransferPtr AssetAPI::RequestAsset(String assetRef, String assetType, bool 
     // Store the newly allocated AssetTransfer internally, so that any duplicated requests to this asset 
     // will return the same request pointer, so we'll avoid multiple downloads to the exact same asset.
     currentTransfers[assetRef] = transfer;
+
+    // Push to pending transfers. These will be sorted by IAssetTransferPrioritizer prior to actual execution.
+    pendingTransfers_.Push(transfer);
 
     // Request for a direct asset reference.
     if (!isSubAsset)
@@ -1462,12 +1481,38 @@ void AssetAPI::Update(float frametime)
 {
     PROFILE(AssetAPI_Update);
 
-    for(uint i = 0; i < providers.Size(); ++i)
+    // Prioritize and execute pending transfers
+    if (!pendingTransfers_.Empty())
+    {
+        PROFILE(AssetAPI_PrioritizeTransfers);
+
+        if (transferPrioritizer_)
+        {
+            AssetTransferPtrVector sorted = transferPrioritizer_->Prioritize(pendingTransfers_);
+            if (sorted.Size() == pendingTransfers_.Size())
+                pendingTransfers_ = sorted;
+            else
+                LogErrorF("AssetAPI: IAssetTransferPrioritizer implementation returned incorrect amount of transfers. Returned %d when expecting %d", sorted.Size(), pendingTransfers_.Size());
+        }
+        foreach(AssetTransferPtr transfer, pendingTransfers_)
+        {
+            if (transfer->provider)
+                transfer->provider->ExecuteTransfer(transfer);
+            else
+                LogErrorF("AssetAPI: Cannot execute asset transfer '%s' as it has no provider", transfer->SourceUrl().CString());
+        }
+        pendingTransfers_.Clear();
+    }
+
+    // Update providers
+    for(uint i = 0, num = providers.Size(); i<num; ++i)
         providers[i]->Update(frametime);
 
     // Proceed with ready transfers.
     if (readyTransfers.Size() > 0)
     {
+        PROFILE(AssetAPI_Process_Completed);
+
         // Normally it is the AssetProvider's responsibility to call AssetTransferCompleted when a download finishes.
         // The 'readyTransfers' list contains all the asset transfers that don't have any AssetProvider serving them. These occur in two cases:
         // 1) A client requested an asset that was already loaded. In that case the request is not given to any assetprovider, but delayed in readyTransfers
@@ -1475,7 +1520,7 @@ void AssetAPI::Update(float frametime)
         // 2) We found the asset from disk cache. No need to ask an assetprovider
 
         // Call AssetTransferCompleted manually for any asset that doesn't have an AssetProvider serving it. ("virtual transfers").
-        for(uint i = 0; i < readyTransfers.Size(); ++i)
+        for(uint i = 0, num = readyTransfers.Size(); i<num; ++i)
             AssetTransferCompleted(readyTransfers[i].Get());
         readyTransfers.Clear();
     }
@@ -1483,10 +1528,12 @@ void AssetAPI::Update(float frametime)
     // Proceed with ready sub asset transfers.
     if (readySubTransfers.Size() > 0)
     {
+        PROFILE(AssetAPI_Process_SubTransfers);
+
         // readySubTransfers contains sub asset transfers to loaded bundles. The sub asset loading cannot be completed in RequestAsset
         // as it would trigger signals before the calling code can receive and hook to the AssetTransfer. We delay calling LoadSubAssetToTransfer
         // into this function so that all is hooked and loading can be done normally. This is very similar to the above case for readyTransfers.
-        for(uint i = 0; i < readySubTransfers.Size(); ++i)
+        for(uint i = 0, num = readySubTransfers.Size(); i<num; ++i)
         {
             AssetTransferPtr subTransfer = readySubTransfers[i].subAssetTransfer;
             LoadSubAssetToTransfer(subTransfer, readySubTransfers[i].parentBundleRef, subTransfer->source.ref);

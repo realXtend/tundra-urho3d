@@ -57,7 +57,7 @@ bool LocalAssetProvider::IsValidRef(String assetRef, String) const
         return false;
 }
 
-AssetTransferPtr LocalAssetProvider::RequestAsset(String assetRef, String assetType)
+AssetTransferPtr LocalAssetProvider::CreateTransfer(String assetRef, String assetType)
 {
     PROFILE(LocalAssetProvider_RequestAsset);
     if (assetRef.Empty())
@@ -81,10 +81,13 @@ AssetTransferPtr LocalAssetProvider::RequestAsset(String assetRef, String assetT
     transfer->source.ref = assetRef.Trimmed();
     transfer->assetType = assetType;
     transfer->diskSourceType = IAsset::Original; // The disk source represents the original authoritative source for the asset.
-    
-    pendingDownloads.Push(transfer);
 
     return transfer;
+}
+
+void LocalAssetProvider::ExecuteTransfer(AssetTransferPtr transfer)
+{
+    pendingDownloads.Push(transfer);
 }
 
 bool LocalAssetProvider::AbortTransfer(IAssetTransfer *transfer)

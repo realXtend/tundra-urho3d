@@ -76,11 +76,11 @@ bool HttpAssetProvider::IsValidRef(String assetRef, String assetType) const
     return (assetRef.StartsWith("http://") || assetRef.StartsWith("https://"));
 }
 
-AssetTransferPtr HttpAssetProvider::RequestAsset(String assetRef, String assetType)
+AssetTransferPtr HttpAssetProvider::CreateTransfer(String assetRef, String assetType)
 {
     assetRef = assetRef.Trimmed();
 
-    HttpRequestPtr request = client_->Get(assetRef);
+    HttpRequestPtr request = client_->Create(Http::Method::Get, assetRef);
     if (!request)
         return AssetTransferPtr();
     
@@ -88,6 +88,13 @@ AssetTransferPtr HttpAssetProvider::RequestAsset(String assetRef, String assetTy
     transfer->provider = this;
 
     return transfer;
+}
+
+void HttpAssetProvider::ExecuteTransfer(AssetTransferPtr transfer)
+{
+    HttpAssetTransfer *httpTransfer = dynamic_cast<HttpAssetTransfer*>(transfer.Get());
+    if (httpTransfer)
+        client_->Schedule(httpTransfer->Request());
 }
 
 bool HttpAssetProvider::AbortTransfer(IAssetTransfer *transfer)

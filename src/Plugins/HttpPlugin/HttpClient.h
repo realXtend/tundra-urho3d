@@ -56,10 +56,17 @@ public:
     Http::Stats *Stats() const;
 
 private:
+    /// Create a request without scheduling it.
+    HttpRequestPtr Create(int method, const String &url);
+    HttpRequestPtr Create(int method, const String &url, const Vector<u8> &body, const String &contentType);
+
+    /// Schedule a request.
     HttpRequestPtr Schedule(int method, const String &url);
     HttpRequestPtr Schedule(int method, const String &url, const Vector<u8> &body, const String &contentType);
+    bool Schedule(HttpRequestPtr request);
 
     friend class HttpPlugin;
+    friend class HttpAssetProvider;
     void Update(float frametime);
 
     void DumpStats() const;

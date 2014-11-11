@@ -99,6 +99,18 @@ Http::Stats *HttpClient::Stats() const
 
 // Private API
 
+HttpRequestPtr HttpClient::Create(int method, const String &url)
+{
+    return HttpRequestPtr(new HttpRequest(framework_, method, url));
+}
+
+HttpRequestPtr HttpClient::Create(int method, const String &url, const Vector<u8> &body, const String &contentType)
+{
+    HttpRequestPtr request(new HttpRequest(framework_, method, url));
+    request->SetBody(body, contentType);
+    return request;
+}
+
 HttpRequestPtr HttpClient::Schedule(int method, const String &url)
 {
     if (!queue_)
@@ -118,6 +130,14 @@ HttpRequestPtr HttpClient::Schedule(int method, const String &url, const Vector<
     request->SetBody(body, contentType);
     queue_->Schedule(request);
     return request;
+}
+
+bool HttpClient::Schedule(HttpRequestPtr request)
+{
+    if (!queue_)
+        return false;
+    queue_->Schedule(request);
+    return true;
 }
 
 void HttpClient::Update(float frametime)

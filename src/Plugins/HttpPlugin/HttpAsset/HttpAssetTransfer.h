@@ -17,10 +17,13 @@ public:
     HttpAssetTransfer(HttpAssetProvider *provider, HttpRequestPtr &request, const String &assetRef_, const String &assetType_);
     ~HttpAssetTransfer();
 
+    HttpRequestPtr Request() const { return request_; }
+
 private:
     void OnFinished(HttpRequestPtr &request, int status, const String &error);
 
     HttpAssetProvider *provider_;
+    HttpRequestPtr request_;
 };
 
 }

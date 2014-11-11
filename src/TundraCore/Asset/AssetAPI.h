@@ -65,6 +65,16 @@ public:
     template<typename T>
     Vector<SharedPtr<T> > AssetsOfType() const;
 
+    /// Set new asset transfer prioritizer.
+    /** Can be used to override the DefaultAssetTransferPrioritizer implementation
+        that is automatically set by AssetAPI.
+        @note You can also pass a null ptr to remove any asset prioritization. */
+    void SetAssetTransferPrioritizer(AssetTransferPrioritizerPtr prioritizer);
+
+    /// Returns the current asset transfer prioritizer.
+    /** The returned pointer may also be null. @see SetAssetTransferPrioritizer */
+    AssetTransferPrioritizerWeakPtr AssetTransferPrioritizer() const;
+
     /// Registers a type factory for creating assets of the type governed by the factory.
     void RegisterAssetTypeFactory(AssetTypeFactoryPtr factory);
 
@@ -514,6 +524,12 @@ private:
 
     /// Stores all the currently ongoing asset transfers.
     AssetTransferMap currentTransfers;
+
+    /// Stores all currently pending transfers.
+    AssetTransferPtrVector pendingTransfers_;
+
+    /// Asset transfer prioritizer.
+    AssetTransferPrioritizerPtr transferPrioritizer_;
 
     /// Stores all the currently ongoing asset bundle monitors.
     AssetBundleMonitorMap bundleMonitors;

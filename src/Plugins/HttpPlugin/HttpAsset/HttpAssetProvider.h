@@ -26,7 +26,9 @@ public:
     /// IAssetProvider override.
     bool IsValidRef(String assetRef, String assetType) const override;
     /// IAssetProvider override.
-    AssetTransferPtr RequestAsset(String assetRef, String assetType) override;
+    AssetTransferPtr CreateTransfer(String assetRef, String assetType) override;
+    /// IAssetProvider override.
+    void ExecuteTransfer(AssetTransferPtr transfer) override;
     /// IAssetProvider override.
     bool AbortTransfer(IAssetTransfer *transfer) override;
     /// IAssetProvider override.

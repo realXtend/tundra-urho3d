@@ -39,10 +39,13 @@ public:
                or if the provider in question does not need the type information, this can be left blank. */
     virtual bool IsValidRef(String assetRef, String assetType) const = 0;
 
-    /// Request asset with assetRef and assetType from this provider.
+    /// Create asset transfer for @c assetRef and @c assetType.
     /** @return Initiated asset transfer. Note that this can be null. */
-    virtual AssetTransferPtr RequestAsset(String assetRef, String assetType) = 0;
-    
+    virtual AssetTransferPtr CreateTransfer(String assetRef, String assetType) = 0;
+
+    /// Execute transfer that this provider has created and prepared in CreateTransfer.
+    virtual void ExecuteTransfer(AssetTransferPtr transfer) = 0;
+
     /// Aborts the ongoing transfer, returns true if successful and false otherwise.
     /** Override this function in a provider implementation if it supports aborting. */
     virtual bool AbortTransfer(IAssetTransfer * UNUSED_PARAM(transfer)) { return false; }
