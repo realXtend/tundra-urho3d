@@ -189,9 +189,13 @@ public:
     uint VerticesHeight() const { return PatchHeight() * cPatchSize; }
 
     /// Returns the height value on the given terrain grid point.
-    /// @param x In the range [0, EC_Terrain::PatchWidth * EC_Terrain::cPatchSize [.
-    /// @param y In the range [0, EC_Terrain::PatchHeight * EC_Terrain::cPatchSize [.
+    /// @param x In the range [0, Terrain::PatchWidth * Terrain::cPatchSize [.
+    /// @param y In the range [0, Terrain::PatchHeight * Terrain::cPatchSize [.
     float GetPoint(uint x, uint y) const;
+
+    void SetPointHeight(uint x, uint y, float height);
+
+    bool LoadFromImageFile(String filename, float offset, float scale);
 
     /// Loads the terrain height map data from the given in-memory .ntf file buffer.
     bool LoadFromDataInMemory(const char *data, size_t numBytes);
@@ -266,6 +270,8 @@ private:
 
     /// Releases all resources used for the given patch.
     void DestroyPatch(uint x, uint y);
+
+    void Destroy();
 
     /// Updates the terrain material with the new texture on the given texture unit index.
     /// @param index The texture unit index to set the new texture to.

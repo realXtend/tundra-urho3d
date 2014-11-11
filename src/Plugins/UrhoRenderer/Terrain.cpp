@@ -13,6 +13,7 @@
 #include "BinaryAsset.h"
 #include "TextureAsset.h"
 #include "Placeable.h"
+#include "AssetAPI.h"
 
 #include <Engine/Scene/Scene.h>
 #include <Node.h>
@@ -22,6 +23,8 @@
 #include <IndexBuffer.h>
 #include <Geometry.h>
 #include <Math/MathFunc.h>
+#include <Image.h>
+#include <MemoryBuffer.h>
 
 
 namespace Tundra
@@ -35,7 +38,9 @@ Terrain::Terrain(Urho3D::Context* context, Scene* scene) :
     INIT_ATTRIBUTE_VALUE(uScale, "Tex. U scale", 0.0f),
     INIT_ATTRIBUTE_VALUE(vScale, "Tex. V scale", 0.0f),
     INIT_ATTRIBUTE_VALUE(material, "Material", AssetReference("", "Material")),
-    INIT_ATTRIBUTE_VALUE(heightMap, "Heightmap", AssetReference("", "Heightmap"))
+    INIT_ATTRIBUTE_VALUE(heightMap, "Heightmap", AssetReference("", "Heightmap")),
+    patchWidth_(1),
+    patchHeight_(1)
 {
     patches_.Resize(1);
     MakePatchFlat(0, 0, 0.f);
@@ -198,12 +203,29 @@ void Terrain::DestroyPatch(uint x, uint y)
     }
 }
 
+void Terrain::Destroy()
+{
+    for(uint y = 0; y < patchHeight_; ++y)
+        for(uint x = 0; x < patchWidth_; ++x)
+            DestroyPatch(x, y);
+
+    if (!GetFramework() || world_.Expired()) // Already destroyed or not initialized at all.
+        return;
+
+    if (rootNode_)
+    {
+        rootNode_->Remove();
+        rootNode_ = 0;
+    }
+}
+
+
 void Terrain::MakePatchFlat(uint x, uint y, float heightValue)
 {
     Patch &patch = GetPatch(x, y);
     patch.heightData.Clear();
     patch.heightData.Reserve(cPatchSize * cPatchSize);
-    for (size_t i=0 ; i<patch.heightData.Size() ; ++i)
+    for (size_t i=0 ; i<cPatchSize * cPatchSize ; ++i)
         patch.heightData.Push(heightValue);
     
     patch.patch_geometry_dirty = true;
@@ -272,28 +294,27 @@ void Terrain::OnTerrainAssetLoaded(AssetPtr asset_)
     if (assetData)
         LoadFromDataInMemory((const char*)&assetData->data[0], assetData->data.Size());
 
-    /// \todo allow terrain loading from image heightmap
-    //if (textureData)
-    //{
-    //    if (textureData->DiskSource().Empty())
-    //    {
-    //        LogError("Tried to load terrain from texture file \"" + textureData->Name() + "\", but this requires a disk source of the asset for the load to work properly!");
-    //        return;
-    //    }
-    //    std::map<String, String> args = ParseAssetRefArgs(heightMap.Get().ref, 0);
-    //    float scale = 30.f;
-    //    float offset = 0.f;
-    //    if (args.find("scale") != args.end())
-    //        scale = ToFloat(args["scale"]);
-    //    if (args.find("offset") != args.end())
-    //        offset = ToFloat(args["offset"]);
-    //    ///\todo Add support for converting the loaded image file directly to a .ntf asset and refer to that one.
-    //    bool success = LoadFromImageFile(textureData->DiskSource(), offset, scale);
-    //    if (!success)
-    //    {
-    //        LogError("Failed to load terrain from texture source \"" + textureData->Name() + "\"! Loading the file \"" + textureData->DiskSource() + "\" failed!");
-    //    }
-    //}
+    if (textureData)
+    {
+        if (textureData->DiskSource().Empty())
+        {
+            LogError("Tried to load terrain from texture file \"" + textureData->Name() + "\", but this requires a disk source of the asset for the load to work properly!");
+            return;
+        }
+        HashMap<String, String> args = ParseAssetRefArgs(heightMap.Get().ref, 0);
+        float scale = 30.f;
+        float offset = 0.f;
+        if (args.Find("scale") != args.End())
+            scale = ToFloat(args["scale"]);
+        if (args.Find("offset") != args.End())
+            offset = ToFloat(args["offset"]);
+        ///\todo Add support for converting the loaded image file directly to a .ntf asset and refer to that one.
+        bool success = LoadFromImageFile(textureData->DiskSource(), offset, scale);
+        if (!success)
+        {
+            LogError("Failed to load terrain from texture source \"" + textureData->Name() + "\"! Loading the file \"" + textureData->DiskSource() + "\" failed!");
+        }
+    }
 }
 
 float Terrain::GetPoint(uint x, uint y) const
@@ -304,6 +325,14 @@ float Terrain::GetPoint(uint x, uint y) const
         y = cPatchSize * patchHeight_ - 1;
 
     return GetPatch(x / cPatchSize, y / cPatchSize).heightData[(y % cPatchSize) * cPatchSize + (x % cPatchSize)];
+}
+
+void Terrain::SetPointHeight(uint x, uint y, float height)
+{
+    if (x >= cPatchSize * patchWidth_ || y >= cPatchSize * patchHeight_)
+        return; // Out of bounds signals are silently ignored.
+
+    GetPatch(x / cPatchSize, y / cPatchSize).heightData[(y % cPatchSize) * cPatchSize + (x % cPatchSize)] = height;
 }
 
 float3 Terrain::CalculateNormal(uint x, uint y, uint xinside, uint yinside) const
@@ -337,6 +366,40 @@ u32 ReadU32(const char *dataPtr, size_t numBytes, int &offset)
     u32 data = *(u32*)(dataPtr + offset); ///@note Requires unaligned load support from the CPU and assumes data storage endianness to be the same for loader and saver.
     offset += 4;
     return data;
+}
+
+bool Terrain::LoadFromImageFile(String filename, float offset, float scale)
+{
+    SharedPtr<Urho3D::Image> image = SharedPtr<Urho3D::Image>(new Urho3D::Image(GetContext()));
+    Vector<u8> data;
+    if (!LoadFileToVector(filename, data))
+        return false;
+
+    Urho3D::MemoryBuffer imageBuffer(&data[0], data.Size());
+    if (!image->Load(imageBuffer))
+        return false;
+
+    // Note: In the following, we round down, so if the image size is not a multiple of cPatchSize (== 16),
+    // we will not use the whole image contents.
+    xPatches.Set((uint)image->GetWidth() / cPatchSize, AttributeChange::Disconnected);
+    yPatches.Set((uint)image->GetHeight() / cPatchSize, AttributeChange::Disconnected);
+    ResizeTerrain(xPatches.Get(), yPatches.Get());
+
+    for(uint y = 0; y < yPatches.Get() * cPatchSize; ++y)
+        for(uint x = 0; x < xPatches.Get() * cPatchSize; ++x)
+        {
+            Urho3D::Color c = image->GetPixel(x, y);
+            float height = offset + scale * ((c.r_ + c.g_ + c.b_) / 3.f); // Treat the image as a grayscale heightmap field with the color in range [0,1].
+            SetPointHeight(x, y, height);
+        }
+
+    xPatches.Changed(AttributeChange::LocalOnly);
+    yPatches.Changed(AttributeChange::LocalOnly);
+
+    DirtyAllTerrainPatches();
+    RegenerateDirtyTerrainPatches();
+
+    return true;
 }
 
 bool Terrain::LoadFromDataInMemory(const char *data, size_t numBytes)
@@ -376,8 +439,7 @@ bool Terrain::LoadFromDataInMemory(const char *data, size_t numBytes)
     }
 
     // The terrain asset loaded ok. We are good to set that terrain as the active terrain.
-    /// \todo enable
-//    Destroy();
+    Destroy();
 
     patches_ = newPatches;
     patchWidth_ = xPatches;
