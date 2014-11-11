@@ -114,6 +114,9 @@ public:
     /// Returns the asset provider this asset was loaded from.
     AssetProviderPtr AssetProvider() const;
 
+    /// Returns the AssetAPI this asset is managed by.
+    AssetAPI* GetAssetAPI() const { return assetAPI; }
+
     /// Returns a textual human-readable representation of this asset in the form "<name> (<type>)".
     String ToString() const;
 

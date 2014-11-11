@@ -26,6 +26,7 @@ IMaterialAsset::~IMaterialAsset()
 void IMaterialAsset::DoUnload()
 {
     material.Reset();
+    textures_.Clear();
 }
 
 bool IMaterialAsset::IsLoaded() const

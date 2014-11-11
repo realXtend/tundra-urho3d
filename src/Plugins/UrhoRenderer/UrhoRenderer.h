@@ -48,6 +48,15 @@ public:
     /// Returns window height, or 0 if no render window
     int WindowHeight() const;
 
+    /// Register an Ogre material processor for material loading/conversion.
+    void RegisterOgreMaterialProcessor(IOgreMaterialProcessor* processor, bool addFirst = true);
+
+    /// Unregister an Ogre material processor.
+    void UnregisterOgreMaterialProcessor(IOgreMaterialProcessor* processor);
+
+    /// Find an available material processor for a material. Return null if none acceptable.
+    IOgreMaterialProcessor* FindOgreMaterialProcessor(const Ogre::MaterialParser& material) const;
+
 private:
     void Load() override;
     void Initialize() override;
@@ -63,6 +72,9 @@ private:
 
     /// Stores the camera that is active in the main window.
     EntityWeakPtr activeMainCamera;
+
+    /// Registered Ogre material processors.
+    Vector<SharedPtr<IOgreMaterialProcessor> > materialProcessors;
 };
 
 }

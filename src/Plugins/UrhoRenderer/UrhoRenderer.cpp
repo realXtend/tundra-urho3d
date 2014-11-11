@@ -22,6 +22,7 @@
 #include "UrhoMeshAsset.h"
 #include "Ogre/OgreMeshAsset.h"
 #include "Ogre/OgreMaterialAsset.h"
+#include "Ogre/DefaultOgreMaterialProcessor.h"
 #include "GenericAssetFactory.h"
 
 #include <Engine/Graphics/Camera.h>
@@ -36,6 +37,8 @@ namespace Tundra
 UrhoRenderer::UrhoRenderer(Framework* owner) :
     IModule("UrhoRenderer", owner)
 {
+    // Register default material convertor
+    RegisterOgreMaterialProcessor(new DefaultOgreMaterialProcessor(GetContext()));
 }
 
 UrhoRenderer::~UrhoRenderer()
@@ -208,6 +211,39 @@ int UrhoRenderer::WindowHeight() const
 {
     Urho3D::Graphics* gfx = GetSubsystem<Urho3D::Graphics>();
     return gfx ? gfx->GetHeight() : 0;
+}
+
+void UrhoRenderer::RegisterOgreMaterialProcessor(IOgreMaterialProcessor* processor, bool addFirst)
+{
+    if (addFirst)
+        materialProcessors.Insert(0, SharedPtr<IOgreMaterialProcessor>(processor));
+    else
+        materialProcessors.Push(SharedPtr<IOgreMaterialProcessor>(processor));
+}
+
+void UrhoRenderer::UnregisterOgreMaterialProcessor(IOgreMaterialProcessor* processor)
+{
+    for (Vector<SharedPtr<IOgreMaterialProcessor> >::Iterator i = materialProcessors.Begin(); i != materialProcessors.End(); ++i)
+    {
+        if (i->Get() == processor)
+        {
+            materialProcessors.Erase(i);
+            return;
+        }
+    }
+
+    LogWarning("Could not find Ogre material processor to remove");
+}
+
+IOgreMaterialProcessor* UrhoRenderer::FindOgreMaterialProcessor(const Ogre::MaterialParser& material) const
+{
+    for (Vector<SharedPtr<IOgreMaterialProcessor> >::ConstIterator i = materialProcessors.Begin(); i != materialProcessors.End(); ++i)
+    {
+        if ((*i)->CanConvert(material))
+            return *i;
+    }
+
+    return nullptr;
 }
 
 void UrhoRenderer::CreateGraphicsWorld(Scene *scene, AttributeChange::Type)

@@ -26,8 +26,11 @@ public:
     /// IAsset override.
     bool IsLoaded() const override;
 
+    /// Textures and the units they belong to.
+    Vector<Pair<int, AssetReference> > textures_;
+
 protected:
-    /// Unload mesh. IAsset override.
+    /// Unload material. IAsset override.
     void DoUnload() override;
 
     /// Urho material resource. Filled by the loading implementations in subclasses.

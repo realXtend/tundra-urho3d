@@ -23,9 +23,6 @@ public:
     Vector<AssetReference> FindReferences() const override;
     /// IAsset override.
     void DependencyLoaded(AssetPtr dependee) override;
-
-private:
-    Vector<AssetReference> textures_;
 };
 
 }

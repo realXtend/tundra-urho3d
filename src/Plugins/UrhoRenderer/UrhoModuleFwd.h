@@ -23,7 +23,13 @@ namespace Tundra
     class Placeable;
     class Mesh;
     class Camera;
+    class IOgreMaterialProcessor;
 
     typedef SharedPtr<GraphicsWorld> GraphicsWorldPtr;
     typedef WeakPtr<GraphicsWorld> GraphicsWorldWeakPtr;
+
+    namespace Ogre
+    {
+        class MaterialParser;
+    }
 }

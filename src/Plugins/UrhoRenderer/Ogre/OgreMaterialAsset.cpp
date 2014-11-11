@@ -3,17 +3,16 @@
 #include "StableHeaders.h"
 #include "OgreMaterialAsset.h"
 #include "OgreMaterialDefines.h"
+#include "IOgreMaterialProcessor.h"
 #include "LoggingFunctions.h"
-
+#include "Framework.h"
 #include "AssetAPI.h"
 #include "TextureAsset.h"
+#include "UrhoRenderer.h"
 
 #include <Profiler.h>
 #include <Graphics/Material.h>
-#include <Graphics/Technique.h>
-#include <Graphics/Texture.h>
 #include <Graphics/Texture2D.h>
-#include <Resource/ResourceCache.h>
 #include <StringUtils.h>
 
 namespace Tundra
@@ -32,50 +31,29 @@ bool OgreMaterialAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
     Unload();
 
     Ogre::MaterialParser parser;
-    bool success = parser.Parse((const char*)data_, numBytes);
-    if (success)
+    if (parser.Parse((const char*)data_, numBytes))
     {
         material = new Urho3D::Material(GetContext());
         material->SetNumTechniques(1);
 
-        //LogInfo(Name().CString());
-        //parser.root->Dump();
-
-        // Pass
-        Ogre::MaterialBlock *tech = parser.root->Technique(0);
-        Ogre::MaterialBlock *pass = (tech ? tech->Pass(0) : 0);
-        if (!tech || !pass)
+        UrhoRenderer* renderer = static_cast<UrhoRenderer*>(assetAPI->GetFramework()->Renderer());
+        IOgreMaterialProcessor* proc = renderer->FindOgreMaterialProcessor(parser);
+        if (proc)
         {
-            LogError("OgreMaterialAsset::DeserializeFromData: No technique with a pass found in " + Name());
-            material.Reset();
-            assetAPI->AssetLoadFailed(Name());
-            return false;
-        }
-        if (pass->Has(Ogre::Material::Pass::Diffuse))
-            material->SetShaderParameter("MatDiffColor", pass->ColorValue(Ogre::Material::Pass::Diffuse, Urho3D::Color::WHITE));
-
-        // Texture unit
-        Ogre::MaterialBlock *tu = pass->TextureUnit(0);
-        if (tu)
-        {
-            String textureRef = tu->StringValue(Ogre::Material::TextureUnit::Texture, "");
-            if (!textureRef.Empty())
-                textures_.Push(AssetReference(assetAPI->ResolveAssetRef(Name(), textureRef), "Texture"));
+            proc->Convert(parser, this);
+            // Inform load has finished. Triggering any textures_ to be fetched.
+            assetAPI->AssetLoadCompleted(Name());
+            return true;
         }
 
-        // Set fitting techinique
-        String techniqueName = (textures_.Size() ? "Diff.xml" : "NoTexture.xml");
-        material->SetTechnique(0, GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Technique>("Techniques/" + techniqueName));
+        LogError("OgreMaterialAsset::DeserializeFromData: no material processor found that could handle data in " + Name());
+        material.Reset();
+        return false;
+    }
 
-        // Inform load has finished. Triggering any textures_ to be fetched.
-        assetAPI->AssetLoadCompleted(Name());
-    }
-    else
-    {
-        LogError("OgreMaterialAsset::DeserializeFromData: " + parser.Error());
-        assetAPI->AssetLoadFailed(Name());
-    }
-    return success;
+    LogError("OgreMaterialAsset::DeserializeFromData: parse failed for " + Name() + ": " + parser.Error());
+    material.Reset();
+    return false;
 }
 
 void OgreMaterialAsset::DependencyLoaded(AssetPtr dependee)
@@ -84,7 +62,19 @@ void OgreMaterialAsset::DependencyLoaded(AssetPtr dependee)
     if (texture)
     {
         LogDebug("Texture loaded: " + texture->Name());
-        material->SetTexture(Urho3D::TU_DIFFUSE, texture->UrhoTexture());
+        bool found = false;
+        for (uint i = 0; i < textures_.Size(); ++i)
+        {
+            /// \todo Is this ref compare reliable?
+            if (!textures_[i].second_.ref.Compare(texture->Name(), false))
+            {
+                material->SetTexture((Urho3D::TextureUnit)textures_[i].first_, texture->UrhoTexture());
+                found = true;
+            }
+        }
+
+        if (!found)
+            LogWarning("OgreMaterialAsset::DependencyLoaded: texture " + texture->Name() + " was not found as ref in any of the texture units in " + Name());
     }
 
     LoadCompleted();
@@ -92,7 +82,10 @@ void OgreMaterialAsset::DependencyLoaded(AssetPtr dependee)
 
 Vector<AssetReference> OgreMaterialAsset::FindReferences() const
 {
-    return textures_;
+    Vector<AssetReference> ret;
+    for (uint i = 0; i < textures_.Size(); ++i)
+        ret.Push(textures_[i].second_);
+    return ret;
 }
 
 }
