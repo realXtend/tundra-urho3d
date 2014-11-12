@@ -10,7 +10,7 @@
 namespace Tundra
 {
 
-/// Simply freelook camera functionality. Creates a camera to scene and allows it to be controlled with mouse & keys
+/// Simple freelook camera functionality. Creates a camera to scene and allows it to be controlled with mouse & keys
 class CameraApplication : public IModule
 {
     OBJECT(CameraApplication);

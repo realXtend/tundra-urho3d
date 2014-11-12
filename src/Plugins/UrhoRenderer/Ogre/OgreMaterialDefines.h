@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreTypes.h"
+#include "UrhoModuleApi.h"
 
 #include <Engine/Container/HashMap.h>
 #include <Engine/Math/StringHash.h>
@@ -144,7 +145,7 @@ typedef HashMap<StringHash, Vector<String> > MaterialProperties;
 typedef HashMap<StringHash, String> MaterialPropertyNames;
 
 /// Material block
-struct MaterialBlock
+struct URHO_MODULE_API MaterialBlock
 {
     /** Block name, ref or identifier eg,
         material <name>
@@ -231,7 +232,7 @@ struct MaterialBlock
     with property types or values. Its meant to store all data
     while preserving Ogre material hierarchy. This data can then
     be selectively then processed into a Urho Material. */
-class MaterialParser
+class URHO_MODULE_API MaterialParser
 {
 public:
     MaterialParser();
