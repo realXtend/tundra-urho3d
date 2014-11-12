@@ -225,7 +225,7 @@ void Terrain::MakePatchFlat(uint x, uint y, float heightValue)
     Patch &patch = GetPatch(x, y);
     patch.heightData.Clear();
     patch.heightData.Reserve(cPatchSize * cPatchSize);
-    for (size_t i=0 ; i<cPatchSize * cPatchSize ; ++i)
+    for (uint i=0 ; i<cPatchSize * cPatchSize ; ++i)
         patch.heightData.Push(heightValue);
     
     patch.patch_geometry_dirty = true;
@@ -334,8 +334,8 @@ float Terrain::GetTerrainMinHeight() const
 {
     float minHeight = std::numeric_limits<float>::max();
 
-    for(size_t i = 0; i < patches_.Size(); ++i)
-        for(size_t j = 0; j < patches_[i].heightData.Size(); ++j)
+    for(uint i = 0; i < patches_.Size(); ++i)
+        for(uint j = 0; j < patches_[i].heightData.Size(); ++j)
             minHeight = Min(minHeight, patches_[i].heightData[j]);
 
     return minHeight;
@@ -345,8 +345,8 @@ float Terrain::GetTerrainMaxHeight() const
 {
     float maxHeight = std::numeric_limits<float>::min();
 
-    for(size_t i = 0; i < patches_.Size(); ++i)
-        for(size_t j = 0; j < patches_[i].heightData.Size(); ++j)
+    for(uint i = 0; i < patches_.Size(); ++i)
+        for(uint j = 0; j < patches_[i].heightData.Size(); ++j)
             maxHeight = Max(maxHeight, patches_[i].heightData[j]);
 
     return maxHeight;
@@ -459,7 +459,7 @@ bool Terrain::LoadFromDataInMemory(const char *data, size_t numBytes)
     assert(sizeof(float) == 4);
 
     // Load the new data.
-    for(size_t i = 0; i < newPatches.Size(); ++i)
+    for(uint i = 0; i < newPatches.Size(); ++i)
     {
         newPatches[i].heightData.Resize(cPatchSize * cPatchSize);
         newPatches[i].patch_geometry_dirty = true;
@@ -499,7 +499,7 @@ bool Terrain::LoadFromDataInMemory(const char *data, size_t numBytes)
 
 void Terrain::DirtyAllTerrainPatches()
 {
-    for(size_t i = 0; i < patches_.Size(); ++i)
+    for(uint i = 0; i < patches_.Size(); ++i)
         patches_[i].patch_geometry_dirty = true;
 }
 

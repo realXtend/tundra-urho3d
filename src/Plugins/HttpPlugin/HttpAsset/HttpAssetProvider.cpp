@@ -99,7 +99,8 @@ void HttpAssetProvider::ExecuteTransfer(AssetTransferPtr transfer)
 
 bool HttpAssetProvider::AbortTransfer(IAssetTransfer *transfer)
 {
-     return false; /// @todo
+    UNREFERENCED_PARAM(transfer);
+    return false; /// @todo
 }
 
 void HttpAssetProvider::DeleteAssetFromStorage(String assetRef)
@@ -151,10 +152,15 @@ AssetStoragePtr HttpAssetProvider::StorageForAssetRef(const String &assetRef) co
 AssetUploadTransferPtr HttpAssetProvider::UploadAssetFromFileInMemory(const u8 *data, uint numBytes,
     AssetStoragePtr destination, const String &assetName)
 {
+    UNREFERENCED_PARAM(data);
+    UNREFERENCED_PARAM(numBytes);
+    UNREFERENCED_PARAM(destination);
+    UNREFERENCED_PARAM(assetName);
+
     return AssetUploadTransferPtr(); /// @todo
 }
 
-AssetStoragePtr HttpAssetProvider::TryCreateStorage(HashMap<String, String> &storageParams, bool fromNetwork)
+AssetStoragePtr HttpAssetProvider::TryCreateStorage(HashMap<String, String> &storageParams, bool /*fromNetwork*/)
 {
     if (!storageParams.Contains("src") || !IsValidRef(storageParams["src"], ""))
         return AssetStoragePtr();

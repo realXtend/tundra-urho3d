@@ -125,7 +125,7 @@ enum MaterialPart
     MP_TextureUnit
 };
 
-static String MaterialPartToString(MaterialPart part)
+static inline String MaterialPartToString(MaterialPart part)
 {
     switch(part)
     {

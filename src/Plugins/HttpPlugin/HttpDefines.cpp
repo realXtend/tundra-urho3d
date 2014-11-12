@@ -269,7 +269,7 @@ Stats::Stats() :
 {   
 }
 
-String PadDouble(double value, int pad)
+String PadDouble(double value, uint pad)
 {
     String v = PadString(Urho3D::ToString("%f", value), pad);
     if (v.Length() >= pad) // cut digits
@@ -277,7 +277,7 @@ String PadDouble(double value, int pad)
     return v; 
 }
 
-void Stats::Dump(bool io_, bool averages_)
+void Stats::Dump(bool averages_)
 {
     Logger l("HttpStats");
     l.InfoF("%s %s %s %s %s",
@@ -301,13 +301,16 @@ void Stats::Dump(bool io_, bool averages_)
         PadDouble((totals.diskReadBytes / 1024.0) / 1024.0, 12).CString(),
         PadDouble((totals.diskWriteBytes / 1024.0) / 1024.0, 12).CString()
     );
-    l.InfoF("%s %s %s %s %s msec",
-        PadString("Avg. time", 14).CString(),
-        PadDouble(averages.msecDownload > -1.0 ? averages.msecDownload : 0.0, 12).CString(),
-        PadDouble(averages.msecUpload > -1.0 ? averages.msecUpload : 0.0, 12).CString(),
-        PadDouble(averages.msecDiskRead > -1.0 ? averages.msecDiskRead : 0.0, 12).CString(),
-        PadDouble(averages.msecDiskWrite > -1.0 ? averages.msecDiskWrite : 0.0, 12).CString()
-    );
+    if (averages_)
+    {
+        l.InfoF("%s %s %s %s %s msec",
+            PadString("Avg. time", 14).CString(),
+            PadDouble(averages.msecDownload > -1.0 ? averages.msecDownload : 0.0, 12).CString(),
+            PadDouble(averages.msecUpload > -1.0 ? averages.msecUpload : 0.0, 12).CString(),
+            PadDouble(averages.msecDiskRead > -1.0 ? averages.msecDiskRead : 0.0, 12).CString(),
+            PadDouble(averages.msecDiskWrite > -1.0 ? averages.msecDiskWrite : 0.0, 12).CString()
+        );
+    }
     l.InfoF("%s %s %s %s %s seconds",
         PadString("Total time", 14).CString(),
         PadDouble(totals.msecDownload / 1000.0, 12).CString(),
@@ -315,20 +318,23 @@ void Stats::Dump(bool io_, bool averages_)
         PadDouble(totals.msecDiskRead / 1000.0, 12).CString(),
         PadDouble(totals.msecDiskWrite / 1000.0, 12).CString()
     );
-    l.InfoF("%s %s %s %s %s kB/sec",
-        PadString("Avg. speed", 14).CString(),
-        PadDouble(averages.downloadBytesPerSec > -1.0 ? averages.downloadBytesPerSec / 1024.0 : 0.0, 12).CString(),
-        PadDouble(averages.uploadBytesPerSec > -1.0 ? averages.uploadBytesPerSec / 1024.0 : 0.0, 12).CString(),
-        PadString("", 12).CString(),
-        PadString("", 12).CString()
-    );
-    l.InfoF("%s %s %s %s %s kB/sec",
-        PadString("Best speed", 14).CString(),
-        PadDouble(averages.bestDownloadBytesPerSec > -1.0 ? averages.bestDownloadBytesPerSec / 1024.0 : 0.0, 12).CString(),
-        PadDouble(averages.bestUploadBytesPerSec > -1.0 ? averages.bestUploadBytesPerSec / 1024.0 : 0.0, 12).CString(),
-        PadString("", 12).CString(),
-        PadString("", 12).CString()
-    );
+    if (averages_)
+    {
+        l.InfoF("%s %s %s %s %s kB/sec",
+            PadString("Avg. speed", 14).CString(),
+            PadDouble(averages.downloadBytesPerSec > -1.0 ? averages.downloadBytesPerSec / 1024.0 : 0.0, 12).CString(),
+            PadDouble(averages.uploadBytesPerSec > -1.0 ? averages.uploadBytesPerSec / 1024.0 : 0.0, 12).CString(),
+            PadString("", 12).CString(),
+            PadString("", 12).CString()
+        );
+        l.InfoF("%s %s %s %s %s kB/sec",
+            PadString("Best speed", 14).CString(),
+            PadDouble(averages.bestDownloadBytesPerSec > -1.0 ? averages.bestDownloadBytesPerSec / 1024.0 : 0.0, 12).CString(),
+            PadDouble(averages.bestUploadBytesPerSec > -1.0 ? averages.bestUploadBytesPerSec / 1024.0 : 0.0, 12).CString(),
+            PadString("", 12).CString(),
+            PadString("", 12).CString()
+        );
+    }
 }
 
 // Stats::IO

@@ -241,7 +241,7 @@ namespace Http
 
         Stats();
 
-        void Dump(bool io_ = true, bool averages_ = true);
+        void Dump(bool averages_ = true);
     };
 
     /// @endcond
