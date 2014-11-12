@@ -135,8 +135,8 @@ public:
     {
         assert(patchX >= 0);
         assert(patchY >= 0);
-        assert(patchX < patchWidth);
-        assert(patchY < patchHeight);
+        assert(patchX < patchWidth_);
+        assert(patchY < patchHeight_);
         return patches_[patchY * patchWidth_ + patchX];
     }
 
@@ -145,8 +145,8 @@ public:
     {
         assert(patchX >= 0);
         assert(patchY >= 0);
-        assert(patchX < patchWidth);
-        assert(patchY < patchHeight);
+        assert(patchX < patchWidth_);
+        assert(patchY < patchHeight_);
         return patches_[patchY * patchWidth_ + patchX];
     }
 
