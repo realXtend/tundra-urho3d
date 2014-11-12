@@ -1,6 +1,6 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
-package com.github.realxtend;
+package org.realxtend.tundra;
 
 import java.util.ArrayList;
 import java.util.Collections;

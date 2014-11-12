@@ -60,5 +60,5 @@
 /** @def TUNDRA_PACKAGE_NAME
     Android package name that is important for correctly loading Tundra plugins. Ignored on desktop platforms */
 #ifndef TUNDRA_PACKAGE_NAME
-#define TUNDRA_PACKAGE_NAME "com.github.realxtend"
+#define TUNDRA_PACKAGE_NAME "org.realxtend.tundra"
 #endif
