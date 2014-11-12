@@ -317,6 +317,42 @@ void Terrain::OnTerrainAssetLoaded(AssetPtr asset_)
     }
 }
 
+void Terrain::Recreate()
+{
+    Destroy();
+    DirtyAllTerrainPatches();
+    RegenerateDirtyTerrainPatches();
+}
+
+void Terrain::GetTerrainHeightRange(float &minHeight, float &maxHeight) const
+{
+    minHeight = GetTerrainMinHeight();
+    maxHeight = GetTerrainMaxHeight();
+}
+
+float Terrain::GetTerrainMinHeight() const
+{
+    float minHeight = std::numeric_limits<float>::max();
+
+    for(size_t i = 0; i < patches_.Size(); ++i)
+        for(size_t j = 0; j < patches_[i].heightData.Size(); ++j)
+            minHeight = Min(minHeight, patches_[i].heightData[j]);
+
+    return minHeight;
+}
+
+float Terrain::GetTerrainMaxHeight() const
+{
+    float maxHeight = std::numeric_limits<float>::min();
+
+    for(size_t i = 0; i < patches_.Size(); ++i)
+        for(size_t j = 0; j < patches_[i].heightData.Size(); ++j)
+            maxHeight = Max(maxHeight, patches_[i].heightData[j]);
+
+    return maxHeight;
+}
+
+
 float Terrain::GetPoint(uint x, uint y) const
 {
     if (x >= cPatchSize * patchWidth_)
@@ -440,6 +476,7 @@ bool Terrain::LoadFromDataInMemory(const char *data, size_t numBytes)
 
     // The terrain asset loaded ok. We are good to set that terrain as the active terrain.
     Destroy();
+    CreateRootNode();
 
     patches_ = newPatches;
     patchWidth_ = xPatches;
@@ -546,7 +583,7 @@ void Terrain::AttachTerrainRootNode()
     }
 }
 
-Urho3D::Node* Terrain::CreateUrhoTerrainPatchNode(Urho3D::Node* parent, uint patchX, uint patchY) const
+Urho3D::Node* Terrain::CreateUrho3DTerrainPatchNode(Urho3D::Node* parent, uint patchX, uint patchY) const
 {
     Urho3D::Node* node = 0;
     if (world_.Expired())
@@ -588,7 +625,7 @@ void Terrain::GenerateTerrainGeometryForOnePatch(uint patchX, uint patchY)
         patch.urhoModel.Reset();
     }
 
-    patch.node = CreateUrhoTerrainPatchNode(rootNode_, patch.x, patch.y);
+    patch.node = CreateUrho3DTerrainPatchNode(rootNode_, patch.x, patch.y);
     assert(patch.node);
 
     /// \todo material
@@ -620,8 +657,10 @@ void Terrain::GenerateTerrainGeometryForOnePatch(uint patchX, uint patchY)
     // This is the vertex stride for the terrain.
     const unsigned short stride = (patch.x + 1 >= patchWidth_) ? cPatchVertexWidth : (cPatchVertexWidth + 1);
 
-    float3 boundsMin = float3(FLOAT_INF, FLOAT_INF, FLOAT_INF);
-    float3 boundsMax = float3(-FLOAT_INF, -FLOAT_INF, -FLOAT_INF);
+    const float cFloatMax = std::numeric_limits<float>::max();
+    const float cFloatMin = std::numeric_limits<float>::min();
+    float3 boundsMin = float3(cFloatMax, cFloatMax, cFloatMax);
+    float3 boundsMax = float3(cFloatMin, cFloatMin, cFloatMin);
     const float uScale = this->uScale.Get();
     const float vScale = this->vScale.Get();
     int skip = 0;

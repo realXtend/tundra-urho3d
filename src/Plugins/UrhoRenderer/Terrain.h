@@ -4,7 +4,6 @@
 
 #include "IComponent.h"
 #include "IAttribute.h"
-//#include "SceneFwd.h"
 #include "UrhoModuleApi.h"
 #include "UrhoModuleFwd.h"
 #include "AssetReference.h"
@@ -30,7 +29,7 @@ typedef WeakPtr<Placeable> PlaceableWeakPtr;
     Adds a heightmap-based terrain to the scene. A Terrain is composed of a rectangular grid of adjacent "patches".
     Each patch is a fixed-size 16x16 height map.
 
-    Registered by EnvironmentComponents plugin.
+    Registered by UrhoRenderer plugin.
 
     <b>Attributes:</b>
     <ul>
@@ -53,8 +52,8 @@ typedef WeakPtr<Placeable> PlaceableWeakPtr;
     Note that the way the textures are used depends completely on the material. For example, the default height-based terrain material "Rex/TerrainPCF"
     only uses the texture channels 0-3, and blends between those based on the terrain height values.
 
-    Does not emit or react on any actions.
-
+    Emits TerrainRegenerated-signal once terrain has been succesfully generated.
+    
     <b>Does not depend on any other components</b>. Currently Terrain stores its own transform matrix, so it does not depend on the Placeable component. It might be more consistent
     to create a dependency to Placeable, so that the position of the terrain is editable in the same way the position of other placeables is done.
     </table> */
@@ -122,9 +121,6 @@ public:
         /// Urho3D -specific: Store a reference to the mesh that is attached to the above SceneNode.
         SharedPtr<Urho3D::Model> urhoModel;
 
-        /// The name of the Mesh resource that contains the GPU geometry data for this patch.
-        String meshGeometryName;
-
         /// If true, the CPU-side heightmap data has changed, but we haven't yet updated
         /// the GPU-side geometry resources since the neighboring patches haven't been loaded
         /// in yet.
@@ -188,13 +184,25 @@ public:
     /// Returns the number of vertices in the whole terrain in the local Y-direction.
     uint VerticesHeight() const { return PatchHeight() * cPatchSize; }
 
+    /// Removes all stored terrain patches and the associated Urho3D scene nodes.
+    void Destroy();
+
     /// Returns the height value on the given terrain grid point.
     /// @param x In the range [0, Terrain::PatchWidth * Terrain::cPatchSize [.
     /// @param y In the range [0, Terrain::PatchHeight * Terrain::cPatchSize [.
     float GetPoint(uint x, uint y) const;
 
+    /// Sets a new height value to the given terrain map vertex. Marks the patch that vertex is part of dirty,
+    /// but does not immediately recreate the GPU surfaces. Use the RegenerateDirtyTerrainPatches() function
+    /// to regenerate the visible Ogre mesh geometry.
     void SetPointHeight(uint x, uint y, float height);
 
+    /// Loads the terrain from the given image file.
+    /** Adjusts the xPatches and yPatches properties to that of the image file, 
+        and clears the heightMap source attribute. This function is intended to be used as a processing tool. Calling this  
+        function will get the terrain contents desynchronized between the local system and network. The file is loaded using Urho3D, so
+        this supports all the file formats Urho3D has codecs loaded for(you can see a list of those in the console at startup).
+        Calling this function will regenerate all terrain patches on the GPU. */
     bool LoadFromImageFile(String filename, float offset, float scale);
 
     /// Loads the terrain height map data from the given in-memory .ntf file buffer.
@@ -203,6 +211,7 @@ public:
     /// Marks all terrain patches dirty.
     void DirtyAllTerrainPatches();
 
+    /// Recreate terrain patches that are marked dirty.
     void RegenerateDirtyTerrainPatches();
 
     /// Returns the minimum height value in the whole terrain.
@@ -233,6 +242,8 @@ private:
     void OnComponentStructureChanged(IComponent*, AttributeChange::Type);
 
     void AttributesChanged() override;
+
+    /// Recreate whole terrain
     void Recreate();
 
     void OnMaterialAssetLoaded(AssetPtr asset);
@@ -246,7 +257,9 @@ private:
     /** After this function returns, the 'root' member node will exist. */
     void CreateRootNode();
 
-    Urho3D::Node* CreateUrhoTerrainPatchNode(Urho3D::Node* parent, uint patchX, uint patchY) const;
+    /// Create a scene node for a terrain patch under the specified parent and at the specified x/y position
+    /** Sets local position of the node based on the patchX and patchY params */
+    Urho3D::Node* CreateUrho3DTerrainPatchNode(Urho3D::Node* parent, uint patchX, uint patchY) const;
 
     /// Calculates and returns the vertex normal for the given terrain vertex.
     /// @param patchX The patch to read from, [0, PatchWidth()[.
@@ -254,8 +267,6 @@ private:
     /// @param xinside The vertex inside the patch to compute the normal for, [0, cPatchSize[.
     /// @param yinside The vertex inside the patch to compute the normal for, [0, cPatchSize[.
     float3 CalculateNormal(uint x, uint y, uint xinside, uint yinside) const;
-
-    void CreateOgreTerrainPatchNode(Urho3D::Node *&node, uint patchX, uint patchY);
 
     /// Sets the given patch to use the currently set material and textures.
     void UpdateTerrainPatchMaterial(uint patchX, uint patchY);
@@ -270,8 +281,6 @@ private:
 
     /// Releases all resources used for the given patch.
     void DestroyPatch(uint x, uint y);
-
-    void Destroy();
 
     /// Updates the terrain material with the new texture on the given texture unit index.
     /// @param index The texture unit index to set the new texture to.
