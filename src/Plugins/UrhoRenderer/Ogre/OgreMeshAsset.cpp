@@ -92,7 +92,6 @@ void ReadPoseVertices(Urho3D::Deserializer& stream, Pose *pose);
 void ReadAnimations(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
 void ReadAnimation(Urho3D::Deserializer& stream, Animation *anim);
 void ReadAnimationKeyFrames(Urho3D::Deserializer& stream, Animation *anim, VertexAnimationTrack *track);
-void NormalizeBoneWeights(VertexData *vertexData);
 
 static String ReadLine(Urho3D::Deserializer& stream)
 {
@@ -212,8 +211,6 @@ void ReadMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
         if (!stream.IsEof())
             RollbackHeader(stream);
     }
-
-    NormalizeBoneWeights(mesh->sharedVertexData);
 }
 
 void ReadMeshLodInfo(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
@@ -367,45 +364,8 @@ void ReadSubMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
             RollbackHeader(stream);
     }
 
-    NormalizeBoneWeights(submesh->vertexData);
-
     submesh->index = mesh->subMeshes.Size();
     mesh->subMeshes.Push(submesh);
-}
-
-void NormalizeBoneWeights(VertexData *vertexData)
-{
-    if (!vertexData || vertexData->boneAssignments.Empty())
-        return;
-
-    HashSet<uint> influencedVertices;
-    for (VertexBoneAssignmentList::ConstIterator baIter=vertexData->boneAssignments.Begin(), baEnd=vertexData->boneAssignments.End(); baIter != baEnd; ++baIter) {
-        influencedVertices.Insert(baIter->vertexIndex);
-    }
-
-    /** Normalize bone weights.
-        Some exporters wont care if the sum of all bone weights
-        for a single vertex equals 1 or not, so validate here. */
-    const float epsilon = 0.05f;
-    for(HashSet<uint>::ConstIterator iter=influencedVertices.Begin(), end=influencedVertices.End(); iter != end; ++iter)
-    {
-        const uint vertexIndex = (*iter);
-
-        float sum = 0.0f;
-        for (VertexBoneAssignmentList::ConstIterator baIter=vertexData->boneAssignments.Begin(), baEnd=vertexData->boneAssignments.End(); baIter != baEnd; ++baIter)
-        {
-            if (baIter->vertexIndex == vertexIndex)
-                sum += baIter->weight;
-        }
-        if ((sum < (1.0f - epsilon)) || (sum > (1.0f + epsilon)))
-        {
-            for (VertexBoneAssignmentList::Iterator baIter=vertexData->boneAssignments.Begin(), baEnd=vertexData->boneAssignments.End(); baIter != baEnd; ++baIter)
-            {
-                if (baIter->vertexIndex == vertexIndex)
-                    baIter->weight /= sum;
-            }
-        }
-    }
 }
 
 void ReadSubMeshOperation(Urho3D::Deserializer& stream, SubMesh *submesh)
@@ -773,6 +733,71 @@ struct VertexElementSource
     uint stride;
 };
 
+struct VertexBlendWeights
+{
+    VertexBlendWeights()
+    {
+        for (uint i = 0; i < 4; ++i)
+        {
+            weights[i] = 0.0f;
+            indices[i] = 0;
+        }
+    }
+
+    void AddBoneInfluence(unsigned char index, float weight)
+    {
+        if (weight <= 0.0f)
+            return;
+
+        for (uint i = 0; i < 4; ++i)
+        {
+            if (weights[i] == 0.0f)
+            {
+                weights[i] = weight;
+                indices[i] = index;
+                return;
+            }
+        }
+
+        // No empty space found, drop the lowest influence
+        int lowestIndex = -1;
+        float lowestWeight = 0.0f;
+        for (uint i = 0; i < 4; ++i)
+        {
+            if (lowestIndex < 0 || weights[i] < lowestWeight)
+            {
+                lowestIndex = i;
+                lowestWeight = weights[i];
+            }
+        }
+
+        if (weight > lowestWeight)
+        {
+            weights[lowestIndex] = weight;
+            indices[lowestIndex] = index;
+        }
+    }
+
+    void Normalize()
+    {
+        float sum = 0.0f;
+        for (uint i = 0; i < 4; ++i)
+            sum += weights[i];
+        
+        if (sum == 0.0f)
+            return;
+
+        for (uint i = 0; i < 4; ++i)
+        {
+            if (weights[i] > 0.0f)
+                weights[i] /= sum; 
+        }
+    }
+
+    float weights[4];
+    unsigned char indices[4];
+};
+
 void CheckVertexElement(unsigned& elementMask, VertexElementSource* sources, Ogre::VertexData* vertexData, Urho3D::VertexElement urhoElement, Ogre::VertexElement::Semantic ogreSemantic, Ogre::VertexElement::Type ogreType, uint ogreIndex = 0)
 {
     VertexElementSource* desc = &sources[urhoElement];
@@ -817,7 +842,7 @@ void CheckVertexElement(unsigned& elementMask, VertexElementSource* sources, Ogr
     }
 }
 
-SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre::VertexData* vertexData, Urho3D::BoundingBox& outBox)
+SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre::VertexData* vertexData, Urho3D::BoundingBox& outBox, PODVector<uint>& localToGlobalBoneMapping)
 {
     SharedPtr<Urho3D::VertexBuffer> ret;
     if (!vertexData || !vertexData->count)
@@ -840,10 +865,55 @@ SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre:
     void* data = ret->Lock(0, vertexData->count, true);
     uint count = vertexData->count;
 
+    Vector<VertexBlendWeights> blendWeights;
+    localToGlobalBoneMapping.Clear();
+    HashMap<uint, uint> globalToLocalBoneMapping;
+    uint numBones = 0;
+    bool bonesExceeded = false;
+
+    if (vertexData->boneAssignments.Size())
+    {
+        elementMask |= Urho3D::ELEMENT_BLENDWEIGHTS;
+        elementMask |= Urho3D::ELEMENT_BLENDINDICES;
+        blendWeights.Resize(vertexData->count);
+        for (VertexBoneAssignmentList::ConstIterator baIter=vertexData->boneAssignments.Begin(), baEnd=vertexData->boneAssignments.End(); baIter != baEnd; ++baIter)
+        {
+            if (baIter->vertexIndex >= vertexData->count)
+            {
+                LogWarning("Found out of range vertex index in bone assignments");
+                continue;
+            }
+
+            uint globalBone = baIter->boneIndex;
+            uint localBone = 0;
+            HashMap<uint, uint>::Iterator i = globalToLocalBoneMapping.Find(globalBone);
+            if (i == globalToLocalBoneMapping.End())
+            {
+                if (numBones >= 64)
+                {
+                    bonesExceeded = true;
+                    continue;
+                }
+                globalToLocalBoneMapping[globalBone] = numBones;
+                localToGlobalBoneMapping.Push(globalBone);
+                ++numBones;
+            }
+            else
+                localBone = i->second_;
+            
+            blendWeights[baIter->vertexIndex].AddBoneInfluence((unsigned char)localBone, baIter->weight);
+        }
+        for (uint i = 0; i < blendWeights.Size(); ++i)
+            blendWeights[i].Normalize();
+    }
+
+    if (bonesExceeded)
+        LogWarning("Submesh uses more than 64 bones for skinning and may render incorrectly");
+
     // Fill all enabled elements with source data, forming interleaved Urho vertices
     float* dest = (float*)data;
     bool tangentIsFloat4 = sources[Urho3D::ELEMENT_TANGENT].ogreType == Ogre::VertexElement::VET_FLOAT4;
-    while (count--)
+    for (uint index = 0; index < count; ++index)
     {
         if (elementMask & Urho3D::MASK_POSITION)
         {
@@ -887,6 +957,14 @@ SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre:
             else
                 *dest++ = 1.0f;
             sources[Urho3D::ELEMENT_TANGENT].MoveToNext();
+        }
+        if (elementMask & Urho3D::MASK_BLENDWEIGHTS)
+        {
+            *dest++ = blendWeights[index].weights[0];
+            *dest++ = blendWeights[index].weights[1];
+            *dest++ = blendWeights[index].weights[2];
+            *dest++ = blendWeights[index].weights[3];
+            *dest++ = *(reinterpret_cast<float*>(blendWeights[index].indices));
         }
     }
 
@@ -949,7 +1027,9 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
     model->SetNumGeometries(subMeshCount);
     Urho3D::BoundingBox bounds;
 
-    SharedPtr<Urho3D::VertexBuffer> sharedVb = MakeVertexBuffer(GetContext(), mesh->sharedVertexData, bounds);
+    Vector<PODVector<uint> > allBoneMappings;
+    PODVector<uint> sharedBoneMapping;
+    SharedPtr<Urho3D::VertexBuffer> sharedVb = MakeVertexBuffer(GetContext(), mesh->sharedVertexData, bounds, sharedBoneMapping);
 
     for (uint i = 0; i < subMeshCount; ++i)
     {
@@ -960,6 +1040,7 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
             continue;
         }
 
+        PODVector<uint> submeshBoneMapping;
         SharedPtr<Urho3D::Geometry> geom(new Urho3D::Geometry(GetContext()));
         SharedPtr<Urho3D::IndexBuffer> ib(new Urho3D::IndexBuffer(GetContext()));
         ib->SetShadowed(true); // Allow CPU-side raycasts and auto-restore on GPU context loss
@@ -967,10 +1048,12 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
         if (ib->GetIndexCount())
             ib->SetData(&subMesh->indexData->buffer[0]);
         geom->SetIndexBuffer(ib);
-        geom->SetVertexBuffer(0, subMesh->usesSharedVertexData ? sharedVb : MakeVertexBuffer(GetContext(), subMesh->vertexData, bounds));
+        geom->SetVertexBuffer(0, subMesh->usesSharedVertexData ? sharedVb : MakeVertexBuffer(GetContext(), subMesh->vertexData, bounds, submeshBoneMapping));
         geom->SetDrawRange(ConvertPrimitiveType(subMesh->operationType), 0, ib->GetIndexCount());
+        allBoneMappings.Push(subMesh->usesSharedVertexData ? sharedBoneMapping : submeshBoneMapping);
         model->SetNumGeometryLodLevels(i, 1);
         model->SetGeometry(i, 0, geom);
+        model->SetGeometryBoneMappings(allBoneMappings);
     }
 
     model->SetBoundingBox(bounds);
