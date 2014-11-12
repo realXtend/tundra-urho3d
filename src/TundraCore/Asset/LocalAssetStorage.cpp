@@ -121,7 +121,7 @@ String LocalAssetStorage::GetFullPathForAsset(const String &assetname, bool recu
     if (iter != cachedFiles.end())
     {
         if (fileSystem->FileExists(iter->second))
-            return directory;
+            return Urho3D::GetPath(iter->second);
     }
 
     return "";
