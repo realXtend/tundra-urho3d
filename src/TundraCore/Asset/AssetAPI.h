@@ -15,6 +15,7 @@
 
 #include <Object.h>
 #include <map>
+#include <string>
 
 namespace Tundra
 {
