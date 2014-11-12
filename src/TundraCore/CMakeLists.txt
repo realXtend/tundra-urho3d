@@ -16,6 +16,7 @@ AddSourceFolder(Signals)
 AddSourceFolder(Scene)
 AddSourceFolder(Math)
 AddSourceFolder(Console)
+AddSourceFolder(Debug)
 
 set(SOURCE_FILES ${CPP_FILES} ${H_FILES})
 

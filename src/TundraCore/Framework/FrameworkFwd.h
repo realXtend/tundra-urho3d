@@ -19,4 +19,5 @@ namespace Tundra
     class SceneAPI;
     class ConsoleAPI;
     class AssetAPI;
+    class DebugAPI;
 }

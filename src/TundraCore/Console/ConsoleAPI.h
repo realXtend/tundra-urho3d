@@ -105,9 +105,6 @@ public:
     /** This command is invoked by typing 'help' to the console. */
     void ListCommands() const;
 
-    /// Toggle debug hud visibility.
-    void ToggleDebugHud() const;
-
     /// Returns names of the available console commands.
     /** @note The names are exactly the strings they were originally registered with.
         Always perform case-insensitive comparison when searching for a specific command. */

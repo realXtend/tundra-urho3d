@@ -3,15 +3,19 @@
 #include "StableHeaders.h"
 #include "Framework.h"
 #include "JSON.h"
-#include "FrameAPI.h"
+
 #include "PluginAPI.h"
+#include "FrameAPI.h"
 #include "ConfigAPI.h"
-#include "SceneAPI.h"
+
+#include "Scene/SceneAPI.h"
 #include "Console/ConsoleAPI.h"
-#include "AssetAPI.h"
-#include "AssetCache.h"
-#include "LocalAssetProvider.h"
-#include "LocalAssetStorage.h"
+#include "Debug/DebugAPI.h"
+#include "Asset/AssetAPI.h"
+#include "Asset/AssetCache.h"
+#include "Asset/LocalAssetProvider.h"
+#include "Asset/LocalAssetStorage.h"
+
 #include "TundraVersionInfo.h"
 #include "LoggingFunctions.h"
 #include "IModule.h"
@@ -83,6 +87,7 @@ Framework::Framework(Context* ctx) :
     frame = new FrameAPI(this);
     plugin = new PluginAPI(this);
     config = new ConfigAPI(this);
+    debug = new DebugAPI(this);
     scene = new SceneAPI(this);
     asset = new AssetAPI(this, headless);
 
@@ -111,6 +116,7 @@ Framework::~Framework()
     frame.Reset();
     plugin.Reset();
     config.Reset();
+    debug.Reset();
     asset.Reset();
 
     instance = 0;
@@ -370,6 +376,11 @@ ConsoleAPI* Framework::Console() const
 AssetAPI* Framework::Asset() const
 {
     return asset;
+}
+
+DebugAPI *Framework::Debug() const
+{
+    return debug;
 }
 
 Engine* Framework::Engine() const

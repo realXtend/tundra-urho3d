@@ -148,6 +148,9 @@ public:
     /// Returns core API Asset object.
     AssetAPI* Asset() const;
 
+    /// Returns core API Debug object.
+    DebugAPI *Debug() const;
+
     /// Return the Urho3D Engine object.
     Urho3D::Engine* Engine() const;
 
@@ -210,6 +213,7 @@ private:
     SharedPtr<Urho3D::Engine> engine;
     /// Framework owns the memory of all the modules in the system. These are freed when Framework is exiting.
     Vector<SharedPtr<IModule> > modules;
+
     /// FrameAPI
     SharedPtr<FrameAPI> frame;
     /// PluginAPI
@@ -222,10 +226,14 @@ private:
     SharedPtr<ConsoleAPI> console;
     /// AssetAPI
     SharedPtr<AssetAPI> asset;
+    /// DebugAPI
+    SharedPtr<DebugAPI> debug;
+
     /// Stores all command line parameters and expanded options specified in the Config XML files, except for the config file(s) themselves.
     OptionsMap startupOptions;
     /// Stores config XML filenames
     Vector<String> configFiles;
+
     /// Exiting flag. When raised, the Framework will exit on the next main loop iteration
     bool exitSignal;
     /// Headless flag. When headless, no rendering window is created
