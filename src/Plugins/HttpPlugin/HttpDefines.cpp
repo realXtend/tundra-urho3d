@@ -269,22 +269,29 @@ Stats::Stats() :
 {   
 }
 
-String PadDouble(double value, uint pad)
+String PadDouble(double value, uint pad, int digits = 4)
 {
-    String v = PadString(Urho3D::ToString("%f", value), pad);
+    String temp = Urho3D::ToString("%f", value);
+    if (digits > -1)
+    {
+        uint i = temp.Find('.');
+        if (i != String::NPOS && i + 1 + digits < temp.Length())
+            temp = temp.Substring(0, i + 1 + digits);
+    }
+    String v = PadString(temp, pad);
     if (v.Length() >= pad) // cut digits
         v = v.Substring(0, pad);
     return v; 
 }
 
-void Stats::Dump(bool averages_)
+void Stats::Dump(bool averages_, bool current_)
 {
-    StringVector lines = GetData(averages_).Split('\n');
+    StringVector lines = GetData(averages_, current_).Split('\n');
     foreach(auto &line, lines)
         LogInfo("[HttpStats] " + line);
 }
 
-String Stats::GetData(bool averages_)
+String Stats::GetData(bool averages_, bool current_)
 {
     String str;
     str.AppendWithFormat("%s %s %s %s %s\n\n",
@@ -342,7 +349,34 @@ String Stats::GetData(bool averages_)
             PadString("", 12).CString()
         );
     }
+    if (current_)
+    {
+        str.AppendWithFormat("\n%s %d\n%s %d\n",
+            PadString("Pending", 12).CString(), current.pending,
+            PadString("Executing", 12).CString(), current.executing
+        );
+        if (current.idle >= 0.f)
+        {
+            str.AppendWithFormat("%s %s %s seconds idle\n",
+                PadString("Threads", 12).CString(),
+                PadString(current.threads, 10).CString(),
+                PadDouble(current.idle, 10, 2).CString()
+            );
+        }
+        else
+            str.AppendWithFormat("%s %d\n", PadString("Threads", 12).CString(), current.threads);
+    }
     return str;
+}
+
+// Stats::Current
+
+Stats::Current::Current() :
+    pending(0),
+    executing(0),
+    threads(0),
+    idle(-1.f)
+{
 }
 
 // Stats::IO

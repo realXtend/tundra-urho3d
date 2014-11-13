@@ -89,6 +89,9 @@ void HttpWorkQueue::Update(float frametime)
         numPending = requests_.Size();
     }
 
+    stats_->current.pending = numPending;
+    stats_->current.executing = numExecuting;
+
     if (numPending + numExecuting == 0)
     {
         /* Don't stop workers immediately. Wait for some time
@@ -96,6 +99,7 @@ void HttpWorkQueue::Update(float frametime)
         durationNoWork_ += frametime;
         if (durationNoWork_ > DurationKeepAliveThreads && threads_.Size() > 0)
             StopThreads();
+        stats_->current.idle = (threads_.Size() > 0 ? durationNoWork_ : -1.f);
         return;
     }
     durationNoWork_ = 0.f;
@@ -103,6 +107,9 @@ void HttpWorkQueue::Update(float frametime)
     // Start new threads
     if (threads_.Size() < numPending)
         StartThreads(numPending);
+
+    stats_->current.idle = -1.f;
+    stats_->current.threads = threads_.Size();
 }
 
 void HttpWorkQueue::StartThreads(uint max)
@@ -124,7 +131,6 @@ void HttpWorkQueue::StartThreads(uint max)
             break;
         }
     }
-    log.DebugF("Thread count now %d", threads_.Size());
 }
 
 void HttpWorkQueue::StopThreads()
@@ -138,6 +144,7 @@ void HttpWorkQueue::StopThreads()
         thread->Stop();
         delete thread;
     }
+    stats_->current.threads = threads_.Size();
 }
 
 HttpRequest* HttpWorkQueue::Next()

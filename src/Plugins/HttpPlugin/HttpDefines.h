@@ -199,6 +199,15 @@ namespace Http
 
     struct Stats
     {
+        struct Current
+        {
+            uint pending;
+            uint executing;
+            uint threads;
+            float idle;
+
+            Current();
+        };
         struct Totals
         {
             uint msecDownload;
@@ -236,13 +245,14 @@ namespace Http
         uint diskReads;
         uint diskWrites;
 
+        Current current;
         Totals totals;
         Averages averages;
 
         Stats();
 
-        void Dump(bool averages_ = true);
-        String GetData(bool averages_ = true);
+        void Dump(bool averages_ = true, bool current_ = true);
+        String GetData(bool averages_ = true, bool current_ = true);
     };
 
     /// @endcond
