@@ -76,6 +76,11 @@ public:
     /// Sets visivility.
     void SetVisible(bool visible);
 
+    /// Show tab @c name.
+    void ShowTab(const String &name);
+    /// Returns available tab names.
+    StringVector TabNames() const;
+
     /// Set elements to show.
     void SetMode(unsigned mode);
     /// Set maximum profiler block depth, default unlimited.
@@ -111,6 +116,8 @@ private:
     void HandlePostUpdate(StringHash eventType, VariantMap& eventData);
     /// Handle window size change.
     void HandleWindowChange(StringHash eventType, VariantMap& eventData);
+    /// Handle tab change from button click.
+    void HandleTabChange(StringHash eventType, VariantMap& eventData);
 
     /// Update. Called by HandlePostUpdate().
     void Update();

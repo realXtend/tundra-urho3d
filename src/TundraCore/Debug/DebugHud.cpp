@@ -24,15 +24,17 @@
 
 #include "StableHeaders.h"
 #include "DebugHud.h"
+#include "LoggingFunctions.h"
+
+#include <CoreEvents.h>
+#include <ResourceCache.h>
+#include <GraphicsEvents.h>
+#include <UIEvents.h>
 
 #include <Context.h>
-#include <ResourceCache.h>
-#include <CoreEvents.h>
 #include <Engine.h>
 #include <Font.h>
 #include <Graphics.h>
-#include <GraphicsEvents.h>
-#include <Log.h>
 #include <Profiler.h>
 #include <Renderer.h>
 #include <Text.h>
@@ -70,17 +72,20 @@ DebugHud::DebugHud(Context* context) :
     useRendererStats_(false),
     mode_(DEBUGHUD_SHOW_NONE)
 {
+    XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("UI/DefaultStyle.xml");
+
     SharedPtr<BorderImage> container = CreateContainer(HA_LEFT, VA_TOP, 100);
     statsText_ = new Text(context_);
-    widgets_.Push(WidgetPair("_internal_stats_text", Urho3D::StaticCast<UIElement>(statsText_)));
+    statsText_->SetStyle("TextMonospaceShadowed", style);
     container->AddChild(statsText_);
 
     container = CreateContainer(HA_LEFT, VA_BOTTOM, 100);
     modeText_ = new Text(context_);
-    widgets_.Push(WidgetPair("_internal_mode_text", Urho3D::StaticCast<UIElement>(modeText_)));
+    modeText_->SetStyle("TextMonospaceShadowed", style);
     container->AddChild(modeText_);
 
     profilerText_ = new Text(context_);
+    profilerText_->SetStyle("TextMonospaceShadowed", style);
     CreateTab("Profiler", Urho3D::StaticCast<UIElement>(profilerText_));
 
     SetDefaultStyle(context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("UI/DefaultStyle.xml"));
@@ -124,11 +129,14 @@ void DebugHud::CreateTab(const String &name, UIElementPtr widget)
     }
 
     SharedPtr<Button> button(new Button(context_));
-    Text *text = button->CreateChild<Text>("button" + name, 0);
+    button->SetName(name);
+    Text *text = button->CreateChild<Text>("buttonText" + name, 0);
     text->SetInternal(true);
     text->SetText(name);
     buttons_.Push(button);
     tabLayout_->AddChild(button);
+
+    SubscribeToEvent(button, E_RELEASED, HANDLER(DebugHud, HandleTabChange));
 
     bool isFirstChild = (tabContainer_->GetNumChildren() == 1);
     ScrollView *view = tabContainer_->CreateChild<ScrollView>("scrollView" + name, Urho3D::M_MAX_UNSIGNED);
@@ -352,6 +360,56 @@ void DebugHud::HandlePostUpdate(StringHash /*eventType*/, VariantMap& /*eventDat
     using namespace PostUpdate;
 
     Update();
+}
+
+void DebugHud::HandleTabChange(StringHash /*eventType*/, VariantMap& eventData)
+{
+    using namespace Released;
+
+    Button *button = dynamic_cast<Button*>(eventData[P_ELEMENT].GetPtr());
+    if (button)
+        ShowTab(button->GetName());
+}
+
+void DebugHud::ShowTab(const String &name)
+{
+    if (name.Empty())
+    {
+        LogError("DebugHud::ShowTab: Provided tab name is empty");
+        return;
+    }
+
+    UIElementPtr tab;
+    for (auto iter = widgets_.Begin(); iter != widgets_.End(); ++iter)
+    {
+        if (iter->first_.Compare(name, true) == 0)
+        {
+            tab = iter->second_;
+            break;
+        }
+    }
+    if (!tab)
+    {
+        LogErrorF("DebugHud::ShowTab: Tab '%s' does not exit.", name.CString());
+        return;
+    }
+    for (auto iter = widgets_.Begin(); iter != widgets_.End(); ++iter)
+    {
+        // Tab widgets are always parented to a ScrollView. Toggle its visibility.
+        bool visible = iter->second_.Get() == tab.Get();
+        UIElement *parent = iter->second_->GetParent();
+        if (parent)
+            parent->SetVisible(visible);
+        iter->second_->SetVisible(visible);
+    }
+}
+
+StringVector DebugHud::TabNames() const
+{
+    StringVector names;
+    for (auto iter = widgets_.Begin(); iter != widgets_.End(); ++iter)
+        names.Push(iter->first_);
+    return names;
 }
 
 }
