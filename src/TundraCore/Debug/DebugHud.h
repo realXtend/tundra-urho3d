@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include "FrameworkFwd.h"
 #include "TundraCoreApi.h"
 #include "CoreTypes.h"
 
@@ -49,14 +50,29 @@ typedef SharedPtr<Urho3D::Button> ButtonPtr;
 typedef SharedPtr<Urho3D::BorderImage> BorderImagePtr;
 typedef Vector<ButtonPtr > ButtonPtrVector;
 typedef Vector<BorderImagePtr > BorderImagePtrVector;
-typedef Pair<String, UIElementPtr > WidgetPair;
-typedef Vector<WidgetPair > WidgetPairVector;
 
 static const unsigned DEBUGHUD_SHOW_NONE = 0x0;
 static const unsigned DEBUGHUD_SHOW_STATS = 0x1;
 static const unsigned DEBUGHUD_SHOW_MODE = 0x2;
 static const unsigned DEBUGHUD_SHOW_PANEL = 0x4;
 static const unsigned DEBUGHUD_SHOW_ALL = 0x7;
+
+/// Debug hud updater
+/** Updates a particular tab in the debug hud view */
+class TUNDRACORE_API DebugHudUpdater : public RefCounted
+{
+public:
+    DebugHudUpdater(Framework *framework) : framework_(framework) {}
+
+    /// Called when updaters tab @c widget is visible and needs to be updated.
+    virtual void UpdateDebugHud(float frametime, const UIElementPtr &widget) = 0;
+
+protected:
+    Framework *framework_;
+};
+typedef SharedPtr<DebugHudUpdater> DebugHudUpdaterPtr;
+
+class ProfilerHud;
 
 /// Displays rendering stats and profiling information.
 class TUNDRACORE_API DebugHud : public Object
@@ -65,7 +81,7 @@ class TUNDRACORE_API DebugHud : public Object
 
 public:
     /// Construct.
-    DebugHud(Urho3D::Context* context);
+    DebugHud(Framework *framework);
     /// Destruct.
     ~DebugHud();
 
@@ -76,6 +92,14 @@ public:
     /// Sets visivility.
     void SetVisible(bool visible);
 
+    /// Add a new tab to profiler.
+    /** @note @c updater reference will be held. You don't need to 
+        hold a reference to it to keep it functional. */
+    bool AddTab(const String &name, DebugHudUpdaterPtr updater, UIElementPtr widget);
+    /// Removes tab @c name.
+    /** If the last references are held by DebugHud the
+        updater and widget will also get destroyed. */
+    void DebugHud::RemoveTab(const String &name);
     /// Show tab @c name.
     void ShowTab(const String &name);
     /// Returns available tab names.
@@ -93,7 +117,7 @@ public:
     /// Return currently shown elements.
     unsigned GetMode() const { return mode_; }
     /// Return maximum profiler block depth.
-    unsigned GetProfilerMaxDepth() const { return profilerMaxDepth_; }
+    unsigned GetProfilerMaxDepth() const;
     /// Return profiler accumulation interval in seconds
     float GetProfilerInterval() const;
 
@@ -118,27 +142,24 @@ private:
     void HandleWindowChange(StringHash eventType, VariantMap& eventData);
     /// Handle tab change from button click.
     void HandleTabChange(StringHash eventType, VariantMap& eventData);
+    /// Update.
+    void OnUpdate(float frametime);
 
-    /// Update. Called by HandlePostUpdate().
-    void Update();
-    /// Return the UI style file.
-    Urho3D::XMLFile* GetDefaultStyle() const;
-    /// Return rendering stats text.
-    Urho3D::Text* GetStatsText() const { return statsText_; }
-    /// Return rendering mode text.
-    Urho3D::Text* GetModeText() const { return modeText_; }
-    /// Return profiler text.
-    Urho3D::Text* GetProfilerText() const { return profilerText_; }
+    struct HudTab
+    {
+        String name;
+        UIElementPtr widget;
+        DebugHudUpdaterPtr updater;
+    };
 
-    void CreateTab(const String &name, UIElementPtr widget);
+    void CreateTab(const String &name, DebugHudUpdaterPtr updater, UIElementPtr widget);
     BorderImagePtr CreateContainer(int ha, int va, int priority);
 
     /// Rendering stats text.
     TextPtr statsText_;
     /// Rendering mode text.
     TextPtr modeText_;
-    /// Profiling information text.
-    TextPtr profilerText_;
+
     /// Tab container.
     BorderImagePtr tabContainer_;
     /// Text widget containers.
@@ -147,21 +168,43 @@ private:
     ButtonPtrVector buttons_;
     /// Tab layout.
     UIElementPtr tabLayout_;
-    /// Tab widgets
-    WidgetPairVector widgets_;
+    /// Tab widget data.
+    Vector<HudTab*> tabs_;
+    /// Current tab
+    HudTab *currentTab_;
+
+    /// Profiler updater implementation
+    SharedPtr<ProfilerHud> profilerUpdater_;
 
     /// Hashmap containing application specific stats.
     HashMap<String, String> appStats_;
-    /// Profiler timer.
-    Urho3D::Timer profilerTimer_;
-    /// Profiler max block depth.
-    unsigned profilerMaxDepth_;
-    /// Profiler accumulation interval.
-    unsigned profilerInterval_;
+
     /// Show 3D geometry primitive/batch count flag.
     bool useRendererStats_;
     /// Current shown-element mode.
     unsigned mode_;
+
+    Framework *framework_;
 };
+
+/// @cond PRIVATE
+class ProfilerHud : public DebugHudUpdater
+{
+public:
+    ProfilerHud(Framework *framework);
+
+    /// DebugHudUpdater override.
+    void UpdateDebugHud(float frametime, const UIElementPtr &widget) override;
+
+    /// Profiler max block depth.
+    unsigned profilerMaxDepth;
+    /// Profiler accumulation interval.
+    unsigned profilerInterval;
+
+private:
+    /// Profiler timer.
+    Urho3D::Timer profilerTimer_;
+};
+/// @endcond
 
 }

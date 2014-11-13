@@ -43,7 +43,7 @@ void DebugAPI::OnKeyDown(StringHash eventType, VariantMap &eventData)
 DebugHud *DebugAPI::Hud()
 {
     if (!debugHud_)
-        debugHud_ = new DebugHud(framework_->GetContext());
+        debugHud_ = new DebugHud(framework_);
     return debugHud_;
 }
 
