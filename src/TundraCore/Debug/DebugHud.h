@@ -99,7 +99,7 @@ public:
     /// Removes tab @c name.
     /** If the last references are held by DebugHud the
         updater and widget will also get destroyed. */
-    void DebugHud::RemoveTab(const String &name);
+    void RemoveTab(const String &name);
     /// Show tab @c name.
     void ShowTab(const String &name);
     /// Returns available tab names.
