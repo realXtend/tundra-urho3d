@@ -242,6 +242,7 @@ namespace Http
         Stats();
 
         void Dump(bool averages_ = true);
+        String GetData(bool averages_ = true);
     };
 
     /// @endcond

@@ -273,68 +273,76 @@ String PadDouble(double value, uint pad)
 {
     String v = PadString(Urho3D::ToString("%f", value), pad);
     if (v.Length() >= pad) // cut digits
-        v = v.Substring(0, 12);
+        v = v.Substring(0, pad);
     return v; 
 }
 
 void Stats::Dump(bool averages_)
 {
-    Logger l("HttpStats");
-    l.InfoF("%s %s %s %s %s",
-        PadString("", 14).CString(),
-        PadString("Download", 12).CString(),
-        PadString("Upload", 12).CString(),
+    StringVector lines = GetData(averages_).Split('\n');
+    foreach(auto &line, lines)
+        LogInfo("[HttpStats] " + line);
+}
+
+String Stats::GetData(bool averages_)
+{
+    String str;
+    str.AppendWithFormat("%s %s %s %s %s\n\n",
+        PadString("", 12).CString(),
+        PadString("Download", 10).CString(),
+        PadString("Upload", 10).CString(),
         PadString("Cache Read", 12).CString(),
         PadString("Cache Write", 12).CString()
     );
-    l.InfoF("%s %s %s %s %s",
-        PadString("Count", 14).CString(),
-        PadString(downloads, 12).CString(),
-        PadString(uploads, 12).CString(),
+    str.AppendWithFormat("%s %s %s %s %s\n",
+        PadString("Count", 12).CString(),
+        PadString(downloads, 10).CString(),
+        PadString(uploads, 10).CString(),
         PadString(diskReads, 12).CString(),
         PadString(diskWrites, 12).CString()
     );
-    l.InfoF("%s %s %s %s %s MB",
-        PadString("Size", 14).CString(),
-        PadDouble((totals.downloadBytes / 1024.0) / 1024.0, 12).CString(),
-        PadDouble((totals.uploadBytes / 1024.0) / 1024.0, 12).CString(),
+    str.AppendWithFormat("%s %s %s %s %s MB\n",
+        PadString("Size", 12).CString(),
+        PadDouble((totals.downloadBytes / 1024.0) / 1024.0, 10).CString(),
+        PadDouble((totals.uploadBytes / 1024.0) / 1024.0, 10).CString(),
         PadDouble((totals.diskReadBytes / 1024.0) / 1024.0, 12).CString(),
         PadDouble((totals.diskWriteBytes / 1024.0) / 1024.0, 12).CString()
     );
     if (averages_)
     {
-        l.InfoF("%s %s %s %s %s msec",
-            PadString("Avg. time", 14).CString(),
-            PadDouble(averages.msecDownload > -1.0 ? averages.msecDownload : 0.0, 12).CString(),
-            PadDouble(averages.msecUpload > -1.0 ? averages.msecUpload : 0.0, 12).CString(),
+        str.AppendWithFormat("%s %s %s %s %s msec\n",
+            PadString("Avg. time", 12).CString(),
+            PadDouble(averages.msecDownload > -1.0 ? averages.msecDownload : 0.0, 10).CString(),
+            PadDouble(averages.msecUpload > -1.0 ? averages.msecUpload : 0.0, 10).CString(),
             PadDouble(averages.msecDiskRead > -1.0 ? averages.msecDiskRead : 0.0, 12).CString(),
             PadDouble(averages.msecDiskWrite > -1.0 ? averages.msecDiskWrite : 0.0, 12).CString()
         );
     }
-    l.InfoF("%s %s %s %s %s seconds",
-        PadString("Total time", 14).CString(),
-        PadDouble(totals.msecDownload / 1000.0, 12).CString(),
-        PadDouble(totals.msecUpload / 1000.0, 12).CString(),
+    str.AppendWithFormat("%s %s %s %s %s seconds\n",
+        PadString("Total time", 12).CString(),
+        PadDouble(totals.msecDownload / 1000.0, 10).CString(),
+        PadDouble(totals.msecUpload / 1000.0, 10).CString(),
         PadDouble(totals.msecDiskRead / 1000.0, 12).CString(),
         PadDouble(totals.msecDiskWrite / 1000.0, 12).CString()
     );
     if (averages_)
     {
-        l.InfoF("%s %s %s %s %s kB/sec",
-            PadString("Avg. speed", 14).CString(),
-            PadDouble(averages.downloadBytesPerSec > -1.0 ? averages.downloadBytesPerSec / 1024.0 : 0.0, 12).CString(),
-            PadDouble(averages.uploadBytesPerSec > -1.0 ? averages.uploadBytesPerSec / 1024.0 : 0.0, 12).CString(),
+        str.AppendWithFormat("%s %s %s %s %s kB/sec\n",
+            PadString("Avg. speed", 12).CString(),
+            PadDouble(averages.downloadBytesPerSec > -1.0 ? averages.downloadBytesPerSec / 1024.0 : 0.0, 10).CString(),
+            PadDouble(averages.uploadBytesPerSec > -1.0 ? averages.uploadBytesPerSec / 1024.0 : 0.0, 10).CString(),
             PadString("", 12).CString(),
             PadString("", 12).CString()
         );
-        l.InfoF("%s %s %s %s %s kB/sec",
-            PadString("Best speed", 14).CString(),
-            PadDouble(averages.bestDownloadBytesPerSec > -1.0 ? averages.bestDownloadBytesPerSec / 1024.0 : 0.0, 12).CString(),
-            PadDouble(averages.bestUploadBytesPerSec > -1.0 ? averages.bestUploadBytesPerSec / 1024.0 : 0.0, 12).CString(),
+        str.AppendWithFormat("%s %s %s %s %s kB/sec\n",
+            PadString("Best speed", 12).CString(),
+            PadDouble(averages.bestDownloadBytesPerSec > -1.0 ? averages.bestDownloadBytesPerSec / 1024.0 : 0.0, 10).CString(),
+            PadDouble(averages.bestUploadBytesPerSec > -1.0 ? averages.bestUploadBytesPerSec / 1024.0 : 0.0, 10).CString(),
             PadString("", 12).CString(),
             PadString("", 12).CString()
         );
     }
+    return str;
 }
 
 // Stats::IO

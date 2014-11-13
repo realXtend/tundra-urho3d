@@ -36,6 +36,9 @@ void TUNDRACORE_API ParseCommand(String input, String &command, StringVector &pa
 /** Negative @pad will insert the whitespace to the left, positive to the right. */
 String TUNDRACORE_API PadString(String str, int pad);
 
+/// Format number digit grouping from 1234567 to "1,234,567" up to 999,999,9999.
+String TUNDRACORE_API FormatDigitGrouping(uint value, const String &fillChar = ",");
+
 /// Templated string padding overload that accepts anything the Urho3d::String ctor accepts.
 template <typename T>
 String PadString(T val, int pad)

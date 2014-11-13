@@ -26,6 +26,7 @@
 #include "DebugHud.h"
 #include "Framework.h"
 #include "FrameAPI.h"
+#include "CoreStringUtils.h"
 #include "LoggingFunctions.h"
 
 #include <CoreEvents.h>
@@ -74,7 +75,7 @@ DebugHud::DebugHud(Framework *framework) :
     mode_(DEBUGHUD_SHOW_NONE),
     currentTab_(0)
 {
-    profilerUpdater_ = new ProfilerHud(framework_);
+    profilerHudPanel_ = new ProfilerHudPanel(framework_);
 
     XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("UI/DefaultStyle.xml");
 
@@ -89,10 +90,7 @@ DebugHud::DebugHud(Framework *framework) :
     container->AddChild(modeText_);
 
     // Profiler tab is implemented here. Normally 3rd party code calls AddTab.
-    SharedPtr<UIElement> profilerText(new Text(context_));
-    AddTab("Profiler", Urho3D::StaticCast<DebugHudUpdater>(profilerUpdater_), profilerText);
-
-    SetDefaultStyle(context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("UI/DefaultStyle.xml"));
+    AddTab("Profiler", StaticCast<DebugHudPanel>(profilerHudPanel_));
 
     framework_->Frame()->PostFrameUpdate.Connect(this, &DebugHud::OnUpdate);
     SubscribeToEvent(E_SCREENMODE, HANDLER(DebugHud, HandleWindowChange));
@@ -100,17 +98,10 @@ DebugHud::DebugHud(Framework *framework) :
 
 DebugHud::~DebugHud()
 {
-    foreach(auto tab, tabs_)
-    {
-        if (tab->widget)
-        {
-            UIElement *parent = tab->widget->GetParent();
-            if (parent)
-                parent->Remove();
-            tab->widget->Remove();
-        }
-        delete tab;
-    }
+    profilerHudPanel_.Reset();
+
+    for(auto iter = tabs_.Begin(); iter != tabs_.End(); ++iter)
+        delete (*iter);
     tabs_.Clear();
     currentTab_ = 0;
 
@@ -119,10 +110,34 @@ DebugHud::~DebugHud()
     containers_.Clear();
 }
 
-void DebugHud::CreateTab(const String &name, DebugHudUpdaterPtr updater, UIElementPtr widget)
+bool DebugHud::AddTab(const String &name, DebugHudPanelWeakPtr updater)
 {
+    foreach(auto tab, tabs_)
+    {
+        if (tab->name.Compare(name, true) == 0)
+        {
+            LogErrorF("DebugHud::AddTab: Tab '%s' already exists.", name.CString());
+            return false;
+        }
+    }
+
+    // Create widget and tab
+    updater->Create();
+    UIElementPtr widget = updater->Widget();
+    if (!widget)
+    {
+        LogErrorF("DebugHud::AddTab: Tab '%s' failed to create a widget for embedding.", name.CString());
+        return false;
+    }
+    HudTab *tab = new HudTab();
+    tab->name = name;
+    tab->updater = updater;
+    tabs_.Push(tab);
+
+    // Get default style
     XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("UI/DefaultStyle.xml");
 
+    // Initialize container
     if (!tabContainer_)
     {
         tabContainer_ = CreateContainer(HA_RIGHT, VA_TOP, 100);
@@ -133,29 +148,31 @@ void DebugHud::CreateTab(const String &name, DebugHudUpdaterPtr updater, UIEleme
             tabContainer_->SetFixedWidth(Urho3D::Clamp(static_cast<int>(graphics->GetWidth() * 0.4), 500, 900));
         }
     }
-    if (!tabLayout_)
+    // Initialize button layout
+    if (!tabButtonLayout_)
     {
-        tabLayout_ = new UIElement(context_);
-        tabLayout_->SetLayout(LM_HORIZONTAL, 15);
-        tabLayout_->SetFixedHeight(35);
-        auto border = tabLayout_->GetLayoutBorder();
+        tabButtonLayout_ = new UIElement(context_);
+        tabButtonLayout_->SetLayout(LM_HORIZONTAL, 15);
+        tabButtonLayout_->SetFixedHeight(35);
+        auto border = tabButtonLayout_->GetLayoutBorder();
         border.top_ = 8; border.bottom_ = 8;
-        tabLayout_->SetLayoutBorder(border);
-        tabContainer_->AddChild(tabLayout_);
+        tabButtonLayout_->SetLayoutBorder(border);
+        tabContainer_->AddChild(tabButtonLayout_);
     }
 
-    SharedPtr<Button> button(new Button(context_));
-    button->SetName(name);
+    // Create button to invoke the panel
+    Button *button = tabButtonLayout_->CreateChild<Button>("button" + name, M_MAX_UNSIGNED);
     Text *text = button->CreateChild<Text>("buttonText" + name, 0);
     text->SetInternal(true);
     text->SetText(name);
-    buttons_.Push(button);
-    tabLayout_->AddChild(button);
+    button->SetName(name);
+    button->SetStyle("Button", style);
 
+    // Sub to click release event
     SubscribeToEvent(button, E_RELEASED, HANDLER(DebugHud, HandleTabChange));
 
     bool isFirstChild = (tabContainer_->GetNumChildren() == 1);
-    ScrollView *view = tabContainer_->CreateChild<ScrollView>("scrollView" + name, Urho3D::M_MAX_UNSIGNED);
+    ScrollView *panel = tabContainer_->CreateChild<ScrollView>("scrollView" + name, Urho3D::M_MAX_UNSIGNED);
 
     /// Auto set style if a text widget to keep things looking consistent.
     Text *textWidget = dynamic_cast<Text*>(widget.Get());
@@ -163,44 +180,32 @@ void DebugHud::CreateTab(const String &name, DebugHudUpdaterPtr updater, UIEleme
         textWidget->SetStyle("TextMonospaceShadowed", style);
     widget->SetVisible(isFirstChild);
 
-    HudTab *tab = new HudTab();
-    tab->name = name;
-    tab->updater = updater;
-    tab->widget = widget;
-    tabs_.Push(tab);
+    // Embed widget to tab panel
+    panel->SetContentElement(widget);
+    panel->SetVisible(isFirstChild);
+    panel->SetStyle("OverlayScrollView", style);
+    tabContainer_->AddChild(panel);
 
-    view->SetContentElement(widget);
-    view->SetVisible(isFirstChild);
-    view->SetStyle("OverlayScrollView", style);
-    tabContainer_->AddChild(view);
-
+    // If first tab panel set it as current
     if (isFirstChild && !currentTab_)
         currentTab_ = tab;
-
+    return true;
 }
 
 BorderImagePtr DebugHud::CreateContainer(int ha, int va, int priority)
 {
+    XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("UI/DefaultStyle.xml");
+
     SharedPtr<BorderImage> container(new BorderImage(context_));
     container->SetAlignment((HorizontalAlignment)ha, (VerticalAlignment)va);
     container->SetPriority(priority);
     container->SetVisible(false);
+    container->SetStyle("VOverlayTransparent", style);
 
     GetSubsystem<UI>()->GetRoot()->AddChild(container);
     
     containers_.Push(container);
     return container;
-}
-
-void DebugHud::SetDefaultStyle(XMLFile* style)
-{
-    if (!style)
-        return;
-
-    foreach(auto button, buttons_)
-        button->SetStyle("Button", style);
-    foreach(SharedPtr<BorderImage> c, containers_)
-        c->SetStyle("VOverlayTransparent", style);
 }
 
 void DebugHud::OnUpdate(float frametime)
@@ -212,7 +217,7 @@ void DebugHud::OnUpdate(float frametime)
     Renderer* renderer = GetSubsystem<Renderer>();
     if (!renderer || !graphics)
         return;
-    
+
     if (statsText_->IsVisible())
     {
         unsigned primitives, batches;
@@ -228,8 +233,8 @@ void DebugHud::OnUpdate(float frametime)
         }
 
         String stats;
-        stats.AppendWithFormat("Triangles %u\nBatches %u\nViews %u\nLights %u\nShadowmaps %u\nOccluders %u",
-            primitives,
+        stats.AppendWithFormat("Triangles  %s\nBatches    %u\nViews      %u\nLights     %u\nShadowmaps %u\nOccluders  %u",
+            FormatDigitGrouping(primitives).CString(),
             batches,
             renderer->GetNumViews(),
             renderer->GetNumLights(true),
@@ -267,8 +272,13 @@ void DebugHud::OnUpdate(float frametime)
         modeText_->SetText(mode);
     }
 
-    if (currentTab_ && currentTab_->updater.Get())
-        currentTab_->updater->UpdateDebugHud(frametime, currentTab_->widget);
+    if (tabContainer_->IsVisible() && currentTab_)
+    {
+        SharedPtr<DebugHudPanel> panel = currentTab_->updater.Lock();
+        UIElementPtr widget = (panel.Get() ? panel->Widget() : UIElementPtr());
+        if (panel && widget)
+            panel->UpdatePanel(frametime, widget);
+    }
 }
 
 void DebugHud::SetMode(unsigned mode)
@@ -282,12 +292,12 @@ void DebugHud::SetMode(unsigned mode)
 
 void DebugHud::SetProfilerMaxDepth(unsigned depth)
 {
-    profilerUpdater_->profilerMaxDepth = depth;
+    profilerHudPanel_->profilerMaxDepth = depth;
 }
 
 void DebugHud::SetProfilerInterval(float interval)
 {
-    profilerUpdater_->profilerInterval = Max((int)(interval * 1000.0f), 0);
+    profilerHudPanel_->profilerInterval = Max((int)(interval * 1000.0f), 0);
 }
 
 void DebugHud::SetUseRendererStats(bool enable)
@@ -312,12 +322,12 @@ void DebugHud::SetVisible(bool visible)
 
 unsigned DebugHud::GetProfilerMaxDepth() const
 {
-    return profilerUpdater_->profilerMaxDepth;
+    return profilerHudPanel_->profilerMaxDepth;
 }
 
 float DebugHud::GetProfilerInterval() const
 {
-    return (float)profilerUpdater_->profilerInterval / 1000.0f;
+    return (float)profilerHudPanel_->profilerInterval / 1000.0f;
 }
 
 void DebugHud::SetAppStats(const String& label, const Variant& stats)
@@ -363,20 +373,6 @@ void DebugHud::HandleTabChange(StringHash /*eventType*/, VariantMap& eventData)
         ShowTab(button->GetName());
 }
 
-bool DebugHud::AddTab(const String &name, DebugHudUpdaterPtr updater, UIElementPtr widget)
-{
-    foreach(auto tab, tabs_)
-    {
-        if (tab->name.Compare(name, true) == 0)
-        {
-            LogErrorF("DebugHud::AddTab: Tab '%s' already exists.", name.CString());
-            return false;
-        }
-    }
-    CreateTab(name, updater, widget);
-    return true;
-}
-
 void DebugHud::RemoveTab(const String &name)
 {
     for (auto iter = tabs_.Begin(); iter != tabs_.End(); ++iter)
@@ -391,13 +387,9 @@ void DebugHud::RemoveTab(const String &name)
                 if (tabs_.Begin() != tabs_.End())
                     ShowTab(tabs_.Front()->name);
             }
-            if (tab->widget)
-            {
-                UIElement *parent = tab->widget->GetParent();
-                if (parent)
-                    parent->Remove();
-                tab->widget->Remove();
-            }
+            if (tab->updater.Get())
+                tab->updater->Destroy();
+            tab->updater.Reset();
             delete tab;
             return;
         }
@@ -416,9 +408,9 @@ void DebugHud::ShowTab(const String &name)
     UIElementPtr widget;
     foreach(auto tab, tabs_)
     {
-        if (tab->name.Compare(name, true) == 0 && tab->widget)
+        if (tab->name.Compare(name, true) == 0 && tab->updater->Widget())
         {
-            widget = tab->widget;
+            widget = tab->updater->Widget();
             currentTab_ = tab;
             break;
         }
@@ -431,13 +423,19 @@ void DebugHud::ShowTab(const String &name)
     foreach(auto tab, tabs_)
     {
         // Tab widgets are always parented to a ScrollView. Toggle its visibility.
-        bool visible = (tab->widget.Get() == widget.Get());
-        UIElement *parent = tab->widget->GetParent();
+        UIElementPtr currentWidget = tab->updater->Widget();
+        bool visible = (currentWidget.Get() == widget.Get());
+        UIElement *parent = currentWidget->GetParent();
         if (parent)
-            parent->SetVisible(visible);
-        tab->widget->SetVisible(visible);
+        {
+            ScrollView *view = dynamic_cast<ScrollView*>(parent->GetParent() ? parent->GetParent() : parent);
+            if (view)
+                view->SetVisible(visible);
+            else
+                parent->SetVisible(visible);
+        }
+        currentWidget->SetVisible(visible);
     }
-    
 }
 
 StringVector DebugHud::TabNames() const
@@ -448,22 +446,25 @@ StringVector DebugHud::TabNames() const
     return names;
 }
 
-// ProfilerHud
+/// @cond PRIVATE
 
-ProfilerHud::ProfilerHud(Framework *framework) :
-    DebugHudUpdater(framework),
+ProfilerHudPanel::ProfilerHudPanel(Framework *framework) :
+    DebugHudPanel(framework),
     profilerMaxDepth(M_MAX_UNSIGNED),
     profilerInterval(1000)
 {
 }
 
-void ProfilerHud::UpdateDebugHud(float /*frametime*/, const UIElementPtr &widget)
+UIElementPtr ProfilerHudPanel::CreateImpl()
 {
-    Text *profilerText = dynamic_cast<Text*>(widget.Get());
-    if (!profilerText)
-        return;
+    return UIElementPtr(new Text(framework_->GetContext()));
+}
+
+void ProfilerHudPanel::UpdatePanel(float /*frametime*/, const UIElementPtr &widget)
+{
     Profiler* profiler = framework_->GetSubsystem<Profiler>();
-    if (!profiler)
+    Text *profilerText = dynamic_cast<Text*>(widget.Get());
+    if (!profiler || !profilerText)
         return;
 
     if (profilerTimer_.GetMSec(false) >= profilerInterval)
@@ -476,5 +477,7 @@ void ProfilerHud::UpdateDebugHud(float /*frametime*/, const UIElementPtr &widget
         profiler->BeginInterval();
     }
 }
+
+/// @endcond
 
 }

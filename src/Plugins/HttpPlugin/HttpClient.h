@@ -8,6 +8,7 @@
 #include "FrameworkFwd.h"
 
 #include "HttpWorkQueue.h"
+#include "DebugHudPanel.h"
 
 #include <Engine/Container/RefCounted.h>
 
@@ -56,6 +57,9 @@ public:
     Http::Stats *Stats() const;
 
 private:
+    friend class HttpPlugin;
+    friend class HttpAssetProvider;
+
     /// Create a request without scheduling it.
     HttpRequestPtr Create(int method, const String &url);
     HttpRequestPtr Create(int method, const String &url, const Vector<u8> &body, const String &contentType);
@@ -65,14 +69,36 @@ private:
     HttpRequestPtr Schedule(int method, const String &url, const Vector<u8> &body, const String &contentType);
     bool Schedule(HttpRequestPtr request);
 
-    friend class HttpPlugin;
-    friend class HttpAssetProvider;
+    void Initialize();
     void Update(float frametime);
-
     void DumpStats() const;
+
+    SharedPtr<HttpHudPanel> httpHudPanel_;
 
     Framework *framework_;
     HttpWorkQueuePtr queue_;    
 };
+
+
+/// @cond PRIVATE
+class HttpHudPanel : public DebugHudPanel
+{
+public:
+    HttpHudPanel(Framework *framework, HttpClient *client, HttpWorkQueue *queue);
+
+    /// DebugHudUpdater override.
+    void UpdatePanel(float frametime, const SharedPtr<Urho3D::UIElement> &widget) override;
+
+protected:
+    /// DebugHudPanel override.
+    SharedPtr<Urho3D::UIElement> CreateImpl() override;
+
+private:
+    HttpClient *client_;
+    HttpWorkQueue *queue_;
+    float t_;
+    float step_;
+};
+/// @endcond
 
 }

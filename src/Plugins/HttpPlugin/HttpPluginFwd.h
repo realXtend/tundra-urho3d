@@ -24,7 +24,9 @@ namespace Tundra
     class HttpRequest;
 
     typedef SharedPtr<HttpWorkQueue> HttpWorkQueuePtr;
+    typedef WeakPtr<HttpWorkQueue> HttpWorkQueueWeakPtr;
     typedef SharedPtr<HttpClient> HttpClientPtr;
+    typedef WeakPtr<HttpClient> HttpClientWeakPtr;
     typedef SharedPtr<HttpRequest> HttpRequestPtr;
     typedef Vector<HttpRequestPtr> HttpRequestPtrList;
 
@@ -46,5 +48,6 @@ namespace Tundra
     }
     class HttpWorkThread;
     typedef Vector<HttpWorkThread*> HttpWorkThreadList;
+    class HttpHudPanel;
     /// @endcond
 }

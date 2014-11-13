@@ -32,6 +32,7 @@ void HttpPlugin::Load()
 
 void HttpPlugin::Initialize()
 {
+    client_->Initialize();
 }
 
 void HttpPlugin::Uninitialize()

@@ -3,10 +3,14 @@
 #include "StableHeaders.h"
 #include "HttpClient.h"
 #include "HttpRequest.h"
+#include "DebugAPI.h"
+#include "DebugHud.h"
 
 #include "Framework.h"
 #include "ConsoleAPI.h"
 #include "LoggingFunctions.h"
+
+#include <UI/Text.h>
 
 #include <curl/curl.h>
 
@@ -18,18 +22,15 @@ HttpClient::HttpClient(Framework *framework) :
 {
     CURLcode err = curl_global_init(CURL_GLOBAL_DEFAULT);
     if (err == CURLE_OK)
-    {
         queue_ = new HttpWorkQueue();
-
-        if (Stats())
-            framework->Console()->RegisterCommand("httpStats", "Dump HTTP statistics to stdout", this, &HttpClient::DumpStats);
-    }
     else
         LogErrorF("[HttpClient] Failed to initialize curl: %s", curl_easy_strerror(err));
 }
 
 HttpClient::~HttpClient()
 {
+    httpHudPanel_.Reset();
+
     // Stop all threads and cleanup curl requests
     queue_.Reset();
 
@@ -140,6 +141,19 @@ bool HttpClient::Schedule(HttpRequestPtr request)
     return true;
 }
 
+void HttpClient::Initialize()
+{
+    if (Stats())
+    {
+        framework_->Console()->RegisterCommand("httpStats", "Dump HTTP statistics to stdout", this, &HttpClient::DumpStats);
+        if (!framework_->IsHeadless())
+        {
+            httpHudPanel_ = new HttpHudPanel(framework_, this, queue_);
+            framework_->Debug()->Hud()->AddTab("HTTP", Urho3D::StaticCast<DebugHudPanel>(httpHudPanel_));
+        }
+    }
+}
+
 void HttpClient::Update(float frametime)
 {
     if (queue_)
@@ -151,5 +165,37 @@ void HttpClient::DumpStats() const
     if (Stats())
         Stats()->Dump();
 }
+
+/// @cond PRIVATE
+
+HttpHudPanel::HttpHudPanel(Framework *framework, HttpClient *client, HttpWorkQueue *queue) :
+    DebugHudPanel(framework),
+    client_(client),
+    queue_(queue),
+    step_(1.f/30.f),
+    t_(1.f)
+{
+}
+
+SharedPtr<Urho3D::UIElement> HttpHudPanel::CreateImpl()
+{
+    return UIElementPtr(new Urho3D::Text(framework_->GetContext()));
+}
+
+void HttpHudPanel::UpdatePanel(float frametime, const SharedPtr<Urho3D::UIElement> &widget)
+{
+    Urho3D::Text *httpText = dynamic_cast<Urho3D::Text*>(widget.Get());
+    if (!httpText || !client_->Stats())
+        return;
+
+    t_ += frametime;
+    if (t_ >= step_)
+    {
+        t_ = 0.f;
+        httpText->SetText(client_->Stats()->GetData());
+    }
+}
+
+/// @endcond
 
 }

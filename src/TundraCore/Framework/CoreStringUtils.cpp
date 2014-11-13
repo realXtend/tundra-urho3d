@@ -7,6 +7,8 @@
 #include <kNet/DataSerializer.h>
 #include <kNet/DataDeserializer.h>
 
+#include <StringUtils.h>
+
 namespace Tundra
 {
 
@@ -81,6 +83,34 @@ String PadString(String str, int pad)
             str += " ";
         pad--;
     }
+    return str;
+}
+
+String FormatDigitGrouping(uint value, const String &fillChar)
+{
+    String str;
+    str.AppendWithFormat("%u", value);
+    if (str.Length() >= 9)
+    {
+        str.Insert(6, fillChar);
+        str.Insert(3, fillChar);
+    }
+    else if (str.Length() >= 8)
+    {
+        str.Insert(5, fillChar);
+        str.Insert(2, fillChar);
+    }
+    else if (str.Length() >= 7)
+    {
+        str.Insert(4, fillChar);
+        str.Insert(1, fillChar);
+    }
+    else if (str.Length() >= 6)
+        str.Insert(3, fillChar);
+    else if (str.Length() >= 5)
+        str.Insert(2, fillChar);
+    else if (str.Length() >= 4)
+        str.Insert(1, fillChar);
     return str;
 }
 
