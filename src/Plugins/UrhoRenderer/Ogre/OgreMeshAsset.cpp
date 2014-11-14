@@ -895,14 +895,8 @@ struct VertexBlendWeights
         }
     }
 
-    void AddBoneInfluence(uint index, float weight)
+    void AddBoneInfluence(unsigned char index, float weight)
     {
-        if (index > 255)
-        {
-            LogWarning("Bone indices are limited to 8 bits");
-            return;
-        }
-
         if (weight <= 0.0f)
             return;
 
@@ -1040,8 +1034,6 @@ static SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context
             }
 
             uint globalBone = baIter->boneIndex;
-            if (globalBone == 0)
-                LogWarning("Using root bone to skin");
 
             // If vertex is influenced by the bone strongly enough (somewhat arbitrary limit), add to the bone's bounding box
             // Note: these vertices are in model space and need to be transformed into bone space when applying the skeleton
