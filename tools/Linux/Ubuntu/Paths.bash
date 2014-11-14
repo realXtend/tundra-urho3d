@@ -15,5 +15,7 @@ export DEPS_BIN=$DEPS/bin
 export DEPS_LIB=$DEPS/lib
 export DEPS_INC=$DEPS/include
 
+export DEPS_WINDOWS_PATCH_DIR=$TUNDRA/tools/Windows/Patches
+
 export TUNDRA_BUILD_DIR_NAME="build-$(uname -n)-$(lsb_release -sr)-$(dpkg-architecture -qDEB_HOST_ARCH)"
 export TUNDRA_BUILD_DIR=$TUNDRA/$TUNDRA_BUILD_DIR_NAME

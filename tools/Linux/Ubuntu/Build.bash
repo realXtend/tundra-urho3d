@@ -120,7 +120,7 @@ if [ $skip_pkg = false ] ; then
 
     print_subtitle "Source control"
     sudo apt-get -y --quiet install \
-        git
+        git subversion
 
     print_subtitle "Urho3D"
     sudo apt-get -y --quiet install \
@@ -130,6 +130,10 @@ if [ $skip_pkg = false ] ; then
     print_subtitle "Curl"
     sudo apt-get -y --quiet install \
         openssl zlib1g-dev autoconf libtool
+
+    print_subtitle "Zziplib"
+    sudo apt-get -y --quiet install \
+        libzzip-dev
 fi
 
 if [ $skip_deps = false ] ; then
@@ -266,6 +270,53 @@ if [ $skip_deps = false ] ; then
 
         mark_built
     fi
+
+    #### zlib
+    # todo build manually if needed for android etc.
+
+    #start_target zlib
+    #
+    #if ! is_cloned ; then
+    #    git clone https://github.com/madler/zlib.git zlib
+    #    cd zlib
+    #    git checkout v1.2.8
+    #fi
+    #
+    #if ! is_built ; then
+    #
+    #    ./configure --prefix=$PWD/build --static
+    #
+    #    make -j $num_cpu -S
+    #    make install
+    #
+    #    mark_built
+    #fi
+
+    #### zziplib
+    # todo build manually if needed for android etc.
+
+    #start_target zziplib
+
+    #if ! is_cloned ; then
+    #    svn checkout svn://svn.code.sf.net/p/zziplib/svn/tags/V_0_13_62 zziplib
+    #    cd zziplib
+    #    svn patch $DEPS_WINDOWS_PATCH_DIR/zziplib-0001-add-cmake.patch
+    #fi
+    #
+    #if ! is_built ; then
+    #    mkdir -p build
+    #    cd build
+    #
+    #    # fails to find zlib
+    #    cmake ../ \
+    #        -DCMAKE_DEBUG_POSTFIX=_d \
+    #        -DZLIB_ROOT=$DEPS_SRC/zlib/build
+    #
+    #    make -j $num_cpu -S
+    #    make install
+    #
+    #    mark_built
+    #fi
 fi
 
 # Build gtest if testing
