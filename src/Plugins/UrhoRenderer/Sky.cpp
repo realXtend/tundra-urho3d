@@ -33,15 +33,16 @@
 namespace
 {
 
+/// \todo default skybox textures not used currently
 const unsigned int cSkyBoxTextureCount = 6;
 const char * const cDefaultSkyBoxTextures[cSkyBoxTextureCount] =
 {
-    "rex_sky_front.dds",
-    "rex_sky_back.dds",
-    "rex_sky_left.dds",
-    "rex_sky_right.dds",
-    "rex_sky_top.dds",
-    "rex_sky_bot.dds"
+    "sky_front.dds",
+    "sky_back.dds",
+    "sky_left.dds",
+    "sky_right.dds",
+    "sky_top.dds",
+    "sky_bot.dds"
 };
 
 } // ~unnamed namespace
@@ -69,7 +70,6 @@ Sky::Sky(Urho3D::Context* context, Scene* scene) :
 
 Sky::~Sky()
 {
-    
     if (urhoNode_ != nullptr)
     {
         urhoNode_->Remove();
@@ -118,14 +118,14 @@ void Sky::AttributesChanged()
         Update();
 }
 
-void Sky::CreateSkybox()
+void Sky::CreateSkyboxNode()
 {
     if (world_.Expired() || urhoNode_)
         return;
 
     Urho3D::Scene* urhoScene = world_->UrhoScene();
 
-    urhoNode_ = urhoScene->CreateChild("Sky");
+    urhoNode_ = urhoScene->CreateChild("Skybox");
     Urho3D::Skybox* skybox = urhoNode_->CreateComponent<Urho3D::Skybox>();
 
     Urho3D::ResourceCache* cache = GetSubsystem<Urho3D::ResourceCache>();
@@ -135,7 +135,7 @@ void Sky::CreateSkybox()
 void Sky::Update()
 {
     if (!urhoNode_)
-        CreateSkybox();
+        CreateSkyboxNode();
 
     if (!urhoNode_)
         return;
@@ -201,9 +201,7 @@ void Sky::OnMaterialAssetLoaded(AssetPtr asset)
     IMaterialAsset* mAsset = dynamic_cast<IMaterialAsset*>(asset.Get());
 
     if (mAsset)
-    {
         Update();
-    }
 }
 
 void Sky::OnTextureAssetRefsChanged(const AssetReferenceList &/*tRefs*/)

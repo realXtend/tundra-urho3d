@@ -69,10 +69,12 @@ public:
     /// Is the sky enabled.
     Attribute<bool> enabled;
 
+    /// Updates skybox material or textures
     void Update();
 
 private:
-    void CreateSkybox();
+    /// Creates Urho scene node
+    void CreateSkyboxNode();
 
     /// Called when the parent entity has been set.
     void UpdateSignals();
