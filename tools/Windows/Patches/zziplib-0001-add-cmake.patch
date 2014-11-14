@@ -1,0 +1,69 @@
+Index: CMakeLists.txt
+===================================================================
+--- CMakeLists.txt	(revision 0)
++++ CMakeLists.txt	(working copy)
+@@ -0,0 +1,64 @@
++cmake_minimum_required(VERSION 2.4.4)
++
++project(zziplib C)
++
++find_package(zlib)
++
++INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIRS})
++SET(ZLIB_ZCONF_PATH ${ZLIB_INCLUDE_DIRS} CACHE PATH "")
++INCLUDE_DIRECTORIES(${ZLIB_ZCONF_PATH})
++
++set(VERSION "0.13.62")
++
++if(MSVC)
++    set(CMAKE_DEBUG_POSTFIX "d")
++    add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
++    add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
++    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
++endif()
++
++#============================================================================
++# zziplib
++#============================================================================
++
++# List the header files
++set(HEADERS zzip/__debug.h
++            zzip/__dirent.h
++            zzip/__fnmatch.h
++            zzip/__hints.h
++            zzip/__mmap.h
++            zzip/_msvc.h
++            zzip/autoconf.h
++            zzip/conf.h
++            zzip/fetch.h
++            zzip/file.h
++            zzip/format.h
++            zzip/fseeko.h
++            zzip/info.h
++            zzip/lib.h
++            zzip/memdisk.h
++            zzip/mmapped.h
++            zzip/plugin.h
++            zzip/stdint.h
++            zzip/types.h
++            zzip/write.h
++            zzip/zzip.h
++)
++
++# List the source files
++set(SRCS zzip/dir.c
++         zzip/err.c
++         zzip/fetch.c
++         zzip/file.c
++         zzip/info.c
++         zzip/plugin.c
++         zzip/stat.c
++         zzip/zip.c
++)
++
++add_library(zziplib SHARED ${SRCS} ${HEADERS})
++add_library(zziplibstatic STATIC ${SRCS} ${HEADERS})
++
++TARGET_LINK_LIBRARIES ( zziplib
++        ${ZLIB_LIBRARIES}
++)
