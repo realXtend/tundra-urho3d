@@ -366,7 +366,6 @@ bool OgreSkeletonAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
         String animName = ogreAnim->name;
         if (animName.Empty())
             continue;
-        LogInfo("Converting animation " + animName);
 
         SharedPtr<Urho3D::Animation> urhoAnim(new Urho3D::Animation(context_));
         urhoAnim->SetLength(ogreAnim->length);

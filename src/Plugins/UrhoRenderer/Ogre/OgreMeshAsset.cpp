@@ -895,8 +895,14 @@ struct VertexBlendWeights
         }
     }
 
-    void AddBoneInfluence(unsigned char index, float weight)
+    void AddBoneInfluence(uint index, float weight)
     {
+        if (index > 255)
+        {
+            LogWarning("Bone indices are limited to 8 bits");
+            return;
+        }
+
         if (weight <= 0.0f)
             return;
 
@@ -922,7 +928,7 @@ struct VertexBlendWeights
             }
         }
 
-        if (weight > lowestWeight)
+        if (lowestIndex != -1 && weight > lowestWeight)
         {
             weights[lowestIndex] = weight;
             indices[lowestIndex] = index;
@@ -1023,6 +1029,8 @@ static SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context
         elementMask |= Urho3D::MASK_BLENDWEIGHTS;
         elementMask |= Urho3D::MASK_BLENDINDICES;
         blendWeights.Resize(vertexData->count);
+        uint localBone = 0;
+
         for (VertexBoneAssignmentList::ConstIterator baIter=vertexData->boneAssignments.Begin(), baEnd=vertexData->boneAssignments.End(); baIter != baEnd; ++baIter)
         {
             if (baIter->vertexIndex >= vertexData->count)
@@ -1032,6 +1040,8 @@ static SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context
             }
 
             uint globalBone = baIter->boneIndex;
+            if (globalBone == 0)
+                LogWarning("Using root bone to skin");
 
             // If vertex is influenced by the bone strongly enough (somewhat arbitrary limit), add to the bone's bounding box
             // Note: these vertices are in model space and need to be transformed into bone space when applying the skeleton
@@ -1043,7 +1053,6 @@ static SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context
                 boneBoundingBoxes[globalBone].Merge(vertex);
             }
 
-            uint localBone = 0;
             HashMap<uint, uint>::Iterator i = globalToLocalBoneMapping.Find(globalBone);
             if (i == globalToLocalBoneMapping.End())
             {
@@ -1054,6 +1063,7 @@ static SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context
                 }
                 globalToLocalBoneMapping[globalBone] = numBones;
                 localToGlobalBoneMapping.Push(globalBone);
+                localBone = numBones;
                 ++numBones;
             }
             else

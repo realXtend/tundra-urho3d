@@ -223,7 +223,7 @@ void AnimationController::DrawSkeleton()
     if (!world_ || !mesh_ || !mesh_->UrhoMesh())
         return;
 
-    world_->UrhoScene()->GetComponent<Urho3D::DebugRenderer>()->AddSkeleton(mesh_->UrhoMesh()->GetSkeleton(), Urho3D::Color::WHITE, true);
+    world_->UrhoScene()->GetComponent<Urho3D::DebugRenderer>()->AddSkeleton(mesh_->UrhoMesh()->GetSkeleton(), Urho3D::Color::WHITE, false);
 }
 
 bool AnimationController::EnableAnimation(const String& name, bool looped, float fadein, bool high_priority)
