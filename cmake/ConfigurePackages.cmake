@@ -5,6 +5,9 @@
 # All per-module dependency configurations should go in <Module>/CMakeLists.txt.
 
 macro(configure_mathgeolib)
+    if ("${MATHGEOLIB_HOME}" STREQUAL "")
+        message(FATAL_ERROR "MATHGEOLIB_HOME not set")
+    endif()
     set(MATHGEOLIB_INCLUDE_DIRS ${MATHGEOLIB_HOME}/include ${MATHGEOLIB_HOME}/include/MathGeoLib)
     set(MATHGEOLIB_LIBRARY_DIRS ${MATHGEOLIB_HOME}/lib)
     set(MATHGEOLIB_LIBRARIES MathGeoLib)
@@ -26,6 +29,9 @@ macro(configure_urho3d)
 endmacro(configure_urho3d)
 
 macro(configure_knet)
+    if ("${KNET_HOME}" STREQUAL "")
+        message(FATAL_ERROR "KNET_HOME not set")
+    endif()
     set(KNET_INCLUDE_DIRS ${KNET_HOME}/include ${KNET_HOME}/include/kNet)
     set(KNET_LIBRARY_DIRS ${KNET_HOME}/lib)
     set(KNET_LIBRARIES kNet)
