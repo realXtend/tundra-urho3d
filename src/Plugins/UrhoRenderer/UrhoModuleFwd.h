@@ -10,6 +10,7 @@ namespace Urho3D
     class AnimatedModel;
     class StaticModel;
     class Light;
+    class Animation;
     class AnimationState;
     class Model;
     class Material;

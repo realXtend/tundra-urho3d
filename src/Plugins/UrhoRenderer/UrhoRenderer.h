@@ -64,7 +64,6 @@ private:
 
     // Handles Urho3D::Graphics E_SCREENMODE & E_WINDOWPOS events.
     void HandleScreenModeChange(StringHash eventType, VariantMap &eventData);
-
     /// Creates GraphicsWorld for a Scene.
     void CreateGraphicsWorld(Scene *scene, AttributeChange::Type);
     /// Removes GraphicsWorld from a Scene.

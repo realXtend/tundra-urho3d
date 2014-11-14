@@ -11,6 +11,7 @@
 #include "AssetRefListener.h"
 #include "IMeshAsset.h"
 #include "IMaterialAsset.h"
+#include "Ogre/OgreSkeletonAsset.h"
 
 #include <Engine/Scene/Scene.h>
 #include <Engine/Scene/Node.h>
@@ -105,6 +106,7 @@ void Mesh::UpdateSignals()
         return;
 
     meshRefListener_ = new AssetRefListener();
+    skeletonRefListener_ = new AssetRefListener();
     materialRefListListener_ = new AssetRefListListener(framework->Asset());
     
     parent->ComponentAdded.Connect(this, &Mesh::OnComponentStructureChanged);
@@ -126,6 +128,7 @@ void Mesh::UpdateSignals()
 
         // Connect ref listeners
         meshRefListener_->Loaded.Connect(this, &Mesh::OnMeshAssetLoaded);
+        skeletonRefListener_->Loaded.Connect(this, &Mesh::OnSkeletonAssetLoaded);
         materialRefListListener_->Changed.Connect(this, &Mesh::OnMaterialAssetRefsChanged);
         materialRefListListener_->Failed.Connect(this, &Mesh::OnMaterialAssetFailed);
         materialRefListListener_->Loaded.Connect(this, &Mesh::OnMaterialAssetLoaded);
@@ -208,6 +211,10 @@ void Mesh::AttributesChanged()
             LogDebug("Warning: Mesh \"" + this->parentEntity->Name() + "\" mesh ref was set to an empty reference!");
         meshRefListener_->HandleAssetRefChange(&meshRef);
     }
+    if (skeletonRef.ValueChanged() && skeletonRefListener_)
+    {
+        skeletonRefListener_->HandleAssetRefChange(&skeletonRef);
+    }
     if (materialRefs.ValueChanged() && materialRefListListener_)
     {
         /* Let the listener resolve and cleanup the refs, while us keeping the originals intact.
@@ -218,6 +225,52 @@ void Mesh::AttributesChanged()
     {
         /// \todo Implement
     }
+}
+
+void Mesh::ApplyMesh()
+{
+    assert(mesh_);
+
+    IMeshAsset* mAsset = dynamic_cast<IMeshAsset*>(meshRefListener_->Asset().Get());
+    OgreSkeletonAsset* sAsset = dynamic_cast<OgreSkeletonAsset*>(skeletonRefListener_->Asset().Get());
+
+    if (!mAsset)
+        return;
+
+    if (mesh_->GetModel())
+    {
+        // Signal destruction of the old model. Eg. bone attachments need to be removed now
+        MeshAboutToBeDestroyed.Emit();
+    }
+
+    // Clear existing skeletal model if any
+    skeletalModel.Reset();
+
+    Urho3D::Model* baseModel = mAsset->UrhoModel();
+    // If a skeleton asset not defined, use the mesh asset as is
+    if (!sAsset)
+    {
+        mesh_->SetModel(baseModel);
+        MeshChanged.Emit();
+        return;
+    }
+
+    // If a skeleton asset is defined, clone the model and add the bones from the skeleton
+    // We don't call Model::Clone() directly, as that would deep copy the vertex data, which we do not want
+    skeletalModel = new Urho3D::Model(context_);
+    skeletalModel->SetNumGeometries(baseModel->GetNumGeometries());
+    for (uint i = 0; i < baseModel->GetNumGeometries(); ++i)
+        for (uint j = 0; j < baseModel->GetNumGeometryLodLevels(i); ++j)
+            skeletalModel->SetGeometry(i, j, baseModel->GetGeometry(i, j));
+    /// \todo Set bone bounds
+    skeletalModel->SetSkeleton(sAsset->UrhoSkeleton());
+    skeletalModel->SetGeometryBoneMappings(baseModel->GetGeometryBoneMappings());
+    skeletalModel->SetBoundingBox(baseModel->GetBoundingBox());
+
+    mesh_->SetModel(skeletalModel);
+
+    MeshChanged.Emit();
+    SkeletonChanged.Emit();
 }
 
 void Mesh::OnMeshAssetLoaded(AssetPtr asset)
@@ -231,7 +284,7 @@ void Mesh::OnMeshAssetLoaded(AssetPtr asset)
 
     if (mesh_)
     {
-        mesh_->SetModel(mAsset->UrhoModel());
+        ApplyMesh();
         // Apply default material first to every submesh to match Tundra behavior
         Urho3D::ResourceCache* cache = GetSubsystem<Urho3D::ResourceCache>();
         for (uint gi=0; gi<mesh_->GetNumGeometries(); ++gi)
@@ -247,7 +300,10 @@ void Mesh::OnMeshAssetLoaded(AssetPtr asset)
             if (materialAsset && materialAsset->IsLoaded())
             {
                 if (mi < mesh_->GetNumGeometries())
+                {
                     mesh_->SetMaterial(mi, materialAsset->UrhoMaterial());
+                    MaterialChanged.Emit(mi, materialAsset->Name());
+                }
                 else
                     LogWarningF("Mesh: Illegal submesh index %d for material %s. Target mesh %s has %d submeshes.", mi, materialAsset->Name().CString(), meshRef.Get().ref.CString(), mesh_->GetNumGeometries());
             }
@@ -255,6 +311,18 @@ void Mesh::OnMeshAssetLoaded(AssetPtr asset)
     }
     else
         LogWarningF("Mesh: Model asset loaded but target mesh has not been created yet in %s", ParentEntity()->ToString().CString());
+}
+
+void Mesh::OnSkeletonAssetLoaded(AssetPtr asset)
+{
+    OgreSkeletonAsset* sAsset = dynamic_cast<OgreSkeletonAsset*>(asset.Get());
+    if (!sAsset)
+    {
+        LogErrorF("Mesh: Skeleton asset load finished for '%s', but downloaded asset was not of type IMeshAsset!", asset->Name().CString());
+        return;
+    }
+    if (mesh_)
+        ApplyMesh();
 }
 
 void Mesh::OnMaterialAssetRefsChanged(const AssetReferenceList &mRefs)
@@ -267,7 +335,9 @@ void Mesh::OnMaterialAssetRefsChanged(const AssetReferenceList &mRefs)
     for (uint gi=0; gi<mesh_->GetNumGeometries(); ++gi)
     {
         if (gi >= (uint)mRefs.Size() || mRefs.refs[gi].ref.Empty())
+        {
             mesh_->SetMaterial(gi, cache->GetResource<Urho3D::Material>("Materials/DefaultGrey.xml"));
+        }
     }
 }
 
@@ -292,7 +362,10 @@ void Mesh::OnMaterialAssetLoaded(uint index, AssetPtr asset)
     if (mesh_ && mesh_->GetModel())
     {
         if (index < mesh_->GetNumGeometries())
+        {
             mesh_->SetMaterial(index, mAsset->UrhoMaterial());
+            MaterialChanged.Emit(index, mAsset->Name());
+        }
         else
             LogWarningF("Mesh: Illegal submesh index %d for material %s. Target mesh %s has %d submeshes.", index, mAsset->Name().CString(), meshRef.Get().ref.CString(), mesh_->GetNumGeometries());
     }

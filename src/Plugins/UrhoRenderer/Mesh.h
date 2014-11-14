@@ -105,6 +105,8 @@ public:
     /// Return the Urho mesh entity component.
     Urho3D::AnimatedModel* UrhoMesh() const;
 
+    /// Return an animation by name from the skeleton, or null if not found.
+    Urho3D::Animation* AnimationByName(const String& name) const;
 private:
     /// Called when the parent entity has been set.
     void UpdateSignals();
@@ -121,8 +123,14 @@ private:
     /// React to attribute changes
     void AttributesChanged() override;
 
+    /// Apply a mesh and/or skeleton asset.
+    void ApplyMesh();
+
     /// Mesh asset has been loaded
     void OnMeshAssetLoaded(AssetPtr asset);
+
+    /// Skeleton asset has been loaded
+    void OnSkeletonAssetLoaded(AssetPtr asset);
 
     /// Material asset refs changed.
     void OnMaterialAssetRefsChanged(const AssetReferenceList &materialRefs);
@@ -147,8 +155,14 @@ private:
     /// Manages mesh asset requests.
     AssetRefListenerPtr meshRefListener_;
 
+    /// Manages skeleton asset requests.
+    AssetRefListenerPtr skeletonRefListener_;
+
     /// Manages material asset requests.
     AssetRefListListenerPtr materialRefListListener_;
+
+    /// Cloned model for applying Ogre skeleton asset
+    SharedPtr<Urho3D::Model> skeletalModel;
 };
 
 COMPONENT_TYPEDEFS(Mesh)

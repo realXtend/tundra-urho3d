@@ -64,34 +64,185 @@ namespace Tundra
 
 using namespace Ogre;
 
-const String            MESH_VERSION_1_8        = "[MeshSerializer_v1.8]";
+enum MeshChunkId
+{
+    M_HEADER = 0x1000,
+        // char*          version           : Version number check
+    M_MESH   = 0x3000,
+        // bool skeletallyAnimated   // important flag which affects h/w buffer policies
+        // Optional M_GEOMETRY chunk
+        M_SUBMESH             = 0x4000, 
+            // char* materialName
+            // bool useSharedVertices
+            // unsigned int indexCount
+            // bool indexes32Bit
+            // unsigned int* faceVertexIndices (indexCount)
+            // OR
+            // unsigned short* faceVertexIndices (indexCount)
+            // M_GEOMETRY chunk (Optional: present only if useSharedVertices = false)
+            M_SUBMESH_OPERATION = 0x4010, // optional, trilist assumed if missing
+                // unsigned short operationType
+            M_SUBMESH_BONE_ASSIGNMENT = 0x4100,
+                // Optional bone weights (repeating section)
+                // unsigned int vertexIndex;
+                // unsigned short boneIndex;
+                // float weight;
+            // Optional chunk that matches a texture name to an alias
+            // a texture alias is sent to the submesh material to use this texture name
+            // instead of the one in the texture unit with a matching alias name
+            M_SUBMESH_TEXTURE_ALIAS = 0x4200, // Repeating section
+                // char* aliasName;
+                // char* textureName;
 
-const unsigned short    HEADER_CHUNK_ID         = 0x1000;
+        M_GEOMETRY          = 0x5000, // NB this chunk is embedded within M_MESH and M_SUBMESH
+            // unsigned int vertexCount
+            M_GEOMETRY_VERTEX_DECLARATION = 0x5100,
+                M_GEOMETRY_VERTEX_ELEMENT = 0x5110, // Repeating section
+                    // unsigned short source;      // buffer bind source
+                    // unsigned short type;        // VertexElementType
+                    // unsigned short semantic; // VertexElementSemantic
+                    // unsigned short offset;    // start offset in buffer in bytes
+                    // unsigned short index;    // index of the semantic (for colours and texture coords)
+            M_GEOMETRY_VERTEX_BUFFER = 0x5200, // Repeating section
+                // unsigned short bindIndex;    // Index to bind this buffer to
+                // unsigned short vertexSize;    // Per-vertex size, must agree with declaration at this index
+                M_GEOMETRY_VERTEX_BUFFER_DATA = 0x5210,
+                    // raw buffer data
+        M_MESH_SKELETON_LINK = 0x6000,
+            // Optional link to skeleton
+            // char* skeletonName           : name of .skeleton to use
+        M_MESH_BONE_ASSIGNMENT = 0x7000,
+            // Optional bone weights (repeating section)
+            // unsigned int vertexIndex;
+            // unsigned short boneIndex;
+            // float weight;
+        M_MESH_LOD = 0x8000,
+            // Optional LOD information
+            // string strategyName;
+            // unsigned short numLevels;
+            // bool manual;  (true for manual alternate meshes, false for generated)
+            M_MESH_LOD_USAGE = 0x8100,
+            // Repeating section, ordered in increasing depth
+            // NB LOD 0 (full detail from 0 depth) is omitted
+            // LOD value - this is a distance, a pixel count etc, based on strategy
+            // float lodValue;
+                M_MESH_LOD_MANUAL = 0x8110,
+                // Required if M_MESH_LOD section manual = true
+                // String manualMeshName;
+                M_MESH_LOD_GENERATED = 0x8120,
+                // Required if M_MESH_LOD section manual = false
+                // Repeating section (1 per submesh)
+                // unsigned int indexCount;
+                // bool indexes32Bit
+                // unsigned short* faceIndexes;  (indexCount)
+                // OR
+                // unsigned int* faceIndexes;  (indexCount)
+        M_MESH_BOUNDS = 0x9000,
+            // float minx, miny, minz
+            // float maxx, maxy, maxz
+            // float radius
+                
+        // Added By DrEvil
+        // optional chunk that contains a table of submesh indexes and the names of
+        // the sub-meshes.
+        M_SUBMESH_NAME_TABLE = 0xA000,
+            // Subchunks of the name table. Each chunk contains an index & string
+            M_SUBMESH_NAME_TABLE_ELEMENT = 0xA100,
+                // short index
+                // char* name
+        // Optional chunk which stores precomputed edge data                     
+        M_EDGE_LISTS = 0xB000,
+            // Each LOD has a separate edge list
+            M_EDGE_LIST_LOD = 0xB100,
+                // unsigned short lodIndex
+                // bool isManual            // If manual, no edge data here, loaded from manual mesh
+                    // bool isClosed
+                    // unsigned long numTriangles
+                    // unsigned long numEdgeGroups
+                    // Triangle* triangleList
+                        // unsigned long indexSet
+                        // unsigned long vertexSet
+                        // unsigned long vertIndex[3]
+                        // unsigned long sharedVertIndex[3] 
+                        // float normal[4] 
 
-const long              MSTREAM_OVERHEAD_SIZE   = sizeof(u16) + sizeof(uint);
+                    M_EDGE_GROUP = 0xB110,
+                        // unsigned long vertexSet
+                        // unsigned long triStart
+                        // unsigned long triCount
+                        // unsigned long numEdges
+                        // Edge* edgeList
+                            // unsigned long  triIndex[2]
+                            // unsigned long  vertIndex[2]
+                            // unsigned long  sharedVertIndex[2]
+                            // bool degenerate
+        // Optional poses section, referred to by pose keyframes
+        M_POSES = 0xC000,
+            M_POSE = 0xC100,
+                // char* name (may be blank)
+                // unsigned short target    // 0 for shared geometry, 
+                                            // 1+ for submesh index + 1
+                // bool includesNormals [1.8+]
+                M_POSE_VERTEX = 0xC111,
+                    // unsigned long vertexIndex
+                    // float xoffset, yoffset, zoffset
+                    // float xnormal, ynormal, znormal (optional, 1.8+)
+        // Optional vertex animation chunk
+        M_ANIMATIONS = 0xD000, 
+            M_ANIMATION = 0xD100,
+            // char* name
+            // float length
+            M_ANIMATION_BASEINFO = 0xD105,
+            // [Optional] base keyframe information (pose animation only)
+            // char* baseAnimationName (blank for self)
+            // float baseKeyFrameTime
+            M_ANIMATION_TRACK = 0xD110,
+                // unsigned short type            // 1 == morph, 2 == pose
+                // unsigned short target        // 0 for shared geometry, 
+                                                // 1+ for submesh index + 1
+                M_ANIMATION_MORPH_KEYFRAME = 0xD111,
+                    // float time
+                    // bool includesNormals [1.8+]
+                    // float x,y,z            // repeat by number of vertices in original geometry
+                M_ANIMATION_POSE_KEYFRAME = 0xD112,
+                    // float time
+                    M_ANIMATION_POSE_REF = 0xD113, // repeat for number of referenced poses
+                        // unsigned short poseIndex 
+                        // float influence
+        // Optional submesh extreme vertex list chink
+        M_TABLE_EXTREMES = 0xE000,
+        // unsigned short submesh_index;
+        // float extremes [n_extremes][3];
+};
+
+static const String            MESH_VERSION_1_8        = "[MeshSerializer_v1.8]";
+
+static const unsigned short    HEADER_CHUNK_ID         = 0x1000;
+
+static const long              MSTREAM_OVERHEAD_SIZE   = sizeof(u16) + sizeof(uint);
 
 static u32 currentLength;
 
-void ReadMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
-void ReadMeshLodInfo(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
-void ReadMeshSkeletonLink(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
-void ReadMeshBounds(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
-void ReadMeshExtremes(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
-void ReadSubMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
-void ReadSubMeshNames(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
-void ReadSubMeshOperation(Urho3D::Deserializer& stream, SubMesh *submesh);
-void ReadSubMeshTextureAlias(Urho3D::Deserializer& stream, SubMesh *submesh);
-void ReadBoneAssignment(Urho3D::Deserializer& stream, VertexData *dest);
-void ReadGeometry(Urho3D::Deserializer& stream, VertexData *dest);
-void ReadGeometryVertexDeclaration(Urho3D::Deserializer& stream, VertexData *dest);
-void ReadGeometryVertexElement(Urho3D::Deserializer& stream, VertexData *dest);
-void ReadGeometryVertexBuffer(Urho3D::Deserializer& stream, VertexData *dest);
-void ReadEdgeList(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
-void ReadPoses(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
-void ReadPoseVertices(Urho3D::Deserializer& stream, Pose *pose);
-void ReadAnimations(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
-void ReadAnimation(Urho3D::Deserializer& stream, Animation *anim);
-void ReadAnimationKeyFrames(Urho3D::Deserializer& stream, Animation *anim, VertexAnimationTrack *track);
+static void ReadMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
+static void ReadMeshLodInfo(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
+static void ReadMeshSkeletonLink(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
+static void ReadMeshBounds(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
+static void ReadMeshExtremes(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
+static void ReadSubMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
+static void ReadSubMeshNames(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
+static void ReadSubMeshOperation(Urho3D::Deserializer& stream, SubMesh *submesh);
+static void ReadSubMeshTextureAlias(Urho3D::Deserializer& stream, SubMesh *submesh);
+static void ReadBoneAssignment(Urho3D::Deserializer& stream, VertexData *dest);
+static void ReadGeometry(Urho3D::Deserializer& stream, VertexData *dest);
+static void ReadGeometryVertexDeclaration(Urho3D::Deserializer& stream, VertexData *dest);
+static void ReadGeometryVertexElement(Urho3D::Deserializer& stream, VertexData *dest);
+static void ReadGeometryVertexBuffer(Urho3D::Deserializer& stream, VertexData *dest);
+static void ReadEdgeList(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
+static void ReadPoses(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
+static void ReadPoseVertices(Urho3D::Deserializer& stream, Pose *pose);
+static void ReadAnimations(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
+static void ReadAnimation(Urho3D::Deserializer& stream, Animation *anim);
+static void ReadAnimationKeyFrames(Urho3D::Deserializer& stream, Animation *anim, VertexAnimationTrack *track);
 
 static String ReadLine(Urho3D::Deserializer& stream)
 {
@@ -125,7 +276,7 @@ static void SkipBytes(Urho3D::Deserializer& stream, uint numBytes)
     stream.Seek(stream.GetPosition() + numBytes);
 }
 
-void ReadMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
+static void ReadMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
 {
     mesh->hasSkeletalAnimations = stream.ReadBool();
 
@@ -213,7 +364,7 @@ void ReadMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
     }
 }
 
-void ReadMeshLodInfo(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
+static void ReadMeshLodInfo(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
 {
     // Assimp does not acknowledge LOD levels as far as I can see it. This info is just skipped.
     // @todo Put this stuff to scene/mesh custom properties. If manual mesh the app can use the information.
@@ -262,12 +413,12 @@ void ReadMeshLodInfo(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
     }
 }
 
-void ReadMeshSkeletonLink(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
+static void ReadMeshSkeletonLink(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
 {
     mesh->skeletonRef = ReadLine(stream);
 }
 
-void ReadMeshBounds(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
+static void ReadMeshBounds(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
 {
     // 2x float vec3 + 1x float sphere radius
     mesh->min = float3(stream.ReadVector3());
@@ -275,14 +426,14 @@ void ReadMeshBounds(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
     SkipBytes(stream, sizeof(float));
 }
 
-void ReadMeshExtremes(Urho3D::Deserializer& stream, Ogre::Mesh * /*mesh*/)
+static void ReadMeshExtremes(Urho3D::Deserializer& stream, Ogre::Mesh * /*mesh*/)
 {
     // Skip extremes, not compatible with Assimp.
     uint numBytes = currentLength - MSTREAM_OVERHEAD_SIZE; 
     SkipBytes(stream, numBytes);
 }
 
-void ReadBoneAssignment(Urho3D::Deserializer& stream, VertexData *dest)
+static void ReadBoneAssignment(Urho3D::Deserializer& stream, VertexData *dest)
 {
     if (!dest) {
         throw std::runtime_error("Cannot read bone assignments, vertex data is null.");
@@ -368,18 +519,18 @@ void ReadSubMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
     mesh->subMeshes.Push(submesh);
 }
 
-void ReadSubMeshOperation(Urho3D::Deserializer& stream, SubMesh *submesh)
+static void ReadSubMeshOperation(Urho3D::Deserializer& stream, SubMesh *submesh)
 {
     submesh->operationType = static_cast<SubMesh::OperationType>(stream.ReadUShort());
 }
 
-void ReadSubMeshTextureAlias(Urho3D::Deserializer& stream, SubMesh *submesh)
+static void ReadSubMeshTextureAlias(Urho3D::Deserializer& stream, SubMesh *submesh)
 {
     submesh->textureAliasName = ReadLine(stream);
     submesh->textureAliasRef = ReadLine(stream);
 }
 
-void ReadSubMeshNames(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
+static void ReadSubMeshNames(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
 {
     u16 id = 0;
     u16 submeshIndex = 0;
@@ -405,7 +556,7 @@ void ReadSubMeshNames(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
     }
 }
 
-void ReadGeometry(Urho3D::Deserializer& stream, VertexData *dest)
+static void ReadGeometry(Urho3D::Deserializer& stream, VertexData *dest)
 {
     dest->count = stream.ReadUInt();
     
@@ -438,7 +589,7 @@ void ReadGeometry(Urho3D::Deserializer& stream, VertexData *dest)
     }
 }
 
-void ReadGeometryVertexDeclaration(Urho3D::Deserializer& stream, VertexData *dest)
+static void ReadGeometryVertexDeclaration(Urho3D::Deserializer& stream, VertexData *dest)
 {
     if (!stream.IsEof())
     {
@@ -455,7 +606,7 @@ void ReadGeometryVertexDeclaration(Urho3D::Deserializer& stream, VertexData *des
     }
 }
 
-void ReadGeometryVertexElement(Urho3D::Deserializer& stream, VertexData *dest)
+static void ReadGeometryVertexElement(Urho3D::Deserializer& stream, VertexData *dest)
 {
     VertexElement element;
     element.source = stream.ReadUShort();
@@ -467,7 +618,7 @@ void ReadGeometryVertexElement(Urho3D::Deserializer& stream, VertexData *dest)
     dest->vertexElements.Push(element);
 }
 
-void ReadGeometryVertexBuffer(Urho3D::Deserializer& stream, VertexData *dest)
+static void ReadGeometryVertexBuffer(Urho3D::Deserializer& stream, VertexData *dest)
 {
     u16 bindIndex = stream.ReadUShort();
     u16 vertexSize = stream.ReadUShort();
@@ -487,7 +638,7 @@ void ReadGeometryVertexBuffer(Urho3D::Deserializer& stream, VertexData *dest)
         stream.Read(&dest->vertexBindings[bindIndex][0], numBytes);
 }
 
-void ReadEdgeList(Urho3D::Deserializer& stream, Ogre::Mesh * /*mesh*/)
+static void ReadEdgeList(Urho3D::Deserializer& stream, Ogre::Mesh * /*mesh*/)
 {
     if (!stream.IsEof())
     {
@@ -531,7 +682,7 @@ void ReadEdgeList(Urho3D::Deserializer& stream, Ogre::Mesh * /*mesh*/)
     }
 }
 
-void ReadPoses(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
+static void ReadPoses(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
 {
     if (!stream.IsEof())
     {
@@ -555,7 +706,7 @@ void ReadPoses(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
     }
 }
 
-void ReadPoseVertices(Urho3D::Deserializer& stream, Pose *pose)
+static void ReadPoseVertices(Urho3D::Deserializer& stream, Pose *pose)
 {
     if (!stream.IsEof())
     {
@@ -578,7 +729,7 @@ void ReadPoseVertices(Urho3D::Deserializer& stream, Pose *pose)
     }
 }
 
-void ReadAnimations(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
+static void ReadAnimations(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
 {
     if (!stream.IsEof())
     {
@@ -601,8 +752,8 @@ void ReadAnimations(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
     }
 }
 
-void ReadAnimation(Urho3D::Deserializer& stream, Animation *anim)
-{    
+static void ReadAnimation(Urho3D::Deserializer& stream, Animation *anim)
+{
     if (!stream.IsEof())
     {
         u16 id = ReadHeader(stream);
@@ -633,7 +784,7 @@ void ReadAnimation(Urho3D::Deserializer& stream, Animation *anim)
     }
 }
 
-void ReadAnimationKeyFrames(Urho3D::Deserializer& stream, Animation *anim, VertexAnimationTrack *track)
+static void ReadAnimationKeyFrames(Urho3D::Deserializer& stream, Animation *anim, VertexAnimationTrack *track)
 {
     if (!stream.IsEof())
     {
@@ -691,7 +842,7 @@ void ReadAnimationKeyFrames(Urho3D::Deserializer& stream, Animation *anim, Verte
     }
 }
 
-Urho3D::PrimitiveType ConvertPrimitiveType(Ogre::ISubMesh::OperationType type)
+static Urho3D::PrimitiveType ConvertPrimitiveType(Ogre::ISubMesh::OperationType type)
 {
     switch (type)
     {
@@ -798,7 +949,7 @@ struct VertexBlendWeights
     unsigned char indices[4];
 };
 
-void CheckVertexElement(unsigned& elementMask, VertexElementSource* sources, Ogre::VertexData* vertexData, Urho3D::VertexElement urhoElement, Ogre::VertexElement::Semantic ogreSemantic, Ogre::VertexElement::Type ogreType, uint ogreIndex = 0)
+static void CheckVertexElement(unsigned& elementMask, VertexElementSource* sources, Ogre::VertexData* vertexData, Urho3D::VertexElement urhoElement, Ogre::VertexElement::Semantic ogreSemantic, Ogre::VertexElement::Type ogreType, uint ogreIndex = 0)
 {
     VertexElementSource* desc = &sources[urhoElement];
 
@@ -842,7 +993,7 @@ void CheckVertexElement(unsigned& elementMask, VertexElementSource* sources, Ogr
     }
 }
 
-SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre::VertexData* vertexData, Urho3D::BoundingBox& outBox, PODVector<uint>& localToGlobalBoneMapping)
+static SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre::VertexData* vertexData, Urho3D::BoundingBox& outBox, PODVector<uint>& localToGlobalBoneMapping)
 {
     SharedPtr<Urho3D::VertexBuffer> ret;
     if (!vertexData || !vertexData->count)
@@ -853,7 +1004,6 @@ SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre:
 
     unsigned elementMask = 0; // All Ogre's vertex buffers will be combined into one with the proper element order
     VertexElementSource sources[Urho3D::MAX_VERTEX_ELEMENTS];
-    /// \todo Check rest, like blend weights / indices
     CheckVertexElement(elementMask, sources, vertexData, Urho3D::ELEMENT_POSITION, Ogre::VertexElement::VES_POSITION, Ogre::VertexElement::VET_FLOAT3);
     CheckVertexElement(elementMask, sources, vertexData, Urho3D::ELEMENT_NORMAL, Ogre::VertexElement::VES_NORMAL, Ogre::VertexElement::VET_FLOAT3);
     CheckVertexElement(elementMask, sources, vertexData, Urho3D::ELEMENT_TEXCOORD1, Ogre::VertexElement::VES_TEXTURE_COORDINATES, Ogre::VertexElement::VET_FLOAT2, 0);
@@ -861,10 +1011,7 @@ SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre:
     CheckVertexElement(elementMask, sources, vertexData, Urho3D::ELEMENT_TANGENT, Ogre::VertexElement::VES_TANGENT, Ogre::VertexElement::VET_FLOAT4);
     CheckVertexElement(elementMask, sources, vertexData, Urho3D::ELEMENT_COLOR, Ogre::VertexElement::VES_DIFFUSE, Ogre::VertexElement::VET_COLOUR);
     
-    ret->SetSize(vertexData->count, elementMask);
-    void* data = ret->Lock(0, vertexData->count, true);
-    uint count = vertexData->count;
-
+    // Skinning data is not contained in Ogre's vertex data, but must be created here manually from vertex bone assignments
     Vector<VertexBlendWeights> blendWeights;
     localToGlobalBoneMapping.Clear();
     HashMap<uint, uint> globalToLocalBoneMapping;
@@ -873,8 +1020,8 @@ SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre:
 
     if (vertexData->boneAssignments.Size())
     {
-        elementMask |= Urho3D::ELEMENT_BLENDWEIGHTS;
-        elementMask |= Urho3D::ELEMENT_BLENDINDICES;
+        elementMask |= Urho3D::MASK_BLENDWEIGHTS;
+        elementMask |= Urho3D::MASK_BLENDINDICES;
         blendWeights.Resize(vertexData->count);
         for (VertexBoneAssignmentList::ConstIterator baIter=vertexData->boneAssignments.Begin(), baEnd=vertexData->boneAssignments.End(); baIter != baEnd; ++baIter)
         {
@@ -909,6 +1056,10 @@ SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre:
 
     if (bonesExceeded)
         LogWarning("Submesh uses more than 64 bones for skinning and may render incorrectly");
+
+    ret->SetSize(vertexData->count, elementMask);
+    void* data = ret->Lock(0, vertexData->count, true);
+    uint count = vertexData->count;
 
     // Fill all enabled elements with source data, forming interleaved Urho vertices
     float* dest = (float*)data;
@@ -971,7 +1122,6 @@ SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre:
     ret->Unlock();
     return ret;
 }
-
 
 OgreMeshAsset::OgreMeshAsset(AssetAPI *owner, const String &type_, const String &name_) :
     IMeshAsset(owner, type_, name_)

@@ -565,9 +565,6 @@ void Bone::AddChild(Bone *bone)
 void Bone::CalculateWorldMatrixAndDefaultPose(Skeleton *skeleton)
 {
     worldMatrix = float4x4::Translate(position) * float4x4::FromQuat(rotation) * float4x4::Scale(scale);
-    if (IsParented())
-        worldMatrix = worldMatrix * parent->worldMatrix;
-
     defaultPose = worldMatrix;
 
     if (IsParented())
