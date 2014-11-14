@@ -35,7 +35,8 @@ IF NOT EXIST tundra-urho3d.sln. (
             -DMATHGEOLIB_HOME=%DEPS%\MathGeoLib\build ^
             -DKNET_HOME=%DEPS%\kNet ^
             -DGTEST_HOME=%DEPS%\gtest ^
-            -DCURL_HOME=%DEPS%\curl\build
+            -DCURL_HOME=%DEPS%\curl\build ^
+            -DZZIPLIB_HOME=%DEPS%\zziplib
     ) ELSE (
         REM Extra arguments has been provided. As CMake options are typically of format -DINSTALL_BINARIES_ONLY:BOOL=ON,
         REM i.e. they contain an equal sign, they will mess up the batch file argument parsing if the arguments are passed on
@@ -47,7 +48,8 @@ IF NOT EXIST tundra-urho3d.sln. (
             -DMATHGEOLIB_HOME=%DEPS%\MathGeoLib\build ^
             -DKNET_HOME=%DEPS%\kNet ^
             -DGTEST_HOME=%DEPS%\gtest ^
-            -DCURL_HOME=%DEPS%\curl\build
+            -DCURL_HOME=%DEPS%\curl\build ^
+            -DZZIPLIB_HOME=%DEPS%\zziplib
     )
     IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 ) ELSE (

@@ -1,6 +1,7 @@
 [
     {
         "--plugin" : [
+			"ZipPlugin",
 			"UrhoRenderer", 
 			"TundraLogic",
 			"HttpPlugin",

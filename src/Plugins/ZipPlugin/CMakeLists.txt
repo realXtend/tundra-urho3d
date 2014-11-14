@@ -1,0 +1,39 @@
+
+macro(configure_zziplib)
+    if ("${ZZIPLIB_HOME}" STREQUAL "")
+        # Make fatal once linux dep build is implemented
+        #message(FATAL_ERROR "ZZIPLIB_HOME not set")
+    endif()
+    set(ZZIPLIB_INCLUDE_DIRS ${ZZIPLIB_HOME})
+    # This is kind of ugly but we can assume zlib location with windows deps
+    set(ZZIPLIB_LIBRARY_DIRS ${ZZIPLIB_HOME}/build ${ZZIPLIB_HOME}/../zlib/build/lib) 
+    set(ZZIPLIB_LIBRARIES optimized zziplibstatic zlibstatic debug zziplibstaticd zlibstaticd)
+endmacro (configure_zziplib)
+
+###############################################################################
+
+configure_zziplib()
+
+# Define target name and output directory
+init_target(ZipPlugin OUTPUT Plugins)
+
+# Define source files
+file(GLOB CPP_FILES *.cpp)
+file(GLOB H_FILES *.h)
+
+set(SOURCE_FILES ${CPP_FILES} ${H_FILES})
+
+add_definitions(-DTUNDRA_ZIP_EXPORTS)
+
+UseTundraCore()
+use_package(ZZIPLIB)
+
+build_library(${TARGET_NAME} SHARED ${SOURCE_FILES})
+
+link_modules(TundraCore)
+link_package(URHO3D)
+link_package(ZZIPLIB)
+
+SetupCompileFlagsWithPCH()
+
+final_target()

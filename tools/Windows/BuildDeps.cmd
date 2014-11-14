@@ -277,6 +277,68 @@ MSBUILD INSTALL.vcxproj /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo
 copy /Y "%DEPS%\openssl\build\lib\*.lib" "%DEPS%\curl\build\lib"
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
+:::::::::::::::::::::::: zlib
+
+IF NOT EXIST "%DEPS%\zlib\". (
+    cecho {0D}Cloning zlib into "%DEPS%\zlib".{# #}{\n}
+    cd "%DEPS%"
+    git clone https://github.com/madler/zlib.git zlib
+    IF NOT EXIST "%DEPS%\zlib\.git" GOTO :ERROR
+    cd zlib
+    git checkout v1.2.8
+    IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+)
+
+cd "%DEPS%\zlib"
+IF NOT EXIST "build-src" mkdir "build-src"
+cd build-src
+
+:: pre build
+
+cecho {0D}Running CMake for zlib.{# #}{\n}
+cmake ../ -G %GENERATOR% ^
+    -DCMAKE_INSTALL_PREFIX="%DEPS%\zlib\build" ^
+    -DCMAKE_DEBUG_POSTFIX=_d
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+:: build
+
+cecho {0D}Building %BUILD_TYPE% zlib. Please be patient, this will take a while.{# #}{\n}
+MSBuild zlib.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+MSBUILD INSTALL.vcxproj /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+:::::::::::::::::::::::: zziplib
+
+IF NOT EXIST "%DEPS%\zziplib\". (
+    cecho {0D}Cloning zziplib into "%DEPS%\zziplib".{# #}{\n}
+    cd "%DEPS%"
+    svn checkout svn://svn.code.sf.net/p/zziplib/svn/tags/V_0_13_62  zziplib
+    IF NOT EXIST "%DEPS%\zziplib\.svn" GOTO :ERROR
+    IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+    cd "%DEPS%\zziplib"
+    svn patch %TOOLS%\Patches\zziplib-0001-add-cmake.patch
+    IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+)
+
+cd "%DEPS%\zziplib"
+IF NOT EXIST "build" mkdir "build"
+cd build
+
+:: pre build
+
+cmake ../ -G %GENERATOR% ^
+    -DCMAKE_DEBUG_POSTFIX=_d ^
+    -DZLIB_ROOT="%DEPS%\zlib\build"
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+:: build
+
+cecho {0D}Building %BUILD_TYPE% zziplib. Please be patient, this will take a while.{# #}{\n}
+MSBuild zziplib.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
 :::::::::::::::::::::::: All done
 
 echo.
