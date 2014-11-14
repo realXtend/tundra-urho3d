@@ -116,8 +116,8 @@ Framework::~Framework()
     frame.Reset();
     plugin.Reset();
     config.Reset();
-    debug.Reset();
     asset.Reset();
+    debug.Reset();
 
     instance = 0;
 }
