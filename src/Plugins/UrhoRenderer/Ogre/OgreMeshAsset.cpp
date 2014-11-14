@@ -993,7 +993,7 @@ static void CheckVertexElement(unsigned& elementMask, VertexElementSource* sourc
     }
 }
 
-static SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre::VertexData* vertexData, Urho3D::BoundingBox& outBox, PODVector<uint>& localToGlobalBoneMapping)
+static SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context, Ogre::VertexData* vertexData, Urho3D::BoundingBox& outBox, PODVector<uint>& localToGlobalBoneMapping, Vector<Urho3D::BoundingBox>& boneBoundingBoxes)
 {
     SharedPtr<Urho3D::VertexBuffer> ret;
     if (!vertexData || !vertexData->count)
@@ -1032,6 +1032,17 @@ static SharedPtr<Urho3D::VertexBuffer> MakeVertexBuffer(Urho3D::Context* context
             }
 
             uint globalBone = baIter->boneIndex;
+
+            // If vertex is influenced by the bone strongly enough (somewhat arbitrary limit), add to the bone's bounding box
+            // Note: these vertices are in model space and need to be transformed into bone space when applying the skeleton
+            if (baIter->weight >= 0.33f && sources[Urho3D::ELEMENT_POSITION].enabled)
+            {
+                if (boneBoundingBoxes.Size() < globalBone + 1)
+                    boneBoundingBoxes.Resize(globalBone + 1);
+                Urho3D::Vector3 vertex = *((Urho3D::Vector3*)(sources[Urho3D::ELEMENT_POSITION].src + baIter->vertexIndex * sources[Urho3D::ELEMENT_POSITION].stride));
+                boneBoundingBoxes[globalBone].Merge(vertex);
+            }
+
             uint localBone = 0;
             HashMap<uint, uint>::Iterator i = globalToLocalBoneMapping.Find(globalBone);
             if (i == globalToLocalBoneMapping.End())
@@ -1179,7 +1190,7 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
 
     Vector<PODVector<uint> > allBoneMappings;
     PODVector<uint> sharedBoneMapping;
-    SharedPtr<Urho3D::VertexBuffer> sharedVb = MakeVertexBuffer(GetContext(), mesh->sharedVertexData, bounds, sharedBoneMapping);
+    SharedPtr<Urho3D::VertexBuffer> sharedVb = MakeVertexBuffer(GetContext(), mesh->sharedVertexData, bounds, sharedBoneMapping, boneBoundingBoxes);
 
     for (uint i = 0; i < subMeshCount; ++i)
     {
@@ -1198,7 +1209,7 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
         if (ib->GetIndexCount())
             ib->SetData(&subMesh->indexData->buffer[0]);
         geom->SetIndexBuffer(ib);
-        geom->SetVertexBuffer(0, subMesh->usesSharedVertexData ? sharedVb : MakeVertexBuffer(GetContext(), subMesh->vertexData, bounds, submeshBoneMapping));
+        geom->SetVertexBuffer(0, subMesh->usesSharedVertexData ? sharedVb : MakeVertexBuffer(GetContext(), subMesh->vertexData, bounds, submeshBoneMapping, boneBoundingBoxes));
         geom->SetDrawRange(ConvertPrimitiveType(subMesh->operationType), 0, ib->GetIndexCount());
         allBoneMappings.Push(subMesh->usesSharedVertexData ? sharedBoneMapping : submeshBoneMapping);
         model->SetNumGeometryLodLevels(i, 1);
@@ -1208,7 +1219,7 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
 
     model->SetBoundingBox(bounds);
 
-    /// \todo Handle skinning data, morphs etc.
+    /// \todo Handle morphs
 
     assetAPI->AssetLoadCompleted(Name());
     return true;

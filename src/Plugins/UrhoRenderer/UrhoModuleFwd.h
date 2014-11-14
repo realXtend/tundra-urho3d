@@ -4,16 +4,17 @@
 
 namespace Urho3D
 {
-    class Node;
-    class Scene;
-    class Camera;
     class AnimatedModel;
-    class StaticModel;
-    class Light;
     class Animation;
     class AnimationState;
-    class Model;
+    class BoundingBox;
+    class Camera;
+    class Light;
     class Material;
+    class Model;
+    class Node;
+    class Scene;
+    class StaticModel;
     class Texture2D;
     class Zone;
 }

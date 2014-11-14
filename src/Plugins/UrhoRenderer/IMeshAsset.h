@@ -29,12 +29,18 @@ public:
     /// Returns submesh count.
     uint NumSubmeshes() const;
 
+    /// Return bone bounding boxes. Not needed by implementations that already contain a fully working skeleton within the Urho model itself
+    const Vector<Urho3D::BoundingBox>& BoneBoundingBoxes() const { return boneBoundingBoxes; }
+
 protected:
     /// Unload mesh. IAsset override.
     void DoUnload() override;
 
     /// Urho model resource. Filled by the loading implementations in subclasses.
     SharedPtr<Urho3D::Model> model;
+
+    /// Bone bounding box information
+    Vector<Urho3D::BoundingBox> boneBoundingBoxes;
 };
 
 }

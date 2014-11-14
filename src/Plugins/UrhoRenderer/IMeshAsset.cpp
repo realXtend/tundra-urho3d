@@ -31,6 +31,7 @@ uint IMeshAsset::NumSubmeshes() const
 void IMeshAsset::DoUnload()
 {
     model.Reset();
+    boneBoundingBoxes.Clear();
 }
 
 bool IMeshAsset::IsLoaded() const

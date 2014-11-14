@@ -353,9 +353,8 @@ bool OgreSkeletonAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
         bones[i].initialRotation_ = rot;
         bones[i].initialScale_ = scale;
         bones[i].offsetMatrix_ = Urho3D::Matrix3x4(ogreSkel->bones[i]->worldMatrix).Inverse();
-
-        bones[i].collisionMask_ = Urho3D::BONECOLLISION_SPHERE;
-        bones[i].radius_ = 0.1f; 
+        // The skeleton can not know the vertex information necessary to calculate bone bounding boxes. Therefore that data
+        // must be combined later from the mesh's data
     }
     // Inform load has finished.
     assetAPI->AssetLoadCompleted(Name());

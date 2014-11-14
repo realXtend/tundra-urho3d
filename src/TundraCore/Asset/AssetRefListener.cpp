@@ -61,7 +61,10 @@ void AssetRefListener::HandleAssetRefChange(AssetAPI *assetApi, String assetRef,
     // If the ref is empty, don't go any further as it will just trigger the LogWarning below.
     assetRef = assetRef.Trimmed();
     if (assetRef.Empty())
+    {
+        asset = AssetPtr();
         return;
+    }
     currentWaitingRef = "";
 
     // Resolve the protocol for generated:// assets. These assets are never meant to be
@@ -106,9 +109,8 @@ void AssetRefListener::HandleAssetRefChange(AssetAPI *assetApi, String assetRef,
     }
     
     // Disconnect from the old asset's load signal
-    AssetPtr assetData = asset.Lock();
-    if (assetData)
-        assetData->Loaded.Disconnect(this, &AssetRefListener::OnAssetLoaded);
+    if (asset)
+        asset->Loaded.Disconnect(this, &AssetRefListener::OnAssetLoaded);
     asset = AssetPtr();
 }
 

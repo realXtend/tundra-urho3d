@@ -262,10 +262,18 @@ void Mesh::ApplyMesh()
     for (uint i = 0; i < baseModel->GetNumGeometries(); ++i)
         for (uint j = 0; j < baseModel->GetNumGeometryLodLevels(i); ++j)
             skeletalModel->SetGeometry(i, j, baseModel->GetGeometry(i, j));
-    /// \todo Set bone bounds
     skeletalModel->SetSkeleton(sAsset->UrhoSkeleton());
     skeletalModel->SetGeometryBoneMappings(baseModel->GetGeometryBoneMappings());
     skeletalModel->SetBoundingBox(baseModel->GetBoundingBox());
+
+    // The skeleton asset contains the bone hierarchy and transforms, but not correct bone bounding boxes. Set up these now
+    Vector<Urho3D::Bone>& bones = skeletalModel->GetSkeleton().GetModifiableBones();
+    const Vector<Urho3D::BoundingBox>& boneBoundingBoxes = mAsset->BoneBoundingBoxes();
+    for (uint i = 0; i < bones.Size() && i < boneBoundingBoxes.Size(); ++i) 
+    {
+        bones[i].collisionMask_ = Urho3D::BONECOLLISION_BOX;
+        bones[i].boundingBox_ = boneBoundingBoxes[i].Transformed(bones[i].offsetMatrix_);
+    }
 
     mesh_->SetModel(skeletalModel);
 
