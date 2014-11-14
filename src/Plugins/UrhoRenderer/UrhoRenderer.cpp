@@ -63,6 +63,7 @@ void UrhoRenderer::Load()
 
     /// \todo Check and add new supported texture extensions
     StringList textureExtensions;
+    textureExtensions.Push(".crn"); // CRN to DDS decompression implemented in TextureAsset
     textureExtensions.Push(".dds");
     textureExtensions.Push(".png");
     textureExtensions.Push(".jpeg");
