@@ -11,6 +11,7 @@
 #include "Light.h"
 #include "EnvironmentLight.h"
 #include "Terrain.h"
+#include "Sky.h"
 #include "IComponentFactory.h"
 #include "ConfigAPI.h"
 #include "SceneAPI.h"
@@ -58,6 +59,7 @@ void UrhoRenderer::Load()
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<AnimationController>()));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<EnvironmentLight>()));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Terrain>()));
+    scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Sky>()));
 
     /// \todo Check and add new supported texture extensions
     StringList textureExtensions;

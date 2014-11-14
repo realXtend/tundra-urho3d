@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<scene>
+	<entity id="1" sync="true" temporary="false">
+		<component type="Name" typeId="26" sync="true" temporary="false">
+			<attribute name="Name" id="name" value="TestBox" type="string" />
+			<attribute name="Description" id="description" value="" type="string" />
+			<attribute name="Group" id="group" value="" type="string" />
+		</component>
+		<component type="Placeable" typeId="20" sync="true" temporary="false">
+			<attribute name="Transform" id="transform" value="0,0,10,0,0,0,1,1,1" type="Transform" />
+			<attribute name="Show bounding box" id="drawDebug" value="false" type="bool" />
+			<attribute name="Visible" id="visible" value="true" type="bool" />
+			<attribute name="Selection layer" id="selectionLayer" value="1" type="int" />
+			<attribute name="Parent entity ref" id="parentRef" value="" type="EntityReference" />
+			<attribute name="Parent bone name" id="parentBone" value="" type="string" />
+		</component>
+		<component type="Terrain" typeId="11" sync="true" temporary="false">
+		   <attribute value="-128,-60,-200,0,0,0,1,1,1" name="Transform"/>
+		   <attribute value="24" name="Grid Width"/>
+		   <attribute value="24" name="Grid Height"/>
+		   <attribute value="0.129999995" name="Tex. U scale"/>
+		   <attribute value="0.129999995" name="Tex. V scale"/>
+		   <attribute value="local://RexTerrainPCF.material" name="Material"/>
+		   <attribute value="local://terrain.ntf" name="Heightmap"/>
+		  </component>
+	</entity>
+	<entity id="2" sync="true" temporary="false">
+		<component type="Name" typeId="26" sync="true" temporary="false">
+			<attribute name="Name" id="name" value="Light" type="string" />
+			<attribute name="Description" id="description" value="" type="string" />
+			<attribute name="Group" id="group" value="" type="string" />
+		</component>
+		<component type="Placeable" typeId="20" sync="true" temporary="false">
+			<attribute name="Transform" id="transform" value="0,6,7,0,0,0,1,1,1" type="Transform" />
+			<attribute name="Show bounding box" id="drawDebug" value="false" type="bool" />
+			<attribute name="Visible" id="visible" value="true" type="bool" />
+			<attribute name="Selection layer" id="selectionLayer" value="1" type="int" />
+			<attribute name="Parent entity ref" id="parentRef" value="" type="EntityReference" />
+			<attribute name="Parent bone name" id="parentBone" value="" type="string" />
+		</component>
+		<component type="Light" typeId="16" sync="true" temporary="false">
+			<attribute name="Type" id="type" value="0" type="int" />
+			<attribute name="Diffuse color" id="diffColor" value="1,1,1,1" type="Color" />
+			<attribute name="Specular color" id="specColor" value="0,0,0,1" type="Color" />
+			<attribute name="Cast shadows" id="castShadows" value="false" type="bool" />
+			<attribute name="Range" id="range" value="25" type="real" />
+			<attribute name="Brightness" id="brightness" value="1" type="real" />
+			<attribute name="Constant atten" id="constAtten" value="0" type="real" />
+			<attribute name="Linear atten" id="linearAtten" value="0.00999999978" type="real" />
+			<attribute name="Quadratic atten" id="quadraAtten" value="0.00999999978" type="real" />
+			<attribute name="Light inner angle" id="innerAngle" value="30" type="real" />
+			<attribute name="Light outer angle" id="outerAngle" value="40" type="real" />
+		</component>
+	</entity>
+	<entity id="3" sync="true" temporary="false">
+		<component type="Sky" typeId="10" sync="true" temporary="false">
+			<attribute name="Texture" value="sky_front.dds;sky_back.dds;sky_left.dds;sky_right.dds;sky_top.dds;sky_bot.dds" />
+			<attribute name="Distance" value="500" />
+			<attribute name="Orientation" value="0.000000 0.000000 0.000000 1.000000" />
+			<attribute name="Draw first" value="true" />
+		</component>
+	</entity>
+</scene>
