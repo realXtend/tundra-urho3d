@@ -356,6 +356,71 @@ bool OgreSkeletonAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
         // The skeleton can not know the vertex information necessary to calculate bone bounding boxes. Therefore that data
         // must be combined later from the mesh's data
     }
+
+    // Create animations
+    for (uint i = 0; i < ogreSkel->animations.Size(); ++i)
+    {
+        Ogre::Animation* ogreAnim = ogreSkel->animations[i];
+        if (!ogreAnim)
+            continue;
+        String animName = ogreAnim->name;
+        if (animName.Empty())
+            continue;
+        LogInfo("Converting animation " + animName);
+
+        SharedPtr<Urho3D::Animation> urhoAnim(new Urho3D::Animation(context_));
+        urhoAnim->SetLength(ogreAnim->length);
+        // Set both animation & resource name, same for now
+        urhoAnim->SetAnimationName(animName);
+        urhoAnim->SetName(animName);
+
+        Vector<Urho3D::AnimationTrack> urhoTracks;
+        for (uint j = 0; j < ogreAnim->tracks.Size(); ++j)
+        {
+            const Ogre::VertexAnimationTrack& ogreTrack = ogreAnim->tracks[j];
+            if (ogreTrack.type != Ogre::VertexAnimationTrack::VAT_TRANSFORM)
+                continue;
+            Urho3D::AnimationTrack urhoTrack;
+            urhoTrack.channelMask_ = Urho3D::CHANNEL_POSITION | Urho3D::CHANNEL_ROTATION;
+            urhoTrack.name_ = ogreTrack.boneName;
+            urhoTrack.nameHash_ = StringHash(ogreTrack.boneName);
+
+            Urho3D::Bone* urhoBone = 0;
+            for (uint k = 0; k < bones.Size(); ++k)
+            {
+                if (bones[k].name_ == urhoTrack.name_)
+                {
+                    urhoBone = &bones[k];
+                    break;
+                }
+            }
+            if (!urhoBone)
+            {
+                LogWarning("OgreSkeletonAsset::DeserializeFromData: found animation track referring to a non-existent bone " + urhoTrack.name_ + ", skipping");
+                continue;
+            }
+
+            for (uint k = 0; k < ogreTrack.transformKeyFrames.Size(); ++k)
+            {
+                const Ogre::TransformKeyFrame& ogreKeyframe = ogreTrack.transformKeyFrames[k];
+                Urho3D::AnimationKeyFrame urhoKeyframe;
+                urhoKeyframe.time_ = ogreKeyframe.timePos;
+
+                // Urho uses absolute bone poses in animation, while Ogre uses additive. Convert to absolute now.
+                urhoKeyframe.position_ = urhoBone->initialPosition_ + urhoBone->initialRotation_ * ogreKeyframe.position;
+                urhoKeyframe.rotation_ = urhoBone->initialRotation_ * ogreKeyframe.rotation;
+                urhoKeyframe.scale_ = ogreKeyframe.scale;
+                if (!ogreKeyframe.scale.Equals(float3(1.0f, 1.0f, 1.0f)))
+                    urhoTrack.channelMask_ |= Urho3D::CHANNEL_SCALE;
+                urhoTrack.keyFrames_.Push(urhoKeyframe);
+            }
+            urhoTracks.Push(urhoTrack);
+        }
+
+        urhoAnim->SetTracks(urhoTracks);
+        animations[animName] = urhoAnim;
+    }
+
     // Inform load has finished.
     assetAPI->AssetLoadCompleted(Name());
     return true;
@@ -370,6 +435,12 @@ void OgreSkeletonAsset::DoUnload()
 bool OgreSkeletonAsset::IsLoaded() const
 {
     return skeleton.GetNumBones() > 0;
+}
+
+Urho3D::Animation* OgreSkeletonAsset::AnimationByName(const String& name) const
+{
+    HashMap<String, SharedPtr<Urho3D::Animation> >::ConstIterator i = animations.Find(name);
+    return i != animations.End() ? i->second_.Get() : nullptr;
 }
 
 }

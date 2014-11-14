@@ -107,6 +107,10 @@ public:
 
     /// Return an animation by name from the skeleton, or null if not found.
     Urho3D::Animation* AnimationByName(const String& name) const;
+
+    /// Return all animations contained by the skeleton.
+    StringVector AnimationNames() const;
+
 private:
     /// Called when the parent entity has been set.
     void UpdateSignals();

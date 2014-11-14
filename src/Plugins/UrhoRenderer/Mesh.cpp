@@ -95,6 +95,28 @@ Urho3D::AnimatedModel* Mesh::UrhoMesh() const
     return mesh_;
 }
 
+Urho3D::Animation* Mesh::AnimationByName(const String& name) const
+{
+    if (!skeletonRefListener_)
+        return nullptr;
+    OgreSkeletonAsset* skelAsset = dynamic_cast<OgreSkeletonAsset*>(skeletonRefListener_->Asset().Get());
+    return skelAsset ? skelAsset->AnimationByName(name) : nullptr;
+}
+
+StringVector Mesh::AnimationNames() const
+{
+    StringVector ret;
+    if (!skeletonRefListener_)
+        return ret;
+    OgreSkeletonAsset* skelAsset = dynamic_cast<OgreSkeletonAsset*>(skeletonRefListener_->Asset().Get());
+    if (!skelAsset)
+        return ret;
+    const HashMap<String, SharedPtr<Urho3D::Animation> >& animations = skelAsset->UrhoAnimations();
+    for (auto i = animations.Begin(); i != animations.End(); ++i)
+        ret.Push(i->first_);
+    return ret;
+}
+
 void Mesh::UpdateSignals()
 {
     Entity* parent = ParentEntity();

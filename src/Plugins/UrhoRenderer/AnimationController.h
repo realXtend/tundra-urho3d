@@ -115,6 +115,9 @@ public:
         /// current phase
         AnimationPhase phase_;
 
+        /// The corresponding Urho animation state. Is strongly owned by the AnimatedModel component
+        WeakPtr<Urho3D::AnimationState> animationState_;
+
         Animation() :
             auto_stop_(false),
             fade_period_(0.0),
@@ -132,14 +135,11 @@ public:
     /// Returns all running animations
     const AnimationMap& RunningAnimations() const { return animations_; }
 
-    /// Auto-associate mesh component if not yet set
-    void AutoSetMesh();
-    
     /// Updates animation(s) by elapsed time
     void Update(float frametime);
 
     /// Draws the mesh skeleton
-    void DrawSkeleton(float frametime);
+    void DrawSkeleton();
 
     /// Enables animation with optional fade-in time
     /* @param name Animation name
@@ -276,9 +276,7 @@ private:
 
     void AttributesChanged() override;
 
-    /// Returns Urho's animation state, or null if no animation found by the @c name.
-    /** @param name Animation name */
-    Urho3D::AnimationState* UrhoAnimationState(const String& name) const;
+    Urho3D::Animation* AnimationByName(const String& name);
 
     /// Mesh component
     MeshWeakPtr mesh_;
@@ -291,8 +289,6 @@ private:
 
     /// Map of animations
     AnimationMap animations_;
-
-    HashMap<String, Urho3D::SharedPtr<Urho3D::AnimationState>> animationStates_;
 };
 
 COMPONENT_TYPEDEFS(AnimationController)

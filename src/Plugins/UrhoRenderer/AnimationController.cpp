@@ -19,8 +19,8 @@
 #include <Engine/Graphics/Animation.h>
 #include <Engine/Graphics/AnimatedModel.h>
 #include <Engine/Graphics/AnimationState.h>
+#include <Engine/Graphics/DebugRenderer.h>
 #include <Engine/Core/StringUtils.h>
-#include <Engine/Resource/ResourceCache.h>
 
 namespace Tundra
 {
@@ -35,7 +35,6 @@ AnimationController::AnimationController(Urho3D::Context* context, Scene* scene)
 
 AnimationController::~AnimationController()
 {
-    animationStates_.Clear();
 }
 
 void AnimationController::UpdateSignals()
@@ -62,7 +61,6 @@ void AnimationController::OnComponentStructureChanged(IComponent*, AttributeChan
     if (!parent)
         return;
 
-    placeable_ = parent->Component<Placeable>();
     mesh_ = parent->Component<Mesh>();
 }
 
@@ -71,78 +69,173 @@ void AnimationController::AttributesChanged()
 
 }
 
-Urho3D::AnimationState* AnimationController::UrhoAnimationState(const String& name) const
+Urho3D::Animation* AnimationController::AnimationByName(const String& name)
 {
-    if (!mesh_)
-        return 0;
-
-    Urho3D::AnimatedModel* model = mesh_.Get()->UrhoMesh();
-    if (!model)
-        return 0;
-
-    int animIndex = -1;
-    const auto& animationStates = model->GetAnimationStates();
-    for (unsigned int i=0 ; i<animationStates.Size() ; ++i)
-    {
-        if (name.Compare(animationStates[i]->GetAnimation()->GetAnimationName(), false))
-        {
-            animIndex = i;
-            break;
-        }
-    }
-    if (animIndex < 0)
-    {
-        //Urho3D::AnimationState* newState = 0;
-        //Urho3D::ResourceCache* cache = GetSubsystem<Urho3D::ResourceCache>();
-        //Urho3D::Animation* walkAnimation = cache->GetResource<Urho3D::Animation>("Models/Jack_Walk.ani");
-        //if (walkAnimation)
-        //{
-        //    newState = model->AddAnimationState(walkAnimation);
-        //    animationStates_[name] = newState;
-        //}
-        //return newState;
-        return 0;
-    }
-
-    return animationStates[animIndex];
+    /// \todo Now only handles animations in the Ogre skeleton asset. Enable use of animation assets
+    return mesh_ ? mesh_->AnimationByName(name) : nullptr;
 }
 
 void AnimationController::Update(float frametime)
 {
-    for (auto iter = animationStates_.Begin() ; iter != animationStates_.End() ; ++iter)
-    {
-        animationStates_[iter->first_]->AddTime(frametime);
-    }
-
-    /// \todo implement
-}
-
-void AnimationController::DrawSkeleton(float /*frametime*/)
-{
-    if (!world_ || !mesh_)
+    if (!mesh_)
         return;
 
-    Urho3D::AnimatedModel* model = mesh_->UrhoMesh();
+    Urho3D::AnimatedModel* model = mesh_.Get()->UrhoMesh();
     if (!model)
         return;
 
-    //Urho3D::Skeleton &skeleton = model->GetSkeleton();
+    for(auto i = animations_.Begin(); i != animations_.End();)
+    {
+        // Check expiration (model change?)
+        if (!i->second_.animationState_)
+            i = animations_.Erase(i);
+        else
+        {
+            Urho3D::AnimationState* animstate = i->second_.animationState_;
 
-    /// \todo draw skeleton
+            switch(i->second_.phase_)
+            {
+            case FadeInPhase:
+                // If period is infinitely fast, skip to full weight & PLAY status
+                if (i->second_.fade_period_ == 0.0f)
+                {
+                    i->second_.weight_ = 1.0f;
+                    i->second_.phase_ = PlayPhase;
+                }   
+                else
+                {
+                    i->second_.weight_ += (1.0f / i->second_.fade_period_) * frametime;
+                    if (i->second_.weight_ >= 1.0f)
+                    {
+                        i->second_.weight_ = 1.0f;
+                        i->second_.phase_ = PlayPhase;
+                    }
+                }
+                break;
+    
+            case PlayPhase:
+                if (i->second_.auto_stop_ || i->second_.num_repeats_ != 1)
+                {
+                    if ((i->second_.speed_factor_ >= 0.f && animstate->GetTime() >= animstate->GetLength()) ||
+                        (i->second_.speed_factor_ < 0.f && animstate->GetTime() <= 0.f))
+                    {
+                        if (i->second_.num_repeats_ != 1)
+                        {
+                            if (i->second_.num_repeats_ > 1)
+                                i->second_.num_repeats_--;
+    
+                            float rewindpos = i->second_.speed_factor_ >= 0.f ? (animstate->GetTime() - animstate->GetLength()) : animstate->GetLength();
+                            animstate->SetTime(rewindpos);
+                        }
+                        else
+                        {
+                            i->second_.phase_ = FadeOutPhase;
+                        }
+                    }
+                }
+                break;
+    
+            case FadeOutPhase:
+                // If period is infinitely fast, skip to disabled status immediately
+                if (i->second_.fade_period_ == 0.0f)
+                {
+                    i->second_.weight_ = 0.0f;
+                    i->second_.phase_ = StopPhase;
+                }
+                else
+                {
+                    i->second_.weight_ -= (1.0f / i->second_.fade_period_) * frametime;
+                    if (i->second_.weight_ <= 0.0f)
+                    {
+                        i->second_.weight_ = 0.0f;
+                        i->second_.phase_ = StopPhase;
+                    }
+                }
+                break;
+            }
+    
+            // Set weight & step the animation forward
+            if (i->second_.phase_ != StopPhase)
+            {
+                float advance = i->second_.speed_factor_ * frametime;
+                float new_weight = i->second_.weight_ * i->second_.weight_factor_;
+                
+                bool cycled = false;
+                float oldtimepos = animstate->GetTime();
+                float animlength = animstate->GetLength();
+                
+                if (new_weight != animstate->GetWeight())
+                    animstate->SetWeight((float)i->second_.weight_ * i->second_.weight_factor_);
+                if (advance != 0.0f)
+                    animstate->AddTime((float)(i->second_.speed_factor_ * frametime));
+                
+                // Check if we should fire an "animation finished" signal
+                float newtimepos = animstate->GetTime();
+                if (advance > 0.0f)
+                {
+                    if (!animstate->IsLooped())
+                    {
+                        if ((oldtimepos < animlength) && (newtimepos >= animlength))
+                            cycled = true;
+                    }
+                    else
+                    {
+                        if (newtimepos < oldtimepos)
+                            cycled = true;
+                    }
+                }
+                else
+                {
+                    if (!animstate->IsLooped())
+                    {
+                        if ((oldtimepos > 0.0f) && (newtimepos == 0.0f))
+                            cycled = true;
+                    }
+                    else
+                    {
+                        if (newtimepos > oldtimepos)
+                            cycled = true;
+                    }
+                }
+                
+                if (cycled)
+                {
+                    if (animstate->IsLooped())
+                        AnimationCycled.Emit(i->first_);
+                    else
+                        AnimationFinished.Emit(i->first_);
+                }
+
+                ++i;
+            }
+            else
+            {
+                // If stopped, disable & remove this animation from list
+                model->RemoveAnimationState(i->second_.animationState_);
+                i = animations_.Erase(i);
+            }
+        }
+    }
+}
+
+void AnimationController::DrawSkeleton()
+{
+    if (!world_ || !mesh_ || !mesh_->UrhoMesh())
+        return;
+
+    world_->UrhoScene()->GetComponent<Urho3D::DebugRenderer>()->AddSkeleton(mesh_->UrhoMesh()->GetSkeleton(), Urho3D::Color::WHITE, true);
 }
 
 bool AnimationController::EnableAnimation(const String& name, bool looped, float fadein, bool high_priority)
 {
-    Urho3D::AnimationState* animstate = UrhoAnimationState(name);
-    if (!animstate) 
-        return false;
-
-    animstate->SetLooped(looped);
-
     // See if we already have this animation
     auto i = animations_.Find(name);
     if (i != animations_.End())
     {
+        if (!i->second_.animationState_)
+            return false;
+
+        i->second_.animationState_->SetLooped(looped);
         i->second_.phase_ = FadeInPhase;
         i->second_.num_repeats_ = (looped ? 0: 1);
         i->second_.fade_period_ = fadein;
@@ -150,16 +243,25 @@ bool AnimationController::EnableAnimation(const String& name, bool looped, float
         // If animation is nonlooped and has already reached end, rewind to beginning
         if ((!looped) && (i->second_.speed_factor_ > 0.0f))
         {
-            if (animstate->GetTime() >= animstate->GetLength())
-                animstate->SetTime(0.0f);
+            if (i->second_.animationState_->GetTime() >= i->second_.animationState_->GetLength())
+                i->second_.animationState_->SetTime(0.0f);
         }
         return true;
     }
     
     // Start new animation from zero weight & speed factor 1, also reset time position
+    Urho3D::Animation* anim = AnimationByName(name);
+    if (!anim)
+        return false;
+    Urho3D::AnimationState* animstate = mesh_->UrhoMesh()->AddAnimationState(anim);
+    if (!animstate)
+        return false;
+
     animstate->SetTime(0.0f);
+    animstate->SetLooped(looped);
     
     Animation newanim;
+    newanim.animationState_ = animstate;
     newanim.phase_ = FadeInPhase;
     newanim.num_repeats_ = (looped ? 0: 1); // if looped, repeat 0 times (loop indefinetly) otherwise repeat one time.
     newanim.fade_period_ = fadein;
@@ -191,16 +293,14 @@ bool AnimationController::EnableExclusiveAnimation(const String& name, bool loop
 
 bool AnimationController::HasAnimationFinished(const String& name) const
 {
-    Urho3D::AnimationState* animstate = UrhoAnimationState(name);
-
-    if (!animstate) 
-        return true;
-
     auto i = animations_.Find(name);
     if (i != animations_.End())
     {
-        if ((!animstate->IsLooped()) && ((i->second_.speed_factor_ >= 0.f && animstate->GetTime() >= animstate->GetLength()) ||
-            (i->second_.speed_factor_ < 0.f && animstate->GetTime() <= 0.f)))
+        if (!i->second_.animationState_)
+            return true;
+
+        if ((!i->second_.animationState_->IsLooped()) && ((i->second_.speed_factor_ >= 0.f && i->second_.animationState_->GetTime() >= i->second_.animationState_->GetLength()) ||
+            (i->second_.speed_factor_ < 0.f && i->second_.animationState_->GetTime() <= 0.f)))
             return true;
         else
             return false;
@@ -256,31 +356,8 @@ bool AnimationController::SetAnimationNumLoops(const String& name, uint repeats)
 
 StringVector AnimationController::AvailableAnimations()
 {
-    //Ogre::Entity* entity = GetEntity();
-    //if (!entity) 
-    //    return availableList;
-    //Ogre::AnimationStateSet* anims = entity->getAllAnimationStates();
-    //if (!anims) 
-    //    return availableList;
-    //Ogre::AnimationStateIterator i = anims->UrhoAnimationStateIterator();
-    //while(i.hasMoreElements()) 
-    //{
-    //    Ogre::AnimationState *animstate = i.getNext();
-    //    availableList << String(animstate->getAnimationName().c_str());
-    //}
-
     StringVector availableList;
-    if (!mesh_ || !mesh_->UrhoMesh())
-        return availableList;
-
-    Urho3D::AnimatedModel *animatedModel = mesh_->UrhoMesh();
-    auto animstates = animatedModel->GetAnimationStates();
-    availableList.Resize(animstates.Size());
-    for (unsigned int i = 0 ; i<animstates.Size() ; ++i)
-    {
-        availableList[i] = animstates[i]->GetAnimation()->GetAnimationName();
-    }
-
+    
     return availableList;
 }
 
@@ -323,13 +400,10 @@ void AnimationController::DisableAllAnimations(float fadeout)
 
 void AnimationController::SetAnimationToEnd(const String& name)
 {
-    Urho3D::AnimationState* animstate = UrhoAnimationState(name);
-    if (!animstate)
-        return;
-        
-    if (animstate)
+    auto i = animations_.Find(name);
+    if (i != animations_.End() && i->second_.animationState_)
     {
-        SetAnimationTimePosition(name, animstate->GetLength());
+        SetAnimationTimePosition(name, i->second_.animationState_->GetLength());
     }
 }
 
@@ -371,15 +445,10 @@ bool AnimationController::SetAnimationPriority(const String& name, bool high_pri
 
 bool AnimationController::SetAnimationTimePosition(const String& name, float newPosition)
 {
-    Urho3D::AnimationState* animstate = UrhoAnimationState(name);
-    if (!animstate) 
-        return false;
-        
-    // See if we find this animation in the list of active animations
     auto i = animations_.Find(name);
-    if (i != animations_.End())
+    if (i != animations_.End() && i->second_.animationState_)
     {
-        animstate->SetTime(newPosition);
+        i->second_.animationState_->SetTime(newPosition);
         return true;
     }
     // Animation not active
@@ -388,15 +457,10 @@ bool AnimationController::SetAnimationTimePosition(const String& name, float new
 
 bool AnimationController::SetAnimationRelativeTimePosition(const String& name, float newPosition)
 {
-    Urho3D::AnimationState* animstate = UrhoAnimationState(name);
-    if (!animstate) 
-        return false;
-        
-    // See if we find this animation in the list of active animations
     auto i = animations_.Find(name);
-    if (i != animations_.End())
+    if (i != animations_.End() && i->second_.animationState_)
     {
-        animstate->SetTime(Clamp(newPosition, 0.0f, 1.0f) * animstate->GetLength());
+        i->second_.animationState_->SetTime(Clamp(newPosition, 0.0f, 1.0f) * i->second_.animationState_->GetLength());
         return true;
     }
     // Animation not active
@@ -405,37 +469,29 @@ bool AnimationController::SetAnimationRelativeTimePosition(const String& name, f
 
 float AnimationController::AnimationLength(const String& name)
 {
-    Urho3D::AnimationState* animstate = UrhoAnimationState(name);
-    if (!animstate)
-        return 0.0f;
+    auto i = animations_.Find(name);
+    if (i != animations_.End() && i->second_.animationState_)
+        return i->second_.animationState_->GetLength();
     else
-        return animstate->GetLength();
+        return 0.0f;
 }
 
 float AnimationController::AnimationTimePosition(const String& name)
 {
-    Urho3D::AnimationState* animstate = UrhoAnimationState(name);
-    if (!animstate)
-        return 0.0f;
-    
-    // See if we find this animation in the list of active animations
     auto i = animations_.Find(name);
-    if (i != animations_.End())
-        return animstate->GetTime();
-    else return 0.0f;
+    if (i != animations_.End() && i->second_.animationState_)
+        return i->second_.animationState_->GetTime();
+    else
+        return 0.0f;
 }
 
 float AnimationController::AnimationRelativeTimePosition(const String& name)
 {
-    Urho3D::AnimationState* animstate = UrhoAnimationState(name);
-    if (!animstate)
-        return 0.0f;
-    
-    // See if we find this animation in the list of active animations
     auto i = animations_.Find(name);
-    if (i != animations_.End())
-        return animstate->GetTime() / animstate->GetLength();
-    else return 0.0f;
+    if (i != animations_.End() && i->second_.animationState_)
+        return i->second_.animationState_->GetTime() / i->second_.animationState_->GetLength();
+    else
+        return 0.0f;
 }
 
 void AnimationController::PlayAnim(const String &name, const String &fadein, const String &exclusive)
