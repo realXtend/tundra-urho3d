@@ -1685,7 +1685,7 @@ void AssetAPI::AssetTransferCompleted(IAssetTransfer *transfer_)
             // Call AssetLoadFailed for the bundle to propagate this information to the waiting sub asset transfers. 
             // Propagating will be done automatically in the AssetBundleMonitor when the bundle fails.
             if (!success)
-                AssetLoadFailed(transfer->asset->Name());
+                AssetLoadFailed(transfer->source.ref);
         }
         else
         {
@@ -2369,16 +2369,24 @@ String AssetAPI::ResourceTypeForAssetRef(String assetRef) const
         if (assetTypeFactories[i]->Type() == "Binary")
             continue;
 
-        foreach (String extension, assetTypeFactories[i]->TypeExtensions())
+        auto exts = assetTypeFactories[i]->TypeExtensions();
+        foreach (String extension, exts)
+        {
             if (filename.EndsWith(extension, false))
                 return assetTypeFactories[i]->Type();
+        }
     }
 
     // Query all registered bundle factories if they provide this asset type.
     for(uint i=0; i<assetBundleTypeFactories.Size(); ++i)
-        foreach (String extension, assetBundleTypeFactories[i]->TypeExtensions())
+    {
+        auto exts = assetBundleTypeFactories[i]->TypeExtensions();
+        foreach (String extension, exts)
+        {
             if (filename.EndsWith(extension, false))
                 return assetBundleTypeFactories[i]->Type();
+        }
+    }
                 
     /** @todo Make these hardcoded ones go away and move to the provider when provided (like above). 
         Seems the resource types have leaked here without the providers being in the code base.
