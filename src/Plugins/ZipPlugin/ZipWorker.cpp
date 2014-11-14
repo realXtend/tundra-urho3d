@@ -97,7 +97,7 @@ void ZipWorker::ThreadFunction()
         // Read zip file content to cache file
         while (0 < (chunkRead = zzip_read(zzipFile, &buffer[0], chunkLen)))
         {
-            if (cacheFile.Write((void*)&buffer[0], chunkRead) != chunkRead)
+            if (cacheFile.Write((void*)&buffer[0], (uint)chunkRead) != (uint)chunkRead)
             {
                 LogError("Failed to write cache file + " + file.cachePath);
                 success = false;

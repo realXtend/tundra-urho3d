@@ -173,7 +173,7 @@ static void ReadSkeleton(Urho3D::Deserializer& stream, Skeleton *skeleton)
     }
     
     // Calculate bone matrices for root bones. Recursively calculates their children.
-    for (size_t i=0, len=skeleton->bones.Size(); i<len; ++i)
+    for (uint i=0, len=skeleton->bones.Size(); i<len; ++i)
     {
         Bone *bone = skeleton->bones[i];
         if (!bone->IsParented())
