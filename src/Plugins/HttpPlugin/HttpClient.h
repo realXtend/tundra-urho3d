@@ -6,6 +6,7 @@
 #include "HttpPluginFwd.h"
 #include "HttpDefines.h"
 #include "FrameworkFwd.h"
+#include "CoreTimeUtils.h"
 
 #include "HttpWorkQueue.h"
 #include "DebugHudPanel.h"
@@ -96,8 +97,8 @@ protected:
 private:
     HttpClient *client_;
     HttpWorkQueue *queue_;
-    float t_;
-    float step_;
+
+    FrameLimiter limiter_;
 };
 /// @endcond
 

@@ -172,8 +172,7 @@ HttpHudPanel::HttpHudPanel(Framework *framework, HttpClient *client, HttpWorkQue
     DebugHudPanel(framework),
     client_(client),
     queue_(queue),
-    step_(1.f/30.f),
-    t_(1.f)
+    limiter_(1.f/30.f)
 {
 }
 
@@ -184,16 +183,12 @@ SharedPtr<Urho3D::UIElement> HttpHudPanel::CreateImpl()
 
 void HttpHudPanel::UpdatePanel(float frametime, const SharedPtr<Urho3D::UIElement> &widget)
 {
-    Urho3D::Text *httpText = dynamic_cast<Urho3D::Text*>(widget.Get());
-    if (!httpText || !client_->Stats())
+    if (!limiter_.ShouldUpdate(frametime))
         return;
 
-    t_ += frametime;
-    if (t_ >= step_)
-    {
-        t_ = 0.f;
+    Urho3D::Text *httpText = dynamic_cast<Urho3D::Text*>(widget.Get());
+    if (httpText && client_->Stats())
         httpText->SetText(client_->Stats()->GetData());
-    }
 }
 
 /// @endcond
