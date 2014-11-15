@@ -150,8 +150,8 @@ void AssetHudPanel::UpdatePanel(float frametime, const SharedPtr<Urho3D::UIEleme
         {
             case IAsset::Original:
             {
-                info.programmatic++;
-                totals.programmatic++;
+                info.original++;
+                totals.original++;
                 break;
             }
             case IAsset::Cached:
@@ -225,8 +225,27 @@ void AssetHudPanel::UpdatePanel(float frametime, const SharedPtr<Urho3D::UIEleme
         }
         str.Append("\n");
     }
+    str.Append("\n");
 
     // todo Transfers
+    auto transfers = framework_->Asset()->PendingTransfers();
+    str.AppendWithFormat("Ongoing Asset Transfers         %u\n\n", transfers.Size());
+    uint printed = 0;
+    foreach(const AssetTransferPtr &transfer, transfers)
+    {
+        if (printed >= 30)
+            break;
+        String ref = transfer->SourceUrl();
+        if (ref.StartsWith("http://"))
+            ref = ref.Substring(7);
+        else if (ref.StartsWith("https://"))
+            ref = ref.Substring(8);
+        if (ref.Length() > 80)
+            ref = ref.Substring(0, 27) + "..." + ref.Substring(ref.Length()-50);
+        str.Append(ref + "\n");
+        printed++;
+    }
+    str.Append("\n");
 
     assetText->SetText(str);
 }
