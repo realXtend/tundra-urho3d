@@ -194,7 +194,10 @@ bool DebugHud::AddTab(const String &name, DebugHudPanelWeakPtr updater)
 
     // If first tab panel set it as current
     if (isFirstChild && !currentTab_)
+    {
+        button->SetStyle("ButtonSelected");
         currentTab_ = tab;
+    }
     return true;
 }
 
@@ -375,11 +378,22 @@ void DebugHud::HandleTabChange(StringHash /*eventType*/, VariantMap& eventData)
     using namespace Released;
 
     Button *button = dynamic_cast<Button*>(eventData[P_ELEMENT].GetPtr());
-    if (button)
-        ShowTab(button->GetName());
+    if (!button)
+        return;
+
+    if (!ShowTab(button->GetName()))
+        return;
+
+    Vector<SharedPtr<UIElement> > children = tabButtonLayout_->GetChildren();
+    foreach(auto child, children)
+    {
+        Button *b = dynamic_cast<Button*>(child.Get());
+        if (b)
+            b->SetStyle(b == button ? "ButtonSelected" : "Button");
+    }
 }
 
-void DebugHud::RemoveTab(const String &name)
+bool DebugHud::RemoveTab(const String &name)
 {
     for (auto iter = tabs_.Begin(); iter != tabs_.End(); ++iter)
     {
@@ -397,18 +411,19 @@ void DebugHud::RemoveTab(const String &name)
                 tab->updater->Destroy();
             tab->updater.Reset();
             delete tab;
-            return;
+            return true;
         }
     }
     LogErrorF("DebugHud::ShowTab: Tab '%s' does not exit.", name.CString());
+    return false;
 }
 
-void DebugHud::ShowTab(const String &name)
+bool DebugHud::ShowTab(const String &name)
 {
     if (name.Empty())
     {
         LogError("DebugHud::ShowTab: Provided tab name is empty");
-        return;
+        return false;
     }
 
     UIElementPtr widget;
@@ -424,7 +439,7 @@ void DebugHud::ShowTab(const String &name)
     if (!widget)
     {
         LogErrorF("DebugHud::ShowTab: Tab '%s' does not exit.", name.CString());
-        return;
+        return false;
     }
     foreach(auto tab, tabs_)
     {
@@ -442,6 +457,7 @@ void DebugHud::ShowTab(const String &name)
         }
         currentWidget->SetVisible(visible);
     }
+    return true;
 }
 
 StringVector DebugHud::TabNames() const

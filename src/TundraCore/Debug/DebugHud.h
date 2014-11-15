@@ -80,9 +80,9 @@ public:
     /// Add a new tab to profiler.
     bool AddTab(const String &name, DebugHudPanelWeakPtr updater);
     /// Removes tab @c name.
-    void RemoveTab(const String &name);
+    bool RemoveTab(const String &name);
     /// Show tab @c name.
-    void ShowTab(const String &name);
+    bool ShowTab(const String &name);
     /// Returns available tab names.
     StringVector TabNames() const;
 
