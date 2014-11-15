@@ -33,6 +33,22 @@ private:
     Urho3D::Timer profilerTimer_;
 };
 
+class SceneHudPanel : public DebugHudPanel
+{
+public:
+    SceneHudPanel(Framework *framework);
+
+    /// DebugHudPanel override.
+    void UpdatePanel(float frametime, const SharedPtr<Urho3D::UIElement> &widget) override;
+
+protected:
+    /// DebugHudPanel override.
+    SharedPtr<Urho3D::UIElement> CreateImpl() override;
+
+private:
+    FrameLimiter limiter_;
+};
+
 class AssetHudPanel : public DebugHudPanel
 {
 public:

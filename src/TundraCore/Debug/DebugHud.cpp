@@ -78,6 +78,7 @@ DebugHud::DebugHud(Framework *framework) :
     currentTab_(0)
 {
     profilerHudPanel_ = new ProfilerHudPanel(framework_);
+    sceneHudPanel_ = new SceneHudPanel(framework_);
     assetHudPanel_ = new AssetHudPanel(framework_);
 
     XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("UI/DefaultStyle.xml");
@@ -94,6 +95,7 @@ DebugHud::DebugHud(Framework *framework) :
 
     // Add core debug panels
     AddTab("Profiler", StaticCast<DebugHudPanel>(profilerHudPanel_));
+    AddTab("Scene", sceneHudPanel_);
     AddTab("Assets", assetHudPanel_);
 
     framework_->Frame()->PostFrameUpdate.Connect(this, &DebugHud::OnUpdate);

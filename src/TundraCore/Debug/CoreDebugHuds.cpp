@@ -7,6 +7,8 @@
 #include "Framework.h"
 #include "AssetAPI.h"
 #include "IAsset.h"
+#include "Scene.h"
+#include "IRenderer.h"
 
 #include <StringUtils.h>
 #include <Profiler.h>
@@ -19,6 +21,21 @@ using namespace Urho3D;
 
 namespace Tundra
 {
+
+void InsertAlpha(StringVector &container, const String &value)
+{
+    if (container.Find(value) != container.End())
+        return;
+    for(auto iter = container.Begin(); iter != container.End(); ++iter)
+    {
+        if (value.Compare((*iter), false) < 0)
+        {
+            container.Insert(iter, value);
+            return;
+        }
+    }
+    container.Push(value);
+}
 
 // Urho Profiler
 
@@ -52,6 +69,146 @@ void ProfilerHudPanel::UpdatePanel(float /*frametime*/, const SharedPtr<Urho3D::
     profiler->BeginInterval();
 }
 
+// Scene
+
+SceneHudPanel::SceneHudPanel(Framework *framework) :
+    DebugHudPanel(framework),
+    limiter_(1.f)
+{
+}
+
+SharedPtr<Urho3D::UIElement> SceneHudPanel::CreateImpl()
+{
+    return SharedPtr<Urho3D::UIElement>(new Text(framework_->GetContext()));
+}
+
+struct SceneInfo
+{
+    uint ents;
+    uint entsRoot;
+    uint entsParented;
+    uint entsLocal;
+    uint entsReplicated;
+    uint entsTemporary;
+    uint entsEmpty;
+
+    StringVector groups;
+    HashMap<String, uint> entGroups;
+
+    uint comps;
+    uint compsLocal;
+    uint compsReplicated;
+    uint compsTemporary;
+
+    StringVector types;
+    HashMap<String, uint> compTypes;
+
+    int pad;
+
+    SceneInfo() : ents(0), entsRoot(0), entsParented(0), entsLocal(0), entsReplicated(0), entsTemporary(0), entsEmpty(0),
+        comps(0), compsLocal(0), compsReplicated(0), compsTemporary(0), pad(14) {}
+};
+
+void SceneHudPanel::UpdatePanel(float frametime, const SharedPtr<Urho3D::UIElement> &widget)
+{
+    if (!limiter_.ShouldUpdate(frametime))
+        return;
+
+    Text *sceneText = dynamic_cast<Text*>(widget.Get());
+    if (!sceneText || !framework_->Renderer())
+        return;
+
+    Scene *scene = framework_->Renderer()->MainCameraScene();
+    if (!scene)
+        return;
+    
+    String str;
+
+    SceneInfo info;
+    auto entities = scene->Entities();
+    info.ents = entities.Size();
+    for(auto entIter = entities.Begin(); entIter != entities.End(); ++entIter)
+    {
+        const EntityPtr ent = entIter->second_;
+        if (ent->Parent())
+            info.entsParented++;
+        else
+            info.entsRoot++;
+
+        if (ent->IsLocal())
+            info.entsLocal++;
+        if (ent->IsReplicated())
+            info.entsReplicated++;
+        if (ent->IsTemporary())
+            info.entsTemporary++;
+
+        String group = ent->Group().Trimmed();
+        if (!group.Empty())
+        {
+            info.entGroups[group]++;
+            InsertAlpha(info.groups, group);
+
+            if ((int)group.Length() > info.pad)
+                info.pad = group.Length() + 2;
+        }
+
+        auto components = ent->Components();
+        info.comps += components.Size();
+        for(auto compIter = components.Begin(); compIter != components.End(); ++compIter)
+        {
+            auto comp = compIter->second_;
+            String type = comp->TypeName();
+            info.compTypes[type]++;
+            InsertAlpha(info.types, type);
+
+            if (comp->IsLocal())
+                info.compsLocal++;
+            if (comp->IsReplicated())
+                info.compsReplicated++;
+            if (comp->IsTemporary())
+                info.compsTemporary++;
+
+            if ((int)type.Length() > info.pad)
+                info.pad = type.Length() + 2;
+        }
+        if (components.Empty())
+            info.entsEmpty++;
+    }
+
+    str.AppendWithFormat("%s   %u\n", PadString("Entities", info.pad).CString(), info.ents);
+    str.AppendWithFormat("  %s %u\n", PadString("Root", info.pad).CString(), info.entsRoot);
+    str.AppendWithFormat("  %s %u\n", PadString("Parented", info.pad).CString(), info.entsParented);
+    str.AppendWithFormat("  %s %u\n", PadString("Empty", info.pad).CString(), info.entsEmpty);
+    str.AppendWithFormat("  %s %u\n", PadString("Replicated", info.pad).CString(), info.entsReplicated);
+    str.AppendWithFormat("  %s %u\n", PadString("Local", info.pad).CString(), info.entsLocal);
+    str.AppendWithFormat("  %s %u\n\n", PadString("Temporary", info.pad).CString(), info.entsTemporary);
+
+    if (!info.groups.Empty())
+    {
+        str.AppendWithFormat("%s   %u\n", PadString("Entity Groups", info.pad).CString(), info.groups.Size());
+        foreach(auto &group, info.groups)
+        {
+            uint num = info.entGroups[group];
+            str.AppendWithFormat("  %s %u\n", PadString(group, info.pad).CString(), num);
+        }
+        str.Append("\n");
+    }
+
+    str.AppendWithFormat("%s   %u\n", PadString("Components", info.pad).CString(), info.comps);
+    str.AppendWithFormat("  %s %u\n", PadString("Replicated", info.pad).CString(), info.compsReplicated);
+    str.AppendWithFormat("  %s %u\n", PadString("Local", info.pad).CString(), info.compsLocal);
+    str.AppendWithFormat("  %s %u\n\n", PadString("Temporary", info.pad).CString(), info.compsTemporary);
+
+    foreach(auto &type, info.types)
+    {
+        uint num = info.compTypes[type];
+        str.AppendWithFormat("  %s %u\n", PadString(type, info.pad).CString(), num);
+    }
+    str.Append("\n");
+
+    sceneText->SetText(str);
+}
+
 // AssetAPI
 
 AssetHudPanel::AssetHudPanel(Framework *framework) :
@@ -63,21 +220,6 @@ AssetHudPanel::AssetHudPanel(Framework *framework) :
 SharedPtr<Urho3D::UIElement> AssetHudPanel::CreateImpl()
 {
     return SharedPtr<Urho3D::UIElement>(new Text(framework_->GetContext()));
-}
-
-void InsertAlpha(StringVector &container, const String &value)
-{
-    if (container.Find(value) != container.End())
-        return;
-    for(auto iter = container.Begin(); iter != container.End(); ++iter)
-    {
-        if (value.Compare((*iter), false) < 0)
-        {
-            container.Insert(iter, value);
-            return;
-        }
-    }
-    container.Push(value);
 }
 
 String Extension(const String &value)

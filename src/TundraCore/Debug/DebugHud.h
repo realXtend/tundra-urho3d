@@ -149,6 +149,7 @@ private:
 
     /// Core debug panels
     SharedPtr<ProfilerHudPanel> profilerHudPanel_;
+    SharedPtr<DebugHudPanel> sceneHudPanel_;
     SharedPtr<DebugHudPanel> assetHudPanel_;
 
     /// Hashmap containing application specific stats.
