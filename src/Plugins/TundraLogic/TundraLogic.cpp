@@ -136,6 +136,7 @@ void TundraLogic::LoadStartupScene()
 void TundraLogic::StartupSceneLoaded(AssetPtr sceneAsset)
 {
     LoadScene(sceneAsset->DiskSource(), false, false);
+    sceneAsset->Unload();
 }
 
 bool TundraLogic::LoadScene(String filename, bool clearScene, bool useEntityIDsFromFile)
