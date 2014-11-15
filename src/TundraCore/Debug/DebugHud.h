@@ -147,8 +147,9 @@ private:
     /// Current tab
     HudTab *currentTab_;
 
-    /// Profiler panel implementation
+    /// Core debug panels
     SharedPtr<ProfilerHudPanel> profilerHudPanel_;
+    SharedPtr<DebugHudPanel> assetHudPanel_;
 
     /// Hashmap containing application specific stats.
     HashMap<String, String> appStats_;
@@ -160,28 +161,5 @@ private:
 
     Framework *framework_;
 };
-
-/// @cond PRIVATE
-class ProfilerHudPanel : public DebugHudPanel
-{
-public:
-    ProfilerHudPanel(Framework *framework);
-
-    /// DebugHudPanel override.
-    void UpdatePanel(float frametime, const UIElementPtr &widget) override;
-
-    /// Profiler max block depth.
-    unsigned profilerMaxDepth;
-    /// Profiler accumulation interval.
-    unsigned profilerInterval;
-
-protected:
-    /// DebugHudPanel override.
-    UIElementPtr CreateImpl() override;
-private:
-    /// Profiler timer.
-    Urho3D::Timer profilerTimer_;
-};
-/// @endcond
 
 }

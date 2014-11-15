@@ -10,7 +10,7 @@ namespace Tundra
 
 FrameLimiter::FrameLimiter(float step_) :
     step(step_),
-    t(0.f)
+    t(step_ + 1.f)
 {
 }
 

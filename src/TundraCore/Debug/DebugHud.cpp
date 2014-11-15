@@ -24,6 +24,8 @@
 
 #include "StableHeaders.h"
 #include "DebugHud.h"
+#include "CoreDebugHuds.h"
+
 #include "Framework.h"
 #include "FrameAPI.h"
 #include "CoreStringUtils.h"
@@ -76,6 +78,7 @@ DebugHud::DebugHud(Framework *framework) :
     currentTab_(0)
 {
     profilerHudPanel_ = new ProfilerHudPanel(framework_);
+    assetHudPanel_ = new AssetHudPanel(framework_);
 
     XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("UI/DefaultStyle.xml");
 
@@ -89,8 +92,9 @@ DebugHud::DebugHud(Framework *framework) :
     modeText_->SetStyle("TextMonospaceShadowed", style);
     container->AddChild(modeText_);
 
-    // Profiler tab is implemented here. Normally 3rd party code calls AddTab.
+    // Add core debug panels
     AddTab("Profiler", StaticCast<DebugHudPanel>(profilerHudPanel_));
+    AddTab("Assets", assetHudPanel_);
 
     framework_->Frame()->PostFrameUpdate.Connect(this, &DebugHud::OnUpdate);
     SubscribeToEvent(E_SCREENMODE, HANDLER(DebugHud, HandleWindowChange));
@@ -445,39 +449,5 @@ StringVector DebugHud::TabNames() const
         names.Push(tab->name);
     return names;
 }
-
-/// @cond PRIVATE
-
-ProfilerHudPanel::ProfilerHudPanel(Framework *framework) :
-    DebugHudPanel(framework),
-    profilerMaxDepth(M_MAX_UNSIGNED),
-    profilerInterval(1000)
-{
-}
-
-UIElementPtr ProfilerHudPanel::CreateImpl()
-{
-    return UIElementPtr(new Text(framework_->GetContext()));
-}
-
-void ProfilerHudPanel::UpdatePanel(float /*frametime*/, const UIElementPtr &widget)
-{
-    Profiler* profiler = framework_->GetSubsystem<Profiler>();
-    Text *profilerText = dynamic_cast<Text*>(widget.Get());
-    if (!profiler || !profilerText)
-        return;
-
-    if (profilerTimer_.GetMSec(false) >= profilerInterval)
-    {
-        profilerTimer_.Reset();
-
-        String profilerOutput = profiler->GetData(false, false, profilerMaxDepth);
-        profilerText->SetText(profilerOutput);
-
-        profiler->BeginInterval();
-    }
-}
-
-/// @endcond
 
 }
