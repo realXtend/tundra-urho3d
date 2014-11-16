@@ -418,9 +418,49 @@ String Framework::InstallationDirectory() const
     return GetSubsystem<FileSystem>()->GetProgramDir();
 }
 
+#if defined(ANDROID)
+
+#include <SDL_System.h>
+
+/* This functionality is coming to the next SDL release
+   https://github.com/spurious/SDL-mirror/blob/master/src/filesystem/android/SDL_sysfilesystem.c
+   Remove this code then and let urho FileSystem take care of it once release is out and Urho version is upgraded.
+   org and app input params are ignored as resolves to android app data directory that already contains app
+   specifiers via package name. */
+char *Tundra_Android_SDL_GetPrefPath(const char* /*org*/, const char* /*app*/)
+{
+    const char *path = SDL_AndroidGetInternalStoragePath();
+    if (path) {
+        size_t pathlen = SDL_strlen(path)+2;
+        char *fullpath = (char *)SDL_malloc(pathlen);
+        if (!fullpath) {
+            SDL_OutOfMemory();
+            return NULL;
+        }
+        SDL_snprintf(fullpath, pathlen, "%s/", path);
+        return fullpath;
+    }
+    return NULL;
+}
+#endif
+
 String Framework::UserDataDirectory() const
 {
+#if !defined(ANDROID)
     return GetInternalPath(GetSubsystem<FileSystem>()->GetAppPreferencesDir(OrganizationName(), ApplicationName()));
+#else
+    // See above Tundra_SDL_GetPrefPath
+    String dir;
+    char *prefPath = Tundra_Android_SDL_GetPrefPath(OrganizationName().CString(), ApplicationName().CString());
+    if (prefPath)
+    {
+        dir = GetInternalPath(String(prefPath));
+        SDL_free(prefPath);
+    }
+    else
+        LogWarning("Could not get application preferences directory: " + String(SDL_GetError()));
+    return dir;
+#endif
 }
 
 String Framework::UserDocumentsDirectory() const
