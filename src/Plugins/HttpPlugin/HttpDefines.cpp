@@ -151,6 +151,23 @@ String LocalEpochToHttpDate(time_t epoch)
     return String(buf);
 }
 
+#if defined(ANDROID) && !defined(__LP64__)
+// Tundra node: Function copied from http://src.chromium.org/svn/trunk/src/base/os_compat_android.cc
+// 32-bit Android has only timegm64() and not timegm().
+// We replicate the behaviour of timegm() when the result overflows time_t.
+#include <time64.h>
+
+time_t timegm(struct tm* const t) {
+  // time_t is signed on Android.
+  static const time_t kTimeMax = ~(1L << (sizeof(time_t) * CHAR_BIT - 1));
+  static const time_t kTimeMin = (1L << (sizeof(time_t) * CHAR_BIT - 1));
+  time64_t result = timegm64(t);
+  if (result < kTimeMin || result > kTimeMax)
+    return 0;
+  return result;
+}
+#endif
+
 time_t HttpDateToUtcEpoch(const String &date)
 {
     StringVector parts = date.Trimmed().Split(' ');

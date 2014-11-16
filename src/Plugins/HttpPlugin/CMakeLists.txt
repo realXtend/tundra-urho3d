@@ -1,4 +1,21 @@
 
+macro(configure_curl)
+    if ("${CURL_HOME}" STREQUAL "")
+        message(FATAL_ERROR "CURL_HOME not set")
+    endif()
+    set(CURL_INCLUDE_DIRS ${CURL_HOME}/include)
+    set(CURL_LIBRARY_DIRS ${CURL_HOME}/lib)
+    if (MSVC)
+        set(CURL_LIBRARIES optimized libcurl libeay32 ssleay32 debug libcurl_d libeay32 ssleay32)
+    elseif (ANDROID)
+        set(CURL_LIBRARIES curl ssl crypto z)
+    else()
+        set(CURL_LIBRARIES curl ssl)
+    endif()
+endmacro (configure_curl)
+
+###############################################################################
+
 configure_curl()
 
 # Define target name and output directory

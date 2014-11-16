@@ -1,14 +1,19 @@
 
 macro(configure_zziplib)
-    if (MSVC)
+    if (MSVC OR ANDROID)
         if ("${ZZIPLIB_HOME}" STREQUAL "")
             # Make fatal once linux dep build is implemented
             message(FATAL_ERROR "ZZIPLIB_HOME not set")
         endif()
         set(ZZIPLIB_INCLUDE_DIRS ${ZZIPLIB_HOME})
-        # This is kind of ugly but we can assume zlib location with windows deps
-        set(ZZIPLIB_LIBRARY_DIRS ${ZZIPLIB_HOME}/build ${ZZIPLIB_HOME}/../zlib/build/lib)
+        set(ZZIPLIB_LIBRARY_DIRS ${ZZIPLIB_HOME}/build)
+    endif()
+    if (MSVC)
+        # This is kind of ugly but we can assume zlib location with Windows deps
+        set(ZZIPLIB_LIBRARY_DIRS ${ZZIPLIB_LIBRARY_DIRS} ${ZZIPLIB_HOME}/../zlib/build/lib)
         set(ZZIPLIB_LIBRARIES optimized zziplibstatic zlibstatic debug zziplibstaticd zlibstaticd)
+    elseif(ANDROID)
+        set(ZZIPLIB_LIBRARIES zziplibstatic z)
     else()
         find_path(ZZIPLIB_INCLUDE_DIRS NAMES zzip/zzip.h)
         find_library(ZZIPLIB_LIBRARIES NAMES libzzip.so)
