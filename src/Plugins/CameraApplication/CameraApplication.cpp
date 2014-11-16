@@ -13,14 +13,20 @@
 #include "Math/float3.h"
 #include "Math/MathFunc.h"
 
-#include <Input.h>
 #include <InputEvents.h>
+#include <ResourceCache.h>
+#include <ProcessUtils.h>
+#include <XMLFile.h>
+#include <UI/UI.h>
+#include <UI/UIEvents.h>
+#include <UI/UIElement.h>
 
 namespace Tundra
 {
 
 CameraApplication::CameraApplication(Framework* owner) :
-    IModule("CameraApplication", owner)
+    IModule("CameraApplication", owner),
+    joystickId_(-1)
 {
 }
 
@@ -36,6 +42,7 @@ void CameraApplication::Initialize()
 {
     // Connect to scene change signals.
     framework->Scene()->SceneCreated.Connect(this, &CameraApplication::OnSceneCreated);
+    framework->Scene()->SceneAboutToBeRemoved.Connect(this, &CameraApplication::OnSceneAboutToBeRemoved);
 }
 
 void CameraApplication::Uninitialize()
@@ -47,7 +54,7 @@ void CameraApplication::Update(float frameTime)
     Entity* cameraEntity = framework->Renderer()->MainCamera();
     if (cameraEntity)
         MoveCamera(cameraEntity, frameTime);
-    else if (lastScene)
+    else if (lastScene_)
         CreateCamera();
 }
 
@@ -57,18 +64,35 @@ void CameraApplication::OnSceneCreated(Scene *scene, AttributeChange::Type)
         return;
 
     // Remember this scene for camera creation on the next update
-    lastScene = scene;
+    lastScene_ = scene;
+
+    if ((Urho3D::GetPlatform() == "Android" || Urho3D::GetPlatform() == "iOS") && joystickId_ < 0)
+    {
+        Urho3D::XMLFile *layout = GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("UI/ScreenJoystick.xml");
+        Urho3D::XMLFile *style = GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("UI/DefaultStyle.xml");
+        joystickId_ = GetSubsystem<Urho3D::Input>()->AddScreenJoystick(layout, style);
+        GetSubsystem<Urho3D::Input>()->SetTouchEmulation(true);
+    }
+}
+
+void CameraApplication::OnSceneAboutToBeRemoved(Scene *scene, AttributeChange::Type)
+{
+    if (joystickId_ >= 0 && lastScene_ && scene == lastScene_.Get())
+    {
+        GetSubsystem<Urho3D::Input>()->RemoveScreenJoystick(joystickId_);
+        joystickId_ = -1;
+    }
 }
 
 void CameraApplication::CreateCamera()
 {
-    if (!lastScene)
+    if (!lastScene_)
         return;
 
     StringVector components;
     components.Push("Placeable");
     components.Push("Camera");
-    Entity* cameraEntity = lastScene->CreateEntity(0, components, AttributeChange::LocalOnly, false, false, true);
+    Entity* cameraEntity = lastScene_->CreateEntity(0, components, AttributeChange::LocalOnly, false, false, true);
     if (!cameraEntity)
     {
         LogError("CameraApplication::CreateCamera: failed to create camera entity");
@@ -84,7 +108,7 @@ void CameraApplication::CreateCamera()
     renderer->SetMainCamera(cameraEntity);
 
     // If scene has an entity called FreeLookCameraSpawnPos, copy its transform
-    Entity* cameraPosEntity = lastScene->EntityByName("FreeLookCameraSpawnPos");
+    Entity* cameraPosEntity = lastScene_->EntityByName("FreeLookCameraSpawnPos");
     if (cameraPosEntity)
     {
         Placeable* cameraPosPlaceable = cameraPosEntity->Component<Placeable>();
@@ -117,6 +141,20 @@ void CameraApplication::MoveCamera(Entity* cameraEntity, float frameTime)
         t.rot.y -= input->GetMouseMoveX() * cameraRotateSpeed;
         t.rot.x = Clamp(t.rot.x, -90.0f, 90.0f);
         changed = true;
+    }
+    else if (input->GetNumTouches() > 0)
+    {
+        // Find a touch point that is not on top of the movement joystick button.
+        for (int ti=0, len=input->GetNumTouches(); ti<len; ++ti)
+        {
+            Urho3D::TouchState *touch = input->GetTouch(ti);
+            if (!touch->touchedElement_.Get())
+            {
+                t.rot -= (float3(static_cast<float>(touch->delta_.y_), static_cast<float>(touch->delta_.x_), 0.f) * cameraRotateSpeed);;
+                changed = true;
+                break;
+            }
+        }
     }
 
     float3 moveVector = float3::zero;

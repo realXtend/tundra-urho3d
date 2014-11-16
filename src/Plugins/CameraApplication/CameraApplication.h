@@ -7,6 +7,13 @@
 #include "IAttribute.h"
 #include "AttributeChangeType.h"
 
+#include <Input.h>
+
+namespace Urho3D
+{
+    class UIElement;
+}
+
 namespace Tundra
 {
 
@@ -23,19 +30,21 @@ public:
     void Update(float frametime) override;
 
 private:
-    /// React to scene creation.
+    /// React to scene creation and removal.
     void OnSceneCreated(Scene *scene, AttributeChange::Type change);
+    void OnSceneAboutToBeRemoved(Scene *scene, AttributeChange::Type change);
 
     /// Create camera to the last created scene
     void CreateCamera();
     /// Move camera by mouse & keys
     void MoveCamera(Entity* cameraEntity, float frametime);
 
-    SceneWeakPtr lastScene;
-
     void Load() override;
     void Initialize() override;
     void Uninitialize() override;
+
+    SceneWeakPtr lastScene_;
+    SDL_JoystickID joystickId_;
 };
 
 }

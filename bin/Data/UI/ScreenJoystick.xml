@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<element>
+    <attribute name="Name" value="ScreenJoystick" />
+    <attribute name="Size" value="800 600" />
+    <element type="Button">
+        <attribute name="Name" value="Hat0" />
+        <attribute name="Position" value="-30 40" />
+        <attribute name="Size" value="256 256" />
+        <attribute name="Vert Alignment" value="Top" />
+        <attribute name="Texture" value="Texture2D;Textures/TouchInput.png" />
+        <attribute name="Image Rect" value="0 256 256 256" />
+        <attribute name="Hover Image Offset" value="0 0" />
+        <attribute name="Pressed Image Offset" value="0 -256" />
+        <attribute name="Opacity" value="0.5" />
+        <element type="Text">
+            <attribute name="Name" value="KeyBinding" />
+            <attribute name="Text" value="WSAD" />
+        </element>
+    </element>
+</element>

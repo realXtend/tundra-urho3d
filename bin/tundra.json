@@ -8,5 +8,8 @@
 			"CameraApplication",
 			"SceneInteract"
 		]
-    }
+    },
+
+    { "--loglevel" : "debug" },
+    { "--file" : "http://tundra-meshmoon-3c8665.s3.amazonaws.com/Unity-Testing/robot-lab-webrocket.txml" }
 ]
