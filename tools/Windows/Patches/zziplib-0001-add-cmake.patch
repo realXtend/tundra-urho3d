@@ -2,7 +2,7 @@ Index: CMakeLists.txt
 ===================================================================
 --- CMakeLists.txt	(revision 0)
 +++ CMakeLists.txt	(working copy)
-@@ -0,0 +1,64 @@
+@@ -0,0 +1,66 @@
 +cmake_minimum_required(VERSION 2.4.4)
 +
 +project(zziplib C)
@@ -19,6 +19,8 @@ Index: CMakeLists.txt
 +    set(CMAKE_DEBUG_POSTFIX "d")
 +    add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
 +    add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
++endif()
++if(MSVC OR ANDROID)
 +    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 +endif()
 +

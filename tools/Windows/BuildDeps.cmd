@@ -4,6 +4,20 @@ echo.
 :: Enable the delayed environment variable expansion needed in VSConfig.cmd.
 setlocal EnableDelayedExpansion
 
+:: NUMBER_OF_PROCESSORS usage can be overridden with TUNDRA_DEPS_CPUS env variable.
+IF "%TUNDRA_DEPS_CPUS%"=="" (
+    set TUNDRA_DEPS_CPUS=%NUMBER_OF_PROCESSORS%
+)
+IF "%TUNDRA_ANDROID%"=="" (
+    set TUNDRA_ANDROID=0
+)
+IF "%TUNDRA_INIT_MSVC_ENV%"=="" (
+    set TUNDRA_INIT_MSVC_ENV=TRUE
+)
+
+:: Android cross compilation can jump over the Visual Studio env init
+if %TUNDRA_INIT_MSVC_ENV%==FALSE GOTO :SKIP_MSVC_ENV_INIT
+
 :: Make sure we're running in Visual Studio Command Prompt
 IF "%VSINSTALLDIR%"=="" (
    %TOOLS%\Utils\cecho {0C}Batch file not executed from Visual Studio Command Prompt - cannot proceed!{# #}{\n}
@@ -49,9 +63,6 @@ IF %BUILD_TYPE%==Debug (
     set POSTFIX_UNDERSCORE_DEBUG=_debug
 )
 
-:: Make sure deps folder exists.
-IF NOT EXIST "%DEPS%". mkdir "%DEPS%"
-
 :: Print user-defined variables
 cecho {F0}This script fetches and builds all Tundra dependencies{# #}{\n}
 echo.
@@ -69,8 +80,7 @@ IF %BUILD_TYPE%==MinSizeRel cecho {0E}     WARNING: MinSizeRel build can suffer 
 
 :: Print scripts usage information
 cecho {0A}Requirements for a successful execution:{# #}{\n}
-echo    1. Install Git and make sure 'git' is accessible from PATH.
-echo     - http://code.google.com/p/tortoisegit/
+echo    1. Install and make sure 'git' and 'svn' are accessible from PATH.
 echo    2. Install DirectX SDK June 2010.
 echo     - http://www.microsoft.com/download/en/details.aspx?id=6812
 echo    3. Install CMake and make sure 'cmake' is accessible from PATH.
@@ -84,10 +94,18 @@ cecho {0E}      if wanting to build Tundra as a 64-bit application.{# #}{\n}
 echo    6. Install Windows SDK.
 echo     - http://www.microsoft.com/download/en/details.aspx?id=8279
 echo    7. Execute this file from Visual Studio 2010/2012/2013 ^(x64^) Command Prompt.
-
+echo.
 echo If you are not ready with the above, press Ctrl-C to abort!
 pause
 echo.
+
+:SKIP_MSVC_ENV_INIT
+
+:: Make sure deps folder exists.
+IF NOT EXIST "%DEPS%". mkdir "%DEPS%"
+
+
+
 
 :::::::::::::::::::::::: MathGeoLib
 
@@ -102,18 +120,30 @@ IF NOT EXIST "%DEPS%\MathGeoLib\". (
     git pull
 )
 
+:: pre build
+
 cecho {0D}Running CMake for MathGeoLib.{# #}{\n}
-cmake . -G %GENERATOR% -DCMAKE_DEBUG_POSTFIX=_d -DCMAKE_INSTALL_PREFIX=%DEPS%\MathGeoLib\build
+cmake . -G %GENERATOR% %TUNDRA_TOOLCHAIN% ^
+        -DANDROID=%TUNDRA_ANDROID% ^
+        -DCMAKE_DEBUG_POSTFIX=_d  ^
+        -DCMAKE_INSTALL_PREFIX=%DEPS%\MathGeoLib\build
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+:: build
 
 cecho {0D}Building %BUILD_TYPE% MathGeoLib. Please be patient, this will take a while.{# #}{\n}
-MSBuild MathGeoLib.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
+IF %TUNDRA_ANDROID%==0 (
+    MSBuild MathGeoLib.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%TUNDRA_DEPS_CPUS%
+    IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+    MSBuild INSTALL.%VCPROJ_FILE_EXT% /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%TUNDRA_DEPS_CPUS%
+) ELSE (
+    make -j%TUNDRA_DEPS_CPUS%
+    make install
+)
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
-:: Install the correct build type into MathGeoLib/build
-cecho {0D}Installing %BUILD_TYPE% MathGeoLib{# #}{\n}
-MSBuild INSTALL.%VCPROJ_FILE_EXT% /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
-IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+
 
 :::::::::::::::::::::::: kNet
 
@@ -132,14 +162,23 @@ IF NOT EXIST "%DEPS%\kNet\". (
 :: pre build
 
 cecho {0D}Running CMake for kNet.{# #}{\n}
-cmake . -G %GENERATOR% -DCMAKE_DEBUG_POSTFIX=_d
+cmake . -G %GENERATOR% %TUNDRA_TOOLCHAIN% ^
+        -DANDROID=%TUNDRA_ANDROID% ^
+        -DCMAKE_DEBUG_POSTFIX=_d
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
 :: build
 
 cecho {0D}Building %BUILD_TYPE% kNet. Please be patient, this will take a while.{# #}{\n}
-MSBuild kNet.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
+IF %TUNDRA_ANDROID%==0 (
+    MSBuild kNet.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%TUNDRA_DEPS_CPUS%
+) ELSE (
+    make -j%TUNDRA_DEPS_CPUS%
+)
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+
+
 
 :::::::::::::::::::::::: Urho3D engine
 
@@ -165,20 +204,47 @@ IF %TARGET_ARCH%==x64 (
 ) ELSE (
     set URHO3D_64BIT=0
 )
-cmake ../Source -G %GENERATOR% -DURHO3D_LIB_TYPE=SHARED -DURHO3D_64BIT=%URHO3D_64BIT% -DURHO3D_ANGELSCRIPT=0 -DURHO3D_LUA=0 -DURHO3D_TOOLS=0 -DURHO3D_PHYSICS=0 -DURHO3D_NETWORK=0 
+
+set URHO_CMAKE_EXTRAS=
+set URHO_CMAKE_RELATIVE_DIR=..\Source
+IF %TUNDRA_ANDROID%==1 (
+    cd ..\Source\Android
+    set URHO_CMAKE_RELATIVE_DIR=..
+    set URHO_CMAKE_EXTRAS=-DLIBRARY_OUTPUT_PATH_ROOT=.
+)
+
+cmake %URHO_CMAKE_RELATIVE_DIR% ^
+    -G %GENERATOR% %TUNDRA_TOOLCHAIN% ^
+    -DANDROID=%TUNDRA_ANDROID% ^
+    -DURHO3D_LIB_TYPE=SHARED ^
+    -DURHO3D_64BIT=%URHO3D_64BIT% ^
+    -DURHO3D_ANGELSCRIPT=0 ^
+    -DURHO3D_LUA=0 ^
+    -DURHO3D_TOOLS=0 ^
+    -DURHO3D_PHYSICS=0 ^
+    -DURHO3D_NETWORK=0 %URHO_CMAKE_EXTRAS%
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
 :: build
 
 cecho {0D}Building %BUILD_TYPE% Urho3D. Please be patient, this will take a while.{# #}{\n}
-MSBuild Urho3D.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
+IF %TUNDRA_ANDROID%==0 (
+    MSBuild Urho3D.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%TUNDRA_DEPS_CPUS%
+) ELSE (
+    make -j%TUNDRA_DEPS_CPUS%
+)
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
 :: deploy
 
-cecho {0D}Deploying Urho3D DLL to Tundra bin\ directory.{# #}{\n}
-copy /Y "%DEPS%\urho3D\Bin\*.dll" "%TUNDRA_BIN%"
+IF %TUNDRA_ANDROID%==0 (
+    cecho {0D}Deploying Urho3D DLL to Tundra bin\ directory.{# #}{\n}
+    copy /Y "%DEPS%\urho3D\Bin\*.dll" "%TUNDRA_BIN%"
+)
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+
+
 
 :::::::::::::::::::::::: gtest
 
@@ -189,58 +255,87 @@ IF NOT EXIST "%DEPS%\gtest\". (
     IF NOT EXIST "%DEPS%\gtest\.svn" GOTO :ERROR
 )
 
-:: pre build
-
 cd "%DEPS%\gtest"
 IF NOT EXIST "build" mkdir "build"
 cd build
 
-cecho {0D}Running CMake for Google C++ Testing Framework.{# #}{\n}
-cmake ../ -G %GENERATOR% -Dgtest_force_shared_crt=TRUE
+IF %TUNDRA_ANDROID%==0 (
+    cecho {0D}Running CMake for Google C++ Testing Framework.{# #}{\n}
+    cmake ../ -G %GENERATOR% -Dgtest_force_shared_crt=TRUE
+    IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+    cecho {0D}Building %BUILD_TYPE% Google C++ Testing Framework. Please be patient, this will take a while.{# #}{\n}
+    MSBuild gtest.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%TUNDRA_DEPS_CPUS%
+) ELSE (
+    cmake ../ -G %GENERATOR% %TUNDRA_TOOLCHAIN%
+    IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+    make -j%TUNDRA_DEPS_CPUS%
+)
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
-:: build
 
-cecho {0D}Building %BUILD_TYPE% Google C++ Testing Framework. Please be patient, this will take a while.{# #}{\n}
-MSBuild gtest.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
-IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
 
 :::::::::::::::::::::::: openssl
 :: For now only build openssl once in release mode
 
-IF NOT EXIST "%DEPS%\openssl\". (
-    cecho {0D}Cloning OpenSSL into "%DEPS%\openssl".{# #}{\n}
-    cd "%DEPS%"
-    git clone https://github.com/openssl/openssl.git openssl
-    IF NOT EXIST "%DEPS%\openssl\.git" GOTO :ERROR
-    cd openssl
-    git checkout OpenSSL_1_0_1j
-    IF NOT %ERRORLEVEL%==0 GOTO :ERROR
-
-    cd "%DEPS%\openssl"
-    IF NOT EXIST "build" mkdir "build"
-
-    cecho {0D}Running pre build for OpenSSL.{# #}{\n}
-    IF %TARGET_ARCH%==x64 (
-        perl Configure VC-WIN64A --prefix="%DEPS%\openssl\build"
-        call ms\do_win64a.bat
-    ) ELSE (
-        IF NOT EXIST "%TOOLS%\Utils\nasm-2.11.06". (
-            curl -o "%TOOLS%\Utils\nasm.zip" http://www.nasm.us/pub/nasm/releasebuilds/2.11.06/win32/nasm-2.11.06-win32.zip
-            7za x -y -o"%TOOLS%\Utils" "%TOOLS%\Utils\nasm.zip"
-            del /Q "%TOOLS%\Utils\nasm.zip"
-        )
-        set PATH=!PATH!;%TOOLS%\Utils\nasm-2.11.06
-        perl Configure VC-WIN32 --prefix="%DEPS%\openssl\build"
-        call ms\do_nasm.bat
+IF %TUNDRA_ANDROID%==0 (
+    IF NOT EXIST "%DEPS%\openssl\". (
+        cecho {0D}Cloning OpenSSL into "%DEPS%\openssl".{# #}{\n}
+        cd "%DEPS%"
+        git clone https://github.com/openssl/openssl.git openssl
+        IF NOT EXIST "%DEPS%\openssl\.git" GOTO :ERROR
+        cd openssl
+        git checkout OpenSSL_1_0_1j
+        IF NOT %ERRORLEVEL%==0 GOTO :ERROR
     )
-    IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+    IF NOT EXIST "%DEPS%\openssl\build". (
+        cd "%DEPS%\openssl"
+        IF NOT EXIST "build" mkdir "build"
 
-    cecho {0D}Building OpenSSL.{# #}{\n}
-    nmake -f ms\nt.mak
-    nmake -f ms\nt.mak install
-    IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+        cecho {0D}Running pre build for OpenSSL.{# #}{\n}
+        IF %TARGET_ARCH%==x64 (
+            perl Configure VC-WIN64A --prefix="%DEPS%\openssl\build"
+            call ms\do_win64a.bat
+        ) ELSE (
+            IF NOT EXIST "%TOOLS%\Utils\nasm-2.11.06". (
+                curl -o "%TOOLS%\Utils\nasm.zip" http://www.nasm.us/pub/nasm/releasebuilds/2.11.06/win32/nasm-2.11.06-win32.zip
+                7za x -y -o"%TOOLS%\Utils" "%TOOLS%\Utils\nasm.zip"
+                del /Q "%TOOLS%\Utils\nasm.zip"
+            )
+            set PATH=!PATH!;%TOOLS%\Utils\nasm-2.11.06
+            perl Configure VC-WIN32 --prefix="%DEPS%\openssl\build"
+            call ms\do_nasm.bat
+        )
+        IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+        cecho {0D}Building OpenSSL.{# #}{\n}
+        nmake -f ms\nt.mak
+        nmake -f ms\nt.mak install
+    )
+) ELSE (
+    IF NOT EXIST "%DEPS%\openssl\". (
+        cd "%DEPS%"
+        %TOOLS%\Utils\curl -o openssl-cmake-1.0.1e-src.tar.gz -L https://launchpad.net/openssl-cmake/1.0.1e/1.0.1e-1/+download/openssl-cmake-1.0.1e-src.tar.gz
+        7za e -y openssl-cmake-1.0.1e-src.tar.gz
+        7za x -y openssl-cmake-1.0.1e-src.tar
+        del /Q openssl-cmake-1.0.1e-src.tar.gz
+        del /Q openssl-cmake-1.0.1e-src.tar
+        ren openssl-cmake-1.0.1e-src openssl
+        IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+    )
+    IF NOT EXIST "%DEPS%\openssl\build". (
+        cd "%DEPS%/openssl"
+        cmake . -G %GENERATOR% %TUNDRA_TOOLCHAIN% ^
+            -DCMAKE_INSTALL_PREFIX=./build
+        make -j%TUNDRA_DEPS_CPUS%
+        make install
+    )
 )
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+
+
 
 :::::::::::::::::::::::: curl
 
@@ -252,6 +347,9 @@ IF NOT EXIST "%DEPS%\curl\". (
     cd curl
     git checkout curl-7_38_0
     IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+    IF %TUNDRA_ANDROID%==1 (
+        patch --strip=1 < %TOOLS%\Patches\android-curl-0001-hack-find-openssl.patch
+    )
 )
 
 cd "%DEPS%\curl"
@@ -260,24 +358,47 @@ cd build-src
 
 :: pre build
 
+set CURL_EXTRAS=-DOPENSSL_ROOT_DIR="%DEPS%\openssl\build"
+IF %TUNDRA_ANDROID%==1 (
+    :: Android build hacks around FindOpenSSL.cmake with above android-curl-0001-hack-find-openssl.patch
+    :: and defines all the needed values via cmd line.
+    set CURL_EXTRAS=-DOPENSSL_INCLUDE_DIR="%DEPS%\openssl\build\include" -DOPENSSL_LIBRARIES="%DEPS%\openssl\build\lib\libssl.a;%DEPS%\openssl\build\lib\libcrypto.a"
+)
+echo '%CURL_EXTRAS%'
+
 cecho {0D}Running CMake for Curl.{# #}{\n}
-cmake ../ -G %GENERATOR% ^
-    -DCMAKE_INSTALL_PREFIX="%DEPS%\curl\build" ^
+cmake ../ -G %GENERATOR% %TUNDRA_TOOLCHAIN% ^
     -DCMAKE_DEBUG_POSTFIX=_d ^
-    -DOPENSSL_ROOT_DIR="%DEPS%\openssl\build" ^
-    -DBUILD_CURL_EXE=OFF -DBUILD_CURL_TESTS=OFF -DCURL_STATICLIB=ON
+    -DCMAKE_INSTALL_PREFIX="%DEPS%\curl\build" ^
+    -DBUILD_CURL_EXE=OFF -DBUILD_CURL_TESTS=OFF -DCURL_STATICLIB=ON ^
+    %CURL_EXTRAS%
+if %TUNDRA_ANDROID%==1 (
+    cmake -C "%TOOLS%\Mods\android-curl-try-run-results.cmake" ../
+)
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
 :: build
+IF %TUNDRA_ANDROID%==0 (
+    cecho {0D}Building %BUILD_TYPE% Curl. Please be patient, this will take a while.{# #}{\n}
+    MSBuild CURL.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%TUNDRA_DEPS_CPUS%
+    IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+    MSBUILD INSTALL.vcxproj /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo
+) ELSE (
+    make -j%TUNDRA_DEPS_CPUS%
+    make install
+)
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+:: For convenience in Tundra cmake copy openssl static libs to curl lib dir
+copy /Y "%DEPS%\openssl\build\lib\*" "%DEPS%\curl\build\lib"
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
-cecho {0D}Building %BUILD_TYPE% Curl. Please be patient, this will take a while.{# #}{\n}
-MSBuild CURL.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
-IF NOT %ERRORLEVEL%==0 GOTO :ERROR
-MSBUILD INSTALL.vcxproj /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo
-copy /Y "%DEPS%\openssl\build\lib\*.lib" "%DEPS%\curl\build\lib"
-IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+
 
 :::::::::::::::::::::::: zlib
+:: Note that Android ships zlib in the system, no need to build it.
+
+IF %TUNDRA_ANDROID%==1 GOTO :SKIP_ZLIB
 
 IF NOT EXIST "%DEPS%\zlib\". (
     cecho {0D}Cloning zlib into "%DEPS%\zlib".{# #}{\n}
@@ -304,12 +425,20 @@ IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 :: build
 
 cecho {0D}Building %BUILD_TYPE% zlib. Please be patient, this will take a while.{# #}{\n}
-MSBuild zlib.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
+MSBuild zlib.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%TUNDRA_DEPS_CPUS%
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 MSBUILD INSTALL.vcxproj /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
+:SKIP_ZLIB
+
+
+
+
 :::::::::::::::::::::::: zziplib
+:: todo Cannot figure out how to build zziplib except to write a _config.h by hand
+:: cmake wont generate this file. ./configure would need to be ran on a shell that has CC CXX etc.
+:: configured correctly to the NDK. You could in theory run 'sh' shell to get a proper config.
 
 IF NOT EXIST "%DEPS%\zziplib\". (
     cecho {0D}Cloning zziplib into "%DEPS%\zziplib".{# #}{\n}
@@ -319,6 +448,10 @@ IF NOT EXIST "%DEPS%\zziplib\". (
     IF NOT %ERRORLEVEL%==0 GOTO :ERROR
     cd "%DEPS%\zziplib"
     svn patch %TOOLS%\Patches\zziplib-0001-add-cmake.patch
+
+    IF %TUNDRA_ANDROID%==1 (
+        copy /Y "%TOOLS%\Mods\android-zziplib-config.h" zzip\_config.h
+    )
     IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 )
 
@@ -328,16 +461,23 @@ cd build
 
 :: pre build
 
-cmake ../ -G %GENERATOR% ^
+cmake ../ -G %GENERATOR% %TUNDRA_TOOLCHAIN% ^
     -DCMAKE_DEBUG_POSTFIX=_d ^
     -DZLIB_ROOT="%DEPS%\zlib\build"
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
 :: build
 
-cecho {0D}Building %BUILD_TYPE% zziplib. Please be patient, this will take a while.{# #}{\n}
-MSBuild zziplib.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%NUMBER_OF_PROCESSORS%
+IF %TUNDRA_ANDROID%==0 (
+    cecho {0D}Building %BUILD_TYPE% zziplib. Please be patient, this will take a while.{# #}{\n}
+    MSBuild zziplib.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%TUNDRA_DEPS_CPUS%
+) ELSE (
+    make -j%TUNDRA_DEPS_CPUS%
+)
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+
+
 
 :::::::::::::::::::::::: All done
 
