@@ -151,8 +151,9 @@ String LocalEpochToHttpDate(time_t epoch)
     return String(buf);
 }
 
+/* Tundra note: Following ifdef block/function was copied from
+   http://src.chromium.org/svn/trunk/src/base/os_compat_android.cc */
 #if defined(ANDROID) && !defined(__LP64__)
-// Tundra node: Function copied from http://src.chromium.org/svn/trunk/src/base/os_compat_android.cc
 // 32-bit Android has only timegm64() and not timegm().
 // We replicate the behaviour of timegm() when the result overflows time_t.
 #include <time64.h>

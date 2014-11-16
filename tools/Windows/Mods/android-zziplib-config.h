@@ -23,9 +23,7 @@
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'. */
 /* #undef ZZIP_HAVE_DIRENT_H */
-//#ifndef ZZIP_HAVE_DIRENT_H 
-//#define ZZIP_HAVE_DIRENT_H  0 
-//#endif
+// Tundra note: Linux has this header but it seems Android does not.
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #ifndef ZZIP_HAVE_DLFCN_H 
