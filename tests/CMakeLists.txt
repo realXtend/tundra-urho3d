@@ -1,4 +1,18 @@
 
+macro(configure_gtest)
+    if ("${GTEST_HOME}" STREQUAL "")
+        message(FATAL_ERROR "GTEST_HOME not set")
+    endif()
+    set(GTEST_INCLUDE_DIRS ${GTEST_HOME}/include)
+    set(GTEST_LIBRARY_DIRS ${GTEST_HOME}/build)
+    set(GTEST_LIBRARIES gtest)
+    if (NOT MSVC)
+        set(GTEST_LIBRARIES ${GTEST_LIBRARIES} pthread)
+    endif()
+endmacro (configure_gtest)
+
+###############################################################################
+
 configure_gtest()
 
 set (PROJECT_TYPE "Tests")
