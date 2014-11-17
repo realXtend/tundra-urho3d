@@ -44,6 +44,8 @@ or use the batch files in `tools\Windows`.
 
 ### Windows, targeting Android
 
+This is a quick summary. For more details refer to the [wiki page](https://github.com/realXtend/tundra-urho3d/wiki/Android:-Cross-compiling-with-Windows).
+
 1. Navigate to `<Tundra-Urho3D>\tools\Windows\`
 2. Run `BuildAndroidDeps.cmd`. The build script will print information what you need in order to proceed, follow the
    instructions carefully. You can abort the script with Ctrl+C at this point and setup your environment.
