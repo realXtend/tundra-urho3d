@@ -71,7 +71,6 @@ void CameraApplication::OnSceneCreated(Scene *scene, AttributeChange::Type)
         Urho3D::XMLFile *layout = GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("UI/ScreenJoystick.xml");
         Urho3D::XMLFile *style = GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("UI/DefaultStyle.xml");
         joystickId_ = GetSubsystem<Urho3D::Input>()->AddScreenJoystick(layout, style);
-        GetSubsystem<Urho3D::Input>()->SetTouchEmulation(true);
     }
 }
 
