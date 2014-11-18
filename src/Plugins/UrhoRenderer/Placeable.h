@@ -301,6 +301,9 @@ private:
 
     /// Respond to ToggleEntity action
     void OnToggleVisibilityTriggered(const StringVector&);
+
+    /// Reparent to another Urho scene node without adjusting local transform. Called internally
+    void Reparent(Urho3D::Node* newParent);
     
     /// Graphics world ptr
     GraphicsWorldWeakPtr world_;

@@ -447,7 +447,7 @@ void Placeable::AttachNode()
         if (parentEntity == ownEntity)
         {
             // If we refer to self, attach to the root
-            sceneNode_->SetParent(root_node);
+            Reparent(root_node);
             attached_ = true;
             return;
         }
@@ -465,7 +465,8 @@ void Placeable::AttachNode()
 
                     if (bone)
                     {
-                        sceneNode_->SetParent(bone);
+                        Reparent(bone);
+                        LogInfo("Attaching to bone named " + bone->GetName());
                         parentMesh_ = parentMesh;
                         parentMesh->MeshAboutToBeDestroyed.Connect(this, &Placeable::OnParentMeshDestroyed);
 
@@ -508,7 +509,7 @@ void Placeable::AttachNode()
                     if (parentCheck == this)
                     {
                         LogWarning("Placeable::AttachNode: Cyclic scene node parenting attempt detected! Parenting to the scene root node instead.");
-                        sceneNode_->SetParent(root_node);
+                        Reparent(root_node);
                         attached_ = true;
                         return;
                     }
@@ -516,7 +517,7 @@ void Placeable::AttachNode()
                 }
 
                 parentPlaceable_ = parentPlaceable;
-                sceneNode_->SetParent(parentPlaceable_->UrhoSceneNode());
+                Reparent(parentPlaceable_->UrhoSceneNode());
                 parentPlaceable_->ChildAttached(ComponentPtr(this));
                 
                 // Connect to destruction of the placeable to be able to detach gracefully
@@ -539,7 +540,7 @@ void Placeable::AttachNode()
         }
     }
         
-    sceneNode_->SetParent(root_node);
+    Reparent(root_node);
     attached_ = true;
 }
 
@@ -559,6 +560,8 @@ void Placeable::DetachNode()
     if (!attached_)
         return;
     
+    LogInfo("Detaching scene node");
+
     // Three possible cases
     // 1) attached to scene root node
     // 2) attached to another scene node
@@ -576,7 +579,7 @@ void Placeable::DetachNode()
     }
 
     /// \todo Cannot actually detach from scene as that would cause destruction of the scene node, just move to scene root
-    sceneNode_->SetParent(world->UrhoScene());
+    Reparent(world->UrhoScene());
 
     attached_ = false;
 }
@@ -766,6 +769,14 @@ void Placeable::OnHideTriggered(const StringVector&)
 void Placeable::OnToggleVisibilityTriggered(const StringVector&)
 {
     ToggleVisibility();
+}
+
+void Placeable::Reparent(Urho3D::Node* newParent)
+{
+    if (!sceneNode_ || !newParent || newParent == sceneNode_->GetParent())
+        return;
+    // AddChild removes from previous parent and adds to new, without changing local transform
+    newParent->AddChild(sceneNode_);
 }
 
 }
