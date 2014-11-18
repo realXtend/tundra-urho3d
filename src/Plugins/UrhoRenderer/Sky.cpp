@@ -11,7 +11,7 @@
 #include "Scene/Scene.h"
 #include "LoggingFunctions.h"
 #include "IAssetTransfer.h"
-
+#include "BinaryAsset.h"
 
 #include <Engine/Scene/Scene.h>
 #include <Node.h>
@@ -75,6 +75,7 @@ Sky::~Sky()
         urhoNode_->Remove();
         urhoNode_.Reset();
     }
+    material_.Reset();
 }
 
 void Sky::UpdateSignals()
@@ -142,57 +143,61 @@ void Sky::Update()
 
     urhoNode_->SetScale(distance.Get());
     
-    // Set material
-    IMaterialAsset *material = dynamic_cast<IMaterialAsset*>(materialAsset_->Asset().Get());
-    if (material && material->IsLoaded())
-        urhoNode_->GetComponent<Urho3D::Skybox>()->SetMaterial(material->UrhoMaterial());
-    else
+    if (material_ != nullptr)
     {
-        Vector<SharedPtr<Urho3D::Image>> images(6);
-        Vector<AssetPtr> textureAssets = textureRefListListener_->Assets();
-        int numLoadedImages = 0;
-        for(uint mi=0; mi<textureAssets.Size(); ++mi)
+        // Use material as is
+        urhoNode_->GetComponent<Urho3D::Skybox>()->SetMaterial(material_->UrhoMaterial());
+        return;
+    }
+
+    Vector<SharedPtr<Urho3D::Image>> images(6);
+    Vector<AssetPtr> textureAssets = textureRefListListener_->Assets();
+    int numLoadedImages = 0;
+    for(uint mi=0; mi<textureAssets.Size(); ++mi)
+    {
+        AssetPtr &TextureAssetPtr = textureAssets[mi];
+        BinaryAsset *binaryAsset = dynamic_cast<BinaryAsset*>(TextureAssetPtr.Get());
+        TextureAsset *textureAsset = dynamic_cast<TextureAsset*>(TextureAssetPtr.Get());
+        if ((textureAsset || binaryAsset) && TextureAssetPtr->IsLoaded())
         {
-            AssetPtr &TextureAssetPtr = textureAssets[mi];
-            TextureAsset *textureAsset = dynamic_cast<TextureAsset*>(TextureAssetPtr.Get());
-            if (textureAsset && textureAsset->IsLoaded())
-            {
-                SharedPtr<Urho3D::Image> image = SharedPtr<Urho3D::Image>(new Urho3D::Image(GetContext()));
-                Vector<u8> data;
-                if (!LoadFileToVector(textureAsset->DiskSource(), data))
-                    continue;
+            SharedPtr<Urho3D::Image> image = SharedPtr<Urho3D::Image>(new Urho3D::Image(GetContext()));
+            Vector<u8> data;
+            if (binaryAsset)
+                data = binaryAsset->data;
+            ///\todo Loading raw image data from disksource leaves an extra GPU texture resource unused.
+            else if (!LoadFileToVector(textureAsset->DiskSource(), data))
+                continue;
 
-                Urho3D::MemoryBuffer imageBuffer(&data[0], data.Size());
-                if (!image->Load(imageBuffer))
-                    continue;
+            Urho3D::MemoryBuffer imageBuffer(&data[0], data.Size());
+            if (!image->Load(imageBuffer))
+                continue;
 
-                images[mi] = image;
-                numLoadedImages++;
-            }
+            images[mi] = image;
+            numLoadedImages++;
         }
+    }
 
-        if (numLoadedImages == 6)
-        {
-            SharedPtr<Urho3D::TextureCube> textureCube = SharedPtr<Urho3D::TextureCube>(new Urho3D::TextureCube(GetContext()));
-            const Urho3D::CubeMapFace faces[6] = { Urho3D::FACE_POSITIVE_X, Urho3D::FACE_NEGATIVE_X, Urho3D::FACE_POSITIVE_Y, Urho3D::FACE_NEGATIVE_Y, Urho3D::FACE_POSITIVE_Z, Urho3D::FACE_NEGATIVE_Z };
-            const int faceOrder[6] = { 3, 2, 4, 5, 0, 1 };
+    if (numLoadedImages == 6)
+    {
+        SharedPtr<Urho3D::TextureCube> textureCube = SharedPtr<Urho3D::TextureCube>(new Urho3D::TextureCube(GetContext()));
+        const Urho3D::CubeMapFace faces[6] = { Urho3D::FACE_POSITIVE_X, Urho3D::FACE_NEGATIVE_X, Urho3D::FACE_POSITIVE_Y, Urho3D::FACE_NEGATIVE_Y, Urho3D::FACE_POSITIVE_Z, Urho3D::FACE_NEGATIVE_Z };
+        const int faceOrder[6] = { 3, 2, 4, 5, 0, 1 };
 
-            for (size_t i=0 ; i<images.Size() ; ++i)
-                if (images[faceOrder[i]] != nullptr)
-                    textureCube->SetData(faces[i], images[faceOrder[i]]);
+        for (size_t i=0 ; i<images.Size() ; ++i)
+            if (images[faceOrder[i]] != nullptr)
+                textureCube->SetData(faces[i], images[faceOrder[i]]);
             
-            SharedPtr<Urho3D::Technique> technique = SharedPtr<Urho3D::Technique>(new Urho3D::Technique(GetContext()));
-            Urho3D::Pass* pass = technique->CreatePass("postopaque");
-            pass->SetDepthWrite(false);
-            pass->SetVertexShader("Skybox");
-            pass->SetPixelShader("Skybox");
-            SharedPtr<Urho3D::Material> material = SharedPtr<Urho3D::Material>(new Urho3D::Material(GetContext()));
-            material->SetCullMode(Urho3D::CULL_NONE);
-            material->SetTechnique(0, technique);
-            material->SetTexture(Urho3D::TU_DIFFUSE, textureCube);
+        SharedPtr<Urho3D::Technique> technique = SharedPtr<Urho3D::Technique>(new Urho3D::Technique(GetContext()));
+        Urho3D::Pass* pass = technique->CreatePass("postopaque");
+        pass->SetDepthWrite(false);
+        pass->SetVertexShader("Skybox");
+        pass->SetPixelShader("Skybox");
+        SharedPtr<Urho3D::Material> material = SharedPtr<Urho3D::Material>(new Urho3D::Material(GetContext()));
+        material->SetCullMode(Urho3D::CULL_NONE);
+        material->SetTechnique(0, technique);
+        material->SetTexture(Urho3D::TU_DIFFUSE, textureCube);
         
-            urhoNode_->GetComponent<Urho3D::Skybox>()->SetMaterial(material);
-        }
+        urhoNode_->GetComponent<Urho3D::Skybox>()->SetMaterial(material);
     }
 }
 
@@ -201,7 +206,22 @@ void Sky::OnMaterialAssetLoaded(AssetPtr asset)
     IMaterialAsset* mAsset = dynamic_cast<IMaterialAsset*>(asset.Get());
 
     if (mAsset)
-        Update();
+    {
+        material_.Reset();
+
+        if (mAsset->textures_.Size() >= 6)
+        {
+            AssetReferenceList list;
+            for (int i=0 ; i<6 ; ++i)
+                list.Append(mAsset->textures_[i].second_);
+
+            textureRefs.Set(list, AttributeChange::LocalOnly);
+        } else
+        {
+            material_ = Urho3D::DynamicCast<IMaterialAsset>(asset);
+            Update();
+        }
+    }
 }
 
 void Sky::OnTextureAssetRefsChanged(const AssetReferenceList &/*tRefs*/)

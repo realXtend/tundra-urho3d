@@ -74,6 +74,19 @@ void DefaultOgreMaterialProcessor::Convert(const Ogre::MaterialParser& src, Ogre
             String textureRef = tu->StringValue(Ogre::Material::TextureUnit::Texture, "");
             if (!textureRef.Empty())
                 dest->textures_.Push(Urho3D::MakePair((int)tuIndex, AssetReference(assetAPI->ResolveAssetRef(dest->Name(), textureRef), "Texture")));
+            
+            String cubeTextureRef = tu->StringValue(Ogre::Material::TextureUnit::CubicTexture, "");
+            if (!cubeTextureRef.Empty())
+            {
+                StringList refs = cubeTextureRef.Split(' ');
+                if (refs.Size() >= 6)
+                    for (uint j=0 ; j<6 ; ++j)
+                    {
+                        ///\todo Try to load as binary, but in some cases the asset may already exist as TextureAsset. This emits a warning.
+                        AssetReference assetReference = AssetReference(assetAPI->ResolveAssetRef(dest->Name(), refs[j]), "Binary");
+                        dest->textures_.Push(Urho3D::MakePair((int)tuIndex, assetReference));
+                    }
+            }
         }
     }
 

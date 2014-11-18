@@ -98,7 +98,8 @@ private:
     /// The Urho3D node the skybox is attached to
     SharedPtr<Urho3D::Node> urhoNode_;
 
-    String currentMaterial_; ///< Urho3D resource name for the currently used material.
+    /// Material. If material contains cube texture, use internal Urho skybox material, otherwise use this material as is.
+    MaterialAssetPtr material_;
     
     GraphicsWorldWeakPtr world_;
 };

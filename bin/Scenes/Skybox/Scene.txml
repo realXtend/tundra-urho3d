@@ -54,7 +54,7 @@
 	</entity>
 	<entity id="3" sync="true" temporary="false">
 		<component type="Sky" typeId="10" sync="true" temporary="false">
-			<attribute name="Texture" value="sky_front.dds;sky_back.dds;sky_left.dds;sky_right.dds;sky_top.dds;sky_bot.dds" />
+			<attribute name="Material" value="SkyBox.material" />
 			<attribute name="Distance" value="500" />
 			<attribute name="Orientation" value="0.000000 0.000000 0.000000 1.000000" />
 			<attribute name="Draw first" value="true" />

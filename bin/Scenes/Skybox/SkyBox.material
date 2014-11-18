@@ -1,0 +1,21 @@
+material RexSkyBox
+{
+	technique
+	{
+		pass
+		{
+			depth_write off
+			
+			diffuse 0 0 0
+			ambient 0 0 0
+			specular 0 0 0 0
+			emissive 1 1 1
+
+			texture_unit
+			{
+				cubic_texture sky_front.dds sky_back.dds sky_left.dds sky_right.dds sky_top.dds sky_bot.dds separateUV
+				tex_address_mode clamp
+			}
+		}
+	}
+}

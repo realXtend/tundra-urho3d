@@ -28,10 +28,12 @@ namespace Tundra
     class Camera;
     class TextureAsset;
     class IOgreMaterialProcessor;
+    class IMaterialAsset;
 
     typedef SharedPtr<GraphicsWorld> GraphicsWorldPtr;
     typedef WeakPtr<GraphicsWorld> GraphicsWorldWeakPtr;
     typedef SharedPtr<TextureAsset> TextureAssetPtr;
+    typedef SharedPtr<IMaterialAsset> MaterialAssetPtr;
 
     namespace Ogre
     {
