@@ -466,7 +466,6 @@ void Placeable::AttachNode()
                     if (bone)
                     {
                         Reparent(bone);
-                        LogInfo("Attaching to bone named " + bone->GetName());
                         parentMesh_ = parentMesh;
                         parentMesh->MeshAboutToBeDestroyed.Connect(this, &Placeable::OnParentMeshDestroyed);
 
@@ -560,8 +559,6 @@ void Placeable::DetachNode()
     if (!attached_)
         return;
     
-    LogInfo("Detaching scene node");
-
     // Three possible cases
     // 1) attached to scene root node
     // 2) attached to another scene node

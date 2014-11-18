@@ -52,8 +52,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Model.h>
 #include <Profiler.h>
 #include <MemoryBuffer.h>
+#include <VectorBuffer.h>
 #include <VertexBuffer.h>
 #include <IndexBuffer.h>
+#include <StringUtils.h>
 #include <Geometry.h>
 
 #include <cstring>
@@ -223,7 +225,7 @@ static const long              MSTREAM_OVERHEAD_SIZE   = sizeof(u16) + sizeof(ui
 
 static u32 currentLength;
 
-static void ReadMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
+static void ReadMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh, float version);
 static void ReadMeshLodInfo(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
 static void ReadMeshSkeletonLink(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
 static void ReadMeshBounds(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
@@ -238,11 +240,11 @@ static void ReadGeometryVertexDeclaration(Urho3D::Deserializer& stream, VertexDa
 static void ReadGeometryVertexElement(Urho3D::Deserializer& stream, VertexData *dest);
 static void ReadGeometryVertexBuffer(Urho3D::Deserializer& stream, VertexData *dest);
 static void ReadEdgeList(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
-static void ReadPoses(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
+static void ReadPoses(Urho3D::Deserializer& stream, Ogre::Mesh *mesh, float version);
 static void ReadPoseVertices(Urho3D::Deserializer& stream, Pose *pose);
-static void ReadAnimations(Urho3D::Deserializer& stream, Ogre::Mesh *mesh);
-static void ReadAnimation(Urho3D::Deserializer& stream, Animation *anim);
-static void ReadAnimationKeyFrames(Urho3D::Deserializer& stream, Animation *anim, VertexAnimationTrack *track);
+static void ReadAnimations(Urho3D::Deserializer& stream, Ogre::Mesh *mesh, float version);
+static void ReadAnimation(Urho3D::Deserializer& stream, Animation *anim, float version);
+static void ReadAnimationKeyFrames(Urho3D::Deserializer& stream, Animation *anim, VertexAnimationTrack *track, float version);
 
 static String ReadLine(Urho3D::Deserializer& stream)
 {
@@ -276,7 +278,7 @@ static void SkipBytes(Urho3D::Deserializer& stream, uint numBytes)
     stream.Seek(stream.GetPosition() + numBytes);
 }
 
-static void ReadMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
+static void ReadMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh, float version)
 {
     mesh->hasSkeletalAnimations = stream.ReadBool();
 
@@ -341,12 +343,12 @@ static void ReadMesh(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
                 }
                 case M_POSES:
                 {
-                    ReadPoses(stream, mesh);
+                    ReadPoses(stream, mesh, version);
                     break;
                 }
                 case M_ANIMATIONS:
                 {
-                    ReadAnimations(stream, mesh);
+                    ReadAnimations(stream, mesh, version);
                     break;
                 }
                 case M_TABLE_EXTREMES:
@@ -682,7 +684,7 @@ static void ReadEdgeList(Urho3D::Deserializer& stream, Ogre::Mesh * /*mesh*/)
     }
 }
 
-static void ReadPoses(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
+static void ReadPoses(Urho3D::Deserializer& stream, Ogre::Mesh *mesh, float version)
 {
     if (!stream.IsEof())
     {
@@ -692,7 +694,10 @@ static void ReadPoses(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
             Pose *pose = new Pose();
             pose->name = ReadLine(stream);
             pose->target = stream.ReadUShort();
-            pose->hasNormals = stream.ReadBool();
+            if (version >= 1.8f)
+                pose->hasNormals = stream.ReadBool();
+            else
+                pose->hasNormals = false;
 
             ReadPoseVertices(stream, pose);
             
@@ -729,7 +734,7 @@ static void ReadPoseVertices(Urho3D::Deserializer& stream, Pose *pose)
     }
 }
 
-static void ReadAnimations(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
+static void ReadAnimations(Urho3D::Deserializer& stream, Ogre::Mesh *mesh, float version)
 {
     if (!stream.IsEof())
     {
@@ -740,7 +745,7 @@ static void ReadAnimations(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
             anim->name = ReadLine(stream);
             anim->length = stream.ReadFloat();
             
-            ReadAnimation(stream, anim);
+            ReadAnimation(stream, anim, version);
 
             mesh->animations.Push(anim);
 
@@ -752,7 +757,7 @@ static void ReadAnimations(Urho3D::Deserializer& stream, Ogre::Mesh *mesh)
     }
 }
 
-static void ReadAnimation(Urho3D::Deserializer& stream, Animation *anim)
+static void ReadAnimation(Urho3D::Deserializer& stream, Animation *anim, float version)
 {
     if (!stream.IsEof())
     {
@@ -772,7 +777,7 @@ static void ReadAnimation(Urho3D::Deserializer& stream, Animation *anim)
             track.type = static_cast<VertexAnimationTrack::Type>(stream.ReadUShort());
             track.target = stream.ReadUShort();
 
-            ReadAnimationKeyFrames(stream, anim, &track);
+            ReadAnimationKeyFrames(stream, anim, &track, version);
             
             anim->tracks.Push(track);
 
@@ -784,7 +789,7 @@ static void ReadAnimation(Urho3D::Deserializer& stream, Animation *anim)
     }
 }
 
-static void ReadAnimationKeyFrames(Urho3D::Deserializer& stream, Animation *anim, VertexAnimationTrack *track)
+static void ReadAnimationKeyFrames(Urho3D::Deserializer& stream, Animation *anim, VertexAnimationTrack *track, float version)
 {
     if (!stream.IsEof())
     {
@@ -797,7 +802,9 @@ static void ReadAnimationKeyFrames(Urho3D::Deserializer& stream, Animation *anim
             {
                 MorphKeyFrame kf;
                 kf.timePos = stream.ReadFloat();
-                bool hasNormals = stream.ReadBool();
+                bool hasNormals = false;
+                if (version >= 1.8f)
+                    hasNormals = stream.ReadBool();
                 
                 uint vertexCount = anim->AssociatedVertexData(track)->count;
                 uint vertexSize = sizeof(float) * (hasNormals ? 6 : 3);
@@ -1158,14 +1165,9 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
     }
 
     /// @todo Check what we can actually support.
-    String version = ReadLine(buffer);
-    /*
-    if (version != MESH_VERSION_1_8)
-    {
-        LogError("OgreMeshAsset::DeserializeFromData: mesh version " + version + " not supported in " + Name());
-        return false;
-    }
-    */
+    String versionStr = ReadLine(buffer);
+    versionStr = versionStr.Substring(versionStr.Find('v') + 1);
+    float version = Urho3D::ToFloat(versionStr);
 
     id = ReadHeader(buffer);
     if (id != M_MESH)
@@ -1177,7 +1179,7 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
     SharedPtr<Ogre::Mesh> mesh(new Ogre::Mesh());
     try
     {
-        ReadMesh(buffer, mesh);
+        ReadMesh(buffer, mesh, version);
     }
     catch (std::exception& e)
     {
@@ -1193,6 +1195,16 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
     Vector<PODVector<uint> > allBoneMappings;
     PODVector<uint> sharedBoneMapping;
     SharedPtr<Urho3D::VertexBuffer> sharedVb = MakeVertexBuffer(GetContext(), mesh->sharedVertexData, bounds, sharedBoneMapping, boneBoundingBoxes);
+
+    Vector<SharedPtr<Urho3D::VertexBuffer> > vbs;
+    HashMap<int, int> poseVbMapping;
+    PODVector<unsigned> morphRangeStarts;
+    PODVector<unsigned> morphRangeCounts;
+    if (sharedVb)
+    {
+        vbs.Push(sharedVb);
+        poseVbMapping[0] = 0; // Shared VB is always first
+    }
 
     for (uint i = 0; i < subMeshCount; ++i)
     {
@@ -1211,7 +1223,19 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
         if (ib->GetIndexCount())
             ib->SetData(&subMesh->indexData->buffer[0]);
         geom->SetIndexBuffer(ib);
-        geom->SetVertexBuffer(0, subMesh->usesSharedVertexData ? sharedVb : MakeVertexBuffer(GetContext(), subMesh->vertexData, bounds, submeshBoneMapping, boneBoundingBoxes));
+        if (!subMesh->usesSharedVertexData)
+        {
+            SharedPtr<Urho3D::VertexBuffer> submeshVb = MakeVertexBuffer(GetContext(), subMesh->vertexData, bounds, submeshBoneMapping, boneBoundingBoxes);
+            geom->SetVertexBuffer(0, submeshVb);
+            poseVbMapping[i+1] = vbs.Size();
+            vbs.Push(submeshVb);
+        }
+        else
+        {
+            // When shared VB is used, it'll always be the first index
+            geom->SetVertexBuffer(0, sharedVb);
+        }
+
         geom->SetDrawRange(ConvertPrimitiveType(subMesh->operationType), 0, ib->GetIndexCount());
         allBoneMappings.Push(subMesh->usesSharedVertexData ? sharedBoneMapping : submeshBoneMapping);
         model->SetNumGeometryLodLevels(i, 1);
@@ -1221,7 +1245,129 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
 
     model->SetBoundingBox(bounds);
 
-    /// \todo Handle morphs
+    // Set initial inactive morph ranges. Will be clarified once morph poses are read in
+    Vector<Urho3D::ModelMorph> morphs;
+    for (uint i = 0; i < vbs.Size(); ++i)
+    {
+        morphRangeStarts.Push(0);
+        morphRangeCounts.Push(0);
+    }
+    for (uint i = 0; i < mesh->animations.Size(); ++i)
+    {
+        HashSet<uint> poseIndices;
+        Ogre::Animation* anim = mesh->animations[i];
+        for (uint t = 0; t < anim->tracks.Size(); ++t)
+        {
+            if (anim->tracks[t].type != Ogre::VertexAnimationTrack::VAT_POSE)
+                continue;
+            for (uint kf = 0; kf < anim->tracks[t].poseKeyFrames.Size(); ++kf)
+            {
+                for (uint r = 0; r < anim->tracks[t].poseKeyFrames[kf].references.Size(); ++r)
+                {
+                    // Take only full influences
+                    if (anim->tracks[t].poseKeyFrames[kf].references[r].influence > 0.999f && anim->tracks[t].poseKeyFrames[kf].references[r].index < mesh->poses.Size())
+                        poseIndices.Insert(anim->tracks[t].poseKeyFrames[kf].references[r].index);
+                }
+            }
+        }
+
+        if (poseIndices.Empty())
+            continue;
+
+        Urho3D::ModelMorph targetMorph;
+        targetMorph.name_ = anim->name;
+        targetMorph.nameHash_ = StringHash(targetMorph.name_);
+        targetMorph.weight_ = 0.0f;
+
+        for (auto it = poseIndices.Begin(); it != poseIndices.End(); ++it)
+        {
+            Ogre::Pose* pose = mesh->poses[*it];
+
+            // Destination vertex buffer index
+            if (poseVbMapping.Find(pose->target) == poseVbMapping.End())
+            {
+                LogWarning("OgreMeshAsset::DeserializeFromData: found pose referring to unknown vertex buffer target");
+                continue;
+            }
+            
+            uint dest = poseVbMapping[pose->target];
+            if (dest >= vbs.Size())
+            {
+                LogWarning("OgreMeshAsset::DeserializeFromData: found pose referring to out-of-range vertex buffer target");
+                continue;
+            }
+
+            Urho3D::VertexBufferMorph bufferMorph;
+            Urho3D::VectorBuffer morphData;
+            bufferMorph.elementMask_ = Urho3D::MASK_POSITION;
+            if (pose->hasNormals)
+                bufferMorph.elementMask_ |= Urho3D::MASK_NORMAL;
+            bool hasOutOfRangeVertices = false;
+            uint goodVertices = 0;
+
+            auto v = pose->vertices.Begin();
+            while (v != pose->vertices.End())
+            {
+                if (v->first_ < vbs[dest]->GetVertexCount())
+                {
+                    morphData.WriteUInt(v->first_);
+                    morphData.WriteVector3(v->second_.offset);
+                    if (pose->hasNormals)
+                        morphData.WriteVector3(v->second_.normal);
+    
+                    if (!morphRangeCounts[dest])
+                    {
+                        // Define initial morph vertex range
+                        morphRangeStarts[dest] = v->first_;
+                        morphRangeCounts[dest] = 1;
+                    }
+                    else
+                    {
+                        // Expand morph vertex range
+                        uint last = morphRangeStarts[dest] + morphRangeCounts[dest];
+    
+                        if (v->first_ < morphRangeStarts[dest])
+                        {
+                            morphRangeStarts[dest] = v->first_;
+                            morphRangeCounts[dest] = last - morphRangeStarts[dest];
+                        }
+                        else if (v->first_ > last)
+                        {
+                            last = v->first_ + 1;
+                            morphRangeCounts[dest] = last - morphRangeStarts[dest];
+                        }
+                    }
+
+                    ++goodVertices;
+                }
+                else
+                    hasOutOfRangeVertices = true;
+                
+                ++v;
+            }
+
+            if (hasOutOfRangeVertices)
+                LogWarning("OgreMeshAsset::DeserializeFromData: pose had references to out-of-range vertices. These have been skipped.");
+            bufferMorph.dataSize_ = morphData.GetSize();
+            bufferMorph.vertexCount_ = goodVertices;
+            if (bufferMorph.dataSize_)
+            {
+                bufferMorph.morphData_ = Urho3D::SharedArrayPtr<unsigned char>(new unsigned char[bufferMorph.dataSize_]);
+                /// \todo Build the data directly to the final array instead of copying
+                memcpy(bufferMorph.morphData_.Get(), morphData.GetData(), bufferMorph.dataSize_);
+            }
+            
+            targetMorph.buffers_[dest] = bufferMorph;
+        }
+
+        morphs.Push(targetMorph);
+    }
+
+    if (morphs.Size())
+        model->SetMorphs(morphs);
+
+    // Set the vertex buffers so that morph data copying will work correctly
+    model->SetVertexBuffers(vbs, morphRangeStarts, morphRangeCounts);
 
     assetAPI->AssetLoadCompleted(Name());
     return true;

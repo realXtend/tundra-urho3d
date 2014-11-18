@@ -299,7 +299,7 @@ struct PoseKeyFrame
 
     PoseRefList references;
 };
-typedef PODVector<PoseKeyFrame> PoseKeyFrameList;
+typedef Vector<PoseKeyFrame> PoseKeyFrameList;
 
 /// Ogre Morph Key Frame
 struct MorphKeyFrame

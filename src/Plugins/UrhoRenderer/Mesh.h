@@ -80,15 +80,55 @@ public:
     /// Should the mesh entity be created with instancing. Irrelevant in tundra-urho3d (depends automatically on geometry), but provided for network protocol compatibility
     Attribute<bool> useInstancing;
 
+    /// IComponent override, implemented to support old TXML with the "Mesh materials" attribute instead of "materialRefs"/"Material refs".
+    /// @todo 2014-10-17 This can be removed at some point when enough time has passed.
+    void DeserializeFrom(Urho3D::XMLElement& element, AttributeChange::Type change) override;
+
+    /// Set the weight (0.0 - 1.0) of a morph on the mesh
+    void SetMorphWeight(const String& morphName, float weight);
+    /// Return the weight of a morph on the mesh. Returns 0.0 if not found
+    float MorphWeight(const String& morphName) const;
+    /// Return names of all available morphs.
+    StringVector MorphNames() const;
+    
+    /// Returns the affine transform that maps from the local space of this mesh to the world space of the scene.
+    float3x4 LocalToWorld() const;
+
+    /// Returns the world space bounding box of this object.
+    /** @copydetails LocalAABB */
+    OBB WorldOBB() const;
+
+    /// Returns the local space bounding box of this object.
+    /** @copydetails LocalAABB */
+    OBB LocalOBB() const;
+
+    /// Returns the world space axis-aligned bounding box of this object.
+    /** @copydetails LocalAABB */
+    AABB WorldAABB() const;
+
+    /// Returns the local space axis-aligned bounding box of this object.
+    /** Precondition: a mesh asset must be loaded
+        @note For the sake of script-safety, a negatively infinite bounding box (AABB::SetNegativeInfinity or OBB::SetNegativeInfinity),
+        for which IsDegenerate == true and IsFinite == false, is returned instead of an uninitialized bounding box, if the preconditions are not met. */
+    AABB LocalAABB() const;
+
+    /// Returns whether the model asset is loaded.
+    bool HasMesh() const;
+
     /// Returns a bone scene node by name. If mesh is not skeletal, always returns null.
     Urho3D::Node* BoneNode(const String& boneName) const;
 
     /// Returns adjustment scene node (used for scaling/offset/orientation modifications)
     Urho3D::Node* AdjustmentSceneNode() const { return adjustmentNode_; }
 
-    /// IComponent override, implemented to support old TXML with the "Mesh materials" attribute instead of "materialRefs"/"Material refs".
-    /// @todo 2014-10-17 This can be removed at some point when enough time has passed.
-    void DeserializeFrom(Urho3D::XMLElement& element, AttributeChange::Type change) override;
+    /// Return the Urho mesh entity component.
+    Urho3D::AnimatedModel* UrhoMesh() const;
+
+    /// Return an animation by name from the skeleton, or null if not found.
+    Urho3D::Animation* AnimationByName(const String& name) const;
+
+    /// Return all animations contained by the skeleton.
+    StringVector AnimationNames() const;
 
     /// Emitted before the mesh is about to be destroyed
     Signal0<void> MeshAboutToBeDestroyed;
@@ -101,15 +141,6 @@ public:
 
     /// Signal is emitted when skeleton has successfully applied to entity.
     Signal0<void> SkeletonChanged;
-
-    /// Return the Urho mesh entity component.
-    Urho3D::AnimatedModel* UrhoMesh() const;
-
-    /// Return an animation by name from the skeleton, or null if not found.
-    Urho3D::Animation* AnimationByName(const String& name) const;
-
-    /// Return all animations contained by the skeleton.
-    StringVector AnimationNames() const;
 
 private:
     /// Called when the parent entity has been set.

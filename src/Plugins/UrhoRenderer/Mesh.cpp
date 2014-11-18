@@ -65,10 +65,79 @@ Mesh::~Mesh()
     }
 }
 
+float3x4 Mesh::LocalToWorld() const
+{
+    if (!adjustmentNode_)
+        return float3x4::identity;
+
+    return float3x4::FromTRS(adjustmentNode_->GetWorldPosition(), adjustmentNode_->GetWorldRotation(), adjustmentNode_->GetWorldScale());
+}
+
+OBB Mesh::WorldOBB() const
+{
+    OBB obb = LocalOBB();
+    obb.Transform(LocalToWorld());
+    return obb;
+}
+
+OBB Mesh::LocalOBB() const
+{
+    OBB obb(LocalAABB());
+    if (obb.IsDegenerate() || !obb.IsFinite())
+        obb.SetNegativeInfinity();
+    return obb;
+}
+
+AABB Mesh::WorldAABB() const
+{
+    AABB aabb = LocalAABB();
+    aabb.Transform(LocalToWorld());
+    return aabb;
+}
+
+AABB Mesh::LocalAABB() const
+{
+    if (mesh_)
+        return AABB(mesh_->GetBoundingBox());
+    else
+        return AABB(float3::inf, -float3::inf); // AABB::SetNegativeInfinity as one-liner
+}
+
+void Mesh::SetMorphWeight(const String& morphName, float weight)
+{
+    if (mesh_)
+        mesh_->SetMorphWeight(morphName, weight);
+}
+
+float Mesh::MorphWeight(const String& morphName) const
+{
+    return mesh_ ? mesh_->GetMorphWeight(morphName) : 0.0f;
+}
+
+StringVector Mesh::MorphNames() const
+{
+    StringVector ret;
+    if (mesh_)
+    {
+        const Vector<Urho3D::ModelMorph>& morphs = mesh_->GetMorphs();
+        for (uint i = 0; i < morphs.Size(); ++i)
+            ret.Push(morphs[i].name_);
+    }
+
+    return ret;
+}
+
+bool Mesh::HasMesh() const
+{
+    return mesh_ && mesh_->GetModel() != nullptr;
+}
+
 Urho3D::Node* Mesh::BoneNode(const String& name) const
 {
-    // When a skeletal mesh is created, the bone hierarchy will be under the adjustment node
-    return adjustmentNode_ ? adjustmentNode_->GetChild(name, true) : nullptr;
+    if (!mesh_)
+        return nullptr;
+    Urho3D::Bone* bone = mesh_->GetSkeleton().GetBone(name);
+    return bone ? bone->node_.Get() : nullptr;
 }
 
 void Mesh::DeserializeFrom(Urho3D::XMLElement& element, AttributeChange::Type change)
@@ -287,6 +356,17 @@ void Mesh::ApplyMesh()
     skeletalModel->SetSkeleton(sAsset->UrhoSkeleton());
     skeletalModel->SetGeometryBoneMappings(baseModel->GetGeometryBoneMappings());
     skeletalModel->SetBoundingBox(baseModel->GetBoundingBox());
+    /// \todo Add functionality in Urho to do this more conveniently
+    const Vector<SharedPtr<Urho3D::VertexBuffer> >& vertexBuffers = baseModel->GetVertexBuffers();
+    PODVector<unsigned> morphRangeStarts;
+    PODVector<unsigned> morphRangeCounts;
+    for (uint i = 0; i < vertexBuffers.Size(); ++i)
+    {
+        morphRangeStarts.Push(baseModel->GetMorphRangeStart(i));
+        morphRangeCounts.Push(baseModel->GetMorphRangeCount(i));
+    }
+    skeletalModel->SetVertexBuffers(vertexBuffers, morphRangeStarts, morphRangeCounts);
+    skeletalModel->SetMorphs(baseModel->GetMorphs());
 
     // The skeleton asset contains the bone hierarchy and transforms, but not correct bone bounding boxes. Set up these now
     Vector<Urho3D::Bone>& bones = skeletalModel->GetSkeleton().GetModifiableBones();
