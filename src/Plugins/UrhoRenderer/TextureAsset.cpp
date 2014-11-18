@@ -15,6 +15,8 @@
 #include <Texture2D.h>
 #include <Material.h>
 
+#include <algorithm>
+
 namespace Tundra
 {
 
