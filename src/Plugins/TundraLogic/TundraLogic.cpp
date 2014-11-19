@@ -148,6 +148,8 @@ bool TundraLogic::LoadScene(String filename, bool clearScene, bool useEntityIDsF
         return false;
     }
 
+    filename = framework->LookupRelativePath(filename);
+
     // If a scene does not exist yet for loading, create it now
     Scene *scene = framework->Scene()->MainCameraScene();
     if (!scene)

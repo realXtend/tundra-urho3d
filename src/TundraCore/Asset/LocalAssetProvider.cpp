@@ -226,7 +226,7 @@ LocalAssetStoragePtr LocalAssetProvider::AddStorageDirectory(String directory, S
     }
     directory = Urho3D::GetInternalPath(GuaranteeTrailingSlash(directory));
     if (!Urho3D::IsAbsolutePath(directory))
-        directory = GetSubsystem<Urho3D::FileSystem>()->GetCurrentDir() + directory;
+        directory = AbsoluteBaseDirectory() + directory;
 
     storageName = storageName.Trimmed();
     if (storageName.Empty())
@@ -405,10 +405,9 @@ AssetStoragePtr LocalAssetProvider::TryCreateStorage(HashMap<String, String> &st
     String protocolPath;
     AssetAPI::AssetRefType refType = AssetAPI::ParseAssetRef(storageParams["src"], 0, 0, &protocolPath, 0, 0, &path);
 
-    Urho3D::FileSystem* fileSystem = GetSubsystem<Urho3D::FileSystem>();
     if (refType == AssetAPI::AssetRefRelativePath)
     {
-        path = GuaranteeTrailingSlash(fileSystem->GetCurrentDir()) + path;
+        path = AbsoluteBaseDirectory() + path;
         refType = AssetAPI::AssetRefLocalPath;
     }
     if (refType != AssetAPI::AssetRefLocalPath)
@@ -442,7 +441,7 @@ LocalAssetStoragePtr LocalAssetProvider::FindStorageForPath(const String &path) 
 {
     String normalizedPath = Urho3D::GetInternalPath(GuaranteeTrailingSlash(path));
     if (!IsAbsolutePath(normalizedPath))
-        normalizedPath = GetSubsystem<Urho3D::FileSystem>()->GetCurrentDir() + normalizedPath;
+        normalizedPath = AbsoluteBaseDirectory() + normalizedPath;
 
     for(uint i = 0; i < storages.Size(); ++i)
         if (normalizedPath.Contains(GuaranteeTrailingSlash(storages[i]->directory)))
@@ -569,6 +568,17 @@ void LocalAssetProvider::CheckForPendingFileSystemChanges()
         }
     }
 }
+
+String LocalAssetProvider::AbsoluteBaseDirectory() const
+{
+    Urho3D::FileSystem* fileSystem = GetSubsystem<Urho3D::FileSystem>();
+#ifdef ANDROID
+    return GuaranteeTrailingSlash(fileSystem->GetProgramDir());
+#else
+    return GuaranteeTrailingSlash(fileSystem->GetCurrentDir());
+#endif
+}
+
 
 }
 

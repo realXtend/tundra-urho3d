@@ -76,6 +76,9 @@ private:
     /// Checks for pending file systems changes and updates 
     void CheckForPendingFileSystemChanges();
 
+    /// Return current directory for making local asset directories absolute if specified as relative. On Android this will refer to the apk instead of the actual current directory
+    String AbsoluteBaseDirectory() const;
+     
     Framework *framework;
     Vector<LocalAssetStoragePtr> storages;          ///< Asset directories to search, may be recursive or not
     Vector<AssetUploadTransferPtr> pendingUploads;  ///< The following asset uploads are pending to be completed by this provider.
