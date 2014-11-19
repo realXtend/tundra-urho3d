@@ -57,15 +57,16 @@ void DefaultOgreMaterialProcessor::Convert(const Ogre::MaterialParser& src, Ogre
         if (tu)
         {
             Urho3D::TextureUnit tuIndex = Urho3D::MAX_TEXTURE_UNITS;
-            if (tu->id.Empty() || tu->id.StartsWith("diffuse", false))
-            {
-                hasDiffuse = true;
-                tuIndex = Urho3D::TU_DIFFUSE;
-            }
-            else if (tu->id.StartsWith("normal", false))
+            if (tu->id.StartsWith("normal", false))
             {
                 hasNormal = true;
                 tuIndex = Urho3D::TU_NORMAL;
+            }
+            // The texture units may have various names. Interpret the first unknown as diffuse
+            else if (hasDiffuse == false || tu->id.StartsWith("diffuse", false))
+            {
+                hasDiffuse = true;
+                tuIndex = Urho3D::TU_DIFFUSE;
             }
 
             if (tuIndex == Urho3D::MAX_TEXTURE_UNITS)
