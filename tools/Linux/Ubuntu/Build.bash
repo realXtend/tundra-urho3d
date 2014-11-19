@@ -155,8 +155,7 @@ if [ $skip_deps = false ] ; then
         cmake .. \
             -DCMAKE_INSTALL_PREFIX=$DEPS \
             -DCMAKE_BUILD_TYPE=$build_type \
-            -DCMAKE_CXX_FLAGS="-fPIC" \
-            -DCMAKE_C_FLAGS="-fPIC"
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON
 
         make -j $num_cpu -S
         make install
@@ -178,7 +177,7 @@ if [ $skip_deps = false ] ; then
 
         cmake .. \
             -DCMAKE_BUILD_TYPE=$build_type \
-            -DCMAKE_CXX_FLAGS="-fPIC" \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DUSE_BOOST:BOOL=FALSE
 
         make -j $num_cpu -S
@@ -222,32 +221,31 @@ if [ $skip_deps = false ] ; then
     #### polarssl
     # alternative for openssl for curl that should allow static linking
     # but currently libpolarssl.a(ctr_drbg.c.o) has problems even with -fPIC
-    #
-    #start_target polarssl
-    #
-    #if ! is_cloned ; then
-    #    git clone https://github.com/polarssl/polarssl.git polarssl
-    #    cd polarssl
-    #    git checkout polarssl-1.3.9
-    #fi
-    #
-    #if ! is_built ; then
-    #
-    #    env CFLAGS="-fPIC" cmake . \
-    #        -DCMAKE_INSTALL_PREFIX=$PWD/build \
-    #        -DCMAKE_BUILD_TYPE=$build_type \
-    #        -DCMAKE_CXX_FLAGS="-fPIC" \
-    #        -DCMAKE_C_FLAGS="-fPIC" \
-    #        -DENABLE_PROGRAMS=OFF \
-    #        -DENABLE_TESTING=OFF \
-    #        -DENABLE_ZLIB_SUPPORT=OFF \
-    #        -DUSE_STATIC_POLARSSL_LIBRARY=ON
-    #
-    #    make -j $num_cpu -S
-    #    make install
-    #
-    #    mark_built
-    #fi
+
+    start_target polarssl
+
+    if ! is_cloned ; then
+        git clone https://github.com/polarssl/polarssl.git polarssl
+        cd polarssl
+        git checkout polarssl-1.3.9
+    fi
+
+    if ! is_built ; then
+
+        cmake . \
+            -DCMAKE_INSTALL_PREFIX=$PWD/build \
+            -DCMAKE_BUILD_TYPE=$build_type \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DENABLE_PROGRAMS=OFF \
+            -DENABLE_TESTING=OFF \
+            -DENABLE_ZLIB_SUPPORT=OFF \
+            -DUSE_STATIC_POLARSSL_LIBRARY=ON
+
+        make -j $num_cpu -S
+        make install
+
+        mark_built
+    fi
 
     #### curl
 
@@ -262,13 +260,15 @@ if [ $skip_deps = false ] ; then
     if ! is_built ; then
         ./buildconf
 
-        ./configure --prefix=$PWD/build --disable-shared --enable-optimize
-            #--without-ssl --with-polarssl=$DEPS_SRC/polarssl/build
+        ./configure --prefix=$PWD/build \
+                    --enable-optimize \
+                    --disable-shared --enable-static \
+                    --without-ssl --with-polarssl=$DEPS_SRC/polarssl/build
 
         make -j $num_cpu -S
         make install
 
-        #cp $DEPS_SRC/polarssl/build/lib/*.a $DEPS_SRC/curl/build/lib/
+        cp $DEPS_SRC/polarssl/build/lib/*.a $DEPS_SRC/curl/build/lib/
 
         mark_built
     fi

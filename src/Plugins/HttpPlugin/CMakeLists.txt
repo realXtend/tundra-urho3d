@@ -10,7 +10,7 @@ macro(configure_curl)
     elseif (ANDROID)
         set(CURL_LIBRARIES curl ssl crypto z)
     else()
-        set(CURL_LIBRARIES curl ssl)
+        set(CURL_LIBRARIES curl)
     endif()
 endmacro (configure_curl)
 
