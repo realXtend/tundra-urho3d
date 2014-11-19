@@ -29,6 +29,7 @@
 #include "GenericAssetFactory.h"
 
 #include <Engine/Core/CoreEvents.h>
+#include <Engine/Core/ProcessUtils.h>
 #include <Engine/Graphics/Camera.h>
 #include <Engine/Graphics/Graphics.h>
 #include <Engine/Graphics/GraphicsEvents.h>
@@ -98,7 +99,11 @@ void UrhoRenderer::Initialize()
         // Track window position and screen mode changes to keep config up-to-date
         SubscribeToEvent(Urho3D::E_WINDOWPOS, HANDLER(UrhoRenderer, HandleScreenModeChange));
         SubscribeToEvent(Urho3D::E_SCREENMODE, HANDLER(UrhoRenderer, HandleScreenModeChange));
-    }
+    
+        // Disable shadows completely for now on mobile devices, as the shadow bias is problematic, and it consumes GPU performance
+        if (Urho3D::GetPlatform() == "Android" || Urho3D::GetPlatform() == "iOS")
+            rend->SetDrawShadows(false);
+    }        
 }
 
 void UrhoRenderer::Uninitialize()
