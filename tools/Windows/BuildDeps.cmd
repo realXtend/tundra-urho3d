@@ -318,7 +318,7 @@ IF %TUNDRA_ANDROID%==0 (
 ) ELSE (
     IF NOT EXIST "%DEPS%\openssl\". (
         cd "%DEPS%"
-        %TOOLS%\Utils\curl -o openssl-cmake-1.0.1e-src.tar.gz -L https://launchpad.net/openssl-cmake/1.0.1e/1.0.1e-1/+download/openssl-cmake-1.0.1e-src.tar.gz
+        %TOOLS%\Utils\curl -o openssl-cmake-1.0.1e-src.tar.gz -k -L https://launchpad.net/openssl-cmake/1.0.1e/1.0.1e-1/+download/openssl-cmake-1.0.1e-src.tar.gz
         7za e -y openssl-cmake-1.0.1e-src.tar.gz
         7za x -y openssl-cmake-1.0.1e-src.tar
         del /Q openssl-cmake-1.0.1e-src.tar.gz
