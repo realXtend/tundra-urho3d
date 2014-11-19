@@ -66,7 +66,7 @@ void CameraApplication::OnSceneCreated(Scene *scene, AttributeChange::Type)
     // Remember this scene for camera creation on the next update
     lastScene_ = scene;
 
-    if ((Urho3D::GetPlatform() == "Android" || Urho3D::GetPlatform() == "iOS") && joystickId_ < 0)
+    if ((Urho3D::GetPlatform() == "Android" || Urho3D::GetPlatform() == "iOS" || GetSubsystem<Urho3D::Input>()->GetTouchEmulation()) && joystickId_ < 0)
     {
         Urho3D::XMLFile *layout = GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("UI/ScreenJoystick.xml");
         Urho3D::XMLFile *style = GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("UI/DefaultStyle.xml");

@@ -658,6 +658,8 @@ void Framework::ApplyStartupOptions(VariantMap &engineInitMap)
         if (log)
             log->SetQuiet(true);
     }
+    if (HasCommandLineParameter("--touchEmulation"))
+        engineInitMap["TouchEmulation"] = true;
 
     // Prepare ConfigAPI data folder
     Vector<String> configDirs = CommandLineParameters("--configDir");
