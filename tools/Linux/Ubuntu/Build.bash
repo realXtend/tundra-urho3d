@@ -116,7 +116,8 @@ if [ $skip_pkg = false ] ; then
     print_subtitle "Build tools and utils"
     sudo apt-get -y --quiet install \
         build-essential gcc \
-        cmake
+        cmake \
+        autoconf libtool
 
     print_subtitle "Source control"
     sudo apt-get -y --quiet install \
@@ -126,14 +127,6 @@ if [ $skip_pkg = false ] ; then
     sudo apt-get -y --quiet install \
         libx11-dev libxrandr-dev libasound2-dev \
         libgl1-mesa-dev
-
-    print_subtitle "Curl"
-    sudo apt-get -y --quiet install \
-        openssl zlib1g-dev autoconf libtool
-
-    print_subtitle "Zziplib"
-    sudo apt-get -y --quiet install \
-        libzzip-dev
 fi
 
 if [ $skip_deps = false ] ; then
@@ -218,6 +211,54 @@ if [ $skip_deps = false ] ; then
         mark_built
     fi
 
+    #### zlib
+    # todo build manually if needed for android etc.
+
+    start_target zlib
+
+    if ! is_cloned ; then
+        git clone https://github.com/madler/zlib.git zlib
+        cd zlib
+        git checkout v1.2.8
+    fi
+
+    if ! is_built ; then
+
+        CFLAGS=-fPIC ./configure --prefix=$PWD/build --static
+
+        make -j $num_cpu -S
+        make install
+
+        mark_built
+    fi
+
+    #### zziplib
+    # todo build manually if needed for android etc.
+
+    start_target zziplib
+
+    if ! is_cloned ; then
+        wget -O zziplib.tar.bz2 http://sourceforge.net/projects/zziplib/files/zziplib13/0.13.62/zziplib-0.13.62.tar.bz2/download
+        tar jxf zziplib.tar.bz2
+        mv zziplib-0.13.62 zziplib
+        rm -f zziplib.tar.bz2
+    fi
+
+    if ! is_built ; then
+
+        ./configure \
+            --prefix=$PWD/build \
+            --with-zlib=$DEPS_SRC/zlib/build \
+            --enable-static \
+            --disable-shared \
+            --with-pic
+
+        make -j $num_cpu -S
+        make install
+
+        mark_built
+    fi
+
     #### polarssl
     # alternative for openssl for curl that should allow static linking
     # but currently libpolarssl.a(ctr_drbg.c.o) has problems even with -fPIC
@@ -263,7 +304,8 @@ if [ $skip_deps = false ] ; then
         ./configure --prefix=$PWD/build \
                     --enable-optimize \
                     --disable-shared --enable-static \
-                    --without-ssl --with-polarssl=$DEPS_SRC/polarssl/build
+                    --without-ssl --with-polarssl=$DEPS_SRC/polarssl/build \
+                    --with-zlib=$DEPS_SRC/zlib/build
 
         make -j $num_cpu -S
         make install
@@ -272,53 +314,6 @@ if [ $skip_deps = false ] ; then
 
         mark_built
     fi
-
-    #### zlib
-    # todo build manually if needed for android etc.
-
-    #start_target zlib
-    #
-    #if ! is_cloned ; then
-    #    git clone https://github.com/madler/zlib.git zlib
-    #    cd zlib
-    #    git checkout v1.2.8
-    #fi
-    #
-    #if ! is_built ; then
-    #
-    #    ./configure --prefix=$PWD/build --static
-    #
-    #    make -j $num_cpu -S
-    #    make install
-    #
-    #    mark_built
-    #fi
-
-    #### zziplib
-    # todo build manually if needed for android etc.
-
-    #start_target zziplib
-
-    #if ! is_cloned ; then
-    #    svn checkout svn://svn.code.sf.net/p/zziplib/svn/tags/V_0_13_62 zziplib
-    #    cd zziplib
-    #    svn patch $DEPS_WINDOWS_PATCH_DIR/zziplib-0001-add-cmake.patch
-    #fi
-    #
-    #if ! is_built ; then
-    #    mkdir -p build
-    #    cd build
-    #
-    #    # fails to find zlib
-    #    cmake ../ \
-    #        -DCMAKE_DEBUG_POSTFIX=_d \
-    #        -DZLIB_ROOT=$DEPS_SRC/zlib/build
-    #
-    #    make -j $num_cpu -S
-    #    make install
-    #
-    #    mark_built
-    #fi
 fi
 
 # Build gtest if testing
@@ -379,12 +374,13 @@ if [ $skip_cmake = false ] ; then
 
     cmake .. \
         -DCMAKE_CXX_FLAGS="-Wno-unused-parameter -Wno-unused-variable" \
+        -DENABLE_TESTS=$build_tests \
         -DMATHGEOLIB_HOME=$DEPS \
         -DURHO3D_HOME=$DEPS_SRC/urho3d \
         -DKNET_HOME=$DEPS_SRC/kNet \
         -DGTEST_HOME=$DEPS_SRC/gtest \
         -DCURL_HOME=$DEPS_SRC/curl/build \
-        -DENABLE_TESTS=$build_tests
+        -DZZIPLIB_HOME=$DEPS_SRC/zziplib/build
 fi
 
 # Tundra build

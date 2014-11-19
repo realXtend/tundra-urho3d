@@ -1,25 +1,25 @@
 
 macro(configure_zziplib)
+    if ("${ZZIPLIB_HOME}" STREQUAL "")
+        # Make fatal once linux dep build is implemented
+        message(FATAL_ERROR "ZZIPLIB_HOME not set")
+    endif()
     if (MSVC OR ANDROID)
-        if ("${ZZIPLIB_HOME}" STREQUAL "")
-            # Make fatal once linux dep build is implemented
-            message(FATAL_ERROR "ZZIPLIB_HOME not set")
-        endif()
         set(ZZIPLIB_INCLUDE_DIRS ${ZZIPLIB_HOME})
         set(ZZIPLIB_LIBRARY_DIRS ${ZZIPLIB_HOME}/build)
     endif()
     if (MSVC)
-        # This is kind of ugly but we can assume zlib location with Windows deps
         list(APPEND ZZIPLIB_LIBRARY_DIRS ${ZZIPLIB_HOME}/../zlib/build/lib)
         set(ZZIPLIB_LIBRARIES optimized zziplibstatic optimized zlibstatic debug zziplibstaticd debug zlibstaticd)
     elseif(ANDROID)
         set(ZZIPLIB_LIBRARIES zziplibstatic z)
     else()
-        find_path(ZZIPLIB_INCLUDE_DIRS NAMES zzip/zzip.h)
-        find_library(ZZIPLIB_LIBRARIES NAMES libzzip.so)
-        if ("${ZZIPLIB_LIBRARIES}"  STREQUAL "ZZIPLIB_LIBRARIES-NOTFOUND")
-            message(FATAL_ERROR "Failed to find ZZIPLIB_LIBRARIES")
-        endif()
+        # Make sure to statically link to our dependency build
+        # zlib is pretty much guaranteed to be picked from the system if not .a postfixed
+        # and the exact directory given to ZZIPLIB_LIBRARY_DIRS
+        set(ZZIPLIB_INCLUDE_DIRS ${ZZIPLIB_HOME}/include)
+        set(ZZIPLIB_LIBRARY_DIRS ${ZZIPLIB_HOME}/lib ${ZZIPLIB_HOME}/../../zlib/build/lib)
+        set(ZZIPLIB_LIBRARIES zzip.a z.a)
     endif()
 endmacro (configure_zziplib)
 
