@@ -308,7 +308,7 @@ private:
     String currentMaterial_;
 
     /// Stores the actual height patches.
-    Urho3D::Vector<Patch> patches_;
+    Vector<Patch> patches_;
     
      /// Graphics world ptr
     GraphicsWorldWeakPtr world_;

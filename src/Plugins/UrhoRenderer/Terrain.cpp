@@ -12,6 +12,7 @@
 #include "Math/Transform.h"
 #include "BinaryAsset.h"
 #include "TextureAsset.h"
+#include "IMaterialAsset.h"
 #include "Placeable.h"
 #include "AssetAPI.h"
 
@@ -35,8 +36,8 @@ Terrain::Terrain(Urho3D::Context* context, Scene* scene) :
     INIT_ATTRIBUTE_VALUE(nodeTransformation, "Transform", Transform(float3(0,0,0),float3(0,0,0),float3(1,1,1))),
     INIT_ATTRIBUTE_VALUE(xPatches, "Grid width", 0),
     INIT_ATTRIBUTE_VALUE(yPatches, "Grid height", 0),
-    INIT_ATTRIBUTE_VALUE(uScale, "Tex. U scale", 0.0f),
-    INIT_ATTRIBUTE_VALUE(vScale, "Tex. V scale", 0.0f),
+    INIT_ATTRIBUTE_VALUE(uScale, "Tex. U scale", 0.13f),
+    INIT_ATTRIBUTE_VALUE(vScale, "Tex. V scale", 0.13f),
     INIT_ATTRIBUTE_VALUE(material, "Material", AssetReference("", "Material")),
     INIT_ATTRIBUTE_VALUE(heightMap, "Heightmap", AssetReference("", "Heightmap")),
     patchWidth_(1),
@@ -271,14 +272,28 @@ void Terrain::AttributesChanged()
     }
     if (material.ValueChanged())
     {
-        /// \todo Implement
+        materialAsset_->HandleAssetRefChange(&material);
+        materialAsset_->Loaded.Connect(this, &Terrain::OnMaterialAssetLoaded);
     }
-    
 }
 
 void Terrain::OnMaterialAssetLoaded(AssetPtr asset_)
 {
-    /// \todo implement
+    IMaterialAsset* mAsset = dynamic_cast<IMaterialAsset*>(asset_.Get());
+    if (!mAsset)
+    {
+        LogErrorF("Terrain: Material asset load finished for '%s', but downloaded asset was not of type IMaterialAsset!", asset_->Name().CString());
+        return;
+    }
+
+    for (uint i = 0; i < patches_.Size(); ++i)
+    {
+        if (patches_[i].node)
+        {
+            Urho3D::StaticModel* sm = patches_[i].node->GetComponent<Urho3D::StaticModel>();
+            sm->SetMaterial(mAsset->UrhoMaterial());
+        }
+    }
 }
 
 void Terrain::OnTerrainAssetLoaded(AssetPtr asset_)
@@ -446,7 +461,7 @@ bool Terrain::LoadFromDataInMemory(const char *data, size_t numBytes)
 
     // Load all the data from the file to an intermediate buffer first, so that we can first see
     // if the file is not broken, and reject it without losing the old terrain.
-    Urho3D::Vector<Patch> newPatches(xPatches * yPatches);
+    Vector<Patch> newPatches(xPatches * yPatches);
 
     // Initialize the new height data structure.
     for(u32 y = 0; y < yPatches; ++y)
@@ -628,19 +643,14 @@ void Terrain::GenerateTerrainGeometryForOnePatch(uint patchX, uint patchY)
     patch.node = CreateUrho3DTerrainPatchNode(rootNode_, patch.x, patch.y);
     assert(patch.node);
 
-    /// \todo material
-    //Ogre::MaterialPtr terrainMaterial = Ogre::MaterialManager::getSingleton().getByName(currentMaterial.toStdString().c_str());
-    //if (!terrainMaterial.get()) // If we could not find the material we were supposed to use, just use the default system terrain material.
-    //    terrainMaterial = OgreRenderer::GetOrCreateLitTexturedMaterial("Rex/TerrainPCF");
-    
     Urho3D::StaticModel* staticModel = patch.node->CreateComponent<Urho3D::StaticModel>();
     staticModel->SetCastShadows(false);
     SharedPtr<Urho3D::Model> manual = SharedPtr<Urho3D::Model>(new Urho3D::Model(GetContext()));
     patch.urhoModel = manual;
     manual->SetNumGeometries(1);
 
-    Urho3D::Vector<unsigned short> indexData;
-    Urho3D::Vector<float> vertexData;
+    Vector<unsigned short> indexData;
+    Vector<float> vertexData;
 
     const float vertexSpacingX = 1.f;
     const float vertexSpacingY = 1.f;
@@ -767,6 +777,11 @@ void Terrain::GenerateTerrainGeometryForOnePatch(uint patchX, uint patchY)
     patch.node->SetVar(GraphicsWorld::componentLink, Variant(WeakPtr<RefCounted>(this)));
 
     patch.patch_geometry_dirty = false;
+
+    // Set material if available
+    IMaterialAsset* mAsset = dynamic_cast<IMaterialAsset*>(materialAsset_->Asset().Get());
+    if (mAsset)
+        staticModel->SetMaterial(mAsset->UrhoMaterial());
 
     AttachTerrainRootNode();
 }

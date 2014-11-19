@@ -251,7 +251,7 @@ String MaterialParser::Error() const
 
 bool MaterialParser::Parse(const char *data_, uint lenght_)
 {
-    data = Urho3D::String(data_, lenght_);
+    data = String(data_, lenght_);
     pos = 0;
     lineNum = 0;
 
@@ -338,6 +338,10 @@ bool MaterialParser::ProcessLine()
     // Block scope end
     if (line[0] == '}')
     {
+        // Material not yet started
+        if (!state.block)
+            return true;
+
         // Store parsed block to parent
         if (state.block->parent)
             state.block->parent->blocks.Push(state.block);
@@ -350,6 +354,10 @@ bool MaterialParser::ProcessLine()
     // Block scope start
     else if (line[0] == '{')
     {
+        // Material not yet started
+        if (!state.block)
+            return true;
+
         // Skip invalid blocks
         if (!state.block || !state.block->IsSupported())
             SkipBlock();
@@ -363,8 +371,11 @@ bool MaterialParser::ProcessLine()
     StringHash key(keyStr);
     String value = (splitPos == String::NPOS ? "" : line.Substring(splitPos+1));
     
+    // Do not begin default_params block if material not started yet
+    if (key == Material::Block::DefaultParameters && !state.block)
+        return true;
+
     // Is this a new block scope identifier?
-    // Note that this w
     if (IsBlockIndentifier(key))
     {
         MaterialPart part = MP_Unsupported;
@@ -417,6 +428,9 @@ bool MaterialParser::ProcessLine()
         state.error = Urho3D::ToString("Ogre::MaterialParser: Invalid script tokens '%s' on line %d before column %d", line.CString(), lineNum, pos);
         return false;
     }
+    // Material not yet started
+    if (!state.block)
+        return true;
 
     // Add property to current block
     state.block->propertyNames[key] = keyStr;
