@@ -2171,6 +2171,12 @@ HashMap<String, String> AssetAPI::ParseAssetStorageString(String storageString)
     if (storageString.EndsWith(";")) 
         storageString = storageString.Substring(0, storageString.Length()-1);
 
+    // Strip out any query parameters from the URL as they contain "=" which is used below for detection.
+    // Query params are also not relevant in resolving the base from a --file <txml> URL.
+    uint queryPos = storageString.Find("?");
+    if (queryPos != String::NPOS)
+        storageString = storageString.Substring(0, queryPos);
+
     // Treat simple strings of form "http://myserver.com/" as "src=http://myserver.com/".
     if (storageString.Find(';') == String::NPOS && storageString.Find('=') == String::NPOS)
         storageString = "src=" + storageString;
