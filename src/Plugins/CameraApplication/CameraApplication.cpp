@@ -24,6 +24,9 @@
 namespace Tundra
 {
 
+const float cMoveSpeed = 30.0f;
+const float cRotateSpeed = 0.3f;
+
 CameraApplication::CameraApplication(Framework* owner) :
     IModule("CameraApplication", owner),
     joystickId_(-1)
@@ -106,14 +109,23 @@ void CameraApplication::CreateCamera()
     }
     renderer->SetMainCamera(cameraEntity);
 
-    // If scene has an entity called FreeLookCameraSpawnPos, copy its transform
-    Entity* cameraPosEntity = lastScene_->EntityByName("FreeLookCameraSpawnPos");
-    if (cameraPosEntity)
-    {
-        Placeable* cameraPosPlaceable = cameraPosEntity->Component<Placeable>();
-        if (cameraPosPlaceable)
-            cameraEntity->Component<Placeable>()->transform.Set(cameraPosPlaceable->transform.Get());
-    }
+    lastScene_->EntityCreated.Connect(this, &CameraApplication::CheckCameraSpawnPos);
+
+    CheckCameraSpawnPos(lastScene_->EntityByName("FreeLookCameraSpawnPos"), AttributeChange::Default);
+}
+
+void CameraApplication::CheckCameraSpawnPos(Entity* entity, AttributeChange::Type /*change*/)
+{
+    if (!entity)
+        return;
+
+    Entity* cameraEntity = framework->Renderer()->MainCamera();
+    if (!cameraEntity || !cameraEntity->Component<Placeable>())
+        return;
+    
+    Placeable* cameraPosPlaceable = entity->Component<Placeable>();
+    if (cameraPosPlaceable)
+        cameraEntity->Component<Placeable>()->transform.Set(cameraPosPlaceable->transform.Get());
 }
 
 void CameraApplication::MoveCamera(Entity* cameraEntity, float frameTime)
@@ -128,16 +140,14 @@ void CameraApplication::MoveCamera(Entity* cameraEntity, float frameTime)
     /// \todo Use InputAPI once it exists
     Urho3D::Input* input = GetSubsystem<Urho3D::Input>();
 
-    const float cameraMoveSpeed = 10.0f;
-    const float cameraRotateSpeed = 0.25f;
     bool changed = false;
 
     Transform t = placeable->transform.Get();
 
     if (input->GetMouseButtonDown(Urho3D::MOUSEB_RIGHT))
     {
-        t.rot.x -= input->GetMouseMoveY() * cameraRotateSpeed;
-        t.rot.y -= input->GetMouseMoveX() * cameraRotateSpeed;
+        t.rot.x -= input->GetMouseMoveY() * cRotateSpeed;
+        t.rot.y -= input->GetMouseMoveX() * cRotateSpeed;
         t.rot.x = Clamp(t.rot.x, -90.0f, 90.0f);
         changed = true;
     }
@@ -149,7 +159,7 @@ void CameraApplication::MoveCamera(Entity* cameraEntity, float frameTime)
             Urho3D::TouchState *touch = input->GetTouch(ti);
             if (!touch->touchedElement_.Get())
             {
-                t.rot -= (float3(static_cast<float>(touch->delta_.y_), static_cast<float>(touch->delta_.x_), 0.f) * cameraRotateSpeed);;
+                t.rot -= (float3(static_cast<float>(touch->delta_.y_), static_cast<float>(touch->delta_.x_), 0.f) * cRotateSpeed);;
                 changed = true;
                 break;
             }
@@ -173,7 +183,7 @@ void CameraApplication::MoveCamera(Entity* cameraEntity, float frameTime)
 
     if (!moveVector.Equals(float3::zero))
     {
-        t.pos += t.Orientation() * (cameraMoveSpeed * frameTime * moveVector);
+        t.pos += t.Orientation() * (cMoveSpeed * frameTime * moveVector);
         changed = true;
     }
 

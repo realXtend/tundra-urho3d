@@ -38,6 +38,8 @@ private:
     void CreateCamera();
     /// Move camera by mouse & keys
     void MoveCamera(Entity* cameraEntity, float frametime);
+    /// Check for creation of an entity; whether it is the camera spawnpos
+    void CheckCameraSpawnPos(Entity* entity, AttributeChange::Type change);
 
     void Load() override;
     void Initialize() override;
