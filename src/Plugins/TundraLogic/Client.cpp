@@ -334,13 +334,17 @@ void Client::HandleLoginReply(kNet::MessageConnection* /*source*/, const char *d
             // Create a non-authoritative scene for the client
             ScenePtr scene = framework_->Scene()->CreateScene("TundraClient", true, false);
 
-//            framework_->Scene()->SetDefaultScene(scene);
             owner_->SyncManager()->RegisterToScene(scene);
             
             UserConnectedResponseData responseData;
             if (msg.loginReplyData.size() > 0)
+            {
                 responseData.responseData = String((const char *)&msg.loginReplyData[0], (int)msg.loginReplyData.size());
-        //        responseData.responseData.setContent(QByteArray((const char *)&msg.loginReplyData[0], (int)msg.loginReplyData.size()));
+                // Parse once as XML so that application functionality does not need to parse separately. Delete if parse fails
+                responseData.responseDataXml = new Urho3D::XMLFile(context_);
+                if (!responseData.responseDataXml->FromString(responseData.responseData))
+                    responseData.responseDataXml.Reset();
+            }
 
             Connected.Emit(&responseData);
         }

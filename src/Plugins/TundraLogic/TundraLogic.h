@@ -61,6 +61,15 @@ private:
     /// Handle startup scene asset being loaded
     void StartupSceneLoaded(AssetPtr sceneAsset);
 
+    /// Handle client connection to server. Add asset storages advertised by the server.
+    void ClientConnectedToServer(UserConnectedResponseData *responseData);
+
+    /// Handle client disconnection from server. Remove asset storages advertised by the server.
+    void ClientDisconnectedFromServer();
+
+    /// Whenever we receive a new asset storage from the server, this function is called to determine if the storage is to be trusted.
+    void DetermineStorageTrustStatus(AssetStoragePtr storage);
+
     /// The sync manager
     SharedPtr<Tundra::SyncManager> syncManager_;
     /// The client
@@ -69,6 +78,8 @@ private:
     ServerPtr server_;
     /// The kristalli protocol
     SharedPtr<Tundra::KristalliProtocol> kristalliProtocol_;
+    /// Asset storages received from the server upon connecting
+    Vector<AssetStorageWeakPtr> storagesReceivedFromServer;
 };
 
 }

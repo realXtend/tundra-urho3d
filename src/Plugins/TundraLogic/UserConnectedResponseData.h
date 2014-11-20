@@ -2,8 +2,14 @@
 
 #pragma once
 
-//#include <QDomDocument>
+#include <XMLFile.h>
 #include <Variant.h>
+#include <CoreTypes.h>
+
+namespace Urho3D
+{
+    class XMLFile;
+}
 
 namespace Tundra
 {
@@ -13,9 +19,12 @@ namespace Tundra
     This is to be unified in the future with both kinds of clients using JSON. */
 struct UserConnectedResponseData
 {
-  //  QDomDocument responseData;
     String responseData;
     Urho3D::VariantMap responseDataJson;
+
+    // Pre-interpreted XML file of the response data, if available. Will be null if parsing has failed
+    SharedPtr<Urho3D::XMLFile> responseDataXml;
 };
+
 }
 

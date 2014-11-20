@@ -13,6 +13,7 @@
 #include "IRenderer.h"
 #include "SceneAPI.h"
 #include "Scene/Scene.h"
+#include "UserConnectedResponseData.h"
 #include "LoggingFunctions.h"
 
 #include "AssetAPI.h"
@@ -61,6 +62,9 @@ void TundraLogic::Initialize()
 
     // Load startup parameters once we are running.
     framework->Frame()->DelayedExecute(0.0f).Connect(this, &TundraLogic::ReadStartupParameters);
+
+    client_->Connected.Connect(this, &TundraLogic::ClientConnectedToServer);
+    client_->Disconnected.Connect(this, &TundraLogic::ClientDisconnectedFromServer);
 }
 
 void TundraLogic::HandleLogin(const StringVector &params) const
@@ -135,11 +139,10 @@ void TundraLogic::ReadStartupParameters(float /*time*/)
         }
         else if (!portParam.Empty())
         {
-            bool ok;
             autoStartServerPort = (unsigned short)Urho3D::ToInt(portParam.Front());
-            if (!ok)
+            if (!autoStartServerPort)
             {
-                LogError("TundraLogicModule::ReadStartupParameters: --port parameter is not a valid unsigned short.");
+                LogError("TundraLogicModule::ReadStartupParameters: --port parameter is not a valid nonzero value.");
                 GetFramework()->Exit();
             }
         }
@@ -252,6 +255,68 @@ ClientPtr TundraLogic::Client() const
 ServerPtr TundraLogic::Server() const
 {
     return server_;
+}
+
+void TundraLogic::ClientConnectedToServer(UserConnectedResponseData *responseData)
+{
+    if (responseData->responseDataXml)
+    {
+        Urho3D::XMLElement root = responseData->responseDataXml->GetRoot("asset");
+        if (root)
+        {
+            Urho3D::XMLElement storage = root.GetChild("storage");
+            while (storage)
+            {
+                String storageData = storage.GetAttribute("data");
+
+                bool connectedToRemoteServer = true; // If false, we connected to localhost.
+                ///\todo Determine here whether we connected to localhost, and if so, set connectedToRemoteServer = false.
+                AssetStoragePtr assetStorage = Fw()->Asset()->DeserializeAssetStorageFromString(storageData, connectedToRemoteServer);
+
+                // Remember that this storage was received from the server, so we can later stop using it when we disconnect (and possibly reconnect to another server).
+                if (assetStorage)
+                {
+                    assetStorage->SetReplicated(true); // We got this from the server.
+                    if (connectedToRemoteServer) // If connected to localhost, we always trust the same storages the server is trusting, so don't need to call DetermineStorageTrustStatus.
+                        DetermineStorageTrustStatus(assetStorage);
+                    storagesReceivedFromServer.Push(AssetStorageWeakPtr(assetStorage));
+                }
+                
+                storage = storage.GetNext("storage");
+            }
+
+            Urho3D::XMLElement defaultStorage = root.GetChild("defaultStorage");
+            if (defaultStorage)
+            {
+                String defaultStorageName = defaultStorage.GetAttribute("name");
+                AssetStoragePtr defaultStoragePtr = Fw()->Asset()->AssetStorageByName(defaultStorageName);
+                if (defaultStoragePtr)
+                    framework->Asset()->SetDefaultAssetStorage(defaultStoragePtr);
+            }
+        }
+    }
+}
+
+void TundraLogic::ClientDisconnectedFromServer()
+{
+    for(size_t i = 0; i < storagesReceivedFromServer.Size(); ++i)
+    {
+        if (storagesReceivedFromServer[i])
+            framework->Asset()->RemoveAssetStorage(storagesReceivedFromServer[i]->Name());
+    }
+    storagesReceivedFromServer.Clear();
+}
+
+void TundraLogic::DetermineStorageTrustStatus(AssetStoragePtr storage)
+{
+    // If the --trustserverstorages command line parameter is set, we trust each storage exactly the way the server does.
+    ///\todo Make the a end-user option at runtime/connection time to specify per-server instance whether --trustserverstorages is in effect.
+    if (!framework->HasCommandLineParameter("--trustserverstorages"))
+    {
+        ///\todo Read from ConfigAPI whether to set false/ask/true here.
+        ///\todo If the trust state is 'ask', show a *non-modal* notification -> config dialog if the user wants to trust content from this source.
+        storage->SetTrustState(IAssetStorage::StorageAskTrust);
+    }
 }
 
 extern "C"
