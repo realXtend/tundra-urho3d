@@ -249,6 +249,8 @@ IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
 
 :::::::::::::::::::::::: gtest
+:: Uncomment below goto if google svn is not responding
+:: GOTO :SKIP_GTEST
 
 IF NOT EXIST "%DEPS%\gtest\". (
     cecho {0D}Cloning Google C++ Testing Framework into "%DEPS%\gtest".{# #}{\n}
@@ -275,6 +277,8 @@ IF %TUNDRA_ANDROID%==0 (
     make -j%TUNDRA_DEPS_CPUS%
 )
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+:SKIP_GTEST
 
 
 
