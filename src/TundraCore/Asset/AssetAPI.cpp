@@ -869,7 +869,7 @@ AssetTransferPtr AssetAPI::RequestAsset(String assetRef, String assetType, bool 
     {
         existingAsset = existingAssetIter->second;
         if (!assetType.Empty() && assetType != existingAsset->Type())
-            LogWarning("AssetAPI::RequestAsset: Tried to request asset \"" + assetRef + "\" by type \"" + assetType + "\". Asset by that name exists, but it is of type \"" + existingAsset->Type() + "\"!");
+            LogDebug("AssetAPI::RequestAsset: Tried to request asset \"" + assetRef + "\" by type \"" + assetType + "\". Asset by that name exists, but it is of type \"" + existingAsset->Type() + "\"!");
         assetType = existingAsset->Type();
     }
     else
