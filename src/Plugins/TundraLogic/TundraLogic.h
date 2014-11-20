@@ -49,16 +49,17 @@ private:
     /// Frame update handler
     void OnUpdate(float frametime);
 
-    /// Load startup scene if necessary. Return true on success.
-    void LoadStartupScene();
+    /// Handle delayed signal to parse command line parameters.
+    void ReadStartupParameters(float time);
 
-    /// Handler for asset request of scene file.
-    void StartupSceneLoaded(AssetPtr sceneAsset);
+    /// Load startup scene if necessary.
+    void LoadStartupScene();
 
     /// Load a scene file into the active (main camera) scene. Return true on success.
     bool LoadScene(String filename, bool clearScene, bool useEntityIDsFromFile);
 
-    bool startupSceneLoaded;
+    /// Handle startup scene asset being loaded
+    void StartupSceneLoaded(AssetPtr sceneAsset);
 
     /// The sync manager
     SharedPtr<Tundra::SyncManager> syncManager_;

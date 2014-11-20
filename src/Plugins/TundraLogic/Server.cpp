@@ -5,6 +5,7 @@
 #include "Server.h"
 #include "TundraLogic.h"
 #include "KristalliProtocol.h"
+#include "LoggingFunctions.h"
 
 namespace Tundra
 {
@@ -21,4 +22,11 @@ UserConnectionList& Server::UserConnections() const
 {
     return owner_->KristalliProtocol()->UserConnections();
 }
+
+bool Server::Start(unsigned short /*port*/, String /*protocol = ""*/)
+{
+    LogError("Server::Start not implemented");
+    return false;
+}
+
 }

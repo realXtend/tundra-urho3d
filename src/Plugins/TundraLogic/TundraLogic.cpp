@@ -8,6 +8,7 @@
 #include "Server.h"
 #include "Framework.h"
 #include "FrameAPI.h"
+#include "ConfigAPI.h"
 #include "ConsoleAPI.h"
 #include "IRenderer.h"
 #include "SceneAPI.h"
@@ -26,9 +27,10 @@
 namespace Tundra
 {
 
+static const unsigned short cDefaultPort = 2345;
+
 TundraLogic::TundraLogic(Framework* owner) :
-    IModule("TundraLogic", owner),
-    startupSceneLoaded(false)
+    IModule("TundraLogic", owner)
 {
 }
 
@@ -56,6 +58,9 @@ void TundraLogic::Initialize()
     framework->Console()->RegisterCommand("disconnect", "Disconnects from a server.", client_.Get(), &Client::Logout);
 
     kristalliProtocol_->Initialize();
+
+    // Load startup parameters once we are running.
+    framework->Frame()->DelayedExecute(0.0f).Connect(this, &TundraLogic::ReadStartupParameters);
 }
 
 void TundraLogic::HandleLogin(const StringVector &params) const
@@ -90,13 +95,6 @@ void TundraLogic::Uninitialize()
 
 void TundraLogic::OnUpdate(float frametime)
 {
-    // Load startup scene on first round of the main loop, as all modules are initialized
-    if (!startupSceneLoaded)
-    {
-        LoadStartupScene();
-        startupSceneLoaded = true;
-    }
-
     kristalliProtocol_->Update(frametime);
     if (client_)
         client_->Update(frametime);
@@ -112,11 +110,78 @@ void TundraLogic::OnUpdate(float frametime)
     
 }
 
+void TundraLogic::ReadStartupParameters(float /*time*/)
+{
+    // Check whether server should be auto started.
+    const bool autoStartServer = framework->HasCommandLineParameter("--server");
+    const bool hasPortParam = framework->HasCommandLineParameter("--port");
+    ushort autoStartServerPort = cDefaultPort;
+    if (hasPortParam && !autoStartServer)
+        LogWarning("TundraLogicModule::ReadStartupParameters: --port parameter given, but --server parameter is not present. Server will not be started.");
+
+    // Write default values to config if not present.
+    ConfigData configData(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_SERVER, "port", cDefaultPort, cDefaultPort);
+    if (!framework->Config()->HasKey(configData))
+        framework->Config()->Write(configData);
+
+    if (autoStartServer)
+    {
+        // Use parameter port or default to config value
+        const StringVector portParam = framework->CommandLineParameters("--port");
+        if (hasPortParam && portParam.Empty())
+        {
+            LogWarning("TundraLogicModule::ReadStartupParameters: --port parameter given without value. Using the default from config.");
+            autoStartServerPort = (unsigned short)framework->Config()->Read(configData).GetInt();
+        }
+        else if (!portParam.Empty())
+        {
+            bool ok;
+            autoStartServerPort = (unsigned short)Urho3D::ToInt(portParam.Front());
+            if (!ok)
+            {
+                LogError("TundraLogicModule::ReadStartupParameters: --port parameter is not a valid unsigned short.");
+                GetFramework()->Exit();
+            }
+        }
+    }
+
+    /// @todo Move --netRate handling to SyncManager.
+    const bool hasNetRate = framework->HasCommandLineParameter("--netrate");
+    const StringVector rateParam = framework->CommandLineParameters("--netrate");
+    if (hasNetRate && rateParam.Empty())
+        LogWarning("TundraLogicModule::ReadStartupParameters: --netrate parameter given without value.");
+    if (!rateParam.Empty())
+    {
+        int rate = Urho3D::ToInt(rateParam.Front());
+        if (rate > 0)
+            syncManager_->SetUpdatePeriod(1.f / (float)rate);
+        else
+            LogError("TundraLogicModule::ReadStartupParameters: --netrate parameter is not a valid nonzero value.");
+    }
+
+    if (autoStartServer)
+        server_->Start(autoStartServerPort); 
+    if (framework->HasCommandLineParameter("--file")) // Load startup scene here (if we have one)
+        LoadStartupScene();
+
+    StringVector connectArgs = framework->CommandLineParameters("--connect");
+    if (connectArgs.Size() > 1) /**< @todo If/when multi-connection support is on place, this should be changed! */
+        LogWarning("TundraLogicModule::ReadStartupParameters: multiple --connect parameters given, ignoring all of them!");
+    if (connectArgs.Size() == 1)
+    {
+        StringVector params = connectArgs.Front().Split(';');
+        if (params.Size() >= 4)
+            client_->Login(/*addr*/params[0], /*port*/(unsigned short)Urho3D::ToInt(params[1]), /*username*/params[3],
+            /*optional passwd*/ params.Size() >= 5 ? params[4] : "", /*protocol*/params[2]);
+        else
+            LogError("TundraLogicModule::ReadStartupParameters: Not enought parameters for --connect. Usage '--connect serverIp;port;protocol;name;password'. Password is optional.");
+    }
+}
+
 void TundraLogic::LoadStartupScene()
 {
-    bool hasFile = framework->HasCommandLineParameter("--file");
     StringVector files = framework->CommandLineParameters("--file");
-    if (hasFile && files.Empty())
+    if (files.Empty())
         LogError("TundraLogicModule: --file specified without a value.");
 
     foreach(const String &file, files)
