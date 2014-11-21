@@ -85,6 +85,7 @@ private:
     void AttributesChanged() override;
 
     void OnMaterialAssetLoaded(AssetPtr asset);
+    void OnMaterialAssetFailed(IAssetTransfer *transfer, String error);
 
     void OnTextureAssetRefsChanged(const AssetReferenceList &tRefs);
 

@@ -96,6 +96,7 @@ void Sky::UpdateSignals()
     if (world_)
     {
         materialAsset_->Loaded.Connect(this, &Sky::OnMaterialAssetLoaded);
+        materialAsset_->TransferFailed.Connect(this, &Sky::OnMaterialAssetFailed);
 
         textureRefListListener_->Changed.Connect(this, &Sky::OnTextureAssetRefsChanged);
         textureRefListListener_->Failed.Connect(this, &Sky::OnTextureAssetFailed);
@@ -239,6 +240,14 @@ void Sky::OnMaterialAssetLoaded(AssetPtr asset)
         } else
             Update();
     }
+}
+
+void Sky::OnMaterialAssetFailed(IAssetTransfer* /*transfer*/, String /*reason*/)
+{
+    if (!GetFramework()->HasCommandLineParameter("--useErrorAsset") || !urhoNode_)
+        return;
+    /// \todo The error asset is not directly usable for skybox, as the depth is not fixed in the shader suitably
+    urhoNode_->GetComponent<Urho3D::Skybox>()->SetMaterial(GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Material>("Materials/AssetLoadError.xml"));
 }
 
 void Sky::OnTextureAssetRefsChanged(const AssetReferenceList &/*tRefs*/)

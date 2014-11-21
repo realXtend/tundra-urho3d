@@ -456,11 +456,9 @@ void Mesh::OnMaterialAssetFailed(uint index, IAssetTransfer* /*transfer*/, Strin
     if (!GetFramework()->HasCommandLineParameter("--useErrorAsset"))
         return;
 
-    Urho3D::ResourceCache* cache = GetSubsystem<Urho3D::ResourceCache>();
-
     // Don't log an warning on load failure if index is out of submesh range.
     if (mesh_ && mesh_->GetModel() && index < mesh_->GetNumGeometries())
-        mesh_->SetMaterial(index, cache->GetResource<Urho3D::Material>("Materials/AssetLoadError.xml"));
+        mesh_->SetMaterial(index, GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Material>("Materials/AssetLoadError.xml"));
 }
 
 void Mesh::OnMaterialAssetLoaded(uint index, AssetPtr asset)
