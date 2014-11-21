@@ -17,6 +17,8 @@
 #include "AssetAPI.h"
 
 #include <Engine/Scene/Scene.h>
+#include <Engine/Resource/ResourceCache.h>
+#include <Engine/Graphics/Material.h>
 #include <Node.h>
 #include <StaticModel.h>
 #include <Model.h>
@@ -93,6 +95,7 @@ void Terrain::UpdateSignals()
         assert(rootNode_);
        
         materialAsset_->Loaded.Connect(this, &Terrain::OnMaterialAssetLoaded);
+        materialAsset_->TransferFailed.Connect(this, &Terrain::OnMaterialAssetFailed);
         heightMapAsset_->Loaded.Connect(this, &Terrain::OnTerrainAssetLoaded);
     }
 }
@@ -292,6 +295,22 @@ void Terrain::OnMaterialAssetLoaded(AssetPtr asset_)
         {
             Urho3D::StaticModel* sm = patches_[i].node->GetComponent<Urho3D::StaticModel>();
             sm->SetMaterial(mAsset->UrhoMaterial());
+        }
+    }
+}
+
+void Terrain::OnMaterialAssetFailed(IAssetTransfer* /*transfer*/, String /*reason*/)
+{
+    if (!GetFramework()->HasCommandLineParameter("--useErrorAsset"))
+        return;
+
+    Urho3D::Material* mat = GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Material>("Materials/AssetLoadError.xml");
+    for (uint i = 0; i < patches_.Size(); ++i)
+    {
+        if (patches_[i].node)
+        {
+            Urho3D::StaticModel* sm = patches_[i].node->GetComponent<Urho3D::StaticModel>();
+            sm->SetMaterial(mat);
         }
     }
 }

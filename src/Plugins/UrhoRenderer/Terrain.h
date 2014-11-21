@@ -247,6 +247,7 @@ private:
     void Recreate();
 
     void OnMaterialAssetLoaded(AssetPtr asset);
+    void OnMaterialAssetFailed(IAssetTransfer *transfer, String error);
     void OnTerrainAssetLoaded(AssetPtr asset);
 
     /// (Re)checks whether this entity has Placeable (or if it was just added or removed), and reparents the rootNode of this component to it or the scene root.

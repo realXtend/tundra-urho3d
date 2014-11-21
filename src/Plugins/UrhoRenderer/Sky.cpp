@@ -208,10 +208,14 @@ void Sky::Update()
         material->SetShaderParameter("MatDiffColor", Urho3D::Vector3(1, 1, 1));
                 
         urhoNode_->GetComponent<Urho3D::Skybox>()->SetMaterial(material);
-    } else
+    } 
+    else
     {
-        Urho3D::ResourceCache* cache = GetSubsystem<Urho3D::ResourceCache>();
-        urhoNode_->GetComponent<Urho3D::Skybox>()->SetMaterial(cache->GetResource<Urho3D::Material>("Materials/AssetLoadError.xml"));
+        if (GetFramework()->HasCommandLineParameter("--useErrorAsset"))
+        {
+            Urho3D::ResourceCache* cache = GetSubsystem<Urho3D::ResourceCache>();
+            urhoNode_->GetComponent<Urho3D::Skybox>()->SetMaterial(cache->GetResource<Urho3D::Material>("Materials/AssetLoadError.xml"));
+        }
     }
 }
 

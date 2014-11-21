@@ -1865,8 +1865,7 @@ void AssetAPI::AssetLoadFailed(const String assetRef)
     if (iter != currentTransfers.end())
     {
         AssetTransferPtr transfer = iter->second;
-        transfer->EmitAssetFailed("Failed to load " + transfer->assetType + " '" + transfer->source.ref + "' from asset data.");
-        currentTransfers.erase(iter);
+        AssetTransferFailed(transfer.Get(), "Failed to load " + transfer->assetType + " '" + transfer->source.ref + "' from asset data.");
     }
     else if (iter2 != assets.end())
         LogError("AssetAPI: Failed to reload asset '" + iter2->second->Name() + "'");

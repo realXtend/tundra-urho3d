@@ -453,6 +453,9 @@ void Mesh::OnMaterialAssetRefsChanged(const AssetReferenceList &mRefs)
 
 void Mesh::OnMaterialAssetFailed(uint index, IAssetTransfer* /*transfer*/, String /*error*/)
 {
+    if (!GetFramework()->HasCommandLineParameter("--useErrorAsset"))
+        return;
+
     Urho3D::ResourceCache* cache = GetSubsystem<Urho3D::ResourceCache>();
 
     // Don't log an warning on load failure if index is out of submesh range.
