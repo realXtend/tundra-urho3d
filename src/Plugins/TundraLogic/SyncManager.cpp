@@ -1142,10 +1142,15 @@ void SyncManager::ReplicateRigidBodyChanges(UserConnection* /*user*/)
 //        user->Send(cRigidBodyUpdateMessage, msgReliable, true, ds);
 }
 
-void SyncManager::HandleRigidBodyChanges(UserConnection* /*source*/, kNet::packet_id_t packetId, const char* data, size_t numBytes)
+void SyncManager::HandleRigidBodyChanges(UserConnection* source, kNet::packet_id_t packetId, const char* data, size_t numBytes)
 {
     ScenePtr scene = scene_.Lock();
     if (!scene)
+        return;
+
+    // Get matching syncstate for reflecting the changes
+    SceneSyncState* state = source->syncState.Get();
+    if (!state)
         return;
 
     kNet::DataDeserializer dd(data, numBytes);
@@ -1256,9 +1261,26 @@ void SyncManager::HandleRigidBodyChanges(UserConnection* /*source*/, kNet::packe
         // Did anything change?
         if (posSendType != 0 || rotSendType != 0 || scaleSendType != 0 || velSendType != 0 || angVelSendType != 0)
         {
-            /// \todo Proper interpolation
             if (placeable)
-                placeable->transform.Set(t, AttributeChange::LocalOnly);
+            {
+                // Record the update time for calculating the update interval
+                // Default update interval if state not found or interval not measured yet
+                EntitySyncState &entityState = state->entities[e->Id()];
+                float updateInterval = updatePeriod_;
+                entityState.UpdateReceived();
+                if (entityState.avgUpdateInterval > 0.0f)
+                    updateInterval = entityState.avgUpdateInterval;
+
+                // Add a fudge factor in case there is jitter in packet receipt or the server is too taxed
+                updateInterval *= 1.25f;
+
+                /// \todo This performs a heap allocation per each transform change received from server, which is not ideal
+                IAttribute* endValue = placeable->transform.Clone();
+                Attribute<Transform>* endValueTransform = static_cast<Attribute<Transform>*>(endValue);
+                endValueTransform->Set(t, AttributeChange::Disconnected);
+
+                scene->StartAttributeInterpolation(&placeable->transform, endValueTransform, updateInterval);
+            }
         }
     }
 
