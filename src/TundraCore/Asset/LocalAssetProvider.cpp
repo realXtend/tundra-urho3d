@@ -71,9 +71,14 @@ AssetTransferPtr LocalAssetProvider::CreateTransfer(String assetRef, String asse
         AssetStoragePtr storage = StorageForAssetRef(assetRef);
         if (!storage)
         {
-            LogError("LocalAssetProvider::RequestAsset: Discarding asset request to path \"" + assetRef +
-                "\" because requests to sources outside registered LocalAssetStorages have been forbidden. (See --acceptUnknownLocalSources).");
-            return AssetTransferPtr();
+            // Detect absolute urls, which we should forbid in this case
+            AssetAPI::AssetRefType refType = AssetAPI::ParseAssetRef(assetRef.Trimmed());
+            if (refType == AssetAPI::AssetRefLocalPath)
+            {
+                LogError("LocalAssetProvider::RequestAsset: Discarding asset request to path \"" + assetRef +
+                    "\" because requests to sources outside registered LocalAssetStorages have been forbidden. (See --acceptUnknownLocalSources).");
+                return AssetTransferPtr();
+            }
         }
     }
 
