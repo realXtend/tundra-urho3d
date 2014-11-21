@@ -146,7 +146,6 @@ void Framework::Initialize()
     engineInitMap["ResourcePaths"] = GetSubsystem<FileSystem>()->GetProgramDir() + "Data";
     engineInitMap["AutoloadPaths"] = "";
     engineInitMap["Headless"] = headless;
-    engineInitMap["WindowTitle"] = "Tundra";
     engineInitMap["WindowResizable"] = true;
     engineInitMap["LogName"] = "Tundra.log";
 
@@ -615,8 +614,20 @@ void Framework::ProcessStartupOptions()
 
 void Framework::ApplyStartupOptions(VariantMap &engineInitMap)
 {
+    String windowTitle = "Tundra";
+    StringVector titleParams = CommandLineParameters("--windowTitle");
+    if (!titleParams.Empty())
+        windowTitle = titleParams.Front();
+    engineInitMap["WindowTitle"] = windowTitle;
+
+    String windowIcon = "Textures/icon-32x32.png";
+    StringVector iconParams = CommandLineParameters("--windowIcon");
+    if (!iconParams.Empty())
+        windowIcon = iconParams.Front();
+    engineInitMap["WindowIcon"] = windowIcon;
+
     // --loglevel controls both shell/console and file logging
-    Vector<String> logLevelParam  = CommandLineParameters("--loglevel");
+    StringVector logLevelParam  = CommandLineParameters("--loglevel");
     if (logLevelParam.Size() > 1)
         LogWarning("Multiple --loglevel parameters specified! Using " + logLevelParam.Front() + " as the value.");
     if (logLevelParam.Size() > 0)
@@ -662,7 +673,7 @@ void Framework::ApplyStartupOptions(VariantMap &engineInitMap)
         engineInitMap["TouchEmulation"] = true;
 
     // Prepare ConfigAPI data folder
-    Vector<String> configDirs = CommandLineParameters("--configDir");
+    StringVector configDirs = CommandLineParameters("--configDir");
     String configDir = "$(USERDATA)/configuration"; // The default configuration goes to "C:\Users\username\AppData\Roaming\Tundra\configuration"
     if (configDirs.Size() >= 1)
         configDir = configDirs.Back();
@@ -681,7 +692,7 @@ void Framework::ApplyStartupOptions(VariantMap &engineInitMap)
             LogWarning("Invalid target FPS value " + String(targetFps) + " read from config. Ignoring.");
     }
 
-    Vector<String> fpsLimitParam = CommandLineParameters("--fpsLimit");
+    StringVector fpsLimitParam = CommandLineParameters("--fpsLimit");
     if (fpsLimitParam.Size() > 1)
         LogWarning("Multiple --fpslimit parameters specified! Using " + fpsLimitParam.Front() + " as the value.");
     if (fpsLimitParam.Size() > 0)
@@ -693,7 +704,7 @@ void Framework::ApplyStartupOptions(VariantMap &engineInitMap)
             LogWarning("Erroneous FPS limit given with --fpsLimit: " + fpsLimitParam.Front() + ". Ignoring.");
     }
 
-    Vector<String> fpsLimitInactiveParam = CommandLineParameters("--fpsLimitWhenInactive");
+    StringVector fpsLimitInactiveParam = CommandLineParameters("--fpsLimitWhenInactive");
     if (fpsLimitInactiveParam.Size() > 1)
         LogWarning("Multiple --fpslimit parameters specified! Using " + fpsLimitInactiveParam.Front() + " as the value.");
     if (fpsLimitInactiveParam.Size() > 0)
