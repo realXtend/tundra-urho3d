@@ -1142,118 +1142,126 @@ void SyncManager::ReplicateRigidBodyChanges(UserConnection* /*user*/)
 //        user->Send(cRigidBodyUpdateMessage, msgReliable, true, ds);
 }
 
-void SyncManager::HandleRigidBodyChanges(UserConnection* /*source*/, kNet::packet_id_t /*packetId*/, const char* /*data*/, size_t /*numBytes*/)
+void SyncManager::HandleRigidBodyChanges(UserConnection* /*source*/, kNet::packet_id_t packetId, const char* data, size_t numBytes)
 {
-//    ScenePtr scene = scene_.lock();
-//    if (!scene)
-//        return;
-//
-//    kNet::DataDeserializer dd(data, numBytes);
-//    while(dd.BitsLeft() >= 9)
-//    {
-//        u32 entityID = dd.ReadVLE<kNet::VLE8_16_32>();
-//        EntityPtr e = scene->EntityById(entityID);
-//        shared_ptr<EC_Placeable> placeable = e ? e->GetComponent<EC_Placeable>() : shared_ptr<EC_Placeable>();
+    ScenePtr scene = scene_.Lock();
+    if (!scene)
+        return;
+
+    kNet::DataDeserializer dd(data, numBytes);
+    while(dd.BitsLeft() >= 9)
+    {
+        u32 entityID = dd.ReadVLE<kNet::VLE8_16_32>();
+        EntityPtr e = scene->EntityById(entityID);
+        Placeable* placeable = e ? e->Component<Placeable>().Get() : nullptr;
 //        shared_ptr<EC_RigidBody> rigidBody = e ? e->GetComponent<EC_RigidBody>() : shared_ptr<EC_RigidBody>();
-//        Transform t = e ? placeable->transform.Get() : Transform();
+        Transform t = e ? placeable->transform.Get() : Transform();
 //
 //        float3 newLinearVel = rigidBody ? rigidBody->linearVelocity.Get() : float3::zero;
+        float3 newLinearVel(float3::zero);
 //
 //        // If the server omitted linear velocity, interpolate towards the last received linear velocity.
 //        std::map<entity_id_t, RigidBodyInterpolationState>::iterator iter = e ? serverConnection_->syncState->entityInterpolations.find(entityID) : serverConnection_->syncState->entityInterpolations.end();
 //        if (iter != serverConnection_->syncState->entityInterpolations.end())
 //            newLinearVel = iter->second.interpEnd.vel;
-//
-//        int posSendType;
-//        int rotSendType;
-//        int scaleSendType;
-//        int velSendType;
-//        int angVelSendType;
-//        dd.ReadArithmeticEncoded(8, posSendType, 3, rotSendType, 4, scaleSendType, 3, velSendType, 3, angVelSendType, 2);
-//
-//        if (posSendType == 1)
-//        {
-//            t.pos.x = dd.ReadSignedFixedPoint(11, 8);
-//            t.pos.y = dd.ReadSignedFixedPoint(11, 8);
-//            t.pos.z = dd.ReadSignedFixedPoint(11, 8);
-//        }
-//        else if (posSendType == 2)
-//        {
-//            t.pos.x = dd.Read<float>();
-//            t.pos.y = dd.Read<float>();
-//            t.pos.z = dd.Read<float>();
-//        }
-//
-//        if (rotSendType == 1) // 1 DOF
-//        {
-//            float3 forward;
-//            dd.ReadNormalizedVector2D(8, forward.x, forward.z);
-//            forward.y = 0.f;
-//            float3x3 orientation = float3x3::LookAt(float3::unitZ, forward, float3::unitY, float3::unitY);
-//            t.SetOrientation(orientation);
-//        }
-//        else if (rotSendType == 2)
-//        {
-//            float3 forward;
-//            dd.ReadNormalizedVector3D(9, 8, forward.x, forward.y, forward.z);
-//
-//            float3x3 orientation = float3x3::LookAt(float3::unitZ, forward, float3::unitY, float3::unitY);
-//            t.SetOrientation(orientation);
-//
-//        }
-//        else if (rotSendType == 3)
-//        {
-//            // Read the quantized float manually, without a call to ReadQuantizedFloat, to be able to compare the quantized bit pattern.
-//            u32 quantizedAngle = dd.ReadBits(10);
-//            if (quantizedAngle != 0)
-//            {
-//                float angle = quantizedAngle * 3.141592654f / (float)((1 << 10) - 1);
-//                float3 axis;
-//                dd.ReadNormalizedVector3D(11, 10, axis.x, axis.y, axis.z);
-//                t.SetOrientation(Quat(axis, angle));
-//            }
-//            else
-//                t.SetOrientation(Quat::identity);
-//        }
-//
-//        if (scaleSendType == 1)
-//            t.scale = float3::FromScalar(dd.Read<float>());
-//        else if (scaleSendType == 2)
-//        {
-//            t.scale.x = dd.Read<float>();
-//            t.scale.y = dd.Read<float>();
-//            t.scale.z = dd.Read<float>();
-//        }
-//
-//        if (velSendType == 1)
-//            dd.ReadVector3D(11, 10, 3, 8, newLinearVel.x, newLinearVel.y, newLinearVel.z);
-//        else if (velSendType == 2)
-//            dd.ReadVector3D(11, 10, 10, 8, newLinearVel.x, newLinearVel.y, newLinearVel.z);
-//
+
+        int posSendType;
+        int rotSendType;
+        int scaleSendType;
+        int velSendType;
+        int angVelSendType;
+        dd.ReadArithmeticEncoded(8, posSendType, 3, rotSendType, 4, scaleSendType, 3, velSendType, 3, angVelSendType, 2);
+
+        if (posSendType == 1)
+        {
+            t.pos.x = dd.ReadSignedFixedPoint(11, 8);
+            t.pos.y = dd.ReadSignedFixedPoint(11, 8);
+            t.pos.z = dd.ReadSignedFixedPoint(11, 8);
+        }
+        else if (posSendType == 2)
+        {
+            t.pos.x = dd.Read<float>();
+            t.pos.y = dd.Read<float>();
+            t.pos.z = dd.Read<float>();
+        }
+
+        if (rotSendType == 1) // 1 DOF
+        {
+            float3 forward;
+            dd.ReadNormalizedVector2D(8, forward.x, forward.z);
+            forward.y = 0.f;
+            float3x3 orientation = float3x3::LookAt(float3::unitZ, forward, float3::unitY, float3::unitY);
+            t.SetOrientation(orientation);
+        }
+        else if (rotSendType == 2)
+        {
+            float3 forward;
+            dd.ReadNormalizedVector3D(9, 8, forward.x, forward.y, forward.z);
+
+            float3x3 orientation = float3x3::LookAt(float3::unitZ, forward, float3::unitY, float3::unitY);
+            t.SetOrientation(orientation);
+
+        }
+        else if (rotSendType == 3)
+        {
+            // Read the quantized float manually, without a call to ReadQuantizedFloat, to be able to compare the quantized bit pattern.
+            u32 quantizedAngle = dd.ReadBits(10);
+            if (quantizedAngle != 0)
+            {
+                float angle = quantizedAngle * 3.141592654f / (float)((1 << 10) - 1);
+                float3 axis;
+                dd.ReadNormalizedVector3D(11, 10, axis.x, axis.y, axis.z);
+                t.SetOrientation(Quat(axis, angle));
+            }
+            else
+                t.SetOrientation(Quat::identity);
+        }
+
+        if (scaleSendType == 1)
+            t.scale = float3::FromScalar(dd.Read<float>());
+        else if (scaleSendType == 2)
+        {
+            t.scale.x = dd.Read<float>();
+            t.scale.y = dd.Read<float>();
+            t.scale.z = dd.Read<float>();
+        }
+
+        if (velSendType == 1)
+            dd.ReadVector3D(11, 10, 3, 8, newLinearVel.x, newLinearVel.y, newLinearVel.z);
+        else if (velSendType == 2)
+            dd.ReadVector3D(11, 10, 10, 8, newLinearVel.x, newLinearVel.y, newLinearVel.z);
+
 //        float3 newAngVel = rigidBody ? rigidBody->angularVelocity.Get() : float3::zero;
-//
-//        if (angVelSendType == 1)
-//        {
-//            // Read the quantized float manually, without a call to ReadQuantizedFloat, to be able to compare the quantized bit pattern.
-//            u32 quantizedAngle = dd.ReadBits(10);
-//            if (quantizedAngle != 0)
-//            {
-//                float angle = quantizedAngle * 3.141592654f / (float)((1 << 10) - 1);
-//                float3 axis;
-//                dd.ReadNormalizedVector3D(11, 10, axis.x, axis.y, axis.z);
-//                Quat q(axis, angle);
-//                newAngVel = q.ToEulerZYX();
-//                Swap(newAngVel.z, newAngVel.x);
-//                newAngVel = RadToDeg(newAngVel);
-//            }
-//        }
-//
-//        if (!e) // Discard this message - we don't have the entity in our scene to which the message applies to.
-//            continue;
-//
-//        // Did anything change?
-//        if (posSendType != 0 || rotSendType != 0 || scaleSendType != 0 || velSendType != 0 || angVelSendType != 0)
-//        {
+        float3 newAngVel(float3::zero);
+
+        if (angVelSendType == 1)
+        {
+            // Read the quantized float manually, without a call to ReadQuantizedFloat, to be able to compare the quantized bit pattern.
+            u32 quantizedAngle = dd.ReadBits(10);
+            if (quantizedAngle != 0)
+            {
+                float angle = quantizedAngle * 3.141592654f / (float)((1 << 10) - 1);
+                float3 axis;
+                dd.ReadNormalizedVector3D(11, 10, axis.x, axis.y, axis.z);
+                Quat q(axis, angle);
+                newAngVel = q.ToEulerZYX();
+                Swap(newAngVel.z, newAngVel.x);
+                newAngVel = RadToDeg(newAngVel);
+            }
+        }
+
+        if (!e) // Discard this message - we don't have the entity in our scene to which the message applies to.
+            continue;
+
+        // Did anything change?
+        if (posSendType != 0 || rotSendType != 0 || scaleSendType != 0 || velSendType != 0 || angVelSendType != 0)
+        {
+            /// \todo Proper interpolation
+            if (placeable)
+                placeable->transform.Set(t, AttributeChange::LocalOnly);
+        }
+    }
+
 //            // Create or update the interpolation state.
 //            Transform orig = placeable->transform.Get();
 //
