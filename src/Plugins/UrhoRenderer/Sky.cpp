@@ -142,13 +142,14 @@ void Sky::Update()
         return;
 
     urhoNode_->SetScale(distance.Get());
-    
+    Urho3D::ResourceCache* cache = GetSubsystem<Urho3D::ResourceCache>();
+
     if (material_ != nullptr && textureRefListListener_->Assets().Size() < 6)
     {
         // Use material as is
 
         ///\todo Remove diff color setting once DefaultOgreMaterialProcessor sets it properly.
-        material_->UrhoMaterial()->SetShaderParameter("MatDiffColor", Urho3D::Vector3(1, 1, 1));
+        material_->UrhoMaterial()->SetShaderParameter("MatDiffColor", Urho3D::Vector4(1, 1, 1, 1));
         material_->UrhoMaterial()->SetCullMode(Urho3D::CULL_NONE);
         urhoNode_->GetComponent<Urho3D::Skybox>()->SetMaterial(material_->UrhoMaterial());
         return;
@@ -190,31 +191,24 @@ void Sky::Update()
         for (size_t i=0 ; i<images.Size() ; ++i)
             if (images[faceOrder[i]] != nullptr)
                 textureCube->SetData(faces[i], images[faceOrder[i]]);
-           
-        SharedPtr<Urho3D::Technique> technique = SharedPtr<Urho3D::Technique>(new Urho3D::Technique(GetContext()));
-        Urho3D::Pass* pass = technique->CreatePass("postopaque");
-        pass->SetDepthWrite(false);
-        pass->SetVertexShader("Skybox");
-        pass->SetPixelShader("Skybox");
-        
+
         SharedPtr<Urho3D::Material> material;
         if (material_)
             material = material_->UrhoMaterial();
         else
             material = SharedPtr<Urho3D::Material>(new Urho3D::Material(GetContext()));
         material->SetCullMode(Urho3D::CULL_NONE);
-        material->SetTechnique(0, technique);
+        material->SetTechnique(0, cache->GetResource<Urho3D::Technique>("Techniques/DiffSkybox.xml"));
         material->SetTexture(Urho3D::TU_DIFFUSE, textureCube);
         ///\todo Remove diff color setting once DefaultOgreMaterialProcessor sets it properly.
-        material->SetShaderParameter("MatDiffColor", Urho3D::Vector3(1, 1, 1));
-                
+        material->SetShaderParameter("MatDiffColor", Urho3D::Vector4(1, 1, 1, 1));
+    
         urhoNode_->GetComponent<Urho3D::Skybox>()->SetMaterial(material);
     } 
     else
     {
         if (GetFramework()->HasCommandLineParameter("--useErrorAsset"))
         {
-            Urho3D::ResourceCache* cache = GetSubsystem<Urho3D::ResourceCache>();
             urhoNode_->GetComponent<Urho3D::Skybox>()->SetMaterial(cache->GetResource<Urho3D::Material>("Materials/AssetLoadError.xml"));
         }
     }
