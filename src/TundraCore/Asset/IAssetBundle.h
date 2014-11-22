@@ -16,7 +16,7 @@ namespace Tundra
 /// Base class for all asset bundles that provide sub assets.
 class TUNDRACORE_API IAssetBundle : public Object
 {
-    OBJECT(AssetBundle);
+    OBJECT(IAssetBundle);
 
 public:
     IAssetBundle(AssetAPI *assetAPI, const String &type, const String &name);
