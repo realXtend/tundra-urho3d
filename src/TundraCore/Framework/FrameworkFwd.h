@@ -20,4 +20,6 @@ namespace Tundra
     class ConsoleAPI;
     class AssetAPI;
     class DebugAPI;
+    class InputAPI;
+    class InputContext;
 }

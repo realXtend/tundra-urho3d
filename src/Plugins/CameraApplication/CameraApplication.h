@@ -47,6 +47,8 @@ private:
 
     SceneWeakPtr lastScene_;
     SDL_JoystickID joystickId_;
+
+    SharedPtr<InputContext> inputContext_;
 };
 
 }

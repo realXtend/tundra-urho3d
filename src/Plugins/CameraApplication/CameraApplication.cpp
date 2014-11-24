@@ -12,6 +12,8 @@
 #include "LoggingFunctions.h"
 #include "Math/float3.h"
 #include "Math/MathFunc.h"
+#include "Input/InputAPI.h"
+#include "Input/InputContext.h"
 
 #include <InputEvents.h>
 #include <ResourceCache.h>
@@ -46,10 +48,13 @@ void CameraApplication::Initialize()
     // Connect to scene change signals.
     framework->Scene()->SceneCreated.Connect(this, &CameraApplication::OnSceneCreated);
     framework->Scene()->SceneAboutToBeRemoved.Connect(this, &CameraApplication::OnSceneAboutToBeRemoved);
+
+    inputContext_ = framework->Input()->RegisterInputContext("CameraApplication", 101);
 }
 
 void CameraApplication::Uninitialize()
 {
+    inputContext_.Reset();
 }
 
 void CameraApplication::Update(float frameTime)
@@ -137,21 +142,20 @@ void CameraApplication::MoveCamera(Entity* cameraEntity, float frameTime)
     if (!placeable)
         return;
     
-    /// \todo Use InputAPI once it exists
-    Urho3D::Input* input = GetSubsystem<Urho3D::Input>();
+    InputAPI* input = framework->Input();
 
     bool changed = false;
 
     Transform t = placeable->transform.Get();
 
-    if (input->GetMouseButtonDown(Urho3D::MOUSEB_RIGHT))
+    if (inputContext_->IsMouseButtonDown(Urho3D::MOUSEB_RIGHT))
     {
         t.rot.x -= input->GetMouseMoveY() * cRotateSpeed;
         t.rot.y -= input->GetMouseMoveX() * cRotateSpeed;
         t.rot.x = Clamp(t.rot.x, -90.0f, 90.0f);
         changed = true;
     }
-    else if (input->GetNumTouches() > 0)
+    else if (inputContext_->GetNumTouches() > 0)
     {
         // Find a touch point that is not on top of the movement joystick button.
         for (int ti=0, len=input->GetNumTouches(); ti<len; ++ti)
@@ -168,17 +172,17 @@ void CameraApplication::MoveCamera(Entity* cameraEntity, float frameTime)
 
     float3 moveVector = float3::zero;
     // Note right-handed coordinate system
-    if (input->GetKeyDown(Urho3D::KEY_W))
+    if (inputContext_->IsKeyDown(Urho3D::KEY_W))
         moveVector += float3(0.0f, 0.0f, -1.0f);
-    if (input->GetKeyDown(Urho3D::KEY_S))
+    if (inputContext_->IsKeyDown(Urho3D::KEY_S))
         moveVector += float3(0.0f, 0.0f, 1.0f);
-    if (input->GetKeyDown(Urho3D::KEY_A))
+    if (inputContext_->IsKeyDown(Urho3D::KEY_A))
         moveVector += float3(-1.0f, 0.0f, 0.0f);
-    if (input->GetKeyDown(Urho3D::KEY_D))
+    if (inputContext_->IsKeyDown(Urho3D::KEY_D))
         moveVector += float3(1.0f, 0.0f, 0.0f);
-    if (input->GetKeyDown(Urho3D::KEY_SPACE))
+    if (inputContext_->IsKeyDown(Urho3D::KEY_SPACE))
         moveVector += float3(0.0f, 1.0f, 0.0f);
-    if (input->GetKeyDown(Urho3D::KEY_C))
+    if (inputContext_->IsKeyDown(Urho3D::KEY_C))
         moveVector += float3(0.0f, -1.0f, 0.0f);
 
     if (!moveVector.Equals(float3::zero))

@@ -151,6 +151,9 @@ public:
     /// Returns core API Debug object.
     DebugAPI *Debug() const;
 
+    /// Returns core API Input object.
+    InputAPI* Input() const;
+
     /// Return the Urho3D Engine object.
     Urho3D::Engine* Engine() const;
 
@@ -228,6 +231,8 @@ private:
     SharedPtr<AssetAPI> asset;
     /// DebugAPI
     SharedPtr<DebugAPI> debug;
+    /// InputAPI
+    SharedPtr<InputAPI> input;
 
     /// Stores all command line parameters and expanded options specified in the Config XML files, except for the config file(s) themselves.
     OptionsMap startupOptions;

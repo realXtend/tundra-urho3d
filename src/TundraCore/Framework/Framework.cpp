@@ -11,6 +11,7 @@
 #include "Scene/SceneAPI.h"
 #include "Console/ConsoleAPI.h"
 #include "Debug/DebugAPI.h"
+#include "Input/InputAPI.h"
 #include "Asset/AssetAPI.h"
 #include "Asset/AssetCache.h"
 #include "Asset/LocalAssetProvider.h"
@@ -90,6 +91,7 @@ Framework::Framework(Context* ctx) :
     debug = new DebugAPI(this);
     scene = new SceneAPI(this);
     asset = new AssetAPI(this, headless);
+    input = new InputAPI(this);
 
     // Prepare main cache directory
     String cacheDir = UserDataDirectory() + "cache";
@@ -152,8 +154,7 @@ void Framework::Initialize()
     LogInfo("");
     engine->Initialize(engineInitMap);
     // Show mouse cursor for more pleasant experience
-    /// \todo Move to InputAPI once it exists
-    GetSubsystem<Input>()->SetMouseVisible(true);
+    input->SetMouseCursorVisible(true);
 
     // Initialize core APIs
     console->Initialize();
@@ -315,6 +316,7 @@ void Framework::ProcessOneFrame()
         modules[i]->Update(dt);
 
     asset->Update(dt);
+    input->Update(dt);
     frame->Update(dt);
 
     /// \todo remove Android hack: exit by pressing back button, which is mapped to ESC
@@ -381,6 +383,11 @@ AssetAPI* Framework::Asset() const
 DebugAPI *Framework::Debug() const
 {
     return debug;
+}
+
+InputAPI *Framework::Input() const
+{
+    return input;
 }
 
 Engine* Framework::Engine() const
