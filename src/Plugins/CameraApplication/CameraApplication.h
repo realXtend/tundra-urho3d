@@ -49,6 +49,8 @@ private:
     SDL_JoystickID joystickId_;
 
     SharedPtr<InputContext> inputContext_;
+
+    float movementHeld_;
 };
 
 }

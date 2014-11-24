@@ -26,12 +26,13 @@
 namespace Tundra
 {
 
-const float cMoveSpeed = 30.0f;
-const float cRotateSpeed = 0.3f;
+const float cMoveSpeed = 15.0f;
+const float cRotateSpeed = 0.20f;
 
 CameraApplication::CameraApplication(Framework* owner) :
     IModule("CameraApplication", owner),
-    joystickId_(-1)
+    joystickId_(-1),
+    movementHeld_(0.f)
 {
 }
 
@@ -185,11 +186,17 @@ void CameraApplication::MoveCamera(Entity* cameraEntity, float frameTime)
     if (inputContext_->IsKeyDown(Urho3D::KEY_C))
         moveVector += float3(0.0f, -1.0f, 0.0f);
 
+    if (inputContext_->IsKeyPressed(Urho3D::KEY_SHIFT))
+        moveVector *= 2;
+
     if (!moveVector.Equals(float3::zero))
     {
-        t.pos += t.Orientation() * (cMoveSpeed * frameTime * moveVector);
+        movementHeld_ = Clamp(movementHeld_ + (frameTime * 4.f), 0.f, 1.0f);
+        t.pos += t.Orientation() * (cMoveSpeed * frameTime * moveVector * movementHeld_);
         changed = true;
     }
+    else
+        movementHeld_ = 0.f;
 
     if (changed)
         placeable->transform.Set(t);
