@@ -32,12 +32,12 @@ public:
     {
     }
 
-    virtual void OnDeviceReset()
+    void OnDeviceReset() override
     {
         Texture2D::OnDeviceReset();
         if (IsDataLost() && owner && owner->DiskSource().Trimmed().Length())
         {
-            LogWarning("Restoring lost texture " + owner->Name() + " from file!");
+            LogDebug("Restoring lost TextureAsset " + owner->Name() + " from its disk source");
             owner->LoadFromFile(owner->DiskSource());
         }
     }
