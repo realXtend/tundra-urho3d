@@ -276,7 +276,8 @@ void Framework::LoadConfig(VariantMap &engineInitMap)
     IntVector2 windowPosition = config->Read(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_GRAPHICS, "window position", IntVector2(Urho3D::M_MAX_INT,Urho3D::M_MAX_INT)).GetIntVector2();
     IntVector2 windowSize = config->Read(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_GRAPHICS, "window size", IntVector2(1024,768)).GetIntVector2();
 
-    if (windowPosition.x_ != Urho3D::M_MAX_INT && windowPosition.y_ != Urho3D::M_MAX_INT)
+    // If position is at 0,0 (from a full screen mode) do not apply it
+    if (windowPosition.x_ != Urho3D::M_MAX_INT && windowPosition.y_ != Urho3D::M_MAX_INT && windowPosition.x_ > 0 && windowPosition.y_ > 0)
     {
         engineInitMap["WindowPositionX"] = windowPosition.x_;
         engineInitMap["WindowPositionY"] = windowPosition.y_;
