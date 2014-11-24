@@ -321,7 +321,7 @@ void Framework::ProcessOneFrame()
 
     /// \todo remove Android hack: exit by pressing back button, which is mapped to ESC
 #ifdef ANDROID
-    if (GetSubsystem<Input>()->GetKeyPress(KEY_ESC))
+    if (GetSubsystem<Urho3D::Input>()->GetKeyPress(KEY_ESC))
         Exit();
 #endif
 
