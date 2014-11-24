@@ -11,6 +11,7 @@
 #include "Crunch/crn_decomp.h"
 #include "Crunch/dds_defs.h"
 
+#include <GraphicsEvents.h>
 #include <MemoryBuffer.h>
 #include <Texture2D.h>
 #include <Material.h>
@@ -19,32 +20,6 @@
 
 namespace Tundra
 {
-
-/// Subclassed Texture2D which knows how to handle data loss by using the asset's disksource
-class AssetBackedTexture2D : public Urho3D::Texture2D
-{
-    OBJECT(AssetBackedTexture2D);
-
-public:
-    AssetBackedTexture2D(TextureAsset* owner_) :
-        Texture2D(owner_->GetContext()),
-        owner(owner_)
-    {
-    }
-
-    void OnDeviceReset() override
-    {
-        Texture2D::OnDeviceReset();
-        if (IsDataLost() && owner && owner->DiskSource().Trimmed().Length())
-        {
-            LogDebug("Restoring lost TextureAsset " + owner->Name() + " from its disk source");
-            owner->LoadFromFile(owner->DiskSource());
-        }
-    }
-
-    WeakPtr<TextureAsset> owner;
-};
-
 
 TextureAsset::TextureAsset(AssetAPI *owner, const String &type_, const String &name_) :
     IAsset(owner, type_, name_)
@@ -62,8 +37,9 @@ bool TextureAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*al
 
     bool success = false;
 
-    if (!texture)
-        texture = new AssetBackedTexture2D(this);
+    // Delete previous data first
+    Unload();
+    texture = new Urho3D::Texture2D(context_);
 
     if (!Name().EndsWith(".crn", false))
     {
@@ -82,7 +58,11 @@ bool TextureAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*al
     }
 
     if (success)
+    {
+        // Once data has been loaded, subscribe to device reset events to be able to restore the data if necessary
+        SubscribeToEvent(Urho3D::E_DEVICERESET, HANDLER(TextureAsset, HandleDeviceReset));
         assetAPI->AssetLoadCompleted(Name());
+    }
     else
     {
         LogError("TextureAsset::DeserializeFromData: Failed to load texture asset " + Name());
@@ -220,6 +200,15 @@ size_t TextureAsset::Width() const
         return 0;
 
     return texture->GetWidth();
+}
+
+void TextureAsset::HandleDeviceReset(StringHash /*eventType*/, VariantMap& /*eventData*/)
+{
+    if (texture && texture->IsDataLost() && DiskSource().Trimmed().Length())
+    {
+        LogDebug("TextureAsset::HandleDeviceReset: Restoring texture data for " + Name() + " from disk source");
+        LoadFromFile(DiskSource().Trimmed());
+    }
 }
 
 }

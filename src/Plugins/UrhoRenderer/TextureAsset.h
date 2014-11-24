@@ -42,6 +42,8 @@ protected:
     SharedPtr<Urho3D::Texture2D> texture;
 
 private:
+    void HandleDeviceReset(StringHash eventType, VariantMap& eventData);
+
     bool DecompressCRNtoDDS(const u8 *crnData, uint crnNumBytes, Vector<u8> &ddsData) const;
 };
 
