@@ -242,7 +242,8 @@ void DebugHud::OnUpdate(float frametime)
         }
 
         String stats;
-        stats.AppendWithFormat("Triangles  %s\nBatches    %u\nViews      %u\nLights     %u\nShadowmaps %u\nOccluders  %u",
+        stats.AppendWithFormat("FPS        %d\nTriangles  %s\nBatches    %u\nViews      %u\nLights     %u\nShadowmaps %u\nOccluders  %u",
+            static_cast<int>(1.f / GetSubsystem<Time>()->GetTimeStep()),
             FormatDigitGrouping(primitives).CString(),
             batches,
             renderer->GetNumViews(),
