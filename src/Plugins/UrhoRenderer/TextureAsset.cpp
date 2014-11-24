@@ -20,6 +20,32 @@
 namespace Tundra
 {
 
+/// Subclassed Texture2D which knows how to handle data loss by using the asset's disksource
+class AssetBackedTexture2D : public Urho3D::Texture2D
+{
+    OBJECT(AssetBackedTexture2D);
+
+public:
+    AssetBackedTexture2D(TextureAsset* owner_) :
+        Texture2D(owner_->GetContext()),
+        owner(owner_)
+    {
+    }
+
+    virtual void OnDeviceReset()
+    {
+        Texture2D::OnDeviceReset();
+        if (IsDataLost() && owner && owner->DiskSource().Trimmed().Length())
+        {
+            LogWarning("Restoring lost texture " + owner->Name() + " from file!");
+            owner->LoadFromFile(owner->DiskSource());
+        }
+    }
+
+    WeakPtr<TextureAsset> owner;
+};
+
+
 TextureAsset::TextureAsset(AssetAPI *owner, const String &type_, const String &name_) :
     IAsset(owner, type_, name_)
 {
@@ -36,13 +62,12 @@ bool TextureAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*al
 
     bool success = false;
 
-    /// Force an unload of previous data first.
-    Unload();
+    if (!texture)
+        texture = new AssetBackedTexture2D(this);
 
     if (!Name().EndsWith(".crn", false))
     {
         Urho3D::MemoryBuffer imageBuffer(data_, numBytes);
-        texture = new Urho3D::Texture2D(GetContext());
         success = texture->Load(imageBuffer);
     }
     else
@@ -52,7 +77,6 @@ bool TextureAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*al
         if (success)
         {
             Urho3D::MemoryBuffer imageBuffer(&ddsData[0], ddsData.Size());
-            texture = new Urho3D::Texture2D(GetContext());
             success = texture->Load(imageBuffer);
         }
     }
