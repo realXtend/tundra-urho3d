@@ -9,6 +9,7 @@ namespace Urho3D
     class AnimationState;
     class BoundingBox;
     class Camera;
+    class Image;
     class Light;
     class Material;
     class Model;

@@ -3,7 +3,7 @@
 #include "StableHeaders.h"
 #include "Renderer.h"
 #include "AssetAPI.h"
-#include "AssetCache.h"
+#include "Framework.h"
 #include "Profiler.h"
 #include "LoggingFunctions.h"
 #include "TextureAsset.h"
@@ -12,6 +12,7 @@
 #include "Crunch/dds_defs.h"
 
 #include <GraphicsEvents.h>
+#include <Image.h>
 #include <MemoryBuffer.h>
 #include <Texture2D.h>
 #include <Material.h>
@@ -44,7 +45,13 @@ bool TextureAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*al
     if (!Name().EndsWith(".crn", false))
     {
         Urho3D::MemoryBuffer imageBuffer(data_, numBytes);
-        success = texture->Load(imageBuffer);
+        SharedPtr<Urho3D::Image> image(new Urho3D::Image(context_));
+        success = image->Load(imageBuffer);
+        if (success)
+        {
+            DetermineMipsToSkip(image, texture);
+            success = texture->SetData(image);
+        }
     }
     else
     {
@@ -53,7 +60,13 @@ bool TextureAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*al
         if (success)
         {
             Urho3D::MemoryBuffer imageBuffer(&ddsData[0], ddsData.Size());
-            success = texture->Load(imageBuffer);
+            SharedPtr<Urho3D::Image> image(new Urho3D::Image(context_));
+            success = image->Load(imageBuffer);
+            if (success)
+            {
+                DetermineMipsToSkip(image, texture);
+                success = texture->SetData(image);
+            }
         }
     }
 
@@ -208,6 +221,52 @@ void TextureAsset::HandleDeviceReset(StringHash /*eventType*/, VariantMap& /*eve
     {
         LogDebug("TextureAsset::HandleDeviceReset: Restoring texture data for " + Name() + " from disk source");
         LoadFromFile(DiskSource().Trimmed());
+    }
+}
+
+int TextureAsset::MaxTextureSize() const
+{
+    int maxTextureSize = Urho3D::M_MAX_INT;
+
+    // Android: hardcoded texture size limit if not specified to reduce memory use.
+    /// \todo Investigate if this is the best way to do this
+#ifdef ANDROID
+    maxTextureSize = 512;
+#endif
+
+    if (assetAPI->GetFramework()->HasCommandLineParameter("--maxTextureSize"))
+    {
+        StringVector sizeParam = assetAPI->GetFramework()->CommandLineParameters("--maxTextureSize");
+        if (sizeParam.Size() > 0)
+        {
+            int size = Urho3D::ToInt(sizeParam.Front());
+            if (size > 0)
+                maxTextureSize = size;
+        }
+    }
+
+    return maxTextureSize;
+}
+
+void TextureAsset::DetermineMipsToSkip(Urho3D::Image* image, Urho3D::Texture2D* texture) const
+{
+    if (!image || !texture)
+        return;
+
+    int maxDimension = Urho3D::Max(image->GetWidth(), image->GetHeight());
+    int maxSize = MaxTextureSize();
+    int mipsToSkip = 0;
+    while (maxDimension > 1 && maxDimension > maxSize)
+    {
+        maxDimension >>= 1;
+        ++mipsToSkip;
+    }
+    // Force all settings to same
+    if (mipsToSkip > 0)
+    {
+        texture->SetMipsToSkip(Urho3D::QUALITY_LOW, mipsToSkip);
+        texture->SetMipsToSkip(Urho3D::QUALITY_MEDIUM, mipsToSkip);
+        texture->SetMipsToSkip(Urho3D::QUALITY_HIGH, mipsToSkip);
     }
 }
 

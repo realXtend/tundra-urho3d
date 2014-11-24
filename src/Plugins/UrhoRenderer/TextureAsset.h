@@ -45,6 +45,9 @@ private:
     void HandleDeviceReset(StringHash eventType, VariantMap& eventData);
 
     bool DecompressCRNtoDDS(const u8 *crnData, uint crnNumBytes, Vector<u8> &ddsData) const;
+
+    int MaxTextureSize() const;
+    void DetermineMipsToSkip(Urho3D::Image* image, Urho3D::Texture2D* texture) const;
 };
 
 }
