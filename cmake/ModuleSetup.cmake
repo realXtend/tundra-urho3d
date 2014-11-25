@@ -252,6 +252,7 @@ macro(UseTundraCore)
     include_directories(${CMAKE_SOURCE_DIR}/src/TundraCore/
         ${CMAKE_SOURCE_DIR}/src/TundraCore/Asset
         ${CMAKE_SOURCE_DIR}/src/TundraCore/Framework
+        ${CMAKE_SOURCE_DIR}/src/TundraCore/Input
         ${CMAKE_SOURCE_DIR}/src/TundraCore/JSON
         ${CMAKE_SOURCE_DIR}/src/TundraCore/Scene
         ${CMAKE_SOURCE_DIR}/src/TundraCore/Console

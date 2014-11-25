@@ -4,6 +4,7 @@
 
 #include "IModule.h"
 #include "SceneFwd.h"
+#include "InputFwd.h"
 #include "IAttribute.h"
 #include "AttributeChangeType.h"
 #include "IRenderer.h"
@@ -90,8 +91,11 @@ private:
     /** This function will only perform the raycast once per Tundra mainloop frame. */
     RayQueryResult* ExecuteRaycast();
     
-    /// Handle mouse input events. \todo Refactor to use InputAPI once it exists
-    void HandleMouseEvent(StringHash eventType, VariantMap& eventData);
+    void Initialize() override;
+    void Uninitialize() override;
+
+    /// Handle mouse input events.
+    void HandleMouseEvent(MouseEvent* e);
 
     int lastX; ///< Last known mouse cursor's x position.
     int lastY; ///< Last known mouse cursor's y position.
@@ -101,7 +105,7 @@ private:
 
     EntityWeakPtr lastHitEntity; ///< Last entity raycast has hit.
     mutable RayQueryResult lastRaycast; ///< Last raycast result.
-    
+    SharedPtr<InputContext> inputContext;
 };
 
 }

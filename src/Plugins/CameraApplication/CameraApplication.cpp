@@ -12,8 +12,8 @@
 #include "LoggingFunctions.h"
 #include "Math/float3.h"
 #include "Math/MathFunc.h"
-#include "Input/InputAPI.h"
-#include "Input/InputContext.h"
+#include "InputAPI.h"
+#include "InputContext.h"
 
 #include <InputEvents.h>
 #include <ResourceCache.h>

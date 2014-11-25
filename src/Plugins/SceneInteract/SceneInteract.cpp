@@ -13,8 +13,9 @@
 #include "Math/MathFunc.h"
 #include "UrhoRenderer.h"
 
-#include <Input.h>
-#include <InputEvents.h>
+#include "InputAPI.h"
+#include "InputContext.h"
+
 #include <StringUtils.h>
 #include <UI.h>
 
@@ -27,16 +28,21 @@ SceneInteract::SceneInteract(Framework* owner) :
     lastY(-1),
     frameRaycasted(false)
 {
-    /// \todo Use InputAPI once it exists
-    Urho3D::Input* input = GetSubsystem<Urho3D::Input>();
-    SubscribeToEvent(input, Urho3D::E_MOUSEMOVE, HANDLER(SceneInteract, HandleMouseEvent));
-    SubscribeToEvent(input, Urho3D::E_MOUSEWHEEL, HANDLER(SceneInteract, HandleMouseEvent));
-    SubscribeToEvent(input, Urho3D::E_MOUSEBUTTONUP, HANDLER(SceneInteract, HandleMouseEvent));
-    SubscribeToEvent(input, Urho3D::E_MOUSEBUTTONDOWN, HANDLER(SceneInteract, HandleMouseEvent));
 }
 
 SceneInteract::~SceneInteract()
 {
+}
+
+void SceneInteract::Initialize()
+{
+    inputContext = framework->Input()->RegisterInputContext("SceneInteract", 100);
+    inputContext->MouseEventReceived.Connect(this, &SceneInteract::HandleMouseEvent);
+}
+
+void SceneInteract::Uninitialize()
+{
+    inputContext.Reset();
 }
 
 void SceneInteract::Update(float /*frameTime*/)
@@ -170,16 +176,15 @@ RayQueryResult* SceneInteract::ExecuteRaycast()
     return &lastRaycast;
 }
 
-void SceneInteract::HandleMouseEvent(StringHash eventType, VariantMap& eventData)
+void SceneInteract::HandleMouseEvent(MouseEvent* e)
 {
     // Invalidate cached raycast if mouse coordinates have changed
-    Urho3D::IntVector2 mousePos = GetSubsystem<Urho3D::Input>()->GetMousePosition();
     if (frameRaycasted)
-        if (lastX != mousePos.x_ || lastY != mousePos.y_)
+        if (lastX != e->x || lastY != e->y)
             frameRaycasted = false;
 
-    lastX = mousePos.x_;
-    lastY = mousePos.y_;
+    lastX = e->x;
+    lastY = e->y;
     itemUnderMouse = GetSubsystem<Urho3D::UI>()->GetElementAt(lastX, lastY, true) != nullptr;
 
     RayQueryResult *raycastResult = ExecuteRaycast();
@@ -192,36 +197,36 @@ void SceneInteract::HandleMouseEvent(StringHash eventType, VariantMap& eventData
 
     if (lastHitEntity)
     {
-        if(eventType == Urho3D::E_MOUSEMOVE)
+        if(e->Type() == MouseEvent::MouseMove)
         {
-            EntityMouseMove.Emit(hitEntity, eventData[Urho3D::MouseMove::P_BUTTONS].GetInt(), raycastResult);
+            EntityMouseMove.Emit(hitEntity, e->otherButtons, raycastResult);
         }
-        else if (eventType == Urho3D::E_MOUSEWHEEL)
+        else if (e->Type() == MouseEvent::MouseScroll)
         {
-            actionParams.Push(String(eventData[Urho3D::MouseWheel::P_WHEEL].GetInt()));
+            actionParams.Push(String(e->relativeZ));
             actionParams.Push(Urho3D::ToString("%f,%f,%f", raycastResult->pos.x, raycastResult->pos.y, raycastResult->pos.z));
             hitEntity->Exec(EntityAction::Local, "MouseScroll", actionParams);
-            EntityMouseScroll.Emit(hitEntity, eventData[Urho3D::MouseWheel::P_WHEEL].GetInt(), raycastResult);
+            EntityMouseScroll.Emit(hitEntity, e->relativeZ, raycastResult);
         }
-        else if (eventType == Urho3D::E_MOUSEBUTTONDOWN)
+        else if (e->Type() == MouseEvent::MousePressed)
         {
             // Execute local entity action with signature:
             // Action name: "MousePress"
             // String parameters: (int)mouseButton, (float,float,float)"x,y,z"
-            actionParams.Push(String(eventData[Urho3D::MouseButtonDown::P_BUTTON].GetInt()));
+            actionParams.Push(String((int)e->button));
             actionParams.Push(Urho3D::ToString("%f,%f,%f", raycastResult->pos.x, raycastResult->pos.y, raycastResult->pos.z));
             hitEntity->Exec(EntityAction::Local, "MousePress", actionParams);
-            EntityClicked.Emit(hitEntity, eventData[Urho3D::MouseButtonDown::P_BUTTON].GetInt(), raycastResult);
+            EntityClicked.Emit(hitEntity, (int)e->button, raycastResult);
         }
-        else if (eventType == Urho3D::E_MOUSEBUTTONUP)
+        else if (e->Type() == MouseEvent::MouseReleased)
         {
             // Execute local entity action with signature:
             // Action name: "MouseRelease"
             // String parameters: (int)mouseButton, (float,float,float)"x,y,z", (int)"submesh index"
-            actionParams.Push(String(eventData[Urho3D::MouseButtonUp::P_BUTTON].GetInt()));
+            actionParams.Push(String((int)e->button));
             actionParams.Push(Urho3D::ToString("%f,%f,%f", raycastResult->pos.x, raycastResult->pos.y, raycastResult->pos.z));
             hitEntity->Exec(EntityAction::Local, "MouseRelease", actionParams);
-            EntityClickReleased.Emit(hitEntity, eventData[Urho3D::MouseButtonUp::P_BUTTON].GetInt(), raycastResult);
+            EntityClickReleased.Emit(hitEntity, (int)e->button, raycastResult);
         }
     }
 }

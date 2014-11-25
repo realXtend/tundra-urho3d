@@ -6,6 +6,7 @@
 #include "SceneFwd.h"
 #include "IAttribute.h"
 #include "AttributeChangeType.h"
+#include "InputFwd.h"
 
 #include <Input.h>
 
