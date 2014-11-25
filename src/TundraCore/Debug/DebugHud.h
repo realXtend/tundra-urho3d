@@ -126,7 +126,10 @@ private:
     struct HudTab
     {
         String name;
+        bool created;
         DebugHudPanelWeakPtr updater;
+
+        HudTab() : created(false) {}
     };
 
     BorderImagePtr CreateContainer(int ha, int va, int priority);

@@ -118,16 +118,37 @@ DebugHud::~DebugHud()
 
 bool DebugHud::AddTab(const String &name, DebugHudPanelWeakPtr updater)
 {
-    foreach(auto tab, tabs_)
+    HudTab *tab = nullptr;
+    for(auto iter = tabs_.Begin(); iter != tabs_.End(); ++iter)
     {
-        if (tab->name.Compare(name, true) == 0)
+        HudTab *tabIter = (*iter);
+        if (tabIter->updater.Get() == updater.Get())
+        {
+            if (tabIter->created)
+                return true;
+            tab = tabIter;
+            break;
+        }
+        else if (tabIter->name.Compare(name, true) == 0)
         {
             LogErrorF("DebugHud::AddTab: Tab '%s' already exists.", name.CString());
             return false;
         }
     }
+    if (!tab)
+    {
+        tab = new HudTab();
+        tab->name = name;
+        tab->updater = updater;
+        tabs_.Push(tab);
+    }
+
+    // Don't load UI resources until debug hud is actually shown
+    if (mode_ == DEBUGHUD_SHOW_NONE)
+        return true;
 
     // Create widget and tab
+    tab->created = true;
     updater->Create();
     UIElementPtr widget = updater->Widget();
     if (!widget)
@@ -135,10 +156,6 @@ bool DebugHud::AddTab(const String &name, DebugHudPanelWeakPtr updater)
         LogErrorF("DebugHud::AddTab: Tab '%s' failed to create a widget for embedding.", name.CString());
         return false;
     }
-    HudTab *tab = new HudTab();
-    tab->name = name;
-    tab->updater = updater;
-    tabs_.Push(tab);
 
     // Get default style
     XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("UI/DefaultStyle.xml");
@@ -293,11 +310,25 @@ void DebugHud::OnUpdate(float frametime)
 
 void DebugHud::SetMode(unsigned mode)
 {
+    if (mode_ == mode)
+        return;
+    mode_ = mode;
+
+    /* Lazy load tabs that have not been created yet.
+       This is delayed until show event to avoid loading
+       UI resources when debug hud is not actually used. */
+    if (mode != DEBUGHUD_SHOW_NONE)
+    {
+        foreach(auto tab, tabs_)
+        {
+            if (!tab->created)
+                AddTab(tab->name, tab->updater);
+        }
+    }
+
     statsText_->GetParent()->SetVisible((mode & DEBUGHUD_SHOW_STATS) != 0);
     modeText_->GetParent()->SetVisible((mode & DEBUGHUD_SHOW_MODE) != 0);
     tabContainer_->SetVisible((mode & DEBUGHUD_SHOW_PANEL) != 0);
-
-    mode_ = mode;
 }
 
 void DebugHud::SetProfilerMaxDepth(unsigned depth)
