@@ -27,6 +27,7 @@
 #include "CoreDebugHuds.h"
 
 #include "Framework.h"
+#include "ConfigAPI.h"
 #include "FrameAPI.h"
 #include "CoreStringUtils.h"
 #include "LoggingFunctions.h"
@@ -144,7 +145,7 @@ bool DebugHud::AddTab(const String &name, DebugHudPanelWeakPtr updater)
     }
 
     // Don't load UI resources until debug hud is actually shown
-    if (mode_ == DEBUGHUD_SHOW_NONE)
+    if (!IsVisible())
         return true;
 
     // Create widget and tab
@@ -184,11 +185,10 @@ bool DebugHud::AddTab(const String &name, DebugHudPanelWeakPtr updater)
     }
 
     // Create button to invoke the panel
-    Button *button = tabButtonLayout_->CreateChild<Button>("button" + name, M_MAX_UNSIGNED);
+    Button *button = tabButtonLayout_->CreateChild<Button>(name, M_MAX_UNSIGNED);
     Text *text = button->CreateChild<Text>("buttonText" + name, 0);
     text->SetInternal(true);
     text->SetText(name);
-    button->SetName(name);
     button->SetStyle("Button", style);
 
     // Sub to click release event
@@ -214,6 +214,12 @@ bool DebugHud::AddTab(const String &name, DebugHudPanelWeakPtr updater)
     {
         button->SetStyle("ButtonSelected");
         currentTab_ = tab;
+    }
+    else
+    {
+        Variant selectedTab = framework_->Config()->Read(ConfigAPI::FILE_FRAMEWORK, "debug hud", "selected tab");
+        if (selectedTab.GetType() == VariantType::VAR_STRING && selectedTab.GetString() == name)
+            ShowTab(name);
     }
     return true;
 }
@@ -361,6 +367,11 @@ void DebugHud::SetVisible(bool visible)
     SetMode(visible ? DEBUGHUD_SHOW_ALL : DEBUGHUD_SHOW_NONE);
 }
 
+bool DebugHud::IsVisible() const
+{
+    return (mode_ != DEBUGHUD_SHOW_NONE);
+}
+
 unsigned DebugHud::GetProfilerMaxDepth() const
 {
     return profilerHudPanel_->profilerMaxDepth;
@@ -410,19 +421,8 @@ void DebugHud::HandleTabChange(StringHash /*eventType*/, VariantMap& eventData)
     using namespace Released;
 
     Button *button = dynamic_cast<Button*>(eventData[P_ELEMENT].GetPtr());
-    if (!button)
-        return;
-
-    if (!ShowTab(button->GetName()))
-        return;
-
-    Vector<SharedPtr<UIElement> > children = tabButtonLayout_->GetChildren();
-    foreach(auto child, children)
-    {
-        Button *b = dynamic_cast<Button*>(child.Get());
-        if (b)
-            b->SetStyle(b == button ? "ButtonSelected" : "Button");
-    }
+    if (button)
+        ShowTab(button->GetName());
 }
 
 bool DebugHud::RemoveTab(const String &name)
@@ -452,6 +452,8 @@ bool DebugHud::RemoveTab(const String &name)
 
 bool DebugHud::ShowTab(const String &name)
 {
+    if (!IsVisible())
+        return false;
     if (name.Empty())
     {
         LogError("DebugHud::ShowTab: Provided tab name is empty");
@@ -459,9 +461,10 @@ bool DebugHud::ShowTab(const String &name)
     }
 
     UIElementPtr widget;
-    foreach(auto tab, tabs_)
+    for(auto iter = tabs_.Begin(); iter != tabs_.End(); ++iter)
     {
-        if (tab->name.Compare(name, true) == 0 && tab->updater->Widget())
+        HudTab *tab = (*iter);
+        if (tab->created && tab->name.Compare(name, true) == 0 && tab->updater->Widget())
         {
             widget = tab->updater->Widget();
             currentTab_ = tab;
@@ -475,6 +478,9 @@ bool DebugHud::ShowTab(const String &name)
     }
     foreach(auto tab, tabs_)
     {
+        if (!tab->created)
+            continue;
+
         // Tab widgets are always parented to a ScrollView. Toggle its visibility.
         UIElementPtr currentWidget = tab->updater->Widget();
         bool visible = (currentWidget.Get() == widget.Get());
@@ -488,6 +494,20 @@ bool DebugHud::ShowTab(const String &name)
                 parent->SetVisible(visible);
         }
         currentWidget->SetVisible(visible);
+
+        if (visible)
+        {
+            // Store currently open tab to config without writing to disk.
+            ConfigFile &f = framework_->Config()->GetFile(ConfigAPI::FILE_FRAMEWORK);
+            f.Set("debug hud", "selected tab", tab->name);
+        }
+    }
+    Vector<SharedPtr<UIElement> > children = tabButtonLayout_->GetChildren();
+    foreach(auto child, children)
+    {
+        Button *b = dynamic_cast<Button*>(child.Get());
+        if (b)
+            b->SetStyle(b->GetName() == name ? "ButtonSelected" : "Button");
     }
     return true;
 }

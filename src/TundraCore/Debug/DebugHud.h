@@ -76,6 +76,8 @@ public:
     void ToggleVisibility();
     /// Sets visivility.
     void SetVisible(bool visible);
+    /// Returns if UI is visible.
+    bool IsVisible() const;
 
     /// Add a new tab to profiler.
     bool AddTab(const String &name, DebugHudPanelWeakPtr updater);
