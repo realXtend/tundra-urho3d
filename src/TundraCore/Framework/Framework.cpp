@@ -30,6 +30,7 @@
 #include <Engine/Core/ProcessUtils.h>
 #include <Engine/Input/Input.h>
 #include <Engine/Graphics/Graphics.h>
+#include <Profiler.h>
 
 using namespace Urho3D;
 
@@ -173,6 +174,10 @@ void Framework::Initialize()
 
     // Set storages from command line options
     SetupAssetStorages();
+
+    // Show profiler immediately if requested
+    if (HasCommandLineParameter("--showProfiler"))
+        debug->ToggleDebugHudVisibility();
 }
 
 void Framework::SetupAssetStorages()
@@ -329,6 +334,15 @@ void Framework::ProcessOneFrame()
     engine->Update();
     engine->Render();
     engine->ApplyFrameLimit();
+
+    if (HasCommandLineParameter("--logProfilerEachFrame"))
+    {
+        // Android does not tolerate long log lines (cuts output past certain point), therefore split and log each row separately
+        StringVector lines = GetSubsystem<Urho3D::Profiler>()->GetData(false, false).Split('\n');
+        for (uint i = 0; i < lines.Size(); ++i)
+            LogInfo(lines[i]);
+        GetSubsystem<Urho3D::Profiler>()->BeginInterval();
+    }
 
     time->EndFrame();
 

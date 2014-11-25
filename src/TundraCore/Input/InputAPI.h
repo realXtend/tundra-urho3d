@@ -168,7 +168,7 @@ public:
 
     /// Returns the mouse coordinates in local client coordinate frame denoting where the given mouse button was last pressed down.
     /** Note that this does not tell whether the mouse button is currently held down or not. 
-    /** @param mouseButton Urho3D code */
+        @param mouseButton Urho3D code */
     Point MousePressedPos(int mouseButton) const;
 
     /// Returns the current mouse position in the main window coordinate space.
