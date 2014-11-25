@@ -103,6 +103,8 @@ private:
     MaterialAssetPtr material_;
     
     GraphicsWorldWeakPtr world_;
+
+    int texturesLoaded;
 };
 
 }

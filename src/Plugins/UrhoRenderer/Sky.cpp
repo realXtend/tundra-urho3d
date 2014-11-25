@@ -56,7 +56,8 @@ Sky::Sky(Urho3D::Context* context, Scene* scene) :
     INIT_ATTRIBUTE_VALUE(distance, "Distance", 500),
     INIT_ATTRIBUTE_VALUE(orientation, "Orientation", Quat::identity),
     INIT_ATTRIBUTE_VALUE(drawFirst, "Draw first", true),
-    INIT_ATTRIBUTE_VALUE(enabled, "Enabled", true)
+    INIT_ATTRIBUTE_VALUE(enabled, "Enabled", true),
+    texturesLoaded(0)
 {
     materialAsset_ = new AssetRefListener();
 
@@ -101,6 +102,8 @@ void Sky::UpdateSignals()
         textureRefListListener_->Changed.Connect(this, &Sky::OnTextureAssetRefsChanged);
         textureRefListListener_->Failed.Connect(this, &Sky::OnTextureAssetFailed);
         textureRefListListener_->Loaded.Connect(this, &Sky::OnTextureAssetLoaded);
+
+        CreateSkyboxNode();
     }
 }
 
@@ -115,8 +118,11 @@ void Sky::AttributesChanged()
     if (textureRefs.ValueChanged() && textureRefListListener_)
         textureRefListListener_->HandleChange(textureRefs.Get());
 
-    if (distance.ValueChanged() || drawFirst.ValueChanged() || orientation.ValueChanged() || enabled.ValueChanged())
-        Update();
+    if (distance.ValueChanged())
+    {
+        if (urhoNode_)
+            urhoNode_->SetScale(distance.Get());
+    }
 }
 
 void Sky::CreateSkyboxNode()
@@ -136,12 +142,8 @@ void Sky::CreateSkyboxNode()
 void Sky::Update()
 {
     if (!urhoNode_)
-        CreateSkyboxNode();
-
-    if (!urhoNode_)
         return;
 
-    urhoNode_->SetScale(distance.Get());
     Urho3D::ResourceCache* cache = GetSubsystem<Urho3D::ResourceCache>();
 
     if (material_ != nullptr && textureRefListListener_->Assets().Size() < 6)
@@ -155,7 +157,7 @@ void Sky::Update()
         return;
     }
 
-    Vector<SharedPtr<Urho3D::Image>> images(6);
+    Vector<SharedPtr<Urho3D::Image> > images(6);
     Vector<AssetPtr> textureAssets = textureRefListListener_->Assets();
     int numLoadedImages = 0;
     for(uint mi=0; mi<textureAssets.Size(); ++mi)
@@ -194,7 +196,7 @@ void Sky::Update()
 
         SharedPtr<Urho3D::Material> material;
         if (material_)
-            material = material_->UrhoMaterial();
+            material = material_->UrhoMaterial()->Clone();
         else
             material = SharedPtr<Urho3D::Material>(new Urho3D::Material(GetContext()));
         material->SetCullMode(Urho3D::CULL_NONE);
@@ -231,7 +233,8 @@ void Sky::OnMaterialAssetLoaded(AssetPtr asset)
 
             textureRefs.Set(list, AttributeChange::LocalOnly);
             // Update call is implicit via OnTextureAssetLoaded()
-        } else
+        }
+        else
             Update();
     }
 }
@@ -246,17 +249,21 @@ void Sky::OnMaterialAssetFailed(IAssetTransfer* /*transfer*/, String /*reason*/)
 
 void Sky::OnTextureAssetRefsChanged(const AssetReferenceList &/*tRefs*/)
 {
-    Update();
+    texturesLoaded = 0;
 }
 
 void Sky::OnTextureAssetFailed(uint /*index*/, IAssetTransfer* /*transfer*/, String /*error*/)
 {
-    Update();
+    ++texturesLoaded;
+    if (texturesLoaded == 6)
+        Update();
 }
 
 void Sky::OnTextureAssetLoaded(uint /*index*/, AssetPtr asset)
 {
-    Update();
+    ++texturesLoaded;
+    if (texturesLoaded == 6)
+        Update();
 }
 
 }
