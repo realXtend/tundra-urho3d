@@ -140,6 +140,7 @@ AssetPtr IAsset::Clone(String newAssetName) const
 bool IAsset::LoadFromFile(String filename)
 {
     PROFILE(IAsset_LoadFromFile);
+
     filename = filename.Trimmed(); ///\todo Sanitate.
     if (filename.Empty())
     {
@@ -148,13 +149,14 @@ bool IAsset::LoadFromFile(String filename)
     }
 
     Vector<u8> fileData;
+    profile.Start(AssetProfile::DiskRead);
     bool success = LoadFileToVector(filename, fileData);
+    profile.Done(AssetProfile::DiskRead);
     if (!success)
     {
         LogDebug("LoadFromFile failed for file \"" + filename + "\", could not read file!");
         return false;
     }
-
     if (fileData.Size() == 0)
     {
         LogDebug("LoadFromFile failed for file \"" + filename + "\", file size was 0!");
@@ -176,6 +178,7 @@ bool IAsset::LoadFromFileInMemory(const u8 *data, uint numBytes, bool allowAsync
         return false;
     }
 
+    profile.Start(AssetProfile::Load);
     return DeserializeFromData(data, numBytes, allowAsynchronous);
 }
 
@@ -190,6 +193,8 @@ void IAsset::DependencyLoaded(AssetPtr dependee)
 void IAsset::LoadCompleted()
 {
     PROFILE(IAsset_LoadCompleted);
+    profile.Done(AssetProfile::Load);
+
     // If asset was loaded successfully, and there are no pending dependencies, emit Loaded() now.
     AssetPtr thisAsset(this);
     if (IsLoaded() && !assetAPI->HasPendingDependencies(thisAsset))
@@ -282,5 +287,32 @@ Vector<u8> IAsset::RawData(const String &serializationParameters) const
     else
         return Vector<u8>();
 }
+
+/// @cond PRIVATE
+
+void AssetProfile::Start(Phase p)
+{
+    timers[p].Reset();
+}
+
+void AssetProfile::Done(Phase p)
+{
+    HashMap<int, Urho3D::Timer>::Iterator iter = timers.Find(p);
+    if (iter != timers.End())
+    {
+        spent[p] = iter->second_.GetMSec(false) / 1000.f;
+        timers.Erase(iter);
+    }
+}
+
+float AssetProfile::SpentSeconds(Phase p) const
+{
+    HashMap<int, float>::ConstIterator iter = spent.Find(p);
+    if (iter != spent.End())
+        return iter->second_;
+    return 0.f;
+}
+
+/// @endcond
 
 }

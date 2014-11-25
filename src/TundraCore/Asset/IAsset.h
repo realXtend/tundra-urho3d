@@ -9,9 +9,28 @@
 #include "Signals.h"
 
 #include <Object.h>
+#include <Timer.h>
 
 namespace Tundra
 {
+
+/// @cond PRIVATE
+struct AssetProfile
+{
+    enum Phase
+    {
+        DiskRead,
+        Load
+    };
+
+    void Start(Phase p);
+    void Done(Phase p);
+    float SpentSeconds(Phase p) const;
+
+    HashMap<int, Urho3D::Timer> timers;
+    HashMap<int, float> spent;
+};
+/// @endcond
 
 /// Base class for all assets loaded in the system.
 class TUNDRACORE_API IAsset : public Object
@@ -25,6 +44,10 @@ public:
     /** However, each asset subclass is expected to Unload itself in the destructor. Especially, any assets that create  any Ogre asset 
         types into internal Ogre pools must guarantee that at dtor (and at Unload()) these resources from Ogre pools are completely cleared. */
     virtual ~IAsset() {}
+
+    /// @cond PRIVATE
+    AssetProfile profile;
+    /// @endcond
 
     enum SourceType
     {
