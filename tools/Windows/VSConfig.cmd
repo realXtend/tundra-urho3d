@@ -20,6 +20,7 @@ IF "!GENERATOR!"=="" (
 )
 
 IF NOT !GENERATOR!==%GENERATOR_VS2010% IF NOT !GENERATOR!==%GENERATOR_VS2010_WIN64% IF NOT !GENERATOR!==%GENERATOR_VS2012% IF NOT !GENERATOR!==%GENERATOR_VS2012_WIN64% IF NOT !GENERATOR!==%GENERATOR_VS2013% IF NOT !GENERATOR!==%GENERATOR_VS2013_WIN64% (
+:: TODO Some nicer check for this.
     Utils\cecho {0C}VSConfig.cmd: Invalid or unsupported CMake generator string passed: !GENERATOR!. Cannot proceed, aborting!{# #}{\n}
     GOTO :EOF
 )

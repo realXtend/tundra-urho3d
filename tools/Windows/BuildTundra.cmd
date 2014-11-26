@@ -7,8 +7,13 @@
 
 :: Enable the delayed environment variable expansion needed in VSConfig.cmd.
 setlocal EnableDelayedExpansion
+
+set CALL_CECHO=%CD%\Utils\cecho
+
 :: TODO Calling VSConfig.cmd here and once again in RunCMake.cmd.
 call VSConfig.cmd %2
+:: If TARGET_ARCH is empty, VSConfig has failed.
+IF "%TARGET_ARCH%"=="" GOTO :Error
 
 set BUILD_PATH=build-%VS_VER%-%TARGET_ARCH%
 set BUILD_TYPE=%1
@@ -18,7 +23,7 @@ IF "%BUILD_TYPE%"=="" set BUILD_TYPE=RelWithDebInfo
 call RunCMake.cmd %2
 
 cd ..\..\%BUILD_PATH%
-set CALL_CECHO=..\tools\Windows\Utils\cecho
+
 %CALL_CECHO% {0D}Building %BUILD_TYPE% Tundra-Urho3D.{# #}{\n}
 MSBuild tundra-urho3d.sln /p:Configuration=%BUILD_TYPE% %3 %4 %5 %6 %7 %8 %9
 IF NOT %ERRORLEVEL%==0 GOTO :Error
