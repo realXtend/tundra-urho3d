@@ -253,6 +253,12 @@ void TextureAsset::DetermineMipsToSkip(Urho3D::Image* image, Urho3D::Texture2D* 
     if (!image || !texture)
         return;
 
+#ifdef ANDROID
+    /// \todo Should we attempt to force to POT dimensions?
+    if (!Urho3D::IsPowerOfTwo(image->GetWidth()) || !Urho3D::IsPowerOfTwo(image->GetHeight()))
+        LogWarning("Texture " + Name() + " is not power of two and may render incorrectly or cause slower rendering on Android");
+#endif
+
     int maxDimension = Urho3D::Max(image->GetWidth(), image->GetHeight());
     int maxSize = MaxTextureSize();
     int mipsToSkip = 0;
