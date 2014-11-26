@@ -33,8 +33,9 @@ but is not tested regularly and no batch scripts are provided currently.
    You can abort the script with Ctrl+C at this point and setup your environment.
 4. After the script has completed, the dependencies can be found `deps-vs<VersionNumber>-<TargetArchitecture>\`.
    The needed runtime libraries are automatically copied to `bin\`.
-   **Note:** If building with the Windows 8 (or newer) SDK, copy the `d3dcompiler_46.dll` from `C:\Program Files 
-(x86)\Windows Kits\8.0\bin\<x86|x64>` to `<Tundra-Urho3D>\bin` directory so that the executables will run correctly.
+   **Note:** If building with the Windows 8 (or newer) SDK, `d3dcompiler_46.dll` needs to be available in `bin\`
+   so that the executables will run correctly. `BuildDeps.cmd` should copy the file (from `C:\Program Files (x86)\Windows Kits\8.0\Redist\D3D\<x86|x64>`)
+   automatically, but if it fails, you must to it manually.
 5. Now run CMake batch script corresponding to your desired build configuration. This script will set up the needed
    build environment variables for CMake and invoke CMake to generate a tundra-urho3d.sln solution into the
    `build-vs<VersionNumber>-<TargetArchitecture>` subdirectory.

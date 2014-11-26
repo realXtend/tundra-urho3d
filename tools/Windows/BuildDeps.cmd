@@ -489,8 +489,14 @@ IF %TUNDRA_ANDROID%==0 (
 )
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
-
-
+:: d3dcompiler_46.dll needs to be copied to bin directory on VS > 2010 builds.
+IF NOT %VS_VER%==vs2010 (
+    IF %TUNDRA_ANDROID%==0 (
+        cecho {0D}Copying %BUILD_TYPE% d3dcompiler_46.dll to Tundra bin\ directory.{# #}{\n}
+        copy /Y "C:\Program Files (x86)\Windows Kits\8.0\Redist\D3D\%TARGET_ARCH%\d3dcompiler_46.dll" "%TUNDRA_BIN%"
+        IF NOT %ERRORLEVEL%==0 cecho {0E}Warning: %BUILD_TYPE% d3dcompiler_46.dll not found, copy the file manually.{# #}{\n}
+    )
+)
 
 :::::::::::::::::::::::: All done
 
