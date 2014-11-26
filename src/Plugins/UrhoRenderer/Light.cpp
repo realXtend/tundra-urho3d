@@ -4,6 +4,7 @@
 #include "Light.h"
 #include "GraphicsWorld.h"
 #include "AttributeMetadata.h"
+#include "Framework.h"
 #include "Placeable.h"
 #include "UrhoRenderer.h"
 #include "Scene/Scene.h"
@@ -142,6 +143,9 @@ void Light::AttachLight()
     light_->SetRange(range.Get());
     light_->SetFov(outerAngle.Get() * 2.0f);
     light_->SetBrightness(brightness.Get());
+
+    if (GetFramework()->HasCommandLineParameter("--forceVertexLighting"))
+        light_->SetPerVertex(true);
 }
 
 void Light::DetachLight()

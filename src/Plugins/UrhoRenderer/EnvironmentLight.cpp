@@ -4,6 +4,7 @@
 #include "EnvironmentLight.h"
 #include "GraphicsWorld.h"
 #include "AttributeMetadata.h"
+#include "Framework.h"
 #include "Placeable.h"
 #include "UrhoRenderer.h"
 #include "Scene/Scene.h"
@@ -78,6 +79,9 @@ void EnvironmentLight::UpdateSignals()
         light_->SetShadowCascade(Urho3D::CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
         light_->SetShadowBias(Urho3D::BiasParameters(0.00005f, 0.5f));
         #endif
+
+       if (GetFramework()->HasCommandLineParameter("--forceVertexLighting"))
+            light_->SetPerVertex(true);
     }
 }
 
