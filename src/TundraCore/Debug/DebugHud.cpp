@@ -218,7 +218,7 @@ bool DebugHud::AddTab(const String &name, DebugHudPanelWeakPtr updater)
     else
     {
         Variant selectedTab = framework_->Config()->Read(ConfigAPI::FILE_FRAMEWORK, "debug hud", "selected tab");
-        if (selectedTab.GetType() == VariantType::VAR_STRING && selectedTab.GetString() == name)
+        if (selectedTab.GetType() == VAR_STRING && selectedTab.GetString() == name)
             ShowTab(name);
     }
     return true;

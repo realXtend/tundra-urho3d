@@ -14,7 +14,10 @@
 
 namespace Tundra
 {
-    
+
+// using 'this' in initializer list which is technically UB but safe in our case, as the InputContext constructor just uses the base class to get the Urho context from InputAPI
+#pragma warning(disable:4355)
+
 InputAPI::InputAPI(Framework *framework_) :
     Object(framework_->GetContext()),
     lastMouseX(0),

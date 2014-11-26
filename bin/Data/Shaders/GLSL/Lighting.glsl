@@ -90,7 +90,8 @@ float GetDiffuse(vec3 normal, vec3 worldPos, out vec3 lightDir)
         vec3 lightVec = (cLightPosPS.xyz - worldPos) * cLightPosPS.w;
         float lightDist = length(lightVec);
         lightDir = lightVec / lightDist;
-        return max(dot(normal, lightDir), 0.0) * texture2D(sLightRampMap, vec2(lightDist, 0.0)).r;
+        float atten = clamp(1.0 - lightDist * lightDist, 0.0, 1.0);
+        return max(dot(normal, lightDir), 0.0) * atten;
     #endif
 }
 
@@ -101,7 +102,7 @@ float GetDiffuseVolumetric(vec3 worldPos)
     #else
         vec3 lightVec = (cLightPosPS.xyz - worldPos) * cLightPosPS.w;
         float lightDist = length(lightVec);
-        return texture2D(sLightRampMap, vec2(lightDist, 0.0)).r;
+        return clamp(1.0 - lightDist * lightDist, 0.0, 1.0);
     #endif
 }
 

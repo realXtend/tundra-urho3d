@@ -101,9 +101,13 @@ void UrhoRenderer::Initialize()
         SubscribeToEvent(Urho3D::E_SCREENMODE, HANDLER(UrhoRenderer, HandleScreenModeChange));
     
         // Disable shadows completely for now on mobile devices, as the shadow bias is problematic, and it consumes GPU performance
+        // Also disable specular highlights for per-pixel lighting
         if (Urho3D::GetPlatform() == "Android" || Urho3D::GetPlatform() == "iOS")
+        {
             rend->SetDrawShadows(false);
-    }        
+            rend->SetSpecularLighting(false);
+        }
+    }
 }
 
 void UrhoRenderer::Uninitialize()

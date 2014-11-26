@@ -27,6 +27,7 @@
 #include <Graphics.h>
 #include <Technique.h>
 #include <GraphicsDefs.h>
+#include <GraphicsEvents.h>
 
 
 namespace
@@ -186,13 +187,19 @@ void Sky::Update()
 
     if (numLoadedImages == 6)
     {
-        SharedPtr<Urho3D::TextureCube> textureCube = SharedPtr<Urho3D::TextureCube>(new Urho3D::TextureCube(GetContext()));
+        // Reuse the previous cube texture if possible
+        SharedPtr<Urho3D::TextureCube> textureCube = (cubeTexture_.Get() == nullptr) ? SharedPtr<Urho3D::TextureCube>(new Urho3D::TextureCube(GetContext())) : cubeTexture_.Lock();
+
         const Urho3D::CubeMapFace faces[6] = { Urho3D::FACE_POSITIVE_X, Urho3D::FACE_NEGATIVE_X, Urho3D::FACE_POSITIVE_Y, Urho3D::FACE_NEGATIVE_Y, Urho3D::FACE_POSITIVE_Z, Urho3D::FACE_NEGATIVE_Z };
         const int faceOrder[6] = { 3, 2, 4, 5, 0, 1 };
 
         for (size_t i=0 ; i<images.Size() ; ++i)
             if (images[faceOrder[i]] != nullptr)
                 textureCube->SetData(faces[i], images[faceOrder[i]]);
+
+        // Remember the created texture for tracking device loss
+        cubeTexture_ = textureCube;
+        SubscribeToEvent(Urho3D::E_DEVICERESET, HANDLER(Sky, HandleDeviceReset));
 
         SharedPtr<Urho3D::Material> material;
         if (material_)
@@ -264,6 +271,15 @@ void Sky::OnTextureAssetLoaded(uint /*index*/, AssetPtr asset)
     ++texturesLoaded;
     if (texturesLoaded == 6)
         Update();
+}
+
+void Sky::HandleDeviceReset(StringHash /*eventType*/, VariantMap& /*eventData*/)
+{
+    if (cubeTexture_ && cubeTexture_->IsDataLost())
+    {
+        LogDebug("Recreating cube texture due to data loss");
+        Update();
+    }
 }
 
 }

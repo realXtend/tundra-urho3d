@@ -93,6 +93,8 @@ private:
 
     void OnTextureAssetLoaded(uint index, AssetPtr asset);
 
+    void HandleDeviceReset(StringHash eventType, VariantMap& eventData);
+
     AssetRefListenerPtr materialAsset_;
     AssetRefListListenerPtr textureRefListListener_;
 
@@ -102,6 +104,9 @@ private:
     /// Material. If material contains cube texture, use internal Urho skybox material, otherwise use this material as is.
     MaterialAssetPtr material_;
     
+    /// Pointer to last created cube map texture
+    WeakPtr<Urho3D::TextureCube> cubeTexture_;
+
     GraphicsWorldWeakPtr world_;
 
     int texturesLoaded;
