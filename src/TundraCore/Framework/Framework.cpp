@@ -182,10 +182,10 @@ void Framework::Initialize()
 
 void Framework::SetupAssetStorages()
 {
-    // Add the System asset storage
-    /// @todo See if actually needed
+    // Add the "Ogre Media" asset storage which contains built-in sky and terrain assets
+    /// \todo Scenes should be sanitated to not refer to it
     String systemAssetDir = InstallationDirectory() + "Data/Assets";
-    asset->AssetProvider<LocalAssetProvider>()->AddStorageDirectory(systemAssetDir, "System", true, false);
+    asset->AssetProvider<LocalAssetProvider>()->AddStorageDirectory(systemAssetDir, "Ogre Media", true, false);
 
     // Add storages from --file first then --storage. First one passed will be set as default (if non have default=true;)
     /// @todo Should the first --storage take priority over --file. Can be used to override the base url for the --file
