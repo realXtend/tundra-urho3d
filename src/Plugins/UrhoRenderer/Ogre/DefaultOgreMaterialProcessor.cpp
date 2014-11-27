@@ -48,6 +48,8 @@ void DefaultOgreMaterialProcessor::Convert(const Ogre::MaterialParser& src, Ogre
     {
         if (pass->StringValue(Ogre::Material::Pass::SceneBlend, "").StartsWith("alpha", false))
             blendTypeString = "Alpha";
+        if (pass->StringValue(Ogre::Material::Pass::SceneBlend, "").StartsWith("add", false))
+            blendTypeString = "Add";
     }
 
     // Texture units. Textures are set as the asset's dependencies

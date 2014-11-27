@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<scene>
+	<entity id="1" sync="true" temporary="false">
+		<component type="Name" typeId="26" sync="true" temporary="false">
+			<attribute name="Name" id="name" value="Sparkles" type="string" />
+			<attribute name="Description" id="description" value="" type="string" />
+			<attribute name="Group" id="group" value="" type="string" />
+		</component>
+		<component type="Placeable" typeId="20" sync="true" temporary="false">
+			<attribute name="Transform" id="transform" value="0,0,-40,0,0,0,1,1,1" type="Transform" />
+			<attribute name="Show bounding box" id="drawDebug" value="false" type="bool" />
+			<attribute name="Visible" id="visible" value="true" type="bool" />
+			<attribute name="Selection layer" id="selectionLayer" value="1" type="int" />
+			<attribute name="Parent entity ref" id="parentRef" value="" type="EntityReference" />
+			<attribute name="Parent bone name" id="parentBone" value="" type="string" />
+		</component>
+		<component type="ParticleSystem" typeId="27" sync="true" temporary="false">
+			<attribute name="Particle Ref" value="local://sparkles.particle" />
+			<attribute name="Cast shadows" id="castShadows" value="false" type="bool" />
+			<attribute name="Enabled" id="enabled" value="true" type="bool" />
+			<attribute name="Rendering distance" id="renderingDistance" value="0" type="real" />
+		</component>
+	</entity>
+</scene>

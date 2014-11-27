@@ -18,6 +18,8 @@ namespace Urho3D
     class StaticModel;
     class Texture2D;
     class Zone;
+    class ParticleEffect;
+    class ParticleEmitter;
 }
 
 namespace Tundra

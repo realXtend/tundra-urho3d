@@ -12,6 +12,7 @@
 #include "EnvironmentLight.h"
 #include "Terrain.h"
 #include "Sky.h"
+#include "ParticleSystem.h"
 #include "IComponentFactory.h"
 #include "ConfigAPI.h"
 #include "SceneAPI.h"
@@ -26,6 +27,7 @@
 #include "Ogre/OgreMaterialAsset.h"
 #include "Ogre/OgreSkeletonAsset.h"
 #include "Ogre/DefaultOgreMaterialProcessor.h"
+#include "Ogre/OgreParticleAsset.h"
 #include "GenericAssetFactory.h"
 
 #include <Engine/Core/CoreEvents.h>
@@ -61,6 +63,7 @@ void UrhoRenderer::Load()
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<EnvironmentLight>()));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Terrain>()));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Sky>()));
+    scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<ParticleSystem>));
 
     /// \todo Check and add new supported texture extensions
     StringList textureExtensions;
@@ -78,6 +81,7 @@ void UrhoRenderer::Load()
     framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<OgreMeshAsset>("OgreMesh", ".mesh")));
     framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<OgreMaterialAsset>("OgreMaterial", ".material")));
     framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<OgreSkeletonAsset>("OgreSkeleton", ".skeleton")));
+    framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<OgreParticleAsset>("OgreParticle", ".particle")));
     framework->Asset()->RegisterAssetTypeFactory(AssetTypeFactoryPtr(new GenericAssetFactory<TextureAsset>("Texture", textureExtensions)));
 }
 
