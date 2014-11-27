@@ -17,6 +17,7 @@
 #include "Name.h"
 #include "PlaceholderComponent.h"
 #include "LoggingFunctions.h"
+#include "Script.h"
 
 #include <Math/Quat.h>
 #include <Math/float2.h>
@@ -54,9 +55,10 @@ SceneAPI::SceneAPI(Framework *owner) :
     attributeTypeNames.Push(IAttribute::PointTypeName);
     assert(attributeTypeNames.Size() == IAttribute::NumTypes - 1 && "Attribute type registration mismatch!"); // -1 as IAttributeNoneTypeName is not in the list.
 
-    // Name and DynamicComponent are always available
+    // Name, DynamicComponent & Script are always available
     RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Name>()));
     RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<DynamicComponent>()));
+    RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Script>()));
 }
 
 SceneAPI::~SceneAPI()

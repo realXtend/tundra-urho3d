@@ -18,6 +18,7 @@ AddSourceFolder(Math)
 AddSourceFolder(Console)
 AddSourceFolder(Debug)
 AddSourceFolder(Input)
+AddSourceFolder(Script)
 
 set(SOURCE_FILES ${CPP_FILES} ${H_FILES})
 

@@ -258,6 +258,7 @@ macro(UseTundraCore)
         ${CMAKE_SOURCE_DIR}/src/TundraCore/Console
         ${CMAKE_SOURCE_DIR}/src/TundraCore/Debug
         ${CMAKE_SOURCE_DIR}/src/TundraCore/Signals
+        ${CMAKE_SOURCE_DIR}/src/TundraCore/Script
     )
     # Due to automatic CMake dependency transfer, we will need kNet and MathGeoLib link directories
     # Urho3D include directories are also needed throughout the project
