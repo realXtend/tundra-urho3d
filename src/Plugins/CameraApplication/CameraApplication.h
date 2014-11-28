@@ -8,7 +8,7 @@
 #include "AttributeChangeType.h"
 #include "InputFwd.h"
 #include "Signals.h"
-#include "CameraAPI.h"
+#include "CameraApi.h"
 #include "Math/float3.h"
 
 #include <Input.h>
