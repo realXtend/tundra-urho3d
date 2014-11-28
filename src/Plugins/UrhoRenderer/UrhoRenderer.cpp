@@ -14,6 +14,7 @@
 #include "Sky.h"
 #include "ParticleSystem.h"
 #include "Fog.h"
+#include "WaterPlane.h"
 #include "IComponentFactory.h"
 #include "ConfigAPI.h"
 #include "SceneAPI.h"
@@ -66,6 +67,7 @@ void UrhoRenderer::Load()
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Sky>()));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<ParticleSystem>));
     scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<Fog>));
+    scene->RegisterComponentFactory(ComponentFactoryPtr(new GenericComponentFactory<WaterPlane>));
 
     /// \todo Check and add new supported texture extensions
     StringList textureExtensions;
