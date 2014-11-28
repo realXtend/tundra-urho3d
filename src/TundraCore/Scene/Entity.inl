@@ -31,7 +31,7 @@ Vector<SharedPtr<T> > Entity::ComponentsOfType() const
     Vector<SharedPtr<T> > ret;
     for(ComponentMap::ConstIterator i = components_.Begin(); i != components_.End(); ++i)
     {
-        SharedPtr<T> t = Urho3D::StaticCast<T>(i->second_);
+        SharedPtr<T> t = Urho3D::DynamicCast<T>(i->second_);
         if (t)
             ret.Push(t);
     }

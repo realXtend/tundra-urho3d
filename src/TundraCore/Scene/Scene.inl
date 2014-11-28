@@ -20,7 +20,7 @@ Vector<SharedPtr<T> > Scene::Components(const String &name) const
         {
             Vector<SharedPtr<T> > components =  it->second_->ComponentsOfType<T>();
             if (!components.Empty())
-                ret.insert(ret.End(), components.Begin(), components.End());
+                ret.Insert(ret.End(), components.Begin(), components.End());
         }
     }
     else
