@@ -315,4 +315,6 @@ private:
     GraphicsWorldWeakPtr world_;
 };
 
+COMPONENT_TYPEDEFS(Terrain)
+
 }

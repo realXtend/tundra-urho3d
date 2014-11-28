@@ -112,5 +112,7 @@ private:
     int texturesLoaded;
 };
 
+COMPONENT_TYPEDEFS(Sky)
+
 }
 

@@ -113,5 +113,6 @@ private:
     AssetRefListenerPtr particleRefListener_;
 };
 
+COMPONENT_TYPEDEFS(ParticleSystem)
 }
 
