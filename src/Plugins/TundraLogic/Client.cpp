@@ -12,6 +12,7 @@
 #include "Framework.h"
 #include "Scene.h"
 #include "SceneAPI.h"
+#include "AssetAPI.h"
 #include "LoggingFunctions.h"
 #include "TundraLogicUtils.h"
 #include "TundraMessages.h"
@@ -137,8 +138,7 @@ void Client::DoLogout(bool fail)
         client_id_ = 0;
         
         framework_->Scene()->RemoveScene("TundraClient");
-        /// \todo Uncomment after Asset API implemented
-        //framework_->Asset()->ForgetAllAssets();
+        framework_->Asset()->ForgetAllAssets();
         
         Disconnected.Emit();
     }

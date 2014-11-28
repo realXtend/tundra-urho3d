@@ -67,7 +67,9 @@ void Avatar::OnAvatarAppearanceLoaded(AssetPtr asset)
     // Create components the avatar needs, with network sync disabled, if they don't exist yet
     // Note: the mesh is created non-syncable on purpose, as each client's Avatar component should execute this code upon receiving the appearance
     MeshPtr mesh = entity->GetOrCreateComponent<Mesh>("", AttributeChange::LocalOnly, false);
-    
+    if (mesh->IsReplicated())
+        LogWarning("Warning! Mesh component is replicated and may not work as intended for the Avatar component");
+
     SetupAppearance();
 }
 
@@ -85,7 +87,6 @@ void Avatar::AttributesChanged()
 
 void Avatar::SetupAppearance()
 {
-    LogWarning("SetupAppearance");
     PROFILE(Avatar_SetupAppearance);
     
     Entity* entity = ParentEntity();
@@ -95,11 +96,17 @@ void Avatar::SetupAppearance()
     
     Mesh* mesh = entity->Component<Mesh>().Get();
     if (!mesh)
+    {
+        LogWarning("Avatar::SetupAppearance: No Mesh component in entity, can not setup appearance");
         return;
+    }
 
     // If mesh ref is empty, no need to go further
     if (!desc->mesh_.Length())
+    {
+        LogWarning("Avatar::SetupAppearance: AvatarDescAsset contains empty mesh ref, can not setup appearance");
         return;
+    }
     
     SetupMeshAndMaterials();
     SetupDynamicAppearance();
@@ -161,8 +168,8 @@ void Avatar::SetupMeshAndMaterials()
     String meshName = LookupAsset(desc->mesh_);
     String skeletonName = LookupAsset(desc->skeleton_);
 
-    mesh->meshRef.Set(AssetReference(meshName, "OgreMesh"));
-    mesh->skeletonRef.Set(AssetReference(skeletonName, "OgreSkeleton"));
+    mesh->skeletonRef.Set(AssetReference(skeletonName, "OgreSkeleton"), AttributeChange::LocalOnly);
+    mesh->meshRef.Set(AssetReference(meshName, "OgreMesh"), AttributeChange::LocalOnly);
 
     AssetReferenceList materials("OgreMaterial");
     for (uint i = 0; i < desc->materials_.Size(); ++i)

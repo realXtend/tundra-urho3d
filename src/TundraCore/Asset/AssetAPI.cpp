@@ -1520,7 +1520,8 @@ void AssetAPI::Update(float frametime)
         // 2) We found the asset from disk cache. No need to ask an assetprovider
 
         // Call AssetTransferCompleted manually for any asset that doesn't have an AssetProvider serving it. ("virtual transfers").
-        for(uint i = 0, num = readyTransfers.Size(); i<num; ++i)
+        // Note that completing these transfers may cause further virtual transfers to be pushed, which must be handled now before clearing the vector
+        for(uint i = 0; i < readyTransfers.Size(); ++i)
             AssetTransferCompleted(readyTransfers[i].Get());
         readyTransfers.Clear();
     }

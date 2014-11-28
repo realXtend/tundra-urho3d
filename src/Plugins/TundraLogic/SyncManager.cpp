@@ -2154,7 +2154,7 @@ void SyncManager::HandleCreateEntity(UserConnection* source, const char* data, s
             ComponentPtr comp = entity->CreateComponentWithId(compID, typeID, name, change);
             if (!comp)
             {
-                LogWarning("Failed to create component type " + String(compID) + " to " + entity->ToString() + " while handling CreateEntity message, skipping component");
+                LogWarning("Failed to create component type " + String(typeID) + " to " + entity->ToString() + " while handling CreateEntity message, skipping component");
                 continue;
             }
             // On server, get the assigned ID now
