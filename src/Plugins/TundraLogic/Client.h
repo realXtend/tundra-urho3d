@@ -10,6 +10,11 @@
 #include <Object.h>
 #include <kNet/Socket.h>
 
+namespace kNet
+{
+    class MessageConnection;
+}
+
 namespace Tundra
 {
 

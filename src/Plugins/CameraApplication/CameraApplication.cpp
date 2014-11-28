@@ -32,7 +32,8 @@ const float cRotateSpeed = 0.20f;
 CameraApplication::CameraApplication(Framework* owner) :
     IModule("CameraApplication", owner),
     joystickId_(-1),
-    movementHeld_(0.f)
+    movementHeld_(0.f),
+    lastMoveVector_(float3::zero)
 {
 }
 
@@ -51,6 +52,7 @@ void CameraApplication::Initialize()
     framework->Scene()->SceneAboutToBeRemoved.Connect(this, &CameraApplication::OnSceneAboutToBeRemoved);
 
     inputContext_ = framework->Input()->RegisterInputContext("CameraApplication", 101);
+    inputContext_->MouseScroll.Connect(this, &CameraApplication::OnMouseScroll);
 }
 
 void CameraApplication::Uninitialize()
@@ -63,7 +65,7 @@ void CameraApplication::Update(float frameTime)
     Entity* cameraEntity = framework->Renderer()->MainCamera();
     if (cameraEntity)
         MoveCamera(cameraEntity, frameTime);
-    else if (lastScene_)
+    else if (!cameraEntity && lastScene_)
         CreateCamera();
 }
 
@@ -114,6 +116,7 @@ void CameraApplication::CreateCamera()
         return;
     }
     renderer->SetMainCamera(cameraEntity);
+    lastCamera_ = cameraEntity;
 
     lastScene_->EntityCreated.Connect(this, &CameraApplication::CheckCameraSpawnPos);
 
@@ -149,12 +152,12 @@ void CameraApplication::MoveCamera(Entity* cameraEntity, float frameTime)
 
     Transform t = placeable->transform.Get();
 
+    float3 rotDelta = float3::zero;
+
     if (inputContext_->IsMouseButtonDown(Urho3D::MOUSEB_RIGHT))
     {
-        t.rot.x -= input->GetMouseMoveY() * cRotateSpeed;
-        t.rot.y -= input->GetMouseMoveX() * cRotateSpeed;
-        t.rot.x = Clamp(t.rot.x, -90.0f, 90.0f);
-        changed = true;
+        rotDelta.x -= input->GetMouseMoveY() * cRotateSpeed;
+        rotDelta.y -= input->GetMouseMoveX() * cRotateSpeed;
     }
     else if (inputContext_->GetNumTouches() > 0)
     {
@@ -164,11 +167,20 @@ void CameraApplication::MoveCamera(Entity* cameraEntity, float frameTime)
             Urho3D::TouchState *touch = input->GetTouch(ti);
             if (!touch->touchedElement_.Get())
             {
-                t.rot -= (float3(static_cast<float>(touch->delta_.y_), static_cast<float>(touch->delta_.x_), 0.f) * cRotateSpeed);;
-                changed = true;
+                rotDelta -= (float3(static_cast<float>(touch->delta_.y_), static_cast<float>(touch->delta_.x_), 0.f) * cRotateSpeed);
                 break;
             }
         }
+    }
+
+    if (!rotDelta.Equals(float3::zero))
+    {
+        RotateChanged.Emit(rotDelta);
+
+        t.rot.x += rotDelta.x;
+        t.rot.y += rotDelta.y;
+        t.rot.x = Clamp(t.rot.x, -90.0f, 90.0f);
+        changed = true;
     }
 
     float3 moveVector = float3::zero;
@@ -186,6 +198,12 @@ void CameraApplication::MoveCamera(Entity* cameraEntity, float frameTime)
     if (inputContext_->IsKeyDown(Urho3D::KEY_C))
         moveVector += float3(0.0f, -1.0f, 0.0f);
 
+    if (!moveVector.Equals(lastMoveVector_))
+    {
+        lastMoveVector_ = moveVector;
+        MoveChanged.Emit(moveVector);
+    }
+
     if (inputContext_->IsKeyPressed(Urho3D::KEY_SHIFT))
         moveVector *= 2;
 
@@ -198,8 +216,14 @@ void CameraApplication::MoveCamera(Entity* cameraEntity, float frameTime)
     else
         movementHeld_ = 0.f;
 
-    if (changed)
+    // If some other camera (like avatar) is active, do not actually move, only transmit the move signals
+    if (changed && cameraEntity == lastCamera_)
         placeable->transform.Set(t);
+}
+
+void CameraApplication::OnMouseScroll(MouseEvent* e)
+{
+    ZoomChanged.Emit(e->relativeZ);
 }
 
 }

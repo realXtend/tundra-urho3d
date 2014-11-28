@@ -77,6 +77,7 @@ AddProject(Plugins Plugins/ZipPlugin)
 AddProject(Plugins Plugins/HttpPlugin)
 AddProject(Plugins Plugins/CameraApplication)
 AddProject(Plugins Plugins/SceneInteract)
+AddProject(Plugins Plugins/AvatarApplication)
 
 BeginSection("Configuring Tundra Executable(s)")
 AddProject(Tundra Tundra/Tundra)

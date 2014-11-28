@@ -47,7 +47,7 @@ private:
     void Uninitialize() override;
 
     /// Frame update handler
-    void OnUpdate(float frametime);
+    void Update(float frametime) override;
 
     /// Handle delayed signal to parse command line parameters.
     void ReadStartupParameters(float time);

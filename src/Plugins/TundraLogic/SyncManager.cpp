@@ -1142,7 +1142,7 @@ void SyncManager::ReplicateRigidBodyChanges(UserConnection* /*user*/)
 //        user->Send(cRigidBodyUpdateMessage, msgReliable, true, ds);
 }
 
-void SyncManager::HandleRigidBodyChanges(UserConnection* source, kNet::packet_id_t packetId, const char* data, size_t numBytes)
+void SyncManager::HandleRigidBodyChanges(UserConnection* source, kNet::packet_id_t /*packetId*/, const char* data, size_t numBytes)
 {
     ScenePtr scene = scene_.Lock();
     if (!scene)

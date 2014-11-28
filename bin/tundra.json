@@ -6,7 +6,8 @@
 			"TundraLogic",
 			"HttpPlugin",
 			"CameraApplication",
-			"SceneInteract"
+			"SceneInteract",
+			"AvatarApplication"
 		]
     }
 ]

@@ -279,7 +279,7 @@ bool AnimationController::EnableExclusiveAnimation(const String& name, bool loop
     while(i != animations_.End())
     {
         const String& other_name = i->first_;
-        if (other_name.Compare(name, false) == 0)
+        if (other_name.Compare(name, false) != 0)
         {
             i->second_.phase_ = FadeOutPhase;
             i->second_.fade_period_ = fadeout;

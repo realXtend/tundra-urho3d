@@ -47,8 +47,6 @@ void TundraLogic::Load()
 
 void TundraLogic::Initialize()
 {
-    framework->Frame()->Updated.Connect(this, &TundraLogic::OnUpdate);
-
     client_ = SharedPtr<Tundra::Client>(new Tundra::Client(this));
     server_ = SharedPtr<Tundra::Server>(new Tundra::Server(this));
     syncManager_ = SharedPtr<Tundra::SyncManager>(new Tundra::SyncManager(this)); // Syncmanager expects client (and server) to exist
@@ -97,7 +95,7 @@ void TundraLogic::Uninitialize()
     server_.Reset();
 }
 
-void TundraLogic::OnUpdate(float frametime)
+void TundraLogic::Update(float frametime)
 {
     kristalliProtocol_->Update(frametime);
     if (client_)
