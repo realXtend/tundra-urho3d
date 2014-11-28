@@ -23,7 +23,7 @@ public:
     ~ScriptAsset();
     
     /// Load script asset from memory
-    virtual bool DeserializeFromData(const u8 *data, size_t numBytes, bool allowAsynchronous);
+    bool DeserializeFromData(const u8 *data, uint numBytes, bool allowAsynchronous) override;
 
     /// Load script asset into memory
     virtual bool SerializeTo(Vector<u8> &dst, const String &serializationParameters) const;

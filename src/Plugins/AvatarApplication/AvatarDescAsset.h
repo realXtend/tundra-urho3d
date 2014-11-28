@@ -28,7 +28,7 @@ public:
     ~AvatarDescAsset();
 
     /// Deserialize from XML data
-    bool DeserializeFromData(const u8 *data, size_t numBytes, bool allowAsynchronous) override;
+    bool DeserializeFromData(const u8 *data, uint numBytes, bool allowAsynchronous) override;
     /// Serialize to XML data
     bool SerializeTo(Vector<u8> &dst, const String &serializationParameters) const override;
     /// Check if asset is loaded. Checks only XML data size

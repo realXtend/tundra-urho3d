@@ -88,7 +88,7 @@ void AvatarDescAsset::DoUnload()
     properties_.Clear();
 }
 
-bool AvatarDescAsset::DeserializeFromData(const u8 *data, size_t numBytes, bool /*allowAsynchronous*/)
+bool AvatarDescAsset::DeserializeFromData(const u8 *data, uint numBytes, bool /*allowAsynchronous*/)
 {
     // Store the raw XML as a string
     avatarAppearanceXML_ = String((const char*)data, numBytes);

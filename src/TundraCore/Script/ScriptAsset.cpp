@@ -23,7 +23,7 @@ void ScriptAsset::DoUnload()
     references.Clear();
 }
 
-bool ScriptAsset::DeserializeFromData(const u8 *data, size_t numBytes, bool /*allowAsynchronous*/)
+bool ScriptAsset::DeserializeFromData(const u8 *data, uint numBytes, bool /*allowAsynchronous*/)
 {
     Urho3D::MemoryBuffer buffer(data, numBytes);
     scriptContent = buffer.ReadString();
