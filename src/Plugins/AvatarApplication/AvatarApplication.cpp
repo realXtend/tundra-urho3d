@@ -1,6 +1,7 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
+#include "Win.h"
 #include "AvatarApplication.h"
 #include "BinaryAsset.h"
 #include "GenericAssetFactory.h"

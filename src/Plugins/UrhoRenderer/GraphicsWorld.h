@@ -192,8 +192,8 @@ public:
     static StringHash componentLink;
 
 private:
-    /// Handle frame update. Used for entity visibility tracking
-    void OnUpdated(float timeStep);
+    /// Handle Urho postrender update event. Used for entity visibility tracking
+    void HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData);
 
     /// Do the actual raycast.
     void RaycastInternal(const Ray& ray, unsigned layerMask, float maxDistance, bool getAllResults);

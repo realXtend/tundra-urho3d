@@ -29,6 +29,7 @@
 #include <Profiler.h>
 #include <Engine/Scene/Scene.h>
 #include <Engine/Graphics/Camera.h>
+#include <Engine/Core/CoreEvents.h>
 #include <Engine/Graphics/DebugRenderer.h>
 #include <Engine/Graphics/Drawable.h>
 #include <Engine/Graphics/Octree.h>
@@ -63,8 +64,7 @@ GraphicsWorld::GraphicsWorld(UrhoRenderer* owner, Scene* scene) :
     
     SetDefaultSceneFog();
 
-    // Connect to frame update to handle time-based update
-    framework_->Frame()->Updated.Connect(this, &GraphicsWorld::OnUpdated);
+    SubscribeToEvent(Urho3D::E_POSTRENDERUPDATE, HANDLER(GraphicsWorld, HandlePostRenderUpdate));
 }
 
 GraphicsWorld::~GraphicsWorld()
@@ -72,9 +72,9 @@ GraphicsWorld::~GraphicsWorld()
     urhoScene_.Reset();
 }
 
-void GraphicsWorld::OnUpdated(float /*timeStep*/)
+void GraphicsWorld::HandlePostRenderUpdate(StringHash /*eventType*/, VariantMap& /*eventData*/)
 {
-    PROFILE(GraphicsWorld_OnUpdated);
+    PROFILE(GraphicsWorld_PostRenderUpdate);
 
     visibleEntities_.Clear();
 

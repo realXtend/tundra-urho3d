@@ -95,10 +95,13 @@ void UrhoRenderer::Initialize()
     framework->Scene()->SceneCreated.Connect(this, &UrhoRenderer::CreateGraphicsWorld);
     framework->Scene()->SceneAboutToBeRemoved.Connect(this, &UrhoRenderer::RemoveGraphicsWorld);
 
-    // Setup renderer global settings if we're not headless
+    // Enable the main (full-screen) viewport
     Urho3D::Renderer* rend = GetSubsystem<Urho3D::Renderer>();
     if (rend)
     {
+        rend->SetNumViewports(1);
+        rend->SetViewport(0, new Urho3D::Viewport(context_));
+
         // Track window position and screen mode changes to keep config up-to-date
         SubscribeToEvent(Urho3D::E_WINDOWPOS, HANDLER(UrhoRenderer, HandleScreenModeChange));
         SubscribeToEvent(Urho3D::E_SCREENMODE, HANDLER(UrhoRenderer, HandleScreenModeChange));
@@ -209,8 +212,6 @@ void UrhoRenderer::SetMainCamera(Entity *mainCameraEntity)
     if (!rend)
         return; // In headless mode the renderer doesn't exist
 
-    // Recreate the viewport whenever camera changes so that the old view does not contain dangling references
-    rend->SetViewport(0, new Urho3D::Viewport(context_));
     Urho3D::Viewport* vp = rend->GetViewport(0);
     if (vp)
     {
