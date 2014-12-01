@@ -184,16 +184,16 @@ private:
     void Detach();
 
     /// Finds out that is EC_Placeable component connected to same entity where water plane component is placed. 
-    /** @returns component pointer to EC_Placeable component. */
+    /** @returns component pointer to Placeable component. */
     ComponentPtr FindPlaceable() const;
 
     /// Changes water plane position.
-    /** This function should be called only if the parent entity of this component has no EC_Placeable component.
+    /** This function should be called only if the parent entity of this component has no Placeable component.
         @note Uses attribute @p position to for water plane defining water plane position  */
     void SetPosition();
 
     /// Changes water plane rotation
-    /** This function should be called only if the parent entity of this component has no EC_Placeable component.
+    /** This function should be called only if the parent entity of this component has no Placeable component.
         @note Uses attribute @p rotation to for water plane defining water plane rotation */
     void SetOrientation();
 
