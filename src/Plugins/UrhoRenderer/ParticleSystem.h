@@ -101,7 +101,7 @@ private:
     SharedPtr<Urho3D::Node> adjustmentNode_;
 
     /// Urho3D particle emitter component
-    SharedPtr<Urho3D::ParticleEmitter> particleEmitter_;
+    Vector<Urho3D::ParticleEmitter*> particleEmitters_;
 
     /// placeable component 
     WeakPtr<Placeable> placeable_;

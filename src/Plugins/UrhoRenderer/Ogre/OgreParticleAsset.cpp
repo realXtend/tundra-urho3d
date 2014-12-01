@@ -29,10 +29,8 @@ Urho3D::EmitterType UrhoEmitterTypeFromOgre(const String &ogreType)
     return type;
 }
 
-SharedPtr<Urho3D::ParticleEffect> ParticleEffectFromTemplate(SharedPtr<Urho3D::ParticleEffect> effect, const Ogre::ParticleSystemParser &parser)
+SharedPtr<Urho3D::ParticleEffect> ParticleEffectFromTemplate(SharedPtr<Urho3D::ParticleEffect> effect, const Tundra::Ogre::ParticleSystemBlock *effectBlock)//const Ogre::ParticleSystemParser &parser)
 {
-    Tundra::Ogre::ParticleSystemBlock* effectBlock = parser.root;
-
     effect->SetNumParticles(effectBlock->IntValue(Ogre::ParticleSystem::Effect::Quota, 10000));
     Urho3D::Vector2 size(effectBlock->FloatValue(Ogre::ParticleSystem::Effect::ParticleWidth, 100), effectBlock->FloatValue(Ogre::ParticleSystem::Effect::ParticleHeight, 100));
     effect->SetMinParticleSize(size);
@@ -106,17 +104,20 @@ bool OgreParticleAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
     Ogre::ParticleSystemParser parser;
     if (parser.Parse((const char*)data_, numBytes))
     {
-        ///\todo Handle multiple particle effects in single file.
-        particleEffect_ = ParticleEffectFromTemplate(SharedPtr<Urho3D::ParticleEffect>(new Urho3D::ParticleEffect(GetContext())), parser);
-        if (parser.root->Has(Ogre::ParticleSystem::Effect::Material))
+        for (size_t i=0 ; i<parser.templates.Size() ; ++i)
         {
-            String materialRef = parser.root->StringValue(Ogre::ParticleSystem::Effect::Material, "");
-            materials_.Push(Urho3D::MakePair(0, AssetReference(assetAPI->ResolveAssetRef(Name(), materialRef), "OgreMaterial")));
-        }
-        else
-            particleEffect_->SetMaterial(GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Material>("Materials/DefaultGrey.xml"));
+            SharedPtr<Urho3D::ParticleEffect> effect = ParticleEffectFromTemplate(SharedPtr<Urho3D::ParticleEffect>(new Urho3D::ParticleEffect(GetContext())), parser.templates[i]);
+            particleEffects_.Push(effect);
+            if (parser.templates[i]->Has(Ogre::ParticleSystem::Effect::Material))
+            {
+                String materialRef = parser.templates[i]->StringValue(Ogre::ParticleSystem::Effect::Material, "");
+                materials_.Push(Urho3D::MakePair(0, AssetReference(assetAPI->ResolveAssetRef(Name(), materialRef), "OgreMaterial")));
+            }
+            else
+                effect->SetMaterial(GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Material>("Materials/DefaultGrey.xml"));
 
-        assetAPI->AssetLoadCompleted(Name());
+            assetAPI->AssetLoadCompleted(Name());
+        }
         return true;
     }
 
@@ -126,16 +127,16 @@ bool OgreParticleAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
 void OgreParticleAsset::DependencyLoaded(AssetPtr dependee)
 {
     IMaterialAsset *material = dynamic_cast<IMaterialAsset*>(dependee.Get());
-    if (material && particleEffect_ != nullptr)
+    if (material)
     {
         LogDebug("Material loaded: " + material->Name());
         bool found = false;
         for (uint i = 0; i < materials_.Size(); ++i)
         {
             /// \todo Is this ref compare reliable?
-            if (!materials_[i].second_.ref.Compare(material->Name(), false))
+            if (!materials_[i].second_.ref.Compare(material->Name(), false) && i < particleEffects_.Size())
             {
-                particleEffect_->SetMaterial(material->UrhoMaterial());
+                particleEffects_[i]->SetMaterial(material->UrhoMaterial());
                 found = true;
             }
         }

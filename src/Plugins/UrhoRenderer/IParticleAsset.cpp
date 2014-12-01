@@ -25,12 +25,15 @@ IParticleAsset::~IParticleAsset()
 
 void IParticleAsset::DoUnload()
 {
-    particleEffect_.Reset();
+    foreach (SharedPtr<Urho3D::ParticleEffect> pe, particleEffects_)
+        pe.Reset();
+
+    particleEffects_.Clear();
 }
 
 bool IParticleAsset::IsLoaded() const
 {
-    return particleEffect_ != nullptr;
+    return particleEffects_.Size() > 0;
 }
 
 }

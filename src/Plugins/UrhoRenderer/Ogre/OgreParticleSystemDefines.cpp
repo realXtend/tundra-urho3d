@@ -13,7 +13,7 @@ namespace Tundra
 namespace Ogre
 {
 
-// MaterialBlock
+// ParticleSystemBlock
 
 ParticleSystemBlock::ParticleSystemBlock(ParticleSystemBlock *parent_, ParticleSystemPart part_, int e, int a) : 
     parent(parent_),
@@ -208,16 +208,19 @@ void ParticleSystemBlock::Dump(bool recursive, uint indentation)
         LogInfo("");
 }
 
-// MaterialParser
+// ParticleSystemParser
 
 ParticleSystemParser::ParticleSystemParser() :
-    root(0)
+    root(nullptr)
 {
 }
 
 ParticleSystemParser::~ParticleSystemParser()
 {
-    SAFE_DELETE(root);
+    foreach(ParticleSystemBlock* tmp, templates)
+        SAFE_DELETE(tmp);
+
+    templates.Clear();
 }
 
 String ParticleSystemParser::Error() const
@@ -231,17 +234,16 @@ bool ParticleSystemParser::Parse(const char *data_, uint lenght_)
     pos = 0;
     lineNum = 0;
 
-    SAFE_DELETE(root);
+    foreach(ParticleSystemBlock* tmp, templates)
+        SAFE_DELETE(tmp);
+    templates.Clear();
+    root = nullptr;
 
     for(;;)
     {
         if (!ProcessLine())
             break;
     }
-
-    // Make root safe even on failure
-    if (!root)
-        root = new ParticleSystemBlock();
 
     return (state.error.Length() == 0);
 }
@@ -322,10 +324,8 @@ bool ParticleSystemParser::ProcessLine()
         if (state.block->parent)
             state.block->parent->blocks.Push(state.block);
 
-        // If traversed back to root we are done.
-        /// @todo If we want to parse multiple particle systems from a single file change this logic.
         state.block = state.block->parent;
-        return (state.block != 0);
+        return true;
     }
     // Block scope start
     else if (line[0] == '{')
@@ -378,8 +378,11 @@ bool ParticleSystemParser::ProcessLine()
         state.block = new ParticleSystemBlock(state.block, part, state.emitter, state.affector);
         state.block->id = value;
 
-        if (!root && part == PSP_ParticleSystem)
+        if (part == PSP_ParticleSystem)
+        {
             root = state.block;
+            templates.Push(root);
+        }
 
         //LogInfoF("    emitter %d affector %d", state.block->emitter, state.block->affector);
         return true;

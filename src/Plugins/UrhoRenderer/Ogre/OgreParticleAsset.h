@@ -10,7 +10,7 @@
 namespace Tundra
 {
 
-/// Represents a particle asset loaded from Ogre binary format
+/// Represents a particle asset loaded from Ogre binary format.
 class URHO_MODULE_API OgreParticleAsset : public IParticleAsset
 {
     OBJECT(OgreParticleAsset);

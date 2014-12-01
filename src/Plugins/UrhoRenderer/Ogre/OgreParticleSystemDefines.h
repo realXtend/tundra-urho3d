@@ -131,7 +131,7 @@ struct URHO_MODULE_API ParticleSystemBlock
     /// Child blocks
     Vector<ParticleSystemBlock*> blocks;
 
-    /// Parent block
+    /// parent block
     ParticleSystemBlock *parent;
 
     ParticleSystemBlock(ParticleSystemBlock *parent_ = 0, ParticleSystemPart part_ = PSP_Unsupported, int e = -1, int a = -1);
@@ -197,7 +197,7 @@ public:
 
     /// Root block
     /** Can be accessed after Parse to query material data. */
-    ParticleSystemBlock *root;
+    Vector<ParticleSystemBlock*> templates;
 
     /// Parses script from input data.
     /** @param Returns success. If false you can query Error() for a printable message. */
@@ -211,6 +211,8 @@ private:
     
     void Advance();
     void SkipBlock();
+
+    ParticleSystemBlock *root;
 
     /// Data
     String data;

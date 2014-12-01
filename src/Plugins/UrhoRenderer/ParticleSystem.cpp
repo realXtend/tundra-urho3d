@@ -42,16 +42,15 @@ ParticleSystem::~ParticleSystem()
 {
     if (world_.Expired())
     {
-        if (particleEmitter_)
+        if (particleEmitters_.Size() > 0)
             LogError("ParticleSystem: World has expired, skipping uninitialization!");
         return;
     }
 
     DetachParticleSystem();
 
-    if (particleEmitter_)
+    if (particleEmitters_.Size() > 0)
     {
-        particleEmitter_.Reset();
         adjustmentNode_->Remove();
         adjustmentNode_.Reset();
     }
@@ -74,7 +73,7 @@ void ParticleSystem::UpdateSignals()
     if (parent->ParentScene())
         world_ = parent->ParentScene()->Subsystem<GraphicsWorld>();
 
-    if (world_ && !particleEmitter_)
+    if (world_ && !adjustmentNode_)
     {
         Urho3D::Scene* urhoScene = world_->UrhoScene();
         adjustmentNode_ = urhoScene->CreateChild("AdjustmentNode");
@@ -83,9 +82,6 @@ void ParticleSystem::UpdateSignals()
         ///\todo Is this needed for particle effects?
         adjustmentNode_->SetVar(GraphicsWorld::entityLink, Variant(WeakPtr<RefCounted>(parent)));
         adjustmentNode_->SetVar(GraphicsWorld::componentLink, Variant(WeakPtr<RefCounted>(this)));
-
-        particleEmitter_ = adjustmentNode_->CreateComponent<Urho3D::ParticleEmitter>();
-        particleEmitter_->SetEnabled(false);
 
         // Connect ref listeners
         particleRefListener_->Loaded.Connect(this, &ParticleSystem::OnParticleAssetLoaded);
@@ -106,47 +102,54 @@ void ParticleSystem::OnComponentStructureChanged(IComponent*, AttributeChange::T
 
 void ParticleSystem::AttributesChanged()
 {
-    if (!ViewEnabled() || !particleEmitter_)
+    if (!ViewEnabled() || !adjustmentNode_)
         return;
 
     if (particleRef.ValueChanged() && particleRefListener_)
         particleRefListener_->HandleAssetRefChange(&particleRef);
     if (castShadows.ValueChanged())
-        particleEmitter_->SetCastShadows(castShadows.Get());
+        foreach (Urho3D::ParticleEmitter* emitter, particleEmitters_)
+            emitter->SetCastShadows(castShadows.Get());
     if (enabled.ValueChanged())
-        particleEmitter_->SetEnabled(enabled.Get());
+        foreach (Urho3D::ParticleEmitter* emitter, particleEmitters_)
+            emitter->SetEnabled(enabled.Get());
     if (renderingDistance.ValueChanged())
-        particleEmitter_->SetDrawDistance(renderingDistance.Get());
+        foreach (Urho3D::ParticleEmitter* emitter, particleEmitters_)
+            emitter->SetDrawDistance(renderingDistance.Get());
 }
 
 void ParticleSystem::OnParticleAssetLoaded(AssetPtr asset)
 {
     IParticleAsset *particleAsset = dynamic_cast<IParticleAsset*>(asset.Get());
 
-    Urho3D::ParticleEffect* effect = particleAsset->UrhoParticleEffect();
-
-    ///\todo Particles are now facing away from camera (or culled wrong side), so need to force fix culling.
-    effect->GetMaterial()->SetCullMode(Urho3D::CULL_NONE);
-
-    StringHash alphaPass = StringHash("alpha");
-    ///\todo Need to force use of vertex color technique for colored particles. Remove once OgreMaterialProcessor can handle this.
-    if (effect->GetColorFrames().Size() > 0 && effect->GetMaterial()->GetTechnique(0) &&
-        effect->GetMaterial()->GetTechnique(0)->GetPass(alphaPass))
+    foreach (SharedPtr<Urho3D::ParticleEffect> effect, particleAsset->particleEffects_)
     {
-        if (effect->GetMaterial()->GetTechnique(0)->GetPass(alphaPass)->GetBlendMode() == Urho3D::BLEND_ADD)
-            effect->GetMaterial()->SetTechnique(0, GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Technique>("Techniques/DiffVColAdd.xml"));
-        else
-            effect->GetMaterial()->SetTechnique(0, GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Technique>("Techniques/DiffVColUnlitAlpha.xml"));
+        ///\todo Particles are now facing away from camera (or culled wrong side), so need to force fix culling.
+        effect->GetMaterial()->SetCullMode(Urho3D::CULL_NONE);
+
+        StringHash alphaPass = StringHash("alpha");
+        ///\todo Need to force use of vertex color technique for colored particles. Remove once OgreMaterialProcessor can handle this.
+        if (effect->GetColorFrames().Size() > 0 && effect->GetMaterial()->GetTechnique(0) &&
+            effect->GetMaterial()->GetTechnique(0)->GetPass(alphaPass))
+        {
+            if (effect->GetMaterial()->GetTechnique(0)->GetPass(alphaPass)->GetBlendMode() == Urho3D::BLEND_ADD)
+                effect->GetMaterial()->SetTechnique(0, GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Technique>("Techniques/DiffVColAdd.xml"));
+            else
+                effect->GetMaterial()->SetTechnique(0, GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::Technique>("Techniques/DiffVColUnlitAlpha.xml"));
+        }
+
+        Urho3D::ParticleEmitter* particleEmitter = adjustmentNode_->CreateComponent<Urho3D::ParticleEmitter>();
+        particleEmitter->SetEnabled(false);
+        particleEmitter->SetEffect(effect);
+        particleEmitters_.Push(particleEmitter);
+
+        AttachParticleSystem();
     }
-
-    particleEmitter_->SetEffect(effect);
-
-    AttachParticleSystem();
 }
 
 void ParticleSystem::AttachParticleSystem()
 {
-    if (!particleEmitter_ || world_.Expired())
+    if (!adjustmentNode_ || world_.Expired())
         return;
 
     // Detach first, in case the original placeable no longer exists
@@ -169,12 +172,13 @@ void ParticleSystem::AttachParticleSystem()
     adjustmentNode_->SetParent(placeableNode);
     adjustmentNode_->SetPosition(Urho3D::Vector3(0, 0, 0));
 
-    particleEmitter_->SetEnabled(enabled.Get());
+    foreach (Urho3D::ParticleEmitter* emitter, particleEmitters_)
+        emitter->SetEnabled(enabled.Get());
 }
 
 void ParticleSystem::DetachParticleSystem()
 {
-     if (!particleEmitter_ || world_.Expired())
+     if (!adjustmentNode_ || world_.Expired())
         return;
 
     if (placeable_)
@@ -183,7 +187,9 @@ void ParticleSystem::DetachParticleSystem()
         // When removed from the placeable, attach to scene root to avoid being removed from scene
         adjustmentNode_->SetParent(urhoScene);
         placeable_.Reset();
-        particleEmitter_->SetEnabled(false); // We should not render while detached
+
+        foreach (Urho3D::ParticleEmitter* emitter, particleEmitters_)
+            emitter->SetEnabled(false); // We should not render while detached
     }
 }
 
