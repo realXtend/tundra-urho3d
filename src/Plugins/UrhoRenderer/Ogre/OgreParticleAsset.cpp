@@ -81,8 +81,68 @@ SharedPtr<Urho3D::ParticleEffect> ParticleEffectFromTemplate(SharedPtr<Urho3D::P
         effect->SetInactiveTime(repeatDelay);
     }
 
-    ///\todo Ogre Affectors
+    for (size_t i=0 ; i<effectBlock->NumAffectors() ; ++i)
+    {
+        Tundra::Ogre::ParticleSystemBlock *affectorBlock = effectBlock->Affector(i);
 
+        // Linear force
+        if (StringHash(affectorBlock->id) == Ogre::ParticleSystem::Affector::LinearForce)
+        {
+            if (affectorBlock->Has(Ogre::ParticleSystem::Affector::ForceVector))
+                effect->SetConstantForce(affectorBlock->Vector3Value(Ogre::ParticleSystem::Affector::ForceVector, Urho3D::Vector3::ZERO));
+        }
+
+        // Scaler
+        if (StringHash(affectorBlock->id) == Ogre::ParticleSystem::Affector::Scaler)
+        {
+            if (affectorBlock->Has(Ogre::ParticleSystem::Affector::Rate))
+                effect->SetSizeAdd(affectorBlock->FloatValue(Ogre::ParticleSystem::Affector::Rate, 0));
+        }
+
+        // Rotator
+        if (StringHash(affectorBlock->id) == Ogre::ParticleSystem::Affector::Rotator)
+        {
+            effect->SetMinRotationSpeed(affectorBlock->FloatValue(Ogre::ParticleSystem::Affector::RotationSpeedRangeStart, 0));
+            effect->SetMaxRotationSpeed(affectorBlock->FloatValue(Ogre::ParticleSystem::Affector::RotationSpeedRangeEnd, 0));
+            effect->SetMinRotation(affectorBlock->FloatValue(Ogre::ParticleSystem::Affector::RotationRangeStart, 0));
+            effect->SetMaxRotation(affectorBlock->FloatValue(Ogre::ParticleSystem::Affector::RotationRangeEnd, 0));
+        }
+
+        // ColourInterpolator
+        if (StringHash(affectorBlock->id) == Ogre::ParticleSystem::Affector::ColourInterpolator)
+        {
+            Vector<Urho3D::ColorFrame> colorFrames;
+            for (int i=0 ; i<6 ; ++i)
+            {
+                StringHash color = StringHash(Ogre::ParticleSystem::Affector::Color + String(i));
+                StringHash time = StringHash(Ogre::ParticleSystem::Affector::Time + String(i));
+                if (!affectorBlock->Has(color) || !affectorBlock->Has(time))
+                    break;
+                colorFrames.Push(Urho3D::ColorFrame(affectorBlock->ColorValue(color, Urho3D::Color::WHITE), affectorBlock->FloatValue(time, 0)));
+            }
+            if (colorFrames.Size() > 0)
+                effect->SetColorFrames(colorFrames);
+        }
+
+        if (StringHash(affectorBlock->id) == Ogre::ParticleSystem::Affector::ColourFader)
+        {
+            Urho3D::Color startColor = Urho3D::Color::WHITE;
+            if (effect->GetColorFrames().Size() > 0)
+                startColor = effect->GetColorFrames()[0].color_;
+
+            Vector<Urho3D::ColorFrame> colorFrames;
+            colorFrames.Push(Urho3D::ColorFrame(startColor, 0));
+            float4 affectorColor = float4(affectorBlock->FloatValue(Ogre::ParticleSystem::Affector::Red, 0),
+                affectorBlock->FloatValue(Ogre::ParticleSystem::Affector::Green, 0),
+                affectorBlock->FloatValue(Ogre::ParticleSystem::Affector::Blue, 0),
+                affectorBlock->FloatValue(Ogre::ParticleSystem::Affector::Alpha, 0));
+
+            float4 endColor = startColor.ToVector4() + affectorColor * effect->GetMinTimeToLive();
+            Urho3D::Color c = Urho3D::Color(endColor.x, endColor.y, endColor.z, endColor.w);
+            colorFrames.Push(Urho3D::ColorFrame(c, effect->GetMinTimeToLive()));
+            effect->SetColorFrames(colorFrames);
+        }
+    }
 
     return effect;
 }

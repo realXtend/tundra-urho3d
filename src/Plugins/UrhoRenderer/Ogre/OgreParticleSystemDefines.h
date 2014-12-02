@@ -80,7 +80,28 @@ namespace ParticleSystem
 
     namespace Affector
     {
+        const StringHash LinearForce                = "LinearForce";
+        const StringHash ForceVector                = "force_vector";
+        const StringHash ForceApplication           = "force_application";
 
+        const StringHash Scaler                     = "Scaler";
+        const StringHash Rate                       = "rate";
+
+        const StringHash Rotator                    = "Rotator";
+        const StringHash RotationSpeedRangeStart    = "rotation_speed_range_start";
+        const StringHash RotationSpeedRangeEnd      = "rotation_speed_range_end";
+        const StringHash RotationRangeStart         = "rotation_range_start";
+        const StringHash RotationRangeEnd           = "rotation_range_end";
+
+        const StringHash ColourInterpolator         = "ColourInterpolator";
+        const String Time                           = "time";
+        const String Color                          = "colour";
+
+        const StringHash ColourFader                = "ColourFader";
+        const StringHash Red                        = "red";
+        const StringHash Green                      = "green";
+        const StringHash Blue                       = "blue";
+        const StringHash Alpha                      = "alpha";
     }
 }
 
