@@ -29,8 +29,9 @@ Urho3D::EmitterType UrhoEmitterTypeFromOgre(const String &ogreType)
     return type;
 }
 
-SharedPtr<Urho3D::ParticleEffect> ParticleEffectFromTemplate(SharedPtr<Urho3D::ParticleEffect> effect, const Tundra::Ogre::ParticleSystemBlock *effectBlock)//const Ogre::ParticleSystemParser &parser)
+SharedPtr<Urho3D::ParticleEffect> ParticleEffectFromTemplate(SharedPtr<Urho3D::ParticleEffect> effect, const Tundra::Ogre::ParticleSystemBlock *effectBlock)
 {
+    // Particle system attributes
     effect->SetNumParticles(effectBlock->IntValue(Ogre::ParticleSystem::Effect::Quota, 10000));
     Urho3D::Vector2 size(effectBlock->FloatValue(Ogre::ParticleSystem::Effect::ParticleWidth, 100), effectBlock->FloatValue(Ogre::ParticleSystem::Effect::ParticleHeight, 100));
     effect->SetMinParticleSize(size);
@@ -38,11 +39,12 @@ SharedPtr<Urho3D::ParticleEffect> ParticleEffectFromTemplate(SharedPtr<Urho3D::P
     effect->SetSorted(effectBlock->BooleanValue(Ogre::ParticleSystem::Effect::Sorted, false));
     effect->SetRelative(effectBlock->BooleanValue(Ogre::ParticleSystem::Effect::LocalSpace, false));
     effect->SetUpdateInvisible(effectBlock->IntValue(Ogre::ParticleSystem::Effect::NonvisibleUpdateTimeout, 0) == 0);
+
+    // Emitter attributes
     if (effectBlock->NumEmitters() > 0)
     {
         Tundra::Ogre::ParticleSystemBlock* emitterBlock = effectBlock->Emitter(0);
         effect->SetEmitterType(UrhoEmitterTypeFromOgre(emitterBlock->id));
-        //effect->SetMinRotation(emitterBlock->FloatValue(Ogre::ParticleSystem::Emitter::Angle
         Vector<Urho3D::ColorFrame> colorFrames;
         if (emitterBlock->Has(Ogre::ParticleSystem::Emitter::Colour))
             colorFrames.Push(Urho3D::ColorFrame(emitterBlock->ColorValue(Ogre::ParticleSystem::Emitter::Colour, Urho3D::Color::WHITE)));
@@ -81,6 +83,7 @@ SharedPtr<Urho3D::ParticleEffect> ParticleEffectFromTemplate(SharedPtr<Urho3D::P
         effect->SetInactiveTime(repeatDelay);
     }
 
+    // Affectors
     for (size_t i=0 ; i<effectBlock->NumAffectors() ; ++i)
     {
         Tundra::Ogre::ParticleSystemBlock *affectorBlock = effectBlock->Affector(i);
@@ -108,7 +111,7 @@ SharedPtr<Urho3D::ParticleEffect> ParticleEffectFromTemplate(SharedPtr<Urho3D::P
             effect->SetMaxRotation(affectorBlock->FloatValue(Ogre::ParticleSystem::Affector::RotationRangeEnd, 0));
         }
 
-        // ColourInterpolator
+        // ColourInterpolator, overrides ColourRangeStart, ColourRangeEnd
         if (StringHash(affectorBlock->id) == Ogre::ParticleSystem::Affector::ColourInterpolator)
         {
             Vector<Urho3D::ColorFrame> colorFrames;
@@ -124,6 +127,7 @@ SharedPtr<Urho3D::ParticleEffect> ParticleEffectFromTemplate(SharedPtr<Urho3D::P
                 effect->SetColorFrames(colorFrames);
         }
 
+        // ColourFader, overrides ColourRangeEnd
         if (StringHash(affectorBlock->id) == Ogre::ParticleSystem::Affector::ColourFader)
         {
             Urho3D::Color startColor = Urho3D::Color::WHITE;

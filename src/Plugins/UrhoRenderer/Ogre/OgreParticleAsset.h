@@ -10,7 +10,7 @@
 namespace Tundra
 {
 
-/// Represents a particle asset loaded from Ogre binary format.
+/// Represents a particle asset loaded from Ogre script format.
 /** \todo does not support following:
       Particle system attributes:
         cull_each

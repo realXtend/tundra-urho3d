@@ -10,7 +10,7 @@
 namespace Tundra
 {
 
-/// Represents a particle asset. May contain several particle effects.
+/// Represents a particle asset. May contain several separate particle effects.
 class URHO_MODULE_API IParticleAsset : public IAsset
 {
     OBJECT(IParticleAsset);
