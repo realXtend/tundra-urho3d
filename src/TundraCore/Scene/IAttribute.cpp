@@ -15,15 +15,16 @@
 #include "AssetReference.h"
 #include "EntityReference.h"
 #include "Math/Transform.h"
-#include "Math/Quat.h"
-#include "Math/float2.h"
-#include "Math/float3.h"
-#include "Math/float3.h"
-#include "Math/MathFunc.h"
 #include "Math/Color.h"
 #include "Math/Point.h"
 #include "LoggingFunctions.h"
 
+#include <Math/Quat.h>
+#include <Math/float2.h>
+#include <Math/float3.h>
+#include <Math/float3.h>
+
+#include <Math/MathFunc.h>
 #include <StringUtils.h>
 
 #include <kNet/DataDeserializer.h>
@@ -129,7 +130,7 @@ template<> u32 TUNDRACORE_API Attribute<Point>::TypeId() const { return PointId;
 
 // TypeName implementations
 template<> const String TUNDRACORE_API & Attribute<int>::TypeName() const { return IntTypeName; }
-template<> const String TUNDRACORE_API & Attribute<uint>::TypeName() const { return IntTypeName; }
+template<> const String TUNDRACORE_API & Attribute<uint>::TypeName() const { return UIntTypeName; }
 template<> const String TUNDRACORE_API & Attribute<float>::TypeName() const { return RealTypeName; }
 template<> const String TUNDRACORE_API & Attribute<String>::TypeName() const { return StringTypeName; }
 template<> const String TUNDRACORE_API & Attribute<bool>::TypeName() const { return BoolTypeName; }
