@@ -423,10 +423,10 @@ bool MaterialParser::ProcessLine()
         //LogInfoF("    tech %d pass %d tu %d", state.block->technique, state.block->pass, state.block->textureUnit);
         return true;
     }
-    else if (splitPos == String::NPOS)
+    else if (value.Empty())
     {
-        state.error = Urho3D::ToString("Ogre::MaterialParser: Invalid script tokens '%s' on line %d before column %d", line.CString(), lineNum, pos);
-        return false;
+        LogWarningF("Ogre::MaterialParser: Invalid script token '%s' without a value on line %d before column %d", keyStr.CString(), lineNum, pos);
+        return true;
     }
     // Material not yet started
     if (!state.block)
