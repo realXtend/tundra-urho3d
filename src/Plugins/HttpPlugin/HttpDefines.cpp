@@ -175,39 +175,85 @@ time_t HttpDateToUtcEpoch(const String &date)
         return 0;
 
     StringVector parts = date.Trimmed().Split(' ');
-    if (parts.Size() != 6)
-    {
-        LogErrorF("Invalid date '%s' format. Expecting 'Tue, 15 Nov 2010 08:12:31 GMT'.", date.CString());
-        return 0;
-    }
 
-    /* Tue, 15 Nov 2010 08:12:31 GMT
-       http://www.cplusplus.com/reference/ctime/tm/
+    /* http://www.cplusplus.com/reference/ctime/tm/
        http://www.cplusplus.com/reference/ctime/mktime/ */
     struct tm timeFormat;
     timeFormat.tm_yday = 0;
     timeFormat.tm_wday = 0;
     timeFormat.tm_isdst = 0;
-    timeFormat.tm_wday = HttpWeekDay(parts[0]); // Handles trailing ','
-    timeFormat.tm_mday = HttpMonthDay(parts[1]);
-    timeFormat.tm_mon = HttpMonth(parts[2]);
-    timeFormat.tm_year = HttpYear(parts[3]);
 
-    StringVector timeParts = parts[4].Trimmed().Split(':');
-    if (timeParts.Size() != 3)
+    // http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3
+    if (parts.Size() == 6)
     {
-        LogErrorF("Invalid time '%s' format. Expecting '08:12:31'.", parts[4].CString());
+        // Sun, 06 Nov 1994 08:49:37 GMT ; RFC 822, updated by RFC 1123
+        timeFormat.tm_wday = HttpWeekDay(parts[0]);
+        timeFormat.tm_mday = HttpMonthDay(parts[1]);
+        timeFormat.tm_mon = HttpMonth(parts[2]);
+        timeFormat.tm_year = HttpYear(parts[3]);
+
+        StringVector timeParts = parts[4].Trimmed().Split(':');
+        if (timeParts.Size() != 3)
+        {
+            LogErrorF("Invalid time '%s' format. Expecting '08:12:31'.", parts[4].CString());
+            return 0;
+        }
+        timeFormat.tm_hour = Urho3D::ToInt(timeParts[0]);
+        timeFormat.tm_min = Urho3D::ToInt(timeParts[1]);
+        timeFormat.tm_sec = Urho3D::ToInt(timeParts[2]);
+
+        if (timeFormat.tm_wday == -1 || timeFormat.tm_mday == -1 || timeFormat.tm_mon == -1 || timeFormat.tm_year == -1)
+        {
+            LogErrorF("Failed to parse time format struct from date '%s'", date.CString());
+            return 0;
+        }
+    }
+    else if (parts.Size() == 4)
+    {
+        // Sunday, 06-Nov-94 08:49:37 GMT ; RFC 850, obsoleted by RFC 1036
+        StringVector dateParts = parts[1].Split('-');
+        if (dateParts.Size() != 3)
+        {
+            LogErrorF("Invalid time '%s' format. Expecting '06-Nov-94' (RFC 850/1036).", parts[1].CString());
+            return 0;
+        }
+
+        /* This format is deprecated because it only has two digits for the year.
+           It's very rare that we would get these from a server. We are going to make
+           an assumption that no server is no longer returning date headers from 19XX.
+           I'm sure theseservers exist but they are probably not going to be used for
+           3D applications using Turho. On the other hand we have about 85 years before
+           this hardcoded "20" will cause issue on the other end of the spectrum.
+           I'm sure the deprecation of this header is pretty complete by then :)*/
+        String year = "20" + dateParts[2];
+
+        timeFormat.tm_wday = HttpWeekDay(parts[0]);
+        timeFormat.tm_mday = HttpMonthDay(dateParts[0]);
+        timeFormat.tm_mon = HttpMonth(dateParts[1]);
+        timeFormat.tm_year = HttpYear(year);
+
+        StringVector timeParts = parts[2].Trimmed().Split(':');
+        if (timeParts.Size() != 3)
+        {
+            LogErrorF("Invalid time '%s' format. Expecting '08:12:31'.", parts[4].CString());
+            return 0;
+        }
+        timeFormat.tm_hour = Urho3D::ToInt(timeParts[0]);
+        timeFormat.tm_min = Urho3D::ToInt(timeParts[1]);
+        timeFormat.tm_sec = Urho3D::ToInt(timeParts[2]);
+
+        if (timeFormat.tm_wday == -1 || timeFormat.tm_mday == -1 || timeFormat.tm_mon == -1 || timeFormat.tm_year == -1)
+        {
+            LogErrorF("Failed to parse time format struct from date '%s'", date.CString());
+            return 0;
+        }
+    }
+    else
+    {
+        LogErrorF("Invalid HTTP date format '%s'. Expecting 'Sun, 06 Nov 1994 08:49:37 GMT' (RFC 822/1123) or 'Sunday, 06-Nov-94 08:49:37 GMT' (FC 850/1036).", date.CString());
         return 0;
     }
-    timeFormat.tm_hour = Urho3D::ToInt(timeParts[0]);
-    timeFormat.tm_min = Urho3D::ToInt(timeParts[1]);
-    timeFormat.tm_sec = Urho3D::ToInt(timeParts[2]);
 
-    if (timeFormat.tm_wday == -1 || timeFormat.tm_mday == -1 || timeFormat.tm_mon == -1 || timeFormat.tm_year == -1)
-    {
-        LogErrorF("Failed to parse time format struct from date '%s'", date.CString());
-        return 0;
-    }
 #ifdef WIN32
     return _mkgmtime(&timeFormat);
 #else
