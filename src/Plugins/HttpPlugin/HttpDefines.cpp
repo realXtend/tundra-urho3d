@@ -171,6 +171,9 @@ time_t timegm(struct tm* const t) {
 
 time_t HttpDateToUtcEpoch(const String &date)
 {
+    if (date.Empty())
+        return 0;
+
     StringVector parts = date.Trimmed().Split(' ');
     if (parts.Size() != 6)
     {

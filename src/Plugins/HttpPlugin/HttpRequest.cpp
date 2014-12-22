@@ -594,9 +594,12 @@ void HttpRequest::Perform()
                     if (file.Write(&responseData_.bodyBytes[0], bodySize) == bodySize)
                     {
                         file.Close(); // File shared ptr will close when gets out of scope. Lets just do it here before modifying below last modified on the file.
-                        time_t epoch = Http::HttpDateToUtcEpoch(lastModified);
-                        if (epoch > 0) // SetLastModifiedTime converts utc epoch correctly to local
-                            framework_->GetSubsystem<Urho3D::FileSystem>()->SetLastModifiedTime(requestData_.cacheFile, static_cast<uint>(epoch));
+                        if (!lastModified.Empty())
+                        {
+                            time_t epoch = Http::HttpDateToUtcEpoch(lastModified);
+                            if (epoch > 0) // SetLastModifiedTime converts utc epoch correctly to local
+                                framework_->GetSubsystem<Urho3D::FileSystem>()->SetLastModifiedTime(requestData_.cacheFile, static_cast<uint>(epoch));
+                        }
                     }
                     requestData_.msecDiskWrite = t.GetMSec(false);
                 }
