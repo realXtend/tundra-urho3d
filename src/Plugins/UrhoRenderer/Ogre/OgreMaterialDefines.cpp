@@ -425,7 +425,7 @@ bool MaterialParser::ProcessLine()
     }
     else if (value.Empty())
     {
-        LogWarningF("Ogre::MaterialParser: Invalid script token '%s' without a value on line %d before column %d", keyStr.CString(), lineNum, pos);
+        LogWarningF("Ogre::MaterialParser: Skipping invalid script token '%s' without a value on line %d before column %d", keyStr.CString(), lineNum, pos);
         return true;
     }
     // Material not yet started
