@@ -37,6 +37,8 @@ inline Dst checked_static_cast(Src src)
 }
 
 /// foreach macro for STL containers (and any other containers providing begin() and end() member functions) and C arrays.
+/** @bug break withing foreach is buggy at the moment (only breaks one iteration, does not break for good). Urho's implementation
+    was used as a base for this, issue for Urho's foreach can be found from here https://github.com/urho3d/Urho3D/issues/561 */
 #define foreach_std(val, container) \
     for(auto it = std::begin(container); it != std::end(container); ++it) \
         if (bool _foreach_flag = false) {} \
