@@ -20,11 +20,11 @@
 #include <kNet/DataDeserializer.h>
 #include <kNet/DataSerializer.h>
 
-#include <Engine/IO/File.h>
-#include <Engine/Resource/XMLFile.h>
-#include <Engine/IO/FileSystem.h>
-#include <Engine/Core/StringUtils.h>
-#include <Engine/Core/Profiler.h>
+#include <Urho3D/IO/File.h>
+#include <Urho3D/Resource/XMLFile.h>
+#include <Urho3D/IO/FileSystem.h>
+#include <Urho3D/Core/StringUtils.h>
+#include <Urho3D/Core/Profiler.h>
 
 using namespace kNet;
 using namespace std;

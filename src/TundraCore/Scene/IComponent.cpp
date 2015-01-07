@@ -13,11 +13,11 @@
 #include "Framework.h"
 #include "LoggingFunctions.h"
 
-#include <XMLFile.h>
+#include <Urho3D/Resource/XMLFile.h>
 
 #include <kNet/DataSerializer.h>
 #include <kNet/DataDeserializer.h>
-#include <StringUtils.h>
+#include <Urho3D/Core/StringUtils.h>
 
 namespace Tundra
 {

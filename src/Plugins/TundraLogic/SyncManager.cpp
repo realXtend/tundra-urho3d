@@ -20,10 +20,10 @@
 #include "Camera.h"
 #include "AttributeMetadata.h"
 #include "LoggingFunctions.h"
-#include "Profiler.h"
 #include "Placeable.h"
 
-#include <StringUtils.h>
+#include <Urho3D/Core/Profiler.h>
+#include <Urho3D/Core/StringUtils.h>
 
 #include <cstring>
 

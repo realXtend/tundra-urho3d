@@ -8,6 +8,6 @@
 #include "CoreTypes.h"
 #include "CoreDefines.h"
 /// @todo More essential Urho #includes
-#include <Str.h>
+#include <Urho3D/Container/Str.h>
 #include <kNet.h>
 #endif

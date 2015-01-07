@@ -10,7 +10,7 @@
 #include "Framework.h"
 #include "LoggingFunctions.h"
 
-#include <FileSystem.h>
+#include <Urho3D/IO/FileSystem.h>
 
 namespace Tundra
 {

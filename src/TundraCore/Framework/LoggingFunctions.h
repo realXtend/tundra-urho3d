@@ -9,9 +9,9 @@
 #include "TundraCoreApi.h"
 #include "CoreTypes.h"
 
-#include <Str.h>
+#include <Urho3D/Container/Str.h>
 #include <string>
-#include <Log.h>
+#include <Urho3D/IO/Log.h>
 
 namespace Tundra
 {

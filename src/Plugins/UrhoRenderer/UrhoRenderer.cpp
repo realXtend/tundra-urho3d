@@ -32,13 +32,13 @@
 #include "Ogre/OgreParticleAsset.h"
 #include "GenericAssetFactory.h"
 
-#include <Engine/Core/CoreEvents.h>
-#include <Engine/Core/ProcessUtils.h>
-#include <Engine/Graphics/Camera.h>
-#include <Engine/Graphics/Graphics.h>
-#include <Engine/Graphics/GraphicsEvents.h>
-#include <Engine/Graphics/Renderer.h>
-#include <Engine/Graphics/Viewport.h>
+#include <Urho3D/Core/CoreEvents.h>
+#include <Urho3D/Core/ProcessUtils.h>
+#include <Urho3D/Graphics/Camera.h>
+#include <Urho3D/Graphics/Graphics.h>
+#include <Urho3D/Graphics/GraphicsEvents.h>
+#include <Urho3D/Graphics/Renderer.h>
+#include <Urho3D/Graphics/Viewport.h>
 
 namespace Tundra
 {

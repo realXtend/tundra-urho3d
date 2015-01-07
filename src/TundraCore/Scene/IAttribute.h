@@ -11,7 +11,7 @@
 #include "AttributeChangeType.h"
 #include "SceneFwd.h"
 
-#include <Ptr.h>
+#include <Urho3D/Container/Ptr.h>
 
 namespace Tundra
 {

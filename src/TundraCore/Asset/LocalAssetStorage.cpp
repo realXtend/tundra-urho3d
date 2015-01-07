@@ -7,11 +7,11 @@
 #include "AssetAPI.h"
 #include "LoggingFunctions.h"
 
-#include <Profiler.h>
-#include <File.h>
-#include <FileSystem.h>
-#include <FileWatcher.h>
-#include <StringUtils.h>
+#include <Urho3D/Core/Profiler.h>
+#include <Urho3D/IO/File.h>
+#include <Urho3D/IO/FileSystem.h>
+#include <Urho3D/IO/FileWatcher.h>
+#include <Urho3D/Core/StringUtils.h>
 
 namespace Tundra
 {

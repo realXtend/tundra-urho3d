@@ -9,8 +9,8 @@
 #include "IAsset.h"
 #include "Signals.h"
 
-#include <RefCounted.h>
-#include <Str.h>
+#include <Urho3D/Container/RefCounted.h>
+#include <Urho3D/Container/Str.h>
 
 namespace Tundra
 {

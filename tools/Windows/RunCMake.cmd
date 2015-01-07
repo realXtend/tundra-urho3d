@@ -31,7 +31,7 @@ IF NOT EXIST tundra-urho3d.sln. (
         REM No extra arguments provided, trust that GENERATOR is set properly.
         cmake.exe .. ^
             -G %GENERATOR% ^
-            -DURHO3D_HOME=%DEPS%\urho3d ^
+            -DURHO3D_HOME=%DEPS%\urho3d\Build ^
             -DMATHGEOLIB_HOME=%DEPS%\MathGeoLib\build ^
             -DKNET_HOME=%DEPS%\kNet ^
             -DGTEST_HOME=%DEPS%\gtest ^

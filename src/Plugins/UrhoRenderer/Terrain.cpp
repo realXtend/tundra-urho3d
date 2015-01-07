@@ -8,7 +8,7 @@
 #include "LoggingFunctions.h"
 #include "AssetRefListener.h"
 #include "Framework.h"
-#include "Profiler.h"
+#include <Urho3D/Core/Profiler.h>
 #include "Math/Transform.h"
 #include "BinaryAsset.h"
 #include "TextureAsset.h"
@@ -16,18 +16,19 @@
 #include "Placeable.h"
 #include "AssetAPI.h"
 
-#include <Engine/Scene/Scene.h>
-#include <Engine/Resource/ResourceCache.h>
-#include <Engine/Graphics/Material.h>
-#include <Node.h>
-#include <StaticModel.h>
-#include <Model.h>
-#include <VertexBuffer.h>
-#include <IndexBuffer.h>
-#include <Geometry.h>
 #include <Math/MathFunc.h>
-#include <Image.h>
-#include <MemoryBuffer.h>
+
+#include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Graphics/Material.h>
+#include <Urho3D/Scene/Node.h>
+#include <Urho3D/Graphics/StaticModel.h>
+#include <Urho3D/Graphics/Model.h>
+#include <Urho3D/Graphics/VertexBuffer.h>
+#include <Urho3D/Graphics/IndexBuffer.h>
+#include <Urho3D/Graphics/Geometry.h>
+#include <Urho3D/Resource/Image.h>
+#include <Urho3D/IO/MemoryBuffer.h>
 
 
 namespace Tundra

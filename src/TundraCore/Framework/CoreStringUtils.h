@@ -5,7 +5,7 @@
 #include "TundraCoreApi.h"
 #include "CoreTypes.h"
 
-#include <Engine/Container/Str.h>
+#include <Urho3D/Container/Str.h>
 
 namespace kNet { class DataSerializer; class DataDeserializer; }
 

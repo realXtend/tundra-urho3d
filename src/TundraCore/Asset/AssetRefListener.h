@@ -7,7 +7,7 @@
 #include "AssetReference.h"
 #include "Signals.h"
 
-#include <RefCounted.h>
+#include <Urho3D/Container/RefCounted.h>
 
 namespace Tundra
 {

@@ -10,10 +10,10 @@
 #include "TextureAsset.h"
 #include "UrhoRenderer.h"
 
-#include <Profiler.h>
-#include <Graphics/Material.h>
-#include <Graphics/Texture2D.h>
-#include <StringUtils.h>
+#include <Urho3D/Core/Profiler.h>
+#include <Urho3D/Graphics/Material.h>
+#include <Urho3D/Graphics/Texture2D.h>
+#include <Urho3D/Core/StringUtils.h>
 
 namespace Tundra
 {

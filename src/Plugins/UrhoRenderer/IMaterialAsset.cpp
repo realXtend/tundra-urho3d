@@ -1,14 +1,13 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
-#include "Renderer.h"
 #include "AssetAPI.h"
 #include "AssetCache.h"
-#include "Profiler.h"
 #include "LoggingFunctions.h"
 #include "IMaterialAsset.h"
 
-#include <Engine/Graphics/Material.h>
+#include <Urho3D/Core/Profiler.h>
+#include <Urho3D/Graphics/Material.h>
 
 namespace Tundra
 {

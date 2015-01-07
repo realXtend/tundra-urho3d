@@ -8,7 +8,7 @@
 #include "ConsoleAPI.h"
 #include "FrameAPI.h"
 
-#include <InputEvents.h>
+#include <Urho3D/Input/InputEvents.h>
 
 namespace Tundra
 {

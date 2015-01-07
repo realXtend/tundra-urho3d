@@ -8,8 +8,8 @@
 #include "Scene/Scene.h"
 #include "LoggingFunctions.h"
 
-#include <Engine/Graphics/GraphicsDefs.h>
-#include <Engine/Graphics/Zone.h>
+#include <Urho3D/Graphics/GraphicsDefs.h>
+#include <Urho3D/Graphics/Zone.h>
 
 namespace Tundra
 {

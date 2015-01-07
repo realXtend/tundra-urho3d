@@ -20,9 +20,9 @@
 #include "Placeable.h"
 #include "UrhoRenderer.h"
 
-#include <Engine/Resource/XMLFile.h>
-#include <Engine/Resource/XMLElement.h>
-#include <Engine/Core/StringUtils.h>
+#include <Urho3D/Resource/XMLFile.h>
+#include <Urho3D/Resource/XMLElement.h>
+#include <Urho3D/Core/StringUtils.h>
 
 using namespace kNet;
 

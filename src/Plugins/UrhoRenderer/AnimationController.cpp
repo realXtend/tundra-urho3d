@@ -12,15 +12,15 @@
 #include "FrameAPI.h"
 #include "Framework.h"
 
-#include <Engine/Scene/Node.h>
-#include <Engine/Scene/Scene.h>
-#include <Engine/Graphics/Graphics.h>
-#include <Engine/Graphics/Light.h>
-#include <Engine/Graphics/Animation.h>
-#include <Engine/Graphics/AnimatedModel.h>
-#include <Engine/Graphics/AnimationState.h>
-#include <Engine/Graphics/DebugRenderer.h>
-#include <Engine/Core/StringUtils.h>
+#include <Urho3D/Scene/Node.h>
+#include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Graphics/Graphics.h>
+#include <Urho3D/Graphics/Light.h>
+#include <Urho3D/Graphics/Animation.h>
+#include <Urho3D/Graphics/AnimatedModel.h>
+#include <Urho3D/Graphics/AnimationState.h>
+#include <Urho3D/Graphics/DebugRenderer.h>
+#include <Urho3D/Core/StringUtils.h>
 
 namespace Tundra
 {

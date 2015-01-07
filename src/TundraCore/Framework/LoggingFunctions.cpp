@@ -10,7 +10,7 @@
 #include "Framework.h"
 #include "Console/ConsoleAPI.h"
 
-#include <Engine/Core/ProcessUtils.h>
+#include <Urho3D/Core/ProcessUtils.h>
 
 namespace Tundra
 {

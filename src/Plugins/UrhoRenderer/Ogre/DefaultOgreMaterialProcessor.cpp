@@ -7,10 +7,10 @@
 #include "LoggingFunctions.h"
 #include "AssetAPI.h"
 
-#include <Graphics/Material.h>
-#include <Graphics/Technique.h>
-#include <Resource/ResourceCache.h>
-#include <StringUtils.h>
+#include <Urho3D/Graphics/Material.h>
+#include <Urho3D/Graphics/Technique.h>
+#include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Core/StringUtils.h>
 
 namespace Tundra
 {

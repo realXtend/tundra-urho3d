@@ -10,7 +10,7 @@
 #include "CoreTypes.h"
 #include "FrameworkFwd.h"
 
-#include <Object.h>
+#include <Urho3D/Core/Object.h>
 
 namespace Tundra
 {

@@ -9,10 +9,11 @@
 #include "AssetRefListener.h"
 #include "AvatarDescAsset.h"
 #include "Entity.h"
-#include "Profiler.h"
 #include "Scene/Scene.h"
 #include "Framework.h"
 #include "LoggingFunctions.h"
+
+#include <Urho3D/Core/Profiler.h>
 
 namespace Tundra
 {

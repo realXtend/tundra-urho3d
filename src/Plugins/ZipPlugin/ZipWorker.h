@@ -5,7 +5,7 @@
 #include "ZipPluginApi.h"
 #include "ZipPluginFwd.h"
 
-#include <Engine/Core/Thread.h>
+#include <Urho3D/Core/Thread.h>
 
 /// @cond PRIVATE
 struct zzip_dir;

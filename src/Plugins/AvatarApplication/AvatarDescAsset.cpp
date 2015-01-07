@@ -3,13 +3,13 @@
 #include "StableHeaders.h"
 #include "AvatarDescAsset.h"
 #include "AssetAPI.h"
-#include "Profiler.h"
 #include "Math/Quat.h"
 #include "Math/MathFunc.h"
 #include "LoggingFunctions.h"
 
-#include <XMLFile.h>
-#include <StringUtils.h>
+#include <Urho3D/Core/Profiler.h>
+#include <Urho3D/Resource/XMLFile.h>
+#include <Urho3D/Core/StringUtils.h>
 #include <cstring>
 
 namespace Tundra

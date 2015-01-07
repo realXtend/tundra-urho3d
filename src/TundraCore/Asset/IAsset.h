@@ -8,8 +8,8 @@
 #include "AssetReference.h"
 #include "Signals.h"
 
-#include <Object.h>
-#include <Timer.h>
+#include <Urho3D/Core/Object.h>
+#include <Urho3D/Core/Timer.h>
 
 namespace Tundra
 {

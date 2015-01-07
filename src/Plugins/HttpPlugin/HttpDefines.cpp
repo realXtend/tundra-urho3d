@@ -5,7 +5,7 @@
 #include "HttpCurlInterop.h"
 #include "LoggingFunctions.h"
 
-#include <Engine/Core/StringUtils.h>
+#include <Urho3D/Core/StringUtils.h>
 
 namespace Tundra
 {

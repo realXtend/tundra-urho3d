@@ -15,8 +15,8 @@
 #include "CoreStringUtils.h"
 #include "CoreTimeUtils.h"
 
-#include <Object.h>
-#include <RefCounted.h>
+#include <Urho3D/Core/Object.h>
+#include <Urho3D/Container/RefCounted.h>
 
 #include <map>
 

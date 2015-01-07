@@ -5,7 +5,7 @@
 #include "TundraCoreApi.h"
 #include "AssetFwd.h"
 
-#include <Str.h>
+#include <Urho3D/Container/Str.h>
 
 namespace Tundra
 {

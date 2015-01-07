@@ -15,7 +15,7 @@
 #include "AttributeChangeType.h"
 #include "EntityAction.h"
 
-#include <Object.h>
+#include <Urho3D/Core/Object.h>
 
 namespace Tundra
 {

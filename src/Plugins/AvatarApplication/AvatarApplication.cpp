@@ -26,7 +26,7 @@
 #include "InputAPI.h"
 #include "InputContext.h"
 
-#include <Engine/Scene/Node.h>
+#include <Urho3D/Scene/Node.h>
 
 namespace Tundra
 {

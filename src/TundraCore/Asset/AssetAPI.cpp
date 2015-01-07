@@ -25,12 +25,12 @@
 #include "LoggingFunctions.h"
 #include "CoreStringUtils.h"
 
-#include <Context.h>
-#include <Profiler.h>
-#include <StringUtils.h>
-#include <FileSystem.h>
-#include <File.h>
-#include <FileWatcher.h>
+#include <Urho3D/Core/Context.h>
+#include <Urho3D/Core/Profiler.h>
+#include <Urho3D/Core/StringUtils.h>
+#include <Urho3D/IO/FileSystem.h>
+#include <Urho3D/IO/File.h>
+#include <Urho3D/IO/FileWatcher.h>
 
 namespace Tundra
 {

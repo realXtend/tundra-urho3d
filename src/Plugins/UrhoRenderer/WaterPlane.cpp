@@ -6,26 +6,25 @@
 
 #include "Placeable.h"
 #include "AttributeMetadata.h"
-#include "Renderer.h"
 #include "Scene/Scene.h"
 #include "GraphicsWorld.h"
 #include "LoggingFunctions.h"
 #include "Framework.h"
 #include "FrameAPI.h"
-#include "Profiler.h"
 #include "IMaterialAsset.h"
 #include "AssetRefListener.h"
 #include "UrhoRenderer.h"
 #include "Camera.h"
 
-#include <Engine/Scene/Node.h>
-#include <Engine/Scene/Scene.h>
-#include <Engine/Graphics/StaticModel.h>
-#include <Engine/Resource/ResourceCache.h>
-#include <Engine/Graphics/Model.h>
-#include <Engine/Graphics/Material.h>
-#include <Engine/Graphics/Zone.h>
-#include <Engine/Graphics/Camera.h>
+#include <Urho3D/Core/Profiler.h>
+#include <Urho3D/Scene/Node.h>
+#include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Graphics/StaticModel.h>
+#include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Graphics/Model.h>
+#include <Urho3D/Graphics/Material.h>
+#include <Urho3D/Graphics/Zone.h>
+#include <Urho3D/Graphics/Camera.h>
 
 namespace Tundra
 {

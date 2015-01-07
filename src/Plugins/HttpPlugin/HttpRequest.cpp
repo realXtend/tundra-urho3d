@@ -6,10 +6,10 @@
 #include "Framework.h"
 #include "JSON.h"
 
-#include <Engine/Core/WorkQueue.h>
-#include <Engine/Core/StringUtils.h>
-#include <Engine/IO/FileSystem.h>
-#include <Engine/IO/File.h>
+#include <Urho3D/Core/WorkQueue.h>
+#include <Urho3D/Core/StringUtils.h>
+#include <Urho3D/IO/FileSystem.h>
+#include <Urho3D/IO/File.h>
 
 #include <curl/curl.h>
 #include "HttpParser/http_parser.h"

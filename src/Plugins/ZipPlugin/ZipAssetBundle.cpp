@@ -12,7 +12,7 @@
 #include "AssetCache.h"
 #include "LoggingFunctions.h"
 
-#include <FileSystem.h>
+#include <Urho3D/IO/FileSystem.h>
 #include <zzip/zzip.h>
 
 namespace Tundra

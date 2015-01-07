@@ -7,7 +7,7 @@
 #include "Math/float2.h"
 #include "Math/float3.h"
 
-#include <Vector.h>
+#include <Urho3D/Container/Vector.h>
 
 namespace Tundra
 {

@@ -5,7 +5,6 @@
 #include "UrhoModuleApi.h"
 #include "UrhoModuleFwd.h"
 #include "IComponent.h"
-#include "Attribute.h"
 #include "Math/Color.h"
 #include "Math/float3.h"
 #include "Math/Quat.h"

@@ -191,7 +191,7 @@ if [ $skip_deps = false ] ; then
         mkdir -p Build
         cd Build
 
-        cmake ../Source \
+        cmake ..\
             -DCMAKE_INSTALL_PREFIX=$DEPS \
             -DCMAKE_BUILD_TYPE=$build_type \
             -DURHO3D_64BIT=$build_64bit_int \
@@ -206,7 +206,7 @@ if [ $skip_deps = false ] ; then
 
         make -j $num_cpu -S
         
-        cp -L ../Lib/libUrho3D.so $TUNDRA_BIN/
+        cp -L Lib/libUrho3D.so $TUNDRA_BIN/
 
         mark_built
     fi

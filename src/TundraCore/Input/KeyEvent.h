@@ -6,8 +6,8 @@
 #include "InputFwd.h"
 #include "CoreTypes.h"
 
-#include <Object.h>
-#include <InputEvents.h>
+#include <Urho3D/Core/Object.h>
+#include <Urho3D/Input/InputEvents.h>
 
 namespace Tundra
 {

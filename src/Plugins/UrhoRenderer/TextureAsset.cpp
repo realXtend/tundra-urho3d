@@ -1,21 +1,20 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
-#include "Renderer.h"
 #include "AssetAPI.h"
 #include "Framework.h"
-#include "Profiler.h"
+#include <Urho3D/Core/Profiler.h>
 #include "LoggingFunctions.h"
 #include "TextureAsset.h"
 
 #include "Crunch/crn_decomp.h"
 #include "Crunch/dds_defs.h"
 
-#include <GraphicsEvents.h>
-#include <Image.h>
-#include <MemoryBuffer.h>
-#include <Texture2D.h>
-#include <Material.h>
+#include <Urho3D/Graphics/GraphicsEvents.h>
+#include <Urho3D/Resource/Image.h>
+#include <Urho3D/IO/MemoryBuffer.h>
+#include <Urho3D/Graphics/Texture2D.h>
+#include <Urho3D/Graphics/Material.h>
 
 #include <algorithm>
 

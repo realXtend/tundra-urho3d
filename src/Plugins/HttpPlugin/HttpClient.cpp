@@ -10,7 +10,7 @@
 #include "ConsoleAPI.h"
 #include "LoggingFunctions.h"
 
-#include <UI/Text.h>
+#include <Urho3D/UI/Text.h>
 
 #include <curl/curl.h>
 

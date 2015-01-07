@@ -8,10 +8,10 @@
 #include "Signals.h"
 #include "LoggingFunctions.h"
 
-#include <Engine/Core/Mutex.h>
-#include <Engine/Container/Str.h>
-#include <Engine/Container/HashMap.h>
-#include <Engine/Container/RefCounted.h>
+#include <Urho3D/Core/Mutex.h>
+#include <Urho3D/Container/Str.h>
+#include <Urho3D/Container/HashMap.h>
+#include <Urho3D/Container/RefCounted.h>
 
 #include "HttpCurlInterop.h"
 

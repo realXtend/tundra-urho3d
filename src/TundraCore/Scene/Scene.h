@@ -12,7 +12,7 @@
 #include "SceneDesc.h"
 #include "Entity.h"
 
-#include <Vector.h>
+#include <Urho3D/Container/Vector.h>
 
 namespace Tundra
 {

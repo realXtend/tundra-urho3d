@@ -26,18 +26,18 @@
 #include <Geometry/Circle.h>
 #include <Geometry/Sphere.h>
 
-#include <Profiler.h>
-#include <Engine/Scene/Scene.h>
-#include <Engine/Graphics/Camera.h>
-#include <Engine/Core/CoreEvents.h>
-#include <Engine/Graphics/DebugRenderer.h>
-#include <Engine/Graphics/Drawable.h>
-#include <Engine/Graphics/Octree.h>
-#include <Engine/Graphics/OctreeQuery.h>
-#include <Engine/Graphics/Renderer.h>
-#include <Engine/Graphics/View.h>
-#include <Engine/Graphics/Viewport.h>
-#include <Engine/Graphics/Zone.h>
+#include <Urho3D/Core/Profiler.h>
+#include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Graphics/Camera.h>
+#include <Urho3D/Core/CoreEvents.h>
+#include <Urho3D/Graphics/DebugRenderer.h>
+#include <Urho3D/Graphics/Drawable.h>
+#include <Urho3D/Graphics/Octree.h>
+#include <Urho3D/Graphics/OctreeQuery.h>
+#include <Urho3D/Graphics/Renderer.h>
+#include <Urho3D/Graphics/View.h>
+#include <Urho3D/Graphics/Viewport.h>
+#include <Urho3D/Graphics/Zone.h>
 
 namespace Tundra
 {

@@ -41,22 +41,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "StableHeaders.h"
-#include "Renderer.h"
 #include "AssetAPI.h"
 #include "AssetCache.h"
-#include "Profiler.h"
 #include "LoggingFunctions.h"
 #include "OgreMeshAsset.h"
 #include "OgreMeshDefines.h"
 
-#include <Model.h>
-#include <Profiler.h>
-#include <MemoryBuffer.h>
-#include <VectorBuffer.h>
-#include <VertexBuffer.h>
-#include <IndexBuffer.h>
-#include <StringUtils.h>
-#include <Geometry.h>
+#include <Urho3D/Graphics/Model.h>
+#include <Urho3D/Core/Profiler.h>
+#include <Urho3D/IO/MemoryBuffer.h>
+#include <Urho3D/IO/VectorBuffer.h>
+#include <Urho3D/Graphics/VertexBuffer.h>
+#include <Urho3D/Graphics/IndexBuffer.h>
+#include <Urho3D/Core/StringUtils.h>
+#include <Urho3D/Graphics/Geometry.h>
 
 #include <cstring>
 #include <stdexcept>

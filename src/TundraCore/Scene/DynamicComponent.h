@@ -7,7 +7,7 @@
 #include "IComponent.h"
 #include "IAttribute.h"
 
-#include <Variant.h>
+#include <Urho3D/Core/Variant.h>
 
 namespace Tundra
 {

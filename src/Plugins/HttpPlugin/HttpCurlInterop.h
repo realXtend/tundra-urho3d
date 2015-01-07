@@ -6,9 +6,9 @@
 #include "HttpPluginFwd.h"
 #include "CoreTypes.h"
 
-#include <Engine/Container/Str.h>
-#include <Engine/Container/HashMap.h>
-#include <Engine/Core/Variant.h>
+#include <Urho3D/Container/Str.h>
+#include <Urho3D/Container/HashMap.h>
+#include <Urho3D/Core/Variant.h>
 
 #include <curl/curl.h>
 

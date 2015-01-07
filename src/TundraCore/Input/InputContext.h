@@ -8,8 +8,8 @@
 #include "KeyEvent.h"
 #include "Signals.h"
 
-#include <Object.h>
-#include <HashSet.h>
+#include <Urho3D/Core/Object.h>
+#include <Urho3D/Container/HashSet.h>
 
 namespace Tundra
 {

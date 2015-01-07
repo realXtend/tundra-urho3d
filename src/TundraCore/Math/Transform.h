@@ -13,7 +13,7 @@
 #include "Math/Quat.h"
 #include "Math/MathFunc.h"
 
-#include <Str.h>
+#include <Urho3D/Container/Str.h>
 
 namespace Tundra
 {

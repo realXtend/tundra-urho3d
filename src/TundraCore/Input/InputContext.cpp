@@ -9,7 +9,7 @@
 #include "Framework.h"
 #include "FrameAPI.h"
 
-#include <Input.h>
+#include <Urho3D/Input/Input.h>
 
 namespace Tundra
 {

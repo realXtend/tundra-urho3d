@@ -156,7 +156,7 @@ BeginSection("Configuring Dependencies")
 
 # Set CMake custom module path & include them
 # The following CMake modules are required for the project to build.
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${URHO3D_HOME}/Source/CMake/Modules)
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${URHO3D_HOME}/../CMake/Modules)
 include (FindUrho3D)
 include (ConfigurePackages)
 include (ModuleSetup)

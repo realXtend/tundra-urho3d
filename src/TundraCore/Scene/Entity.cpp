@@ -10,8 +10,8 @@
 #include "IComponent.h"
 #include "LoggingFunctions.h"
 
-#include <Engine/Resource/XMLFile.h>
-#include <Engine/Core/Profiler.h>
+#include <Urho3D/Resource/XMLFile.h>
+#include <Urho3D/Core/Profiler.h>
 
 #include <kNet/DataSerializer.h>
 #include <kNet/DataDeserializer.h>

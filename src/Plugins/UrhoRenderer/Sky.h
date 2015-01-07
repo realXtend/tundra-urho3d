@@ -10,8 +10,8 @@
 #include "UrhoModuleFwd.h"
 #include "AssetRefListener.h"
 
-#include <Image.h>
-#include <TextureCube.h>
+#include <Urho3D/Resource/Image.h>
+#include <Urho3D/Graphics/TextureCube.h>
 
 namespace Tundra
 {

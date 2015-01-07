@@ -10,14 +10,14 @@
 #include "LoggingFunctions.h"
 #include "IParticleAsset.h"
 
-#include <Engine/Scene/Node.h>
-#include <Engine/Scene/Scene.h>
-#include <Engine/Graphics/ParticleEmitter.h>
-#include <Engine/Graphics/ParticleEffect.h>
-#include <Engine/Graphics/GraphicsDefs.h>
-#include <Engine/Resource/ResourceCache.h>
-#include <Engine/Graphics/Material.h>
-#include <Engine/Graphics/Technique.h>
+#include <Urho3D/Scene/Node.h>
+#include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Graphics/ParticleEmitter.h>
+#include <Urho3D/Graphics/ParticleEffect.h>
+#include <Urho3D/Graphics/GraphicsDefs.h>
+#include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Graphics/Material.h>
+#include <Urho3D/Graphics/Technique.h>
 
 namespace Tundra
 {

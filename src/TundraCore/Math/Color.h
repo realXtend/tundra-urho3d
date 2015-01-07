@@ -5,7 +5,7 @@
 #include "TundraCoreApi.h"
 #include "Math/float4.h"
 
-#include <Engine/Math/Color.h>
+#include <Urho3D/Math/Color.h>
 
 namespace Tundra
 {

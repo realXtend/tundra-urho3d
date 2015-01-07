@@ -9,8 +9,8 @@
 #include "TundraCoreApi.h"
 #include "SceneFwd.h"
 
-#include <HashMap.h>
-#include <Vector.h>
+#include <Urho3D/Container/HashMap.h>
+#include <Urho3D/Container/Vector.h>
 
 namespace Tundra
 {

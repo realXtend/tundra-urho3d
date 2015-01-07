@@ -11,7 +11,7 @@
 #include "HttpWorkQueue.h"
 #include "DebugHudPanel.h"
 
-#include <Engine/Container/RefCounted.h>
+#include <Urho3D/Container/RefCounted.h>
 
 namespace Tundra
 {

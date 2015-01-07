@@ -11,7 +11,7 @@
 #include <kNet/DataSerializer.h>
 #include <kNet/DataDeserializer.h>
 
-#include <XMLFile.h>
+#include <Urho3D/Resource/XMLFile.h>
 #include <Sort.h>
 
 namespace Tundra

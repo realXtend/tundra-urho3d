@@ -14,9 +14,9 @@
 #include "Geometry/Ray.h"
 #include "Signals.h"
 
-#include <Rect.h>
-#include <HashSet.h>
-#include <Object.h>
+#include <Urho3D/Math/Rect.h>
+#include <Urho3D/Container/HashSet.h>
+#include <Urho3D/Core/Object.h>
 
 namespace Tundra
 {

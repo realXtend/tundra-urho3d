@@ -21,8 +21,6 @@ macro(configure_urho3d)
     find_package (Urho3D REQUIRED)
     # Set the debug libraries to match our convention
     set (URHO3D_DEBUG_LIBRARIES ${URHO3D_LIBRARIES_DBG})
-    # Add Urho root include directory to allow disambiguation between Tundra/MathGeoLib/Urho includes
-    set (URHO3D_INCLUDE_DIRS ${URHO3D_INCLUDE_DIRS} ${URHO3D_HOME}/Source)
     # Using just find_package does not set all Urho3D definitions. Set some most important of them manually
     add_definitions(-DURHO3D_LOGGING)
     add_definitions(-DURHO3D_PROFILING)

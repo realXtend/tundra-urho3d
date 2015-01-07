@@ -7,10 +7,10 @@
 #include "Framework.h"
 #include "LoggingFunctions.h"
 
-#include <File.h>
-#include <FileSystem.h>
-#include <ProcessUtils.h>
-#include <XMLFile.h>
+#include <Urho3D/IO/File.h>
+#include <Urho3D/IO/FileSystem.h>
+#include <Urho3D/Core/ProcessUtils.h>
+#include <Urho3D/Resource/XMLFile.h>
 
 #ifndef WIN32
 #include <dlfcn.h>

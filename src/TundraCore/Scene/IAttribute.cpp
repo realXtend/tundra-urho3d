@@ -25,7 +25,7 @@
 #include <Math/float3.h>
 
 #include <Math/MathFunc.h>
-#include <StringUtils.h>
+#include <Urho3D/Core/StringUtils.h>
 
 #include <kNet/DataDeserializer.h>
 #include <kNet/DataSerializer.h>

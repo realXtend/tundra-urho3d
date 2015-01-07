@@ -5,9 +5,9 @@
 #include "CoreTypes.h"
 #include "UrhoModuleApi.h"
 
-#include <Engine/Container/HashMap.h>
-#include <Engine/Math/StringHash.h>
-#include <Engine/Math/Color.h>
+#include <Urho3D/Container/HashMap.h>
+#include <Urho3D/Math/StringHash.h>
+#include <Urho3D/Math/Color.h>
 
 /// @cond PRIVATE
 

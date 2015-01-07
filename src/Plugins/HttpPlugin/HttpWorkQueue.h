@@ -8,9 +8,9 @@
 
 #include "LoggingFunctions.h"
 
-#include <Engine/Container/RefCounted.h>
-#include <Engine/Core/Thread.h>
-#include <Engine/Core/Mutex.h>
+#include <Urho3D/Container/RefCounted.h>
+#include <Urho3D/Core/Thread.h>
+#include <Urho3D/Core/Mutex.h>
 
 namespace Tundra
 {

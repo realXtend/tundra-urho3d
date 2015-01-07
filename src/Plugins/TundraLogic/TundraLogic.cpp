@@ -22,8 +22,8 @@
 #include "LocalAssetProvider.h"
 #include "LocalAssetStorage.h"
 
-#include <Timer.h>
-#include <StringUtils.h>
+#include <Urho3D/Core/Timer.h>
+#include <Urho3D/Core/StringUtils.h>
 
 namespace Tundra
 {

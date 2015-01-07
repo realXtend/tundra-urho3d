@@ -13,15 +13,15 @@
 #include "Framework.h"
 #include "LoggingFunctions.h"
 
-#include <Profiler.h>
-#include <StringUtils.h>
-#include <Engine/Scene/Node.h>
-#include <Engine/Scene/Scene.h>
-#include <Engine/Graphics/Graphics.h>
-#include <Engine/Graphics/Camera.h>
-#include <Engine/Graphics/GraphicsEvents.h>
-#include <Engine/Graphics/Renderer.h>
-#include <Engine/Core/Profiler.h>
+#include <Urho3D/Core/Profiler.h>
+#include <Urho3D/Core/StringUtils.h>
+#include <Urho3D/Scene/Node.h>
+#include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Graphics/Graphics.h>
+#include <Urho3D/Graphics/Camera.h>
+#include <Urho3D/Graphics/GraphicsEvents.h>
+#include <Urho3D/Graphics/Renderer.h>
+#include <Urho3D/Core/Profiler.h>
 #include <Geometry/Plane.h>
 
 namespace Tundra

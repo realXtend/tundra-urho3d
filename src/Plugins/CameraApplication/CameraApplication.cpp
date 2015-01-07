@@ -15,13 +15,13 @@
 #include "InputAPI.h"
 #include "InputContext.h"
 
-#include <InputEvents.h>
-#include <ResourceCache.h>
-#include <ProcessUtils.h>
-#include <XMLFile.h>
-#include <UI/UI.h>
-#include <UI/UIEvents.h>
-#include <UI/UIElement.h>
+#include <Urho3D/Input/InputEvents.h>
+#include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Core/ProcessUtils.h>
+#include <Urho3D/Resource/XMLFile.h>
+#include <Urho3D/UI/UI.h>
+#include <Urho3D/UI/UIEvents.h>
+#include <Urho3D/UI/UIElement.h>
 
 namespace Tundra
 {

@@ -15,10 +15,10 @@
 #include "MsgEntityAction.h"
 #include "Signals.h"
 
-#include <Object.h>
-#include <Variant.h>
-#include <List.h>
-#include <HashMap.h>
+#include <Urho3D/Core/Object.h>
+#include <Urho3D/Core/Variant.h>
+#include <Urho3D/Container/List.h>
+#include <Urho3D/Container/HashMap.h>
 //#include <list>
 #include <map>
 #include <set>

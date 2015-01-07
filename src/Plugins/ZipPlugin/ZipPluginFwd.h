@@ -4,8 +4,8 @@
 
 #include "CoreTypes.h"
 
-#include <Engine/Container/Str.h>
-#include <Engine/Container/Ptr.h>
+#include <Urho3D/Container/Str.h>
+#include <Urho3D/Container/Ptr.h>
 
 namespace Tundra
 {

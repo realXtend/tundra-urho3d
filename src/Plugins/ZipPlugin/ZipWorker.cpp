@@ -8,9 +8,9 @@
 
 #include "LoggingFunctions.h"
 
-#include <IO/File.h>
-#include <IO/FileSystem.h>
-#include <Container/Sort.h>
+#include <Urho3D/IO/File.h>
+#include <Urho3D/IO/FileSystem.h>
+#include <Urho3D/Container/Sort.h>
 
 #include <zzip/zzip.h>
 

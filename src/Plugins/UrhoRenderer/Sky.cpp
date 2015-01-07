@@ -13,21 +13,21 @@
 #include "IAssetTransfer.h"
 #include "BinaryAsset.h"
 
-#include <Engine/Scene/Scene.h>
-#include <Node.h>
-#include <Skybox.h>
-#include <Model.h>
-#include <Material.h>
-#include <Technique.h>
-#include <ResourceCache.h>
-#include <Texture2D.h>
-#include <TextureCube.h>
-#include <MemoryBuffer.h>
-#include <Image.h>
-#include <Graphics.h>
-#include <Technique.h>
-#include <GraphicsDefs.h>
-#include <GraphicsEvents.h>
+#include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Scene/Node.h>
+#include <Urho3D/Graphics/Skybox.h>
+#include <Urho3D/Graphics/Model.h>
+#include <Urho3D/Graphics/Material.h>
+#include <Urho3D/Graphics/Technique.h>
+#include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Graphics/Texture2D.h>
+#include <Urho3D/Graphics/TextureCube.h>
+#include <Urho3D/IO/MemoryBuffer.h>
+#include <Urho3D/Resource/Image.h>
+#include <Urho3D/Graphics/Graphics.h>
+#include <Urho3D/Graphics/Technique.h>
+#include <Urho3D/Graphics/GraphicsDefs.h>
+#include <Urho3D/Graphics/GraphicsEvents.h>
 
 
 namespace

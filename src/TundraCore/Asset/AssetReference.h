@@ -4,7 +4,7 @@
 
 #include "TundraCoreApi.h"
 
-#include <Str.h>
+#include <Urho3D/Container/Str.h>
 
 namespace Tundra
 {

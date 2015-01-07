@@ -6,9 +6,9 @@
 #include "CoreTypes.h"
 #include "IComponent.h"
 
-#include <Str.h>
-#include <Context.h>
-#include <RefCounted.h>
+#include <Urho3D/Container/Str.h>
+#include <Urho3D/Core/Context.h>
+#include <Urho3D/Container/RefCounted.h>
 
 namespace Tundra
 {

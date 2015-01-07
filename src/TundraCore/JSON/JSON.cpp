@@ -3,7 +3,7 @@
 #include "StableHeaders.h"
 #include "JSON.h"
 
-#include <StringUtils.h>
+#include <Urho3D/Core/StringUtils.h>
 
 #include <cstdio>
 #include <cstdlib>

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include <XMLFile.h>
-#include <Variant.h>
+#include <Urho3D/Resource/XMLFile.h>
+#include <Urho3D/Core/Variant.h>
 #include <CoreTypes.h>
 
 namespace Urho3D

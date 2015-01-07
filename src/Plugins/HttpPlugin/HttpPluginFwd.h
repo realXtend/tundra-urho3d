@@ -5,8 +5,8 @@
 #include "CoreTypes.h"
 #include "CoreStringUtils.h"
 
-#include <Engine/Container/Ptr.h>
-#include <Engine/Container/HashMap.h>
+#include <Urho3D/Container/Ptr.h>
+#include <Urho3D/Container/HashMap.h>
 
 #include <map>
 

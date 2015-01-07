@@ -11,7 +11,7 @@
 #include "Framework.h"
 #include "IComponent.h"
 
-#include <StringUtils.h>
+#include <Urho3D/Core/StringUtils.h>
 
 namespace Tundra
 {

@@ -9,7 +9,7 @@
 #include "FrameAPI.h"
 #include "Framework.h"
 
-#include <Profiler.h>
+#include <Urho3D/Core/Profiler.h>
 
 namespace Tundra
 {

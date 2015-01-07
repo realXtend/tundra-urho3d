@@ -1,10 +1,9 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
-#include "Renderer.h"
 #include "AssetAPI.h"
 #include "AssetCache.h"
-#include "Profiler.h"
+#include <Urho3D/Core/Profiler.h>
 #include "LoggingFunctions.h"
 #include "OgreParticleAsset.h"
 #include "OgreParticleSystemDefines.h"
@@ -12,10 +11,10 @@
 #include "OgreMeshAsset.h"
 #include "OgreMeshDefines.h"
 
-#include <Engine/Core/StringUtils.h>
-#include <Engine/Graphics/ParticleEffect.h>
-#include <Engine/Resource/ResourceCache.h>
-#include <Engine/Graphics/Material.h>
+#include <Urho3D/Core/StringUtils.h>
+#include <Urho3D/Graphics/ParticleEffect.h>
+#include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Graphics/Material.h>
 
 namespace Tundra
 {

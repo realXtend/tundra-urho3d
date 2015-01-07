@@ -6,8 +6,8 @@
 #include "FrameworkFwd.h"
 #include "CoreTypes.h"
 
-#include <List.h>
-#include <Object.h>
+#include <Urho3D/Container/List.h>
+#include <Urho3D/Core/Object.h>
 
 namespace Tundra
 {

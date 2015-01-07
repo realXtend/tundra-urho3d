@@ -21,16 +21,16 @@
 #include "LoggingFunctions.h"
 #include "IModule.h"
 
-#include <Engine/Core/Context.h>
-#include <Engine/Engine.h>
-#include <Engine/IO/FileSystem.h>
-#include <Engine/IO/File.h>
-#include <Engine/IO/Log.h>
-#include <Engine/Resource/XMLFile.h>
-#include <Engine/Core/ProcessUtils.h>
-#include <Engine/Input/Input.h>
-#include <Engine/Graphics/Graphics.h>
-#include <Profiler.h>
+#include <Urho3D/Core/Context.h>
+#include <Urho3D/Engine/Engine.h>
+#include <Urho3D/IO/FileSystem.h>
+#include <Urho3D/IO/File.h>
+#include <Urho3D/IO/Log.h>
+#include <Urho3D/Resource/XMLFile.h>
+#include <Urho3D/Core/ProcessUtils.h>
+#include <Urho3D/Input/Input.h>
+#include <Urho3D/Graphics/Graphics.h>
+#include <Urho3D/Core/Profiler.h>
 
 using namespace Urho3D;
 

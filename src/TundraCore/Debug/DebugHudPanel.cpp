@@ -3,7 +3,7 @@
 #include "StableHeaders.h"
 #include "DebugHudPanel.h"
 
-#include "UI/ScrollView.h"
+#include <Urho3D/UI/ScrollView.h>
 
 namespace Tundra
 {

@@ -5,9 +5,9 @@
 #include "TundraCoreApi.h"
 #include "CoreTypes.h"
 
-#include <HashMap.h>
-#include <Str.h>
-#include <Vector.h>
+#include <Urho3D/Container/HashMap.h>
+#include <Urho3D/Container/Str.h>
+#include <Urho3D/Container/Vector.h>
 
 #ifdef GetObject
 #undef GetObject // Guard against Win32 GetObject macro

@@ -6,7 +6,7 @@
 #include "AssetAPI.h"
 #include "LoggingFunctions.h"
 
-#include <MemoryBuffer.h>
+#include <Urho3D/IO/MemoryBuffer.h>
 #include <cstring>
 
 namespace Tundra

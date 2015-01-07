@@ -13,11 +13,11 @@
 #include "IMaterialAsset.h"
 #include "Ogre/OgreSkeletonAsset.h"
 
-#include <Engine/Scene/Scene.h>
-#include <Engine/Scene/Node.h>
-#include <Engine/Graphics/AnimatedModel.h>
-#include <Engine/Graphics/Material.h>
-#include <Engine/Resource/ResourceCache.h>
+#include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Scene/Node.h>
+#include <Urho3D/Graphics/AnimatedModel.h>
+#include <Urho3D/Graphics/Material.h>
+#include <Urho3D/Resource/ResourceCache.h>
 
 namespace Tundra
 {

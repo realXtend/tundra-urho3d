@@ -32,24 +32,24 @@
 #include "CoreStringUtils.h"
 #include "LoggingFunctions.h"
 
-#include <CoreEvents.h>
-#include <ResourceCache.h>
-#include <GraphicsEvents.h>
-#include <UIEvents.h>
+#include <Urho3D/Core/CoreEvents.h>
+#include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Graphics/GraphicsEvents.h>
+#include <Urho3D/UI/UIEvents.h>
 
-#include <Context.h>
-#include <Engine.h>
-#include <Font.h>
-#include <Graphics.h>
-#include <Profiler.h>
-#include <Renderer.h>
-#include <Text.h>
-#include <BorderImage.h>
-#include <UI.h>
-#include <Button.h>
-#include <ScrollView.h>
+#include <Urho3D/Core/Context.h>
+#include <Urho3D/Engine/Engine.h>
+#include <Urho3D/UI/Font.h>
+#include <Urho3D/Graphics/Graphics.h>
+#include <Urho3D/Core/Profiler.h>
+#include <Urho3D/Graphics/Renderer.h>
+#include <Urho3D/UI/Text.h>
+#include <Urho3D/UI/BorderImage.h>
+#include <Urho3D/UI/UI.h>
+#include <Urho3D/UI/Button.h>
+#include <Urho3D/UI/ScrollView.h>
 
-#include <DebugNew.h>
+#include <Urho3D/DebugNew.h>
 
 using namespace Urho3D;
 

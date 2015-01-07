@@ -10,11 +10,11 @@
 #include "Math/float3.h"
 #include "Math/Quat.h"
 
-#include <Profiler.h>
-#include <StringUtils.h>
+#include <Urho3D/Core/Profiler.h>
+#include <Urho3D/Core/StringUtils.h>
 
-#include <MemoryBuffer.h>
-#include <Engine/Graphics/Animation.h>
+#include <Urho3D/IO/MemoryBuffer.h>
+#include <Urho3D/Graphics/Animation.h>
 #include <stdexcept>
 
 namespace Tundra

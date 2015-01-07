@@ -7,8 +7,8 @@
 #include "Framework.h"
 #include "Math/MathFunc.h"
 
-#include <Engine/Core/ProcessUtils.h>
-#include <Engine/Core/StringUtils.h>
+#include <Urho3D/Core/ProcessUtils.h>
+#include <Urho3D/Core/StringUtils.h>
 
 namespace Tundra
 {

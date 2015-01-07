@@ -5,9 +5,9 @@
 #include "ConfigAPI.h"
 #include "LoggingFunctions.h"
 
-#include <Context.h>
-#include <File.h>
-#include <FileSystem.h>
+#include <Urho3D/Core/Context.h>
+#include <Urho3D/IO/File.h>
+#include <Urho3D/IO/FileSystem.h>
 
 using namespace Urho3D;
 

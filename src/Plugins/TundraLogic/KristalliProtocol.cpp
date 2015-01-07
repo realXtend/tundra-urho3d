@@ -9,7 +9,7 @@
 #include "ConsoleAPI.h"
 #include "LoggingFunctions.h"
 
-#include <Engine/Core/Profiler.h>
+#include <Urho3D/Core/Profiler.h>
 
 #include <kNet.h>
 #include <kNet/UDPMessageConnection.h>

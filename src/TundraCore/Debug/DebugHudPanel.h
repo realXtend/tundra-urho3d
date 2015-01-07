@@ -6,9 +6,9 @@
 #include "FrameworkFwd.h"
 #include "CoreTypes.h"
 
-#include <SharedPtr.h>
-#include <RefCounted.h>
-#include <UIElement.h>
+#include <Urho3D/Container/Ptr.h>
+#include <Urho3D/Container/RefCounted.h>
+#include <Urho3D/UI/UIElement.h>
 
 namespace Tundra
 {

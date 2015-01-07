@@ -12,7 +12,7 @@
 #include "Math/Transform.h"
 
 #include <Math/float3.h>
-#include <Model.h>
+#include <Urho3D/Graphics/Model.h>
 
 namespace Tundra
 {

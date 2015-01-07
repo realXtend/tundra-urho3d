@@ -6,7 +6,7 @@
 #include <kNet/Types.h>
 
 // Urho3D foreach
-#include <ForEach.h>
+#include <Urho3D/Container/ForEach.h>
 
 // Urho3D often used types
 namespace Urho3D

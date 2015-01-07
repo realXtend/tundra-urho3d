@@ -6,7 +6,6 @@
 #include "Framework.h"
 #include "Placeable.h"
 #include "Entity.h"
-#include "Profiler.h"
 #include "Scene/Scene.h"
 #include "LoggingFunctions.h"
 #include "Math/float3.h"
@@ -16,8 +15,9 @@
 #include "InputAPI.h"
 #include "InputContext.h"
 
-#include <StringUtils.h>
-#include <UI.h>
+#include <Urho3D/Core/Profiler.h>
+#include <Urho3D/Core/StringUtils.h>
+#include <Urho3D/UI/UI.h>
 
 namespace Tundra
 {

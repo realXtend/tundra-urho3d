@@ -206,9 +206,9 @@ IF %TARGET_ARCH%==x64 (
 )
 
 set URHO_CMAKE_EXTRAS=
-set URHO_CMAKE_RELATIVE_DIR=..\Source
+set URHO_CMAKE_RELATIVE_DIR=..
 IF %TUNDRA_ANDROID%==1 (
-    cd ..\Source\Android
+    cd ..\Android
     set URHO_CMAKE_RELATIVE_DIR=..
     set URHO_CMAKE_EXTRAS=-DLIBRARY_OUTPUT_PATH_ROOT=.
 )
@@ -241,7 +241,7 @@ IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
 IF %TUNDRA_ANDROID%==0 (
     cecho {0D}Deploying Urho3D DLL to Tundra bin\ directory.{# #}{\n}
-    copy /Y "%DEPS%\urho3D\Bin\*.dll" "%TUNDRA_BIN%"
+    copy /Y "%DEPS%\urho3D\Build\Bin\*.dll" "%TUNDRA_BIN%"
 )
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 

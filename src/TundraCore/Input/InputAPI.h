@@ -11,8 +11,8 @@
 #include "MouseEvent.h"
 #include "InputContext.h"
 
-#include <Object.h>
-#include <List.h>
+#include <Urho3D/Core/Object.h>
+#include <Urho3D/Container/List.h>
 
 
 class Framework;

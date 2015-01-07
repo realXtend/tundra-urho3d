@@ -43,9 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Math/Quat.h"
 #include "Math/float4x4.h"
 
-#include <HashMap.h>
-#include <HashSet.h>
-#include <RefCounted.h>
+#include <Urho3D/Container/HashMap.h>
+#include <Urho3D/Container/HashSet.h>
+#include <Urho3D/Container/RefCounted.h>
 
 namespace Tundra
 {

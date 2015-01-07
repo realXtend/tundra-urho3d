@@ -6,7 +6,7 @@
 #include "IAsset.h"
 #include "Signals.h"
 
-#include <XMLFile.h>
+#include <Urho3D/Resource/XMLFile.h>
 
 namespace Urho3D
 {

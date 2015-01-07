@@ -7,10 +7,10 @@
 #include "LoggingFunctions.h"
 #include "CoreDefines.h"
 #include "ConfigAPI.h"
-#include "Profiler.h"
 #include "FrameAPI.h"
 
-#include <Input.h>
+#include <Urho3D/Core/Profiler.h>
+#include <Urho3D/Input/Input.h>
 
 namespace Tundra
 {

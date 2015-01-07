@@ -24,7 +24,7 @@
 #include <Math/float3.h>
 #include <Math/float4.h>
 
-#include <XMLElement.h>
+#include <Urho3D/Resource/XMLElement.h>
 
 namespace Tundra
 {

@@ -4,7 +4,7 @@
 
 #include "HttpPluginFwd.h"
 
-#include <Engine/Core/Timer.h>
+#include <Urho3D/Core/Timer.h>
 
 #include <time.h>
 

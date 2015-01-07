@@ -10,10 +10,10 @@
 #include "Scene/Scene.h"
 #include "LoggingFunctions.h"
 
-#include <Engine/Scene/Node.h>
-#include <Engine/Scene/Scene.h>
-#include <Engine/Graphics/GraphicsDefs.h>
-#include <Engine/Graphics/Light.h>
+#include <Urho3D/Scene/Node.h>
+#include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Graphics/GraphicsDefs.h>
+#include <Urho3D/Graphics/Light.h>
 
 namespace Tundra
 {

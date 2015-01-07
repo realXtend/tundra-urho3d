@@ -8,7 +8,7 @@
 #include "UrhoModuleFwd.h"
 #include "CoreTypes.h"
 
-#include <Engine/Graphics/Skeleton.h>
+#include <Urho3D/Graphics/Skeleton.h>
 
 namespace Tundra
 {

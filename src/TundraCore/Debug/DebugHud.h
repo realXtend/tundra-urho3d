@@ -30,7 +30,7 @@
 
 #include "DebugHudPanel.h"
 
-#include <Timer.h>
+#include <Urho3D/Core/Timer.h>
 
 namespace Urho3D
 {

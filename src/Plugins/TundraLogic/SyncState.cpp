@@ -7,9 +7,9 @@
 #include "Scene/Scene.h"
 #include "Entity.h"
 #include "IComponent.h"
-#include "Profiler.h"
-
 #include "LoggingFunctions.h"
+
+#include <Urho3D/Core/Profiler.h>
 
 namespace Tundra
 {

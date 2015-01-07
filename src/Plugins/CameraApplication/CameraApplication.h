@@ -11,7 +11,7 @@
 #include "CameraApi.h"
 #include "Math/float3.h"
 
-#include <Input.h>
+#include <Urho3D/Input/Input.h>
 
 namespace Urho3D
 {

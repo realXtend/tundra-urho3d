@@ -8,8 +8,8 @@
 #include "IAssetProvider.h"
 #include "LoggingFunctions.h"
 
-#include <Profiler.h>
-#include <HashSet.h>
+#include <Urho3D/Core/Profiler.h>
+#include <Urho3D/Container/HashSet.h>
 
 namespace Tundra
 {

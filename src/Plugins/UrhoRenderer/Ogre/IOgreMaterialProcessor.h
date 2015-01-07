@@ -8,7 +8,7 @@
 #include "CoreTypes.h"
 #include "AssetReference.h"
 
-#include <Object.h>
+#include <Urho3D/Core/Object.h>
 
 namespace Tundra
 {

@@ -12,7 +12,7 @@
 #include "IAttribute.h"
 #include "Signals.h"
 
-#include <Object.h>
+#include <Urho3D/Core/Object.h>
 
 /// Define component shared and weak pointers, e.g. PlaceablePtr and PlaceableWeakPtr for a Placeable component.
 /** This define should be placed after the class definition, but inside the Tundra namespace */

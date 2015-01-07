@@ -10,15 +10,15 @@
 #include "Framework.h"
 #include "FrameAPI.h"
 
-#include <CoreEvents.h>
-#include <EngineEvents.h>
-#include <Engine.h>
-#include <ProcessUtils.h>
-#include <ResourceCache.h>
-#include <XMLFile.h>
-#include <Console.h>
-#include <UI/Text.h>
-#include <Log.h>
+#include <Urho3D/Core/CoreEvents.h>
+#include <Urho3D/Engine/EngineEvents.h>
+#include <Urho3D/Engine/Engine.h>
+#include <Urho3D/Core/ProcessUtils.h>
+#include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Resource/XMLFile.h>
+#include <Urho3D/Engine/Console.h>
+#include <Urho3D/UI/Text.h>
+#include <Urho3D/IO/Log.h>
 
 namespace Tundra
 {

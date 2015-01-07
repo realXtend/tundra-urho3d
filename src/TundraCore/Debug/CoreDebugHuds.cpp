@@ -10,10 +10,10 @@
 #include "Scene.h"
 #include "IRenderer.h"
 
-#include <StringUtils.h>
-#include <Profiler.h>
-#include <Text.h>
-#include <Container/Sort.h>
+#include <Urho3D/Core/StringUtils.h>
+#include <Urho3D/Core/Profiler.h>
+#include <Urho3D/UI/Text.h>
+#include <Urho3D/Container/Sort.h>
 
 /// @cond PRIVATE
 

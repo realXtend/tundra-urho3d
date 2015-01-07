@@ -8,7 +8,7 @@
 #include "AssetAPI.h"
 #include "IAssetBundle.h"
 
-#include <Engine/Core/Mutex.h>
+#include <Urho3D/Core/Mutex.h>
 
 namespace Urho3D
 {
