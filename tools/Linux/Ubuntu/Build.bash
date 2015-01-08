@@ -206,7 +206,7 @@ if [ $skip_deps = false ] ; then
 
         make -j $num_cpu -S
         
-        cp -L Lib/libUrho3D.so $TUNDRA_BIN/
+        cp -L lib/libUrho3D.so $TUNDRA_BIN/
 
         mark_built
     fi
@@ -376,7 +376,7 @@ if [ $skip_cmake = false ] ; then
         -DCMAKE_CXX_FLAGS="-Wno-unused-parameter -Wno-unused-variable" \
         -DENABLE_TESTS=$build_tests \
         -DMATHGEOLIB_HOME=$DEPS \
-        -DURHO3D_HOME=$DEPS_SRC/urho3d \
+        -DURHO3D_HOME=$DEPS_SRC/urho3d/Build \
         -DKNET_HOME=$DEPS_SRC/kNet \
         -DGTEST_HOME=$DEPS_SRC/gtest \
         -DCURL_HOME=$DEPS_SRC/curl/build \
