@@ -20,18 +20,18 @@
 #include <Geometry/Sphere.h>
 #include "Math/Color.h" // Tundra's own class
 
-#include <Engine/Math/Vector2.h>
-#include <Engine/Math/Vector3.h>
-#include <Engine/Math/Vector4.h>
-#include <Engine/Math/Matrix3.h>
-#include <Engine/Math/Matrix3x4.h>
-#include <Engine/Math/Matrix4.h>
-#include <Engine/Math/Quaternion.h>
-#include <Engine/Math/BoundingBox.h>
-#include <Engine/Math/Ray.h>
-#include <Engine/Math/Plane.h>
-#include <Engine/Math/Sphere.h>
-#include <Engine/Math/Color.h>
+#include <Urho3D/Math/Vector2.h>
+#include <Urho3D/Math/Vector3.h>
+#include <Urho3D/Math/Vector4.h>
+#include <Urho3D/Math/Matrix3.h>
+#include <Urho3D/Math/Matrix3x4.h>
+#include <Urho3D/Math/Matrix4.h>
+#include <Urho3D/Math/Quaternion.h>
+#include <Urho3D/Math/BoundingBox.h>
+#include <Urho3D/Math/Ray.h>
+#include <Urho3D/Math/Plane.h>
+#include <Urho3D/Math/Sphere.h>
+#include <Urho3D/Math/Color.h>
 
 using namespace Tundra;
 using namespace Tundra::Test;
