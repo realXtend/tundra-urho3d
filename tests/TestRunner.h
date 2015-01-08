@@ -11,8 +11,8 @@
 
 #include <Math/MathFunc.h>
 
-#include <Engine/Core/Context.h>
-#include <Engine/Core/ProcessUtils.h>
+#include <Urho3D/Core/Context.h>
+#include <Urho3D/Core/ProcessUtils.h>
 
 #include <gtest/gtest.h>
 

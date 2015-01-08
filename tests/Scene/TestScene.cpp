@@ -7,7 +7,7 @@
 #include "Entity.h"
 #include "LoggingFunctions.h"
 
-#include <Engine/IO/FileSystem.h>
+#include <Urho3D/IO/FileSystem.h>
 
 #include <kNet/DataSerializer.h>
 
