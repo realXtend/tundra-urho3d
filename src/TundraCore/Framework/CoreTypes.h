@@ -5,8 +5,8 @@
 // Use kNet/Types.h for fixed-width types instead of duplicating the code here.
 #include <kNet/Types.h>
 
-// Urho3D foreach
-#include <Urho3D/Container/ForEach.h>
+#include <Urho3D/Urho3D.h> // for URHO3D_API definition
+#include <Urho3D/Container/ForEach.h> // Urho3D foreach
 
 // Urho3D often used types
 namespace Urho3D
