@@ -12,7 +12,7 @@
 #include <kNet/DataDeserializer.h>
 
 #include <Urho3D/Resource/XMLFile.h>
-#include <Sort.h>
+#include <Urho3D/Container/Sort.h>
 
 namespace Tundra
 {
