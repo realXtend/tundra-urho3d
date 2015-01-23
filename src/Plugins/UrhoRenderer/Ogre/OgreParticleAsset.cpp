@@ -83,7 +83,7 @@ SharedPtr<Urho3D::ParticleEffect> ParticleEffectFromTemplate(SharedPtr<Urho3D::P
     }
 
     // Affectors
-    for (size_t i=0 ; i<effectBlock->NumAffectors() ; ++i)
+    for(uint i = 0 ; i < effectBlock->NumAffectors(); ++i)
     {
         Tundra::Ogre::ParticleSystemBlock *affectorBlock = effectBlock->Affector(i);
 
@@ -167,7 +167,7 @@ bool OgreParticleAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
     Ogre::ParticleSystemParser parser;
     if (parser.Parse((const char*)data_, numBytes))
     {
-        for (size_t i=0 ; i<parser.templates.Size() ; ++i)
+        for(uint i = 0 ; i < parser.templates.Size(); ++i)
         {
             SharedPtr<Urho3D::ParticleEffect> effect = ParticleEffectFromTemplate(SharedPtr<Urho3D::ParticleEffect>(new Urho3D::ParticleEffect(GetContext())), parser.templates[i]);
             particleEffects_.Push(effect);

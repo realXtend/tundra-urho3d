@@ -297,7 +297,7 @@ void TundraLogic::ClientConnectedToServer(UserConnectedResponseData *responseDat
 
 void TundraLogic::ClientDisconnectedFromServer()
 {
-    for(size_t i = 0; i < storagesReceivedFromServer.Size(); ++i)
+    for(uint i = 0; i < storagesReceivedFromServer.Size(); ++i)
     {
         if (storagesReceivedFromServer[i])
             framework->Asset()->RemoveAssetStorage(storagesReceivedFromServer[i]->Name());
