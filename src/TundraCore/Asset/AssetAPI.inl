@@ -19,7 +19,7 @@ Vector<SharedPtr<T> > AssetAPI::AssetsOfType() const
     {
         SharedPtr<T> asset = Urho3D::DynamicCast<T>(i->second);
         if (asset)
-            ret.push_back(asset);
+            ret.Push(asset);
     }
     return ret;
 }
