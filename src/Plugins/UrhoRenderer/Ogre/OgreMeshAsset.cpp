@@ -1195,6 +1195,7 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
     SharedPtr<Urho3D::VertexBuffer> sharedVb = MakeVertexBuffer(GetContext(), mesh->sharedVertexData, bounds, sharedBoneMapping, boneBoundingBoxes);
 
     Vector<SharedPtr<Urho3D::VertexBuffer> > vbs;
+    Vector<SharedPtr<Urho3D::IndexBuffer> > ibs;
     HashMap<int, int> poseVbMapping;
     PODVector<unsigned> morphRangeStarts;
     PODVector<unsigned> morphRangeCounts;
@@ -1221,6 +1222,7 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
         if (ib->GetIndexCount())
             ib->SetData(&subMesh->indexData->buffer[0]);
         geom->SetIndexBuffer(ib);
+        ibs.Push(ib);
         if (!subMesh->usesSharedVertexData)
         {
             SharedPtr<Urho3D::VertexBuffer> submeshVb = MakeVertexBuffer(GetContext(), subMesh->vertexData, bounds, submeshBoneMapping, boneBoundingBoxes);
@@ -1364,8 +1366,9 @@ bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*a
     if (morphs.Size())
         model->SetMorphs(morphs);
 
-    // Set the vertex buffers so that morph data copying will work correctly
+    // Set the vertex & index buffers so that morph data copying and model saving will work correctly
     model->SetVertexBuffers(vbs, morphRangeStarts, morphRangeCounts);
+    model->SetIndexBuffers(ibs);
 
     assetAPI->AssetLoadCompleted(Name());
     return true;
