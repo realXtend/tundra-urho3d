@@ -480,7 +480,7 @@ String Scene::SerializeToXmlString(bool serializeTemporary, bool serializeLocal)
         if (ent->ShouldBeSerialized(serializeTemporary, serializeLocal, serializeChildren))
             ent->SerializeToXML(sceneDoc, sceneElem, serializeTemporary, serializeLocal, serializeChildren);
 
-    return sceneDoc.ToString();
+    return sceneDoc.ToString(" ");
 }
 
 bool Scene::SaveSceneXML(const String& filename, bool serializeTemporary, bool serializeLocal) const
