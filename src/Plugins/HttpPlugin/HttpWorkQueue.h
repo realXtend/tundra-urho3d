@@ -76,7 +76,7 @@ private:
     /// Stats
     Http::Stats *stats_;
 
-    Logger log;
+    static const Logger log;
 };
 
 /// @cond PRIVATE

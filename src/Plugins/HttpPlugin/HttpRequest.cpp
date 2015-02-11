@@ -20,10 +20,10 @@ namespace Tundra
 #define HTTP_INITIAL_BODY_SIZE (256*1024)
 
 // HttpRequest
+const Logger HttpRequest::log = Logger("HttpRequest");
 
 HttpRequest::HttpRequest(Framework* framework, int method, const String &url) :
     framework_(framework),
-    log("HttpRequest"),
     executing_(false),
     verbose_(false),
     completed_(false)

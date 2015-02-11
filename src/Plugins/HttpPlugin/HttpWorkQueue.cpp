@@ -16,9 +16,9 @@ namespace Tundra
 // HttpWorkQueue
 
 const float DurationKeepAliveThreads = 10.f;
+const Logger HttpWorkQueue::log = Logger("HttpRequest");
 
 HttpWorkQueue::HttpWorkQueue() :
-    log("HttpWorkQueue"),
     durationNoWork_(0.f),
     stats_(new Http::Stats())
 {

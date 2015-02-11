@@ -236,7 +236,7 @@ private:
     bool completed_;
     bool verbose_;
 
-    Logger log;
+    static const Logger log;
 };
 
 }
