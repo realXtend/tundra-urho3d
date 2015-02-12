@@ -2,18 +2,19 @@
 
 #include "StableHeaders.h"
 #include "SceneInteract.h"
+
 #include "GraphicsWorld.h"
 #include "Framework.h"
 #include "Placeable.h"
 #include "Entity.h"
 #include "Scene/Scene.h"
 #include "LoggingFunctions.h"
-#include "Math/float3.h"
-#include "Math/MathFunc.h"
 #include "UrhoRenderer.h"
-
 #include "InputAPI.h"
 #include "InputContext.h"
+
+#include <Math/float3.h>
+#include <Math/MathFunc.h>
 
 #include <Urho3D/Core/Profiler.h>
 #include <Urho3D/Core/StringUtils.h>
@@ -26,7 +27,8 @@ SceneInteract::SceneInteract(Framework* owner) :
     IModule("SceneInteract", owner),
     lastX(-1),
     lastY(-1),
-    frameRaycasted(false)
+    frameRaycasted(false),
+    itemUnderMouse(false)
 {
 }
 

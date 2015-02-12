@@ -1,19 +1,18 @@
 ﻿// For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
-#include <kNet.h>
 
 #include "SyncManager.h"
 #include "TundraLogic.h"
 #include "Client.h"
 #include "Server.h"
 #include "UserConnection.h"
-#include "Framework.h"
-#include "SceneAPI.h"
-
 #include "TundraMessages.h"
 #include "MsgEntityAction.h"
 #include "TundraLogicUtils.h"
+
+#include "Framework.h"
+#include "SceneAPI.h"
 #include "Scene/Scene.h"
 #include "Entity.h"
 #include "CoreStringUtils.h"
@@ -22,11 +21,12 @@
 #include "LoggingFunctions.h"
 #include "Placeable.h"
 
+#include <kNet.h>
+
 #include <Urho3D/Core/Profiler.h>
 #include <Urho3D/Core/StringUtils.h>
 
 #include <cstring>
-
 
 // Used to print EC mismatch warnings only once per EC.
 static std::set<u32> mismatchingComponentTypes;
@@ -1160,7 +1160,7 @@ void SyncManager::HandleRigidBodyChanges(UserConnection* source, kNet::packet_id
         EntityPtr e = scene->EntityById(entityID);
         Placeable* placeable = e ? e->Component<Placeable>().Get() : nullptr;
 //        shared_ptr<EC_RigidBody> rigidBody = e ? e->GetComponent<EC_RigidBody>() : shared_ptr<EC_RigidBody>();
-        Transform t = e ? placeable->transform.Get() : Transform();
+        Transform t = placeable ? placeable->transform.Get() : Transform();
 //
 //        float3 newLinearVel = rigidBody ? rigidBody->linearVelocity.Get() : float3::zero;
         float3 newLinearVel(float3::zero);

@@ -14,7 +14,7 @@
 
 namespace Tundra
 {
-
+/// @todo Move to StringUtils
 bool ParseBool(const String& str, bool defaultValue)
 {
     if (str.Trimmed().Empty())
@@ -23,14 +23,14 @@ bool ParseBool(const String& str, bool defaultValue)
         return Urho3D::ToBool(str);
 }
 
-String QuatToLegacyRexString(const Quat& q)
+static String QuatToLegacyRexString(const Quat& q)
 {
     char str[256];
     sprintf(str, "%f %f %f %f", q.w, q.x, q.y, q.z);
     return str;
 }
 
-Quat QuatFromLegacyRexString(const String& str)
+static Quat QuatFromLegacyRexString(const String& str)
 {
     // If consists of 3 components split by spaces, interpret as Euler angles
     if (str.Split(' ').Size() == 3)
@@ -59,14 +59,16 @@ Quat QuatFromLegacyRexString(const String& str)
     return q;
 }
 
-String modifierMode[] = {
+static const String modifierMode[] = {
     "relative",
     "absolute",
     "cumulative"
 };
 
 AvatarDescAsset::AvatarDescAsset(AssetAPI *owner, const String &type_, const String &name_) :
-    IAsset(owner, type_, name_)
+    IAsset(owner, type_, name_),
+    height_(0.f),
+    weight_(0.f)
 {
 }
 
