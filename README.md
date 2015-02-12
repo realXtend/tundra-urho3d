@@ -26,7 +26,7 @@ but is not tested regularly and no batch scripts are provided currently.
 1. Open up the Visual Studio (x64 Win64) Command Prompt which is required in order to have the required build tools
    and several other utilities in your PATH.
 2. Navigate to `<Tundra-Urho3D>\tools\Windows\VS<VersionNumber>\`
-3. Run `BuildDeps_<BuildType>.cmd`, or `BuildDepsX64_<BuildType>.cmd` (if wanting to do a 64-bit build).
+3. Run `BuildDeps-<BuildType>.cmd`, or `BuildDeps-x64-<BuildType>.cmd` (if wanting to do a 64-bit build).
    `RelWithDebInfo` is recommended for the common development work, but you probably want to have the `Debug`
    build available too.
    The build script will print information what you need in order to proceed, follow the instructions carefully.
