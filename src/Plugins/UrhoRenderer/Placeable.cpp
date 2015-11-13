@@ -415,7 +415,7 @@ void Placeable::AttachNode()
     // Scene root node is same as the Urho scene itself
     Urho3D::Scene* root_node = world->UrhoScene();
 
-    PROFILE(Placeable_AttachNode);
+    URHO3D_PROFILE(Placeable_AttachNode);
 
     // If already attached, detach first
     if (attached_)
@@ -652,7 +652,7 @@ void Placeable::CheckParentEntityCreated(Entity* entity, AttributeChange::Type)
 {
     if (!attached_ && entity)
     {
-        PROFILE(Placeable_CheckParentEntityCreated);
+        URHO3D_PROFILE(Placeable_CheckParentEntityCreated);
         /** @note EntityReference::Lookup was replaced here by Matches that does
             not iterate the whole scene (worst case scenario, parented by name).
             This freezes Tundra for quite badly if there are thousands of Entities

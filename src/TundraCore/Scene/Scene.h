@@ -28,7 +28,7 @@ class UserConnection;
     \ingroup Scene_group */
 class TUNDRACORE_API Scene : public Object
 {
-    OBJECT(Scene);
+    URHO3D_OBJECT(Scene, Object);
 
 public:
     ~Scene();

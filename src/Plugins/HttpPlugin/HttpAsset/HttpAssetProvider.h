@@ -13,7 +13,7 @@ namespace Tundra
 /// HTTP asset provider.
 class TUNDRA_HTTP_API HttpAssetProvider : public IAssetProvider
 {
-    OBJECT(HttpAssetProvider);
+    URHO3D_OBJECT(HttpAssetProvider, IAssetProvider);
 
 public:
     HttpAssetProvider(Framework *framework, const HttpClientPtr &client);

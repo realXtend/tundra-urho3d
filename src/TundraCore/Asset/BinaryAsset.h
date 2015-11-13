@@ -12,7 +12,7 @@ namespace Tundra
 /// A generic data container for assets of unknown type.
 class TUNDRACORE_API BinaryAsset : public IAsset
 {
-    OBJECT(BinaryAsset);
+    URHO3D_OBJECT(BinaryAsset, IAsset);
 
 public:
     BinaryAsset(AssetAPI *owner, const String &type_, const String &name_) :

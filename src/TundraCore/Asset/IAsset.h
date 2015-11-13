@@ -35,7 +35,7 @@ struct AssetProfile
 /// Base class for all assets loaded in the system.
 class TUNDRACORE_API IAsset : public Object
 {
-    OBJECT(IAsset);
+    URHO3D_OBJECT(IAsset, Object);
 
 public:
     IAsset(AssetAPI *owner, const String &type_, const String &name_);

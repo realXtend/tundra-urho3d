@@ -44,7 +44,7 @@ DelayedSignal& FrameAPI::DelayedExecute(float time)
 
 void FrameAPI::Update(float frametime)
 {
-    PROFILE(FrameAPI_Update);
+    URHO3D_PROFILE(FrameAPI_Update);
 
     Updated.Emit(frametime);
     PostFrameUpdate.Emit(frametime);

@@ -133,7 +133,7 @@ bool AvatarDescAsset::IsLoaded() const
 
 bool AvatarDescAsset::ReadAvatarAppearance(Urho3D::XMLFile& source)
 {
-    PROFILE(Avatar_ReadAvatarAppearance);
+    URHO3D_PROFILE(Avatar_ReadAvatarAppearance);
     
     Urho3D::XMLElement avatar = source.GetRoot("avatar");
     if (avatar.IsNull())
@@ -372,7 +372,7 @@ void AvatarDescAsset::ReadMasterModifier(const Urho3D::XMLElement& source)
 
 void AvatarDescAsset::ReadAnimationDefinitions(Urho3D::XMLFile& source)
 {
-    PROFILE(Avatar_ReadAnimationDefinitions);
+    URHO3D_PROFILE(Avatar_ReadAnimationDefinitions);
     
     animations_.Clear();
     

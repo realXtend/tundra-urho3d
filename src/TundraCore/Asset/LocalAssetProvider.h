@@ -12,10 +12,10 @@ namespace Tundra
 /// Provides access to files on the local file system using the 'local://' URL specifier.
 class TUNDRACORE_API LocalAssetProvider : public IAssetProvider
 {
-    OBJECT(LocalAssetProvider);
+    URHO3D_OBJECT(LocalAssetProvider, IAssetProvider);
 
 public:
-    explicit LocalAssetProvider(Framework* framework);   
+    explicit LocalAssetProvider(Framework* framework);
     ~LocalAssetProvider();
 
     /// Adds the given directory as an asset storage.

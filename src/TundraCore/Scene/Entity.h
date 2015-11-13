@@ -24,7 +24,7 @@ namespace Tundra
     @ingroup Scene_group */
 class TUNDRACORE_API Entity : public Object
 {
-    OBJECT(Entity);
+    URHO3D_OBJECT(Entity, Object);
 
 public:
     typedef HashMap<component_id_t, ComponentPtr> ComponentMap; ///< Component container.

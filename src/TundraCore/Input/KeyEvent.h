@@ -15,7 +15,7 @@ namespace Tundra
 /// This data structure is passed as a parameter in all keyboard-related input events.
 class TUNDRACORE_API KeyEvent : public Object
 {
-    OBJECT(KeyEvent);
+    URHO3D_OBJECT(KeyEvent, Object);
 
 public:
     KeyEvent(Object *owner);

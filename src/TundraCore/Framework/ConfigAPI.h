@@ -103,7 +103,7 @@ private:
     lower case before any accessing files. "MyKey" will get and set you same value as "mykey". */
 class TUNDRACORE_API ConfigAPI : public Object
 {
-    OBJECT(ConfigAPI);
+    URHO3D_OBJECT(ConfigAPI, Object);
 
 public:
     ///\todo Make these properties so that can be obtained to scripts too.

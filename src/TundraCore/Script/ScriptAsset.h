@@ -12,7 +12,7 @@ namespace Tundra
 /// Contains data of a script file loaded to the system.
 class TUNDRACORE_API ScriptAsset : public IAsset
 {
-    OBJECT(ScriptAsset);
+    URHO3D_OBJECT(ScriptAsset, IAsset);
 
 public:
     ScriptAsset(AssetAPI *owner, const String &type_, const String &name_) :

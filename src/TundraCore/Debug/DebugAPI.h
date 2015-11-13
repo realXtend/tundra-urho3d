@@ -21,7 +21,7 @@ class DebugHud;
 /** Exposes debug and profiling functionality for applications. */
 class TUNDRACORE_API DebugAPI : public Object
 {
-    OBJECT(DebugAPI);
+    URHO3D_OBJECT(DebugAPI, Object);
 
 public:
     /// Returns the debug hud.

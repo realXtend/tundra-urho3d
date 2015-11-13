@@ -33,7 +33,7 @@ TextureAsset::~TextureAsset()
 
 bool TextureAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*allowAsynchronous*/)
 {
-    PROFILE(TextureAsset_LoadFromFileInMemory);
+    URHO3D_PROFILE(TextureAsset_LoadFromFileInMemory);
 
     bool success = false;
 
@@ -72,7 +72,7 @@ bool TextureAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*al
     if (success)
     {
         // Once data has been loaded, subscribe to device reset events to be able to restore the data if necessary
-        SubscribeToEvent(Urho3D::E_DEVICERESET, HANDLER(TextureAsset, HandleDeviceReset));
+        SubscribeToEvent(Urho3D::E_DEVICERESET, URHO3D_HANDLER(TextureAsset, HandleDeviceReset));
         assetAPI->AssetLoadCompleted(Name());
     }
     else
@@ -86,7 +86,7 @@ bool TextureAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*al
 
 bool TextureAsset::DecompressCRNtoDDS(const u8 *crnData, uint crnNumBytes, Vector<u8> &ddsData) const
 {
-    PROFILE(TextureAsset_DecompressCRNtoDDS);
+    URHO3D_PROFILE(TextureAsset_DecompressCRNtoDDS);
 
     // Texture data
     crnd::crn_texture_info textureInfo;

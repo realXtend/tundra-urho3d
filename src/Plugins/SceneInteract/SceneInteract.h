@@ -31,7 +31,7 @@ namespace Tundra
     </ul> */
 class SceneInteract : public IModule
 {
-    OBJECT(SceneInteract);
+    URHO3D_OBJECT(SceneInteract, IModule);
 
 public:
     SceneInteract(Framework* owner);

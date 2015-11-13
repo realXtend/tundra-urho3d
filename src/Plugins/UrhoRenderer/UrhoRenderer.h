@@ -16,7 +16,7 @@ namespace Tundra
 /// A renderer module using Urho3D
 class URHO_MODULE_API UrhoRenderer : public IModule, public IRenderer
 {
-    OBJECT(UrhoRenderer);
+    URHO3D_OBJECT(UrhoRenderer, IModule);
 
 public:
     UrhoRenderer(Framework* owner);

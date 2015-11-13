@@ -36,7 +36,7 @@ public:
     -trigger delayed signals when spesified amount of time has elapsed. */
 class TUNDRACORE_API FrameAPI : public Object
 {
-    OBJECT(FrameAPI);
+    URHO3D_OBJECT(FrameAPI, Object);
 
     /// Return wall clock time of Framework in seconds.
     float WallClockTime() const;

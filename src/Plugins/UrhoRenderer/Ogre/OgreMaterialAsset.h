@@ -12,7 +12,7 @@ namespace Tundra
 /// Represents a material asset loaded from Ogre material script
 class URHO_MODULE_API OgreMaterialAsset : public IMaterialAsset
 {
-    OBJECT(OgreMaterialAsset);
+    URHO3D_OBJECT(OgreMaterialAsset, IMaterialAsset);
 
 public:
     OgreMaterialAsset(AssetAPI *owner, const String &type_, const String &name_);

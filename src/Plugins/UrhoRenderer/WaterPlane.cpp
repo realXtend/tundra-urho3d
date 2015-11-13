@@ -179,7 +179,7 @@ void WaterPlane::Update(float /*frametime*/)
 {
     if (!world_.Get())
         return;
-    PROFILE(EC_WaterPlane_Update);
+    URHO3D_PROFILE(EC_WaterPlane_Update);
     bool cameraWasInsideWaterCube = cameraInsideWaterCube_;
     cameraInsideWaterCube_ = IsCameraInsideWaterCube();
     if (!cameraWasInsideWaterCube && cameraInsideWaterCube_)

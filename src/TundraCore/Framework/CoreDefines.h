@@ -8,6 +8,10 @@
 
 #include <cassert>
 
+// Disable DLL interface related warnings resulting from Urho3D template classes
+#pragma warning(disable:4251)
+#pragma warning(disable:4275)
+
 /** @def DLLEXPORT
     __declspec(dllexport) for Windows, empty otherwise. */
 #ifdef WIN32

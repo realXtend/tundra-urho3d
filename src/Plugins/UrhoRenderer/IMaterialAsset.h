@@ -14,7 +14,7 @@ namespace Tundra
 /** Base class for varying format implementations (Urho material, Ogre material, Assimp material etc.) */
 class URHO_MODULE_API IMaterialAsset : public IAsset
 {
-    OBJECT(IMaterialAsset);
+    URHO3D_OBJECT(IMaterialAsset, IAsset);
 
 public:
     IMaterialAsset(AssetAPI *owner, const String &type_, const String &name_);

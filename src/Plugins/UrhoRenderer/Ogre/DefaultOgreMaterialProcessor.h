@@ -10,7 +10,7 @@ namespace Tundra
 /// Default Ogre material processor. 
 class URHO_MODULE_API DefaultOgreMaterialProcessor : public IOgreMaterialProcessor
 {
-    OBJECT(DefaultOgreMaterialProcessor);
+    URHO3D_OBJECT(DefaultOgreMaterialProcessor, IOgreMaterialProcessor);
 
 public:
     /// Construct.

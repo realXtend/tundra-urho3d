@@ -34,7 +34,7 @@ typedef HashMap<Key, KeyPressInformation> HeldKeysMap;
 /// Provides clients with input events in a priority order.
 class TUNDRACORE_API InputContext : public Object
 {
-    OBJECT(InputContext);
+    URHO3D_OBJECT(InputContext, Object);
 
 public:
     InputContext(InputAPI *owner, const char *name, int priority);

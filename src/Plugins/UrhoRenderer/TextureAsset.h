@@ -13,7 +13,7 @@ namespace Tundra
 /// Represents a texture asset loaded to the GPU.
 class URHO_MODULE_API TextureAsset : public IAsset
 {
-    OBJECT(TextureAsset);
+    URHO3D_OBJECT(TextureAsset, IAsset);
 
 public:
     TextureAsset(AssetAPI *owner, const String &type_, const String &name_);

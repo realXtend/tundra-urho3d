@@ -338,7 +338,7 @@ void Framework::ProcessOneFrame()
     if (HasCommandLineParameter("--logProfilerEachFrame"))
     {
         // Android does not tolerate long log lines (cuts output past certain point), therefore split and log each row separately
-        StringVector lines = GetSubsystem<Urho3D::Profiler>()->GetData(false, false).Split('\n');
+        StringVector lines = GetSubsystem<Urho3D::Profiler>()->PrintData(false, false).Split('\n');
         for (uint i = 0; i < lines.Size(); ++i)
             LogInfo(lines[i]);
         GetSubsystem<Urho3D::Profiler>()->BeginInterval();

@@ -62,7 +62,7 @@ class ProfilerHudPanel;
 /// Displays rendering stats and profiling information.
 class TUNDRACORE_API DebugHud : public Object
 {
-    OBJECT(DebugHud);
+    URHO3D_OBJECT(DebugHud, Object);
 
 public:
     /// Construct.

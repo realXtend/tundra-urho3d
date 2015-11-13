@@ -15,7 +15,7 @@ namespace Tundra
 /** Once proper script support is in place, the application part can be removed. */
 class AvatarApplication : public IModule
 {
-    OBJECT(AvatarApplication);
+    URHO3D_OBJECT(AvatarApplication, IModule);
 
 public:
     AvatarApplication(Framework* owner);

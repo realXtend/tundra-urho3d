@@ -327,7 +327,7 @@ bool SceneSyncState::ShouldMarkAsDirty(entity_id_t id)
     std::map<entity_id_t, EntitySyncState>::iterator i = entities.find(id);
     if (i == entities.end())
     {
-        PROFILE(SyncState_Emit_AboutToDirtyEntity);
+        URHO3D_PROFILE(SyncState_Emit_AboutToDirtyEntity);
         
         // Scene or entity null, do not process yet.
         if (!FillRequest(id))

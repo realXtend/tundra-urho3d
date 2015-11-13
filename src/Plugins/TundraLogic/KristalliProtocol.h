@@ -21,7 +21,7 @@ namespace Tundra
 /// Implements kNet protocol -based server and client functionality.
 class TUNDRALOGIC_API KristalliProtocol : public Object, public kNet::IMessageHandler, public kNet::INetworkServerListener
 {
-    OBJECT(KristalliProtocol);
+    URHO3D_OBJECT(KristalliProtocol, Object);
 
 public:
     KristalliProtocol(TundraLogic* owner);

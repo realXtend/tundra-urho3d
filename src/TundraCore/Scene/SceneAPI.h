@@ -19,7 +19,7 @@ namespace Tundra
     Owned by Framework. */
 class TUNDRACORE_API SceneAPI : public Object
 {
-    OBJECT(SceneAPI);
+    URHO3D_OBJECT(SceneAPI, Object);
 
 public:
     typedef HashMap<unsigned, ComponentDesc> PlaceholderComponentTypeMap;

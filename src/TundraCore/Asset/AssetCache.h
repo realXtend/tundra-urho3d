@@ -14,7 +14,7 @@ namespace Tundra
 /// Implements a disk cache for asset files to avoid re-downloading assets between runs.
 class TUNDRACORE_API AssetCache : public Object
 {
-    OBJECT(AssetCache);
+    URHO3D_OBJECT(AssetCache, Object);
 
 public:
     explicit AssetCache(AssetAPI *owner, String assetCacheDirectory);

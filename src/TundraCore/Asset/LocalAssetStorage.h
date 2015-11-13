@@ -16,7 +16,7 @@ class AssetAPI;
 /// Represents a single (possibly recursive) directory on the local file system.
 class TUNDRACORE_API LocalAssetStorage : public IAssetStorage
 {
-    OBJECT(LocalAssetStorage);
+    URHO3D_OBJECT(LocalAssetStorage, IAssetStorage);
 
 public:
     /// recursive, writable, liveUpdate and autoDiscoverable all set to true by default.

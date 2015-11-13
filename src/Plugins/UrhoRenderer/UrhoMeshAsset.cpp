@@ -21,7 +21,7 @@ UrhoMeshAsset::UrhoMeshAsset(AssetAPI *owner, const String &type_, const String 
 
 bool UrhoMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*allowAsynchronous*/)
 {
-    PROFILE(UrhoMeshAsset_LoadFromFileInMemory);
+    URHO3D_PROFILE(UrhoMeshAsset_LoadFromFileInMemory);
 
     /// Force an unload of previous data first.
     Unload();

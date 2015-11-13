@@ -25,7 +25,7 @@ namespace Tundra
     a sync state is filled per client connection. SyncManager object is only exposed to scripting on the server. */
 class TUNDRALOGIC_API SyncManager : public Object
 {
-    OBJECT(SyncManager);
+    URHO3D_OBJECT(SyncManager, Object);
 
 public:
     explicit SyncManager(TundraLogic* owner);

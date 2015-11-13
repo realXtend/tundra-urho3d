@@ -99,7 +99,7 @@ void KristalliProtocol::Update(float /*frametime*/)
     // for each of them.
     if (serverConnection)
     {
-        PROFILE(KristalliProtocolModule_kNet_client_Process);
+        URHO3D_PROFILE(KristalliProtocolModule_kNet_client_Process);
         serverConnection->Process();
     }
 
@@ -115,7 +115,7 @@ void KristalliProtocol::Update(float /*frametime*/)
     // Process server incoming connections & messages if server up
     if (server)
     {
-        PROFILE(KristalliProtocolModule_kNet_server_Process);
+        URHO3D_PROFILE(KristalliProtocolModule_kNet_server_Process);
 
         server->Process();
 

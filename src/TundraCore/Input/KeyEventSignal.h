@@ -14,7 +14,7 @@ namespace Tundra
 /// A signal object for input events to a specific key on the keyboard.
 class TUNDRACORE_API KeyEventSignal : public Object
 {
-    OBJECT(KeyEventSignal);
+    URHO3D_OBJECT(KeyEventSignal, Object);
 
     Signal1<KeyEvent*> SequencePressed;
     Signal1<KeyEvent*> SequenceReleased;

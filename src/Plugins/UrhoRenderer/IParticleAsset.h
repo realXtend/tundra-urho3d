@@ -13,7 +13,7 @@ namespace Tundra
 /// Represents a particle asset. May contain several separate particle effects.
 class URHO_MODULE_API IParticleAsset : public IAsset
 {
-    OBJECT(IParticleAsset);
+    URHO3D_OBJECT(IParticleAsset, IAsset);
 
 public:
     IParticleAsset(AssetAPI *owner, const String &type_, const String &name_);

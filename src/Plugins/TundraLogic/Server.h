@@ -17,9 +17,8 @@ namespace Tundra
 /// \todo Implement
 class TUNDRALOGIC_API Server : public Object
 {
-    OBJECT(Server)
+    URHO3D_OBJECT(Server, Object)
     
-
 public:
     explicit Server(TundraLogic* owner);
     ~Server() {};

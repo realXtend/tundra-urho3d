@@ -1438,7 +1438,7 @@ void Scene::EndAllAttributeInterpolations()
 
 void Scene::UpdateAttributeInterpolations(float frametime)
 {
-    PROFILE(Scene_UpdateInterpolation);
+    URHO3D_PROFILE(Scene_UpdateInterpolation);
     
     interpolating_ = true;
     

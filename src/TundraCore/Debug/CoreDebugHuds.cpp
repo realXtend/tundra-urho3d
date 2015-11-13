@@ -78,7 +78,7 @@ void ProfilerHudPanel::UpdatePanel(float /*frametime*/, const SharedPtr<Urho3D::
 
     profilerTimer_.Reset();
 
-    String profilerOutput = profiler->GetData(false, false, profilerMaxDepth);
+    String profilerOutput = profiler->PrintData(false, false, profilerMaxDepth);
     profilerText->SetText(profilerOutput);
 
     profiler->BeginInterval();

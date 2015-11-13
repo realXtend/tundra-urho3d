@@ -105,8 +105,8 @@ void UrhoRenderer::Initialize()
         rend->SetViewport(0, new Urho3D::Viewport(context_));
 
         // Track window position and screen mode changes to keep config up-to-date
-        SubscribeToEvent(Urho3D::E_WINDOWPOS, HANDLER(UrhoRenderer, HandleScreenModeChange));
-        SubscribeToEvent(Urho3D::E_SCREENMODE, HANDLER(UrhoRenderer, HandleScreenModeChange));
+        SubscribeToEvent(Urho3D::E_WINDOWPOS, URHO3D_HANDLER(UrhoRenderer, HandleScreenModeChange));
+        SubscribeToEvent(Urho3D::E_SCREENMODE, URHO3D_HANDLER(UrhoRenderer, HandleScreenModeChange));
     
         // Disable shadows completely for now on mobile devices, as the shadow bias is problematic, and it consumes GPU performance
         // Also disable specular highlights for per-pixel lighting

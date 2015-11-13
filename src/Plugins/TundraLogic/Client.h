@@ -21,7 +21,7 @@ namespace Tundra
 /// Top-level scene and network protocol handling logic.
 class TUNDRALOGIC_API Client : public Object
 {
-    OBJECT(Client);
+    URHO3D_OBJECT(Client, Object);
 
 public:
     explicit Client(TundraLogic* owner);

@@ -1148,7 +1148,7 @@ OgreMeshAsset::OgreMeshAsset(AssetAPI *owner, const String &type_, const String 
 
 bool OgreMeshAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*allowAsynchronous*/)
 {
-    PROFILE(OgreMeshAsset_LoadFromFileInMemory);
+    URHO3D_PROFILE(OgreMeshAsset_LoadFromFileInMemory);
 
     /// Force an unload of previous data first.
     Unload();

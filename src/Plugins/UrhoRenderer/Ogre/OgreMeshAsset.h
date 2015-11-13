@@ -13,7 +13,7 @@ namespace Tundra
 /// Represents a mesh asset loaded from Ogre binary format
 class URHO_MODULE_API OgreMeshAsset : public IMeshAsset
 {
-    OBJECT(OgreMeshAsset);
+    URHO3D_OBJECT(OgreMeshAsset, IMeshAsset);
 
 public:
     OgreMeshAsset(AssetAPI *owner, const String &type_, const String &name_);

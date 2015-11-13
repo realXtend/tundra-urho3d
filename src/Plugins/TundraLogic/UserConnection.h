@@ -32,7 +32,7 @@ const NetworkProtocolVersion cHighestSupportedProtocolVersion = ProtocolHierarch
 /// Represents a client connection on the server side. Subclassed by networking implementations.
 class TUNDRALOGIC_API UserConnection : public Object
 {
-    OBJECT(UserConnection);
+    URHO3D_OBJECT(UserConnection, Object);
 
 public:
     UserConnection(Object* owner);
@@ -113,7 +113,7 @@ public:
 /// A kNet user connection.
 class TUNDRALOGIC_API KNetUserConnection : public UserConnection
 {
-    OBJECT(KNetUserConnection);
+    URHO3D_OBJECT(KNetUserConnection, UserConnection);
 
 public:
     KNetUserConnection(Object* owner);

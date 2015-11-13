@@ -17,7 +17,7 @@ typedef SharedPtr<Tundra::Server> ServerPtr;
 /// Top-level scene and network protocol handling logic.
 class TUNDRALOGIC_API TundraLogic : public IModule
 {
-    OBJECT(TundraLogic);
+    URHO3D_OBJECT(TundraLogic, IModule);
 
 public:
     TundraLogic(Framework* owner);

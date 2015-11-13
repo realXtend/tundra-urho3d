@@ -60,7 +60,7 @@ private:
     @note Console commands are case-insensitive. */
 class TUNDRACORE_API ConsoleAPI : public Object
 {
-    OBJECT(ConsoleAPI);
+    URHO3D_OBJECT(ConsoleAPI, Object);
 
 public:
     typedef std::map<String, SharedPtr<ConsoleCommand>, StringCompareCaseInsensitive> CommandMap;

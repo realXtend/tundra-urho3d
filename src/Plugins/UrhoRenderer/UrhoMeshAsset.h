@@ -13,7 +13,7 @@ namespace Tundra
 /// Represents a mesh asset in Urho native format.
 class URHO_MODULE_API UrhoMeshAsset : public IMeshAsset
 {
-    OBJECT(UrhoMeshAsset);
+    URHO3D_OBJECT(UrhoMeshAsset, IMeshAsset);
 
 public:
     UrhoMeshAsset(AssetAPI *owner, const String &type_, const String &name_);

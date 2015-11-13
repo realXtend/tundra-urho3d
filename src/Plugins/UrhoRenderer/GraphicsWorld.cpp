@@ -64,7 +64,7 @@ GraphicsWorld::GraphicsWorld(UrhoRenderer* owner, Scene* scene) :
     
     SetDefaultSceneFog();
 
-    SubscribeToEvent(Urho3D::E_POSTRENDERUPDATE, HANDLER(GraphicsWorld, HandlePostRenderUpdate));
+    SubscribeToEvent(Urho3D::E_POSTRENDERUPDATE, URHO3D_HANDLER(GraphicsWorld, HandlePostRenderUpdate));
 }
 
 GraphicsWorld::~GraphicsWorld()
@@ -74,7 +74,7 @@ GraphicsWorld::~GraphicsWorld()
 
 void GraphicsWorld::HandlePostRenderUpdate(StringHash /*eventType*/, VariantMap& /*eventData*/)
 {
-    PROFILE(GraphicsWorld_PostRenderUpdate);
+    URHO3D_PROFILE(GraphicsWorld_PostRenderUpdate);
 
     visibleEntities_.Clear();
 
@@ -231,7 +231,7 @@ Vector<RayQueryResult> GraphicsWorld::RaycastAll(const Ray& ray, unsigned layerM
 
 void GraphicsWorld::RaycastInternal(const Ray& ray, unsigned layerMask, float maxDistance, bool getAllResults)
 {
-    PROFILE(GraphicsWorld_Raycast);
+    URHO3D_PROFILE(GraphicsWorld_Raycast);
     
     rayHits_.Clear();
 
@@ -267,7 +267,7 @@ void GraphicsWorld::RaycastInternal(const Ray& ray, unsigned layerMask, float ma
 
 EntityVector GraphicsWorld::FrustumQuery(const Urho3D::IntRect &viewrect) const
 {
-    PROFILE(GraphicsWorld_FrustumQuery);
+    URHO3D_PROFILE(GraphicsWorld_FrustumQuery);
     
     EntityVector ret;
     Camera* cameraComp = renderer_->MainCameraComponent();

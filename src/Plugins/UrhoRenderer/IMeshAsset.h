@@ -14,7 +14,7 @@ namespace Tundra
 /** Base class for varying format implementations (Urho mesh, Ogre mesh, Assimp mesh etc.) */
 class URHO_MODULE_API IMeshAsset : public IAsset
 {
-    OBJECT(IMeshAsset);
+    URHO3D_OBJECT(IMeshAsset, IAsset);
 
 public:
     IMeshAsset(AssetAPI *owner, const String &type_, const String &name_);

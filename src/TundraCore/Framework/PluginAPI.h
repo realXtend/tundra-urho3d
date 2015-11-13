@@ -15,7 +15,7 @@ namespace Tundra
 /// Implements plugin loading functionality.
 class TUNDRACORE_API PluginAPI : public Object
 {
-    OBJECT(PluginAPI);
+    URHO3D_OBJECT(PluginAPI, Object);
 
 public:
     /// Returns list of plugin configuration files that were used to load the plugins at startup.

@@ -38,7 +38,7 @@ namespace Tundra
         ColourFader2  affector  */
 class URHO_MODULE_API OgreParticleAsset : public IParticleAsset
 {
-    OBJECT(OgreParticleAsset);
+    URHO3D_OBJECT(OgreParticleAsset, IParticleAsset);
 
 public:
     OgreParticleAsset(AssetAPI *owner, const String &type_, const String &name_);

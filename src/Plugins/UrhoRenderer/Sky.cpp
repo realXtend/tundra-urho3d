@@ -199,7 +199,7 @@ void Sky::Update()
 
         // Remember the created texture for tracking device loss
         cubeTexture_ = textureCube;
-        SubscribeToEvent(Urho3D::E_DEVICERESET, HANDLER(Sky, HandleDeviceReset));
+        SubscribeToEvent(Urho3D::E_DEVICERESET, URHO3D_HANDLER(Sky, HandleDeviceReset));
 
         SharedPtr<Urho3D::Material> material;
         if (material_)

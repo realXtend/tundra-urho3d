@@ -19,7 +19,7 @@ DebugAPI::DebugAPI(Framework *framework) :
 {
     framework_->Console()->RegisterCommand("prof", "Toggle profiling HUD.", this, &DebugAPI::ToggleDebugHudVisibility);
 
-    SubscribeToEvent(Urho3D::E_KEYDOWN, HANDLER(DebugAPI, OnKeyDown));
+    SubscribeToEvent(Urho3D::E_KEYDOWN, URHO3D_HANDLER(DebugAPI, OnKeyDown));
 }
 
 DebugAPI::~DebugAPI()

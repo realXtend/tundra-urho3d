@@ -40,15 +40,15 @@ InputAPI::InputAPI(Framework *framework_) :
     if (framework_->IsHeadless())
         return;
 
-    SubscribeToEvent(Urho3D::E_KEYDOWN, HANDLER(InputAPI, EventFilter));
-    SubscribeToEvent(Urho3D::E_KEYUP, HANDLER(InputAPI, EventFilter));
-    SubscribeToEvent(Urho3D::E_MOUSEBUTTONDOWN, HANDLER(InputAPI, EventFilter));
-    SubscribeToEvent(Urho3D::E_MOUSEBUTTONUP, HANDLER(InputAPI, EventFilter));
-    SubscribeToEvent(Urho3D::E_MOUSEMOVE, HANDLER(InputAPI, EventFilter));
-    SubscribeToEvent(Urho3D::E_MOUSEWHEEL, HANDLER(InputAPI, EventFilter));
-    SubscribeToEvent(Urho3D::E_TOUCHBEGIN, HANDLER(InputAPI, EventFilter));
-    SubscribeToEvent(Urho3D::E_TOUCHMOVE, HANDLER(InputAPI, EventFilter));
-    SubscribeToEvent(Urho3D::E_TOUCHEND, HANDLER(InputAPI, EventFilter));
+    SubscribeToEvent(Urho3D::E_KEYDOWN, URHO3D_HANDLER(InputAPI, EventFilter));
+    SubscribeToEvent(Urho3D::E_KEYUP, URHO3D_HANDLER(InputAPI, EventFilter));
+    SubscribeToEvent(Urho3D::E_MOUSEBUTTONDOWN, URHO3D_HANDLER(InputAPI, EventFilter));
+    SubscribeToEvent(Urho3D::E_MOUSEBUTTONUP, URHO3D_HANDLER(InputAPI, EventFilter));
+    SubscribeToEvent(Urho3D::E_MOUSEMOVE, URHO3D_HANDLER(InputAPI, EventFilter));
+    SubscribeToEvent(Urho3D::E_MOUSEWHEEL, URHO3D_HANDLER(InputAPI, EventFilter));
+    SubscribeToEvent(Urho3D::E_TOUCHBEGIN, URHO3D_HANDLER(InputAPI, EventFilter));
+    SubscribeToEvent(Urho3D::E_TOUCHMOVE, URHO3D_HANDLER(InputAPI, EventFilter));
+    SubscribeToEvent(Urho3D::E_TOUCHEND, URHO3D_HANDLER(InputAPI, EventFilter));
 
     LoadKeyBindingsFromFile();
 }
@@ -658,7 +658,7 @@ void InputAPI::EventFilter(StringHash eventType, VariantMap& eventData)
 
 void InputAPI::Update(float /*frametime*/)
 {
-    PROFILE(InputAPI_Update);
+    URHO3D_PROFILE(InputAPI_Update);
 
     // Move all the double-buffered input events to current events.
     pressedKeys = newKeysPressedQueue;

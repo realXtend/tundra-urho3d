@@ -238,7 +238,7 @@ void Camera::UpdateSignals()
 
         Urho3D::Renderer* urhoRenderer = GetSubsystem<Urho3D::Renderer>();
         if (urhoRenderer)
-            SubscribeToEvent(urhoRenderer, Urho3D::E_BEGINVIEWUPDATE, HANDLER(Camera, HandleBeginViewUpdate));
+            SubscribeToEvent(urhoRenderer, Urho3D::E_BEGINVIEWUPDATE, URHO3D_HANDLER(Camera, HandleBeginViewUpdate));
     }
 
     // Make sure we attach to the Placeable if exists.

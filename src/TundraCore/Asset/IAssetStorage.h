@@ -16,7 +16,7 @@ namespace Tundra
 /// A base class for a database or a collection of assets in a single source.
 class TUNDRACORE_API IAssetStorage : public Object
 {
-    OBJECT(IAssetStorage);
+    URHO3D_OBJECT(IAssetStorage, Object);
 
 public:
     IAssetStorage(Urho3D::Context* context) :

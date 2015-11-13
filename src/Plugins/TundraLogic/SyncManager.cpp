@@ -298,7 +298,7 @@ void SyncManager::HandleNetworkMessage(UserConnection* user, kNet::packet_id_t p
 
 void SyncManager::NewUserConnected(const UserConnectionPtr &user)
 {
-    PROFILE(SyncManager_NewUserConnected);
+    URHO3D_PROFILE(SyncManager_NewUserConnected);
 
     ScenePtr scene = scene_.Lock();
     if (!scene)
@@ -842,7 +842,7 @@ void SyncManager::InterpolateRigidBodies(f64 /*frametime*/, SceneSyncState* /*st
 
 void SyncManager::Update(f64 frametime)
 {
-    PROFILE(SyncManager_Update);
+    URHO3D_PROFILE(SyncManager_Update);
 
     // For the client, smoothly update all rigid bodies by interpolating.
     if (!owner_->IsServer())
@@ -892,7 +892,7 @@ void SyncManager::Update(f64 frametime)
 /// \todo Uncomment and fix after RigidBody component implemented
 void SyncManager::ReplicateRigidBodyChanges(UserConnection* /*user*/)
 {
-//    PROFILE(SyncManager_ReplicateRigidBodyChanges);
+//    URHO3D_PROFILE(SyncManager_ReplicateRigidBodyChanges);
 //    
 //    ScenePtr scene = scene_.Lock();
 //    if (!scene)
@@ -1515,7 +1515,7 @@ void SyncManager::HandleRegisterComponentType(UserConnection* source, const char
 
 void SyncManager::ProcessSyncState(UserConnection* user)
 {
-    PROFILE(SyncManager_ProcessSyncState);
+    URHO3D_PROFILE(SyncManager_ProcessSyncState);
     
     ScenePtr scene = scene_.Lock();
     bool isServer = owner_->IsServer();

@@ -310,7 +310,7 @@ OgreSkeletonAsset::~OgreSkeletonAsset()
 
 bool OgreSkeletonAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*allowAsynchronous*/)
 {
-    PROFILE(OgreSkeletonAsset_LoadFromFileInMemory);
+    URHO3D_PROFILE(OgreSkeletonAsset_LoadFromFileInMemory);
 
     /// Force an unload of previous data first.
     Unload();
@@ -373,21 +373,18 @@ bool OgreSkeletonAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
         urhoAnim->SetAnimationName(animName);
         urhoAnim->SetName(animName);
 
-        Vector<Urho3D::AnimationTrack> urhoTracks;
         for (uint j = 0; j < ogreAnim->tracks.Size(); ++j)
         {
             const Ogre::VertexAnimationTrack& ogreTrack = ogreAnim->tracks[j];
             if (ogreTrack.type != Ogre::VertexAnimationTrack::VAT_TRANSFORM)
                 continue;
-            Urho3D::AnimationTrack urhoTrack;
-            urhoTrack.channelMask_ = Urho3D::CHANNEL_POSITION | Urho3D::CHANNEL_ROTATION;
-            urhoTrack.name_ = ogreTrack.boneName;
-            urhoTrack.nameHash_ = StringHash(ogreTrack.boneName);
+            Urho3D::AnimationTrack* urhoTrack = urhoAnim->CreateTrack(ogreTrack.boneName);
+            urhoTrack->channelMask_ = Urho3D::CHANNEL_POSITION | Urho3D::CHANNEL_ROTATION;
 
             Urho3D::Bone* urhoBone = 0;
             for (uint k = 0; k < bones.Size(); ++k)
             {
-                if (bones[k].name_ == urhoTrack.name_)
+                if (bones[k].name_ == urhoTrack->name_)
                 {
                     urhoBone = &bones[k];
                     break;
@@ -395,7 +392,7 @@ bool OgreSkeletonAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
             }
             if (!urhoBone)
             {
-                LogWarning("OgreSkeletonAsset::DeserializeFromData: found animation track referring to a non-existent bone " + urhoTrack.name_ + ", skipping");
+                LogWarning("OgreSkeletonAsset::DeserializeFromData: found animation track referring to a non-existent bone " + urhoTrack->name_ + ", skipping");
                 continue;
             }
 
@@ -410,13 +407,12 @@ bool OgreSkeletonAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
                 urhoKeyframe.rotation_ = urhoBone->initialRotation_ * ogreKeyframe.rotation;
                 urhoKeyframe.scale_ = ogreKeyframe.scale;
                 if (!ogreKeyframe.scale.Equals(float3(1.0f, 1.0f, 1.0f)))
-                    urhoTrack.channelMask_ |= Urho3D::CHANNEL_SCALE;
-                urhoTrack.keyFrames_.Push(urhoKeyframe);
+                    urhoTrack->channelMask_ |= Urho3D::CHANNEL_SCALE;
+                urhoTrack->keyFrames_.Push(urhoKeyframe);
             }
-            urhoTracks.Push(urhoTrack);
+            
         }
 
-        urhoAnim->SetTracks(urhoTracks);
         animations[animName] = urhoAnim;
     }
 

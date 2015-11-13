@@ -131,7 +131,7 @@ void Terrain::UpdateRootNodeTransform()
 
 void Terrain::ResizeTerrain(uint newPatchWidth, uint newPatchHeight)
 {
-    PROFILE(Terrain_ResizeTerrain);
+    URHO3D_PROFILE(Terrain_ResizeTerrain);
 
     const uint maxPatchSize = 256;
     // Do an artificial limit to a preset N patches per side. (This limit is way too large already for the current terrain vertex LOD management.)
@@ -540,7 +540,7 @@ void Terrain::DirtyAllTerrainPatches()
 
 void Terrain::RegenerateDirtyTerrainPatches()
 {
-    PROFILE(Terrain_RegenerateDirtyTerrainPatches);
+    URHO3D_PROFILE(Terrain_RegenerateDirtyTerrainPatches);
 
     Entity *parentEntity = ParentEntity();
     if (!parentEntity)
@@ -643,7 +643,7 @@ Urho3D::Node* Terrain::CreateUrho3DTerrainPatchNode(Urho3D::Node* parent, uint p
 
 void Terrain::GenerateTerrainGeometryForOnePatch(uint patchX, uint patchY)
 {
-    PROFILE(Terrain_GenerateTerrainGeometryForOnePatch);
+    URHO3D_PROFILE(Terrain_GenerateTerrainGeometryForOnePatch);
 
     Terrain::Patch &patch = GetPatch(patchX, patchY);
 

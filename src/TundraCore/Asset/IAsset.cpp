@@ -139,7 +139,7 @@ AssetPtr IAsset::Clone(String newAssetName) const
 
 bool IAsset::LoadFromFile(String filename)
 {
-    PROFILE(IAsset_LoadFromFile);
+    URHO3D_PROFILE(IAsset_LoadFromFile);
 
     filename = filename.Trimmed(); ///\todo Sanitate.
     if (filename.Empty())
@@ -171,7 +171,7 @@ bool IAsset::LoadFromFile(String filename)
 
 bool IAsset::LoadFromFileInMemory(const u8 *data, uint numBytes, bool allowAsynchronous)
 {
-    PROFILE(IAsset_LoadFromFileInMemory);
+    URHO3D_PROFILE(IAsset_LoadFromFileInMemory);
     if (!data || numBytes == 0)
     {
         LogDebug("LoadFromFileInMemory failed for asset \"" + ToString() + "\"! No data present!");
@@ -192,7 +192,7 @@ void IAsset::DependencyLoaded(AssetPtr dependee)
 
 void IAsset::LoadCompleted()
 {
-    PROFILE(IAsset_LoadCompleted);
+    URHO3D_PROFILE(IAsset_LoadCompleted);
     profile.Done(AssetProfile::Load);
 
     // If asset was loaded successfully, and there are no pending dependencies, emit Loaded() now.

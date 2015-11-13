@@ -617,7 +617,7 @@ void Entity::Exec(EntityAction::ExecTypeField type, const String &action, const 
 
 void Entity::Exec(EntityAction::ExecTypeField type, const String &action, const StringVector &params)
 {
-    PROFILE(Entity_ExecEntityAction);
+    URHO3D_PROFILE(Entity_ExecEntityAction);
     
     EntityAction *act = Action(action);
     if ((type & EntityAction::Local) != 0)

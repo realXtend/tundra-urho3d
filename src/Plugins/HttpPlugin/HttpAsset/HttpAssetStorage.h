@@ -11,7 +11,7 @@ namespace Tundra
 /// Represents a single (possibly recursive) directory on the local file system.
 class TUNDRA_HTTP_API HttpAssetStorage : public IAssetStorage
 {
-    OBJECT(HttpAssetStorage);
+    URHO3D_OBJECT(HttpAssetStorage, IAssetStorage);
 
 public:
     HttpAssetStorage(Urho3D::Context* context, const String &name, const String &baseUrl, const String &localDir);

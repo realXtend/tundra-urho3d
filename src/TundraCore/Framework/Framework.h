@@ -19,7 +19,7 @@ typedef HashMap<String, Pair<String, Vector<String> > > OptionsMap;
 /// The system root access object.
 class TUNDRACORE_API Framework : public Object 
 {
-    OBJECT(Framework);
+    URHO3D_OBJECT(Framework, Object);
 
 public:
     explicit Framework(Urho3D::Context* ctx);

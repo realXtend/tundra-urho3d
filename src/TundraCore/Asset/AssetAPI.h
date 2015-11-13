@@ -49,7 +49,7 @@ typedef std::map<String, AssetBundleMonitorPtr, StringCompareCaseInsensitive> As
 /** Registers LocalAssetProvider and BinaryAssetFactory by default. */
 class TUNDRACORE_API AssetAPI : public Object
 {
-    OBJECT(AssetAPI);
+    URHO3D_OBJECT(AssetAPI, Object);
 
     friend class Framework;
 

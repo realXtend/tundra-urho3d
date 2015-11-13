@@ -29,7 +29,7 @@ ConsoleAPI::ConsoleAPI(Framework *framework) :
     logLevel_(LogLevelInfo),
     pollInput_(1.f/30.f)
 {
-    SubscribeToEvent(Urho3D::E_CONSOLECOMMAND, HANDLER(ConsoleAPI, HandleConsoleCommand));
+    SubscribeToEvent(Urho3D::E_CONSOLECOMMAND, URHO3D_HANDLER(ConsoleAPI, HandleConsoleCommand));
 
     RegisterCommand("help", "Lists all registered commands.", this, &ConsoleAPI::ListCommands);
 }
@@ -194,7 +194,7 @@ LogLevel ConsoleAPI::CurrentLogLevel() const
 
 void ConsoleAPI::Print(const String &message)
 {
-    LOGRAW(message);
+    URHO3D_LOGRAW(message);
 }
 
 }

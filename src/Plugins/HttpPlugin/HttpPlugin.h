@@ -12,7 +12,7 @@ namespace Tundra
 /// Provides HTTP client and server functionality
 class TUNDRA_HTTP_API HttpPlugin : public IModule
 {
-    OBJECT(HttpPlugin);
+    URHO3D_OBJECT(HttpPlugin, IModule);
 
 public:
     HttpPlugin(Framework* owner);

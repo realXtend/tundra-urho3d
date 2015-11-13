@@ -25,7 +25,7 @@ OgreMaterialAsset::OgreMaterialAsset(AssetAPI *owner, const String &type_, const
 
 bool OgreMaterialAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*allowAsynchronous*/)
 {
-    PROFILE(OgreMaterialAsset_LoadFromFileInMemory);
+    URHO3D_PROFILE(OgreMaterialAsset_LoadFromFileInMemory);
 
     /// Force an unload of previous data first.
     Unload();

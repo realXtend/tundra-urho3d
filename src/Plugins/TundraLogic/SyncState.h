@@ -219,7 +219,7 @@ struct RigidBodyInterpolationState
 /// State change request to permit/deny changes.
 class TUNDRALOGIC_API StateChangeRequest : public Object
 {
-    OBJECT(StateChangeRequest);
+    URHO3D_OBJECT(StateChangeRequest, Object);
 
 public:
     StateChangeRequest(Object* owner, u32 connectionID);
@@ -272,7 +272,7 @@ typedef Urho3D::List<component_id_t> ComponentIdList;
 /// Scene's per-user network sync state
 class TUNDRALOGIC_API SceneSyncState : public Object
 {
-    OBJECT(SceneSyncState);
+    URHO3D_OBJECT(SceneSyncState, Object);
 
 public:
     explicit SceneSyncState(UserConnection* owner, u32 userConnectionID = 0, bool isServer = false);

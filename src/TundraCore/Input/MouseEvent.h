@@ -16,7 +16,7 @@ namespace Tundra
 /// This data structure is passed as a parameter in all mouse-related input events.
 class TUNDRACORE_API MouseEvent : public Object
 {
-    OBJECT(MouseEvent);
+    URHO3D_OBJECT(MouseEvent, Object);
 
 public:
     MouseEvent(InputAPI *owner);

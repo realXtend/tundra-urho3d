@@ -24,7 +24,7 @@ namespace Tundra
 /// Simple freelook camera functionality. Creates a camera to scene and allows it to be controlled with mouse & keys
 class CAMERA_API CameraApplication : public IModule
 {
-    OBJECT(CameraApplication);
+    URHO3D_OBJECT(CameraApplication, IModule);
 
 public:
     CameraApplication(Framework* owner);

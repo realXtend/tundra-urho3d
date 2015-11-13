@@ -59,7 +59,7 @@ bool LocalAssetProvider::IsValidRef(String assetRef, String) const
 
 AssetTransferPtr LocalAssetProvider::CreateTransfer(String assetRef, String assetType)
 {
-    PROFILE(LocalAssetProvider_RequestAsset);
+    URHO3D_PROFILE(LocalAssetProvider_RequestAsset);
     if (assetRef.Empty())
         return AssetTransferPtr();
     assetType = assetType.Trimmed();
@@ -168,7 +168,7 @@ String LocalAssetProvider::GetPathForAsset(const String &assetRef, LocalAssetSto
 
 void LocalAssetProvider::Update(float /*frametime*/)
 {
-    PROFILE(LocalAssetProvider_Update);
+    URHO3D_PROFILE(LocalAssetProvider_Update);
 
     ///@note It is *very* important that below we first complete all uploads, and then the downloads.
     /// This is because it is a rather common code flow to upload an asset for an entity, and immediately after that
@@ -335,7 +335,7 @@ void LocalAssetProvider::CompletePendingFileDownloads()
 
     while(pendingDownloads.Size() > 0)
     {
-        PROFILE(LocalAssetProvider_ProcessPendingDownload);
+        URHO3D_PROFILE(LocalAssetProvider_ProcessPendingDownload);
 
         AssetTransferPtr transfer = pendingDownloads.Back();
         pendingDownloads.Pop();
@@ -465,7 +465,7 @@ AssetStoragePtr LocalAssetProvider::StorageByName(const String &name) const
 
 AssetStoragePtr LocalAssetProvider::StorageForAssetRef(const String &assetRef) const
 {
-    PROFILE(LocalAssetProvider_GetStorageForAssetRef);
+    URHO3D_PROFILE(LocalAssetProvider_GetStorageForAssetRef);
 
     AssetAPI::AssetRefType refType = AssetAPI::ParseAssetRef(assetRef.Trimmed());
     if (refType != AssetAPI::AssetRefLocalPath && refType != AssetAPI::AssetRefLocalUrl)
@@ -480,7 +480,7 @@ void LocalAssetProvider::CompletePendingFileUploads()
 {
     while(pendingUploads.Size() > 0)
     {
-        PROFILE(LocalAssetProvider_ProcessPendingUpload);
+        URHO3D_PROFILE(LocalAssetProvider_ProcessPendingUpload);
         AssetUploadTransferPtr transfer = pendingUploads.Back();
         pendingUploads.Pop();
 
@@ -521,7 +521,7 @@ void LocalAssetProvider::CompletePendingFileUploads()
 
 void LocalAssetProvider::CheckForPendingFileSystemChanges()
 {
-    PROFILE(LocalAssetProvider_CheckForPendingFileSystemChanges);
+    URHO3D_PROFILE(LocalAssetProvider_CheckForPendingFileSystemChanges);
     Urho3D::FileSystem* fileSystem = GetSubsystem<Urho3D::FileSystem>();
 
     for(uint i = 0; i < storages.Size(); ++i)

@@ -23,7 +23,7 @@ typedef WeakPtr<componentTypeName> componentTypeName ## WeakPtr;
 /// Specifies unique type name and unique type ID of this component.
 /** Warning: This #define alters the current visibility specifier in the class file. */
 #define COMPONENT_NAME(componentTypeName, componentTypeId)                              \
-    OBJECT(componentTypeName);                                                          \
+    URHO3D_OBJECT(componentTypeName, IComponent);                                       \
 public:                                                                                 \
     enum { ComponentTypeId = componentTypeId };                                         \
     static const String &TypeNameStatic()                                               \
@@ -94,7 +94,7 @@ namespace Tundra
     as when doing batch updates of Attributes (for performance or correctness). */
 class TUNDRACORE_API IComponent : public Object
 {
-    OBJECT(IComponent);
+    URHO3D_OBJECT(IComponent, Object);
 
 public:
     /// @cond PRIVATE

@@ -100,7 +100,7 @@ DebugHud::DebugHud(Framework *framework) :
     AddTab("Assets", assetHudPanel_);
 
     framework_->Frame()->PostFrameUpdate.Connect(this, &DebugHud::OnUpdate);
-    SubscribeToEvent(E_SCREENMODE, HANDLER(DebugHud, HandleWindowChange));
+    SubscribeToEvent(E_SCREENMODE, URHO3D_HANDLER(DebugHud, HandleWindowChange));
 }
 
 DebugHud::~DebugHud()
@@ -192,7 +192,7 @@ bool DebugHud::AddTab(const String &name, DebugHudPanelWeakPtr updater)
     button->SetStyle("Button", style);
 
     // Sub to click release event
-    SubscribeToEvent(button, E_RELEASED, HANDLER(DebugHud, HandleTabChange));
+    SubscribeToEvent(button, E_RELEASED, URHO3D_HANDLER(DebugHud, HandleTabChange));
 
     bool isFirstChild = (tabContainer_->GetNumChildren() == 1);
     ScrollView *panel = tabContainer_->CreateChild<ScrollView>("scrollView" + name, Urho3D::M_MAX_UNSIGNED);
@@ -298,8 +298,10 @@ void DebugHud::OnUpdate(float frametime)
             renderer->GetDynamicInstancing() ? "On" : "Off",
             #ifdef URHO3D_OPENGL
             "OGL");
+            #elif defined(URHO3D_D3D11)
+            "D3D11");
             #else
-            graphics->GetSM3Support() ? "SM3" : "SM2");
+            "D3D9");
             #endif
 
         modeText_->SetText(mode);

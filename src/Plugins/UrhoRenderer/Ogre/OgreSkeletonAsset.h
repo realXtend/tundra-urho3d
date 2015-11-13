@@ -16,7 +16,7 @@ namespace Tundra
 /// Represents an Ogre skeleton and the animations it contains
 class URHO_MODULE_API OgreSkeletonAsset : public IAsset
 {
-    OBJECT(OgreSkeletonAsset);
+    URHO3D_OBJECT(OgreSkeletonAsset, IAsset);
 
 public:
     OgreSkeletonAsset(AssetAPI *owner, const String &type_, const String &name_);

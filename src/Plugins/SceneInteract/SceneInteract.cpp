@@ -51,7 +51,7 @@ void SceneInteract::Update(float /*frameTime*/)
 {
     if (!framework->IsHeadless())
     {
-        PROFILE(SceneInteract_Update);
+        URHO3D_PROFILE(SceneInteract_Update);
 
         ExecuteRaycast();
         if (lastHitEntity)

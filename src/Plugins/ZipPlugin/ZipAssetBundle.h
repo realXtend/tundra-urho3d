@@ -26,7 +26,7 @@ namespace Tundra
 /// Provides zip packed asset bundles.
 class TUNDRA_ZIP_API ZipAssetBundle : public IAssetBundle
 {
-    OBJECT(ZipAssetBundle);
+    URHO3D_OBJECT(ZipAssetBundle, IAssetBundle);
 
 public:
     ZipAssetBundle(AssetAPI *owner, const String &type, const String &name);

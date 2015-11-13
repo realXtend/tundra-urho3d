@@ -20,7 +20,7 @@ namespace Tundra
 /// Avatar appearance description asset
 class AVATAR_API AvatarDescAsset : public IAsset
 {
-    OBJECT(AvatarDescAsset);
+    URHO3D_OBJECT(AvatarDescAsset, IAsset);
 
 public:
     AvatarDescAsset(AssetAPI *owner, const String &type_, const String &name_);

@@ -88,7 +88,7 @@ void Avatar::AttributesChanged()
 
 void Avatar::SetupAppearance()
 {
-    PROFILE(Avatar_SetupAppearance);
+    URHO3D_PROFILE(Avatar_SetupAppearance);
     
     Entity* entity = ParentEntity();
     AvatarDescAssetPtr desc = AvatarDesc();

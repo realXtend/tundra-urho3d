@@ -47,7 +47,7 @@ namespace Tundra
     has access to InputAPI, and the event tree -based API can be used by all modules. */
 class TUNDRACORE_API InputAPI : public Object
 {
-    OBJECT(InputAPI);
+    URHO3D_OBJECT(InputAPI, Object);
 
 public:
     /// Initializes the API and hooks it into the main application window.

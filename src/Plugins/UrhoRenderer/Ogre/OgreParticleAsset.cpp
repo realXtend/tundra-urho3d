@@ -157,7 +157,7 @@ OgreParticleAsset::OgreParticleAsset(AssetAPI *owner, const String &type_, const
 
 bool OgreParticleAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool /*allowAsynchronous*/)
 {
-    PROFILE(OgreParticleAsset_LoadFromFileInMemory);
+    URHO3D_PROFILE(OgreParticleAsset_LoadFromFileInMemory);
 
     /// Force an unload of previous data first.
     Unload();

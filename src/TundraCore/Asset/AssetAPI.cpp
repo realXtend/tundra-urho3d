@@ -117,7 +117,7 @@ AssetStoragePtr AssetAPI::AssetStorageByName(const String &name) const
 
 AssetStoragePtr AssetAPI::StorageForAssetRef(const String &ref) const
 {
-    PROFILE(AssetAPI_StorageForAssetRef);
+    URHO3D_PROFILE(AssetAPI_StorageForAssetRef);
     foreach(const AssetProviderPtr &provider, providers)
     {
         AssetStoragePtr storage = provider->StorageForAssetRef(ref);
@@ -786,7 +786,7 @@ AssetTransferPtr AssetAPI::RequestAsset(String assetRef, String assetType, bool 
     //   the asset is already loaded to the system. This function also handles reloading existing
     //   but at the moment unloaded assets.
 
-    PROFILE(AssetAPI_RequestAsset);
+    URHO3D_PROFILE(AssetAPI_RequestAsset);
 
     // Turn named storage and default storage specifiers to absolute specifiers.
     assetRef = ResolveAssetRef("", assetRef);
@@ -1040,7 +1040,7 @@ AssetTransferPtr AssetAPI::RequestAsset(const AssetReference &ref, bool forceTra
 
 AssetProviderPtr AssetAPI::ProviderForAssetRef(String assetRef, String assetType) const
 {
-    PROFILE(AssetAPI_GetProviderForAssetRef);
+    URHO3D_PROFILE(AssetAPI_GetProviderForAssetRef);
 
     assetType = assetType.Trimmed();
     assetRef = assetRef.Trimmed();
@@ -1241,7 +1241,7 @@ AssetPtr AssetAPI::CreateNewAsset(String type, String name)
 
 AssetPtr AssetAPI::CreateNewAsset(String type, String name, AssetStoragePtr storage)
 {
-    PROFILE(AssetAPI_CreateNewAsset);
+    URHO3D_PROFILE(AssetAPI_CreateNewAsset);
     type = type.Trimmed();
     name = name.Trimmed();
     if (name.Length() == 0)
@@ -1287,7 +1287,7 @@ AssetPtr AssetAPI::CreateNewAsset(String type, String name, AssetStoragePtr stor
 
     ///\bug DiskSource and DiskSourceType are not set yet.
     {
-        PROFILE(AssetAPI_CreateNewAsset_emit_AssetCreated);
+        URHO3D_PROFILE(AssetAPI_CreateNewAsset_emit_AssetCreated);
         AssetCreated.Emit(asset);
     }
     
@@ -1296,7 +1296,7 @@ AssetPtr AssetAPI::CreateNewAsset(String type, String name, AssetStoragePtr stor
 
 AssetBundlePtr AssetAPI::CreateNewAssetBundle(String type, String name)
 {
-    PROFILE(AssetAPI_CreateNewAssetBundle);
+    URHO3D_PROFILE(AssetAPI_CreateNewAssetBundle);
     type = type.Trimmed();
     name = name.Trimmed();
     if (name.Length() == 0)
@@ -1427,7 +1427,7 @@ bool AssetAPI::LoadSubAssetToTransfer(AssetTransferPtr transfer, IAssetBundle *b
 
 AssetTypeFactoryPtr AssetAPI::AssetTypeFactory(const String &typeName) const
 {
-    PROFILE(AssetAPI_AssetTypeFactory);
+    URHO3D_PROFILE(AssetAPI_AssetTypeFactory);
     for(uint i = 0; i < assetTypeFactories.Size(); ++i)
         if (assetTypeFactories[i]->Type().Compare(typeName, false) == 0)
             return assetTypeFactories[i];
@@ -1437,7 +1437,7 @@ AssetTypeFactoryPtr AssetAPI::AssetTypeFactory(const String &typeName) const
 
 AssetBundleTypeFactoryPtr AssetAPI::AssetBundleTypeFactory(const String &typeName) const
 {
-    PROFILE(AssetAPI_AssetBundleTypeFactory);
+    URHO3D_PROFILE(AssetAPI_AssetBundleTypeFactory);
     for(uint i = 0; i < assetBundleTypeFactories.Size(); ++i)
         if (assetBundleTypeFactories[i]->Type().Compare(typeName, false) == 0)
             return assetBundleTypeFactories[i];
@@ -1479,12 +1479,12 @@ AssetBundlePtr AssetAPI::FindBundle(String bundleRef) const
 
 void AssetAPI::Update(float frametime)
 {
-    PROFILE(AssetAPI_Update);
+    URHO3D_PROFILE(AssetAPI_Update);
 
     // Prioritize and execute pending transfers
     if (!pendingTransfers_.Empty())
     {
-        PROFILE(AssetAPI_PrioritizeTransfers);
+        URHO3D_PROFILE(AssetAPI_PrioritizeTransfers);
 
         if (transferPrioritizer_)
         {
@@ -1511,7 +1511,7 @@ void AssetAPI::Update(float frametime)
     // Proceed with ready transfers.
     if (readyTransfers.Size() > 0)
     {
-        PROFILE(AssetAPI_Process_Completed);
+        URHO3D_PROFILE(AssetAPI_Process_Completed);
 
         // Normally it is the AssetProvider's responsibility to call AssetTransferCompleted when a download finishes.
         // The 'readyTransfers' list contains all the asset transfers that don't have any AssetProvider serving them. These occur in two cases:
@@ -1529,7 +1529,7 @@ void AssetAPI::Update(float frametime)
     // Proceed with ready sub asset transfers.
     if (readySubTransfers.Size() > 0)
     {
-        PROFILE(AssetAPI_Process_SubTransfers);
+        URHO3D_PROFILE(AssetAPI_Process_SubTransfers);
 
         // readySubTransfers contains sub asset transfers to loaded bundles. The sub asset loading cannot be completed in RequestAsset
         // as it would trigger signals before the calling code can receive and hook to the AssetTransfer. We delay calling LoadSubAssetToTransfer
@@ -1620,7 +1620,7 @@ AssetTransferMap::const_iterator AssetAPI::FindTransferIterator(IAssetTransfer *
 
 void AssetAPI::AssetTransferCompleted(IAssetTransfer *transfer_)
 {
-    PROFILE(AssetAPI_AssetTransferCompleted);
+    URHO3D_PROFILE(AssetAPI_AssetTransferCompleted);
     
     assert(transfer_);
     
@@ -1813,7 +1813,7 @@ void AssetAPI::AssetTransferAborted(IAssetTransfer *transfer)
 
 void AssetAPI::AssetLoadCompleted(const String assetRef)
 {
-    PROFILE(AssetAPI_AssetLoadCompleted);
+    URHO3D_PROFILE(AssetAPI_AssetLoadCompleted);
 
     AssetPtr asset;
     AssetTransferMap::const_iterator iter = FindTransferIterator(assetRef);
@@ -1842,7 +1842,7 @@ void AssetAPI::AssetLoadCompleted(const String assetRef)
         const String diskSource = asset->DiskSource();
 
         {
-            PROFILE(AssetAPI_AssetLoadCompleted_ProcessDependencies);
+            URHO3D_PROFILE(AssetAPI_AssetLoadCompleted_ProcessDependencies);
 
             // If this asset depends on any other assets, we have to make asset requests for those assets as well (and all assets that they refer to, and so on).
             RequestAssetDependencies(asset);
@@ -1954,7 +1954,7 @@ void AssetAPI::AssetUploadTransferCompleted(IAssetUploadTransfer *uploadTransfer
 
 void AssetAPI::AssetDependenciesCompleted(AssetTransferPtr transfer)
 {    
-    PROFILE(AssetAPI_AssetDependenciesCompleted);
+    URHO3D_PROFILE(AssetAPI_AssetDependenciesCompleted);
 
     // Emit success for this transfer
     transfer->EmitTransferSucceeded();
@@ -1970,7 +1970,7 @@ void AssetAPI::AssetDependenciesCompleted(AssetTransferPtr transfer)
 
 void AssetAPI::NotifyAssetDependenciesChanged(AssetPtr asset)
 {
-    PROFILE(AssetAPI_NotifyAssetDependenciesChanged);
+    URHO3D_PROFILE(AssetAPI_NotifyAssetDependenciesChanged);
 
     /// Delete all old stored asset dependencies for this asset.
     RemoveAssetDependencies(asset->Name());
@@ -1990,7 +1990,7 @@ void AssetAPI::NotifyAssetDependenciesChanged(AssetPtr asset)
 
 void AssetAPI::RequestAssetDependencies(AssetPtr asset)
 {
-    PROFILE(AssetAPI_RequestAssetDependencies);
+    URHO3D_PROFILE(AssetAPI_RequestAssetDependencies);
     // Make sure we have most up-to-date internal view of the asset dependencies.
     NotifyAssetDependenciesChanged(asset);
 
@@ -2012,7 +2012,7 @@ void AssetAPI::RequestAssetDependencies(AssetPtr asset)
 
 void AssetAPI::RemoveAssetDependencies(String asset)
 {
-    PROFILE(AssetAPI_RemoveAssetDependencies);
+    URHO3D_PROFILE(AssetAPI_RemoveAssetDependencies);
     for(uint i = 0; i < assetDependencies.Size(); ++i)
         if (String::Compare(assetDependencies[i].first_.CString(), asset.CString(), false) == 0)
         {
@@ -2023,7 +2023,7 @@ void AssetAPI::RemoveAssetDependencies(String asset)
 
 Vector<AssetPtr> AssetAPI::FindDependents(String dependee)
 {
-    PROFILE(AssetAPI_FindDependents);
+    URHO3D_PROFILE(AssetAPI_FindDependents);
 
     Vector<AssetPtr> dependents;
     for(uint i = 0; i < assetDependencies.Size(); ++i)
@@ -2040,7 +2040,7 @@ Vector<AssetPtr> AssetAPI::FindDependents(String dependee)
 
 int AssetAPI::NumPendingDependencies(AssetPtr asset) const
 {
-    PROFILE(AssetAPI_NumPendingDependencies);
+    URHO3D_PROFILE(AssetAPI_NumPendingDependencies);
     int numDependencies = 0;
 
     Vector<AssetReference> refs = asset->FindReferences();
@@ -2082,7 +2082,7 @@ int AssetAPI::NumPendingDependencies(AssetPtr asset) const
 
 bool AssetAPI::HasPendingDependencies(AssetPtr asset) const
 {
-    PROFILE(AssetAPI_HasPendingDependencies);
+    URHO3D_PROFILE(AssetAPI_HasPendingDependencies);
 
     Vector<AssetReference> refs = asset->FindReferences();
     for(uint i = 0; i < refs.Size(); ++i)
@@ -2200,7 +2200,7 @@ HashMap<String, String> AssetAPI::ParseAssetStorageString(String storageString)
 
 void AssetAPI::OnAssetLoaded(AssetPtr asset)
 {
-    PROFILE(AssetAPI_OnAssetLoaded);
+    URHO3D_PROFILE(AssetAPI_OnAssetLoaded);
 
     Vector<AssetPtr> dependents = FindDependents(asset->Name());
     for(uint i = 0; i < dependents.Size(); ++i)
@@ -2255,7 +2255,7 @@ void AssetAPI::OnAssetDiskSourceChanged(const String &path)
 
 void AssetAPI::OnAssetChanged(IAssetStorage* storage, String localName, String diskSource, IAssetStorage::ChangeType change)
 {
-    PROFILE(AssetAPI_OnAssetChanged);
+    URHO3D_PROFILE(AssetAPI_OnAssetChanged);
 
     assert(storage);
     

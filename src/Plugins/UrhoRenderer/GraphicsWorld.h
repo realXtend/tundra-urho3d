@@ -24,7 +24,7 @@ namespace Tundra
 /// Contains the graphical representation of a scene, ie. the Urho Scene
 class URHO_MODULE_API GraphicsWorld : public Object
 {
-    OBJECT(GraphicsWorld);
+    URHO3D_OBJECT(GraphicsWorld, Object);
 
 public:
     /// Called by the UrhoRenderer upon the creation of a new scene
