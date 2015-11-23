@@ -34,7 +34,8 @@ install:
   - cmake -version
 
 script: 
-  - ./tools/Linux/Ubuntu/Build.bash --run-analysis --run-tests
+  # TODO disable --run-analysis for now as building cppcheck crashes to internal compiler error
+  - ./tools/Linux/Ubuntu/Build.bash --run-tests
 
 notifications:
   irc: 
