@@ -17,7 +17,7 @@ void VS(float4 iPos : POSITION,
     out float2 oWaterUV : TEXCOORD2,
     out float3 oNormal : TEXCOORD3,
     out float4 oEyeVec : TEXCOORD4,
-    out float4 oPos : POSITION)
+    out float4 oPos : OUTPOSITION)
 {
     float4x3 modelMatrix = iModelMatrix;
     float3 worldPos = GetWorldPos(modelMatrix);
@@ -35,13 +35,13 @@ void PS(
     float2 iWaterUV : TEXCOORD2,
     float3 iNormal : TEXCOORD3,
     float4 iEyeVec : TEXCOORD4,
-    out float4 oColor : COLOR0)
+    out float4 oColor : OUTCOLOR0)
 {
     float2 refractUV = iScreenPos.xy / iScreenPos.w;
 
-    float2 noise = (tex2D(sNormalMap, iWaterUV).rg - 0.5) * cNoiseStrength;
+    float2 noise = (Sample2D(NormalMap, iWaterUV).rg - 0.5) * cNoiseStrength;
     refractUV += noise;
 
-    float3 refractColor = tex2D(sEnvMap, refractUV).rgb * cWaterTint;
+    float3 refractColor = Sample2D(EnvMap, refractUV).rgb * cWaterTint;
     oColor = float4(GetFog(refractColor, GetFogFactor(iEyeVec.w)), 1.0);
 }
