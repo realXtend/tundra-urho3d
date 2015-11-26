@@ -505,6 +505,8 @@ IF %TUNDRA_ANDROID%==0 (
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
 :: d3dcompiler_46.dll needs to be copied to bin directory on VS > 2010 builds.
+:: TODO Installing Urho3D would appear to perform this automatically, at least for newer versions?
+:: If this is removed or alter, remember to tweak README.md too.
 IF NOT %VS_VER%==vs2010 (
     IF %TUNDRA_ANDROID%==0 (
         cecho {0D}Copying %BUILD_TYPE% d3dcompiler_46.dll to Tundra bin\ directory.{# #}{\n}
