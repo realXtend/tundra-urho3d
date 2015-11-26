@@ -1,3 +1,3 @@
-@cd ..
-@call BuildDeps.cmd "Visual Studio 12 Win64" Debug
-@cd VS2013
+@pushd ..
+@call BuildDeps.cmd "Visual Studio 12 2013 Win64" Debug
+@popd
