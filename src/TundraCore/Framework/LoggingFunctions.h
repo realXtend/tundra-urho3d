@@ -28,7 +28,11 @@ enum LogLevel
 
 namespace Detail // Hide from Tundra namespace
 {
+#ifdef WIN32
+    const String Newline = "\r\n";
+#else
     const String Newline = "\n";
+#endif
 }
 
 /// Outputs a message to the log to the given channel (if @c level is enabled) to both stdout and ConsoleAPI.
