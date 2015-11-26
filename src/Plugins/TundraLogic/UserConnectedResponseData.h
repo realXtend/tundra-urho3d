@@ -2,14 +2,11 @@
 
 #pragma once
 
+#include "JSON.h"
+
 #include <Urho3D/Resource/XMLFile.h>
 #include <Urho3D/Core/Variant.h>
 #include <CoreTypes.h>
-
-namespace Urho3D
-{
-    class XMLFile;
-}
 
 namespace Tundra
 {
@@ -19,11 +16,8 @@ namespace Tundra
     This is to be unified in the future with both kinds of clients using JSON. */
 struct UserConnectedResponseData
 {
-    String responseData;
-    Urho3D::VariantMap responseDataJson;
-
-    // Pre-interpreted XML file of the response data, if available. Will be null if parsing has failed
     SharedPtr<Urho3D::XMLFile> responseDataXml;
+    JSONValue responseDataJson;
 };
 
 }

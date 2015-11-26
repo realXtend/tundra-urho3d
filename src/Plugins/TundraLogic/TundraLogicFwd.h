@@ -25,6 +25,7 @@ namespace Tundra
     struct UserConnectedResponseData;
 
     typedef Urho3D::SharedPtr<UserConnection> UserConnectionPtr;
+    typedef Urho3D::WeakPtr<UserConnection> UserConnectionWeakPtr;
     typedef Urho3D::Vector<UserConnectionPtr> UserConnectionList;
     typedef Urho3D::SharedPtr<KNetUserConnection> KNetUserConnectionPtr;
 

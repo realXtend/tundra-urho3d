@@ -39,6 +39,11 @@ TundraLogic::~TundraLogic()
 {
 }
 
+bool TundraLogic::IsServer() const
+{
+    return kristalliProtocol_ ? kristalliProtocol_->IsServer() : false;
+}
+
 void TundraLogic::Load()
 {
     kristalliProtocol_ = SharedPtr<Tundra::KristalliProtocol>(new Tundra::KristalliProtocol(this));
@@ -63,6 +68,7 @@ void TundraLogic::Initialize()
 
     client_->Connected.Connect(this, &TundraLogic::ClientConnectedToServer);
     client_->Disconnected.Connect(this, &TundraLogic::ClientDisconnectedFromServer);
+    server_->UserConnected.Connect(this, &TundraLogic::ServerNewUserConnected);
 }
 
 void TundraLogic::HandleLogin(const StringVector &params) const
@@ -175,7 +181,7 @@ void TundraLogic::ReadStartupParameters(float /*time*/)
             client_->Login(/*addr*/params[0], /*port*/(unsigned short)Urho3D::ToInt(params[1]), /*username*/params[3],
             /*optional passwd*/ params.Size() >= 5 ? params[4] : "", /*protocol*/params[2]);
         else
-            LogError("TundraLogicModule::ReadStartupParameters: Not enought parameters for --connect. Usage '--connect serverIp;port;protocol;name;password'. Password is optional.");
+            LogError("TundraLogicModule::ReadStartupParameters: Not enough parameters for --connect. Usage '--connect serverIp;port;protocol;name;password'. Password is optional.");
     }
 }
 
@@ -304,6 +310,56 @@ void TundraLogic::ClientDisconnectedFromServer()
     }
     storagesReceivedFromServer.Clear();
 }
+
+void TundraLogic::ServerNewUserConnected(u32 /*connectionID*/, UserConnection *connection, UserConnectedResponseData *responseData)
+{
+    if (!responseData->responseDataXml->GetRoot())
+        responseData->responseDataXml->CreateRoot("asset");
+    Urho3D::XMLElement assetRoot = responseData->responseDataXml->GetRoot();
+
+    // Did we get a new user from the same computer the server is running at?
+    bool isLocalhostConnection = false;
+    KNetUserConnection* kNetConn = dynamic_cast<KNetUserConnection*>(connection);
+    if (kNetConn && kNetConn->connection)
+    {
+        isLocalhostConnection = (kNetConn->connection->RemoteEndPoint().IPToString() == "127.0.0.1" ||
+            kNetConn->connection->LocalEndPoint().IPToString() == kNetConn->connection->RemoteEndPoint().IPToString());
+    }
+
+    // Serialize all storages to the client. If the client is from the same computer than the server, we can also serialize the LocalAssetStorages.
+    AssetStorageVector storages = framework->Asset()->AssetStorages();
+    for (size_t i = 0; i < storages.Size(); ++i)
+    {
+        bool isLocalStorage = (dynamic_cast<LocalAssetStorage*>(storages[i].Get()) != 0);
+        if (storages[i]->IsReplicated() && (!isLocalStorage || isLocalhostConnection))
+        {
+            Urho3D::XMLElement storage = assetRoot.CreateChild("storage");
+            storage.SetAttribute("data", storages[i]->SerializeToString(!isLocalhostConnection));
+        }
+    }
+
+    // Specify which storage to use as default.
+    AssetStoragePtr defaultStorage = Fw()->Asset()->DefaultAssetStorage();
+    bool defaultStorageIsLocal = (dynamic_cast<LocalAssetStorage*>(defaultStorage.Get()) != 0);
+    if (defaultStorage && (!defaultStorageIsLocal || isLocalhostConnection))
+    {
+        Urho3D::XMLElement storage = assetRoot.CreateChild("defaultStorage");
+        storage.SetAttribute("name", defaultStorage->Name());
+        if (!defaultStorage->IsReplicated())
+            LogWarning("Server specified the client to use the storage \"" + defaultStorage->Name() + "\" as default, but it is not a replicated storage!");
+    }
+
+    // Fill the same data as JSON for web clients
+    JSONValue storageData;
+    storageData["default"] = true;
+    storageData["name"] = defaultStorage->Name();
+    storageData["type"] = defaultStorage->Type();
+    storageData["src"] = defaultStorage->BaseURL();
+    responseData->responseDataJson["storage"] = storageData;
+
+    LogInfo(responseData->responseDataXml->ToString());
+}
+
 
 void TundraLogic::DetermineStorageTrustStatus(AssetStoragePtr storage)
 {

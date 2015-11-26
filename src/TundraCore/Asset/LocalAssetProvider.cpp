@@ -424,7 +424,7 @@ AssetStoragePtr LocalAssetProvider::TryCreateStorage(HashMap<String, String> &st
     bool writable           = (storageParams.Contains("readonly") ? !Urho3D::ToBool(storageParams["readonly"]) : true);
     bool liveUpdate         = (storageParams.Contains("liveupdate") ? Urho3D::ToBool(storageParams["liveupdate"]) : true);
     bool autoDiscoverable   = (storageParams.Contains("autodiscoverable") ? Urho3D::ToBool(storageParams["autodiscoverable"]) : true);
-    bool replicated         = (storageParams.Contains("replicated") ? Urho3D::ToBool(storageParams["replicated"]) : false);
+    bool replicated         = (storageParams.Contains("replicated") ? Urho3D::ToBool(storageParams["replicated"]) : true);
     String trusted          = (storageParams.Contains("trusted") ? storageParams["trusted"] : "");
 
     LocalAssetStoragePtr storagePtr = AddStorageDirectory(path, name, recursive, writable, 

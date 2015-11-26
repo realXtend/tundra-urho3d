@@ -232,7 +232,7 @@ public:
     }
 
     /// Set the change request accepted
-    void SetAccepted(bool accepted)         
+    void SetAccepted(bool accepted)
     { 
         accepted_ = accepted; 
     }

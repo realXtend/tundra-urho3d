@@ -21,20 +21,20 @@ class TUNDRALOGIC_API Server : public Object
     
 public:
     explicit Server(TundraLogic* owner);
-    ~Server() {};
+    ~Server();
 
     /// Perform any per-frame processing
-    void Update(float frametime) { UNREFERENCED_PARAM(frametime); };
+    void Update(float frametime);
 
     /// Get matching userconnection from a messageconnection, or null if unknown
     /// @todo Rename to UserConnection(ForMessageConnection) or similar.
-    UserConnectionPtr GetUserConnection(kNet::MessageConnection* source) const { UNREFERENCED_PARAM(source); return UserConnectionPtr(); }
+    UserConnectionPtr GetUserConnection(kNet::MessageConnection* source) const;
 
     /// Get all connected users
     UserConnectionList& UserConnections() const;
 
     /// Set current action sender. Called by SyncManager
-    void SetActionSender(UserConnection *user) { UNREFERENCED_PARAM(user); };
+    void SetActionSender(UserConnection *user);
 
     /// Returns the backend server object.
     /** Use this object to Broadcast messages to all currently connected clients.
@@ -73,39 +73,40 @@ public:
     bool IsAboutToStart() const;
 
     /// Returns all authenticated users.
-    UserConnectionList AuthenticatedUsers() const { return UserConnectionList(); }
+    UserConnectionList AuthenticatedUsers() const;
 
     /// Returns connection corresponding to a connection ID.
-    UserConnectionPtr UserConnectionById(u32 connectionID) const { UNREFERENCED_PARAM(connectionID); return UserConnectionPtr(); }
+    UserConnectionPtr UserConnectionById(u32 connectionID) const;
 
     /// Returns current sender of an action.
     /** Valid (non-null) only while an action packet is being handled. Null if it was invoked by server */
-    UserConnectionPtr ActionSender() const { return UserConnectionPtr(); }
+    UserConnectionPtr ActionSender() const;
 
     // signals
 
     /// A user is connecting. This is your chance to deny access.
     /** Call user->Disconnect() to deny access and kick the user out.
         @todo the connectionID parameter is unnecessary as it can be retrieved from connection. */
-    void UserAboutToConnect(u32 connectionID, UserConnection* connection);
+    Signal2<u32, UserConnection*> UserAboutToConnect;
 
     /// A user has connected (and authenticated)
     /** @param responseData The handler of this signal can add his own application-specific data to this structure.
         This data is sent to the client and the applications on the client computer can read them as needed.
         @todo the connectionID parameter is unnecessary as it can be retrieved from connection. */
-    void UserConnected(u32 connectionID, UserConnection* connection, UserConnectedResponseData *responseData);
+    Signal3<u32, UserConnection*, UserConnectedResponseData*> UserConnected;
 
-    void MessageReceived(UserConnection *connection, kNet::packet_id_t, kNet::message_id_t id, const char* data, size_t numBytes);
+    /// Message received from an user connection
+    Signal5<UserConnection*, kNet::packet_id_t, kNet::message_id_t, const char*, size_t> MessageReceived;
 
     /// A user has disconnected
     /** @todo the connectionID parameter is unnecessary as it can be retrieved from connection. */
-    void UserDisconnected(u32 connectionID, UserConnection* connection);
+    Signal2<u32, UserConnection*> UserDisconnected;
 
     /// The server has been started
-    void ServerStarted();
+    Signal0<void> ServerStarted;
 
     /// The server has been stopped
-    void ServerStopped();
+    Signal0<void> ServerStopped;
 
 private:
     /// Handle a Kristalli protocol message
@@ -119,12 +120,11 @@ private:
     /// Finalize the login of a user. Allow security plugins to inspect login credentials. Return true if allowed to log in
     bool FinalizeLogin(UserConnectionPtr user);
 
-    //UserConnectionWeakPtr actionSender;
+    UserConnectionWeakPtr actionSender;
     TundraLogic* owner_;
     Framework* framework_;
     int current_port_;
     String current_protocol_;
-
 
     UserConnectionList userConnectionList_;
 };

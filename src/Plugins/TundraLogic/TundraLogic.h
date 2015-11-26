@@ -23,8 +23,8 @@ public:
     TundraLogic(Framework* owner);
     ~TundraLogic();
 
-    /// \todo hardcoded because no server functionality implemented
-    bool IsServer() { return false; }
+    /// Returns whether a server is running
+    bool IsServer() const;
 
     /// Returns pointer to KristalliProtocolModule
     SharedPtr<Tundra::KristalliProtocol> KristalliProtocol() const;
@@ -70,6 +70,8 @@ private:
     /// Whenever we receive a new asset storage from the server, this function is called to determine if the storage is to be trusted.
     void DetermineStorageTrustStatus(AssetStoragePtr storage);
 
+    /// Handle new connection to server. Populate local asset storages if connected from the same machine to the login response data.
+    void ServerNewUserConnected(u32 connectionID, UserConnection *connection, UserConnectedResponseData *responseData);
     /// The sync manager
     SharedPtr<Tundra::SyncManager> syncManager_;
     /// The client

@@ -23,11 +23,12 @@ enum NetworkProtocolVersion
 {
     ProtocolOriginal = 0x1,         // Original
     ProtocolCustomComponents = 0x2, // Adds support for transmitting new static-structured component types without actual C++ implementation, using EC_PlaceholderComponent
-    ProtocolHierarchicScene = 0x3   // Adds support for hierarchic scene, ie. entities having child entities,
+    ProtocolHierarchicScene = 0x3,  // Adds support for hierarchic scene, ie. entities having child entities,
+    ProtocolWebClientRigidBodyMessage = 0x4 // WebSocket client that supports the rigid body optimization message
 };
 
 /// Highest supported protocol version in the build. Update this when a new protocol version is added
-const NetworkProtocolVersion cHighestSupportedProtocolVersion = ProtocolHierarchicScene;
+const NetworkProtocolVersion cHighestSupportedProtocolVersion = ProtocolWebClientRigidBodyMessage;
 
 /// Represents a client connection on the server side. Subclassed by networking implementations.
 class TUNDRALOGIC_API UserConnection : public Object

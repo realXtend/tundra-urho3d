@@ -99,12 +99,8 @@ void Client::Login(const String& address, unsigned short port, kNet::SocketTrans
     SetLoginProperty("client-name", "Name");
     SetLoginProperty("client-organization", "Org");
 
-    //KristalliProtocolModule *kristalli = framework_->GetModule<KristalliProtocolModule>();
-    //connect(kristalli, SIGNAL(NetworkMessageReceived(kNet::MessageConnection *, kNet::packet_id_t, kNet::message_id_t, const char *, size_t)), 
-    //        this, SLOT(HandleKristalliMessage(kNet::MessageConnection*, kNet::packet_id_t, kNet::message_id_t, const char*, size_t)), Qt::UniqueConnection);
     kristalli->NetworkMessageReceived.Connect(this, &Client::HandleKristalliMessage);
 
-    //connect(kristalli, SIGNAL(ConnectionAttemptFailed()), this, SLOT(OnConnectionAttemptFailed()), Qt::UniqueConnection);
     kristalli->ConnectionAttemptFailed.Connect(this, &Client::OnConnectionAttemptFailed);
 
     kristalli->Connect(address.CString(), port, protocol);
@@ -157,8 +153,6 @@ void Client::DoLogout(bool fail)
 
     SharedPtr<KristalliProtocol> kristalli = owner_->KristalliProtocol();
     kristalli->NetworkMessageReceived.Disconnect(this, &Client::HandleKristalliMessage);
-   // disconnect(kristalli, SIGNAL(NetworkMessageReceived(kNet::MessageConnection *, kNet::packet_id_t, kNet::message_id_t, const char *, size_t)), 
-   //     this, SLOT(HandleKristalliMessage(kNet::MessageConnection*, kNet::packet_id_t, kNet::message_id_t, const char*, size_t)));
 
     kristalli->ConnectionAttemptFailed.Disconnect(this, &Client::OnConnectionAttemptFailed);
 
@@ -287,19 +281,6 @@ void Client::HandleKristalliMessage(kNet::MessageConnection* source, kNet::packe
             HandleLoginReply(source, data, numBytes);
         }
         break;
-        /// \todo These are not used? Commented out by cmayhem.
-    //case MsgClientJoined::messageID:
-    //    {
-    //        MsgClientJoined msg(data, numBytes);
-    //        HandleClientJoined(source, msg);
-    //    }
-    //    break;
-    //case MsgClientLeft::messageID:
-    //    {
-    //        MsgClientLeft msg(data, numBytes);
-    //        HandleClientLeft(source, msg);
-    //    }
-    //    break;
     }
     
     NetworkMessageReceived.Emit(packetId, messageId, data, numBytes);
@@ -339,11 +320,9 @@ void Client::HandleLoginReply(kNet::MessageConnection* /*source*/, const char *d
             UserConnectedResponseData responseData;
             if (msg.loginReplyData.size() > 0)
             {
-                responseData.responseData = String((const char *)&msg.loginReplyData[0], (int)msg.loginReplyData.size());
-                // Parse once as XML so that application functionality does not need to parse separately. Delete if parse fails
+                String responseDataStr((const char *)&msg.loginReplyData[0], (int)msg.loginReplyData.size());
                 responseData.responseDataXml = new Urho3D::XMLFile(context_);
-                if (!responseData.responseDataXml->FromString(responseData.responseData))
-                    responseData.responseDataXml.Reset();
+                responseData.responseDataXml->FromString(responseDataStr);
             }
 
             Connected.Emit(&responseData);
