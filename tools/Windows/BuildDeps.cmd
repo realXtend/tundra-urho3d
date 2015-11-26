@@ -26,6 +26,7 @@ IF "%VSINSTALLDIR%"=="" (
 
 :: Set up variables depending on the used Visual Studio version
 call VSConfig.cmd %1
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
 :: Set up variables depending on the used build type.
 set BUILD_TYPE=%2
@@ -43,9 +44,9 @@ IF "!BUILD_TYPE!"=="" (
 )
 IF NOT !BUILD_TYPE!==%BUILD_TYPE_MINSIZEREL% IF NOT !BUILD_TYPE!==%BUILD_TYPE_RELEASE% IF NOT !BUILD_TYPE!==%BUILD_TYPE_RELWITHDEBINFO% IF NOT !BUILD_TYPE!==%BUILD_TYPE_DEBUG% (
     cecho {0C}VSConfig.cmd: Invalid or unsupported CMake build type passed: !BUILD_TYPE!. Cannot proceed, aborting!{# #}{\n}
-    pause
-    GOTO :EOF
+    GOTO :ERROR
 )
+
 :: DEBUG_OR_RELEASE and DEBUG_OR_RELEASE_LOWERCASE are "Debug" and "debug" for Debug build and "Release" and "release"
 :: for all of the Release variants. 
 :: POSTFIX_D, POSTFIX_UNDERSCORE_D and POSTFIX_UNDERSCORE_DEBUG are helpers for performing file copies and checking
@@ -80,24 +81,34 @@ IF %BUILD_TYPE%==MinSizeRel cecho {0E}     WARNING: MinSizeRel build can suffer 
 
 :: Print scripts usage information
 cecho {0A}Requirements for a successful execution:{# #}{\n}
-echo    1. Install and make sure 'git' and 'svn' are accessible from PATH.
+echo    1. Install Git and SVN and make sure 'git' and 'svn' are accessible from PATH.
+:: TODO Print the following only if using VS 2010/2012 and/or Express editions?
 echo    2. Install DirectX SDK June 2010.
 echo     - http://www.microsoft.com/download/en/details.aspx?id=6812
 echo    3. Install CMake and make sure 'cmake' is accessible from PATH.
 echo     - http://www.cmake.org/
-echo    4. Install Visual Studio 2010/2012/2013 with latest updates (Express is ok, but see section 5 for 2010).
+echo    4. Install Visual Studio 2010 or newer with latest updates (Express is ok, but see section 5 for 2010).
 echo     - http://www.microsoft.com/visualstudio/eng/downloads
+:: TODO Print these only if using VS 2010
 cecho {0E}   5. Optional: Make sure you have the Visual Studio x64 tools installed{# #}{\n}
 cecho {0E}      before installing the Visual Studio 2010 Service Pack 1, {# #}{\n}
 cecho {0E}      http://www.microsoft.com/en-us/download/details.aspx?id=23691 {# #}{\n}
 cecho {0E}      if wanting to build Tundra as a 64-bit application.{# #}{\n}
+:: TODO Print the following only if using VS 2010/2012 and/or Express editions?
 echo    6. Install Windows SDK.
 echo     - http://www.microsoft.com/download/en/details.aspx?id=8279
-echo    7. Execute this file from Visual Studio 2010/2012/2013 ^(x64^) Command Prompt.
+echo    7. Execute this file with Visual Studio environment variables set.
+echo.    - https://msdn.microsoft.com/en-us/library/ms229859(v=vs.110).aspx
+:: TODO Perl instructions!
 echo.
 echo If you are not ready with the above, press Ctrl-C to abort!
 pause
 echo.
+
+:: Check that required tools are in PATH
+FOR %%i IN (cmake git svn perl) DO (
+    where %%i 1> NUL 2> NUL || cecho {0C}Required tool '%%i' not installed or not added to PATH!{# #}{\n} && goto :ERROR
+)
 
 :SKIP_MSVC_ENV_INIT
 
@@ -294,7 +305,8 @@ IF %TUNDRA_ANDROID%==0 (
         git clone https://github.com/openssl/openssl.git openssl
         IF NOT EXIST "%DEPS%\openssl\.git" GOTO :ERROR
         cd openssl
-        git checkout OpenSSL_1_0_1j
+        REM 1.0.2d required for VS 2015 suppport. 1.0.1 series fail to build.
+        git checkout OpenSSL_1_0_2d
         IF NOT %ERRORLEVEL%==0 GOTO :ERROR
     )
     IF NOT EXIST "%DEPS%\openssl\build". (
@@ -318,7 +330,9 @@ IF %TUNDRA_ANDROID%==0 (
         IF NOT %ERRORLEVEL%==0 GOTO :ERROR
         cecho {0D}Building OpenSSL.{# #}{\n}
         nmake -f ms\nt.mak
+        IF NOT %ERRORLEVEL%==0 GOTO :ERROR
         nmake -f ms\nt.mak install
+        IF NOT %ERRORLEVEL%==0 GOTO :ERROR
     )
 ) ELSE (
     IF NOT EXIST "%DEPS%\openssl\". (
@@ -494,26 +508,29 @@ IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 IF NOT %VS_VER%==vs2010 (
     IF %TUNDRA_ANDROID%==0 (
         cecho {0D}Copying %BUILD_TYPE% d3dcompiler_46.dll to Tundra bin\ directory.{# #}{\n}
-        copy /Y "C:\Program Files (x86)\Windows Kits\8.0\Redist\D3D\%TARGET_ARCH%\d3dcompiler_46.dll" "%TUNDRA_BIN%"
-        IF NOT %ERRORLEVEL%==0 cecho {0E}Warning: %BUILD_TYPE% d3dcompiler_46.dll not found, copy the file manually.{# #}{\n}
+        IF EXIST "C:\Program Files (x86)\Windows Kits\8.0\Redist\D3D\%TARGET_ARCH%\d3dcompiler_46.dll". (
+            copy /Y "C:\Program Files (x86)\Windows Kits\8.0\Redist\D3D\%TARGET_ARCH%\d3dcompiler_46.dll" "%TUNDRA_BIN%"
+        ) ELSE (
+            cecho {0E}Warning: %BUILD_TYPE% d3dcompiler_46.dll not found, copy the file manually.{# #}{\n}
+        )
     )
 )
 
 :::::::::::::::::::::::: All done
 
 echo.
-%TOOLS%\Utils\cecho {0A}Tundra dependencies built.{# #}{\n}
-set PATH=%ORIGINAL_PATH%
-cd %TOOLS%
-GOTO :EOF
+cecho {0A}Tundra dependencies built.{# #}{\n}
+GOTO :END
 
 :::::::::::::::::::::::: Error exit handler
 
 :ERROR
+
 echo.
-%TOOLS%\Utils\cecho {0C}An error occurred! Aborting!{# #}{\n}
+%~dp0\Utils\cecho {0C}An error occurred! Aborting!{# #}{\n}
+pause
+:END
 set PATH=%ORIGINAL_PATH%
 cd %TOOLS%
-pause
 
 endlocal

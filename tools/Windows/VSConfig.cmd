@@ -6,6 +6,8 @@
 set GENERATOR=%1
 
 :: Supported Visual Studio versions:
+set GENERATOR_VS2015="Visual Studio 14 2015"
+set GENERATOR_VS2015_WIN64="Visual Studio 14 2015 Win64"
 set GENERATOR_VS2013="Visual Studio 12"
 set GENERATOR_VS2013_WIN64="Visual Studio 12 Win64"
 set GENERATOR_VS2012="Visual Studio 11"
@@ -21,9 +23,10 @@ IF "!GENERATOR!"=="" (
 
 :: TODO Some nicer check for this.
 IF NOT !GENERATOR!==%GENERATOR_VS2010% IF NOT !GENERATOR!==%GENERATOR_VS2010_WIN64% IF NOT !GENERATOR!==%GENERATOR_VS2012% IF NOT !GENERATOR!==%GENERATOR_VS2012_WIN64% IF NOT !GENERATOR!==%GENERATOR_VS2013% IF NOT !GENERATOR!==%GENERATOR_VS2013_WIN64% (
+IF NOT !GENERATOR!==%GENERATOR_VS2015% IF NOT !GENERATOR!==%GENERATOR_VS2015_WIN64%  (
     Utils\cecho {0C}VSConfig.cmd: Invalid or unsupported CMake generator string passed: !GENERATOR!. Cannot proceed, aborting!{# #}{\n}
-    GOTO :EOF
-)
+    exit /b 1
+))
 
 :: Figure out the build configuration from the CMake generator string.
 :: Are we building 32-bit or 64-bit version.
@@ -38,6 +41,10 @@ set VS_PLATFORM=Win32
 set GENERATOR_NO_DOUBLEQUOTES=%GENERATOR:"=%
 set GENERATOR_SPLIT=%GENERATOR_NO_DOUBLEQUOTES: =,%
 FOR %%i IN (%GENERATOR_SPLIT%) DO (
+    IF %%i==14 (
+        set VS_VER=vs2015
+        set VC_VER=vc14
+    )
     IF %%i==12 (
         set VS_VER=vs2013
         set VC_VER=vc12

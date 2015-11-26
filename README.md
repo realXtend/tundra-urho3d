@@ -20,8 +20,7 @@ supported) or GCC 4.7 or newer. All Clang versions should support the needed fea
 
 ### Windows, targeting Windows
 
-Make sure that you have the latest Visual Studio Service Packs or Updates installed. Visual Studio 2012 should work,
-but is not tested regularly and no batch scripts are provided currently.
+Make sure that you have the latest Visual Studio Service Packs or Updates installed.
 
 1. Open up the Visual Studio (x64 Win64) Command Prompt which is required in order to have the required build tools
    and several other utilities in your PATH.
