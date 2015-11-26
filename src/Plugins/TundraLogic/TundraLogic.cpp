@@ -328,7 +328,7 @@ void TundraLogic::ServerNewUserConnected(u32 /*connectionID*/, UserConnection *c
 
     // Serialize all storages to the client. If the client is from the same computer than the server, we can also serialize the LocalAssetStorages.
     AssetStorageVector storages = framework->Asset()->AssetStorages();
-    for (size_t i = 0; i < storages.Size(); ++i)
+    for (unsigned i = 0; i < storages.Size(); ++i)
     {
         bool isLocalStorage = (dynamic_cast<LocalAssetStorage*>(storages[i].Get()) != 0);
         if (storages[i]->IsReplicated() && (!isLocalStorage || isLocalhostConnection))

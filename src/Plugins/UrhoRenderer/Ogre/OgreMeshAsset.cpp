@@ -659,7 +659,7 @@ static void ReadEdgeList(Urho3D::Deserializer& stream, Ogre::Mesh * /*mesh*/)
 
                 for (uint i=0; i<numEdgeGroups; ++i)
                 {
-                    u16 id = ReadHeader(stream);
+                    id = ReadHeader(stream);
                     if (id != M_EDGE_GROUP)
                     {
                         throw std::runtime_error("M_EDGE_GROUP not found in M_EDGE_LIST_LOD");

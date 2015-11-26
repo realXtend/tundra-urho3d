@@ -119,7 +119,7 @@ String LocalAssetProvider::GetPathForAsset(const String &assetRef, LocalAssetSto
 {
     String path;
     String path_filename;
-    AssetAPI::AssetRefType refType = AssetAPI::ParseAssetRef(assetRef.Trimmed(), 0, 0, 0, 0, &path_filename, &path);
+    AssetAPI::AssetRefType refType = AssetAPI::ParseAssetRef(assetRef.Trimmed(), nullptr, nullptr, nullptr, nullptr, &path_filename, &path);
     if (refType == AssetAPI::AssetRefLocalPath)
     {
         // If the asset ref has already been converted to an absolute path, simply return the assetRef as is.
@@ -141,7 +141,7 @@ String LocalAssetProvider::GetPathForAsset(const String &assetRef, LocalAssetSto
     // Check first all subdirs without recursion, because recursion is potentially slow
     for (uint i = 0; i < storages.Size(); ++i)
     {
-        String path = storages[i]->GetFullPathForAsset(path_filename, false);
+        path = storages[i]->GetFullPathForAsset(path_filename, false);
         if (path != "")
         {
             if (storage)
@@ -152,7 +152,7 @@ String LocalAssetProvider::GetPathForAsset(const String &assetRef, LocalAssetSto
 
     for (uint i = 0; i < storages.Size(); ++i)
     {
-        String path = storages[i]->GetFullPathForAsset(path_filename, true);
+        path = storages[i]->GetFullPathForAsset(path_filename, true);
         if (path != "")
         {
             if (storage)

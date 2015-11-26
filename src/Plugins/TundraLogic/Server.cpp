@@ -361,11 +361,11 @@ bool Server::FinalizeLogin(UserConnectionPtr user)
     {
         if (u->userID != user->userID)
         {
-            MsgClientJoined joined;
-            joined.userID = u->userID;
+            MsgClientJoined joined2;
+            joined2.userID = u->userID;
             if (u->HasProperty("username"))
-                joined.username = u->Property("username").GetString();
-            user->Send(joined);
+                joined2.username = u->Property("username").GetString();
+            user->Send(joined2);
         }
     }
     

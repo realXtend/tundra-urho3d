@@ -115,10 +115,14 @@ endif()
 # Set compiler warning levels.
 if (MSVC)
     add_definitions(/W4)
-    if (MSVC_VERSION LESS 1700)
+    if (MSVC_VERSION LESS 1700) # < 2012
         # We are using 'override' and strongly typed enums but those are nonstandard extensions in VC < 11 causing a warning.
         add_definitions(/wd4481 /wd4480)
     endif()
+    if(MSVC_VERSION GREATER 1800) # > 2013
+        # Disable overeager and false positives causing C4458 ("declaration of 'indentifier' hides class member"), at least for now.
+        add_definitions(/wd4458)
+    ENDIF()
 else ()
     add_definitions (-Wall -Wextra -Wno-unknown-pragmas -Wno-unused -Wno-reorder -Wno-switch -Wno-write-strings)
 endif()

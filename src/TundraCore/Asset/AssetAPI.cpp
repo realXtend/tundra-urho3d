@@ -383,7 +383,7 @@ AssetAPI::AssetRefType AssetAPI::ParseAssetRef(String assetRef, String *outProto
     
     if (pos != String::NPOS)
     {
-        String assetRef = fullPath.Substring(0, pos);
+        assetRef = fullPath.Substring(0, pos);
         subAssetName = fullPath.Substring(pos + 1).Trimmed();
         if (subAssetName.StartsWith("\""))
             subAssetName = subAssetName.Substring(1);

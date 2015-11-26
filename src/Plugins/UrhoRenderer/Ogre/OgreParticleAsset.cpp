@@ -114,10 +114,10 @@ SharedPtr<Urho3D::ParticleEffect> ParticleEffectFromTemplate(SharedPtr<Urho3D::P
         if (StringHash(affectorBlock->id) == Ogre::ParticleSystem::Affector::ColourInterpolator)
         {
             Vector<Urho3D::ColorFrame> colorFrames;
-            for (int i=0 ; i<6 ; ++i)
+            for (int j = 0 ; j < 6; ++j)
             {
-                StringHash color = StringHash(Ogre::ParticleSystem::Affector::Color + String(i));
-                StringHash time = StringHash(Ogre::ParticleSystem::Affector::Time + String(i));
+                StringHash color = StringHash(Ogre::ParticleSystem::Affector::Color + String(j));
+                StringHash time = StringHash(Ogre::ParticleSystem::Affector::Time + String(j));
                 if (!affectorBlock->Has(color) || !affectorBlock->Has(time))
                     break;
                 colorFrames.Push(Urho3D::ColorFrame(affectorBlock->ColorValue(color, Urho3D::Color::WHITE), affectorBlock->FloatValue(time, 0)));

@@ -215,8 +215,8 @@ void InputContext::UpdateFrame()
     }
 
     // Put all new events to the buffer.
-    for(auto iter = newKeyEvents.Begin(); iter != newKeyEvents.End(); ++iter)
-        heldKeysBuffered[iter->first_] = iter->second_;
+    for(auto it = newKeyEvents.Begin(); it != newKeyEvents.End(); ++it)
+        heldKeysBuffered[it->first_] = it->second_;
 
     newKeyEvents.Clear();
 }

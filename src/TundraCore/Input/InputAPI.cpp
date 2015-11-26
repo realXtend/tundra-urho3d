@@ -214,11 +214,11 @@ void InputAPI::SetPriority(InputContextPtr inputContext, int newPriority)
     auto iter = registeredInputContexts.Begin();
     for(; iter != registeredInputContexts.End(); ++iter)
     {
-        SharedPtr<InputContext> inputContext = iter->Lock();
-        if (!inputContext)
+        SharedPtr<InputContext> ic = iter->Lock();
+        if (!ic)
             continue;
 
-        if (inputContext->Priority() <= newPriority)
+        if (ic->Priority() <= newPriority)
             break;
     }
 

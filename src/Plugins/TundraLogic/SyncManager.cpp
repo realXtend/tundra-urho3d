@@ -2127,7 +2127,7 @@ void SyncManager::HandleCreateEntity(UserConnection* source, const char* data, s
             if (isServer) compID = 0;
             
             u32 typeID = ds.ReadVLE<kNet::VLE8_16_32>();
-            String name = String(ds.ReadString().c_str());
+            String compName = String(ds.ReadString().c_str());
             unsigned attrDataSize = ds.ReadVLE<kNet::VLE8_16_32>();
             if (attrDataSize > NUMELEMS(attrDataBuffer_))
             {
@@ -2151,7 +2151,7 @@ void SyncManager::HandleCreateEntity(UserConnection* source, const char* data, s
                 entity->RemoveComponentById(compID, AttributeChange::LocalOnly);
             }
             
-            ComponentPtr comp = entity->CreateComponentWithId(compID, typeID, name, change);
+            ComponentPtr comp = entity->CreateComponentWithId(compID, typeID, compName, change);
             if (!comp)
             {
                 LogWarning("Failed to create component type " + String(typeID) + " to " + entity->ToString() + " while handling CreateEntity message, skipping component");
@@ -2169,12 +2169,12 @@ void SyncManager::HandleCreateEntity(UserConnection* source, const char* data, s
             // Fill static attributes
             unsigned numStaticAttrs = comp->NumStaticAttributes();
             const AttributeVector& attrs = comp->Attributes();
-            for (uint i = 0; i < numStaticAttrs; ++i)
+            for (uint j = 0; j < numStaticAttrs; ++j)
             {
                 // Allow component version mismatches (adding more attributes to the end of static attributes list), break if no more data present.
                 // All attributes (including bool) are at least 8 bits.
                 if (attrDs.BitsLeft() >= 8)
-                    attrs[i]->FromBinary(attrDs, AttributeChange::Disconnected);
+                    attrs[j]->FromBinary(attrDs, AttributeChange::Disconnected);
                 else
                 {
                     if (mismatchingComponentTypes.find(comp->TypeId()) == mismatchingComponentTypes.end())
@@ -2193,8 +2193,8 @@ void SyncManager::HandleCreateEntity(UserConnection* source, const char* data, s
                 {
                     u8 index = attrDs.Read<u8>();
                     u8 typeId = attrDs.Read<u8>();
-                    String name = String(attrDs.ReadString().c_str());
-                    IAttribute* newAttr = comp->CreateAttribute(index, typeId, name, change);
+                    String attrName = String(attrDs.ReadString().c_str());
+                    IAttribute* newAttr = comp->CreateAttribute(index, typeId, attrName, change);
                     if (!newAttr)
                     {
                         LogWarning("Failed to create dynamic attribute. Skipping rest of the attributes for this component.");
@@ -2365,8 +2365,8 @@ void SyncManager::HandleCreateComponents(UserConnection* source, const char* dat
                 {
                     u8 index = attrDs.Read<u8>();
                     u8 typeId = attrDs.Read<u8>();
-                    String name = String(attrDs.ReadString().c_str());
-                    IAttribute* newAttr = comp->CreateAttribute(index, typeId, name, change);
+                    String attrName = String(attrDs.ReadString().c_str());
+                    IAttribute* newAttr = comp->CreateAttribute(index, typeId, attrName, change);
                     if (!newAttr)
                     {
                         LogWarning("Failed to create dynamic attribute. Skipping rest of the attributes for this component.");
