@@ -505,6 +505,36 @@ IF %TUNDRA_ANDROID%==0 (
 )
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
+
+
+
+:::::::::::::::::::::::: Bullet physics engine
+IF NOT EXIST "%DEPS%\bullet\". (
+    cecho {0D}Cloning Bullet into "%DEPS%\bullet".{# #}{\n}
+    cd "%DEPS%"
+    git clone https://github.com/bulletphysics/bullet3 bullet
+    cd "%DEPS%/bullet"
+    git checkout 2.83.6
+    IF NOT EXIST "%DEPS%\bullet\.git" GOTO :ERROR
+)
+
+cd "%DEPS%\bullet\"
+cecho {0D}Running CMake for Bullet.{# #}{\n}
+cmake . -G %GENERATOR% -DBUILD_EXTRAS:BOOL=OFF -DBUILD_UNIT_TESTS:BOOL=OFF ^
+    -DBUILD_BULLET3:BOOL=OFF -DBUILD_BULLET2_DEMOS:BOOL=OFF ^
+    -DCMAKE_DEBUG_POSTFIX=_d -DUSE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=ON ^
+    -DCMAKE_MINSIZEREL_POSTFIX= -DCMAKE_RELWITHDEBINFO_POSTFIX=
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+cecho {0D}Building %BUILD_TYPE% Bullet. Please be patient, this will take a while.{# #}{\n}
+IF %TUNDRA_ANDROID%==0 (
+    MSBuild BULLET_PHYSICS.sln /p:configuration=%BUILD_TYPE% /clp:ErrorsOnly /nologo /m:%TUNDRA_DEPS_CPUS%
+) ELSE (
+    make -j%TUNDRA_DEPS_CPUS%
+)
+IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+
 :::::::::::::::::::::::: All done
 
 echo.
