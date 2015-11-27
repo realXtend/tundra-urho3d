@@ -315,6 +315,36 @@ if [ $skip_deps = false ] ; then
 
         mark_built
     fi
+
+    #### Bullet
+
+    start_target bullet
+
+    if ! is_cloned ; then
+        git clone https://github.com/bulletphysics/bullet3 bullet
+        cd bullet
+        git checkout 2.83.6
+    fi
+
+    if ! is_built ; then
+        mkdir -p build
+        cd build
+
+	cmake .. \
+            -DCMAKE_INSTALL_PREFIX=$DEPS \
+            -DCMAKE_BUILD_TYPE=$build_type \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DBUILD_EXTRAS:BOOL=OFF \
+            -DBUILD_UNIT_TESTS:BOOL=OFF \
+            -DBUILD_BULLET3:BOOL=OFF \
+            -DBUILD_BULLET2_DEMOS:BOOL=OFF \
+            -DCMAKE_MINSIZEREL_POSTFIX= -DCMAKE_RELWITHDEBINFO_POSTFIX=
+
+        make -j $num_cpu -S
+        make install
+
+        mark_built
+    fi    
 fi
 
 # Build gtest if testing
