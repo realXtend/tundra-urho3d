@@ -87,19 +87,20 @@ echo    2. Install DirectX SDK June 2010.
 echo     - http://www.microsoft.com/download/en/details.aspx?id=6812
 echo    3. Install CMake and make sure 'cmake' is accessible from PATH.
 echo     - http://www.cmake.org/
-echo    4. Install Visual Studio 2010 or newer with latest updates (Express is ok, but see section 5 for 2010).
+echo    4. Install Perl.
+echo     - https://www.perl.org/get.html#win32
+echo    5. Install Visual Studio 2010 or newer with latest updates (Express is ok, but see section 5 for 2010).
 echo     - http://www.microsoft.com/visualstudio/eng/downloads
 :: TODO Print these only if using VS 2010
-cecho {0E}   5. Optional: Make sure you have the Visual Studio x64 tools installed{# #}{\n}
+cecho {0E}   6. Optional: Make sure you have the Visual Studio x64 tools installed{# #}{\n}
 cecho {0E}      before installing the Visual Studio 2010 Service Pack 1, {# #}{\n}
 cecho {0E}      http://www.microsoft.com/en-us/download/details.aspx?id=23691 {# #}{\n}
 cecho {0E}      if wanting to build Tundra as a 64-bit application.{# #}{\n}
 :: TODO Print the following only if using VS 2010/2012 and/or Express editions?
-echo    6. Install Windows SDK.
+echo    7. Install Windows SDK.
 echo     - http://www.microsoft.com/download/en/details.aspx?id=8279
-echo    7. Execute this file with Visual Studio environment variables set.
+echo    8. Execute this file with Visual Studio environment variables set.
 echo.    - https://msdn.microsoft.com/en-us/library/ms229859(v=vs.110).aspx
-:: TODO Perl instructions!
 echo.
 echo If you are not ready with the above, press Ctrl-C to abort!
 pause
@@ -503,20 +504,6 @@ IF %TUNDRA_ANDROID%==0 (
     make -j%TUNDRA_DEPS_CPUS%
 )
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
-
-:: d3dcompiler_46.dll needs to be copied to bin directory on VS > 2010 builds.
-:: TODO Installing Urho3D would appear to perform this automatically, at least for newer versions?
-:: If this is removed or alter, remember to tweak README.md too.
-IF NOT %VS_VER%==vs2010 (
-    IF %TUNDRA_ANDROID%==0 (
-        cecho {0D}Copying %BUILD_TYPE% d3dcompiler_46.dll to Tundra bin\ directory.{# #}{\n}
-        IF EXIST "C:\Program Files (x86)\Windows Kits\8.0\Redist\D3D\%TARGET_ARCH%\d3dcompiler_46.dll". (
-            copy /Y "C:\Program Files (x86)\Windows Kits\8.0\Redist\D3D\%TARGET_ARCH%\d3dcompiler_46.dll" "%TUNDRA_BIN%"
-        ) ELSE (
-            cecho {0E}Warning: %BUILD_TYPE% d3dcompiler_46.dll not found, copy the file manually.{# #}{\n}
-        )
-    )
-)
 
 :::::::::::::::::::::::: All done
 
