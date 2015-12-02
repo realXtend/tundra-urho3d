@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 #include "AssetFwd.h"
 #include "CoreTypes.h"
 #include "AssetReference.h"
@@ -16,7 +16,7 @@ namespace Tundra
 class OgreMaterialAsset;
 
 /// Interface for Ogre material processing classes which can convert a subset of Ogre materials to Urho materials, using eg. specific shaders.
-class URHO_MODULE_API IOgreMaterialProcessor : public Object
+class URHORENDERER_API IOgreMaterialProcessor : public Object
 {
 public:
     /// Construct.

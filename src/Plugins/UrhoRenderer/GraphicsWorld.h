@@ -4,8 +4,8 @@
 
 #include "CoreDefines.h"
 #include "CoreTypes.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 #include "SceneFwd.h"
 #include "Scene/Scene.h"
 #include "IRenderer.h"
@@ -22,7 +22,7 @@ namespace Tundra
 {
 
 /// Contains the graphical representation of a scene, ie. the Urho Scene
-class URHO_MODULE_API GraphicsWorld : public Object
+class URHORENDERER_API GraphicsWorld : public Object
 {
     URHO3D_OBJECT(GraphicsWorld, Object);
 

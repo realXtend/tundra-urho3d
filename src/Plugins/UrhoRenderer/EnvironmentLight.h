@@ -5,8 +5,8 @@
 #include "IComponent.h"
 #include "IAttribute.h"
 #include "SceneFwd.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 #include "Math/Color.h"
 
 namespace Tundra
@@ -47,7 +47,7 @@ typedef WeakPtr<Placeable> PlaceableWeakPtr;
     Does not emit any actions.
 
     </table> */
-class URHO_MODULE_API EnvironmentLight : public IComponent
+class URHORENDERER_API EnvironmentLight : public IComponent
 {
     COMPONENT_NAME(EnvironmentLight, 8)
 

@@ -4,15 +4,15 @@
 
 #include "Math/MathNamespace.h"
 #include "IAsset.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 
 namespace Tundra
 {
 
 /// Represents a material asset. 
 /** Base class for varying format implementations (Urho material, Ogre material, Assimp material etc.) */
-class URHO_MODULE_API IMaterialAsset : public IAsset
+class URHORENDERER_API IMaterialAsset : public IAsset
 {
     URHO3D_OBJECT(IMaterialAsset, IAsset);
 

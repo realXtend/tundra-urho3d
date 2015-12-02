@@ -6,8 +6,8 @@
 #include "IAttribute.h"
 #include "EntityReference.h"
 #include "SceneFwd.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 #include "Math/Transform.h"
 #include "Math/float3.h"
 #include "Signals.h"
@@ -52,7 +52,7 @@ namespace Tundra
     <b>Doesn't depend on any components</b>.
 
     </table> */
-class URHO_MODULE_API Placeable : public IComponent
+class URHORENDERER_API Placeable : public IComponent
 {
     COMPONENT_NAME(Placeable, 20)
 

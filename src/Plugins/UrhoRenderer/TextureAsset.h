@@ -4,14 +4,14 @@
 
 #include "Math/MathNamespace.h"
 #include "IAsset.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 
 namespace Tundra
 {
 
 /// Represents a texture asset loaded to the GPU.
-class URHO_MODULE_API TextureAsset : public IAsset
+class URHORENDERER_API TextureAsset : public IAsset
 {
     URHO3D_OBJECT(TextureAsset, IAsset);
 

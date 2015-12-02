@@ -4,8 +4,8 @@
 
 #include "IComponent.h"
 #include "IAttribute.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 #include "AssetReference.h"
 #include "AssetRefListener.h"
 #include "CoreTypes.h"
@@ -57,7 +57,7 @@ typedef WeakPtr<Placeable> PlaceableWeakPtr;
     <b>Does not depend on any other components</b>. Currently Terrain stores its own transform matrix, so it does not depend on the Placeable component. It might be more consistent
     to create a dependency to Placeable, so that the position of the terrain is editable in the same way the position of other placeables is done.
     </table> */
-class URHO_MODULE_API Terrain : public IComponent
+class URHORENDERER_API Terrain : public IComponent
 {
     COMPONENT_NAME(Terrain, 11)
 

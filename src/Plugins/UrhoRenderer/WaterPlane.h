@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 #include "IComponent.h"
 #include "Math/Color.h"
 #include "Math/float3.h"
@@ -71,7 +71,7 @@ namespace Tundra
     <b>Can use @ref Placeable "Placeable" component</b>. If entity has the position defined by the Placeable component then it also specifies the position
     in the world space where this water plane is by default placed at. Note component does not need Placeable component.
     </table> */
-class URHO_MODULE_API WaterPlane : public IComponent
+class URHORENDERER_API WaterPlane : public IComponent
 {
     COMPONENT_NAME(WaterPlane, 12);
 

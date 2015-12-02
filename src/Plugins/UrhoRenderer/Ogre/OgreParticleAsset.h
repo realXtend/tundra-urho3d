@@ -4,8 +4,8 @@
 
 #include "Math/MathNamespace.h"
 #include "IParticleAsset.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 
 namespace Tundra
 {
@@ -36,7 +36,7 @@ namespace Tundra
         DeflectorPlane affector
         DirectionRandomiser affector
         ColourFader2  affector  */
-class URHO_MODULE_API OgreParticleAsset : public IParticleAsset
+class URHORENDERER_API OgreParticleAsset : public IParticleAsset
 {
     URHO3D_OBJECT(OgreParticleAsset, IParticleAsset);
 

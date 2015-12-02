@@ -6,15 +6,15 @@
 #include "IRenderer.h"
 #include "SceneFwd.h"
 #include "AttributeChangeType.h"
-#include "UrhoModuleFwd.h"
-#include "UrhoModuleApi.h"
+#include "UrhoRendererFwd.h"
+#include "UrhoRendererApi.h"
 #include "Signals.h"
 
 namespace Tundra
 {
 
 /// A renderer module using Urho3D
-class URHO_MODULE_API UrhoRenderer : public IModule, public IRenderer
+class URHORENDERER_API UrhoRenderer : public IModule, public IRenderer
 {
     URHO3D_OBJECT(UrhoRenderer, IModule);
 

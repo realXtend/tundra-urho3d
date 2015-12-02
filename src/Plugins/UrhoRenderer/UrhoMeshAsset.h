@@ -4,14 +4,14 @@
 
 #include "Math/MathNamespace.h"
 #include "IMeshAsset.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 
 namespace Tundra
 {
 
 /// Represents a mesh asset in Urho native format.
-class URHO_MODULE_API UrhoMeshAsset : public IMeshAsset
+class URHORENDERER_API UrhoMeshAsset : public IMeshAsset
 {
     URHO3D_OBJECT(UrhoMeshAsset, IMeshAsset);
 

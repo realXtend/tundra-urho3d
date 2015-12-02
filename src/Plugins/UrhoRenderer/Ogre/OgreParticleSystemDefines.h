@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreTypes.h"
-#include "UrhoModuleApi.h"
+#include "UrhoRendererApi.h"
 
 #include <Urho3D/Container/HashMap.h>
 #include <Urho3D/Math/StringHash.h>
@@ -131,7 +131,7 @@ typedef HashMap<StringHash, Vector<String> > ParticleSystemProperties;
 typedef HashMap<StringHash, String> ParticleSystemPropertyNames;
 
 /// Material block
-struct URHO_MODULE_API ParticleSystemBlock
+struct URHORENDERER_API ParticleSystemBlock
 {
     /** Block name, ref or identifier eg,
         particle_system <name>
@@ -210,7 +210,7 @@ struct URHO_MODULE_API ParticleSystemBlock
 };
 
 /// ParticleSystem parser
-class URHO_MODULE_API ParticleSystemParser
+class URHORENDERER_API ParticleSystemParser
 {
 public:
     ParticleSystemParser();

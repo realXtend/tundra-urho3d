@@ -9,7 +9,7 @@ AddSourceFolder(Ogre)
 
 set (SOURCE_FILES ${CPP_FILES} ${H_FILES})
 
-add_definitions(-DURHO_MODULE_EXPORTS)
+add_definitions(-DURHORENDERER_EXPORTS)
 
 UseTundraCore()
 use_modules(TundraCore)

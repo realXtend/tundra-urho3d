@@ -3,14 +3,14 @@
 #pragma once
 
 #include "IMaterialAsset.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 
 namespace Tundra
 {
 
 /// Represents a material asset loaded from Ogre material script
-class URHO_MODULE_API OgreMaterialAsset : public IMaterialAsset
+class URHORENDERER_API OgreMaterialAsset : public IMaterialAsset
 {
     URHO3D_OBJECT(OgreMaterialAsset, IMaterialAsset);
 

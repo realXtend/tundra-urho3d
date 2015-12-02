@@ -4,8 +4,8 @@
 
 #include "Math/MathNamespace.h"
 #include "IMeshAsset.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 #include "CoreTypes.h"
 
 #include <Urho3D/Graphics/Skeleton.h>
@@ -14,7 +14,7 @@ namespace Tundra
 {
 
 /// Represents an Ogre skeleton and the animations it contains
-class URHO_MODULE_API OgreSkeletonAsset : public IAsset
+class URHORENDERER_API OgreSkeletonAsset : public IAsset
 {
     URHO3D_OBJECT(OgreSkeletonAsset, IAsset);
 

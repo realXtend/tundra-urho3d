@@ -4,15 +4,15 @@
 
 #include "Math/MathNamespace.h"
 #include "IAsset.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 
 namespace Tundra
 {
 
 /// Represents a mesh loaded to the GPU.
 /** Base class for varying format implementations (Urho mesh, Ogre mesh, Assimp mesh etc.) */
-class URHO_MODULE_API IMeshAsset : public IAsset
+class URHORENDERER_API IMeshAsset : public IAsset
 {
     URHO3D_OBJECT(IMeshAsset, IAsset);
 

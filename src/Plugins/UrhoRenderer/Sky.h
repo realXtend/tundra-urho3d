@@ -3,11 +3,11 @@
 #pragma once
 
 #include "IComponent.h"
-#include "UrhoModuleApi.h"
+#include "UrhoRendererApi.h"
 #include "IAttribute.h"
 #include "Math/Quat.h"
 #include "AssetReference.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererFwd.h"
 #include "AssetRefListener.h"
 
 #include <Urho3D/Resource/Image.h>
@@ -24,7 +24,7 @@ namespace Tundra
 
     Makes the entity a sky.
 
-    Registered by UrhoModule.
+    Registered by UrhoRenderer.
 
     <b>Attributes</b>:
     <ul>
@@ -38,7 +38,7 @@ namespace Tundra
     <div> @copydoc drawFirst </div>
     </ul>
     </table> */
-class URHO_MODULE_API Sky : public IComponent
+class URHORENDERER_API Sky : public IComponent
 {
     COMPONENT_NAME(Sky, 10)
 

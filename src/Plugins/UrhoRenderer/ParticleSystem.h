@@ -5,8 +5,8 @@
 #include "IComponent.h"
 #include "IAttribute.h"
 #include "SceneFwd.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 #include "AssetReference.h"
 #include "AssetRefListener.h"
 
@@ -42,7 +42,7 @@ namespace Tundra
 
     <b>Depends on the component @ref Placeable "Placeable".</b>
     </table> */
-class URHO_MODULE_API ParticleSystem : public IComponent
+class URHORENDERER_API ParticleSystem : public IComponent
 {
     COMPONENT_NAME(ParticleSystem, 27);
 

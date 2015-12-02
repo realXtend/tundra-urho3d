@@ -5,8 +5,8 @@
 #include "IComponent.h"
 #include "IAttribute.h"
 #include "SceneFwd.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 #include "CoreStringUtils.h"
 
 namespace Tundra
@@ -61,7 +61,7 @@ typedef WeakPtr<Mesh> MeshWeakPtr;
 
     <b>Depends on the component Mesh</b>.
     </table> */
-class URHO_MODULE_API AnimationController : public IComponent
+class URHORENDERER_API AnimationController : public IComponent
 {
     COMPONENT_NAME(AnimationController, 14)
 

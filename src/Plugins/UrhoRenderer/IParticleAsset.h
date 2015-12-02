@@ -4,14 +4,14 @@
 
 #include "Math/MathNamespace.h"
 #include "IAsset.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 
 namespace Tundra
 {
 
 /// Represents a particle asset. May contain several separate particle effects.
-class URHO_MODULE_API IParticleAsset : public IAsset
+class URHORENDERER_API IParticleAsset : public IAsset
 {
     URHO3D_OBJECT(IParticleAsset, IAsset);
 

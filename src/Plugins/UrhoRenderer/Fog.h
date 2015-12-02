@@ -5,8 +5,8 @@
 #include "IComponent.h"
 #include "IAttribute.h"
 #include "SceneFwd.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 #include "Math/Color.h"
 
 namespace Tundra
@@ -21,7 +21,7 @@ namespace Tundra
     Defines the overall fog settings for the whole scene, hence only one component per scene is applicable.
     Sets also the background color of the viewport same as the fog color.
 
-    Registered by UrhoModule.
+    Registered by UrhoRenderer.
 
     <b>Attributes</b>:
     <ul>
@@ -37,7 +37,7 @@ namespace Tundra
     <div> @copydoc expDensity </div>
     </ul>
     </table> */
-class URHO_MODULE_API Fog : public IComponent
+class URHORENDERER_API Fog : public IComponent
 {
     COMPONENT_NAME(Fog, 9);
 

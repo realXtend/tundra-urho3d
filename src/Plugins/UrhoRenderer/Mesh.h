@@ -3,8 +3,8 @@
 #pragma once
 
 #include "IComponent.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 #include "Math/float3.h"
 #include "Math/Quat.h"
 #include "Geometry/OBB.h"
@@ -48,7 +48,7 @@ typedef WeakPtr<Placeable> PlaceableWeakPtr;
 
     <b>Depends on the component Placeable</b>.
     </table> */
-class URHO_MODULE_API Mesh : public IComponent
+class URHORENDERER_API Mesh : public IComponent
 {
     COMPONENT_NAME(Mesh, 17)
 

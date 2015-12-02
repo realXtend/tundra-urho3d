@@ -5,8 +5,8 @@
 #include "IComponent.h"
 #include "IAttribute.h"
 #include "SceneFwd.h"
-#include "UrhoModuleApi.h"
-#include "UrhoModuleFwd.h"
+#include "UrhoRendererApi.h"
+#include "UrhoRendererFwd.h"
 #include "Math/Color.h"
 
 namespace Tundra
@@ -65,7 +65,7 @@ typedef WeakPtr<Placeable> PlaceableWeakPtr;
 
     <b>Depends on the Placeable component. The position in the Placeable component specifies the position in the world space where this light is placed at.
     </table> */
-class URHO_MODULE_API Light : public IComponent
+class URHORENDERER_API Light : public IComponent
 {
     COMPONENT_NAME(Light, 16)
 
