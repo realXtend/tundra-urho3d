@@ -16,6 +16,7 @@ message("") # Newline before any output from the CMake script.
 set (URHO3D_HOME         ""      CACHE PATH "Urho3D dependency directory")
 set (MATHGEOLIB_HOME     ""      CACHE PATH "MathGeoLib dependency directory")
 set (KNET_HOME           ""      CACHE PATH "kNet dependency directory")
+set (BULLET_HOME         ""      CACHE PATH "Bullet dependency directory")
 
 # If not passed to cmake, set and cache normalized path for environment variables
 if (NOT URHO3D_HOME)
@@ -30,6 +31,10 @@ if (NOT KNET_HOME)
     file (TO_CMAKE_PATH "$ENV{KNET_HOME}" KNET_HOME)
     set (KNET_HOME ${KNET_HOME} CACHE PATH "MathGeoLib dependency directory")
 endif()
+if (NOT BULLET_HOME)
+    file (TO_CMAKE_PATH "$ENV{BULLET_HOME}" BULLET_HOME)
+    set (BULLET_HOME ${BULLET_HOME} CACHE PATH "Bullet dependency directory")
+endif()
 
 # If we still haven't resolved dependencies report a fatal error
 if (NOT URHO3D_HOME)
@@ -40,6 +45,9 @@ if (NOT MATHGEOLIB_HOME)
 endif ()
 if (NOT KNET_HOME)
     message(FATAL_ERROR "KNET_HOME could not be resolved from a environment variable or from cmake cache!")
+endif ()
+if (NOT BULLET_HOME)
+    message(FATAL_ERROR "BULLET_HOME could not be resolved from a environment variable or from cmake cache!")
 endif ()
 
 # CMake policies
@@ -161,7 +169,6 @@ BeginSection("Configuring Dependencies")
 # Set CMake custom module path & include them
 # The following CMake modules are required for the project to build.
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${URHO3D_HOME}/../CMake/Modules)
-include (FindUrho3D)
 include (ConfigurePackages)
 include (ModuleSetup)
 include (TundraInstall)
