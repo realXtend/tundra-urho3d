@@ -402,6 +402,7 @@ if [ $skip_cmake = false ] ; then
         -DMATHGEOLIB_HOME=$DEPS \
         -DURHO3D_HOME=$DEPS_SRC/urho3d/Build \
         -DKNET_HOME=$DEPS_SRC/kNet \
+        -DBULLET_HOME=$DEPS \
         -DGTEST_HOME=$DEPS_SRC/gtest \
         -DCURL_HOME=$DEPS_SRC/curl/build \
         -DZZIPLIB_HOME=$DEPS_SRC/zziplib/build

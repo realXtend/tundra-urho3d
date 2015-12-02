@@ -34,6 +34,7 @@ IF NOT EXIST tundra-urho3d.sln. (
             -DURHO3D_HOME=%DEPS%\urho3d\Build ^
             -DMATHGEOLIB_HOME=%DEPS%\MathGeoLib\build ^
             -DKNET_HOME=%DEPS%\kNet ^
+            -DBULLET_HOME=%DEPS%\bullet ^
             -DGTEST_HOME=%DEPS%\gtest ^
             -DCURL_HOME=%DEPS%\curl\build ^
             -DZZIPLIB_HOME=%DEPS%\zziplib
@@ -44,9 +45,10 @@ IF NOT EXIST tundra-urho3d.sln. (
         REM as the first argument as pass all arguments as is by using %*.
         cmake.exe .. ^
             -G %* ^
-            -DURHO3D_HOME=%DEPS%\urho3d ^
+            -DURHO3D_HOME=%DEPS%\urho3d\Build ^
             -DMATHGEOLIB_HOME=%DEPS%\MathGeoLib\build ^
             -DKNET_HOME=%DEPS%\kNet ^
+            -DBULLET_HOME=%DEPS%\bullet ^
             -DGTEST_HOME=%DEPS%\gtest ^
             -DCURL_HOME=%DEPS%\curl\build ^
             -DZZIPLIB_HOME=%DEPS%\zziplib

@@ -32,6 +32,7 @@ namespace Tundra
     class TextureAsset;
     class IOgreMaterialProcessor;
     class IMaterialAsset;
+    class IMeshAsset;
 
     typedef SharedPtr<GraphicsWorld> GraphicsWorldPtr;
     typedef WeakPtr<GraphicsWorld> GraphicsWorldWeakPtr;
