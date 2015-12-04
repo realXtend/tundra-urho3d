@@ -66,6 +66,9 @@ public:
     /// Returns "(r, g, b, a)" (limited precision).
     String ToString() const;
 
+    /// Set component values.
+    void Set(float r_, float g_, float b_) { r = r_; g = g_; b = b_; }
+
     /// Implicit conversion to float4.
     operator float4() const { return float4(r, g, b, a); }
     /// Explicit conversion to float4.

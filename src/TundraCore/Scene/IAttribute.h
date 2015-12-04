@@ -8,10 +8,12 @@
 
 #include "TundraCoreApi.h"
 #include "CoreDefines.h"
+#include "CoreTypes.h"
 #include "AttributeChangeType.h"
 #include "SceneFwd.h"
 
 #include <Urho3D/Container/Ptr.h>
+#include <Urho3D/Container/Str.h>
 
 namespace Tundra
 {

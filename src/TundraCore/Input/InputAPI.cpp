@@ -159,7 +159,7 @@ static void DumpInputContext(int &idx, const InputContextPtr &ic)
     if (ic)
         LogInfo("Context " + String(idx++) + ":\"" + String(ic->Name()) + "\", priority " + String(ic->Priority()));
     else
-        LogInfo("Context " + String(idx++) + ": expired weak_ptr.");
+        LogInfo("Context " + String(idx++) + ": expired WeakPtr.");
 }
 
 void InputAPI::DumpInputContexts()

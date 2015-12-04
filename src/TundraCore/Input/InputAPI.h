@@ -92,7 +92,7 @@ public:
     /// Creates a new input context with the given name.
     /** The name is not an ID, i.e. it does not have to be unique with 
         existing contexts (although it is encouraged). When you no longer need the context, free all refcounts to it.
-        Remember to hold on to a shared_ptr of the input context as long as you are using the context. */
+        Remember to hold on to a SharedPtr of the input context as long as you are using the context. */
     InputContextPtr RegisterInputContext(const String &name, int priority);
 
     /// Creates an untracked InputContext for use from scripting languages that cannot hold a strong reference to an input context.

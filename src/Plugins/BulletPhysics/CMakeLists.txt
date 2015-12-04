@@ -12,12 +12,12 @@ set (SOURCE_FILES ${CPP_FILES} ${H_FILES})
 add_definitions(-DBULLETPHYSICS_EXPORTS)
 
 UseTundraCore()
-use_modules(TundraCore UrhoRenderer)
+use_modules(TundraCore Plugins/UrhoRenderer)
 use_package(BULLET)
 
 build_library(${TARGET_NAME} SHARED ${SOURCE_FILES})
 
-link_modules(TundraCore)
+link_modules(TundraCore Plugins/UrhoRenderer)
 link_package(URHO3D)
 link_package(BULLET)
 link_package(MATHGEOLIB)

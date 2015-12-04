@@ -2,8 +2,9 @@
     {
         "--plugin" : [
 			"ZipPlugin",
-			"UrhoRenderer", 
+			"UrhoRenderer",
 			"TundraLogic",
+			"BulletPhysics",
 			"HttpPlugin",
 			"CameraApplication",
 			"SceneInteract",
