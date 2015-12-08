@@ -51,8 +51,6 @@ run_tests=false
 build_debug=false
 build_type="Release"
 build_tests="OFF"
-build_64bit=false
-build_64bit_int=0
 
 # Parse command line args
 
@@ -94,10 +92,6 @@ while [[ $1 = -* ]]; do
     esac
 done
 
-if [ $(dpkg-architecture -qDEB_HOST_ARCH) = "amd64" ] ; then
-    build_64bit=true
-    build_64bit_int=1
-fi
 if [ $run_tests = true ] ; then
     build_tests="ON"
 fi
@@ -194,7 +188,6 @@ if [ $skip_deps = false ] ; then
         cmake ..\
             -DCMAKE_INSTALL_PREFIX=$DEPS \
             -DCMAKE_BUILD_TYPE=$build_type \
-            -DURHO3D_64BIT=$build_64bit_int \
             -DURHO3D_LIB_TYPE=SHARED \
             -DURHO3D_ANGELSCRIPT=0 \
             -DURHO3D_LUA=0 \
