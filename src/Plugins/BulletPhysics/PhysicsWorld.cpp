@@ -595,8 +595,8 @@ PhysicsRaycastResult* PhysicsWorld::Raycast(const float3& origin, const float3& 
     float3 normalizedDir = direction.Normalized();
     
     btCollisionWorld::ClosestRayResultCallback rayCallback(origin, origin + maxdistance * normalizedDir);
-    rayCallback.m_collisionFilterGroup = collisiongroup;
-    rayCallback.m_collisionFilterMask = collisionmask;
+    rayCallback.m_collisionFilterGroup = (short)collisiongroup;
+    rayCallback.m_collisionFilterMask = (short)collisionmask;
     
     impl->world->rayTest(rayCallback.m_rayFromWorld, rayCallback.m_rayToWorld, rayCallback);
     
@@ -631,7 +631,7 @@ EntityVector PhysicsWorld::ObbCollisionQuery(const OBB &obb, int collisionGroup,
     btTransform t1(m.ToQuat(), obb.CenterPoint());
     btRigidBody* tempRigidBody = new btRigidBody(1.0f, 0, &box);
     tempRigidBody->setWorldTransform(t1);
-    impl->world->addRigidBody(tempRigidBody, collisionGroup, collisionMask);
+    impl->world->addRigidBody(tempRigidBody, (short)collisionGroup, (short)collisionMask);
     tempRigidBody->activate(); // To make sure we get collision results from static sleeping rigidbodies, activate the temp rigid body
     
     ObbCallback resultCallback(objects);

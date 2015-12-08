@@ -29,7 +29,7 @@ public:
 
     void Load();
     void Initialize();
-    void Update(f64 frametime);
+    void Update(float frametime);
     void Uninitialize();
 
     /// Forget cache bullet shapes.

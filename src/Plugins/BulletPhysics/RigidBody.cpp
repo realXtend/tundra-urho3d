@@ -412,7 +412,7 @@ void RigidBody::UpdateSignals()
     impl->world = scene->Subsystem<PhysicsWorld>();
 }
 
-void RigidBody::OnComponentAdded(IComponent* component, AttributeChange::Type change)
+void RigidBody::OnComponentAdded(IComponent* /*component*/, AttributeChange::Type /*change*/)
 {
     CheckForPlaceableAndTerrain();
 }
@@ -538,7 +538,7 @@ void RigidBody::CreateBody()
 //    impl->body->setSleepingThresholds(0.2f, 0.5f); // Bullet defaults are 0.8 and 1.0.
     impl->body->setUserPointer(this);
     impl->body->setCollisionFlags(collisionFlags);
-    impl->world->BulletWorld()->addRigidBody(impl->body, collisionLayer.Get(), collisionMask.Get());
+    impl->world->BulletWorld()->addRigidBody(impl->body, (short)collisionLayer.Get(), (short)collisionMask.Get());
     impl->body->activate();
     
     UpdateGravity();
@@ -564,7 +564,7 @@ void RigidBody::ReaddBody()
     // http://www.bulletphysics.org/Bullet/phpBB3/viewtopic.php?f=9&t=5194&hilit=inertia+tensor#p18820
     impl->body->updateInertiaTensor();
 
-    impl->world->BulletWorld()->addRigidBody(impl->body, collisionLayer.Get(), collisionMask.Get());
+    impl->world->BulletWorld()->addRigidBody(impl->body, (short)collisionLayer.Get(), (short)collisionMask.Get());
     impl->body->clearForces();
     impl->body->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
     impl->body->setAngularVelocity(btVector3(0.0f, 0.0f, 0.0f));

@@ -10,6 +10,12 @@
 
 #include "hull.h"
 
+// Disable repetitive warnings
+#ifdef _MSC_VER
+#pragma warning(disable : 4127)
+#pragma warning(disable : 4244)
+#endif
+
 /*----------------------------------------------------------------------
 		Copyright (c) 2004 Open Dynamics Framework Group
 					www.physicstools.org

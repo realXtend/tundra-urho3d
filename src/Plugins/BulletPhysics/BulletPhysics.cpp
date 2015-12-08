@@ -159,7 +159,7 @@ void BulletPhysics::AutoCollisionMesh()
     }
 }
 
-void BulletPhysics::Update(f64 frametime)
+void BulletPhysics::Update(float frametime)
 {
     URHO3D_PROFILE(BulletPhysics_Update);
     // Loop all the physics worlds and update them.
@@ -184,6 +184,7 @@ void BulletPhysics::CreatePhysicsWorld(Scene *scene, AttributeChange::Type /*cha
 void BulletPhysics::RemovePhysicsWorld(Scene *scene, AttributeChange::Type /*change*/)
 {
     PhysicsWorldPtr worldPtr = scene->Subsystem<PhysicsWorld>();
+    scene->RemoveSubsystem(worldPtr.Get());
     physicsWorlds_.Remove(worldPtr);
 
     // At this point all Entities have been destroyed. There should be nothing in the cache
