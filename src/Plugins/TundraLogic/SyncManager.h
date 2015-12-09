@@ -35,7 +35,7 @@ public:
     void RegisterToScene(ScenePtr scene);
     
     /// Accumulate time & send pending sync messages if enough time passed from last update
-    void Update(f64 frametime);
+    void Update(float frametime);
     
     /// Create new replication state for user and dirty it (server operation only)
     void NewUserConnected(const UserConnectionPtr &user);
@@ -149,7 +149,7 @@ private:
     
     void ReplicateRigidBodyChanges(UserConnection* user);
 
-    void InterpolateRigidBodies(f64 frametime, SceneSyncState* state);
+    void InterpolateRigidBodies(float frametime, SceneSyncState* state);
 
     void ReplicateComponentType(u32 typeId, UserConnection* connection = 0);
 

@@ -44,7 +44,7 @@ public:
     virtual ~PhysicsWorld();
     
     /// Step the physics world. May trigger several internal simulation substeps, according to the deltatime given.
-    void Simulate(f64 frametime);
+    void Simulate(float frametime);
     
     /// Process collision from an internal sub-step (Bullet post-tick callback)
     void ProcessPostTick(float subStepTime);

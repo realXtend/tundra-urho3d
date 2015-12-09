@@ -356,10 +356,7 @@ void TundraLogic::ServerNewUserConnected(u32 /*connectionID*/, UserConnection *c
     storageData["type"] = defaultStorage->Type();
     storageData["src"] = defaultStorage->BaseURL();
     responseData->responseDataJson["storage"] = storageData;
-
-    LogInfo(responseData->responseDataXml->ToString());
 }
-
 
 void TundraLogic::DetermineStorageTrustStatus(AssetStoragePtr storage)
 {

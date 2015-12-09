@@ -11,6 +11,7 @@ UseTundraCore()
 use_modules(TundraCore Plugins/UrhoRenderer Plugins/TundraLogic Plugins/CameraApplication)
 
 add_definitions(-DAVATAR_EXPORTS)
+use_package(BULLET)
 
 build_library(${TARGET_NAME} SHARED ${SOURCE_FILES})
 

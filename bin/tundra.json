@@ -3,8 +3,8 @@
         "--plugin" : [
 			"ZipPlugin",
 			"UrhoRenderer",
-			"TundraLogic",
 			"BulletPhysics",
+			"TundraLogic",
 			"HttpPlugin",
 			"CameraApplication",
 			"SceneInteract",

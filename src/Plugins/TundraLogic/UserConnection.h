@@ -23,7 +23,7 @@ enum NetworkProtocolVersion
 {
     ProtocolOriginal = 0x1,         // Original
     ProtocolCustomComponents = 0x2, // Adds support for transmitting new static-structured component types without actual C++ implementation, using EC_PlaceholderComponent
-    ProtocolHierarchicScene = 0x3,  // Adds support for hierarchic scene, ie. entities having child entities,
+    ProtocolHierarchicScene = 0x3,  // Adds support for hierarchic scene, ie. entities having child entities
     ProtocolWebClientRigidBodyMessage = 0x4 // WebSocket client that supports the rigid body optimization message
 };
 

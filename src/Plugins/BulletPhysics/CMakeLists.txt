@@ -1,8 +1,6 @@
 # Define target name and output directory
 init_target(BulletPhysics OUTPUT Plugins)
 
-configure_bullet()
-
 # Define source files
 file(GLOB CPP_FILES *.cpp)
 file(GLOB H_FILES *.h)
@@ -17,7 +15,7 @@ use_package(BULLET)
 
 build_library(${TARGET_NAME} SHARED ${SOURCE_FILES})
 
-link_modules(TundraCore Plugins/UrhoRenderer)
+link_modules(TundraCore UrhoRenderer)
 link_package(URHO3D)
 link_package(BULLET)
 link_package(MATHGEOLIB)

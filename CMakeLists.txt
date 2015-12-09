@@ -163,6 +163,7 @@ BeginSection("Dependency Variables")
 message(STATUS "URHO3D_HOME      = " ${URHO3D_HOME})
 message(STATUS "MATHGEOLIB_HOME  = " ${MATHGEOLIB_HOME})
 message(STATUS "KNET_HOME        = " ${KNET_HOME})
+message(STATUS "BULLET_HOME      = " ${BULLET_HOME})
 
 BeginSection("Configuring Dependencies")
 
@@ -181,6 +182,9 @@ configure_mathgeolib()
 
 # Find/configure kNet
 configure_knet()
+
+# Find/configure Bullet
+configure_bullet()
 
 EndSection()
 

@@ -417,7 +417,7 @@ btDiscreteDynamicsWorld* PhysicsWorld::BulletWorld() const
     return impl->world;
 }
 
-void PhysicsWorld::Simulate(f64 frametime)
+void PhysicsWorld::Simulate(float frametime)
 {
     if (!runPhysics_)
         return;
