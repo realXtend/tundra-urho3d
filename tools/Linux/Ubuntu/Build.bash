@@ -156,6 +156,8 @@ if [ $skip_deps = false ] ; then
 
     if ! is_cloned ; then
         git clone https://github.com/juj/kNet.git kNet
+        cd kNet
+        git checkout master
     fi
 
     if ! is_built ; then
