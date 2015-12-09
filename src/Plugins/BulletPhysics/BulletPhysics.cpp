@@ -41,7 +41,7 @@ namespace Tundra
 {
 
 BulletPhysics::BulletPhysics(Framework* owner)
-:IModule("Physics", owner),
+:IModule("BulletPhysics", owner),
 defaultPhysicsUpdatePeriod_(1.0f / 60.0f),
 defaultMaxSubSteps_(6) // If fps is below 10, we start to slow down physics
 {
