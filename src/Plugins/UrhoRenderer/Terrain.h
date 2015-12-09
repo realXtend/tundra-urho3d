@@ -133,8 +133,6 @@ public:
     /// @return The patch at given (x,y) coordinates. Pass in values in range [0, PatchWidth()/PatchHeight[.
     Patch &GetPatch(uint patchX, uint patchY)
     {
-        assert(patchX >= 0);
-        assert(patchY >= 0);
         assert(patchX < patchWidth_);
         assert(patchY < patchHeight_);
         return patches_[patchY * patchWidth_ + patchX];
@@ -143,8 +141,6 @@ public:
     /// @return The patch at given (x,y) coordinates. Pass in values in range [0, PatchWidth()/PatchHeight[. Read only.
     const Patch &GetPatch(uint patchX, uint patchY) const
     {
-        assert(patchX >= 0);
-        assert(patchY >= 0);
         assert(patchX < patchWidth_);
         assert(patchY < patchHeight_);
         return patches_[patchY * patchWidth_ + patchX];
