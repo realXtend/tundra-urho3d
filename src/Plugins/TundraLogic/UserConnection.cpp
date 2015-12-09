@@ -6,8 +6,6 @@
 #include "LoggingFunctions.h"
 #include "Client.h"
 
-/// \todo MathGeoLib and kNet both define LOG macro, which causes compile warnings
-#undef LOG
 #include <kNet.h>
 
 namespace Tundra

@@ -8,8 +8,6 @@
 #include "IComponent.h"
 #include "LoggingFunctions.h"
 
-/// \todo MathGeoLib and kNet both define LOG macro, which causes compile warnings
-#undef LOG
 #include <kNet.h>
 #include <Urho3D/Core/Profiler.h>
 

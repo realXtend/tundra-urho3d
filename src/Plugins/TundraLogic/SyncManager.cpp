@@ -21,7 +21,6 @@
 #include "LoggingFunctions.h"
 #include "Placeable.h"
 
-#undef LOG
 #include <kNet.h>
 
 #include <Urho3D/Core/Profiler.h>

@@ -11,8 +11,6 @@
 
 #include <Urho3D/Core/Profiler.h>
 
-/// \todo MathGeoLib and kNet both define LOG macro, which causes compile warnings
-#undef LOG
 #include <kNet.h>
 #include <kNet/UDPMessageConnection.h>
 
