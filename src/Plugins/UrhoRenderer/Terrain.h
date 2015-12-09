@@ -150,7 +150,7 @@ public:
     /** This function does not tell whether the data for the patch is actually loaded on the CPU or the GPU. */
     bool PatchExists(uint patchX, uint patchY) const
     {
-        return patchX < patchWidth_ && patchY < patchHeight_ && patchY * patchWidth_ + patchX < (int)patches_.Size();
+        return patchX < patchWidth_ && patchY < patchHeight_ && patchY * patchWidth_ + patchX < patches_.Size();
     }
 
     /// Returns true if all the patches on the terrain are loaded on the CPU, i.e. if all the terrain height data has been streamed in from the server side.
