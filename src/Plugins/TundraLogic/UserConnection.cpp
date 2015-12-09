@@ -1,12 +1,14 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
-#include <kNet.h>
-
 #include "UserConnection.h"
 #include "Entity.h"
 #include "LoggingFunctions.h"
 #include "Client.h"
+
+/// \todo MathGeoLib and kNet both define LOG macro, which causes compile warnings
+#undef LOG
+#include <kNet.h>
 
 namespace Tundra
 {

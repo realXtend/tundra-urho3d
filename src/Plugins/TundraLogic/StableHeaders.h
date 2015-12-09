@@ -9,5 +9,4 @@
 #include "CoreDefines.h"
 /// @todo More essential Urho #includes
 #include <Urho3D/Container/Str.h>
-#include <kNet.h>
 #endif

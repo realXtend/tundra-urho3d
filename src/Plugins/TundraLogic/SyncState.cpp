@@ -1,7 +1,6 @@
 // For conditions of distribution and use, see copyright notice in license.txt
 
 #include "StableHeaders.h"
-#include <kNet.h>
 #include "SyncState.h"
 #include "UserConnection.h"
 #include "Scene/Scene.h"
@@ -9,6 +8,9 @@
 #include "IComponent.h"
 #include "LoggingFunctions.h"
 
+/// \todo MathGeoLib and kNet both define LOG macro, which causes compile warnings
+#undef LOG
+#include <kNet.h>
 #include <Urho3D/Core/Profiler.h>
 
 namespace Tundra
