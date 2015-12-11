@@ -40,6 +40,7 @@ exit /b 1
 :GeneratorValid
 :: Figure out the build configuration from the CMake generator string.
 :: Are we building 32-bit or 64-bit version.
+set ARCH_BITS=32
 set TARGET_ARCH=x86
 :: TODO This can be probably removed.
 set INTEL_ARCH=ia32
@@ -53,10 +54,14 @@ set GENERATOR_NO_DOUBLEQUOTES=%GENERATOR:"=%
 set GENERATOR_SPLIT=%GENERATOR_NO_DOUBLEQUOTES: =,%
 FOR %%i IN (%GENERATOR_SPLIT%) DO (
     call :StrLength LEN %%i
-    IF !LEN!==2 set VC_VER=vc%%i
+    IF !LEN!==2 (
+        set VC_VER_NUM=%%i
+        set VC_VER=vc%%i
+    )
     IF !LEN!==4 set VS_VER=vs%%i
     REM Are going to perform a 64-bit build?
     IF %%i==Win64 (
+        set ARCH_BITS=64
         set TARGET_ARCH=x64
         set INTEL_ARCH=intel64
         set VS_PLATFORM=x64

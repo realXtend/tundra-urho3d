@@ -535,6 +535,58 @@ IF %TUNDRA_ANDROID%==0 (
 IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
 
+
+
+::::::::::::::::::::::::: Boost (for websocketpp)
+set BOOST_VERSION="1.49.0"
+:: Version string with underscores instead of dots.
+set BOOST_VER=%BOOST_VERSION:.=_%
+set BOOST_ROOT=%DEPS%\boost
+set BOOST_INCLUDEDIR=%DEPS%\boost
+set BOOST_LIBRARYDIR=%DEPS%\boost\stage\lib
+
+IF %TUNDRA_ANDROID%==0 (
+    IF NOT EXIST "%DEPS%\boost". (
+        cecho {0D}%BOOST_ROOT%{# #}{\n}
+        cecho {0D}Downloading and extracting Boost %BOOST_VERSION% into "%DEPS%\boost".{# #}{\n}
+        cd "%DEPS%"
+        IF NOT EXIST boost_%BOOST_VER%.zip. (
+            wget http://downloads.sourceforge.net/project/boost/boost/%BOOST_VERSION%/boost_%BOOST_VER%.zip
+            IF NOT EXIST boost_%BOOST_VER%.zip. GOTO :ERROR
+        )
+        7za x boost_%BOOST_VER%.zip
+        ren boost_%BOOST_VER% boost
+        IF NOT EXIST "%DEPS%\boost\boost.css" GOTO :ERROR
+    
+        cd "%DEPS%\boost"
+        cecho {0D}Building Boost build script.{# #}{\n}
+        call bootstrap
+        IF NOT %ERRORLEVEL%==0 GOTO :ERROR
+
+        cd "%DEPS%\boost"
+        cecho {0D}Building Boost. Please be patient, this will take a while.{# #}{\n}
+        REM NOTE The ".0" postfix below doesn't necessarily work for all future VS versions.
+        call .\b2 --toolset=msvc-%VC_VER_NUM%.0 address-model=%ARCH_BITS% -j %NUMBER_OF_PROCESSORS% --with-system --with-regex --with-thread --with-date_time --with-random stage
+    ) ELSE (
+        ::TODO Even if %DEPS%\boost exists, we have no guarantee that boost is built successfully for real
+        cecho {0D}Boost already built. Skipping.{# #}{\n}
+    )
+)
+
+
+
+
+:::::::::::::::::::::::: websocketpp
+
+IF NOT EXIST "%DEPS%\websocketpp\". (
+    cecho {0D}Cloning websocketpp library from https://https://github.com/realXtend/websocketpp.git into "%DEPS%\websocketpp".{# #}{\n}
+    cd "%DEPS%"
+    git clone https://github.com/realXtend/websocketpp.git websocketpp
+)
+
+
+
+
 :::::::::::::::::::::::: All done
 
 echo.
