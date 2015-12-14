@@ -115,10 +115,10 @@ public:
     bool IsInsideVolume(const float3& point) const;
 
     /// Entity has entered the volume.
-    Signal1<Entity*> EntityEnter;
+    Signal1<Entity* ARG(entity)> EntityEnter;
 
     /// Entity has left the volume.
-    Signal1<Entity*> EntityLeave;
+    Signal1<Entity* ARG(entity)> EntityLeave;
 
 private:
     void UpdateSignals();

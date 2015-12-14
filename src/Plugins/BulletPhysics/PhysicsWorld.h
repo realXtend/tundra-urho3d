@@ -119,21 +119,21 @@ public:
         @param impulse Impulse applied to the objects to separate them
         @param newCollision True if same collision did not happen on the previous frame.
                 If collision has multiple contact points, newCollision can only be true for the first of them. */
-    Signal7<Entity*, Entity*, const float3&, const float3&, float, float, bool> PhysicsCollision;
+    Signal7<Entity* ARG(entityA), Entity* ARG(entityB), const float3& ARG(position), const float3& ARG(normal), float ARG(distance), float ARG(impulse), bool ARG(newCollision)> PhysicsCollision;
     
     /// A new physics collision has happened between two entities.
     /** This is exactly like the PhysicsCollision but is only triggered once.
         If you are not interested in long running collisions like objects being inside each other or one is resting on the other, use this signal.
         @see PhysicsCollision */
-    Signal6<Entity*, Entity*, const float3&, const float3&, float, float> NewPhysicsCollision;
+    Signal6<Entity* ARG(entityA), Entity* ARG(entityB), const float3& ARG(position), const float3& ARG(normal), float ARG(distance), float ARG(impulse)> NewPhysicsCollision;
 
     /// Emitted before the simulation steps. Note: emitted only once per frame, not before each substep.
     /** @param frametime Length of simulation steps */
-    Signal1<float> AboutToUpdate;
+    Signal1<float ARG(frametime)> AboutToUpdate;
     
     /// Emitted after each simulation step
     /** @param frametime Length of simulation step */
-    Signal1<float> Updated;
+    Signal1<float ARG(frametime)> Updated;
 
 private:
     /// Draw physics debug geometry, if debug drawing enabled

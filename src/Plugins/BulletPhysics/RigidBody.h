@@ -175,13 +175,13 @@ public:
         @param impulse Impulse applied to the objects to separate them
         @param newCollision True if same collision did not happen on the previous frame.
         If collision has multiple contact points, newCollision can only be true for the first of them. */
-    Signal6<Entity*, const float3&, const float3&, float, float, bool> PhysicsCollision;
+    Signal6<Entity* ARG(otherEntity), const float3& ARG(position), const float3& ARG(normal), float ARG(distance), float ARG(impulse), bool ARG(newCollision)> PhysicsCollision;
 
     /// A new physics collision has happened between this rigid body and another entity.
     /** This is exactly like the PhysicsCollision but is only triggered once.
         If you are not interested in long running collisions like objects being inside each other or one is resting on the other, use this signal.
         @see PhysicsCollision */
-    Signal5<Entity*, const float3&, const float3&, float, float> NewPhysicsCollision;
+    Signal5<Entity* ARG(otherEntity), const float3& ARG(position), const float3& ARG(normal), float ARG(distance), float ARG(impulse)> NewPhysicsCollision;
 
     /// Set collision mesh from visible mesh. Also sets mass 0 (static) because trimeshes cannot move in Bullet
     /** @return true if successful (Mesh component could be found and contained a mesh reference) */
