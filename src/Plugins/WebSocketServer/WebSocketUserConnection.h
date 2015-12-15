@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "WebSocketServerModuleApi.h"
+#include "WebSocketServerApi.h"
 #include "Win.h"
 
 #include "FrameworkFwd.h"
@@ -13,22 +13,15 @@
 #include "SyncState.h"
 #include "UserConnection.h"
 
-#include <QObject>
-#include <QHash>
-#include <QString>
-#include <QVariant>
-
 namespace WebSocket
 {
-    class WEBSOCKET_SERVER_MODULE_API UserConnection : public ::UserConnection
+    class WEBSOCKETSERVER_API UserConnection : public Tundra::UserConnection
     {
-        Q_OBJECT
-
     public:
         UserConnection(ConnectionPtr connection_);
         ~UserConnection();
 
-        virtual QString ConnectionType() const { return "websocket"; }
+        virtual Tundra::String ConnectionType() const { return "websocket"; }
 
         ConnectionPtr WebSocketConnection() const;
 
@@ -39,12 +32,8 @@ namespace WebSocket
 
         ConnectionWeakPtr webSocketConnection;
 
-    public slots:
+    public:
         virtual void Disconnect();
         virtual void Close();
-
-        void DisconnectDelayed(int msec = 1000);
-        
-        
     };
 }

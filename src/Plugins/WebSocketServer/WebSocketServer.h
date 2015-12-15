@@ -2,9 +2,10 @@
 
 #pragma once
 
-#include "WebSocketServereApi.h"
+#include "WebSocketServerApi.h"
 #include "Win.h"
-
+#include "CoreTypes.h"
+#include "CoreDefines.h"
 #include "FrameworkFwd.h"
 #include "WebSocketFwd.h"
 #include "kNetFwd.h"
@@ -16,21 +17,23 @@
 #include "EntityAction.h"
 
 #include "StdPtr.h"
+#include "Signals.h"
 
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
 #include "kNet/DataSerializer.h"
 
+#include <Urho3D/Core/Mutex.h>
 #include <Urho3D/Core/Thread.h>
 
 namespace WebSocket
 {
-    typedef shared_ptr<websocketpp::server<websocketpp::config::asio> > ServerPtr;
+    typedef boost::shared_ptr<websocketpp::server<websocketpp::config::asio> > ServerPtr;
     typedef websocketpp::server<websocketpp::config::asio>::connection_ptr ConnectionPtr;
-    typedef weak_ptr<websocketpp::server<websocketpp::config::asio>::connection_type> ConnectionWeakPtr;
+    typedef boost::weak_ptr<websocketpp::server<websocketpp::config::asio>::connection_type> ConnectionWeakPtr;
     typedef websocketpp::connection_hdl ConnectionHandle;
     typedef websocketpp::server<websocketpp::config::asio>::message_ptr MessagePtr;
-    typedef shared_ptr<kNet::DataSerializer> DataSerializerPtr;
+    typedef boost::shared_ptr<kNet::DataSerializer> DataSerializerPtr;
     
     // WebSocket events
     struct SocketEvent
@@ -55,7 +58,7 @@ namespace WebSocket
     class ServerThread : public Urho3D::Thread
     {
     public:
-        virtual void run();
+        virtual void ThreadFunction();
 
         WebSocket::ServerPtr server_;
     };
@@ -63,12 +66,12 @@ namespace WebSocket
     /// WebSocket server. 
     /** Manages user requestedConnections and receiving/sending out data with them.
         All signals emitted by this object will be in the main thread. */
-    class WEBSOCKET_SERVER_MODULE_API Server : public QObject, public enable_shared_from_this<Server>
+    class WEBSOCKETSERVER_API Server : public Urho3D::Object
     {
-    Q_OBJECT
+        URHO3D_OBJECT(Server, Object);
 
     public:
-        Server(Framework *framework);
+        Server(Tundra::Framework *framework);
         ~Server();
         
         bool Start();
@@ -77,31 +80,27 @@ namespace WebSocket
         
         friend class Handler;
         
-    public slots:
+    public:
         /// Returns client with id, null if not found.
-        WebSocket::UserConnectionPtr UserConnection(uint connectionId);
+        WebSocket::UserConnectionPtr UserConnection(Tundra::uint connectionId);
 
         /// Returns client with websocket connection ptr, null if not found.
         WebSocket::UserConnectionPtr UserConnection(WebSocket::ConnectionPtr connection);
         
         /// Mirror the Server object API.
-        WebSocket::UserConnectionPtr GetUserConnection(uint connectionId) { return UserConnection(connectionId); }
+        WebSocket::UserConnectionPtr GetUserConnection(Tundra::uint connectionId) { return UserConnection(connectionId); }
 
         /// Returns all user connections
         WebSocket::UserConnectionList UserConnections() { return connections_; }
-        
-    private slots:
-        void OnScriptEngineCreated(QScriptEngine *engine);
 
-    signals:
         /// The server has been started
-        void ServerStarted();
+        Tundra::Signal0<void> ServerStarted;
 
         /// The server has been stopped
-        void ServerStopped();
+        Tundra::Signal0<void> ServerStopped;
         
         /// Network message received from client
-        void NetworkMessageReceived(WebSocket::UserConnection *source, kNet::message_id_t id, const char* data, size_t numBytes);
+        Tundra::Signal4<WebSocket::UserConnection* ARG(source), kNet::message_id_t ARG(id), const char* ARG(data), size_t ARG(numBytesNetworkMessageReceived)> NetworkMessageReceived;
 
     protected:
         void Reset();
@@ -113,10 +112,10 @@ namespace WebSocket
         void OnSocketInit(WebSocket::ConnectionHandle connection, boost::asio::ip::tcp::socket& s);
         
     private:
-        QString LC;
-        ushort port_;
+        Tundra::String LC;
+        Tundra::ushort port_;
         
-        Framework *framework_;
+        Tundra::Framework *framework_;
         
         WebSocket::ServerPtr server_;
 
@@ -125,7 +124,7 @@ namespace WebSocket
 
         ServerThread thread_;
 
-        QMutex mutexEvents_;
-        QList<SocketEvent*> events_;
+        Urho3D::Mutex mutexEvents_;
+        Tundra::Vector<SocketEvent*> events_;
     };
 }

@@ -312,7 +312,7 @@ void SyncManager::NewUserConnected(const UserConnectionPtr &user)
     user->NetworkMessageReceived.Connect(this, &SyncManager::HandleNetworkMessage);
 
     // Mark all entities in the sync state as new so we will send them
-    user->syncState = SharedPtr<SceneSyncState>(new SceneSyncState(user.Get(), user->ConnectionId(), owner_->IsServer()));
+    user->syncState = SharedPtr<SceneSyncState>(new SceneSyncState(user->ConnectionId(), owner_->IsServer()));
     user->syncState->SetParentScene(scene_);
 
     if (owner_->IsServer())

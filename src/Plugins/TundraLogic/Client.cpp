@@ -38,9 +38,9 @@ Client::Client(TundraLogic* owner) :
     client_id_(0)
 {
     // Create "virtual" client->server connection & syncstate. Used by SyncManager
-    serverUserConnection_ = KNetUserConnectionPtr(new KNetUserConnection(this));
+    serverUserConnection_ = KNetUserConnectionPtr(new KNetUserConnection());
     serverUserConnection_->properties["authenticated"] = true;
-    serverUserConnection_->syncState = SharedPtr<SceneSyncState>(new SceneSyncState(serverUserConnection_, 0, false));
+    serverUserConnection_->syncState = SharedPtr<SceneSyncState>(new SceneSyncState(0, false));
 }
 
 Client::~Client()

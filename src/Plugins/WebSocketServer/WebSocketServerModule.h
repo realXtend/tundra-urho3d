@@ -7,8 +7,10 @@
 
 #include "IModule.h"
 #include "CoreTypes.h"
+#include "Signals.h"
 
-#include <QString>
+namespace Tundra
+{
 
 /// WebSocketServerModule
 /** This module was originally developed by Adminotech Ltd. for the Meshmoon hosting platform.
@@ -19,10 +21,10 @@
     
     The module will hopefully be developed further as open source for the common good.
 */
-class WEBSOCKETSERVER_API WebSocketServerModule : public Tundra::IModule
+class WEBSOCKETSERVER_API WebSocketServerModule : public IModule
 {
 public:
-    WebSocketServerModule();
+    WebSocketServerModule(Framework* framework);
     virtual ~WebSocketServerModule();
 
     void Load();
@@ -31,22 +33,23 @@ public:
     
     void Update(float frametime);
     
-public slots:
     bool IsServer();
     
     const WebSocketServerPtr& GetServer();
     
-signals:
-    void ServerStarted(WebSocketServerPtr server);
+    Signal1<WebSocketServerPtr ARG(server)> ServerStarted;
     
-private slots:
+private:
     void StartServer();
     void StopServer();
     
 private:
-    QString LC;
+    String LC;
 
     bool isServer_;
     
     WebSocketServerPtr server_;
 };
+
+}
+

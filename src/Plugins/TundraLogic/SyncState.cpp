@@ -19,18 +19,16 @@ typedef std::vector<entity_id_t> EntityIdList;
 typedef EntityIdList::const_iterator PendingConstIter;
 typedef EntityIdList::iterator PendingIter;
 
-StateChangeRequest::StateChangeRequest(Object* owner, u32 connectionID) :
-    Object(owner->GetContext()),
+StateChangeRequest::StateChangeRequest(u32 connectionID) :
     connectionID_(connectionID)
 { 
     Reset(); 
 }
 
 
-SceneSyncState::SceneSyncState(UserConnection* owner, u32 userConnectionID, bool isServer) :
-    Object(owner->GetContext()),
+SceneSyncState::SceneSyncState(u32 userConnectionID, bool isServer) :
     userConnectionID_(userConnectionID),
-    changeRequest_(owner, userConnectionID),
+    changeRequest_(userConnectionID),
     isServer_(isServer),
     placeholderComponentsSent_(false),
     locationInitialized(false),
@@ -43,8 +41,6 @@ SceneSyncState::SceneSyncState(UserConnection* owner, u32 userConnectionID, bool
 SceneSyncState::~SceneSyncState()
 {
 }
-
-// Public slots
 
 /// @remark Enables a 'pending' logic in SyncManager, with which a script can throttle the sending of entities to clients.
 VariantList SceneSyncState::PendingEntityIDs() const
@@ -327,8 +323,6 @@ bool SceneSyncState::ShouldMarkAsDirty(entity_id_t id)
     std::map<entity_id_t, EntitySyncState>::iterator i = entities.find(id);
     if (i == entities.end())
     {
-        URHO3D_PROFILE(SyncState_Emit_AboutToDirtyEntity);
-        
         // Scene or entity null, do not process yet.
         if (!FillRequest(id))
             return false;

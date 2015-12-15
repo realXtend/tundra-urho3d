@@ -11,8 +11,7 @@
 namespace Tundra
 {
 
-UserConnection::UserConnection(Object* owner) : 
-    Object(owner->GetContext()),
+UserConnection::UserConnection() : 
     userID(0),
     protocolVersion(ProtocolOriginal)
 {}
@@ -73,11 +72,6 @@ void UserConnection::DenyConnection(const String &reason)
 {
     properties["authenticated"] = false;
     properties["reason"] = reason;
-}
-
-KNetUserConnection::KNetUserConnection(Object* owner) : 
-    UserConnection(owner)
-{
 }
 
 void KNetUserConnection::Send(kNet::message_id_t id, const char* data, size_t numBytes, bool reliable, bool inOrder, unsigned long priority, unsigned long contentID)

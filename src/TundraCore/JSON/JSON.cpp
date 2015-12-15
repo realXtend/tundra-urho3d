@@ -1,6 +1,7 @@
 // For conditions of distribution and use, see copyright notice in License.txt
 
 #include "StableHeaders.h"
+#include "LoggingFunctions.h"
 #include "JSON.h"
 
 #include <Urho3D/Core/StringUtils.h>
@@ -82,6 +83,12 @@ JSONValue::JSONValue(const JSONObject& value) :
     *this = value;
 }
 
+JSONValue::JSONValue(const Variant& value) :
+    type(JSON_NULL)
+{
+    *this = value;
+}
+
 JSONValue::~JSONValue()
 {
     SetType(JSON_NULL);
@@ -117,6 +124,33 @@ JSONValue& JSONValue::operator = (const JSONValue& rhs)
         break;
     }
     
+    return *this;
+}
+
+JSONValue& JSONValue::operator = (const Variant& rhs)
+{
+    switch (rhs.GetType())
+    {
+    case VAR_NONE:
+        *this = JSONValue();
+    case VAR_BOOL:
+        *this = rhs.GetBool();
+        break;
+    case VAR_INT:
+        *this = rhs.GetInt();
+        break;
+    case VAR_FLOAT:
+    case VAR_DOUBLE:
+        *this = rhs.GetDouble();
+        break;
+    case VAR_STRING:
+        *this = rhs.GetString();
+        break;
+    default:
+        LogError("JSONValue::operator = unsupported variant type " + rhs.GetTypeName());
+        break;
+    }
+
     return *this;
 }
 
@@ -330,6 +364,24 @@ void JSONValue::ToString(String& dest, int spacing, int indent) const
         
     default:
         dest += "null";
+    }
+}
+
+Urho3D::Variant JSONValue::ToVariant() const
+{
+    switch (type)
+    {
+    case JSON_NULL:
+        return Variant();
+    case JSON_BOOL:
+        return Variant(GetBool());
+    case JSON_NUMBER:
+        return Variant(GetNumber());
+    case JSON_STRING:
+        return Variant(GetString());
+    default:
+        LogError("JSONValue::ToVariant unsupported type " + String((unsigned)type));
+        return Variant();
     }
 }
 

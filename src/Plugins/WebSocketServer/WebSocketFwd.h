@@ -13,10 +13,9 @@ namespace WebSocket
     class UserConnection;
     
     typedef Tundra::SharedPtr<UserConnection> UserConnectionPtr;
+    typedef Tundra::WeakPtr<UserConnection> UserConnectionWeakPtr;
     typedef Tundra::Vector<UserConnectionPtr> UserConnectionList;
 }
-
-class Framework;
 
 struct libwebsocket_context;
 

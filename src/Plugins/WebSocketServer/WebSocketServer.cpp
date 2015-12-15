@@ -1,7 +1,7 @@
 
 #include "WebSocketServer.h"
 #include "WebSocketUserConnection.h"
-
+#include "TundraLogic.h"
 #include "Framework.h"
 #include "CoreDefines.h"
 #include "CoreStringUtils.h"
@@ -17,6 +17,7 @@
 #include "AssetAPI.h"
 #include "IAssetStorage.h"
 #include "IAsset.h"
+#include "JSON.h"
 
 #include <algorithm>
 
@@ -27,16 +28,20 @@
 #include <utime.h>
 #endif
 
+#include <Urho3D/Core/StringUtils.h>
+
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
 #endif
 
+using namespace Tundra;
+
 namespace WebSocket
 {
-
 // ServerThread
 
-void ServerThread::run()
+
+void ServerThread::ThreadFunction()
 {
     if (!server_)
         return;
@@ -62,24 +67,22 @@ void ServerThread::run()
 // Server
 
 Server::Server(Framework *framework) :
+    Object(framework->GetContext()),
     LC("[WebSocketServer]: "),
     framework_(framework),
     port_(2345)
 {
     // Port
-    QStringList portParam = framework->CommandLineParameters("--port");
-    if (!portParam.isEmpty())
+    StringList portParam = framework->CommandLineParameters("--port");
+    if (!portParam.Empty())
     {
-        bool ok = false;
-        port_ = portParam.first().toUShort(&ok);
-        if (!ok)
+        port_ = ToUInt(portParam.Front());
+        if (!port_)
         {
             port_ = 2345;
             LogWarning(LC + "Failed to parse int from --port, using default port 2345.");
         }
     }
-    
-    qRegisterMetaType<MsgEntityAction>("MsgEntityAction");
 }
 
 Server::~Server()
@@ -89,29 +92,29 @@ Server::~Server()
 
 void Server::Update(float frametime)
 {
-    TundraLogic::TundraLogicModule* tundraLogic = framework_->Module<TundraLogicModule>();
-    TundraLogic::Server* tundraServer = tundraLogic->GetServer().get();
+    TundraLogic* tundraLogic = framework_->Module<TundraLogic>();
+    ::Server* tundraServer = tundraLogic->Server();
 
     // Clean dead requestedConnections
-    if (!connections_.empty())
+    if (!connections_.Empty())
     {
-        WebSocket::UserConnectionList::iterator cleanupIter = connections_.begin();
-        while (cleanupIter != connections_.end())
+        WebSocket::UserConnectionList::Iterator cleanupIter = connections_.Begin();
+        while (cleanupIter != connections_.End())
         {
             WebSocket::UserConnectionPtr connection = *cleanupIter;
             if (!connection)
             {
-                cleanupIter = connections_.erase(cleanupIter);
+                cleanupIter = connections_.Erase(cleanupIter);
             }
             else if (connection->webSocketConnection.expired())
             {
                 // If user was already registered to the Tundra server, remove from there
-                tundraServer->RemoveExternalUser(static_pointer_cast< ::UserConnection>(connection));
+                tundraServer->RemoveExternalUser(Urho3D::StaticCast<::UserConnection>(connection));
                 if (!connection->userID)
-                    LogDebug(LC + QString("Removing non-logged in WebSocket connection."));
+                    LogDebug(LC + "Removing non-logged in WebSocket connection.");
                 else
-                    LogInfo(LC + QString("Removing expired WebSocket connection with ID %1").arg(connection->userID));
-                cleanupIter = connections_.erase(cleanupIter);
+                    LogInfo(LC + "Removing expired WebSocket connection with ID " + String(connection->userID));
+                cleanupIter = connections_.Erase(cleanupIter);
             }
             else
             {
@@ -120,18 +123,20 @@ void Server::Update(float frametime)
         }
     }
     
-    QList<SocketEvent*> processEvents;
+    Vector<SocketEvent*> processEvents;
     {
-        QMutexLocker lockEvents(&mutexEvents_);
-        if (events_.size() == 0)
+        Urho3D::MutexLock lockEvents(mutexEvents_);
+        if (events_.Size() == 0)
             return;
         // Make copy of current event queue for processing
         processEvents = events_;
-        events_.clear();
+        events_.Clear();
     }
 
+    Vector<UserConnectionPtr> toDisconnect;
+
     // Process events pushed from the websocket thread(s)
-    for (int i=0; i< processEvents.size(); ++i)
+    for (uint i=0; i < processEvents.Size(); ++i)
     {
         SocketEvent *event = processEvents[i];
         if (!event)
@@ -143,25 +148,25 @@ void Server::Update(float frametime)
             if (!UserConnection(event->connection))
             {
                 WebSocket::UserConnectionPtr userConnection(new WebSocket::UserConnection(event->connection));
-                connections_.push_back(userConnection);
+                connections_.Push(userConnection);
 
                 // The connection does not yet have an ID assigned. Tundra server will assign on login
-                LogDebug(LC + QString("New WebSocket connection."));
+                LogDebug(LC + String("New WebSocket connection."));
             }
         }
         // User disconnected
         else if (event->type == SocketEvent::Disconnected)
         {
-            for(UserConnectionList::iterator iter = connections_.begin(); iter != connections_.end(); ++iter)
+            for(UserConnectionList::Iterator iter = connections_.Begin(); iter != connections_.End(); ++iter)
             {
                 if ((*iter) && (*iter)->WebSocketConnection() == event->connection)
                 {
-                    tundraServer->RemoveExternalUser(static_pointer_cast< ::UserConnection>(*iter));
+                    tundraServer->RemoveExternalUser(Urho3D::StaticCast<::UserConnection>(*iter));
                     if (!(*iter)->userID)
-                        LogDebug(LC + QString("Removing non-logged in WebSocket connection."));
+                        LogDebug(LC + "Removing non-logged in WebSocket connection.");
                     else
-                        LogInfo(LC + QString("Removing WebSocket connection with ID %1").arg((*iter)->userID));
-                    connections_.erase(iter);
+                        LogInfo(LC + "Removing WebSocket connection with ID " + String((*iter)->userID));
+                    connections_.Erase(iter);
                     break;
                 }
             }
@@ -179,36 +184,38 @@ void Server::Update(float frametime)
                 if (messageId == cLoginMessage)
                 {
                     bool ok = false;
-                    QString loginDataString = ReadUtf8String(dd);
+                    String loginDataString = ReadUtf8String(dd);
                     // Read optional protocol version
                     if (dd.BytesLeft())
                         userConnection->protocolVersion = (NetworkProtocolVersion)dd.ReadVLE<kNet::VLE8_16_32>();
 
-                    QVariantMap map = TundraJson::Parse(loginDataString.toUtf8(), &ok).toMap();
+                    JSONValue json;
+                    ok = json.FromString(loginDataString);
                     if (ok)
                     {
-                        foreach(const QString &key, map.keys())
-                            userConnection->properties[key] = map[key];
+                        JSONObject jsonObj = json.GetObject();
+                        for (JSONObject::ConstIterator i = jsonObj.Begin(); i != jsonObj.End(); ++i)
+                            userConnection->properties[i->first_] = i->second_.ToVariant();
                         userConnection->properties["authenticated"] = true;
-                        bool success = tundraServer->AddExternalUser(static_pointer_cast< ::UserConnection>(userConnection));
+                        bool success = tundraServer->AddExternalUser(Urho3D::StaticCast<::UserConnection>(userConnection));
                         if (!success)
                         {
-                            LogInfo(LC + QString("Connection ID %1 login refused").arg(userConnection->userID));
-                            userConnection->DisconnectDelayed();
+                            LogInfo(LC + "Connection ID " + String(userConnection->userID) + " login refused");
+                            toDisconnect.Push(userConnection);
                         }
                         else
-                            LogInfo(LC + QString("Connection ID %1 login successful").arg(userConnection->userID));
+                            LogInfo(LC + "Connection ID " + String(userConnection->userID) + " login successful");
                     }
                 }
                 else
                 {
                     // Only signal messages from authenticated users
-                    if (userConnection->properties["authenticated"].toBool() == true)
+                    if (userConnection->properties["authenticated"].GetBool() == true)
                     {
                         // Signal network message. As per kNet tradition the message ID is given separately in addition with the rest of the data
-                        emit NetworkMessageReceived(userConnection.get(), messageId, event->data->GetData() + sizeof(u16), event->data->BytesFilled() - sizeof(u16));
+                        NetworkMessageReceived.Emit(userConnection.Get(), messageId, event->data->GetData() + sizeof(u16), event->data->BytesFilled() - sizeof(u16));
                         // Signal network message on the Tundra server so that it can be globally picked up
-                        tundraServer->EmitNetworkMessageReceived(userConnection.get(), 0, messageId, event->data->GetData() + sizeof(u16), event->data->BytesFilled() - sizeof(u16));
+                        tundraServer->EmitNetworkMessageReceived(userConnection.Get(), 0, messageId, event->data->GetData() + sizeof(u16), event->data->BytesFilled() - sizeof(u16));
                     }
                 }
             }
@@ -222,11 +229,17 @@ void Server::Update(float frametime)
         
         SAFE_DELETE(event);
     }
+
+    for (uint i = 0; i < toDisconnect.Size(); ++i)
+    {
+        if (toDisconnect[i])
+            toDisconnect[i]->Disconnect();
+    }
 }
 
 WebSocket::UserConnectionPtr Server::UserConnection(uint connectionId)
 {
-    for(UserConnectionList::iterator iter = connections_.begin(); iter != connections_.end(); ++iter)
+    for(UserConnectionList::Iterator iter = connections_.Begin(); iter != connections_.End(); ++iter)
         if ((*iter)->userID == connectionId)
             return (*iter);
 
@@ -238,7 +251,7 @@ WebSocket::UserConnectionPtr Server::UserConnection(ConnectionPtr connection)
     if (!connection.get())
         return WebSocket::UserConnectionPtr();
 
-    for(UserConnectionList::iterator iter = connections_.begin(); iter != connections_.end(); ++iter)
+    for(UserConnectionList::Iterator iter = connections_.Begin(); iter != connections_.End(); ++iter)
         if ((*iter)->WebSocketConnection().get() == connection.get())
             return (*iter);
     return WebSocket::UserConnectionPtr();
@@ -274,20 +287,18 @@ bool Server::Start()
 
         // Start the server polling thread
         thread_.server_ = server_;
-        thread_.start();
+        thread_.Run();
 
     } 
     catch (std::exception &e) 
     {
-        LogError(LC + QString::fromStdString(e.what()));
+        LogError(LC + String(e.what()));
         return false;
     }
     
-    qDebug() << QString(LC + "Started to port %1 with %2 listeners threads in main thread")
-        .arg(port_).arg(QThread::idealThreadCount() > 0 ? QThread::idealThreadCount() : 1).toStdString().c_str() 
-        << QThread::currentThreadId();
+    LogInfo(LC + "WebSocket server started to port " + String(port_));
 
-    emit ServerStarted();
+    ServerStarted.Emit();
     
     return true;
 }
@@ -299,13 +310,13 @@ void Server::Stop()
         if (server_)
         {
             server_->stop();
-            thread_.wait();
-            emit ServerStopped();
+            thread_.Stop();
+            ServerStopped.Emit();
         }
     }
     catch (std::exception &e) 
     {
-        LogError(LC + "Error while closing server: " + QString::fromStdString(e.what()));
+        LogError(LC + "Error while closing server: " + String(e.what()));
         return;
     }
     
@@ -316,84 +327,74 @@ void Server::Stop()
 
 void Server::Reset()
 {
-    connections_.clear();
+    connections_.Clear();
 
     server_.reset();
 }
 
 void Server::OnConnected(ConnectionHandle connection)
 {
-    QMutexLocker lock(&mutexEvents_);
+    Urho3D::MutexLock lock(mutexEvents_);
 
     ConnectionPtr connectionPtr = server_->get_con_from_hdl(connection);
 
     // Find existing events and remove them if we got duplicates 
     // that were not synced to main thread yet.
-    QList<SocketEvent*> removeItems;
-    for (int i=0; i<events_.size(); ++i)
+    Vector<SocketEvent*> removeItems;
+    for (uint i = 0; i < events_.Size(); ++i)
     {
         // Remove any and all messages from this connection, 
         // if there are any data messages for this connection.
         // Which is not possible in theory.
         SocketEvent *existing = events_[i];
         if (existing->connection == connectionPtr)
-            removeItems << existing;
+            removeItems.Push(existing);
     }
-    if (!removeItems.isEmpty())
+    if (!removeItems.Empty())
     {
-        foreach(SocketEvent *existing, removeItems)
-        {
-            events_.removeAll(existing);
-            SAFE_DELETE(existing);
-        }
-        removeItems.clear();
+        for (uint i = 0; i < removeItems.Size(); ++i)
+            events_.Remove(removeItems[i]);
     }
 
-    events_ << new SocketEvent(connectionPtr, SocketEvent::Connected);
-        
-    mutexEvents_.unlock();
+    events_.Push(new SocketEvent(connectionPtr, SocketEvent::Connected));
 }
 
 void Server::OnDisconnected(ConnectionHandle connection)
 {
-    QMutexLocker lock(&mutexEvents_);
+    Urho3D::MutexLock lock(mutexEvents_);
 
     ConnectionPtr connectionPtr = server_->get_con_from_hdl(connection);
 
     // Find existing events and remove them if we got duplicates 
     // that were not synced to main thread yet.
-    QList<SocketEvent*> removeItems;
-    for (int i=0; i<events_.size(); ++i)
+    Vector<SocketEvent*> removeItems;
+    for (uint i = 0; i < events_.Size(); ++i)
     {
-        // Remove any and all messages from this connection, 
-        // no need to process he is disconnecting
+        // Remove any and all messages from this connection,
+        // as it's disconnecting
         SocketEvent *existing = events_[i];
         if (existing->connection == connectionPtr)
-            removeItems << existing;
+            removeItems.Push(existing);
     }
-    if (!removeItems.isEmpty())
+    if (!removeItems.Empty())
     {
-        foreach(SocketEvent *existing, removeItems)
-        {
-            events_.removeAll(existing);
-            SAFE_DELETE(existing);
-        }
-        removeItems.clear();
+        for (uint i = 0; i < removeItems.Size(); ++i)
+            events_.Remove(removeItems[i]);
     }
 
-    events_ << new SocketEvent(connectionPtr, SocketEvent::Disconnected);
+    events_.Push(new SocketEvent(connectionPtr, SocketEvent::Disconnected));
 }
 
 void Server::OnMessage(ConnectionHandle connection, MessagePtr data)
 {   
-    QMutexLocker lock(&mutexEvents_);
+    Urho3D::MutexLock lock(mutexEvents_);
 
     ConnectionPtr connectionPtr = server_->get_con_from_hdl(connection);
 
     if (data->get_opcode() == websocketpp::frame::opcode::TEXT)
     {
-        QByteArray buffer = QString::fromStdString(data->get_payload()).toUtf8();
-        LogInfo(QString("[WebSocketServer]: on_utf8_message: size=%1 msg=%2").arg(buffer.size()).arg(QString(buffer)));
+        String textMsg(data->get_payload().c_str());
+        LogInfo("[WebSocketServer]: on_utf8_message: size=" + String(textMsg.Length()) + " msg=" + textMsg);
     }
     else if (data->get_opcode() == websocketpp::frame::opcode::BINARY)
     {
@@ -407,15 +408,9 @@ void Server::OnMessage(ConnectionHandle connection, MessagePtr data)
         event->data = DataSerializerPtr(new kNet::DataSerializer(payload.size()));
         event->data->AddAlignedByteArray(&payload[0], payload.size());
 
-        events_ << event;
+        events_.Push(event);
     }
 }
-
-void Server::OnScriptEngineCreated(QScriptEngine *engine)
-{
-    RegisterWebSocketPluginMetaTypes(engine);
-}
-
 
 /// \todo Implement actual registering of http handlers, for now disabled
 /*

@@ -8,6 +8,7 @@
 #include "TundraLogicApi.h"
 #include "TundraLogicFwd.h"
 #include "CoreTypes.h"
+#include "CoreDefines.h"
 #include "SceneFwd.h"
 
 #include "Math/Transform.h"
@@ -217,12 +218,10 @@ struct RigidBodyInterpolationState
 };
 
 /// State change request to permit/deny changes.
-class TUNDRALOGIC_API StateChangeRequest : public Object
+class TUNDRALOGIC_API StateChangeRequest : public RefCounted
 {
-    URHO3D_OBJECT(StateChangeRequest, Object);
-
 public:
-    StateChangeRequest(Object* owner, u32 connectionID);
+    StateChangeRequest(u32 connectionID);
 
     void Reset(entity_id_t entityId = 0)
     {
@@ -270,12 +269,10 @@ private:
 typedef Urho3D::List<component_id_t> ComponentIdList;
 
 /// Scene's per-user network sync state
-class TUNDRALOGIC_API SceneSyncState : public Object
+class TUNDRALOGIC_API SceneSyncState : public RefCounted
 {
-    URHO3D_OBJECT(SceneSyncState, Object);
-
 public:
-    explicit SceneSyncState(UserConnection* owner, u32 userConnectionID = 0, bool isServer = false);
+    explicit SceneSyncState(u32 userConnectionID = 0, bool isServer = false);
     virtual ~SceneSyncState();
 
     /// Entity sync states

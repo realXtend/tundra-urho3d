@@ -31,12 +31,10 @@ enum NetworkProtocolVersion
 const NetworkProtocolVersion cHighestSupportedProtocolVersion = ProtocolWebClientRigidBodyMessage;
 
 /// Represents a client connection on the server side. Subclassed by networking implementations.
-class TUNDRALOGIC_API UserConnection : public Object
+class TUNDRALOGIC_API UserConnection : public RefCounted
 {
-    URHO3D_OBJECT(UserConnection, Object);
-
 public:
-    UserConnection(Object* owner);
+    UserConnection();
 
     /// Returns the connection ID.
     u32 ConnectionId() const { return userID; }
@@ -114,11 +112,7 @@ public:
 /// A kNet user connection.
 class TUNDRALOGIC_API KNetUserConnection : public UserConnection
 {
-    URHO3D_OBJECT(KNetUserConnection, UserConnection);
-
 public:
-    KNetUserConnection(Object* owner);
-
     virtual String ConnectionType() const { return "knet"; }
 
     /// Message connection.

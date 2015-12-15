@@ -19,7 +19,7 @@ UserConnection::UserConnection(ConnectionPtr connection_)
 UserConnection::~UserConnection()
 {
     webSocketConnection.reset();
-    syncState.reset();
+    syncState.Reset();
 }
 
 void UserConnection::Send(kNet::message_id_t id, const char* data, size_t numBytes, bool reliable, bool inOrder, unsigned long priority, unsigned long contentID)
@@ -55,13 +55,6 @@ void UserConnection::Disconnect()
 void UserConnection::Close()
 {
     Disconnect();
-}
-
-void UserConnection::DisconnectDelayed(int msec)
-{
-    if (msec < 0)
-        msec = 1;
-    QTimer::singleShot(msec, this, SLOT(Disconnect()));
 }
 
 }

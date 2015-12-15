@@ -1,5 +1,6 @@
 #include "WebSocketServerModule.h"
 #include "WebSocketServer.h"
+#include "WebSocketUserConnection.h"
 
 #include "Framework.h"
 #include "CoreDefines.h"
@@ -9,8 +10,11 @@
 #include "SceneAPI.h"
 #include "Scene.h"
 
-WebSocketServerModule::WebSocketServerModule() :
-    IModule("WebSocketServer"),
+namespace Tundra
+{
+
+WebSocketServerModule::WebSocketServerModule(Framework* framework) :
+    IModule("WebSocketServer", framework),
     LC("[WebSocketServer]: ")
 {
 }
@@ -22,7 +26,7 @@ WebSocketServerModule::~WebSocketServerModule()
 
 void WebSocketServerModule::Load()
 {
-    isServer_ = framework_->HasCommandLineParameter("--server");
+    isServer_ = framework->HasCommandLineParameter("--server");
 }
 
 void WebSocketServerModule::Initialize()
@@ -36,12 +40,12 @@ void WebSocketServerModule::Uninitialize()
     StopServer();
 }
 
-void WebSocketServerModule::Update(f64 frametime)
+void WebSocketServerModule::Update(float frametime)
 {
     if (!isServer_)
         return;
     
-    if (server_.get())
+    if (server_.Get())
         server_->Update(frametime);
 }
 
@@ -59,34 +63,34 @@ void WebSocketServerModule::StartServer()
 {
     if (!isServer_)
         return;
-    if (server_.get())
+    if (server_.Get())
     {
         LogWarning(LC + "Server already started.");
         return;
     }
 
     // Server
-    server_ = WebSocketServerPtr(new WebSocket::Server(framework_));
+    server_ = WebSocketServerPtr(new WebSocket::Server(framework));
     server_->Start();
 
-    framework_->RegisterDynamicObject("websocketserver", server_.get());
-
-    emit ServerStarted(server_);
+    ServerStarted.Emit(server_);
 }
 
 void WebSocketServerModule::StopServer()
 {
-    if (server_.get())
+    if (server_.Get())
         server_->Stop();
-    server_.reset();
+    server_.Reset();
+}
+
 }
 
 extern "C"
 {
-    DLLEXPORT void TundraPluginMain(Framework *fw)
-    {
-        Framework::SetInstance(fw); // Inside this DLL, remember the pointer to the global framework object.
-        IModule *module = new WebSocketServerModule();
-        fw->RegisterModule(module);
-    }
+
+DLLEXPORT void TundraPluginMain(Tundra::Framework *fw)
+{
+    fw->RegisterModule(new Tundra::WebSocketServerModule(fw));
+}
+
 }

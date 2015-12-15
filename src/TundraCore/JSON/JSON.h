@@ -8,6 +8,7 @@
 #include <Urho3D/Container/HashMap.h>
 #include <Urho3D/Container/Str.h>
 #include <Urho3D/Container/Vector.h>
+#include <Urho3D/Core/Variant.h>
 
 #ifdef GetObject
 #undef GetObject // Guard against Win32 GetObject macro
@@ -73,6 +74,8 @@ public:
     JSONValue(const JSONArray& value);
     /// Construct from a JSON object.
     JSONValue(const JSONObject& value);
+    /// Construct from a Variant.
+    JSONValue(const Variant& value);
     /// Destruct.
     ~JSONValue();
     
@@ -96,6 +99,8 @@ public:
     JSONValue& operator = (const JSONArray& value);
     /// Assign a JSON object.
     JSONValue& operator = (const JSONObject& value);
+    /// Assign from a Variant.
+    JSONValue& operator = (const Urho3D::Variant& value);
     /// Index as an array. Becomes an array if was not before.
     JSONValue& operator [] (uint index);
     /// Const index as an array. Return a null value if not an array.
@@ -117,6 +122,8 @@ public:
     void ToString(String& dest, int spacing = 2, int indent = 0) const;
     /// Return as string.
     String ToString(int spacing = 2) const;
+    /// Convert to variant.
+    Urho3D::Variant ToVariant() const;
     
     /// Push a value at the end. Becomes an array if was not before.
     void Push(const JSONValue& value);
