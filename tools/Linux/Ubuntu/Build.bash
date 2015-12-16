@@ -121,11 +121,6 @@ if [ $skip_pkg = false ] ; then
     sudo apt-get -y --quiet install \
         libx11-dev libxrandr-dev libasound2-dev \
         libgl1-mesa-dev
-
-    print_subtitle "Boost"
-    # TODO: uses fixed boost version now, may not be compatible with older OS'es without package sources
-    sudo apt-get -y --quiet install \
-        libboost1.54-all-dev
 fi
 
 if [ $skip_deps = false ] ; then
@@ -346,6 +341,21 @@ if [ $skip_deps = false ] ; then
         mark_built
     fi    
 
+    #### boost
+
+    start_target boost
+    if ! is_cloned ; then
+        wget http://sourceforge.net/projects/boost/files/boost/1.54.0/boost_1_54_0.tar.gz
+        tar -xf boost_1_54_0.tar.gz
+        mv boost_1_54_0 boost
+        rm boost_1_54_0.tar.gz
+    fi
+    if ! is_built ; then
+        ./bootstrap.sh --prefix=$DEPS --with-libraries=system
+        ./b2 install
+        mark_built
+    fi
+
     #### websocketpp
 
     start_target websocketpp
@@ -422,7 +432,8 @@ if [ $skip_cmake = false ] ; then
         -DBULLET_HOME=$DEPS \
         -DGTEST_HOME=$DEPS_SRC/gtest \
         -DCURL_HOME=$DEPS_SRC/curl/build \
-        -DZZIPLIB_HOME=$DEPS_SRC/zziplib/build
+        -DZZIPLIB_HOME=$DEPS_SRC/zziplib/build \
+        -DBOOST_ROOT=$DEPS
 fi
 
 # Tundra build

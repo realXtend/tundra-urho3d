@@ -17,8 +17,6 @@ before_install:
 
   # CMake 2.8.x that supports CMAKE_POSITION_INDEPENDENT_CODE
   - sudo add-apt-repository -y ppa:kalakris/cmake
-  # Repository for Boost latest versions
-  - sudo add-apt-repository -y ppa:boost-latest/ppa
   - sudo apt-get update -qq
 
 install:

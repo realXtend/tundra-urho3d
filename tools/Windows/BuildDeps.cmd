@@ -538,7 +538,7 @@ IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 
 
 ::::::::::::::::::::::::: Boost (for websocketpp)
-set BOOST_VERSION="1.49.0"
+set BOOST_VERSION="1.54.0"
 :: Version string with underscores instead of dots.
 set BOOST_VER=%BOOST_VERSION:.=_%
 set BOOST_ROOT=%DEPS%\boost
@@ -566,7 +566,7 @@ IF %TUNDRA_ANDROID%==0 (
         cd "%DEPS%\boost"
         cecho {0D}Building Boost. Please be patient, this will take a while.{# #}{\n}
         REM NOTE The ".0" postfix below doesn't necessarily work for all future VS versions.
-        call .\b2 --toolset=msvc-%VC_VER_NUM%.0 address-model=%ARCH_BITS% -j %NUMBER_OF_PROCESSORS% --with-system --with-regex --with-thread --with-date_time --with-random stage
+        call .\b2 --toolset=msvc-%VC_VER_NUM%.0 address-model=%ARCH_BITS% -j %NUMBER_OF_PROCESSORS% --with-system stage
     ) ELSE (
         ::TODO Even if %DEPS%\boost exists, we have no guarantee that boost is built successfully for real
         cecho {0D}Boost already built. Skipping.{# #}{\n}
