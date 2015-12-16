@@ -7,7 +7,9 @@
 #include "kNet/DataSerializer.h"
 
 #include <boost/system/error_code.hpp>
+#ifdef BOOST_SYSTEM_NOEXCEPT
 #define _WEBSOCKETPP_NOEXCEPT_TOKEN_ BOOST_SYSTEM_NOEXCEPT
+#endif
 
 #include <websocketpp/frame.hpp>
 
