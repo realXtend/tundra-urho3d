@@ -121,6 +121,10 @@ if [ $skip_pkg = false ] ; then
     sudo apt-get -y --quiet install \
         libx11-dev libxrandr-dev libasound2-dev \
         libgl1-mesa-dev
+
+    print_subtitle "Boost"
+    sudo apt-get -y --quiet install \
+        libboost-all-dev
 fi
 
 if [ $skip_deps = false ] ; then
@@ -340,6 +344,16 @@ if [ $skip_deps = false ] ; then
 
         mark_built
     fi    
+
+    #### websocketpp
+
+    start_target websocketpp
+
+    if ! is_cloned ; then
+         git clone https://github.com/realXtend/websocketpp.git websocketpp
+         # Simply copy headers to deps include
+         cp -r websocketpp/websocketpp ../include
+    fi
 fi
 
 # Build gtest if testing

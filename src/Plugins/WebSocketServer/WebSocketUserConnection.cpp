@@ -6,6 +6,9 @@
 #include "kNet/DataDeserializer.h"
 #include "kNet/DataSerializer.h"
 
+#include <boost/system/error_code.hpp>
+#define _WEBSOCKETPP_NOEXCEPT_TOKEN_ BOOST_SYSTEM_NOEXCEPT
+
 #include <websocketpp/frame.hpp>
 
 namespace WebSocket

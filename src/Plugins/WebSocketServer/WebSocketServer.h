@@ -19,9 +19,13 @@
 #include "StdPtr.h"
 #include "Signals.h"
 
+#include "kNet/DataSerializer.h"
+
+#include <boost/system/error_code.hpp>
+#define _WEBSOCKETPP_NOEXCEPT_TOKEN_ BOOST_SYSTEM_NOEXCEPT
+
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
-#include "kNet/DataSerializer.h"
 
 #include <Urho3D/Core/Mutex.h>
 #include <Urho3D/Core/Thread.h>

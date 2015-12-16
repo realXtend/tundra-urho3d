@@ -1,5 +1,5 @@
 # Define target name and output directory
-init_target (WebSocketServer OUTPUT plugins)
+init_target (WebSocketServer OUTPUT Plugins)
 
 macro(configure_boost)
     if (NOT Boost_FOUND)
