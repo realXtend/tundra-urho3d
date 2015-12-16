@@ -123,8 +123,9 @@ if [ $skip_pkg = false ] ; then
         libgl1-mesa-dev
 
     print_subtitle "Boost"
+    # TODO: uses fixed boost version now, may not be compatible with older OS'es without package sources
     sudo apt-get -y --quiet install \
-        libboost-all-dev
+        libboost1.54-all-dev
 fi
 
 if [ $skip_deps = false ] ; then
