@@ -180,6 +180,8 @@ if [ $skip_deps = false ] ; then
 
     if ! is_cloned ; then
         git clone https://github.com/urho3d/Urho3D.git urho3d
+        cd urho3d
+        git checkout 5acb708
     fi
 
     if ! is_built ; then
@@ -352,7 +354,7 @@ if [ $skip_deps = false ] ; then
     fi
     if ! is_built ; then
         ./bootstrap.sh --prefix=$DEPS --with-libraries=system
-        ./b2 install
+        ./b2 cxxflags="-fPIC" install
         mark_built
     fi
 
