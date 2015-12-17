@@ -32,13 +32,12 @@ macro(configure_boost)
         set(Boost_DEBUG FALSE)
         set(Boost_USE_MULTITHREADED TRUE)
         set(Boost_DETAILED_FAILURE_MSG TRUE)
-        set(Boost_ADDITIONAL_VERSIONS "1.39.0" "1.40.0" "1.41.0" "1.42.0" "1.43.0" "1.44.0" "1.46.1" "1.49.0")
 
         if ("${TUNDRA_BOOST_LIBRARIES}" STREQUAL "")
             set(TUNDRA_BOOST_LIBRARIES system)
         endif()
 
-        find_package(Boost 1.39.0 COMPONENTS ${TUNDRA_BOOST_LIBRARIES})
+        find_package(Boost 1.54.0 COMPONENTS ${TUNDRA_BOOST_LIBRARIES})
 
         if (Boost_FOUND)
             include_directories(${Boost_INCLUDE_DIRS})
