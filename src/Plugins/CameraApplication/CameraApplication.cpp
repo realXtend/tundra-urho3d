@@ -8,6 +8,8 @@
 #include "../UrhoRenderer/Camera.h" // Possible ambiguity with Urho3D's Camera component
 #include "SceneAPI.h"
 #include "Entity.h"
+#include "TundraLogic.h"
+#include "SyncManager.h"
 #include "Scene/Scene.h"
 #include "LoggingFunctions.h"
 #include "Math/float3.h"
@@ -116,6 +118,10 @@ void CameraApplication::CreateCamera()
         return;
     }
     renderer->SetMainCamera(cameraEntity);
+    TundraLogic* logic = framework->Module<TundraLogic>();
+    if (logic)
+        logic->SyncManager()->SetObserver(EntityPtr(cameraEntity));
+
     lastCamera_ = cameraEntity;
 
     lastScene_->EntityCreated.Connect(this, &CameraApplication::CheckCameraSpawnPos);

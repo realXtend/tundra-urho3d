@@ -139,7 +139,7 @@ public:
     IMeshAsset* MeshAsset() const;
 
     /// Returns name of the mesh asset.
-    const String& MeshName() const;
+    String MeshName() const;
 
     /// Emitted before the mesh is about to be destroyed
     Signal0<void> MeshAboutToBeDestroyed;

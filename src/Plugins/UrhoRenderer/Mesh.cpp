@@ -197,7 +197,7 @@ IMeshAsset* Mesh::MeshAsset() const
     return meshRefListener_ ? dynamic_cast<IMeshAsset*>(meshRefListener_->Asset().Get()) : (IMeshAsset*)0;
 }
 
-const String& Mesh::MeshName() const
+String Mesh::MeshName() const
 {
     return (meshRefListener_ && meshRefListener_->Asset()) ? meshRefListener_->Asset()->Name() : String::EMPTY;
 }

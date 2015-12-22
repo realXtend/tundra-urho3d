@@ -242,6 +242,13 @@ SyncManager::SyncManager(TundraLogic* owner) :
     priorityUpdatePeriod_(1.f),
     prioritizer_(0)
 {
+    if (framework_->HasCommandLineParameter("--interestManagement"))
+    {
+        StringVector imParams = framework_->CommandLineParameters("--interestManagement");
+        if (!imParams.Empty())
+            SetInterestManagementEnabled(Urho3D::ToBool(imParams.Back()));
+    }
+
     if (framework_->HasCommandLineParameter("--noclientphysics"))
         noClientPhysicsHandoff_ = true;
     
@@ -984,7 +991,8 @@ void SyncManager::Update(float frametime)
         InterpolateRigidBodies(frametime, serverConnection_->syncState.Get());
 
     // Check if it is yet time to perform a network update tick.
-    updateAcc_ += (float)frametime;
+    updateAcc_ += frametime;
+    prioUpdateAcc_ += frametime;
     if (updateAcc_ < updatePeriod_)
         return;
 

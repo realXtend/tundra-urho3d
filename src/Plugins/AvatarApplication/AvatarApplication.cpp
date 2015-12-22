@@ -15,6 +15,7 @@
 #include "../UrhoRenderer/AnimationController.h"
 #include "TundraLogic.h"
 #include "Client.h"
+#include "SyncManager.h"
 #include "SceneAPI.h"
 #include "Avatar.h"
 #include "Entity.h"
@@ -108,6 +109,7 @@ void AvatarApplication::OnEntityCreated(Entity* entity, AttributeChange::Type)
         avatarCamera->SetName("AvatarCamera");
         avatarCameraEntity_ = avatarCamera;
         avatarCamera->Component<Camera>()->SetActive();
+        logic->SyncManager()->SetObserver(EntityPtr(avatarCameraEntity_));
         Placeable* avatarPlaceable = entity->Component<Placeable>();
         // Init yaw/pitch
         if (avatarPlaceable)
