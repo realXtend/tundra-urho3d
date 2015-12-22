@@ -186,6 +186,23 @@ StringVector Mesh::AnimationNames() const
     return ret;
 }
 
+void Mesh::ForceMeshLoad()
+{
+    if (meshRefListener_)
+        meshRefListener_->HandleAssetRefChange(&meshRef);
+}
+
+IMeshAsset* Mesh::MeshAsset() const
+{
+    return meshRefListener_ ? dynamic_cast<IMeshAsset*>(meshRefListener_->Asset().Get()) : (IMeshAsset*)0;
+}
+
+const String& Mesh::MeshName() const
+{
+    return (meshRefListener_ && meshRefListener_->Asset()) ? meshRefListener_->Asset()->Name() : String::EMPTY;
+}
+
+
 void Mesh::UpdateSignals()
 {
     Entity* parent = ParentEntity();

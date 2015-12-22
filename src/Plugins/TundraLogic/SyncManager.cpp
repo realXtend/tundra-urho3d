@@ -37,6 +37,129 @@ static size_t oldAttrDataBufferSize = 16 * 1024;
 namespace Tundra
 {
 
+// Helper function for optimizing network transfer of position and orientation.
+void WriteOptimizedPosAndRot(kNet::DataSerializer &ds, int posSendType, const float3 &pos, int rotSendType, const float3x3 &rot)
+{
+    if (posSendType == 1) // Sends fixed 57 bits.
+    {
+        ds.AddSignedFixedPoint(11, 8, pos.x);
+        ds.AddSignedFixedPoint(11, 8, pos.y);
+        ds.AddSignedFixedPoint(11, 8, pos.z);
+    }
+    else if (posSendType == 2) // Sends fixed 96 bits.
+    {
+        ds.Add<float>(pos.x);
+        ds.Add<float>(pos.y);
+        ds.Add<float>(pos.z);
+    }
+
+    if (rotSendType == 1) // Orientation with 1 DOF, only yaw.
+    {
+        // The transform is looking straight forward, i.e. the +y vector of the transform local space points straight towards +y in world space.
+        // Therefore the forward vector has y == 0, so send (x,z) as a 2D vector.
+        ds.AddNormalizedVector2D(rot.Col(2).x, rot.Col(2).z, 8);  // Sends fixed 8 bits.
+    }
+    else if (rotSendType == 2) // Orientation with 2 DOF, yaw and pitch.
+    {
+        float3 forward = rot.Col(2);
+        forward.Normalize();
+        ds.AddNormalizedVector3D(forward.x, forward.y, forward.z, 9, 8); // Sends fixed 17 bits.
+    }
+    else if (rotSendType == 3) // Orientation with 3 DOF, full yaw, pitch and roll.
+    {
+        Quat o = rot.ToQuat();
+
+        float3 axis;
+        float angle;
+        o.ToAxisAngle(axis, angle);
+        if (angle >= 3.141592654f) // Remove the quaternion double cover representation by constraining angle to [0, pi].
+        {
+            axis = -axis;
+            angle = 2.f * 3.141592654f - angle;
+        }
+
+        // Sends 10-31 bits.
+        u32 quantizedAngle = ds.AddQuantizedFloat(0, 3.141592654f, 10, angle);
+        if (quantizedAngle != 0)
+            ds.AddNormalizedVector3D(axis.x, axis.y, axis.z, 11, 10);
+    }
+}
+
+// Helper function for optimizing network transfer of position and orientation.
+void ReadOptimizedPosAndRot(kNet::DataDeserializer &dd, int posSendType, float3 &pos, int rotSendType, Quat &rot)
+{
+    if (posSendType == 1)
+    {
+        pos.x = dd.ReadSignedFixedPoint(11, 8);
+        pos.y = dd.ReadSignedFixedPoint(11, 8);
+        pos.z = dd.ReadSignedFixedPoint(11, 8);
+    }
+    else if (posSendType == 2)
+    {
+        pos.x = dd.Read<float>();
+        pos.y = dd.Read<float>();
+        pos.z = dd.Read<float>();
+    }
+
+    if (rotSendType == 1) // 1 DOF
+    {
+        float3 forward;
+        dd.ReadNormalizedVector2D(8, forward.x, forward.z);
+        forward.y = 0.f;
+        float3x3 orientation = float3x3::LookAt(float3::unitZ, forward, float3::unitY, float3::unitY);
+        rot.Set(orientation);
+    }
+    else if (rotSendType == 2)
+    {
+        float3 forward;
+        dd.ReadNormalizedVector3D(9, 8, forward.x, forward.y, forward.z);
+
+        float3x3 orientation = float3x3::LookAt(float3::unitZ, forward, float3::unitY, float3::unitY);
+        rot.Set(orientation);
+    }
+    else if (rotSendType == 3)
+    {
+        // Read the quantized float manually, without a call to ReadQuantizedFloat, to be able to compare the quantized bit pattern.
+        u32 quantizedAngle = dd.ReadBits(10);
+        if (quantizedAngle != 0)
+        {
+            float angle = quantizedAngle * 3.141592654f / (float)((1 << 10) - 1);
+            float3 axis;
+            dd.ReadNormalizedVector3D(11, 10, axis.x, axis.y, axis.z);
+            rot = Quat(axis, angle);
+        }
+        else
+            rot = Quat::identity;
+    }
+}
+
+// Helper function for optimizing network transfer of orientation: 0 - don't send, 1 - send compact, 2 - send full.
+int DetectPosSendType(bool posChanged, const float3 &pos)
+{
+    return posChanged ? (pos.Abs().MaxElement() >= 1023.f ? 2 : 1) : 0;
+}
+
+// Helper function for optimizing network transfer of orientation: 0 - don't send, 1 - 1 DOF, 2 - 2 DOF, 3 - 3 DOF.
+int DetectRotSendType(bool rotChanged, const float3x3 &rot)
+{
+    if (rotChanged)
+    {
+        float3 fwd = rot.Col(2);
+        float3 up = rot.Col(1);
+        float3 planeNormal = float3::unitY.Cross(rot.Col(2));
+        float d = planeNormal.Dot(rot.Col(1));
+
+        if (up.Dot(float3::unitY) >= 0.999f)
+            return 1; // Looking upright, 1 DOF.
+        else if (Abs(d) <= 0.001f && Abs(fwd.Dot(float3::unitY)) < 0.95f && up.Dot(float3::unitY) > 0.f)
+            return 2; // No roll, i.e. 2 DOF. Use this only if not looking too close towards the +Y axis, due to precision issues, and only when object +Y is towards world up.
+        else
+            return 3; // Full 3 DOF
+    }
+    else
+        return 0;
+}
+
 bool SyncManager::WriteComponentFullUpdate(kNet::DataSerializer& ds, ComponentPtr comp)
 {
     // Component identification
@@ -114,7 +237,10 @@ SyncManager::SyncManager(TundraLogic* owner) :
     updateAcc_(0.0),
     maxLinExtrapTime_(3.0f),
     noClientPhysicsHandoff_(false),
-    componentTypeSender_(0)
+    componentTypeSender_(0),
+    prioUpdateAcc_(0.0),
+    priorityUpdatePeriod_(1.f),
+    prioritizer_(0)
 {
     if (framework_->HasCommandLineParameter("--noclientphysics"))
         noClientPhysicsHandoff_ = true;
@@ -134,17 +260,6 @@ SyncManager::~SyncManager()
 {
 }
 
-void SyncManager::SendCameraUpdateRequest(UserConnectionPtr conn, bool enabled)
-{
-    const int maxMessageSizeBytes = 1400;
-
-    kNet::DataSerializer ds(maxMessageSizeBytes);
-
-    ds.Add<u8>(enabled);
-
-    conn->Send(cCameraOrientationRequest, true, true, ds);
-}
-
 void SyncManager::SetUpdatePeriod(float period)
 {
     // Allow max 100fps
@@ -153,6 +268,24 @@ void SyncManager::SetUpdatePeriod(float period)
     updatePeriod_ = period;
     
     GetClientExtrapolationTime();
+}
+
+void SyncManager::SetPriorityUpdatePeriod(float period)
+{
+    priorityUpdatePeriod_ = period;
+    if (priorityUpdatePeriod_ < updatePeriod_)
+        priorityUpdatePeriod_ = updatePeriod_;
+}
+
+void SyncManager::SetInterestManagementEnabled(bool enabled)
+{
+    SetPrioritizer(enabled ? new DefaultEntityPrioritizer(scene_) : 0);
+}
+
+void SyncManager::SetPrioritizer(EntityPrioritizer *prioritizer)
+{
+    SAFE_DELETE(prioritizer_);
+    prioritizer_ =  prioritizer;
 }
 
 void SyncManager::GetClientExtrapolationTime()
@@ -237,8 +370,8 @@ void SyncManager::HandleNetworkMessage(UserConnection* user, kNet::packet_id_t p
     {
         switch(messageId)
         {
-        case cCameraOrientationUpdate:
-            HandleCameraOrientation(user, data, numBytes);
+        case cObserverPositionMessage:
+            HandleObserverPosition(user, data, numBytes);
             break;
         case cCreateEntityMessage:
             HandleCreateEntity(user, data, numBytes);
@@ -325,6 +458,11 @@ void SyncManager::NewUserConnected(const UserConnectionPtr &user)
             continue;
         entity_id_t id = entity->Id();
         user->syncState->MarkEntityDirty(id);
+        if (prioritizer_)
+        {
+            // MarkEntityDirty() above has created a proper sync state for the entity.
+            prioritizer_->ComputeSyncPriorities(user->syncState->entities[entity->Id()], user->syncState->observerPos, user->syncState->observerRot);
+        }
     }
 }
 
@@ -860,26 +998,52 @@ void SyncManager::Update(float frametime)
     if (owner_->IsServer())
     {
         // If we are server, process all authenticated users
-
-        // Then send out changes to other attributes via the generic sync mechanism.
+        // SyncState is not added to the user before it's authenticated, so using UserConnections() instead of
+        // AuthenticatedUsers() and checking for SyncState's existence does the same thing in a little more efficient fashion.
         UserConnectionList& users = owner_->Server()->UserConnections();
         for(auto i = users.Begin(); i != users.End(); ++i)
-            if ((*i)->syncState)
+        {
+            SceneSyncState *syncState = (*i)->syncState.Get();
+            if (syncState)
             {
-                // First send out all changes to rigid bodies. Supported on desktop (kNet) clients and web clients
-                // with sufficiently high protocol version. After processing this function, the bits related to 
-                // rigid body states have been cleared, so the generic sync will not double-replicate the rigid body
-                // positions and velocities.
+                // First sort the dirty queue according to priority if IM enabled
+                if (prioritizer_) /**< @todo Move all code in this block behind EntityPrioritizer? */
+                {
+                    /// @todo Do priority update independently from regular sync update.
+                    if (prioUpdateAcc_ >= priorityUpdatePeriod_)
+                    {
+                        prioUpdateAcc_ = fmod(prioUpdateAcc_, priorityUpdatePeriod_);
+                        if (prioritizer_)
+                            prioritizer_->ComputeSyncPriorities(syncState->entities, syncState->observerPos, syncState->observerRot);
+                    }
+                    URHO3D_PROFILE(SyncManager_Update_SortDirtyQueue);
+                    syncState->dirtyQueue.sort();
+                }
+
+                // Then send out all changes to rigid bodies.
+                // After processing this function, the bits related to rigid body states have been cleared,
+                // so the generic sync will not double-replicate the rigid body positions and velocities.
+                /// @note As of now only native clients understand the optimized rigid body sync message.
+                /// This may change with future protocol versions
                 if (dynamic_cast<KNetUserConnection*>(i->Get()) || (*i)->protocolVersion >= ProtocolWebClientRigidBodyMessage)
                     ReplicateRigidBodyChanges((*i).Get());
+                // Finally send out changes to other attributes via the generic sync mechanism.
                 ProcessSyncState((*i).Get());
             }
+        }
     }
     else
     {
         // If we are client and the connection is current, process just the server sync state
         if (Urho3D::StaticCast<KNetUserConnection>(serverConnection_)->connection)
+        {
             ProcessSyncState(serverConnection_.Get());
+            if (prioritizer_ && prioUpdateAcc_ >= priorityUpdatePeriod_)
+            {
+                prioUpdateAcc_ = fmod(prioUpdateAcc_, priorityUpdatePeriod_);
+                SendObserverPosition(serverConnection_.Get(), serverConnection_->syncState.Get());
+            }
+        }
     }
 }
 
@@ -896,7 +1060,8 @@ void SyncManager::ReplicateRigidBodyChanges(UserConnection* user)
     bool msgReliable = false;
     SceneSyncState* state = user->syncState.Get();
 
-    for (Urho3D::HashMap<entity_id_t,EntitySyncState*>::Iterator iter = state->dirtyQueue.Begin(); iter != state->dirtyQueue.End(); ++iter)
+    /// \todo In interest management mode, this doesn't skip entities that shouldn't be updated according to their priority-based interval
+    for (std::list<EntitySyncState*>::iterator it = state->dirtyQueue.begin(); it != state->dirtyQueue.end(); ++it)
     {
         const int maxRigidBodyMessageSizeBits = 350; // An update for a single rigid body can take at most this many bits. (conservative bound)
         // If we filled up this message, send it out and start crafting anothero one.
@@ -907,7 +1072,7 @@ void SyncManager::ReplicateRigidBodyChanges(UserConnection* user)
             msgReliable = false;
         }
 
-        EntitySyncState &ess = *(iter->second_);
+        EntitySyncState &ess = *(*it);
 
         if (ess.isNew || ess.removed)
             continue; // Newly created and removed entities are handled through the traditional sync mechanism.
@@ -982,31 +1147,14 @@ void SyncManager::ReplicateRigidBodyChanges(UserConnection* user)
         bool scaleChanged = transformDirty && (t.scale.DistanceSq(ess.transform.scale) > 1e-3f);
 
         // Detect whether to send compact or full states for each variable.
-        // 0 - don't send, 1 - send compact, 2 - send full.
-        int posSendType = posChanged ? (t.pos.Abs().MaxElement() >= 1023.f ? 2 : 1) : 0;
+        int posSendType = DetectPosSendType(posChanged, t.pos);
         int rotSendType;
         int scaleSendType;
         int velSendType;
         int angVelSendType;
 
-        float3x3 rot;
-        if (rotChanged)
-        {
-            rot = t.Orientation3x3();
-            float3 fwd = rot.Col(2);
-            float3 up = rot.Col(1);
-            float3 planeNormal = float3::unitY.Cross(rot.Col(2));
-            float d = planeNormal.Dot(rot.Col(1));
-
-            if (up.Dot(float3::unitY) >= 0.999f)
-                rotSendType = 1; // Looking upright, 1 DOF.
-            else if (Abs(d) <= 0.001f && Abs(fwd.Dot(float3::unitY)) < 0.95f && up.Dot(float3::unitY) > 0.f)
-                rotSendType = 2; // No roll, i.e. 2 DOF. Use this only if not looking too close towards the +Y axis, due to precision issues, and only when object +Y is towards world up.
-            else
-                rotSendType = 3; // Full 3 DOF
-        }
-        else
-            rotSendType = 0;
+        float3x3 rot = t.Orientation3x3();
+        rotSendType = DetectRotSendType(rotChanged, rot);
 
         if (scaleChanged)
         {
@@ -1030,49 +1178,8 @@ void SyncManager::ReplicateRigidBodyChanges(UserConnection* user)
         ds.AddVLE<kNet::VLE8_16_32>(ess.id); // Sends max. 32 bits.
 
         ds.AddArithmeticEncoded(8, posSendType, 3, rotSendType, 4, scaleSendType, 3, velSendType, 3, angVelSendType, 2); // Sends fixed 8 bits.
-        if (posSendType == 1) // Sends fixed 57 bits.
-        {
-            ds.AddSignedFixedPoint(11, 8, t.pos.x);
-            ds.AddSignedFixedPoint(11, 8, t.pos.y);
-            ds.AddSignedFixedPoint(11, 8, t.pos.z);
-        }
-        else if (posSendType == 2) // Sends fixed 96 bits.
-        {
-            ds.Add<float>(t.pos.x);
-            ds.Add<float>(t.pos.y);
-            ds.Add<float>(t.pos.z);
-        }        
-
-        if (rotSendType == 1) // Orientation with 1 DOF, only yaw.
-        {
-            // The transform is looking straight forward, i.e. the +y vector of the transform local space points straight towards +y in world space.
-            // Therefore the forward vector has y == 0, so send (x,z) as a 2D vector.
-            ds.AddNormalizedVector2D(rot.Col(2).x, rot.Col(2).z, 8);  // Sends fixed 8 bits.
-        }
-        else if (rotSendType == 2) // Orientation with 2 DOF, yaw and pitch.
-        {
-            float3 forward = rot.Col(2);
-            forward.Normalize();
-            ds.AddNormalizedVector3D(forward.x, forward.y, forward.z, 9, 8); // Sends fixed 17 bits.
-        }
-        else if (rotSendType == 3) // Orientation with 3 DOF, full yaw, pitch and roll.
-        {
-            Quat o = t.Orientation();
-
-            float3 axis;
-            float angle;
-            o.ToAxisAngle(axis, angle);
-            if (angle >= 3.141592654f) // Remove the quaternion double cover representation by constraining angle to [0, pi].
-            {
-                axis = -axis;
-                angle = 2.f * 3.141592654f - angle;
-            }
-
-            // Sends 10-31 bits.
-            u32 quantizedAngle = ds.AddQuantizedFloat(0, 3.141592654f, 10, angle);
-            if (quantizedAngle != 0)
-                ds.AddNormalizedVector3D(axis.x, axis.y, axis.z, 11, 10);
-        }
+        
+        WriteOptimizedPosAndRot(ds, posSendType, t.pos, rotSendType, rot);
 
         if (scaleSendType == 1) // Sends fixed 32 bytes.
         {
@@ -1501,13 +1608,27 @@ void SyncManager::ProcessSyncState(UserConnection* user)
 
     // Process the state's dirty entity queue.
     /// \todo Limit and prioritize the data sent. For now the whole queue is processed, regardless of whether the connection is being saturated.
-    if (state->dirtyQueue.Size() > 0)
-    {
-        for (auto iter = state->dirtyQueue.Begin() ; iter != state->dirtyQueue.End() ; ++iter)
-            ProcessEntitySyncState(isServer, user, scene.Get(), state, iter->second_);
+   // Interest management sync priorization performed only on the server
+    const bool serverImEnabled = (isServer && prioritizer_);
 
-        
-        state->dirtyQueue.Clear();
+    // Process the state's dirty entity queue.
+    /// @todo Ideally, the server should be able to define an output per user threshold, 
+    /// which the server could automatically adjust accordingly to the number of concurrent users.
+    std::list<EntitySyncState*>::iterator it = state->dirtyQueue.begin();
+    while(it != state->dirtyQueue.end())
+    {
+        EntitySyncState& entityState = **it;
+        // See if we need to sync yet.
+        float timeSinceLastSend = kNet::Clock::SecondsSinceF(entityState.lastNetworkSendTime);
+        if (serverImEnabled && timeSinceLastSend < entityState.ComputePrioritizedUpdateInterval(updatePeriod_))
+        {
+            ++it;
+            continue;
+        }
+        std::list<EntitySyncState*>::iterator next = ++it;
+        // Note: depending on entity parenting this may process other entities
+        ProcessEntitySyncState(isServer, user, scene.Get(), state, &entityState);
+        it = next;
     }
 
     // Send queued entity actions after scene sync
@@ -1520,10 +1641,8 @@ void SyncManager::ProcessSyncState(UserConnection* user)
     }
 }
 
-void SyncManager::ProcessEntitySyncState(bool isServer, UserConnection* user, Scene *scene, SceneSyncState *sceneState, EntitySyncState *entityState)
+void SyncManager::ProcessEntitySyncState(bool isServer, UserConnection* user, Scene *scene, SceneSyncState *sceneState, EntitySyncState* entityState)
 {
-    entityState->isInQueue = false;
-
     unsigned sceneId = 0;       /// @todo Replace with proper scene ID once multiscene support is in place.
     bool removeState = false;
 
@@ -1544,7 +1663,7 @@ void SyncManager::ProcessEntitySyncState(bool isServer, UserConnection* user, Sc
     
     // Remove entity
     if (entityState->removed)
-    {        
+    {
         /* This code is commented out as it seems this situation should not be possible.
            If you look at SceneSyncState::MarkEntityRemoved(entity_id_t id) where entityState->removed is set to true,
            if there is a ->isNew on the same state, it is just forgotten on the spot and we will never reach this code.
@@ -1581,7 +1700,7 @@ void SyncManager::ProcessEntitySyncState(bool isServer, UserConnection* user, Sc
             entity_id_t parentId = (entity->Parent() ? entity->Parent()->Id() : 0);
 
             // Check if parent is dirty as a new state and send it first.
-            if (parentId > 0 && sceneState->dirtyQueue.Contains(parentId))
+            if (parentId > 0 && sceneState->dirtyEntities.Contains(parentId))
             {
                 /* This will clear the .isNew etc. booleans in the queue,
                    once the main iteration reaches this parent it will do no
@@ -1589,7 +1708,7 @@ void SyncManager::ProcessEntitySyncState(bool isServer, UserConnection* user, Sc
                    the parent chain is deeper than one level, it will recurse
                    here untill a unparented Entity is found and sent them in the
                    correct order. */
-                EntitySyncState *parentState = sceneState->dirtyQueue[parentId];
+                EntitySyncState *parentState = sceneState->dirtyEntities[parentId];
                 if (parentState && parentState->isNew)
                     ProcessEntitySyncState(isServer, user, scene, sceneState, parentState);
             }
@@ -1932,6 +2051,8 @@ void SyncManager::ProcessEntitySyncState(bool isServer, UserConnection* user, Sc
         sceneState->MarkEntityProcessed(entity->Id());
     }
     
+    sceneState->RemoveFromQueue(entityState->id);
+
     // Entity removal has been sent to the client, remove it from the SceneState.
     if (removeState)
         sceneState->entities.erase(entityState->id);
@@ -1951,40 +2072,64 @@ bool SyncManager::ValidateAction(UserConnection* source, unsigned /*messageID*/,
     
     return true;
 }
-
-void SyncManager::HandleCameraOrientation(UserConnection* user, const char* data, size_t numBytes)
+void SyncManager::SendObserverPosition(UserConnection *connection, SceneSyncState *senderState)
 {
-    assert(user);
+    Placeable *placeable = observer_ ? observer_->Component<Placeable>().Get() : 0;
+    if (placeable)
+    {
+        const float3 pos = placeable->WorldPosition();
+        const float3 rot = RadToDeg(placeable->WorldOrientation().ToEulerZYX());
+        const bool posChanged = !pos.Equals(senderState->observerPos);
+        const bool rotChanged = !rot.Equals(senderState->observerRot);
+        if (posChanged || rotChanged)
+        {
+            senderState->observerPos = pos;
+            senderState->observerRot = rot;
 
-    ScenePtr scene = scene_.Lock();
+            const size_t maxDataSize = sizeof(uint) + 1 + 6 * sizeof(float); /** <@todo use scene_id_t instead of uint when available */
+            char dataBuffer[maxDataSize];
+            kNet::DataSerializer ds(dataBuffer, maxDataSize);
+            ds.AddVLE<kNet::VLE8_16_32>((uint)0/*scene->Id()*/);/** <@todo Use proper scene ID when available */
 
-    if (!scene)
+            // Detect whether to send compact or full states for each variable.
+            int posSendType = DetectPosSendType(posChanged, pos);
+
+            float3x3 rot3x3 = placeable->WorldOrientation().ToFloat3x3();
+            int rotSendType = DetectRotSendType(rotChanged, rot3x3);
+
+            ds.AddArithmeticEncoded(8, posSendType, 3, rotSendType, 4);
+
+            WriteOptimizedPosAndRot(ds, posSendType, pos, rotSendType, rot3x3);
+            /// @todo Idea: could have inOrder true and use frame number as the contentID?
+            connection->Send(cObserverPositionMessage, false, false, ds);
+        }
+    }
+}
+
+void SyncManager::HandleObserverPosition(UserConnection* source, const char* data, size_t numBytes)
+{
+    SceneSyncState *syncState = source->syncState.Get();
+    if (!syncState)
         return;
 
     kNet::DataDeserializer dd(data, numBytes);
-    
-    Quat orientation;
-    float3 clientpos;
+    uint sceneId = dd.ReadVLE<kNet::VLE8_16_32>(); /**< @todo scene_id_t */
+    UNREFERENCED_PARAM(sceneId) /**< @todo Scene lookup, when multi-scene support is in place. */
 
-    //Read the position of the client from the message
-    orientation.x = dd.ReadSignedFixedPoint(11, 8);
-    orientation.y = dd.ReadSignedFixedPoint(11, 8);
-    orientation.z = dd.ReadSignedFixedPoint(11, 8);
-    orientation.w = dd.ReadSignedFixedPoint(11, 8);
+    int posSendType;
+    int rotSendType;
+    dd.ReadArithmeticEncoded(8, posSendType, 3, rotSendType, 4);
 
-    clientpos.x = dd.ReadSignedFixedPoint(11, 8);
-    clientpos.y = dd.ReadSignedFixedPoint(11, 8);
-    clientpos.z = dd.ReadSignedFixedPoint(11, 8);
+    float3 pos;
+    Quat rot = Quat::identity;
+    ReadOptimizedPosAndRot(dd, posSendType, pos, rotSendType, rot);
 
-    if(!user->syncState->locationInitialized) //If this is the first camera update, save it to the initialPosition variable
-    {
-        user->syncState->initialLocation = clientpos;
-        user->syncState->initialOrientation = orientation;
-        user->syncState->locationInitialized = true;
-    }
-
-    user->syncState->clientOrientation = orientation;
-    user->syncState->clientLocation = clientpos;
+    // Save observer information always, but compute priorities only on fixed interval.
+    if (posSendType)
+        syncState->observerPos = pos;
+    if (rotSendType)
+        syncState->observerRot = RadToDeg(rot.ToEulerZYX());
+    /// @todo if (posSendType || rotSendType) -> notify current prioritizer that new observer position is available
 }
 
 void SyncManager::HandleCreateEntity(UserConnection* source, const char* data, size_t numBytes)
@@ -2651,12 +2796,14 @@ void SyncManager::HandleEditAttributes(UserConnection* source, const char* data,
     }
     
     // Record the update time for calculating the update interval
-    // Default update interval if state not found or interval not measured yet
-    float updateInterval = updatePeriod_;
-    entityState.UpdateReceived();
-    if (entityState.avgUpdateInterval > 0.0f)
-        updateInterval = entityState.avgUpdateInterval;
-
+    float updateInterval = updatePeriod_; // Default update interval if state not found or interval not measured yet
+    std::map<entity_id_t, EntitySyncState>::iterator it = state->entities.find(entityID);
+    if (it != state->entities.end())
+    {
+        it->second.RefreshAvgUpdateInterval();
+        if (it->second.avgUpdateInterval > 0.0f)
+            updateInterval = it->second.avgUpdateInterval;
+    }
     // Add a fudge factor in case there is jitter in packet receipt or the server is too taxed
     updateInterval *= 1.25f;
 

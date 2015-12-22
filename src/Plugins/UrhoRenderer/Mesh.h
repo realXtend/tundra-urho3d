@@ -130,6 +130,17 @@ public:
     /// Return all animations contained by the skeleton.
     StringVector AnimationNames() const;
 
+    /// Forces mesh asset load, even in headless mode, where it doesn't normally occur at all.
+    /** @note Successful mesh asset load in headless mode results in usable MeshAsset(), but OgreEntity() is not
+        usable still, or any other functions that depend on it (e.g. WorldOBB() et al.). */
+    void ForceMeshLoad();
+
+    /// Returns the mesh asset.
+    IMeshAsset* MeshAsset() const;
+
+    /// Returns name of the mesh asset.
+    const String& MeshName() const;
+
     /// Emitted before the mesh is about to be destroyed
     Signal0<void> MeshAboutToBeDestroyed;
 

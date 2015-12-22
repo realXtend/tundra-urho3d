@@ -84,7 +84,8 @@ struct EntitySyncState
         hasParentChange(false),
         id(0),
         avgUpdateInterval(0.0f),
-        lastNetworkSendTime(kNet::Clock::Tick())
+        priority(-1.f),
+        relevancy(-1.f)
     {
     }
     
@@ -155,20 +156,35 @@ struct EntitySyncState
         hasParentChange = false;
     }
     
-    void UpdateReceived()
+    void RefreshAvgUpdateInterval()
     {
         float time = updateTimer.MSecsElapsed() * 0.001f;
         updateTimer.Start();
-        // Maximum update rate should be 100fps. Discard either very frequent or very infrequent updates.
-        if (time < 0.005f || time >= 0.5f)
-            return;
         // If it's the first measurement, set time directly. Else smooth
         if (avgUpdateInterval == 0.0f)
             avgUpdateInterval = time;
         else
             avgUpdateInterval = 0.5f * time + 0.5f * avgUpdateInterval;
     }
-    
+
+    /// Compares EntitySyncStates by FinalPriority().
+    /*  @remark Interest management */
+    bool operator < (const EntitySyncState &rhs) const
+    {
+        return FinalPriority() < rhs.FinalPriority();
+    }
+
+    /// Computes prioritized network update interval in seconds.
+    /*  @remark Interest management */
+    float ComputePrioritizedUpdateInterval(float maxUpdateRate) const { return Clamp(maxUpdateRate * Log2(100.f / FinalPriority()), maxUpdateRate, MinUpdateRate); }
+
+    /// Returns final/combined priority of this sync state.
+    /*  @remark Interest management */
+    float FinalPriority() const { return priority * relevancy; }
+
+    static const float MinUpdateRate; ///< 5 (in seconds)
+//    static const float MaxUpdateRate; ///< 0.005 (in seconds)
+
     Urho3D::List<ComponentSyncState*> dirtyQueue; ///< Dirty components
     std::map<component_id_t, ComponentSyncState> components; ///< Component syncstates
 
@@ -181,15 +197,28 @@ struct EntitySyncState
     bool hasPropertyChanges; ///< The entity has changes into its other properties, such as temporary flag
     bool hasParentChange; ///> The entity's parent has changed
     
-    kNet::PolledTimer updateTimer; ///< Last update received timer
-    float avgUpdateInterval; ///< Average network update interval in seconds
+    kNet::PolledTimer updateTimer; ///< Last update received timer, for calculating avgUpdateInterval.
+    float avgUpdateInterval; ///< Average network update interval in seconds, used for interpolation.
 
     // Special cases for rigid body streaming:
     // On the server side, remember the last sent rigid body parameters, so that we can perform effective pruning of redundant data.
     Transform transform;
     float3 linearVelocity;
     float3 angularVelocity;
-    kNet::tick_t lastNetworkSendTime;
+    kNet::tick_t lastNetworkSendTime; /**< @note Shared usage by rigid body optimization and interest management. */
+
+    /// Priority = size / distance for visible entities, inf for non-visible.
+    /** Larger number means larger importancy. If this value has not been yet calculated it's < 0.
+        Used to determinate the prioritized update interval of the entity together with relevancy.
+        @remark Interest management */
+    float priority;
+
+    /// Arbitrary relevancy factor.
+    /** Larger number means larger importancy. If this has not been yet calculated it's < 0.
+        F.ex. direction or visibility or of the entity can affect this.
+        Used to determinate the prioritized update interval of the entity together with priority.
+        @remark Interest management */
+    float relevancy;
 };
 
 struct RigidBodyInterpolationState
@@ -276,33 +305,25 @@ public:
     virtual ~SceneSyncState();
 
     /// Entity sync states
-    std::map<entity_id_t, EntitySyncState> entities; 
+    EntitySyncStateMap entities; 
 
-    /// Dirty entities pending processing
-    Urho3D::HashMap<entity_id_t,EntitySyncState*> dirtyQueue;
+    /// Dirty entity states by ID pending processing
+    Urho3D::HashMap<entity_id_t,EntitySyncState*> dirtyEntities;
+    /// Dirty entity list pending processing. @remark Interest management
+    std::list<EntitySyncState*> dirtyQueue;
 
     /// Entity interpolations
     std::map<entity_id_t, RigidBodyInterpolationState> entityInterpolations;
 
-    /// Maps containing the relevance factors and visibility data
-    /// @remarks InterestManager functionality
-    std::map<entity_id_t, bool> visibleEntities;
-    std::map<entity_id_t, float> relevanceFactors;
-
-    /// Couple of maps containing the timestamps of last updates and raycasts
-    /// @remarks InterestManager functionality
-    std::map<entity_id_t, float> lastUpdatedEntitys_;
-    std::map<entity_id_t, float> lastRaycastedEntitys_;
-
-    /// @remarks InterestManager functionality
-    Quat clientOrientation;
-    Quat initialOrientation;
-    float3 clientLocation;  //Clients current pos
-    float3 initialLocation; //Clients initial pos
-    bool locationInitialized;
-
     /// Queued EntityAction messages. These will be sent to the user on the next network update tick.
     std::vector<MsgEntityAction> queuedActions;
+
+    /// Last sent (client) or received (server) observer position in world coordinates.
+    /** If !IsFinite() ObserverPosition message has not been been received from the client. */
+    float3 observerPos;
+    /// Last sent (client) or received (server) observer orientation in world coordinates, Euler ZYX in degrees.
+    /** If !IsFinite() ObserverPosition message has not been been received from the client. */
+    float3 observerRot;
 
     // signals
 

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreTypes.h"
-#include <memory>
+#include <map>
 
 namespace Tundra
 {
@@ -30,5 +30,7 @@ namespace Tundra
     typedef Urho3D::SharedPtr<KNetUserConnection> KNetUserConnectionPtr;
 
     typedef Urho3D::HashMap<String, Variant> LoginPropertyMap;
+
+    typedef std::map<entity_id_t, EntitySyncState> EntitySyncStateMap;
 }
 

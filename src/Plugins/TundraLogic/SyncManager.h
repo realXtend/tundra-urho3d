@@ -14,6 +14,7 @@
 #include "SceneFwd.h"
 #include "AttributeChangeType.h"
 #include "EntityAction.h"
+#include "EntityPrioritizer.h"
 
 #include <Urho3D/Core/Object.h>
 
@@ -40,8 +41,6 @@ public:
     /// Create new replication state for user and dirty it (server operation only)
     void NewUserConnected(const UserConnectionPtr &user);
 
-    // slots
-
     /// Set update period (seconds)
     void SetUpdatePeriod(float period);
 
@@ -54,19 +53,33 @@ public:
     SceneSyncState* SceneState(u32 connectionId) const;
     SceneSyncState* SceneState(const UserConnectionPtr &connection) const; /**< @overload @param connection Client connection.*/
 
-    /// Upates Interest Manager settings.
-    /** @param enabled If true, the IM scheme is allowed to filter traffic.
-        @param bool eucl If true, the euclidean distance filter is active.
-        @param bool ray If true, the ray visibility filter is active.
-        @param bool rel If true, the relevance filter is active.
-        @param int critrange specifies the radius for the critical area.
-        @param int rayrange specifies the radius for the raycasting.
-        @param int relrange specifies the radius for the relevance filtering.
-        @param int updateint specifies the update interval for the relevance filtering.
-        @param int raycastint specifies the raycasting interval for the ray visibility filter. */
-    void UpdateInterestManagerSettings(bool enabled, bool eucl, bool ray, bool rel, int critrange, int relrange, int updateint, int raycastint);
+    /// Enable or disable interest management.
+    /** On client this means that the observer's position information is sent to the server.
+        On server this means that DefaultEntityPrioritizer is used and dirty entities are sorted 
+        and synced according to their priority that is calculated according to observer position.
+        @remark Interest management */
+    void SetInterestManagementEnabled(bool enabled);
 
-    void SendCameraUpdateRequest(UserConnectionPtr conn, bool enabled);
+    /// Is interest management enabled.
+    bool IsInterestManagementEnabled() const { return Prioritizer() != 0; }
+
+    /// Sets the client's observer entity. @remark Interest management
+    /** @note The entity needs to have Placeable component present in order to be usable. */
+    void SetObserver(const EntityPtr &entity) { observer_ = entity; }
+    /// Returns the observer entity, if any. @remark Interest management
+    EntityPtr Observer() const { return observer_.Lock(); }
+
+    /// Sets priority update period, cannot be faster that sync update period. @remark Interest management
+    void SetPriorityUpdatePeriod(float period);
+    /// Returns priority update period. @remark Interest management
+    float PriorityUpdatePeriod() const { return priorityUpdatePeriod_; }
+
+    /// Sets the prioritizer.
+    /** Takes ownership of the object. Possible existing prioritizer is deleted.
+        @remark Interest management */
+    void SetPrioritizer(EntityPrioritizer *prioritizer);
+    /// Returns the prioritizer, if any. @remark Interest management
+    EntityPrioritizer *Prioritizer() const { return prioritizer_; }
 
     // signals
     /// This signal is emitted when a new user connects and a new SceneSyncState is created for the connection.
@@ -162,7 +175,7 @@ private:
 
     /// Process @c entityState that belongs to @c sceneState.
     /** This function must only be called if @c entityState is in the @c sceneStates dirtyQueue. */
-    void ProcessEntitySyncState(bool isServer, UserConnection* user, Scene *scene, SceneSyncState *sceneState, EntitySyncState *entityState);
+    void ProcessEntitySyncState(bool isServer, UserConnection* user, Scene *scene, SceneSyncState *sceneState, EntitySyncState* entityState);
     
     /// Validate the scene manipulation action. If returns false, it is ignored
     /** @param source Where the action came from
@@ -173,6 +186,11 @@ private:
     bool ValidateAttributeBuffer(bool fatal, kNet::DataSerializer& ds, ComponentPtr &comp, size_t maxBytes = 0);
     
     ScenePtr GetRegisteredScene() const { return scene_.Lock(); }
+
+    /// @remark Interest management.
+    void HandleObserverPosition(UserConnection* source, const char* data, size_t numBytes);
+    /// Sends client's observer information. @remark Interest management
+    void SendObserverPosition(UserConnection* connection, SceneSyncState *senderState);
 
     /// Owning module
     TundraLogic* owner_;
@@ -212,6 +230,17 @@ private:
 
     /// Set of custom component type id's that were received from the server, to avoid echoing them back in ProcessSyncState
     std::set<u32> componentTypesFromServer_;
+
+    /// Priority update period in seconds.
+    /** On client this means the observer position's send period. On server this means priority recomputation period.
+        @remark Interest management */
+    float priorityUpdatePeriod_;
+    float prioUpdateAcc_; /**< Time accumulator for priority update @remark Interest management */
+    /// If prioritizer != 0, on client this entity's position information is sent to the server.
+    /** @remark Interest management */
+    EntityWeakPtr observer_;
+    /// @remark Interest management
+    EntityPrioritizer *prioritizer_;
 };
 
 }

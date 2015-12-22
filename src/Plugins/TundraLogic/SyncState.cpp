@@ -19,6 +19,8 @@ typedef std::vector<entity_id_t> EntityIdList;
 typedef EntityIdList::const_iterator PendingConstIter;
 typedef EntityIdList::iterator PendingIter;
 
+const float EntitySyncState::MinUpdateRate = 5.f;
+
 StateChangeRequest::StateChangeRequest(u32 connectionID) :
     connectionID_(connectionID)
 { 
@@ -31,9 +33,8 @@ SceneSyncState::SceneSyncState(u32 userConnectionID, bool isServer) :
     changeRequest_(userConnectionID),
     isServer_(isServer),
     placeholderComponentsSent_(false),
-    locationInitialized(false),
-    clientLocation(float3::nan),
-    initialLocation(float3::nan)
+    observerPos(float3::nan),
+    observerRot(float3::nan)
 {
     Clear();
 }
@@ -159,7 +160,8 @@ EntitySyncState &SceneSyncState::GetOrCreateEntitySyncState(entity_id_t id)
 
 void SceneSyncState::Clear()
 {
-    dirtyQueue.Clear();
+    dirtyEntities.Clear();
+    dirtyQueue.clear();
     entities.clear();
     pendingEntities_.clear();
     changeRequest_.Reset();
@@ -174,12 +176,13 @@ void SceneSyncState::RemoveFromQueue(entity_id_t id)
     {
         if (i->second.isInQueue)
         {
-            dirtyQueue.Erase(id);
-
             i->second.isInQueue = false;
             for (auto j = i->second.components.begin(); j != i->second.components.end(); ++j)
                 j->second.isInQueue = false;
             i->second.dirtyQueue.Clear();
+
+            dirtyEntities.Erase(id);
+            dirtyQueue.remove(&i->second);
         }
     }
 }
@@ -217,7 +220,8 @@ bool SceneSyncState::MarkEntityDirty(entity_id_t id, bool hasPropertyChanges, bo
     EntitySyncState& entityState = GetOrCreateEntitySyncState(id);
     if (!entityState.isInQueue)
     {
-        dirtyQueue.Insert(Urho3D::MakePair(id, &entityState));
+        dirtyEntities.Insert(Urho3D::MakePair(id, &entityState));
+        dirtyQueue.push_back(&entityState);
         entityState.isInQueue = true;
     }
     if (hasPropertyChanges)
@@ -248,7 +252,8 @@ void SceneSyncState::MarkEntityRemoved(entity_id_t id)
     i->second.removed = true;
     if (!i->second.isInQueue)
     {
-        dirtyQueue.Insert(Urho3D::MakePair(id, &i->second));
+        dirtyEntities.Insert(Urho3D::MakePair(id, &i->second));
+        dirtyQueue.push_back(&i->second);
         i->second.isInQueue = true;
     }
 }
@@ -419,7 +424,8 @@ EntitySyncState& SceneSyncState::MarkEntityDirtySilent(entity_id_t id)
     EntitySyncState& entityState = GetOrCreateEntitySyncState(id);
     if (!entityState.isInQueue)
     {
-        dirtyQueue.Insert(Urho3D::MakePair(id, &entityState));
+        dirtyEntities.Insert(Urho3D::MakePair(id, &entityState));
+        dirtyQueue.push_back(&entityState);
         entityState.isInQueue = true;
     }
     return entityState;

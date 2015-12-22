@@ -8,9 +8,13 @@ const unsigned long cLoginReplyMessage = 101;
 const unsigned long cClientJoinedMessage = 102;
 const unsigned long cClientLeftMessage = 103;
 
-// Camera
-const unsigned long cCameraOrientationUpdate = 104;
-const unsigned long cCameraOrientationRequest = 105;
+// Interest management
+/// @todo const unsigned long cSetObserverMessage = 104; // Server->client, tells what entity to use as the observer
+/// The message would contain a scene ID and an entity reference (ID or name) of the desired observer entity.
+/// This message would allow the server to tell what entity the client must use as the observer when the client joins the server.
+/// The message could also be client->server and use to negotiate various observer settings (cutoff radius etc.)
+/// @todo ObserverPosition message could be made server->client also to tell the initial position, or to force the position, of the observer.
+const unsigned long cObserverPositionMessage = 105; // Client->server currently
 
 // Scenesync
 // IMPORTANT! At least two numbers from the range [106, 108] must be reserved for scene creation and removal messages!
