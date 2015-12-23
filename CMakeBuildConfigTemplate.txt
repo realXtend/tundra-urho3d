@@ -79,6 +79,7 @@ AddProject(Plugins Plugins/HttpPlugin)
 AddProject(Plugins Plugins/CameraApplication)
 AddProject(Plugins Plugins/SceneInteract)
 AddProject(Plugins Plugins/AvatarApplication)
+AddProject(Plugins Plugins/LoginScreen)
 
 BeginSection("Configuring Tundra Executable(s)")
 AddProject(Tundra Tundra/Tundra)
