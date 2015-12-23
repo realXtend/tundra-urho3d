@@ -43,6 +43,15 @@ public:
     /// Hide login menu
     void Hide();
 
+    void WriteConfig();
+    void ReadConfig();
+
+    /// Read login information from the UI and update the LoginInfomation object
+    void ReadUI();
+
+    // Read connection information from LoginInfomation object and update the UI
+    void UpdateUI();
+
 private:
     /// Instantate login menu UIElements
     void CreateMenu(float time);
@@ -56,23 +65,21 @@ private:
         uint port;
     };
 
-    /// Read & validate login information from the UI elements and write it into LoginInfomation object
-    bool ReadLoginInformation(LoginInformation &info);
-
     /// Triggered when connect button is pressed
     void OnConnectPressed(StringHash eventType, VariantMap& eventData);
 
     /// Triggered when exit button is pressed
     void OnExitPressed(StringHash eventType, VariantMap& eventData);
 
-    UIElementWeakPtr menuRoot;
-    ButtonWeakPtr loginButton;
-    ButtonWeakPtr exitButton;
-    LineEditWeakPtr address;
-    LineEditWeakPtr username;
-    LineEditWeakPtr password;
-    DropListWeakPtr protocol;
+    UIElementWeakPtr menuRoot_;
+    ButtonWeakPtr loginButton_;
+    ButtonWeakPtr exitButton_;
+    LineEditWeakPtr address_;
+    LineEditWeakPtr username_;
+    LineEditWeakPtr password_;
+    DropListWeakPtr protocol_;
 
+    LoginInformation loginInfo_;
 	Framework *framework_;
 };
 

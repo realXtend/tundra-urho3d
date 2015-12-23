@@ -1,0 +1,8 @@
+[
+    {
+        "--config"   : "tundra.json"
+    },
+    {
+        "--plugin" : [ "LoginScreen" ]
+    }
+]

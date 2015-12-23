@@ -8,8 +8,7 @@
 			"HttpPlugin",
 			"CameraApplication",
 			"SceneInteract",
-			"AvatarApplication",
-      "LoginScreen"
+			"AvatarApplication"
 		]
     }
 ]

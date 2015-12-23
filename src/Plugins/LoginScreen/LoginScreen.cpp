@@ -64,7 +64,10 @@ void LoginScreen::Uninitialize()
 void LoginScreen::OnConnected(UserConnectedResponseData* /*responseData*/)
 {
     if (loginPanel_ != NULL)
+    {
         loginPanel_->Hide();
+        loginPanel_->WriteConfig();
+    }
 }
 
 void LoginScreen::OnDisconnected()
