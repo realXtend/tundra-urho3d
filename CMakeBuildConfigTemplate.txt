@@ -82,6 +82,7 @@ AddProject(Plugins Plugins/AvatarApplication)
 if (NOT ANDROID)
     AddProject(Plugins Plugins/WebSocketServer)
 endif()
+AddProject(Plugins Plugins/LoginScreen)
 
 BeginSection("Configuring Tundra Executable(s)")
 AddProject(Tundra Tundra/Tundra)
