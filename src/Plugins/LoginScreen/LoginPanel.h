@@ -26,6 +26,7 @@ typedef WeakPtr<Urho3D::UIElement> UIElementWeakPtr;
 typedef WeakPtr<Urho3D::Button> ButtonWeakPtr;
 typedef WeakPtr<Urho3D::LineEdit> LineEditWeakPtr;
 typedef WeakPtr<Urho3D::DropDownList> DropListWeakPtr;
+typedef WeakPtr<Urho3D::Text> TextWeakPtr;
 
 class LOGINSCREEN_API LoginPanel : public Object
 {
@@ -43,7 +44,10 @@ public:
     /// Hide login menu
     void Hide();
 
+    /// Write login information to config file.
     void WriteConfig();
+
+    /// Read login information from config file.
     void ReadConfig();
 
     /// Read login information from the UI and update the LoginInfomation object
@@ -53,10 +57,16 @@ public:
     void UpdateUI();
 
 private:
+    /// Display login message in panel.
+    void ShowMessage(const String& reason);
+
+    /// Hide login message area
+    void HideMessage(float time);
+
     /// Instantate login menu UIElements
     void CreateMenu(float time);
 
-    /// Data structure for required login infomation
+    /// Data structure for required login information
     struct LoginInformation
     {
         String serverAddress;
@@ -71,6 +81,8 @@ private:
     /// Triggered when exit button is pressed
     void OnExitPressed(StringHash eventType, VariantMap& eventData);
 
+    void OnConnectionFailed(const String& reason);
+
     UIElementWeakPtr menuRoot_;
     ButtonWeakPtr loginButton_;
     ButtonWeakPtr exitButton_;
@@ -78,6 +90,8 @@ private:
     LineEditWeakPtr username_;
     LineEditWeakPtr password_;
     DropListWeakPtr protocol_;
+    UIElementWeakPtr messages_;
+    TextWeakPtr messageText_;
 
     LoginInformation loginInfo_;
 	Framework *framework_;

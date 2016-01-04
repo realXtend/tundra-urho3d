@@ -52,13 +52,29 @@ LoginPanel::~LoginPanel()
 void LoginPanel::Show()
 {
     if (menuRoot_.NotNull())
+    {
         menuRoot_->SetVisible(true);
+        ShowMessage("");
+    }
 }
 
 void LoginPanel::Hide()
 {
     if (menuRoot_.NotNull())
         menuRoot_->SetVisible(false);
+}
+
+void LoginPanel::ShowMessage(const String& message)
+{
+    if (messageText_.Null())
+        return;
+
+    messageText_->SetText(message);
+}
+
+void LoginPanel::HideMessage(float /*time*/)
+{
+    ShowMessage("");
 }
 
 void LoginPanel::CreateMenu(float /*time*/)
@@ -68,6 +84,7 @@ void LoginPanel::CreateMenu(float /*time*/)
     menuRoot_ = new UIElement(context_);
     menuRoot_->SetPriority(10);
     menuRoot_->SetVisible(true);
+    menuRoot_->SetAlignment(HA_CENTER, VA_CENTER);
     menuRoot_->SetSize(GetSubsystem<UI>()->GetRoot()->GetSize());
     GetSubsystem<UI>()->GetRoot()->AddChild(menuRoot_);
 
@@ -75,6 +92,7 @@ void LoginPanel::CreateMenu(float /*time*/)
     menu->SetStyle("LoginMenu", style);
     menu->SetLayoutMode(LayoutMode::LM_VERTICAL);
     menu->SetSize(IntVector2(440, 220));
+    menu->SetMaxSize(IntVector2(440, 300));
     menu->SetAlignment(HA_CENTER, VA_CENTER);
     menu->SetLayoutSpacing(12);
     menuRoot_->AddChild(menu);
@@ -164,6 +182,23 @@ void LoginPanel::CreateMenu(float /*time*/)
             }
         }
 
+        messages_ = new UIElement(context_);
+        messages_->SetName("MessageArea");
+        messages_->SetMinHeight(32);
+        messages_->SetMaxSize(IntVector2(380, 64));
+        messages_->SetLayoutMode(LayoutMode::LM_VERTICAL);
+        messages_->SetAlignment(HA_CENTER, VA_TOP);
+        menu->AddChild(messages_);
+
+        {
+            messageText_ = new Text(context_);
+            messageText_->SetName("MessageLabel");
+            messageText_->SetStyle("TextMonospace", style);
+            messageText_->SetVerticalAlignment(VA_TOP);
+            messages_->AddChild(messageText_);
+            messageText_->SetWordwrap(true);
+        }
+
         UIElement *buttonArea = new UIElement(context_);
         buttonArea->SetName("ButtonArea");
         buttonArea->SetMinSize(IntVector2(0, 32));
@@ -229,6 +264,7 @@ void LoginPanel::CreateMenu(float /*time*/)
             text->SetHoverColor(Color(0.5, 0.5, 1.0, 0.5));
             protocol_->AddItem(text);
         }
+
     }
 
     ReadConfig();
@@ -305,8 +341,25 @@ void LoginPanel::OnConnectPressed(StringHash /*eventType*/, VariantMap& /*eventD
     if (clientPtr.Null())
         return;
 
+    ShowMessage("Connecting...");
     clientPtr->Login(loginInfo_.serverAddress, (unsigned short)loginInfo_.port, loginInfo_.username, password_->GetText(), loginInfo_.protocol);
+    clientPtr->LoginFailed.Connect(this, &LoginPanel::OnConnectionFailed);
     password_->SetText("");
+}
+
+void LoginPanel::OnConnectionFailed(const String& reason)
+{
+    TundraLogic *logic = framework_->Module<TundraLogic>();
+    if (logic == NULL)
+        return;
+
+    SharedPtr<Client> clientPtr = logic->Client();
+    if (clientPtr.Null())
+        return;
+
+    ShowMessage("Failed to connect: " + clientPtr->LoginProperty("LoginFailed").ToString());
+
+    framework_->Frame()->DelayedExecute(5).Connect(this, &LoginPanel::HideMessage);
 }
 
 void LoginPanel::OnExitPressed(StringHash /*eventType*/, VariantMap& /*eventData*/)

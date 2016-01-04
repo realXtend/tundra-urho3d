@@ -8,14 +8,14 @@ file(GLOB H_FILES *.h)
 set (SOURCE_FILES ${CPP_FILES} ${H_FILES})
 
 UseTundraCore()
-use_modules(TundraCore Plugins/TundraLogic)
+use_modules(TundraCore Plugins/TundraLogic Plugins/UrhoRenderer)
 
 add_definitions(-DLOGINSCREEN_EXPORTS)
 use_package(BULLET)
 
 build_library(${TARGET_NAME} SHARED ${SOURCE_FILES})
 
-link_modules(TundraCore Plugins/TundraLogic)
+link_modules(TundraCore Plugins/TundraLogic Plugins/UrhoRenderer)
 link_package(URHO3D)
 
 SetupCompileFlagsWithPCH()
