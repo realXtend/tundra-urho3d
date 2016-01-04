@@ -195,15 +195,14 @@ IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 :::::::::::::::::::::::: Urho3D engine
 
 IF NOT EXIST "%DEPS%\urho3d\". (
-    :: latest master for now, if a "last known good version" is not needed
     cecho {0D}Cloning Urho3D into "%DEPS%\urho3d".{# #}{\n}
     cd "%DEPS%"
     git clone https://github.com/urho3d/Urho3D.git urho3d
     cd "%DEPS%\urho3d\"
     IF NOT EXIST "%DEPS%\urho3d\.git" GOTO :ERROR
+    git checkout 5acb708
 ) ELSE (
     cd "%DEPS%\urho3d\"
-    git pull
 )
 
 :: pre build

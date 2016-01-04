@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "Win.h"
+
 #include <kNet/PolledTimer.h>
 #include <kNet/Types.h>
 
