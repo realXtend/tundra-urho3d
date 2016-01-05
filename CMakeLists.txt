@@ -154,6 +154,11 @@ if (MSVC)
     # TODO Due to the C++11/C99 requirement, we should use the safe versions of sprintf() et al.
     # and the following should not be used.
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    # Until worked around properly, disable enhanced instructions on VS2013. Otherwise some math code
+    # will work incorrectly (eg. sending optimized rigidbody messages)
+    if (MSVC12)
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:IA32")
+    endif()
 else()
     # TODO This was/is needed for kNet, will not anymore as soon as kNet's master branch is merged to stable.
     add_definitions(-DUNIX)
