@@ -2567,7 +2567,7 @@ void SyncManager::HandleRemoveEntity(UserConnection* source, const char* data, s
     scene->RemoveEntity(entityID, change);
 
     // Delete from the sender's syncstate so that we don't echo the delete back needlessly
-    state->RemoveFromQueue(entityID); // Be sure to erase from dirty queue so that we don't invoke UDB
+    state->RemoveFromQueue(entityID);
     state->entities.erase(entityID);
 }
 
@@ -2616,7 +2616,7 @@ void SyncManager::HandleRemoveComponents(UserConnection* source, const char* dat
         }
         entity->RemoveComponent(comp, change);
 
-        entityState.RemoveFromQueue(compID); // Be sure to erase from dirty queue so that we don't invoke UDB
+        entityState.RemoveFromQueue(compID);
         entityState.components.erase(compID);
     }
 }
