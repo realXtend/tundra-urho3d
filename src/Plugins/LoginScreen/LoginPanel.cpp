@@ -69,7 +69,11 @@ void LoginPanel::ShowMessage(const String& message)
     if (messageText_.Null())
         return;
 
-    messageText_->SetText(message);
+    // Cut the message string if its too long for the ui panel to display.
+    if (message.Length() > 112)
+        messageText_->SetText(message.Substring(0, 112));
+    else
+        messageText_->SetText(message);
 }
 
 void LoginPanel::HideMessage(float /*time*/)
@@ -184,8 +188,8 @@ void LoginPanel::CreateMenu(float /*time*/)
 
         messages_ = new UIElement(context_);
         messages_->SetName("MessageArea");
-        messages_->SetMinHeight(32);
-        messages_->SetMaxSize(IntVector2(380, 64));
+        messages_->SetMinHeight(48);
+        messages_->SetMaxSize(IntVector2(380, 48));
         messages_->SetLayoutMode(LayoutMode::LM_VERTICAL);
         messages_->SetAlignment(HA_CENTER, VA_TOP);
         menu->AddChild(messages_);
