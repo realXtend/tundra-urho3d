@@ -71,6 +71,7 @@ BeginSection("Configuring Tundra Framework") # 70 visible chars to match CMakeLi
 AddProject(TundraCore TundraCore)
 
 BeginSection("Configuring Plugins")
+AddProject(Plugins Plugins/JavaScript)
 AddProject(Plugins Plugins/UrhoRenderer)
 AddProject(Plugins Plugins/TundraLogic)
 AddProject(Plugins Plugins/BulletPhysics)

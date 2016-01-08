@@ -2,6 +2,7 @@
     {
         "--plugin" : [
 			"ZipPlugin",
+			"JavaScript",
 			"UrhoRenderer",
 			"BulletPhysics",
 			"TundraLogic",
