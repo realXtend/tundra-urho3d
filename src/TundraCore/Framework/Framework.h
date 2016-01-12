@@ -69,7 +69,7 @@ public:
     /** This is *always* the directory Tundra.exe resides in.
         E.g. on Windows 7 this is usually of form "C:\Program Files (x86)\Tundra 1.0.5\".
         The returned path contains a trailing slash. */
-    String  InstallationDirectory() const;
+    String InstallationDirectory() const;
 
     /// Returns the directory that is used for Tundra data storage on the current user.
     /** E.g. on Windows 7 this is usually of form "C:\Users\username\AppData\Roaming\Tundra\".

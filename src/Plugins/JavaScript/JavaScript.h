@@ -4,12 +4,12 @@
 
 #include "IModule.h"
 #include "JavaScriptApi.h"
+#include "JavaScriptFwd.h"
 #include "Signals.h"
+#include "Scene.h"
 
 namespace Tundra
 {
-
-class ScriptContext;
 
 /// JavaScript scripting module using the Duktape VM
 class JAVASCRIPT_API JavaScript : public IModule
@@ -20,13 +20,18 @@ public:
     JavaScript(Framework* owner);
     ~JavaScript();
 
-    /// Emitted when a new JavaScript context has been created. Use this to expose more classes to the context.
-    Signal1<ScriptContext*> ScriptContextCreated;
+    /// Emitted when a new JavaScript engine instance has been created. Use this to expose more classes to the instance.
+    Signal1<JavaScriptInstance*> ScriptInstanceCreated;
 
 private:
     void Load() override;
     void Initialize() override;
     void Uninitialize() override;
+
+    void OnSceneCreated(Scene *scene, AttributeChange::Type);
+    void OnComponentAdded(Entity* entity, IComponent* comp, AttributeChange::Type change);
+    void OnComponentRemoved(Entity* entity, IComponent* comp, AttributeChange::Type change);
+    void OnScriptAssetsChanged(Script* scriptComp, const Vector<ScriptAssetPtr>& newScripts);
 };
 
 }

@@ -121,7 +121,7 @@ public:
     bool ShouldRun() const;
 
     /// Emitted when changed script assets are ready to run
-    Signal1<const Vector<ScriptAssetPtr>&> ScriptAssetsChanged;
+    Signal2<Script*, const Vector<ScriptAssetPtr>&> ScriptAssetsChanged;
 
     /// Emitted when the script application name has changed
     Signal1<const String&> ApplicationNameChanged;

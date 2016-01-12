@@ -204,8 +204,7 @@ void Script::OnScriptAssetLoaded(uint /*index*/, AssetPtr /*asset_*/)
             ScriptAssetPtr asset = Urho3D::DynamicCast<ScriptAsset>(allAssets[i]);
             if (!asset)
             {
-                /// \todo Uncomment when scriptasset is registered and a script subsystem actually exists
-                //LogError("Script::ScriptAssetLoaded: Loaded asset of type other than ScriptAsset!");
+                LogError("Script::ScriptAssetLoaded: Loaded asset of type other than ScriptAsset!");
                 continue;
             }
             if (asset->IsLoaded())
@@ -214,7 +213,7 @@ void Script::OnScriptAssetLoaded(uint /*index*/, AssetPtr /*asset_*/)
     }
     
     if (loadedScriptAssets.Size() == allAssets.Size())
-        ScriptAssetsChanged.Emit(loadedScriptAssets);
+        ScriptAssetsChanged.Emit(this, loadedScriptAssets);
 }
 
 void Script::RegisterActions()

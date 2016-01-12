@@ -17,6 +17,7 @@ include_directories(
     ../../TundraCore/Framework
     ../../TundraCore/Asset
     ../../TundraCore/Scene
+    ../../TundraCore/Script
     ../../TundraCore/Signals)
 use_package(URHO3D)
 use_package(MATHGEOLIB)

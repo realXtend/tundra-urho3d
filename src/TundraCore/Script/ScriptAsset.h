@@ -48,5 +48,7 @@ private:
     void ParseReferences();
 };
 
+typedef SharedPtr<ScriptAsset> ScriptAssetPtr;
+
 }
 
