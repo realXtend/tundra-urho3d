@@ -57,7 +57,7 @@ void MenuBarItem::Create(const String &title)
     item_->SetFixedWidth(menuText->GetWidth() + 20);
     if (parentItem_.Null())
     {
-        menuBar_->GetRoot()->AddChild(item_);
+        menuBar_->Root()->AddChild(item_);
         menuText->SetAlignment(HA_CENTER, VA_CENTER);
     }
     else
@@ -134,7 +134,7 @@ MenuBarItem* MenuBarItem::Find(const String &title)
     Vector<String> titles = title.Split('/', true);
     if (titles.Size() > 0)
     {
-        item = GetChild(titles[0]);
+        item = Child(titles[0]);
         if (item != NULL && titles.Size() > 1)
         {
             String subTitle = title.Substring(titles[0].Length() + 1);
@@ -144,12 +144,17 @@ MenuBarItem* MenuBarItem::Find(const String &title)
     return item;
 }
 
-MenuBarItem* MenuBarItem::GetChild(const String &title)
+MenuBarItem* MenuBarItem::Child(const String &title)
 {
     // If menu item is already created return it back to user.
     if (subMenus_.Contains(title))
         return subMenus_[title];
     return NULL;
+}
+
+MenuBarItem* MenuBarItem::Parent()
+{
+    return parentItem_;
 }
 
 void MenuBarItem::Remove()
@@ -184,7 +189,7 @@ MenuBarItem* MenuBarItem::CreateMenuItem(const String &title)
     Vector<String> titles = title.Split('/', true);
     if (titles.Size() > 0)
     {
-        item = GetChild(titles[0]);
+        item = Child(titles[0]);
         if (item != NULL) // MenuItem already exist
         {
             if (titles.Size() == 1)

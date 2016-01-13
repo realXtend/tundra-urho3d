@@ -52,11 +52,7 @@ void MenuBar::Create()
     bar_->SetFixedWidth(GetSubsystem<UI>()->GetRoot()->GetWidth());
     bar_->SetLayout(LM_HORIZONTAL, 4, IntRect(4, 0, 4, 0));
 
-    { // Create core menu items
-        MenuBarItem *fileItem = CreateMenuItem("File");
-        MenuBarItem *child = fileItem->CreateMenuItem("Quit");
-        child->OnItemPressed.Connect(this, &MenuBar::OnQuit);
-    }
+    Hide();
 }
 
 void MenuBar::Show()
@@ -107,6 +103,7 @@ MenuBarItem* MenuBar::CreateMenuItem(const String &title)
     Vector<String> titles = title.Split('/', true);
     if (titles.Size() > 0)
     {
+        Show();
         item = GetMenuItem(titles[0]);
         if (item != NULL) // MenuItem already exist
         {
@@ -140,14 +137,9 @@ void MenuBar::RemoveMenuItem(const String &title)
     }
 }
 
-UIElement* MenuBar::GetRoot() const
+UIElement* MenuBar::Root() const
 {
     return bar_;
-}
-
-void MenuBar::OnQuit(MenuBarItem* /*item*/)
-{
-    framework_->Exit();
 }
 
 }

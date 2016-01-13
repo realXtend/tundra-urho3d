@@ -30,8 +30,11 @@ UiAPI::UiAPI(Framework *framework) :
     framework_(framework),
     menuBar_(0)
 {
-    // Wait for one frame before intilizing ui elements.
-    framework_->Frame()->DelayedExecute(0.0f).Connect(this, &UiAPI::Initialize);
+    if (!framework_->HasCommandLineParameter("--nomenubar") && !framework_->HasCommandLineParameter("--nocentralwidget"))
+    {
+        // Wait for one frame before intilizing ui elements.
+        framework_->Frame()->DelayedExecute(0.0f).Connect(this, &UiAPI::Initialize);
+    }
 }
 
 UiAPI::~UiAPI()

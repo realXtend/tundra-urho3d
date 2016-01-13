@@ -44,19 +44,19 @@ public:
     /// Remove child MenuBarItem
     void RemoveMenuItem(const String &title);
 
-    /// Remove Child MenuBarItem
-    void RemoveMenuItem(MenuBarItem *item);
-
     /// Search for MenuBarItem by it's title
     /** Supports both search by title and hierarchical search
-        e.g. Find("File"); Find("File/Save Scene")
-        @param title search title
+        e.g. Find("File") Find("File/Save Scene")
+        @param title MenuItem title
         @return MenuBarItem or null if not found
     */
     MenuBarItem* Find(const String &title);
 
     /// Get child menu item
-    MenuBarItem* GetChild(const String &title);
+    MenuBarItem* Child(const String &title);
+
+    /// Get parent MenuBarItem or NULL if no parent.
+    MenuBarItem* Parent();
 
     /// Remove self and children from MenuBar
     void Remove();
@@ -64,14 +64,17 @@ public:
     /// Return title text
     String Title() const;
 
+    /// Triggered when MenuItem is pressed
     Signal1<MenuBarItem* ARG(menuitem)> OnItemPressed;
 
 protected:
+    /// Create MenuItem object and attach it to parent item.
     void Create(const String &title);
 
-    /// Create popup ui element
+    /// Create popup UiElement
     void CreatePopup();
 
+    /// Release pupup UiElement
     void RemovePopup();
 
     /// Update popup size to fit content inside.

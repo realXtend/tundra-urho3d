@@ -25,7 +25,7 @@ namespace Tundra
 class MenuBarItem;
 typedef SharedPtr<MenuBarItem> MenuBarItemPtr;
 
-/// Top Menu Bar object.
+/// Top menu bar object
 class TUNDRACORE_API MenuBar : public Object
 {
     URHO3D_OBJECT(MenuBar, Object);
@@ -45,7 +45,7 @@ public:
 
     /// Search for MenuBarItem by it's title
     /** Supports both search by title and hierarchical search
-    e.g. Find("File"); Find("File/Save Scene")
+    e.g. Find("File") or Find("File/Save Scene")
     @param title search title
     @return MenuBarItem or null if not found
     */
@@ -57,15 +57,16 @@ public:
     /// Construct a new MenuBarItem
     MenuBarItem* CreateMenuItem(const String &title);
 
+    /// Remove child MenuItem from MenuBar
     void RemoveMenuItem(const String &title);
 
-    UIElement* GetRoot() const;
+    /// Get MenuBar's root UiElement
+    UIElement* Root() const;
 
 protected:
     Framework *framework_;
 
 private:
-    void OnQuit(MenuBarItem* item);
 
     HashMap<String, MenuBarItemPtr> rootItems_;
     SharedPtr<UIElement> bar_;
