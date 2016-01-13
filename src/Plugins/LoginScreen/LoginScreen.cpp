@@ -35,11 +35,6 @@ LoginScreen::~LoginScreen()
         delete loginPanel_;
 }
 
-void LoginScreen::Update(float /*frameTime*/)
-{
-    
-}
-
 void LoginScreen::Initialize()
 {
 	// Check if own avatar was created

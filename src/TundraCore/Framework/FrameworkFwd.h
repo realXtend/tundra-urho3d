@@ -21,5 +21,6 @@ namespace Tundra
     class AssetAPI;
     class DebugAPI;
     class InputAPI;
+    class UiAPI;
     class InputContext;
 }

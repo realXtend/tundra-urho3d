@@ -33,9 +33,6 @@ public:
     LoginScreen(Framework* owner);
     ~LoginScreen();
 
-    /// Frame-based module update
-    void Update(float frametime) override;
-
 private:
 	void Initialize() override;
 	void Uninitialize() override;

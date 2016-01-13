@@ -19,6 +19,7 @@ AddSourceFolder(Console)
 AddSourceFolder(Debug)
 AddSourceFolder(Input)
 AddSourceFolder(Script)
+AddSourceFolder(UI)
 
 set(SOURCE_FILES ${CPP_FILES} ${H_FILES})
 

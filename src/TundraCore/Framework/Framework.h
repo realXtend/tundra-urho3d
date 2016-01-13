@@ -154,6 +154,9 @@ public:
     /// Returns core API Input object.
     InputAPI* Input() const;
 
+    /// Returns core API UI object.
+    UiAPI* Ui() const;
+
     /// Return the Urho3D Engine object.
     Urho3D::Engine* Engine() const;
 
@@ -233,6 +236,8 @@ private:
     SharedPtr<DebugAPI> debug;
     /// InputAPI
     SharedPtr<InputAPI> input;
+    // UiAPI
+    SharedPtr<UiAPI> ui;
 
     /// Stores all command line parameters and expanded options specified in the Config XML files, except for the config file(s) themselves.
     OptionsMap startupOptions;

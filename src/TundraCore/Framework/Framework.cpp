@@ -11,6 +11,7 @@
 #include "Scene/SceneAPI.h"
 #include "Console/ConsoleAPI.h"
 #include "Debug/DebugAPI.h"
+#include "Ui/UiAPI.h"
 #include "Input/InputAPI.h"
 #include "Asset/AssetAPI.h"
 #include "Asset/AssetCache.h"
@@ -93,6 +94,7 @@ Framework::Framework(Context* ctx) :
     scene = new SceneAPI(this);
     asset = new AssetAPI(this, headless);
     input = new InputAPI(this);
+    ui = new UiAPI(this);
 
     // Prepare main cache directory
     String cacheDir = UserDataDirectory() + "cache";
@@ -121,6 +123,7 @@ Framework::~Framework()
     config.Reset();
     asset.Reset();
     debug.Reset();
+    ui.Reset();
 
     instance = 0;
 }
@@ -402,6 +405,11 @@ DebugAPI *Framework::Debug() const
 InputAPI *Framework::Input() const
 {
     return input;
+}
+
+UiAPI *Framework::Ui() const
+{
+    return ui;
 }
 
 Engine* Framework::Engine() const

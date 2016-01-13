@@ -7,8 +7,6 @@
 #include "CoreTypes.h"
 
 #include <Urho3D/Container/Ptr.h>
-#include <Urho3D/Container/RefCounted.h>
-#include <Urho3D/UI/UIElement.h>
 
 namespace Urho3D
 {

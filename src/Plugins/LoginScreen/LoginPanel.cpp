@@ -7,27 +7,18 @@
 #include "Framework.h"
 #include "ConfigAPI.h"
 #include "FrameAPI.h"
-#include "CoreStringUtils.h"
 #include "LoggingFunctions.h"
 #include "TundraLogic.h"
 #include "Client.h"
 
-#include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Resource/ResourceCache.h>
-#include <Urho3D/Graphics/GraphicsEvents.h>
 #include <Urho3D/UI/UIEvents.h>
 
 #include <Urho3D/Core/Context.h>
-#include <Urho3D/Engine/Engine.h>
-#include <Urho3D/UI/Font.h>
-#include <Urho3D/Graphics/Graphics.h>
-#include <Urho3D/Core/Profiler.h>
-#include <Urho3D/Graphics/Renderer.h>
 #include <Urho3D/UI/Text.h>
 #include <Urho3D/UI/BorderImage.h>
 #include <Urho3D/UI/UI.h>
 #include <Urho3D/UI/Button.h>
-#include <Urho3D/UI/ScrollView.h>
 #include <Urho3D/UI/LineEdit.h>
 #include <Urho3D/UI/DropDownList.h>
 
@@ -47,6 +38,16 @@ LoginPanel::~LoginPanel()
 {
     if (menuRoot_.NotNull())
         menuRoot_->Remove();
+
+    menuRoot_.Reset();
+    loginButton_.Reset();
+    exitButton_.Reset();
+    address_.Reset();
+    username_.Reset();
+    password_.Reset();
+    protocol_.Reset();
+    messages_.Reset();
+    messageText_.Reset();
 }
 
 void LoginPanel::Show()
@@ -344,14 +345,14 @@ void LoginPanel::OnConnectPressed(StringHash /*eventType*/, VariantMap& /*eventD
     SharedPtr<Client> clientPtr = logic->Client();
     if (clientPtr.Null())
         return;
-
+    
     ShowMessage("Connecting...");
     clientPtr->Login(loginInfo_.serverAddress, (unsigned short)loginInfo_.port, loginInfo_.username, password_->GetText(), loginInfo_.protocol);
     clientPtr->LoginFailed.Connect(this, &LoginPanel::OnConnectionFailed);
     password_->SetText("");
 }
 
-void LoginPanel::OnConnectionFailed(const String& reason)
+void LoginPanel::OnConnectionFailed(const String& /*reason*/)
 {
     TundraLogic *logic = framework_->Module<TundraLogic>();
     if (logic == NULL)
