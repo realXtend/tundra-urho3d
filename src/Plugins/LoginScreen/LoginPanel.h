@@ -7,6 +7,7 @@
 #include "CoreTypes.h"
 
 #include <Urho3D/Container/Ptr.h>
+#include <Urho3D/Core/Object.h>
 
 namespace Urho3D
 {

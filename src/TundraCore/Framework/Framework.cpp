@@ -11,7 +11,7 @@
 #include "Scene/SceneAPI.h"
 #include "Console/ConsoleAPI.h"
 #include "Debug/DebugAPI.h"
-#include "Ui/UiAPI.h"
+#include "UI/UiAPI.h"
 #include "Input/InputAPI.h"
 #include "Asset/AssetAPI.h"
 #include "Asset/AssetCache.h"
