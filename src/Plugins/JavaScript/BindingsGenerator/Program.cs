@@ -77,6 +77,7 @@ namespace BindingsGenerator
             GeneratePropertyAccessors(classSymbol, tw);
             GenerateMemberFunctions(classSymbol, tw, overloads);
             GenerateFunctionSelectors(classSymbol, tw, overloads);
+            GenerateFunctionList(classSymbol, tw, overloads);
        
             // \todo Create bindings for static functions
             // \todo Create code to instantiate the JS constructor + prototype
@@ -349,6 +350,30 @@ namespace BindingsGenerator
                     tw.WriteLine("");   
                 }
             }
+        }
+
+        static void GenerateFunctionList(Symbol classSymbol, TextWriter tw, Dictionary<string, List<Overload> > overloads)
+        {
+            tw.WriteLine("const duk_function_list_entry " + classSymbol.name + "_Methods[] = {");
+            bool first = true;
+            foreach (KeyValuePair<string, List<Overload> > kvp in overloads)
+            {
+                if (kvp.Value[0].functionName.Contains("Ctor"))
+                    continue;
+
+                string prefix = first ? "" : ",";
+
+                if (kvp.Value.Count >= 2)    
+                    tw.WriteLine(Indent(1) + prefix + "{\"" + kvp.Value[0].function.name + "\", " + kvp.Key + "_Selector, DUK_VARARGS}");
+                else
+                    tw.WriteLine(Indent(1) + prefix + "{\"" + kvp.Value[0].function.name + "\", " + kvp.Value[0].functionName + ", " + kvp.Value[0].parameters.Count + "}");
+
+                first = false;
+            }
+
+            tw.WriteLine(Indent(1) + ",{nullptr, nullptr, 0}");
+            tw.WriteLine("};");
+            tw.WriteLine("");  
         }
 
         static HashSet<string> FindDependencies(Symbol classSymbol)
