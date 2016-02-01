@@ -5,6 +5,9 @@ namespace Bindings
 
 template<class T> T* GetObject(duk_context* ctx, duk_idx_t stackIndex, const char* typeName)
 {
+    if (!duk_is_object(ctx, stackIndex))
+        return 0;
+
     duk_get_prop_string(ctx, stackIndex, "\xff""obj");
     T* obj = static_cast<T*>(duk_to_pointer(ctx, -1));
     duk_pop(ctx);

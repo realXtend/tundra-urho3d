@@ -6,6 +6,13 @@ using System.IO;
 
 namespace BindingsGenerator
 {
+    struct Overload
+    {
+        public string functionName;
+        public Symbol function;
+        public List<Parameter> parameters;
+    }
+
     class Program
     {
         static HashSet<string> classNames = new HashSet<string>();
@@ -65,12 +72,12 @@ namespace BindingsGenerator
             tw.WriteLine("");
 
             // \todo Handle refcounted class destruction (wrap in a smart ptr)
-            Dictionary<string, List<string> > overloads = new Dictionary<string, List<string> >();
+            Dictionary<string, List<Overload> > overloads = new Dictionary<string, List<Overload> >();
             GenerateDestructor(classSymbol, tw);
             GeneratePropertyAccessors(classSymbol, tw);
             GenerateMemberFunctions(classSymbol, tw, overloads);
-
-            // \todo Create member function selectors for overloads
+            GenerateFunctionSelectors(classSymbol, tw, overloads);
+       
             // \todo Create bindings for static functions
             // \todo Create code to instantiate the JS constructor + prototype
 
@@ -95,7 +102,7 @@ namespace BindingsGenerator
                     return typeName + "* " + varName + " = GetObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
                 else
                     return typeName + "* " + varName + " = GetObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + "); " +
-                            "if (!" + varName + ") duk_error(ctx, DUK_ERR_REFERENCE_ERROR, \"Null argument\");";
+                            "if (!" + varName + ") duk_error(ctx, DUK_ERR_REFERENCE_ERROR, \"Null or invalid object argument\");";
             }
             else if (Symbol.IsNumberType(typeName))
                 return typeName + " " + varName + " = duk_require_number(ctx, " + stackIndex + ");";
@@ -151,6 +158,20 @@ namespace BindingsGenerator
             return typeName + "* " + varName + " = GetThisObject<" + typeName + ">(ctx, " + ClassIdentifier(typeName) + "); if (!" + varName + ") duk_error(ctx, DUK_ERR_REFERENCE_ERROR, \"Null this pointer\");";
         }
 
+        static string GenerateArgCheck(Parameter p, int stackIndex)
+        {
+            string typeName = p.BasicType();
+
+            if (!Symbol.IsPODType(typeName))
+                return "GetObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ")";
+            else if (Symbol.IsNumberType(typeName))
+                return "duk_is_number(ctx, " + stackIndex + ")";
+            else if (typeName == "bool")
+                return "duk_is_boolean(ctx, " + stackIndex + ")";
+
+            throw new System.Exception("Unsupported type " + typeName + " for GenerateArgCheck()!");
+        }
+
         static void GenerateDestructor(Symbol classSymbol, TextWriter tw)
         {
             tw.WriteLine("duk_ret_t " + classSymbol.name + "_Dtor" + DukSignature());
@@ -200,7 +221,7 @@ namespace BindingsGenerator
             }
         }
 
-        static void GenerateMemberFunctions(Symbol classSymbol, TextWriter tw, Dictionary<string, List<string> > overloads)
+        static void GenerateMemberFunctions(Symbol classSymbol, TextWriter tw, Dictionary<string, List<Overload> > overloads)
         {
             foreach (Symbol child in classSymbol.children)
             { 
@@ -213,23 +234,39 @@ namespace BindingsGenerator
                     if (!isClassCtor && !IsSupportedReturnType(child.type))
                         continue;
 
-                    // First overload?
-                    if (!overloads.ContainsKey(child.name))
-                        overloads[child.name] = new List<string>();
-                    string functionName = "";
-
+                    string baseFunctionName = "";
                     if (!isClassCtor)
-                        functionName = classSymbol.name + "_" + child.name;
+                        baseFunctionName = classSymbol.name + "_" + child.name;
                     else
-                        functionName = classSymbol.name + "_Ctor";
+                        baseFunctionName = classSymbol.name + "_Ctor";
+
+                    // First overload?
+                    if (!overloads.ContainsKey(baseFunctionName))
+                        overloads[baseFunctionName] = new List<Overload>();
+
+                    // Differentiate function name by parameters
+                    string functionName = baseFunctionName;
                     for (int i = 0; i < child.parameters.Count; ++i)
                         functionName += "_" + child.parameters[i].BasicType();
      
                     // Skip if same overload (typically a const variation) already included
-                    if (overloads[child.name].Contains(functionName))
+                    bool hasSame = false;
+                    foreach (Overload o in overloads[baseFunctionName])
+                    {
+                        if (o.functionName == functionName)
+                        {
+                            hasSame = true;
+                            break;
+                        }
+                    }
+                    if (hasSame)
                         continue;
 
-                    overloads[child.name].Add(functionName);
+                    Overload newOverload = new Overload();
+                    newOverload.functionName = functionName;
+                    newOverload.function = child;
+                    newOverload.parameters = child.parameters;
+                    overloads[baseFunctionName].Add(newOverload);
 
                     if (isClassCtor)
                     {
@@ -285,6 +322,31 @@ namespace BindingsGenerator
                         tw.WriteLine("}");
                         tw.WriteLine(""); 
                     }                           
+                }
+            }
+        }
+
+        static void GenerateFunctionSelectors(Symbol classSymbol, TextWriter tw, Dictionary<string, List<Overload> > overloads)
+        {
+            foreach (KeyValuePair<string, List<Overload> > kvp in overloads)
+            {
+                if (kvp.Value.Count >= 2)
+                {
+                    tw.WriteLine("duk_ret_t " + kvp.Key + "_Selector" + DukSignature());
+                    tw.WriteLine("{");
+                    tw.WriteLine(Indent(1) + "int numArgs = duk_get_top(ctx);");
+                    foreach (Overload o in kvp.Value)
+                    {
+                        string argCheck = "if (numArgs == " + o.parameters.Count;
+                        for (int i = 0; i < o.parameters.Count; ++i)
+                            argCheck += " && " + GenerateArgCheck(o.parameters[i], i);
+                        argCheck += ")";
+                        tw.WriteLine(Indent(1) + argCheck);
+                        tw.WriteLine(Indent(2) + "return " + o.functionName + "(ctx);");
+                    }
+                    tw.WriteLine(Indent(1) + "duk_error(ctx, DUK_ERR_ERROR, \"Could not select function overload\");");
+                    tw.WriteLine("}");
+                    tw.WriteLine("");   
                 }
             }
         }
