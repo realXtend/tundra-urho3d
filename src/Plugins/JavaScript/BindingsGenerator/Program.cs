@@ -13,6 +13,12 @@ namespace BindingsGenerator
         public List<Parameter> parameters;
     }
 
+    struct Property
+    {
+        public string name;
+        public bool readOnly;
+    }
+
     class Program
     {
         static HashSet<string> classNames = new HashSet<string>();
@@ -51,17 +57,16 @@ namespace BindingsGenerator
             TextWriter tw = new StreamWriter(outputDirectory + "/" + classSymbol.name + "Bindings.cpp");
             tw.WriteLine("#include \"BindingsHelpers.h\"");
             tw.WriteLine("#include \"" + classSymbol.name + ".h\"");
-            tw.WriteLine("");
-            tw.WriteLine("namespace Bindings");
-            tw.WriteLine("{");
 
             // Find dependency classes and refer to them
             // Includes
             HashSet<string> dependencies = FindDependencies(classSymbol);
             foreach (string s in dependencies)
-                tw.WriteLine("#include \"" + s + ".h\"");
-            tw.WriteLine("");
+                tw.WriteLine("#include \"" + s + ".h\"");            
+            tw.WriteLine("");        
 
+            tw.WriteLine("namespace Bindings");
+            tw.WriteLine("{");
             // Externs for the type identifiers
             foreach (string s in dependencies)
                 tw.WriteLine("extern const char* " + ClassIdentifier(s) + ";");
@@ -74,14 +79,16 @@ namespace BindingsGenerator
             // \todo Handle refcounted class destruction (wrap in a smart ptr)
             Dictionary<string, List<Overload> > overloads = new Dictionary<string, List<Overload> >();
             Dictionary<string, List<Overload>> staticOverloads = new Dictionary<string, List<Overload>>();
+            List<Property> properties = new List<Property>();
             GenerateDestructor(classSymbol, tw);
-            GeneratePropertyAccessors(classSymbol, tw);
+            GeneratePropertyAccessors(classSymbol, tw, properties);
             GenerateMemberFunctions(classSymbol, tw, overloads, false);
             GenerateFunctionSelectors(classSymbol, tw, overloads);
             GenerateMemberFunctions(classSymbol, tw, staticOverloads, true);
             GenerateFunctionSelectors(classSymbol, tw, staticOverloads);
             GenerateFunctionList(classSymbol, tw, overloads, false);
             GenerateFunctionList(classSymbol, tw, staticOverloads, true);
+            GenerateExposeFunction(classSymbol, tw, overloads, staticOverloads, properties);
        
             // \todo Create bindings for static functions
             // \todo Create code to instantiate the JS constructor + prototype
@@ -192,13 +199,17 @@ namespace BindingsGenerator
             tw.WriteLine("");
         }
 
-        static void GeneratePropertyAccessors(Symbol classSymbol, TextWriter tw)
+        static void GeneratePropertyAccessors(Symbol classSymbol, TextWriter tw, List<Property> properties)
         {
             foreach (Symbol child in classSymbol.children)
             {
                 // \todo Handle non-POD accessors
                 if (child.kind == "variable" && !child.isStatic && IsScriptable(child) && child.visibilityLevel == VisibilityLevel.Public && Symbol.IsPODType(child.type))
                 {
+                    Property newProperty;
+                    newProperty.name = child.name;
+                    newProperty.readOnly = true;
+
                     // Set accessor
                     if (!child.IsConst())
                     {
@@ -210,6 +221,7 @@ namespace BindingsGenerator
                         tw.WriteLine(Indent(1) + "return 0;");
                         tw.WriteLine("}");
                         tw.WriteLine("");
+                        newProperty.readOnly = false;
                     }
 
                     // Get accessor
@@ -222,6 +234,8 @@ namespace BindingsGenerator
                         tw.WriteLine("}");
                         tw.WriteLine("");                                                                                      
                     }
+
+                    properties.Add(newProperty);
                 }
             }
         }
@@ -392,6 +406,34 @@ namespace BindingsGenerator
             tw.WriteLine("");  
         }
 
+        static void GenerateExposeFunction(Symbol classSymbol, TextWriter tw, Dictionary<string, List<Overload> > overloads, Dictionary<string, List<Overload> > staticOverloads, List<Property> properties)
+        {           
+            tw.WriteLine("void Expose" + classSymbol.name + DukSignature());
+            tw.WriteLine("{");
+            
+            string ctorName = classSymbol.name + "_Ctor";
+            if (overloads.ContainsKey(ctorName) && overloads[ctorName].Count >= 2)
+                ctorName += "_Selector";
+
+            /// \todo Handle non-constructable classes, usually RefCounted
+            tw.WriteLine(Indent(1) + "duk_push_c_function(ctx, " + ctorName + ", DUK_VARARGS);");
+            if (staticOverloads.Count > 0)
+                tw.WriteLine(Indent(1) + "duk_put_function_list(ctx, -1, " + classSymbol.name + "_StaticFunctions);");
+            tw.WriteLine(Indent(1) + "duk_push_object(ctx);");
+            tw.WriteLine(Indent(1) + "duk_put_function_list(ctx, -1, " + classSymbol.name + "_Functions);");
+            foreach (Property p in properties)
+            {
+                if (!p.readOnly)
+                    tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + p.name + "\", " + classSymbol.name + "_Get_" + p.name + ", " + classSymbol.name + "_Set" + p.name + ");");
+                else
+                    tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + p.name + "\", " + classSymbol.name + "_Get_" + p.name + ", nullptr);");
+            }
+            tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"prototype\");");
+            tw.WriteLine(Indent(1) + "duk_put_global_string(ctx, " + ClassIdentifier(classSymbol.name) + ");");
+            tw.WriteLine("}");
+            tw.WriteLine("");
+        }
+
         static HashSet<string> FindDependencies(Symbol classSymbol)
         {
             HashSet<string> dependencies = new HashSet<string>();
@@ -402,9 +444,9 @@ namespace BindingsGenerator
 
                 if (child.kind == "function" && !child.name.Contains("operator"))
                 {
-                    AddDependencyIfValid(dependencies, child.type); // Return type
+                    AddDependencyIfValid(classSymbol, dependencies, child.type); // Return type
                     foreach (Parameter p in child.parameters)
-                        AddDependencyIfValid(dependencies, p.BasicType());
+                        AddDependencyIfValid(classSymbol, dependencies, p.BasicType());
                 }
             }
 
@@ -435,9 +477,12 @@ namespace BindingsGenerator
             return t;
         }
 
-        static void AddDependencyIfValid(HashSet<string> dependencyNames, string typeName)
+        static void AddDependencyIfValid(Symbol classSymbol, HashSet<string> dependencyNames, string typeName)
         {
             string t = SanitateTypeName(typeName);
+            if (classSymbol.name == t)
+                return; // Do not add self as dependency
+                
             if (!Symbol.IsPODType(t) && classNames.Contains(t))
                 dependencyNames.Add(t);
         }
