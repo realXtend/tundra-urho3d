@@ -22,6 +22,7 @@ namespace BindingsGenerator
     class Program
     {
         static HashSet<string> classNames = new HashSet<string>();
+        static List<string> exposeTheseClasses = new List<string>();
 
         static void Main(string[] args)
         {
@@ -29,6 +30,7 @@ namespace BindingsGenerator
             {
                 Console.WriteLine("First cmdline parameter should be the absolute path to the root where doxygen generated the documentation XML files.");
                 Console.WriteLine("Second cmdline parameter should be the output directory.");
+                Console.WriteLine("Further cmdline parameters can optionally list the classes to be exposed. Otherwise all will be exposed. When amount of classes is limited, functions using excluded classes will not be exposed.");
                 return;
             }
 
@@ -37,9 +39,15 @@ namespace BindingsGenerator
 
             string outputDirectory = args[1];
 
+            if (args.Length > 2)
+            {
+                for (int i = 2; i < args.Length; ++i)
+                    exposeTheseClasses.Add(args[i]);
+            }
+
             foreach (Symbol classSymbol in s.symbolsByName.Values)
             {
-                if (classSymbol.kind == "class")
+                if (classSymbol.kind == "class" && (exposeTheseClasses.Count == 0 || exposeTheseClasses.Contains(classSymbol.name)))
                     classNames.Add(classSymbol.name);
             }
 
@@ -59,8 +67,8 @@ namespace BindingsGenerator
             tw.WriteLine("#include \"" + classSymbol.name + ".h\"");
 
             // Find dependency classes and refer to them
-            // Includes
             HashSet<string> dependencies = FindDependencies(classSymbol);
+            // Includes
             foreach (string s in dependencies)
                 tw.WriteLine("#include \"" + s + ".h\"");            
             tw.WriteLine("");        
@@ -250,7 +258,18 @@ namespace BindingsGenerator
                         continue;
 
                     bool isClassCtor = !child.isStatic && (child.name == classSymbol.name);
-                    if (!isClassCtor && !IsSupportedReturnType(child.type))
+                    if (!isClassCtor && !IsSupportedType(child.type))
+                        continue;
+                    bool badParameters = false;
+                    for (int i = 0; i < child.parameters.Count; ++i)
+                    {
+                        if (!IsSupportedType(child.parameters[i].BasicType()))
+                        {
+                            badParameters = true;
+                            break;
+                        }
+                    }
+                    if (badParameters)
                         continue;
 
                     string baseFunctionName = "";
@@ -487,7 +506,7 @@ namespace BindingsGenerator
                 dependencyNames.Add(t);
         }
 
-        static bool IsSupportedReturnType(string typeName)
+        static bool IsSupportedType(string typeName)
         {
             string t = SanitateTypeName(typeName);
             return t == "void" || Symbol.IsPODType(t) || classNames.Contains(t);
