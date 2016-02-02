@@ -73,11 +73,15 @@ namespace BindingsGenerator
 
             // \todo Handle refcounted class destruction (wrap in a smart ptr)
             Dictionary<string, List<Overload> > overloads = new Dictionary<string, List<Overload> >();
+            Dictionary<string, List<Overload>> staticOverloads = new Dictionary<string, List<Overload>>();
             GenerateDestructor(classSymbol, tw);
             GeneratePropertyAccessors(classSymbol, tw);
-            GenerateMemberFunctions(classSymbol, tw, overloads);
+            GenerateMemberFunctions(classSymbol, tw, overloads, false);
             GenerateFunctionSelectors(classSymbol, tw, overloads);
-            GenerateFunctionList(classSymbol, tw, overloads);
+            GenerateMemberFunctions(classSymbol, tw, staticOverloads, true);
+            GenerateFunctionSelectors(classSymbol, tw, staticOverloads);
+            GenerateFunctionList(classSymbol, tw, overloads, false);
+            GenerateFunctionList(classSymbol, tw, staticOverloads, true);
        
             // \todo Create bindings for static functions
             // \todo Create code to instantiate the JS constructor + prototype
@@ -222,16 +226,16 @@ namespace BindingsGenerator
             }
         }
 
-        static void GenerateMemberFunctions(Symbol classSymbol, TextWriter tw, Dictionary<string, List<Overload> > overloads)
+        static void GenerateMemberFunctions(Symbol classSymbol, TextWriter tw, Dictionary<string, List<Overload> > overloads, bool generateStatic)
         {
             foreach (Symbol child in classSymbol.children)
             { 
-                if (child.kind == "function" && !child.name.Contains("operator"))
+                if (child.isStatic == generateStatic && child.kind == "function" && !child.name.Contains("operator"))
                 {
                     if (!IsScriptable(child))
                         continue;
 
-                    bool isClassCtor = (child.name == classSymbol.name);
+                    bool isClassCtor = !child.isStatic && (child.name == classSymbol.name);
                     if (!isClassCtor && !IsSupportedReturnType(child.type))
                         continue;
 
@@ -240,6 +244,8 @@ namespace BindingsGenerator
                         baseFunctionName = classSymbol.name + "_" + child.name;
                     else
                         baseFunctionName = classSymbol.name + "_Ctor";
+                    if (child.isStatic)
+                        baseFunctionName += "_Static";
 
                     // First overload?
                     if (!overloads.ContainsKey(baseFunctionName))
@@ -296,7 +302,14 @@ namespace BindingsGenerator
                     {
                         tw.WriteLine("duk_ret_t " + functionName + DukSignature());
                         tw.WriteLine("{");
-                        tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
+                        string callPrefix = "";
+                        if (!child.isStatic)
+                        {
+                            callPrefix = "thisObj->";
+                            tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
+                        }
+                        else
+                            callPrefix = classSymbol.name + "::";
                         
                         string args = "";
                         for (int i = 0; i < child.parameters.Count; ++i)
@@ -311,12 +324,12 @@ namespace BindingsGenerator
                         }
                         if (child.type == "void")
                         {
-                            tw.WriteLine(Indent(1) + "thisObj->" + child.name + "(" + args + ");");
+                            tw.WriteLine(Indent(1) + callPrefix + child.name + "(" + args + ");");
                             tw.WriteLine(Indent(1) + "return 0;");
                         }
                         else
                         {
-                            tw.WriteLine(Indent(1) + child.type + " ret = thisObj->" + child.name + "(" + args + ");");
+                            tw.WriteLine(Indent(1) + child.type + " ret = " + callPrefix + child.name + "(" + args + ");");
                             tw.WriteLine(Indent(1) + GeneratePushToStack(child.type, "ret"));
                             tw.WriteLine(Indent(1) + "return 1;");
                         }
@@ -352,9 +365,12 @@ namespace BindingsGenerator
             }
         }
 
-        static void GenerateFunctionList(Symbol classSymbol, TextWriter tw, Dictionary<string, List<Overload> > overloads)
+        static void GenerateFunctionList(Symbol classSymbol, TextWriter tw, Dictionary<string, List<Overload> > overloads, bool generateStatic)
         {
-            tw.WriteLine("const duk_function_list_entry " + classSymbol.name + "_Methods[] = {");
+            if (!generateStatic)
+                tw.WriteLine("const duk_function_list_entry " + classSymbol.name + "_Functions[] = {");
+            else
+                tw.WriteLine("const duk_function_list_entry " + classSymbol.name + "_StaticFunctions[] = {");
             bool first = true;
             foreach (KeyValuePair<string, List<Overload> > kvp in overloads)
             {
