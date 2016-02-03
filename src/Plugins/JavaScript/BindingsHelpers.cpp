@@ -1,6 +1,9 @@
+// For conditions of distribution and use, see copyright notice in LICENSE
+
+#include "StableHeaders.h"
 #include "BindingsHelpers.h"
 
-namespace Bindings
+namespace JSBindings
 {
 
 void SetObject(duk_context* ctx, duk_idx_t stackIndex, void* obj, const char* typeName)

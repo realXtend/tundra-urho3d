@@ -1,6 +1,6 @@
 #include "duktape.h"
 
-namespace Bindings
+namespace JSBindings
 {
 
 template<class T> T* GetObject(duk_context* ctx, duk_idx_t stackIndex, const char* typeName)
@@ -28,7 +28,7 @@ template<class T> T* GetObject(duk_context* ctx, duk_idx_t stackIndex, const cha
 template<class T> T* GetThisObject(duk_context* ctx, const char* typeName)
 {
     duk_push_this(ctx);
-    T* obj = getobject<T>(ctx, -1, typeName);
+    T* obj = GetObject<T>(ctx, -1, typeName);
     duk_pop(ctx);
     return obj;
 }
