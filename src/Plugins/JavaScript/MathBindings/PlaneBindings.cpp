@@ -500,6 +500,30 @@ static duk_ret_t Plane_PassesThroughOrigin_float(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Plane_ToString(duk_context* ctx)
+{
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    std::string ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t Plane_SerializeToString(duk_context* ctx)
+{
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    std::string ret = thisObj->SerializeToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t Plane_SerializeToCodeString(duk_context* ctx)
+{
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    std::string ret = thisObj->SerializeToCodeString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t Plane_Transform_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -610,6 +634,14 @@ static duk_ret_t Plane_Clip_Selector(duk_context* ctx)
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
+static duk_ret_t Plane_FromString_Static_std__string(duk_context* ctx)
+{
+    std::string str = std::string(duk_require_string(ctx, 0));
+    Plane ret = Plane::FromString(str);
+    PushValueObjectCopy<Plane>(ctx, ret, Plane_Id, Plane_Dtor);
+    return 1;
+}
+
 static const duk_function_list_entry Plane_Functions[] = {
     {"IsDegenerate", Plane_IsDegenerate, 0}
     ,{"ReverseNormal", Plane_ReverseNormal, 0}
@@ -629,12 +661,21 @@ static const duk_function_list_entry Plane_Functions[] = {
     ,{"Intersects", Plane_Intersects_Selector, DUK_VARARGS}
     ,{"Clip", Plane_Clip_Selector, DUK_VARARGS}
     ,{"PassesThroughOrigin", Plane_PassesThroughOrigin_float, 1}
+    ,{"ToString", Plane_ToString, 0}
+    ,{"SerializeToString", Plane_SerializeToString, 0}
+    ,{"SerializeToCodeString", Plane_SerializeToCodeString, 0}
+    ,{nullptr, nullptr, 0}
+};
+
+static const duk_function_list_entry Plane_StaticFunctions[] = {
+    {"FromString", Plane_FromString_Static_std__string, 1}
     ,{nullptr, nullptr, 0}
 };
 
 void Expose_Plane(duk_context* ctx)
 {
     duk_push_c_function(ctx, Plane_Ctor, DUK_VARARGS);
+    duk_put_function_list(ctx, -1, Plane_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Plane_Functions);
     DefineProperty(ctx, "d", Plane_Get_d, Plane_Set_d);

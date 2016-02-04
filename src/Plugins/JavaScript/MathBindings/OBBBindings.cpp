@@ -433,6 +433,30 @@ static duk_ret_t OBB_Intersects_Frustum(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t OBB_ToString(duk_context* ctx)
+{
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    std::string ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t OBB_SerializeToString(duk_context* ctx)
+{
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    std::string ret = thisObj->SerializeToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t OBB_SerializeToCodeString(duk_context* ctx)
+{
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    std::string ret = thisObj->SerializeToCodeString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t OBB_Equals_OBB_float(duk_context* ctx)
 {
     OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
@@ -557,6 +581,14 @@ static duk_ret_t OBB_NumVerticesInEdgeList_Static(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t OBB_FromString_Static_std__string(duk_context* ctx)
+{
+    std::string str = std::string(duk_require_string(ctx, 0));
+    OBB ret = OBB::FromString(str);
+    PushValueObjectCopy<OBB>(ctx, ret, OBB_Id, OBB_Dtor);
+    return 1;
+}
+
 static const duk_function_list_entry OBB_Functions[] = {
     {"SetNegativeInfinity", OBB_SetNegativeInfinity, 0}
     ,{"SetFrom", OBB_SetFrom_Selector, DUK_VARARGS}
@@ -575,6 +607,9 @@ static const duk_function_list_entry OBB_Functions[] = {
     ,{"Distance", OBB_Distance_Sphere, 1}
     ,{"Contains", OBB_Contains_Selector, DUK_VARARGS}
     ,{"Intersects", OBB_Intersects_Selector, DUK_VARARGS}
+    ,{"ToString", OBB_ToString, 0}
+    ,{"SerializeToString", OBB_SerializeToString, 0}
+    ,{"SerializeToCodeString", OBB_SerializeToCodeString, 0}
     ,{"Equals", OBB_Equals_OBB_float, 2}
     ,{"BitEquals", OBB_BitEquals_OBB, 1}
     ,{nullptr, nullptr, 0}
@@ -583,6 +618,7 @@ static const duk_function_list_entry OBB_Functions[] = {
 static const duk_function_list_entry OBB_StaticFunctions[] = {
     {"NumVerticesInTriangulation", OBB_NumVerticesInTriangulation_Static_int_int_int, 3}
     ,{"NumVerticesInEdgeList", OBB_NumVerticesInEdgeList_Static, 0}
+    ,{"FromString", OBB_FromString_Static_std__string, 1}
     ,{nullptr, nullptr, 0}
 };
 

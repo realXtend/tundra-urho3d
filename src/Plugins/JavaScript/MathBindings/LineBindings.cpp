@@ -369,6 +369,30 @@ static duk_ret_t Line_ToLineSegment_float_float(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Line_ToString(duk_context* ctx)
+{
+    Line* thisObj = GetThisObject<Line>(ctx, Line_Id);
+    std::string ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t Line_SerializeToString(duk_context* ctx)
+{
+    Line* thisObj = GetThisObject<Line>(ctx, Line_Id);
+    std::string ret = thisObj->SerializeToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t Line_SerializeToCodeString(duk_context* ctx)
+{
+    Line* thisObj = GetThisObject<Line>(ctx, Line_Id);
+    std::string ret = thisObj->SerializeToCodeString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t Line_Ctor_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -461,6 +485,14 @@ static duk_ret_t Line_ToLineSegment_Selector(duk_context* ctx)
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
+static duk_ret_t Line_FromString_Static_std__string(duk_context* ctx)
+{
+    std::string str = std::string(duk_require_string(ctx, 0));
+    Line ret = Line::FromString(str);
+    PushValueObjectCopy<Line>(ctx, ret, Line_Id, Line_Dtor);
+    return 1;
+}
+
 static const duk_function_list_entry Line_Functions[] = {
     {"IsFinite", Line_IsFinite, 0}
     ,{"Transform", Line_Transform_Selector, DUK_VARARGS}
@@ -472,12 +504,21 @@ static const duk_function_list_entry Line_Functions[] = {
     ,{"IntersectsDisc", Line_IntersectsDisc_Circle, 1}
     ,{"ToRay", Line_ToRay, 0}
     ,{"ToLineSegment", Line_ToLineSegment_Selector, DUK_VARARGS}
+    ,{"ToString", Line_ToString, 0}
+    ,{"SerializeToString", Line_SerializeToString, 0}
+    ,{"SerializeToCodeString", Line_SerializeToCodeString, 0}
+    ,{nullptr, nullptr, 0}
+};
+
+static const duk_function_list_entry Line_StaticFunctions[] = {
+    {"FromString", Line_FromString_Static_std__string, 1}
     ,{nullptr, nullptr, 0}
 };
 
 void Expose_Line(duk_context* ctx)
 {
     duk_push_c_function(ctx, Line_Ctor_Selector, DUK_VARARGS);
+    duk_put_function_list(ctx, -1, Line_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Line_Functions);
     duk_put_prop_string(ctx, -2, "prototype");

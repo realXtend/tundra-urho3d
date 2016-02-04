@@ -151,6 +151,14 @@ static duk_ret_t Circle_IntersectsDisc_Ray(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Circle_ToString(duk_context* ctx)
+{
+    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id);
+    std::string ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t Circle_Transform_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -182,6 +190,7 @@ static const duk_function_list_entry Circle_Functions[] = {
     ,{"Transform", Circle_Transform_Selector, DUK_VARARGS}
     ,{"Intersects", Circle_Intersects_Plane, 1}
     ,{"IntersectsDisc", Circle_IntersectsDisc_Selector, DUK_VARARGS}
+    ,{"ToString", Circle_ToString, 0}
     ,{nullptr, nullptr, 0}
 };
 

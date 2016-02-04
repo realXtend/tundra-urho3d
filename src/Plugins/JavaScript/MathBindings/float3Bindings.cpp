@@ -763,6 +763,30 @@ static duk_ret_t float3_BitEquals_float3(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t float3_ToString(duk_context* ctx)
+{
+    float3* thisObj = GetThisObject<float3>(ctx, float3_Id);
+    std::string ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t float3_SerializeToString(duk_context* ctx)
+{
+    float3* thisObj = GetThisObject<float3>(ctx, float3_Id);
+    std::string ret = thisObj->SerializeToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t float3_SerializeToCodeString(duk_context* ctx)
+{
+    float3* thisObj = GetThisObject<float3>(ctx, float3_Id);
+    std::string ret = thisObj->SerializeToCodeString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t float3_SumOfElements(duk_context* ctx)
 {
     float3* thisObj = GetThisObject<float3>(ctx, float3_Id);
@@ -1368,6 +1392,14 @@ static duk_ret_t float3_AreCollinear_Static_float3_float3_float3_float(duk_conte
     return 1;
 }
 
+static duk_ret_t float3_FromString_Static_std__string(duk_context* ctx)
+{
+    std::string str = std::string(duk_require_string(ctx, 0));
+    float3 ret = float3::FromString(str);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
+    return 1;
+}
+
 static duk_ret_t float3_ScalarTripleProduct_Static_float3_float3_float3(duk_context* ctx)
 {
     float3* u = GetCheckedObject<float3>(ctx, 0, float3_Id);
@@ -1655,6 +1687,9 @@ static const duk_function_list_entry float3_Functions[] = {
     ,{"IsPerpendicular", float3_IsPerpendicular_float3_float, 2}
     ,{"Equals", float3_Equals_Selector, DUK_VARARGS}
     ,{"BitEquals", float3_BitEquals_float3, 1}
+    ,{"ToString", float3_ToString, 0}
+    ,{"SerializeToString", float3_SerializeToString, 0}
+    ,{"SerializeToCodeString", float3_SerializeToCodeString, 0}
     ,{"SumOfElements", float3_SumOfElements, 0}
     ,{"ProductOfElements", float3_ProductOfElements, 0}
     ,{"AverageOfElements", float3_AverageOfElements, 0}
@@ -1694,6 +1729,7 @@ static const duk_function_list_entry float3_StaticFunctions[] = {
     {"FromScalar", float3_FromScalar_Static_float, 1}
     ,{"FromSphericalCoordinates", float3_FromSphericalCoordinates_Static_Selector, DUK_VARARGS}
     ,{"AreCollinear", float3_AreCollinear_Static_float3_float3_float3_float, 4}
+    ,{"FromString", float3_FromString_Static_std__string, 1}
     ,{"ScalarTripleProduct", float3_ScalarTripleProduct_Static_float3_float3_float3, 3}
     ,{"Lerp", float3_Lerp_Static_float3_float3_float, 3}
     ,{"Orthogonalize", float3_Orthogonalize_Static_Selector, DUK_VARARGS}

@@ -699,6 +699,30 @@ static duk_ret_t float4_IsPerpendicular_float4_float(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t float4_ToString(duk_context* ctx)
+{
+    float4* thisObj = GetThisObject<float4>(ctx, float4_Id);
+    std::string ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t float4_SerializeToString(duk_context* ctx)
+{
+    float4* thisObj = GetThisObject<float4>(ctx, float4_Id);
+    std::string ret = thisObj->SerializeToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t float4_SerializeToCodeString(duk_context* ctx)
+{
+    float4* thisObj = GetThisObject<float4>(ctx, float4_Id);
+    std::string ret = thisObj->SerializeToCodeString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t float4_SumOfElements(duk_context* ctx)
 {
     float4* thisObj = GetThisObject<float4>(ctx, float4_Id);
@@ -1466,6 +1490,14 @@ static duk_ret_t float4_AreOrthonormal_Static_float4_float4_float4_float(duk_con
     return 1;
 }
 
+static duk_ret_t float4_FromString_Static_std__string(duk_context* ctx)
+{
+    std::string str = std::string(duk_require_string(ctx, 0));
+    float4 ret = float4::FromString(str);
+    PushValueObjectCopy<float4>(ctx, ret, float4_Id, float4_Dtor);
+    return 1;
+}
+
 static duk_ret_t float4_Lerp_Static_float4_float4_float(duk_context* ctx)
 {
     float4* a = GetCheckedObject<float4>(ctx, 0, float4_Id);
@@ -1655,6 +1687,9 @@ static const duk_function_list_entry float4_Functions[] = {
     ,{"IsFinite", float4_IsFinite, 0}
     ,{"IsPerpendicular3", float4_IsPerpendicular3_float4_float, 2}
     ,{"IsPerpendicular", float4_IsPerpendicular_float4_float, 2}
+    ,{"ToString", float4_ToString, 0}
+    ,{"SerializeToString", float4_SerializeToString, 0}
+    ,{"SerializeToCodeString", float4_SerializeToCodeString, 0}
     ,{"SumOfElements", float4_SumOfElements, 0}
     ,{"ProductOfElements", float4_ProductOfElements, 0}
     ,{"AverageOfElements", float4_AverageOfElements, 0}
@@ -1714,6 +1749,7 @@ static const duk_function_list_entry float4_StaticFunctions[] = {
     ,{"AreCollinear", float4_AreCollinear_Static_float4_float4_float4_float, 4}
     ,{"Orthonormalize", float4_Orthonormalize_Static_Selector, DUK_VARARGS}
     ,{"AreOrthonormal", float4_AreOrthonormal_Static_Selector, DUK_VARARGS}
+    ,{"FromString", float4_FromString_Static_std__string, 1}
     ,{"Lerp", float4_Lerp_Static_float4_float4_float, 3}
     ,{"RandomDir", float4_RandomDir_Static_LCG_float, 2}
     ,{"RandomSphere", float4_RandomSphere_Static_LCG_float4_float, 3}

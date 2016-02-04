@@ -424,6 +424,30 @@ static duk_ret_t float2_BitEquals_float2(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t float2_ToString(duk_context* ctx)
+{
+    float2* thisObj = GetThisObject<float2>(ctx, float2_Id);
+    std::string ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t float2_SerializeToString(duk_context* ctx)
+{
+    float2* thisObj = GetThisObject<float2>(ctx, float2_Id);
+    std::string ret = thisObj->SerializeToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t float2_SerializeToCodeString(duk_context* ctx)
+{
+    float2* thisObj = GetThisObject<float2>(ctx, float2_Id);
+    std::string ret = thisObj->SerializeToCodeString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t float2_SumOfElements(duk_context* ctx)
 {
     float2* thisObj = GetThisObject<float2>(ctx, float2_Id);
@@ -859,6 +883,14 @@ static duk_ret_t float2_FromPolarCoordinates_Static_float2(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t float2_FromString_Static_std__string(duk_context* ctx)
+{
+    std::string str = std::string(duk_require_string(ctx, 0));
+    float2 ret = float2::FromString(str);
+    PushValueObjectCopy<float2>(ctx, ret, float2_Id, float2_Dtor);
+    return 1;
+}
+
 static duk_ret_t float2_Lerp_Static_float2_float2_float(duk_context* ctx)
 {
     float2* a = GetCheckedObject<float2>(ctx, 0, float2_Id);
@@ -964,6 +996,9 @@ static const duk_function_list_entry float2_Functions[] = {
     ,{"IsPerpendicular", float2_IsPerpendicular_float2_float, 2}
     ,{"Equals", float2_Equals_Selector, DUK_VARARGS}
     ,{"BitEquals", float2_BitEquals_float2, 1}
+    ,{"ToString", float2_ToString, 0}
+    ,{"SerializeToString", float2_SerializeToString, 0}
+    ,{"SerializeToCodeString", float2_SerializeToCodeString, 0}
     ,{"SumOfElements", float2_SumOfElements, 0}
     ,{"ProductOfElements", float2_ProductOfElements, 0}
     ,{"AverageOfElements", float2_AverageOfElements, 0}
@@ -1001,6 +1036,7 @@ static const duk_function_list_entry float2_Functions[] = {
 static const duk_function_list_entry float2_StaticFunctions[] = {
     {"FromScalar", float2_FromScalar_Static_float, 1}
     ,{"FromPolarCoordinates", float2_FromPolarCoordinates_Static_Selector, DUK_VARARGS}
+    ,{"FromString", float2_FromString_Static_std__string, 1}
     ,{"Lerp", float2_Lerp_Static_float2_float2_float, 3}
     ,{"Orthogonalize", float2_Orthogonalize_Static_float2_float2, 2}
     ,{"AreOrthogonal", float2_AreOrthogonal_Static_float2_float2_float, 3}

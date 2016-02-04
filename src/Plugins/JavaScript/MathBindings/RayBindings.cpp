@@ -386,6 +386,30 @@ static duk_ret_t Ray_ToLineSegment_float_float(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Ray_ToString(duk_context* ctx)
+{
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    std::string ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t Ray_SerializeToString(duk_context* ctx)
+{
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    std::string ret = thisObj->SerializeToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t Ray_SerializeToCodeString(duk_context* ctx)
+{
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    std::string ret = thisObj->SerializeToCodeString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t Ray_Ctor_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -474,6 +498,14 @@ static duk_ret_t Ray_ToLineSegment_Selector(duk_context* ctx)
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
+static duk_ret_t Ray_FromString_Static_std__string(duk_context* ctx)
+{
+    std::string str = std::string(duk_require_string(ctx, 0));
+    Ray ret = Ray::FromString(str);
+    PushValueObjectCopy<Ray>(ctx, ret, Ray_Id, Ray_Dtor);
+    return 1;
+}
+
 static const duk_function_list_entry Ray_Functions[] = {
     {"IsFinite", Ray_IsFinite, 0}
     ,{"Transform", Ray_Transform_Selector, DUK_VARARGS}
@@ -485,12 +517,21 @@ static const duk_function_list_entry Ray_Functions[] = {
     ,{"IntersectsDisc", Ray_IntersectsDisc_Circle, 1}
     ,{"ToLine", Ray_ToLine, 0}
     ,{"ToLineSegment", Ray_ToLineSegment_Selector, DUK_VARARGS}
+    ,{"ToString", Ray_ToString, 0}
+    ,{"SerializeToString", Ray_SerializeToString, 0}
+    ,{"SerializeToCodeString", Ray_SerializeToCodeString, 0}
+    ,{nullptr, nullptr, 0}
+};
+
+static const duk_function_list_entry Ray_StaticFunctions[] = {
+    {"FromString", Ray_FromString_Static_std__string, 1}
     ,{nullptr, nullptr, 0}
 };
 
 void Expose_Ray(duk_context* ctx)
 {
     duk_push_c_function(ctx, Ray_Ctor_Selector, DUK_VARARGS);
+    duk_put_function_list(ctx, -1, Ray_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Ray_Functions);
     duk_put_prop_string(ctx, -2, "prototype");

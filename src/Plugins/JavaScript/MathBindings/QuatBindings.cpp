@@ -576,6 +576,38 @@ static duk_ret_t Quat_CastToFloat4(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Quat_ToString(duk_context* ctx)
+{
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    std::string  ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t Quat_ToString2(duk_context* ctx)
+{
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    std::string  ret = thisObj->ToString2();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t Quat_SerializeToString(duk_context* ctx)
+{
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    std::string  ret = thisObj->SerializeToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t Quat_SerializeToCodeString(duk_context* ctx)
+{
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    std::string ret = thisObj->SerializeToCodeString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t Quat_Mul_Quat(duk_context* ctx)
 {
     Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
@@ -935,6 +967,14 @@ static duk_ret_t Quat_RandomRotation_Static_LCG(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Quat_FromString_Static_std__string(duk_context* ctx)
+{
+    std::string str = std::string(duk_require_string(ctx, 0));
+    Quat ret = Quat::FromString(str);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
+    return 1;
+}
+
 static duk_ret_t Quat_RotateFromTo_Static_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -987,6 +1027,10 @@ static const duk_function_list_entry Quat_Functions[] = {
     ,{"ToFloat3x4", Quat_ToFloat3x4, 0}
     ,{"ToFloat4x4", Quat_ToFloat4x4_Selector, DUK_VARARGS}
     ,{"CastToFloat4", Quat_CastToFloat4, 0}
+    ,{"ToString", Quat_ToString, 0}
+    ,{"ToString2", Quat_ToString2, 0}
+    ,{"SerializeToString", Quat_SerializeToString, 0}
+    ,{"SerializeToCodeString", Quat_SerializeToCodeString, 0}
     ,{"Mul", Quat_Mul_Selector, DUK_VARARGS}
     ,{"Neg", Quat_Neg, 0}
     ,{nullptr, nullptr, 0}
@@ -1014,6 +1058,7 @@ static const duk_function_list_entry Quat_StaticFunctions[] = {
     ,{"FromEulerZXY", Quat_FromEulerZXY_Static_float_float_float, 3}
     ,{"FromEulerZYX", Quat_FromEulerZYX_Static_float_float_float, 3}
     ,{"RandomRotation", Quat_RandomRotation_Static_LCG, 1}
+    ,{"FromString", Quat_FromString_Static_std__string, 1}
     ,{nullptr, nullptr, 0}
 };
 

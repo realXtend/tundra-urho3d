@@ -407,6 +407,30 @@ static duk_ret_t LineSegment_ToLine(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t LineSegment_ToString(duk_context* ctx)
+{
+    LineSegment* thisObj = GetThisObject<LineSegment>(ctx, LineSegment_Id);
+    std::string ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t LineSegment_SerializeToString(duk_context* ctx)
+{
+    LineSegment* thisObj = GetThisObject<LineSegment>(ctx, LineSegment_Id);
+    std::string ret = thisObj->SerializeToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t LineSegment_SerializeToCodeString(duk_context* ctx)
+{
+    LineSegment* thisObj = GetThisObject<LineSegment>(ctx, LineSegment_Id);
+    std::string ret = thisObj->SerializeToCodeString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t LineSegment_Ctor_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -485,6 +509,14 @@ static duk_ret_t LineSegment_Intersects_Selector(duk_context* ctx)
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
+static duk_ret_t LineSegment_FromString_Static_std__string(duk_context* ctx)
+{
+    std::string str = std::string(duk_require_string(ctx, 0));
+    LineSegment ret = LineSegment::FromString(str);
+    PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_Id, LineSegment_Dtor);
+    return 1;
+}
+
 static const duk_function_list_entry LineSegment_Functions[] = {
     {"Reverse", LineSegment_Reverse, 0}
     ,{"Transform", LineSegment_Transform_Selector, DUK_VARARGS}
@@ -500,12 +532,21 @@ static const duk_function_list_entry LineSegment_Functions[] = {
     ,{"IntersectsDisc", LineSegment_IntersectsDisc_Circle, 1}
     ,{"ToRay", LineSegment_ToRay, 0}
     ,{"ToLine", LineSegment_ToLine, 0}
+    ,{"ToString", LineSegment_ToString, 0}
+    ,{"SerializeToString", LineSegment_SerializeToString, 0}
+    ,{"SerializeToCodeString", LineSegment_SerializeToCodeString, 0}
+    ,{nullptr, nullptr, 0}
+};
+
+static const duk_function_list_entry LineSegment_StaticFunctions[] = {
+    {"FromString", LineSegment_FromString_Static_std__string, 1}
     ,{nullptr, nullptr, 0}
 };
 
 void Expose_LineSegment(duk_context* ctx)
 {
     duk_push_c_function(ctx, LineSegment_Ctor_Selector, DUK_VARARGS);
+    duk_put_function_list(ctx, -1, LineSegment_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, LineSegment_Functions);
     duk_put_prop_string(ctx, -2, "prototype");

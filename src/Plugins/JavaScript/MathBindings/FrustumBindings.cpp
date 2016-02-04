@@ -577,6 +577,22 @@ static duk_ret_t Frustum_Intersects_Frustum(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Frustum_ToString(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisObject<Frustum>(ctx, Frustum_Id);
+    std::string ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t Frustum_SerializeToString(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisObject<Frustum>(ctx, Frustum_Id);
+    std::string ret = thisObj->SerializeToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t Frustum_UnProject_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -748,6 +764,8 @@ static const duk_function_list_entry Frustum_Functions[] = {
     ,{"MinimalEnclosingOBB", Frustum_MinimalEnclosingOBB_float, 1}
     ,{"Contains", Frustum_Contains_Selector, DUK_VARARGS}
     ,{"Intersects", Frustum_Intersects_Selector, DUK_VARARGS}
+    ,{"ToString", Frustum_ToString, 0}
+    ,{"SerializeToString", Frustum_SerializeToString, 0}
     ,{nullptr, nullptr, 0}
 };
 

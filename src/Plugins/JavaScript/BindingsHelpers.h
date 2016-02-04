@@ -10,7 +10,7 @@ void DefineProperty(duk_context* ctx, const char* propertyName, duk_c_function g
 template<class T> T* GetObject(duk_context* ctx, duk_idx_t stackIndex, const char* typeName)
 {
     if (!duk_is_object(ctx, stackIndex))
-        return 0;
+        return nullptr;
 
     duk_get_prop_string(ctx, stackIndex, "\xff""obj");
     T* obj = static_cast<T*>(duk_to_pointer(ctx, -1));
@@ -23,17 +23,14 @@ template<class T> T* GetObject(duk_context* ctx, duk_idx_t stackIndex, const cha
     duk_get_prop_string(ctx, stackIndex, "\xff""type");
     const char* objTypeName = (const char*)duk_to_pointer(ctx, -1);
     duk_pop(ctx);
-    if (objTypeName == typeName)
-        return obj;
-    else
-        return 0;
+    return (objTypeName == typeName) ? obj : nullptr;
 }
 
 template<class T> T* GetCheckedObject(duk_context* ctx, duk_idx_t stackIndex, const char* typeName)
 {
     T* obj = GetObject<T>(ctx, stackIndex, typeName);
     if (!obj)
-        duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+        duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object reference, should be %s", typeName);
     return obj;
 }
 
@@ -43,7 +40,7 @@ template<class T> T* GetThisObject(duk_context* ctx, const char* typeName)
     T* obj = GetObject<T>(ctx, -1, typeName);
     duk_pop(ctx);
     if (!obj)
-        duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+        duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this object reference for type %s", typeName);
     return obj;
 }
 

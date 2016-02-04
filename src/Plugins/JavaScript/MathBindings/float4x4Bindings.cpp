@@ -973,6 +973,30 @@ static duk_ret_t float4x4_ContainsProjection_float(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t float4x4_ToString(duk_context* ctx)
+{
+    float4x4* thisObj = GetThisObject<float4x4>(ctx, float4x4_Id);
+    std::string ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t float4x4_SerializeToString(duk_context* ctx)
+{
+    float4x4* thisObj = GetThisObject<float4x4>(ctx, float4x4_Id);
+    std::string ret = thisObj->SerializeToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t float4x4_ToString2(duk_context* ctx)
+{
+    float4x4* thisObj = GetThisObject<float4x4>(ctx, float4x4_Id);
+    std::string ret = thisObj->ToString2();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t float4x4_ToEulerXYX(duk_context* ctx)
 {
     float4x4* thisObj = GetThisObject<float4x4>(ctx, float4x4_Id);
@@ -2089,6 +2113,9 @@ static const duk_function_list_entry float4x4_Functions[] = {
     ,{"IsOrthonormal3", float4x4_IsOrthonormal3_float, 1}
     ,{"Equals", float4x4_Equals_float4x4_float, 2}
     ,{"ContainsProjection", float4x4_ContainsProjection_float, 1}
+    ,{"ToString", float4x4_ToString, 0}
+    ,{"SerializeToString", float4x4_SerializeToString, 0}
+    ,{"ToString2", float4x4_ToString2, 0}
     ,{"ToEulerXYX", float4x4_ToEulerXYX, 0}
     ,{"ToEulerXZX", float4x4_ToEulerXZX, 0}
     ,{"ToEulerYXY", float4x4_ToEulerYXY, 0}

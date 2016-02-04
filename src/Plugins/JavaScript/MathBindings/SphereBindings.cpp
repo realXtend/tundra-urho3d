@@ -459,6 +459,30 @@ static duk_ret_t Sphere_ExtendRadiusToContain_Sphere_float(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Sphere_ToString(duk_context* ctx)
+{
+    Sphere* thisObj = GetThisObject<Sphere>(ctx, Sphere_Id);
+    std::string ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t Sphere_SerializeToString(duk_context* ctx)
+{
+    Sphere* thisObj = GetThisObject<Sphere>(ctx, Sphere_Id);
+    std::string ret = thisObj->SerializeToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t Sphere_SerializeToCodeString(duk_context* ctx)
+{
+    Sphere* thisObj = GetThisObject<Sphere>(ctx, Sphere_Id);
+    std::string ret = thisObj->SerializeToCodeString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t Sphere_Equals_Sphere_float(duk_context* ctx)
 {
     Sphere* thisObj = GetThisObject<Sphere>(ctx, Sphere_Id);
@@ -572,6 +596,14 @@ static duk_ret_t Sphere_Enclose_Selector(duk_context* ctx)
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
+static duk_ret_t Sphere_FromString_Static_std__string(duk_context* ctx)
+{
+    std::string str = std::string(duk_require_string(ctx, 0));
+    Sphere ret = Sphere::FromString(str);
+    PushValueObjectCopy<Sphere>(ctx, ret, Sphere_Id, Sphere_Dtor);
+    return 1;
+}
+
 static const duk_function_list_entry Sphere_Functions[] = {
     {"Transform", Sphere_Transform_Selector, DUK_VARARGS}
     ,{"MinimalEnclosingAABB", Sphere_MinimalEnclosingAABB, 0}
@@ -589,14 +621,23 @@ static const duk_function_list_entry Sphere_Functions[] = {
     ,{"Intersect", Sphere_Intersect_Plane, 1}
     ,{"Enclose", Sphere_Enclose_Selector, DUK_VARARGS}
     ,{"ExtendRadiusToContain", Sphere_ExtendRadiusToContain_Sphere_float, 2}
+    ,{"ToString", Sphere_ToString, 0}
+    ,{"SerializeToString", Sphere_SerializeToString, 0}
+    ,{"SerializeToCodeString", Sphere_SerializeToCodeString, 0}
     ,{"Equals", Sphere_Equals_Sphere_float, 2}
     ,{"BitEquals", Sphere_BitEquals_Sphere, 1}
+    ,{nullptr, nullptr, 0}
+};
+
+static const duk_function_list_entry Sphere_StaticFunctions[] = {
+    {"FromString", Sphere_FromString_Static_std__string, 1}
     ,{nullptr, nullptr, 0}
 };
 
 void Expose_Sphere(duk_context* ctx)
 {
     duk_push_c_function(ctx, Sphere_Ctor, DUK_VARARGS);
+    duk_put_function_list(ctx, -1, Sphere_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Sphere_Functions);
     DefineProperty(ctx, "r", Sphere_Get_r, Sphere_Set_r);

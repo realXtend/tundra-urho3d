@@ -440,6 +440,30 @@ static duk_ret_t Capsule_Intersects_Frustum(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Capsule_ToString(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    std::string ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t Capsule_SerializeToString(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    std::string ret = thisObj->SerializeToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t Capsule_SerializeToCodeString(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    std::string ret = thisObj->SerializeToCodeString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t Capsule_Equals_Capsule_float(duk_context* ctx)
 {
     Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
@@ -543,6 +567,14 @@ static duk_ret_t Capsule_Intersects_Selector(duk_context* ctx)
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
+static duk_ret_t Capsule_FromString_Static_std__string(duk_context* ctx)
+{
+    std::string str = std::string(duk_require_string(ctx, 0));
+    Capsule ret = Capsule::FromString(str);
+    PushValueObjectCopy<Capsule>(ctx, ret, Capsule_Id, Capsule_Dtor);
+    return 1;
+}
+
 static const duk_function_list_entry Capsule_Functions[] = {
     {"SetFrom", Capsule_SetFrom_Sphere, 1}
     ,{"SetDegenerate", Capsule_SetDegenerate, 0}
@@ -563,14 +595,23 @@ static const duk_function_list_entry Capsule_Functions[] = {
     ,{"Distance", Capsule_Distance_Selector, DUK_VARARGS}
     ,{"Contains", Capsule_Contains_Selector, DUK_VARARGS}
     ,{"Intersects", Capsule_Intersects_Selector, DUK_VARARGS}
+    ,{"ToString", Capsule_ToString, 0}
+    ,{"SerializeToString", Capsule_SerializeToString, 0}
+    ,{"SerializeToCodeString", Capsule_SerializeToCodeString, 0}
     ,{"Equals", Capsule_Equals_Capsule_float, 2}
     ,{"BitEquals", Capsule_BitEquals_Capsule, 1}
+    ,{nullptr, nullptr, 0}
+};
+
+static const duk_function_list_entry Capsule_StaticFunctions[] = {
+    {"FromString", Capsule_FromString_Static_std__string, 1}
     ,{nullptr, nullptr, 0}
 };
 
 void Expose_Capsule(duk_context* ctx)
 {
     duk_push_c_function(ctx, Capsule_Ctor_Selector, DUK_VARARGS);
+    duk_put_function_list(ctx, -1, Capsule_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Capsule_Functions);
     DefineProperty(ctx, "r", Capsule_Get_r, Capsule_Set_r);

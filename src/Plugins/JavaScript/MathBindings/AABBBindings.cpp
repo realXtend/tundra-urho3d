@@ -546,6 +546,30 @@ static duk_ret_t AABB_Enclose_Frustum(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t AABB_ToString(duk_context* ctx)
+{
+    AABB* thisObj = GetThisObject<AABB>(ctx, AABB_Id);
+    std::string ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t AABB_SerializeToString(duk_context* ctx)
+{
+    AABB* thisObj = GetThisObject<AABB>(ctx, AABB_Id);
+    std::string ret = thisObj->SerializeToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t AABB_SerializeToCodeString(duk_context* ctx)
+{
+    AABB* thisObj = GetThisObject<AABB>(ctx, AABB_Id);
+    std::string ret = thisObj->SerializeToCodeString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t AABB_Intersection_AABB(duk_context* ctx)
 {
     AABB* thisObj = GetThisObject<AABB>(ctx, AABB_Id);
@@ -711,6 +735,14 @@ static duk_ret_t AABB_NumVerticesInEdgeList_Static(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t AABB_FromString_Static_std__string(duk_context* ctx)
+{
+    std::string str = std::string(duk_require_string(ctx, 0));
+    AABB ret = AABB::FromString(str);
+    PushValueObjectCopy<AABB>(ctx, ret, AABB_Id, AABB_Dtor);
+    return 1;
+}
+
 static const duk_function_list_entry AABB_Functions[] = {
     {"MinX", AABB_MinX, 0}
     ,{"MinY", AABB_MinY, 0}
@@ -735,6 +767,9 @@ static const duk_function_list_entry AABB_Functions[] = {
     ,{"Contains", AABB_Contains_Selector, DUK_VARARGS}
     ,{"Intersects", AABB_Intersects_Selector, DUK_VARARGS}
     ,{"Enclose", AABB_Enclose_Selector, DUK_VARARGS}
+    ,{"ToString", AABB_ToString, 0}
+    ,{"SerializeToString", AABB_SerializeToString, 0}
+    ,{"SerializeToCodeString", AABB_SerializeToCodeString, 0}
     ,{"Intersection", AABB_Intersection_AABB, 1}
     ,{"Equals", AABB_Equals_AABB_float, 2}
     ,{"BitEquals", AABB_BitEquals_AABB, 1}
@@ -744,6 +779,7 @@ static const duk_function_list_entry AABB_Functions[] = {
 static const duk_function_list_entry AABB_StaticFunctions[] = {
     {"NumVerticesInTriangulation", AABB_NumVerticesInTriangulation_Static_int_int_int, 3}
     ,{"NumVerticesInEdgeList", AABB_NumVerticesInEdgeList_Static, 0}
+    ,{"FromString", AABB_FromString_Static_std__string, 1}
     ,{nullptr, nullptr, 0}
 };
 

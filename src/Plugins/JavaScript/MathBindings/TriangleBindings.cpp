@@ -265,6 +265,30 @@ static duk_ret_t Triangle_Intersects_Capsule(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Triangle_ToString(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisObject<Triangle>(ctx, Triangle_Id);
+    std::string ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t Triangle_SerializeToString(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisObject<Triangle>(ctx, Triangle_Id);
+    std::string ret = thisObj->SerializeToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t Triangle_SerializeToCodeString(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisObject<Triangle>(ctx, Triangle_Id);
+    std::string ret = thisObj->SerializeToCodeString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t Triangle_Equals_Triangle_float(duk_context* ctx)
 {
     Triangle* thisObj = GetThisObject<Triangle>(ctx, Triangle_Id);
@@ -354,6 +378,14 @@ static duk_ret_t Triangle_Area2D_Static_float2_float2_float2(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Triangle_FromString_Static_std__string(duk_context* ctx)
+{
+    std::string str = std::string(duk_require_string(ctx, 0));
+    Triangle ret = Triangle::FromString(str);
+    PushValueObjectCopy<Triangle>(ctx, ret, Triangle_Id, Triangle_Dtor);
+    return 1;
+}
+
 static const duk_function_list_entry Triangle_Functions[] = {
     {"Transform", Triangle_Transform_Selector, DUK_VARARGS}
     ,{"Area", Triangle_Area, 0}
@@ -367,6 +399,9 @@ static const duk_function_list_entry Triangle_Functions[] = {
     ,{"Contains", Triangle_Contains_Selector, DUK_VARARGS}
     ,{"Distance", Triangle_Distance_Selector, DUK_VARARGS}
     ,{"Intersects", Triangle_Intersects_Selector, DUK_VARARGS}
+    ,{"ToString", Triangle_ToString, 0}
+    ,{"SerializeToString", Triangle_SerializeToString, 0}
+    ,{"SerializeToCodeString", Triangle_SerializeToCodeString, 0}
     ,{"Equals", Triangle_Equals_Triangle_float, 2}
     ,{"BitEquals", Triangle_BitEquals_Triangle, 1}
     ,{nullptr, nullptr, 0}
@@ -375,6 +410,7 @@ static const duk_function_list_entry Triangle_Functions[] = {
 static const duk_function_list_entry Triangle_StaticFunctions[] = {
     {"BarycentricInsideTriangle", Triangle_BarycentricInsideTriangle_Static_float3, 1}
     ,{"Area2D", Triangle_Area2D_Static_float2_float2_float2, 3}
+    ,{"FromString", Triangle_FromString_Static_std__string, 1}
     ,{nullptr, nullptr, 0}
 };
 

@@ -744,6 +744,30 @@ static duk_ret_t float3x4_Equals_float3x4_float(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t float3x4_ToString(duk_context* ctx)
+{
+    float3x4* thisObj = GetThisObject<float3x4>(ctx, float3x4_Id);
+    std::string ret = thisObj->ToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t float3x4_SerializeToString(duk_context* ctx)
+{
+    float3x4* thisObj = GetThisObject<float3x4>(ctx, float3x4_Id);
+    std::string ret = thisObj->SerializeToString();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
+static duk_ret_t float3x4_ToString2(duk_context* ctx)
+{
+    float3x4* thisObj = GetThisObject<float3x4>(ctx, float3x4_Id);
+    std::string ret = thisObj->ToString2();
+    duk_push_string(ctx, ret.c_str());
+    return 1;
+}
+
 static duk_ret_t float3x4_ToEulerXYX(duk_context* ctx)
 {
     float3x4* thisObj = GetThisObject<float3x4>(ctx, float3x4_Id);
@@ -1676,6 +1700,9 @@ static const duk_function_list_entry float3x4_Functions[] = {
     ,{"IsColOrthogonal3", float3x4_IsColOrthogonal3_float, 1}
     ,{"IsOrthonormal", float3x4_IsOrthonormal_float, 1}
     ,{"Equals", float3x4_Equals_float3x4_float, 2}
+    ,{"ToString", float3x4_ToString, 0}
+    ,{"SerializeToString", float3x4_SerializeToString, 0}
+    ,{"ToString2", float3x4_ToString2, 0}
     ,{"ToEulerXYX", float3x4_ToEulerXYX, 0}
     ,{"ToEulerXZX", float3x4_ToEulerXZX, 0}
     ,{"ToEulerYXY", float3x4_ToEulerYXY, 0}

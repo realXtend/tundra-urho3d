@@ -8,4 +8,4 @@ INPUT                  = ./src
 FILE_PATTERNS          = *.cpp \
                          *.h
 RECURSIVE              = YES
-PREDEFINED             = MATH_EXPLICIT_COPYCTORS
+PREDEFINED             = MATH_EXPLICIT_COPYCTORS MATH_ENABLE_STL_SUPPORT

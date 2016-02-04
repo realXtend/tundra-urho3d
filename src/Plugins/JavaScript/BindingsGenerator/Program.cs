@@ -165,14 +165,7 @@ namespace BindingsGenerator
 
         static string GenerateGetFromStack(string typeName, int stackIndex, string varName, bool nullCheck = false)
         {
-            if (!Symbol.IsPODType(typeName))
-            {
-                if (!nullCheck)
-                    return typeName + "* " + varName + " = GetObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
-                else
-                    return typeName + "* " + varName + " = GetCheckedObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
-            }
-            else if (Symbol.IsNumberType(typeName))
+            if (Symbol.IsNumberType(typeName))
             {
                 if (typeName == "double")
                     return typeName + " " + varName + " = duk_require_number(ctx, " + stackIndex + ");";
@@ -180,7 +173,16 @@ namespace BindingsGenerator
                     return typeName + " " + varName + " = (" + typeName + ")duk_require_number(ctx, " + stackIndex + ");"; 
             }
             else if (typeName == "bool")
-                return typeName + " " + varName + " = duk_require_bool(ctx, " + stackIndex + ");";
+                return typeName + " " + varName + " = duk_require_bool(ctx, " + stackIndex + ");";            
+            else if (typeName == "std::string")
+                return typeName + " " + varName + " = std::string(duk_require_string(ctx, " + stackIndex + "));";            
+            else if (!Symbol.IsPODType(typeName))
+            {
+                if (!nullCheck)
+                    return typeName + "* " + varName + " = GetObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
+                else
+                    return typeName + "* " + varName + " = GetCheckedObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
+            }
             else
                 throw new System.Exception("Unsupported type " + typeName + " for GenerateGetVariable()!");
         }
@@ -202,6 +204,8 @@ namespace BindingsGenerator
                 return "duk_push_number(ctx, " + source + ");";
             else if (typeName == "bool")
                 return "duk_push_boolean(ctx, " + source + ");";
+            else if (typeName == "std::string")
+                return "duk_push_string(ctx, " + source + ".c_str());";
             else
             {
                 typeName = SanitateTypeName(typeName);
@@ -225,14 +229,17 @@ namespace BindingsGenerator
 
         static string GenerateArgCheck(Parameter p, int stackIndex)
         {
-            string typeName = p.BasicType();
+            string typeName = SanitateTypeName(p.BasicType());
 
-            if (!Symbol.IsPODType(typeName))
-                return "GetObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ")";
-            else if (Symbol.IsNumberType(typeName))
+            if (Symbol.IsNumberType(typeName))
                 return "duk_is_number(ctx, " + stackIndex + ")";
             else if (typeName == "bool")
                 return "duk_is_boolean(ctx, " + stackIndex + ")";
+            else if (typeName == "std::string")
+                return "duk_is_string(ctx, " + stackIndex + ")";
+            if (!Symbol.IsPODType(typeName))
+                return "GetObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ")";
+            else 
 
             throw new System.Exception("Unsupported type " + typeName + " for GenerateArgCheck()!");
         }
@@ -302,7 +309,7 @@ namespace BindingsGenerator
             foreach (Symbol child in classSymbol.children)
             {
                 if (child.isStatic == generateStatic && child.kind == "function" && !child.name.Contains("operator") && child.visibilityLevel == VisibilityLevel.Public)
-                {                 
+                {           
                     if (!IsScriptable(child))
                         continue;
 
@@ -348,7 +355,7 @@ namespace BindingsGenerator
                     // Differentiate function name by parameters
                     string functionName = baseFunctionName;                  
                     for (int i = 0; i < child.parameters.Count; ++i)
-                        functionName += "_" + SanitateTypeName(child.parameters[i].BasicType());
+                        functionName += "_" + SanitateTypeName(child.parameters[i].BasicType()).Replace(':', '_');
      
                     // Skip if same overload (typically a const variation) already included
                     bool hasSame = false;
@@ -381,7 +388,7 @@ namespace BindingsGenerator
                             tw.WriteLine(Indent(1) + GenerateGetFromStack(child.parameters[i].BasicType(), i, child.parameters[i].name, child.parameters[i].IsAReference())); 
                             if (i > 0)
                                 args += ", ";
-                            if (!child.parameters[i].IsAPointer() && !Symbol.IsPODType(child.parameters[i].BasicType()))
+                            if (NeedDereference(child.parameters[i]))
                                 args += "*";
                                   
                             args += child.parameters[i].name;                                    
@@ -411,7 +418,7 @@ namespace BindingsGenerator
                             tw.WriteLine(Indent(1) + GenerateGetFromStack(child.parameters[i].BasicType(), i, child.parameters[i].name, child.parameters[i].IsAReference()));
                             if (i > 0)
                                 args += ", ";
-                            if (!child.parameters[i].IsAPointer() && !Symbol.IsPODType(child.parameters[i].BasicType()))
+                            if (NeedDereference(child.parameters[i]))
                                 args += "*";
 
                             args += child.parameters[i].name;
@@ -572,13 +579,28 @@ namespace BindingsGenerator
         static bool IsSupportedType(string typeName)
         {
             string t = SanitateTypeName(typeName);
-            return t == "void" || Symbol.IsPODType(t) || classNames.Contains(t);
+            return t == "void" || Symbol.IsPODType(t) || classNames.Contains(t) || t == "std::string";
         }
 
         static bool IsBadType(string type)
         {
+            if (type.Contains("std::string"))
+                return false;
             return type.Contains("bool *") || type.EndsWith("float *") || type.EndsWith("float3 *") || type.Contains("std::") || type.Contains("char*") || type.Contains("char *") || type.Contains("[");
         }
+
+        static bool NeedDereference(Parameter p)
+        {
+            if (p.IsAPointer())
+                return false;
+            if (Symbol.IsPODType(p.BasicType()))
+                return false;
+            if (p.BasicType().Contains("std::string"))
+                return false;
+
+            return true;
+        }
+
 
         static public string Indent(int num)
         {
