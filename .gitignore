@@ -50,6 +50,10 @@ src/Android/gen
 src/Android/*.properties
 src/Android/proguard-project.txt
 
+# JS bindings generator bin and obj directories
+src/Plugins/JavaScript/BindingsGenerator/bin
+src/Plugins/JavaScript/BindingsGenerator/obj
+
 # CMake -specific
 *.cmake
 CMakeFiles
