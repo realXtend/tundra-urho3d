@@ -7,10 +7,13 @@
 #include "Framework.h"
 #include "LoggingFunctions.h"
 #include "AssetAPI.h"
+#include "MathBindings/MathBindings.h"
 
 #include <Urho3D/Core/Profiler.h>
 #include <Urho3D/IO/FileSystem.h>
 #include <Urho3D/IO/File.h>
+
+using namespace JSBindings;
 
 namespace Tundra
 {
@@ -59,6 +62,13 @@ JavaScriptInstance::JavaScriptInstance(const Vector<ScriptAssetPtr>& scriptRefs,
 void JavaScriptInstance::CreateEngine()
 {
     ctx_ = duk_create_heap_default();
+
+    {
+        JS_PROFILE(ExposeMathClasses);
+        // Expose default math classes
+        ExposeMathClasses(ctx_);
+    }
+
     module_->ScriptInstanceCreated.Emit(this);
 }
 

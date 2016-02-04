@@ -313,8 +313,14 @@ namespace BindingsGenerator
             foreach (Symbol child in classSymbol.children)
             {
                 if (child.isStatic == generateStatic && child.kind == "function" && !child.name.Contains("operator") && child.visibilityLevel == VisibilityLevel.Public)
-                {
+                {                 
                     if (!IsScriptable(child))
+                        continue;
+
+                    // \hack Unimplemented MathGeolib functions. Remove these checks when fixed
+                    if (classSymbol.name == "float4" && child.name == "Orthogonalize")
+                        continue;
+                    if (classSymbol.name == "Plane" && child.name == "Distance" && child.parameters.Count == 1 && child.parameters[0].BasicType().Contains("float4"))
                         continue;
 
                     bool isClassCtor = !child.isStatic && (child.name == classSymbol.name);

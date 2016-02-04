@@ -6,6 +6,8 @@ file(GLOB CPP_FILES *.cpp)
 file(GLOB C_FILES *.c)
 file(GLOB H_FILES *.h)
 
+AddSourceFolder(MathBindings)
+
 set (SOURCE_FILES ${CPP_FILES} ${C_FILES} ${H_FILES})
 
 add_definitions(-DJAVASCRIPT_EXPORTS)
@@ -14,6 +16,7 @@ add_definitions(-DDUK_COMPILING_DUKTAPE)
 # Specify TundraCore includes manually instead of the full set, as compiling Duktape would clash with the Windows includes
 # due to Tundra's DebugAPI.h
 include_directories(
+    .
     ../../TundraCore/Framework
     ../../TundraCore/Asset
     ../../TundraCore/Scene
