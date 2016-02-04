@@ -8,10 +8,19 @@
 #include <string>
 #include <vector>
 
+#ifdef _MSC_VER
+#include <crtdbg.h>
+#endif
+
 using namespace Tundra;
 
 int WINAPI WinMain(_In_ HINSTANCE /*hInstance*/, _In_opt_ HINSTANCE /*hPrevInstance*/, _In_ LPSTR lpCmdLine, _In_ int /*nShowCmd*/){
     std::string cmdLine(lpCmdLine);
+
+    #if defined(_MSC_VER) && defined(_DEBUG)
+    // Memory leak debugging in MSVC debug mode
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+    #endif
 
     // Parse the Windows command line.
     std::vector<std::string> arguments;

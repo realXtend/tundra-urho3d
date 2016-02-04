@@ -35,6 +35,10 @@ Entity::~Entity()
         i->second_->SetParentEntity(0);
    
     components_.Clear();
+
+    for (ActionMap::Iterator it = actions_.Begin(); it != actions_.End(); ++it)
+        delete it->second_;
+    actions_.Clear();
 }
 
 void Entity::ChangeComponentId(component_id_t old_id, component_id_t new_id)
