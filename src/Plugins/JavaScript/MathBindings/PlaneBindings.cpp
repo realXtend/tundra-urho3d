@@ -73,7 +73,7 @@ duk_ret_t Plane_Dtor(duk_context* ctx)
 
 static duk_ret_t Plane_Set_d(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
     float d = (float)duk_require_number(ctx, 0);
     thisObj->d = d;
     return 0;
@@ -81,7 +81,7 @@ static duk_ret_t Plane_Set_d(duk_context* ctx)
 
 static duk_ret_t Plane_Get_d(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
     duk_push_number(ctx, thisObj->d);
     return 1;
 }
@@ -89,13 +89,13 @@ static duk_ret_t Plane_Get_d(duk_context* ctx)
 static duk_ret_t Plane_Ctor(duk_context* ctx)
 {
     Plane* newObj = new Plane();
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, Plane_Id); duk_push_c_function(ctx, Plane_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<Plane>(ctx, newObj, Plane_Id, Plane_Dtor);
     return 0;
 }
 
 static duk_ret_t Plane_IsDegenerate(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
     bool ret = thisObj->IsDegenerate();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -103,47 +103,47 @@ static duk_ret_t Plane_IsDegenerate(duk_context* ctx)
 
 static duk_ret_t Plane_ReverseNormal(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
     thisObj->ReverseNormal();
     return 0;
 }
 
 static duk_ret_t Plane_Transform_float3x3(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x3* transform = GetObject<float3x3>(ctx, 0, float3x3_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    float3x3* transform = GetCheckedObject<float3x3>(ctx, 0, float3x3_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Plane_Transform_float3x4(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x4* transform = GetObject<float3x4>(ctx, 0, float3x4_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    float3x4* transform = GetCheckedObject<float3x4>(ctx, 0, float3x4_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Plane_Transform_float4x4(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float4x4* transform = GetObject<float4x4>(ctx, 0, float4x4_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    float4x4* transform = GetCheckedObject<float4x4>(ctx, 0, float4x4_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Plane_Transform_Quat(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Quat* transform = GetObject<Quat>(ctx, 0, Quat_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Quat* transform = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Plane_ExamineSide_Triangle(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Triangle* triangle = GetObject<Triangle>(ctx, 0, Triangle_Id); if (!triangle) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Triangle* triangle = GetCheckedObject<Triangle>(ctx, 0, Triangle_Id);
     int ret = thisObj->ExamineSide(*triangle);
     duk_push_number(ctx, ret);
     return 1;
@@ -151,8 +151,8 @@ static duk_ret_t Plane_ExamineSide_Triangle(duk_context* ctx)
 
 static duk_ret_t Plane_Distance_float3(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3* point = GetObject<float3>(ctx, 0, float3_Id); if (!point) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    float3* point = GetCheckedObject<float3>(ctx, 0, float3_Id);
     float ret = thisObj->Distance(*point);
     duk_push_number(ctx, ret);
     return 1;
@@ -160,8 +160,8 @@ static duk_ret_t Plane_Distance_float3(duk_context* ctx)
 
 static duk_ret_t Plane_Distance_LineSegment(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    LineSegment* lineSegment = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!lineSegment) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    LineSegment* lineSegment = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     float ret = thisObj->Distance(*lineSegment);
     duk_push_number(ctx, ret);
     return 1;
@@ -169,8 +169,8 @@ static duk_ret_t Plane_Distance_LineSegment(duk_context* ctx)
 
 static duk_ret_t Plane_Distance_Sphere(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Sphere* sphere = GetObject<Sphere>(ctx, 0, Sphere_Id); if (!sphere) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Sphere* sphere = GetCheckedObject<Sphere>(ctx, 0, Sphere_Id);
     float ret = thisObj->Distance(*sphere);
     duk_push_number(ctx, ret);
     return 1;
@@ -178,8 +178,8 @@ static duk_ret_t Plane_Distance_Sphere(duk_context* ctx)
 
 static duk_ret_t Plane_Distance_Capsule(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Capsule* capsule = GetObject<Capsule>(ctx, 0, Capsule_Id); if (!capsule) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Capsule* capsule = GetCheckedObject<Capsule>(ctx, 0, Capsule_Id);
     float ret = thisObj->Distance(*capsule);
     duk_push_number(ctx, ret);
     return 1;
@@ -187,8 +187,8 @@ static duk_ret_t Plane_Distance_Capsule(duk_context* ctx)
 
 static duk_ret_t Plane_SignedDistance_AABB(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    AABB* aabb = GetObject<AABB>(ctx, 0, AABB_Id); if (!aabb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    AABB* aabb = GetCheckedObject<AABB>(ctx, 0, AABB_Id);
     float ret = thisObj->SignedDistance(*aabb);
     duk_push_number(ctx, ret);
     return 1;
@@ -196,8 +196,8 @@ static duk_ret_t Plane_SignedDistance_AABB(duk_context* ctx)
 
 static duk_ret_t Plane_SignedDistance_OBB(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    OBB* obb = GetObject<OBB>(ctx, 0, OBB_Id); if (!obb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    OBB* obb = GetCheckedObject<OBB>(ctx, 0, OBB_Id);
     float ret = thisObj->SignedDistance(*obb);
     duk_push_number(ctx, ret);
     return 1;
@@ -205,8 +205,8 @@ static duk_ret_t Plane_SignedDistance_OBB(duk_context* ctx)
 
 static duk_ret_t Plane_SignedDistance_Capsule(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Capsule* capsule = GetObject<Capsule>(ctx, 0, Capsule_Id); if (!capsule) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Capsule* capsule = GetCheckedObject<Capsule>(ctx, 0, Capsule_Id);
     float ret = thisObj->SignedDistance(*capsule);
     duk_push_number(ctx, ret);
     return 1;
@@ -214,8 +214,8 @@ static duk_ret_t Plane_SignedDistance_Capsule(duk_context* ctx)
 
 static duk_ret_t Plane_SignedDistance_Frustum(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Frustum* frustum = GetObject<Frustum>(ctx, 0, Frustum_Id); if (!frustum) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Frustum* frustum = GetCheckedObject<Frustum>(ctx, 0, Frustum_Id);
     float ret = thisObj->SignedDistance(*frustum);
     duk_push_number(ctx, ret);
     return 1;
@@ -223,8 +223,8 @@ static duk_ret_t Plane_SignedDistance_Frustum(duk_context* ctx)
 
 static duk_ret_t Plane_SignedDistance_Line(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Line* line = GetObject<Line>(ctx, 0, Line_Id); if (!line) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Line* line = GetCheckedObject<Line>(ctx, 0, Line_Id);
     float ret = thisObj->SignedDistance(*line);
     duk_push_number(ctx, ret);
     return 1;
@@ -232,8 +232,8 @@ static duk_ret_t Plane_SignedDistance_Line(duk_context* ctx)
 
 static duk_ret_t Plane_SignedDistance_LineSegment(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    LineSegment* lineSegment = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!lineSegment) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    LineSegment* lineSegment = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     float ret = thisObj->SignedDistance(*lineSegment);
     duk_push_number(ctx, ret);
     return 1;
@@ -241,8 +241,8 @@ static duk_ret_t Plane_SignedDistance_LineSegment(duk_context* ctx)
 
 static duk_ret_t Plane_SignedDistance_Ray(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Ray* ray = GetObject<Ray>(ctx, 0, Ray_Id); if (!ray) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Ray* ray = GetCheckedObject<Ray>(ctx, 0, Ray_Id);
     float ret = thisObj->SignedDistance(*ray);
     duk_push_number(ctx, ret);
     return 1;
@@ -250,8 +250,8 @@ static duk_ret_t Plane_SignedDistance_Ray(duk_context* ctx)
 
 static duk_ret_t Plane_SignedDistance_Sphere(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Sphere* sphere = GetObject<Sphere>(ctx, 0, Sphere_Id); if (!sphere) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Sphere* sphere = GetCheckedObject<Sphere>(ctx, 0, Sphere_Id);
     float ret = thisObj->SignedDistance(*sphere);
     duk_push_number(ctx, ret);
     return 1;
@@ -259,8 +259,8 @@ static duk_ret_t Plane_SignedDistance_Sphere(duk_context* ctx)
 
 static duk_ret_t Plane_SignedDistance_Triangle(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Triangle* triangle = GetObject<Triangle>(ctx, 0, Triangle_Id); if (!triangle) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Triangle* triangle = GetCheckedObject<Triangle>(ctx, 0, Triangle_Id);
     float ret = thisObj->SignedDistance(*triangle);
     duk_push_number(ctx, ret);
     return 1;
@@ -268,42 +268,42 @@ static duk_ret_t Plane_SignedDistance_Triangle(duk_context* ctx)
 
 static duk_ret_t Plane_OrthoProjection(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
     float3x4 ret = thisObj->OrthoProjection();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x4(ret), float3x4_Id); duk_push_c_function(ctx, float3x4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_Id, float3x4_Dtor);
     return 1;
 }
 
 static duk_ret_t Plane_Project_LineSegment(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    LineSegment* lineSegment = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!lineSegment) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    LineSegment* lineSegment = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     LineSegment ret = thisObj->Project(*lineSegment);
-    duk_push_object(ctx); SetObject(ctx, -1, new LineSegment(ret), LineSegment_Id); duk_push_c_function(ctx, LineSegment_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, LineSegment_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_Id, LineSegment_Dtor);
     return 1;
 }
 
 static duk_ret_t Plane_Project_Triangle(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Triangle* triangle = GetObject<Triangle>(ctx, 0, Triangle_Id); if (!triangle) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Triangle* triangle = GetCheckedObject<Triangle>(ctx, 0, Triangle_Id);
     Triangle ret = thisObj->Project(*triangle);
-    duk_push_object(ctx); SetObject(ctx, -1, new Triangle(ret), Triangle_Id); duk_push_c_function(ctx, Triangle_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Triangle_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Triangle>(ctx, ret, Triangle_Id, Triangle_Dtor);
     return 1;
 }
 
 static duk_ret_t Plane_MirrorMatrix(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
     float3x4 ret = thisObj->MirrorMatrix();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x4(ret), float3x4_Id); duk_push_c_function(ctx, float3x4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_Id, float3x4_Dtor);
     return 1;
 }
 
 static duk_ret_t Plane_Contains_Line_float(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Line* line = GetObject<Line>(ctx, 0, Line_Id); if (!line) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Line* line = GetCheckedObject<Line>(ctx, 0, Line_Id);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Contains(*line, epsilon);
     duk_push_boolean(ctx, ret);
@@ -312,8 +312,8 @@ static duk_ret_t Plane_Contains_Line_float(duk_context* ctx)
 
 static duk_ret_t Plane_Contains_Ray_float(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Ray* ray = GetObject<Ray>(ctx, 0, Ray_Id); if (!ray) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Ray* ray = GetCheckedObject<Ray>(ctx, 0, Ray_Id);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Contains(*ray, epsilon);
     duk_push_boolean(ctx, ret);
@@ -322,8 +322,8 @@ static duk_ret_t Plane_Contains_Ray_float(duk_context* ctx)
 
 static duk_ret_t Plane_Contains_LineSegment_float(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    LineSegment* lineSegment = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!lineSegment) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    LineSegment* lineSegment = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Contains(*lineSegment, epsilon);
     duk_push_boolean(ctx, ret);
@@ -332,8 +332,8 @@ static duk_ret_t Plane_Contains_LineSegment_float(duk_context* ctx)
 
 static duk_ret_t Plane_Contains_Triangle_float(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Triangle* triangle = GetObject<Triangle>(ctx, 0, Triangle_Id); if (!triangle) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Triangle* triangle = GetCheckedObject<Triangle>(ctx, 0, Triangle_Id);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Contains(*triangle, epsilon);
     duk_push_boolean(ctx, ret);
@@ -342,8 +342,8 @@ static duk_ret_t Plane_Contains_Triangle_float(duk_context* ctx)
 
 static duk_ret_t Plane_Contains_Circle_float(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Circle* circle = GetObject<Circle>(ctx, 0, Circle_Id); if (!circle) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Circle* circle = GetCheckedObject<Circle>(ctx, 0, Circle_Id);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Contains(*circle, epsilon);
     duk_push_boolean(ctx, ret);
@@ -352,8 +352,8 @@ static duk_ret_t Plane_Contains_Circle_float(duk_context* ctx)
 
 static duk_ret_t Plane_SetEquals_Plane_float(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Plane* plane = GetObject<Plane>(ctx, 0, Plane_Id); if (!plane) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Plane* plane = GetCheckedObject<Plane>(ctx, 0, Plane_Id);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->SetEquals(*plane, epsilon);
     duk_push_boolean(ctx, ret);
@@ -362,8 +362,8 @@ static duk_ret_t Plane_SetEquals_Plane_float(duk_context* ctx)
 
 static duk_ret_t Plane_Equals_Plane_float(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Plane* other = GetObject<Plane>(ctx, 0, Plane_Id); if (!other) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Plane* other = GetCheckedObject<Plane>(ctx, 0, Plane_Id);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Equals(*other, epsilon);
     duk_push_boolean(ctx, ret);
@@ -372,8 +372,8 @@ static duk_ret_t Plane_Equals_Plane_float(duk_context* ctx)
 
 static duk_ret_t Plane_BitEquals_Plane(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Plane* other = GetObject<Plane>(ctx, 0, Plane_Id); if (!other) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Plane* other = GetCheckedObject<Plane>(ctx, 0, Plane_Id);
     bool ret = thisObj->BitEquals(*other);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -381,8 +381,8 @@ static duk_ret_t Plane_BitEquals_Plane(duk_context* ctx)
 
 static duk_ret_t Plane_IsParallel_Plane_float(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Plane* plane = GetObject<Plane>(ctx, 0, Plane_Id); if (!plane) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Plane* plane = GetCheckedObject<Plane>(ctx, 0, Plane_Id);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->IsParallel(*plane, epsilon);
     duk_push_boolean(ctx, ret);
@@ -391,8 +391,8 @@ static duk_ret_t Plane_IsParallel_Plane_float(duk_context* ctx)
 
 static duk_ret_t Plane_DihedralAngle_Plane(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Plane* plane = GetObject<Plane>(ctx, 0, Plane_Id); if (!plane) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Plane* plane = GetCheckedObject<Plane>(ctx, 0, Plane_Id);
     float ret = thisObj->DihedralAngle(*plane);
     duk_push_number(ctx, ret);
     return 1;
@@ -400,8 +400,8 @@ static duk_ret_t Plane_DihedralAngle_Plane(duk_context* ctx)
 
 static duk_ret_t Plane_Intersects_Sphere(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Sphere* sphere = GetObject<Sphere>(ctx, 0, Sphere_Id); if (!sphere) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Sphere* sphere = GetCheckedObject<Sphere>(ctx, 0, Sphere_Id);
     bool ret = thisObj->Intersects(*sphere);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -409,8 +409,8 @@ static duk_ret_t Plane_Intersects_Sphere(duk_context* ctx)
 
 static duk_ret_t Plane_Intersects_AABB(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    AABB* aabb = GetObject<AABB>(ctx, 0, AABB_Id); if (!aabb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    AABB* aabb = GetCheckedObject<AABB>(ctx, 0, AABB_Id);
     bool ret = thisObj->Intersects(*aabb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -418,8 +418,8 @@ static duk_ret_t Plane_Intersects_AABB(duk_context* ctx)
 
 static duk_ret_t Plane_Intersects_OBB(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    OBB* obb = GetObject<OBB>(ctx, 0, OBB_Id); if (!obb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    OBB* obb = GetCheckedObject<OBB>(ctx, 0, OBB_Id);
     bool ret = thisObj->Intersects(*obb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -427,8 +427,8 @@ static duk_ret_t Plane_Intersects_OBB(duk_context* ctx)
 
 static duk_ret_t Plane_Intersects_Triangle(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Triangle* triangle = GetObject<Triangle>(ctx, 0, Triangle_Id); if (!triangle) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Triangle* triangle = GetCheckedObject<Triangle>(ctx, 0, Triangle_Id);
     bool ret = thisObj->Intersects(*triangle);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -436,8 +436,8 @@ static duk_ret_t Plane_Intersects_Triangle(duk_context* ctx)
 
 static duk_ret_t Plane_Intersects_Frustum(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Frustum* frustum = GetObject<Frustum>(ctx, 0, Frustum_Id); if (!frustum) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Frustum* frustum = GetCheckedObject<Frustum>(ctx, 0, Frustum_Id);
     bool ret = thisObj->Intersects(*frustum);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -445,8 +445,8 @@ static duk_ret_t Plane_Intersects_Frustum(duk_context* ctx)
 
 static duk_ret_t Plane_Intersects_Capsule(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Capsule* capsule = GetObject<Capsule>(ctx, 0, Capsule_Id); if (!capsule) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Capsule* capsule = GetCheckedObject<Capsule>(ctx, 0, Capsule_Id);
     bool ret = thisObj->Intersects(*capsule);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -454,8 +454,8 @@ static duk_ret_t Plane_Intersects_Capsule(duk_context* ctx)
 
 static duk_ret_t Plane_Intersects_Circle(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Circle* circle = GetObject<Circle>(ctx, 0, Circle_Id); if (!circle) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Circle* circle = GetCheckedObject<Circle>(ctx, 0, Circle_Id);
     int ret = thisObj->Intersects(*circle);
     duk_push_number(ctx, ret);
     return 1;
@@ -463,8 +463,8 @@ static duk_ret_t Plane_Intersects_Circle(duk_context* ctx)
 
 static duk_ret_t Plane_Clip_LineSegment(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    LineSegment* line = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!line) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    LineSegment* line = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     bool ret = thisObj->Clip(*line);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -472,9 +472,9 @@ static duk_ret_t Plane_Clip_LineSegment(duk_context* ctx)
 
 static duk_ret_t Plane_Clip_Line_Ray(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Line* line = GetObject<Line>(ctx, 0, Line_Id); if (!line) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    Ray* outRay = GetObject<Ray>(ctx, 1, Ray_Id); if (!outRay) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Line* line = GetCheckedObject<Line>(ctx, 0, Line_Id);
+    Ray* outRay = GetCheckedObject<Ray>(ctx, 1, Ray_Id);
     int ret = thisObj->Clip(*line, *outRay);
     duk_push_number(ctx, ret);
     return 1;
@@ -482,10 +482,10 @@ static duk_ret_t Plane_Clip_Line_Ray(duk_context* ctx)
 
 static duk_ret_t Plane_Clip_Triangle_Triangle_Triangle(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Triangle* triangle = GetObject<Triangle>(ctx, 0, Triangle_Id); if (!triangle) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    Triangle* t1 = GetObject<Triangle>(ctx, 1, Triangle_Id); if (!t1) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    Triangle* t2 = GetObject<Triangle>(ctx, 2, Triangle_Id); if (!t2) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
+    Triangle* triangle = GetCheckedObject<Triangle>(ctx, 0, Triangle_Id);
+    Triangle* t1 = GetCheckedObject<Triangle>(ctx, 1, Triangle_Id);
+    Triangle* t2 = GetCheckedObject<Triangle>(ctx, 2, Triangle_Id);
     int ret = thisObj->Clip(*triangle, *t1, *t2);
     duk_push_number(ctx, ret);
     return 1;
@@ -493,7 +493,7 @@ static duk_ret_t Plane_Clip_Triangle_Triangle_Triangle(duk_context* ctx)
 
 static duk_ret_t Plane_PassesThroughOrigin_float(duk_context* ctx)
 {
-    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Plane* thisObj = GetThisObject<Plane>(ctx, Plane_Id);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->PassesThroughOrigin(epsilon);
     duk_push_boolean(ctx, ret);

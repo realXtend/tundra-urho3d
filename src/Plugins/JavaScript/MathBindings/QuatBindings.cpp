@@ -43,7 +43,7 @@ duk_ret_t Quat_Dtor(duk_context* ctx)
 
 static duk_ret_t Quat_Set_x(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float x = (float)duk_require_number(ctx, 0);
     thisObj->x = x;
     return 0;
@@ -51,14 +51,14 @@ static duk_ret_t Quat_Set_x(duk_context* ctx)
 
 static duk_ret_t Quat_Get_x(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     duk_push_number(ctx, thisObj->x);
     return 1;
 }
 
 static duk_ret_t Quat_Set_y(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float y = (float)duk_require_number(ctx, 0);
     thisObj->y = y;
     return 0;
@@ -66,14 +66,14 @@ static duk_ret_t Quat_Set_y(duk_context* ctx)
 
 static duk_ret_t Quat_Get_y(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     duk_push_number(ctx, thisObj->y);
     return 1;
 }
 
 static duk_ret_t Quat_Set_z(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float z = (float)duk_require_number(ctx, 0);
     thisObj->z = z;
     return 0;
@@ -81,14 +81,14 @@ static duk_ret_t Quat_Set_z(duk_context* ctx)
 
 static duk_ret_t Quat_Get_z(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     duk_push_number(ctx, thisObj->z);
     return 1;
 }
 
 static duk_ret_t Quat_Set_w(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float w = (float)duk_require_number(ctx, 0);
     thisObj->w = w;
     return 0;
@@ -96,7 +96,7 @@ static duk_ret_t Quat_Set_w(duk_context* ctx)
 
 static duk_ret_t Quat_Get_w(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     duk_push_number(ctx, thisObj->w);
     return 1;
 }
@@ -104,39 +104,39 @@ static duk_ret_t Quat_Get_w(duk_context* ctx)
 static duk_ret_t Quat_Ctor(duk_context* ctx)
 {
     Quat* newObj = new Quat();
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<Quat>(ctx, newObj, Quat_Id, Quat_Dtor);
     return 0;
 }
 
 static duk_ret_t Quat_Ctor_Quat(duk_context* ctx)
 {
-    Quat* rhs = GetObject<Quat>(ctx, 0, Quat_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* rhs = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
     Quat* newObj = new Quat(*rhs);
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<Quat>(ctx, newObj, Quat_Id, Quat_Dtor);
     return 0;
 }
 
 static duk_ret_t Quat_Ctor_float3x3(duk_context* ctx)
 {
-    float3x3* rotationMatrix = GetObject<float3x3>(ctx, 0, float3x3_Id); if (!rotationMatrix) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* rotationMatrix = GetCheckedObject<float3x3>(ctx, 0, float3x3_Id);
     Quat* newObj = new Quat(*rotationMatrix);
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<Quat>(ctx, newObj, Quat_Id, Quat_Dtor);
     return 0;
 }
 
 static duk_ret_t Quat_Ctor_float3x4(duk_context* ctx)
 {
-    float3x4* rotationMatrix = GetObject<float3x4>(ctx, 0, float3x4_Id); if (!rotationMatrix) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x4* rotationMatrix = GetCheckedObject<float3x4>(ctx, 0, float3x4_Id);
     Quat* newObj = new Quat(*rotationMatrix);
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<Quat>(ctx, newObj, Quat_Id, Quat_Dtor);
     return 0;
 }
 
 static duk_ret_t Quat_Ctor_float4x4(duk_context* ctx)
 {
-    float4x4* rotationMatrix = GetObject<float4x4>(ctx, 0, float4x4_Id); if (!rotationMatrix) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float4x4* rotationMatrix = GetCheckedObject<float4x4>(ctx, 0, float4x4_Id);
     Quat* newObj = new Quat(*rotationMatrix);
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<Quat>(ctx, newObj, Quat_Id, Quat_Dtor);
     return 0;
 }
 
@@ -147,31 +147,31 @@ static duk_ret_t Quat_Ctor_float_float_float_float(duk_context* ctx)
     float z = (float)duk_require_number(ctx, 2);
     float w = (float)duk_require_number(ctx, 3);
     Quat* newObj = new Quat(x, y, z, w);
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<Quat>(ctx, newObj, Quat_Id, Quat_Dtor);
     return 0;
 }
 
 static duk_ret_t Quat_Ctor_float3_float(duk_context* ctx)
 {
-    float3* rotationAxis = GetObject<float3>(ctx, 0, float3_Id); if (!rotationAxis) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3* rotationAxis = GetCheckedObject<float3>(ctx, 0, float3_Id);
     float rotationAngleRadians = (float)duk_require_number(ctx, 1);
     Quat* newObj = new Quat(*rotationAxis, rotationAngleRadians);
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<Quat>(ctx, newObj, Quat_Id, Quat_Dtor);
     return 0;
 }
 
 static duk_ret_t Quat_Ctor_float4_float(duk_context* ctx)
 {
-    float4* rotationAxis = GetObject<float4>(ctx, 0, float4_Id); if (!rotationAxis) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float4* rotationAxis = GetCheckedObject<float4>(ctx, 0, float4_Id);
     float rotationAngleRadians = (float)duk_require_number(ctx, 1);
     Quat* newObj = new Quat(*rotationAxis, rotationAngleRadians);
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<Quat>(ctx, newObj, Quat_Id, Quat_Dtor);
     return 0;
 }
 
 static duk_ret_t Quat_Angle(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float ret = thisObj->Angle();
     duk_push_number(ctx, ret);
     return 1;
@@ -179,8 +179,8 @@ static duk_ret_t Quat_Angle(duk_context* ctx)
 
 static duk_ret_t Quat_Dot_Quat(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Quat* rhs = GetObject<Quat>(ctx, 0, Quat_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    Quat* rhs = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
     float ret = thisObj->Dot(*rhs);
     duk_push_number(ctx, ret);
     return 1;
@@ -188,7 +188,7 @@ static duk_ret_t Quat_Dot_Quat(duk_context* ctx)
 
 static duk_ret_t Quat_LengthSq(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float ret = thisObj->LengthSq();
     duk_push_number(ctx, ret);
     return 1;
@@ -196,7 +196,7 @@ static duk_ret_t Quat_LengthSq(duk_context* ctx)
 
 static duk_ret_t Quat_Length(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float ret = thisObj->Length();
     duk_push_number(ctx, ret);
     return 1;
@@ -204,7 +204,7 @@ static duk_ret_t Quat_Length(duk_context* ctx)
 
 static duk_ret_t Quat_Normalize(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float ret = thisObj->Normalize();
     duk_push_number(ctx, ret);
     return 1;
@@ -212,15 +212,15 @@ static duk_ret_t Quat_Normalize(duk_context* ctx)
 
 static duk_ret_t Quat_Normalized(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     Quat ret = thisObj->Normalized();
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_IsNormalized_float(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->IsNormalized(epsilon);
     duk_push_boolean(ctx, ret);
@@ -229,7 +229,7 @@ static duk_ret_t Quat_IsNormalized_float(duk_context* ctx)
 
 static duk_ret_t Quat_IsInvertible_float(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->IsInvertible(epsilon);
     duk_push_boolean(ctx, ret);
@@ -238,7 +238,7 @@ static duk_ret_t Quat_IsInvertible_float(duk_context* ctx)
 
 static duk_ret_t Quat_IsFinite(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     bool ret = thisObj->IsFinite();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -246,8 +246,8 @@ static duk_ret_t Quat_IsFinite(duk_context* ctx)
 
 static duk_ret_t Quat_Equals_Quat_float(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Quat* rhs = GetObject<Quat>(ctx, 0, Quat_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    Quat* rhs = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Equals(*rhs, epsilon);
     duk_push_boolean(ctx, ret);
@@ -256,8 +256,8 @@ static duk_ret_t Quat_Equals_Quat_float(duk_context* ctx)
 
 static duk_ret_t Quat_BitEquals_Quat(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Quat* other = GetObject<Quat>(ctx, 0, Quat_Id); if (!other) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    Quat* other = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
     bool ret = thisObj->BitEquals(*other);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -265,22 +265,22 @@ static duk_ret_t Quat_BitEquals_Quat(duk_context* ctx)
 
 static duk_ret_t Quat_Inverse(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     thisObj->Inverse();
     return 0;
 }
 
 static duk_ret_t Quat_Inverted(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     Quat ret = thisObj->Inverted();
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_InverseAndNormalize(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float ret = thisObj->InverseAndNormalize();
     duk_push_number(ctx, ret);
     return 1;
@@ -288,72 +288,72 @@ static duk_ret_t Quat_InverseAndNormalize(duk_context* ctx)
 
 static duk_ret_t Quat_Conjugate(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     thisObj->Conjugate();
     return 0;
 }
 
 static duk_ret_t Quat_Conjugated(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     Quat ret = thisObj->Conjugated();
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_Transform_float_float_float(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float x = (float)duk_require_number(ctx, 0);
     float y = (float)duk_require_number(ctx, 1);
     float z = (float)duk_require_number(ctx, 2);
     float3 ret = thisObj->Transform(x, y, z);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_Transform_float3(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3* vec = GetObject<float3>(ctx, 0, float3_Id); if (!vec) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    float3* vec = GetCheckedObject<float3>(ctx, 0, float3_Id);
     float3 ret = thisObj->Transform(*vec);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_Transform_float4(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float4* vec = GetObject<float4>(ctx, 0, float4_Id); if (!vec) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    float4* vec = GetCheckedObject<float4>(ctx, 0, float4_Id);
     float4 ret = thisObj->Transform(*vec);
-    duk_push_object(ctx); SetObject(ctx, -1, new float4(ret), float4_Id); duk_push_c_function(ctx, float4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float4>(ctx, ret, float4_Id, float4_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_Lerp_Quat_float(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Quat* target = GetObject<Quat>(ctx, 0, Quat_Id); if (!target) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    Quat* target = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
     float t = (float)duk_require_number(ctx, 1);
     Quat ret = thisObj->Lerp(*target, t);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_Slerp_Quat_float(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Quat* target = GetObject<Quat>(ctx, 0, Quat_Id); if (!target) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    Quat* target = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
     float t = (float)duk_require_number(ctx, 1);
     Quat ret = thisObj->Slerp(*target, t);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_AngleBetween_Quat(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Quat* target = GetObject<Quat>(ctx, 0, Quat_Id); if (!target) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    Quat* target = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
      float ret = thisObj->AngleBetween(*target);
     duk_push_number(ctx, ret);
     return 1;
@@ -361,8 +361,8 @@ static duk_ret_t Quat_AngleBetween_Quat(duk_context* ctx)
 
 static duk_ret_t Quat_ToAxisAngle_float3_float(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3* rotationAxis = GetObject<float3>(ctx, 0, float3_Id); if (!rotationAxis) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    float3* rotationAxis = GetCheckedObject<float3>(ctx, 0, float3_Id);
     float rotationAngleRadians = (float)duk_require_number(ctx, 1);
     thisObj->ToAxisAngle(*rotationAxis, rotationAngleRadians);
     return 0;
@@ -370,8 +370,8 @@ static duk_ret_t Quat_ToAxisAngle_float3_float(duk_context* ctx)
 
 static duk_ret_t Quat_ToAxisAngle_float4_float(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float4* rotationAxis = GetObject<float4>(ctx, 0, float4_Id); if (!rotationAxis) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    float4* rotationAxis = GetCheckedObject<float4>(ctx, 0, float4_Id);
     float rotationAngleRadians = (float)duk_require_number(ctx, 1);
     thisObj->ToAxisAngle(*rotationAxis, rotationAngleRadians);
     return 0;
@@ -379,8 +379,8 @@ static duk_ret_t Quat_ToAxisAngle_float4_float(duk_context* ctx)
 
 static duk_ret_t Quat_SetFromAxisAngle_float3_float(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3* rotationAxis = GetObject<float3>(ctx, 0, float3_Id); if (!rotationAxis) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    float3* rotationAxis = GetCheckedObject<float3>(ctx, 0, float3_Id);
     float rotationAngleRadians = (float)duk_require_number(ctx, 1);
     thisObj->SetFromAxisAngle(*rotationAxis, rotationAngleRadians);
     return 0;
@@ -388,8 +388,8 @@ static duk_ret_t Quat_SetFromAxisAngle_float3_float(duk_context* ctx)
 
 static duk_ret_t Quat_SetFromAxisAngle_float4_float(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float4* rotationAxis = GetObject<float4>(ctx, 0, float4_Id); if (!rotationAxis) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    float4* rotationAxis = GetCheckedObject<float4>(ctx, 0, float4_Id);
     float rotationAngleRadians = (float)duk_require_number(ctx, 1);
     thisObj->SetFromAxisAngle(*rotationAxis, rotationAngleRadians);
     return 0;
@@ -397,31 +397,31 @@ static duk_ret_t Quat_SetFromAxisAngle_float4_float(duk_context* ctx)
 
 static duk_ret_t Quat_Set_float3x3(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x3* matrix = GetObject<float3x3>(ctx, 0, float3x3_Id); if (!matrix) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    float3x3* matrix = GetCheckedObject<float3x3>(ctx, 0, float3x3_Id);
     thisObj->Set(*matrix);
     return 0;
 }
 
 static duk_ret_t Quat_Set_float3x4(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x4* matrix = GetObject<float3x4>(ctx, 0, float3x4_Id); if (!matrix) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    float3x4* matrix = GetCheckedObject<float3x4>(ctx, 0, float3x4_Id);
     thisObj->Set(*matrix);
     return 0;
 }
 
 static duk_ret_t Quat_Set_float4x4(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float4x4* matrix = GetObject<float4x4>(ctx, 0, float4x4_Id); if (!matrix) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    float4x4* matrix = GetCheckedObject<float4x4>(ctx, 0, float4x4_Id);
     thisObj->Set(*matrix);
     return 0;
 }
 
 static duk_ret_t Quat_Set_float_float_float_float(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float x = (float)duk_require_number(ctx, 0);
     float y = (float)duk_require_number(ctx, 1);
     float z = (float)duk_require_number(ctx, 2);
@@ -432,191 +432,191 @@ static duk_ret_t Quat_Set_float_float_float_float(duk_context* ctx)
 
 static duk_ret_t Quat_ToEulerXYX(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float3 ret = thisObj->ToEulerXYX();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_ToEulerXZX(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float3 ret = thisObj->ToEulerXZX();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_ToEulerYXY(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float3 ret = thisObj->ToEulerYXY();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_ToEulerYZY(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float3 ret = thisObj->ToEulerYZY();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_ToEulerZXZ(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float3 ret = thisObj->ToEulerZXZ();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_ToEulerZYZ(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float3 ret = thisObj->ToEulerZYZ();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_ToEulerXYZ(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float3 ret = thisObj->ToEulerXYZ();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_ToEulerXZY(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float3 ret = thisObj->ToEulerXZY();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_ToEulerYXZ(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float3 ret = thisObj->ToEulerYXZ();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_ToEulerYZX(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float3 ret = thisObj->ToEulerYZX();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_ToEulerZXY(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float3 ret = thisObj->ToEulerZXY();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_ToEulerZYX(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float3 ret = thisObj->ToEulerZYX();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_ToFloat3x3(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float3x3 ret = thisObj->ToFloat3x3();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_ToFloat3x4(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float3x4 ret = thisObj->ToFloat3x4();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x4(ret), float3x4_Id); duk_push_c_function(ctx, float3x4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_Id, float3x4_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_ToFloat4x4(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float4x4 ret = thisObj->ToFloat4x4();
-    duk_push_object(ctx); SetObject(ctx, -1, new float4x4(ret), float4x4_Id); duk_push_c_function(ctx, float4x4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float4x4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float4x4>(ctx, ret, float4x4_Id, float4x4_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_ToFloat4x4_float3(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3* translation = GetObject<float3>(ctx, 0, float3_Id); if (!translation) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    float3* translation = GetCheckedObject<float3>(ctx, 0, float3_Id);
     float4x4 ret = thisObj->ToFloat4x4(*translation);
-    duk_push_object(ctx); SetObject(ctx, -1, new float4x4(ret), float4x4_Id); duk_push_c_function(ctx, float4x4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float4x4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float4x4>(ctx, ret, float4x4_Id, float4x4_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_ToFloat4x4_float4(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float4* translation = GetObject<float4>(ctx, 0, float4_Id); if (!translation) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    float4* translation = GetCheckedObject<float4>(ctx, 0, float4_Id);
     float4x4 ret = thisObj->ToFloat4x4(*translation);
-    duk_push_object(ctx); SetObject(ctx, -1, new float4x4(ret), float4x4_Id); duk_push_c_function(ctx, float4x4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float4x4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float4x4>(ctx, ret, float4x4_Id, float4x4_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_CastToFloat4(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     float4 ret = thisObj->CastToFloat4();
-    duk_push_object(ctx); SetObject(ctx, -1, new float4(ret), float4_Id); duk_push_c_function(ctx, float4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float4>(ctx, ret, float4_Id, float4_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_Mul_Quat(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Quat* rhs = GetObject<Quat>(ctx, 0, Quat_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    Quat* rhs = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
     Quat ret = thisObj->Mul(*rhs);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_Mul_float3x3(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x3* rhs = GetObject<float3x3>(ctx, 0, float3x3_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    float3x3* rhs = GetCheckedObject<float3x3>(ctx, 0, float3x3_Id);
     Quat ret = thisObj->Mul(*rhs);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_Mul_float3(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3* vector = GetObject<float3>(ctx, 0, float3_Id); if (!vector) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    float3* vector = GetCheckedObject<float3>(ctx, 0, float3_Id);
     float3 ret = thisObj->Mul(*vector);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_Mul_float4(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float4* vector = GetObject<float4>(ctx, 0, float4_Id); if (!vector) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
+    float4* vector = GetCheckedObject<float4>(ctx, 0, float4_Id);
     float4 ret = thisObj->Mul(*vector);
-    duk_push_object(ctx); SetObject(ctx, -1, new float4(ret), float4_Id); duk_push_c_function(ctx, float4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float4>(ctx, ret, float4_Id, float4_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_Neg(duk_context* ctx)
 {
-    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Quat* thisObj = GetThisObject<Quat>(ctx, Quat_Id);
     Quat ret = thisObj->Neg();
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
@@ -716,32 +716,32 @@ static duk_ret_t Quat_Mul_Selector(duk_context* ctx)
 
 static duk_ret_t Quat_SlerpVector_Static_float3_float3_float(duk_context* ctx)
 {
-    float3* from = GetObject<float3>(ctx, 0, float3_Id); if (!from) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* to = GetObject<float3>(ctx, 1, float3_Id); if (!to) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3* from = GetCheckedObject<float3>(ctx, 0, float3_Id);
+    float3* to = GetCheckedObject<float3>(ctx, 1, float3_Id);
     float t = (float)duk_require_number(ctx, 2);
     float3 ret = Quat::SlerpVector(*from, *to, t);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_SlerpVectorAbs_Static_float3_float3_float(duk_context* ctx)
 {
-    float3* from = GetObject<float3>(ctx, 0, float3_Id); if (!from) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* to = GetObject<float3>(ctx, 1, float3_Id); if (!to) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3* from = GetCheckedObject<float3>(ctx, 0, float3_Id);
+    float3* to = GetCheckedObject<float3>(ctx, 1, float3_Id);
     float angleRadians = (float)duk_require_number(ctx, 2);
     float3 ret = Quat::SlerpVectorAbs(*from, *to, angleRadians);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_LookAt_Static_float3_float3_float3_float3(duk_context* ctx)
 {
-    float3* localForward = GetObject<float3>(ctx, 0, float3_Id); if (!localForward) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* targetDirection = GetObject<float3>(ctx, 1, float3_Id); if (!targetDirection) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* localUp = GetObject<float3>(ctx, 2, float3_Id); if (!localUp) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* worldUp = GetObject<float3>(ctx, 3, float3_Id); if (!worldUp) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3* localForward = GetCheckedObject<float3>(ctx, 0, float3_Id);
+    float3* targetDirection = GetCheckedObject<float3>(ctx, 1, float3_Id);
+    float3* localUp = GetCheckedObject<float3>(ctx, 2, float3_Id);
+    float3* worldUp = GetCheckedObject<float3>(ctx, 3, float3_Id);
     Quat ret = Quat::LookAt(*localForward, *targetDirection, *localUp, *worldUp);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
@@ -749,7 +749,7 @@ static duk_ret_t Quat_RotateX_Static_float(duk_context* ctx)
 {
     float angleRadians = (float)duk_require_number(ctx, 0);
     Quat ret = Quat::RotateX(angleRadians);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
@@ -757,7 +757,7 @@ static duk_ret_t Quat_RotateY_Static_float(duk_context* ctx)
 {
     float angleRadians = (float)duk_require_number(ctx, 0);
     Quat ret = Quat::RotateY(angleRadians);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
@@ -765,45 +765,45 @@ static duk_ret_t Quat_RotateZ_Static_float(duk_context* ctx)
 {
     float angleRadians = (float)duk_require_number(ctx, 0);
     Quat ret = Quat::RotateZ(angleRadians);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_RotateAxisAngle_Static_float3_float(duk_context* ctx)
 {
-    float3* axisDirection = GetObject<float3>(ctx, 0, float3_Id); if (!axisDirection) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3* axisDirection = GetCheckedObject<float3>(ctx, 0, float3_Id);
     float angleRadians = (float)duk_require_number(ctx, 1);
     Quat ret = Quat::RotateAxisAngle(*axisDirection, angleRadians);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_RotateFromTo_Static_float3_float3(duk_context* ctx)
 {
-    float3* sourceDirection = GetObject<float3>(ctx, 0, float3_Id); if (!sourceDirection) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* targetDirection = GetObject<float3>(ctx, 1, float3_Id); if (!targetDirection) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3* sourceDirection = GetCheckedObject<float3>(ctx, 0, float3_Id);
+    float3* targetDirection = GetCheckedObject<float3>(ctx, 1, float3_Id);
     Quat ret = Quat::RotateFromTo(*sourceDirection, *targetDirection);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_RotateFromTo_Static_float4_float4(duk_context* ctx)
 {
-    float4* sourceDirection = GetObject<float4>(ctx, 0, float4_Id); if (!sourceDirection) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float4* targetDirection = GetObject<float4>(ctx, 1, float4_Id); if (!targetDirection) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float4* sourceDirection = GetCheckedObject<float4>(ctx, 0, float4_Id);
+    float4* targetDirection = GetCheckedObject<float4>(ctx, 1, float4_Id);
     Quat ret = Quat::RotateFromTo(*sourceDirection, *targetDirection);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_RotateFromTo_Static_float3_float3_float3_float3(duk_context* ctx)
 {
-    float3* sourceDirection = GetObject<float3>(ctx, 0, float3_Id); if (!sourceDirection) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* targetDirection = GetObject<float3>(ctx, 1, float3_Id); if (!targetDirection) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* sourceDirection2 = GetObject<float3>(ctx, 2, float3_Id); if (!sourceDirection2) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* targetDirection2 = GetObject<float3>(ctx, 3, float3_Id); if (!targetDirection2) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3* sourceDirection = GetCheckedObject<float3>(ctx, 0, float3_Id);
+    float3* targetDirection = GetCheckedObject<float3>(ctx, 1, float3_Id);
+    float3* sourceDirection2 = GetCheckedObject<float3>(ctx, 2, float3_Id);
+    float3* targetDirection2 = GetCheckedObject<float3>(ctx, 3, float3_Id);
     Quat ret = Quat::RotateFromTo(*sourceDirection, *targetDirection, *sourceDirection2, *targetDirection2);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
@@ -813,7 +813,7 @@ static duk_ret_t Quat_FromEulerXYX_Static_float_float_float(duk_context* ctx)
     float y = (float)duk_require_number(ctx, 1);
     float x = (float)duk_require_number(ctx, 2);
     Quat ret = Quat::FromEulerXYX(x2, y, x);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
@@ -823,7 +823,7 @@ static duk_ret_t Quat_FromEulerXZX_Static_float_float_float(duk_context* ctx)
     float z = (float)duk_require_number(ctx, 1);
     float x = (float)duk_require_number(ctx, 2);
     Quat ret = Quat::FromEulerXZX(x2, z, x);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
@@ -833,7 +833,7 @@ static duk_ret_t Quat_FromEulerYXY_Static_float_float_float(duk_context* ctx)
     float x = (float)duk_require_number(ctx, 1);
     float y = (float)duk_require_number(ctx, 2);
     Quat ret = Quat::FromEulerYXY(y2, x, y);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
@@ -843,7 +843,7 @@ static duk_ret_t Quat_FromEulerYZY_Static_float_float_float(duk_context* ctx)
     float z = (float)duk_require_number(ctx, 1);
     float y = (float)duk_require_number(ctx, 2);
     Quat ret = Quat::FromEulerYZY(y2, z, y);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
@@ -853,7 +853,7 @@ static duk_ret_t Quat_FromEulerZXZ_Static_float_float_float(duk_context* ctx)
     float x = (float)duk_require_number(ctx, 1);
     float z = (float)duk_require_number(ctx, 2);
     Quat ret = Quat::FromEulerZXZ(z2, x, z);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
@@ -863,7 +863,7 @@ static duk_ret_t Quat_FromEulerZYZ_Static_float_float_float(duk_context* ctx)
     float y = (float)duk_require_number(ctx, 1);
     float z = (float)duk_require_number(ctx, 2);
     Quat ret = Quat::FromEulerZYZ(z2, y, z);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
@@ -873,7 +873,7 @@ static duk_ret_t Quat_FromEulerXYZ_Static_float_float_float(duk_context* ctx)
     float y = (float)duk_require_number(ctx, 1);
     float z = (float)duk_require_number(ctx, 2);
     Quat ret = Quat::FromEulerXYZ(x, y, z);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
@@ -883,7 +883,7 @@ static duk_ret_t Quat_FromEulerXZY_Static_float_float_float(duk_context* ctx)
     float z = (float)duk_require_number(ctx, 1);
     float y = (float)duk_require_number(ctx, 2);
     Quat ret = Quat::FromEulerXZY(x, z, y);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
@@ -893,7 +893,7 @@ static duk_ret_t Quat_FromEulerYXZ_Static_float_float_float(duk_context* ctx)
     float x = (float)duk_require_number(ctx, 1);
     float z = (float)duk_require_number(ctx, 2);
     Quat ret = Quat::FromEulerYXZ(y, x, z);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
@@ -903,7 +903,7 @@ static duk_ret_t Quat_FromEulerYZX_Static_float_float_float(duk_context* ctx)
     float z = (float)duk_require_number(ctx, 1);
     float x = (float)duk_require_number(ctx, 2);
     Quat ret = Quat::FromEulerYZX(y, z, x);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
@@ -913,7 +913,7 @@ static duk_ret_t Quat_FromEulerZXY_Static_float_float_float(duk_context* ctx)
     float x = (float)duk_require_number(ctx, 1);
     float y = (float)duk_require_number(ctx, 2);
     Quat ret = Quat::FromEulerZXY(z, x, y);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
@@ -923,15 +923,15 @@ static duk_ret_t Quat_FromEulerZYX_Static_float_float_float(duk_context* ctx)
     float y = (float)duk_require_number(ctx, 1);
     float x = (float)duk_require_number(ctx, 2);
     Quat ret = Quat::FromEulerZYX(z, y, x);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
 static duk_ret_t Quat_RandomRotation_Static_LCG(duk_context* ctx)
 {
-    LCG* lcg = GetObject<LCG>(ctx, 0, LCG_Id); if (!lcg) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    LCG* lcg = GetCheckedObject<LCG>(ctx, 0, LCG_Id);
     Quat ret = Quat::RandomRotation(*lcg);
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 

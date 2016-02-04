@@ -55,7 +55,7 @@ duk_ret_t Circle_Dtor(duk_context* ctx)
 
 static duk_ret_t Circle_Set_r(duk_context* ctx)
 {
-    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id);
     float r = (float)duk_require_number(ctx, 0);
     thisObj->r = r;
     return 0;
@@ -63,7 +63,7 @@ static duk_ret_t Circle_Set_r(duk_context* ctx)
 
 static duk_ret_t Circle_Get_r(duk_context* ctx)
 {
-    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id);
     duk_push_number(ctx, thisObj->r);
     return 1;
 }
@@ -71,54 +71,54 @@ static duk_ret_t Circle_Get_r(duk_context* ctx)
 static duk_ret_t Circle_Ctor(duk_context* ctx)
 {
     Circle* newObj = new Circle();
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, Circle_Id); duk_push_c_function(ctx, Circle_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<Circle>(ctx, newObj, Circle_Id, Circle_Dtor);
     return 0;
 }
 
 static duk_ret_t Circle_ContainingPlane(duk_context* ctx)
 {
-    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id);
     Plane ret = thisObj->ContainingPlane();
-    duk_push_object(ctx); SetObject(ctx, -1, new Plane(ret), Plane_Id); duk_push_c_function(ctx, Plane_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Plane_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Plane>(ctx, ret, Plane_Id, Plane_Dtor);
     return 1;
 }
 
 static duk_ret_t Circle_Transform_float3x3(duk_context* ctx)
 {
-    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x3* transform = GetObject<float3x3>(ctx, 0, float3x3_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id);
+    float3x3* transform = GetCheckedObject<float3x3>(ctx, 0, float3x3_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Circle_Transform_float3x4(duk_context* ctx)
 {
-    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x4* transform = GetObject<float3x4>(ctx, 0, float3x4_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id);
+    float3x4* transform = GetCheckedObject<float3x4>(ctx, 0, float3x4_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Circle_Transform_float4x4(duk_context* ctx)
 {
-    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float4x4* transform = GetObject<float4x4>(ctx, 0, float4x4_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id);
+    float4x4* transform = GetCheckedObject<float4x4>(ctx, 0, float4x4_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Circle_Transform_Quat(duk_context* ctx)
 {
-    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Quat* transform = GetObject<Quat>(ctx, 0, Quat_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id);
+    Quat* transform = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Circle_Intersects_Plane(duk_context* ctx)
 {
-    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Plane* plane = GetObject<Plane>(ctx, 0, Plane_Id); if (!plane) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id);
+    Plane* plane = GetCheckedObject<Plane>(ctx, 0, Plane_Id);
     int ret = thisObj->Intersects(*plane);
     duk_push_number(ctx, ret);
     return 1;
@@ -126,8 +126,8 @@ static duk_ret_t Circle_Intersects_Plane(duk_context* ctx)
 
 static duk_ret_t Circle_IntersectsDisc_Line(duk_context* ctx)
 {
-    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Line* line = GetObject<Line>(ctx, 0, Line_Id); if (!line) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id);
+    Line* line = GetCheckedObject<Line>(ctx, 0, Line_Id);
     bool ret = thisObj->IntersectsDisc(*line);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -135,8 +135,8 @@ static duk_ret_t Circle_IntersectsDisc_Line(duk_context* ctx)
 
 static duk_ret_t Circle_IntersectsDisc_LineSegment(duk_context* ctx)
 {
-    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    LineSegment* lineSegment = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!lineSegment) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id);
+    LineSegment* lineSegment = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     bool ret = thisObj->IntersectsDisc(*lineSegment);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -144,8 +144,8 @@ static duk_ret_t Circle_IntersectsDisc_LineSegment(duk_context* ctx)
 
 static duk_ret_t Circle_IntersectsDisc_Ray(duk_context* ctx)
 {
-    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Ray* ray = GetObject<Ray>(ctx, 0, Ray_Id); if (!ray) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Circle* thisObj = GetThisObject<Circle>(ctx, Circle_Id);
+    Ray* ray = GetCheckedObject<Ray>(ctx, 0, Ray_Id);
     bool ret = thisObj->IntersectsDisc(*ray);
     duk_push_boolean(ctx, ret);
     return 1;

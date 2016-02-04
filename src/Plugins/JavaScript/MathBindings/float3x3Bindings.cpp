@@ -47,15 +47,15 @@ duk_ret_t float3x3_Dtor(duk_context* ctx)
 static duk_ret_t float3x3_Ctor(duk_context* ctx)
 {
     float3x3* newObj = new float3x3();
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<float3x3>(ctx, newObj, float3x3_Id, float3x3_Dtor);
     return 0;
 }
 
 static duk_ret_t float3x3_Ctor_float3x3(duk_context* ctx)
 {
-    float3x3* rhs = GetObject<float3x3>(ctx, 0, float3x3_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* rhs = GetCheckedObject<float3x3>(ctx, 0, float3x3_Id);
     float3x3* newObj = new float3x3(*rhs);
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<float3x3>(ctx, newObj, float3x3_Id, float3x3_Dtor);
     return 0;
 }
 
@@ -71,47 +71,47 @@ static duk_ret_t float3x3_Ctor_float_float_float_float_float_float_float_float_f
     float _21 = (float)duk_require_number(ctx, 7);
     float _22 = (float)duk_require_number(ctx, 8);
     float3x3* newObj = new float3x3(_00, _01, _02, _10, _11, _12, _20, _21, _22);
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<float3x3>(ctx, newObj, float3x3_Id, float3x3_Dtor);
     return 0;
 }
 
 static duk_ret_t float3x3_Ctor_float3_float3_float3(duk_context* ctx)
 {
-    float3* col0 = GetObject<float3>(ctx, 0, float3_Id); if (!col0) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* col1 = GetObject<float3>(ctx, 1, float3_Id); if (!col1) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* col2 = GetObject<float3>(ctx, 2, float3_Id); if (!col2) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3* col0 = GetCheckedObject<float3>(ctx, 0, float3_Id);
+    float3* col1 = GetCheckedObject<float3>(ctx, 1, float3_Id);
+    float3* col2 = GetCheckedObject<float3>(ctx, 2, float3_Id);
     float3x3* newObj = new float3x3(*col0, *col1, *col2);
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<float3x3>(ctx, newObj, float3x3_Id, float3x3_Dtor);
     return 0;
 }
 
 static duk_ret_t float3x3_Ctor_Quat(duk_context* ctx)
 {
-    Quat* orientation = GetObject<Quat>(ctx, 0, Quat_Id); if (!orientation) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* orientation = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
     float3x3* newObj = new float3x3(*orientation);
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<float3x3>(ctx, newObj, float3x3_Id, float3x3_Dtor);
     return 0;
 }
 
 static duk_ret_t float3x3_ToQuat(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     Quat ret = thisObj->ToQuat();
-    duk_push_object(ctx); SetObject(ctx, -1, new Quat(ret), Quat_Id); duk_push_c_function(ctx, Quat_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Quat_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_Id, Quat_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_GetScale(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->GetScale();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_At_int_int(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     int row = (int)duk_require_number(ctx, 0);
     int col = (int)duk_require_number(ctx, 1);
      float ret = thisObj->At(row, col);
@@ -121,51 +121,51 @@ static duk_ret_t float3x3_At_int_int(duk_context* ctx)
 
 static duk_ret_t float3x3_Row_int(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     int row = (int)duk_require_number(ctx, 0);
     const float3 & ret = thisObj->Row(row);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_Row3_int(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     int row = (int)duk_require_number(ctx, 0);
     float3 & ret = thisObj->Row3(row);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_Col_int(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     int col = (int)duk_require_number(ctx, 0);
     float3 ret = thisObj->Col(col);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_Col3_int(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     int col = (int)duk_require_number(ctx, 0);
     float3 ret = thisObj->Col3(col);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_Diagonal(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->Diagonal();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_ScaleRow_int_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     int row = (int)duk_require_number(ctx, 0);
     float scalar = (float)duk_require_number(ctx, 1);
     thisObj->ScaleRow(row, scalar);
@@ -174,7 +174,7 @@ static duk_ret_t float3x3_ScaleRow_int_float(duk_context* ctx)
 
 static duk_ret_t float3x3_ScaleCol_int_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     int col = (int)duk_require_number(ctx, 0);
     float scalar = (float)duk_require_number(ctx, 1);
     thisObj->ScaleCol(col, scalar);
@@ -183,31 +183,31 @@ static duk_ret_t float3x3_ScaleCol_int_float(duk_context* ctx)
 
 static duk_ret_t float3x3_WorldX(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->WorldX();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_WorldY(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->WorldY();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_WorldZ(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->WorldZ();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_SetRow_int_float_float_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     int row = (int)duk_require_number(ctx, 0);
     float x = (float)duk_require_number(ctx, 1);
     float y = (float)duk_require_number(ctx, 2);
@@ -218,16 +218,16 @@ static duk_ret_t float3x3_SetRow_int_float_float_float(duk_context* ctx)
 
 static duk_ret_t float3x3_SetRow_int_float3(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     int row = (int)duk_require_number(ctx, 0);
-    float3* rowVector = GetObject<float3>(ctx, 1, float3_Id); if (!rowVector) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3* rowVector = GetCheckedObject<float3>(ctx, 1, float3_Id);
     thisObj->SetRow(row, *rowVector);
     return 0;
 }
 
 static duk_ret_t float3x3_SetCol_int_float_float_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     int column = (int)duk_require_number(ctx, 0);
     float x = (float)duk_require_number(ctx, 1);
     float y = (float)duk_require_number(ctx, 2);
@@ -238,16 +238,16 @@ static duk_ret_t float3x3_SetCol_int_float_float_float(duk_context* ctx)
 
 static duk_ret_t float3x3_SetCol_int_float3(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     int column = (int)duk_require_number(ctx, 0);
-    float3* columnVector = GetObject<float3>(ctx, 1, float3_Id); if (!columnVector) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3* columnVector = GetCheckedObject<float3>(ctx, 1, float3_Id);
     thisObj->SetCol(column, *columnVector);
     return 0;
 }
 
 static duk_ret_t float3x3_Set_float_float_float_float_float_float_float_float_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float _00 = (float)duk_require_number(ctx, 0);
     float _01 = (float)duk_require_number(ctx, 1);
     float _02 = (float)duk_require_number(ctx, 2);
@@ -263,15 +263,15 @@ static duk_ret_t float3x3_Set_float_float_float_float_float_float_float_float_fl
 
 static duk_ret_t float3x3_Set_float3x3(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x3* rhs = GetObject<float3x3>(ctx, 0, float3x3_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    float3x3* rhs = GetCheckedObject<float3x3>(ctx, 0, float3x3_Id);
     thisObj->Set(*rhs);
     return 0;
 }
 
 static duk_ret_t float3x3_Set_int_int_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     int row = (int)duk_require_number(ctx, 0);
     int col = (int)duk_require_number(ctx, 1);
     float value = (float)duk_require_number(ctx, 2);
@@ -281,14 +281,14 @@ static duk_ret_t float3x3_Set_int_int_float(duk_context* ctx)
 
 static duk_ret_t float3x3_SetIdentity(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     thisObj->SetIdentity();
     return 0;
 }
 
 static duk_ret_t float3x3_SwapColumns_int_int(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     int col1 = (int)duk_require_number(ctx, 0);
     int col2 = (int)duk_require_number(ctx, 1);
     thisObj->SwapColumns(col1, col2);
@@ -297,7 +297,7 @@ static duk_ret_t float3x3_SwapColumns_int_int(duk_context* ctx)
 
 static duk_ret_t float3x3_SwapRows_int_int(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     int row1 = (int)duk_require_number(ctx, 0);
     int row2 = (int)duk_require_number(ctx, 1);
     thisObj->SwapRows(row1, row2);
@@ -306,7 +306,7 @@ static duk_ret_t float3x3_SwapRows_int_int(duk_context* ctx)
 
 static duk_ret_t float3x3_SetRotatePartX_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float angleRadians = (float)duk_require_number(ctx, 0);
     thisObj->SetRotatePartX(angleRadians);
     return 0;
@@ -314,7 +314,7 @@ static duk_ret_t float3x3_SetRotatePartX_float(duk_context* ctx)
 
 static duk_ret_t float3x3_SetRotatePartY_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float angleRadians = (float)duk_require_number(ctx, 0);
     thisObj->SetRotatePartY(angleRadians);
     return 0;
@@ -322,7 +322,7 @@ static duk_ret_t float3x3_SetRotatePartY_float(duk_context* ctx)
 
 static duk_ret_t float3x3_SetRotatePartZ_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float angleRadians = (float)duk_require_number(ctx, 0);
     thisObj->SetRotatePartZ(angleRadians);
     return 0;
@@ -330,8 +330,8 @@ static duk_ret_t float3x3_SetRotatePartZ_float(duk_context* ctx)
 
 static duk_ret_t float3x3_SetRotatePart_float3_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3* axisDirection = GetObject<float3>(ctx, 0, float3_Id); if (!axisDirection) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    float3* axisDirection = GetCheckedObject<float3>(ctx, 0, float3_Id);
     float angleRadians = (float)duk_require_number(ctx, 1);
     thisObj->SetRotatePart(*axisDirection, angleRadians);
     return 0;
@@ -339,15 +339,15 @@ static duk_ret_t float3x3_SetRotatePart_float3_float(duk_context* ctx)
 
 static duk_ret_t float3x3_SetRotatePart_Quat(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Quat* orientation = GetObject<Quat>(ctx, 0, Quat_Id); if (!orientation) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    Quat* orientation = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
     thisObj->SetRotatePart(*orientation);
     return 0;
 }
 
 static duk_ret_t float3x3_Determinant(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float ret = thisObj->Determinant();
     duk_push_number(ctx, ret);
     return 1;
@@ -355,7 +355,7 @@ static duk_ret_t float3x3_Determinant(duk_context* ctx)
 
 static duk_ret_t float3x3_DeterminantSymmetric(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float ret = thisObj->DeterminantSymmetric();
     duk_push_number(ctx, ret);
     return 1;
@@ -363,7 +363,7 @@ static duk_ret_t float3x3_DeterminantSymmetric(duk_context* ctx)
 
 static duk_ret_t float3x3_Inverse_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->Inverse(epsilon);
     duk_push_boolean(ctx, ret);
@@ -372,7 +372,7 @@ static duk_ret_t float3x3_Inverse_float(duk_context* ctx)
 
 static duk_ret_t float3x3_InverseFast_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->InverseFast(epsilon);
     duk_push_boolean(ctx, ret);
@@ -381,9 +381,9 @@ static duk_ret_t float3x3_InverseFast_float(duk_context* ctx)
 
 static duk_ret_t float3x3_SolveAxb_float3_float3(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3* b = GetObject<float3>(ctx, 0, float3_Id);
-    float3* x = GetObject<float3>(ctx, 1, float3_Id); if (!x) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3* x = GetCheckedObject<float3>(ctx, 1, float3_Id);
     bool ret = thisObj->SolveAxb(*b, *x);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -391,15 +391,15 @@ static duk_ret_t float3x3_SolveAxb_float3_float3(duk_context* ctx)
 
 static duk_ret_t float3x3_Inverted(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3x3 ret = thisObj->Inverted();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_InverseColOrthogonal(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     bool ret = thisObj->InverseColOrthogonal();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -407,7 +407,7 @@ static duk_ret_t float3x3_InverseColOrthogonal(duk_context* ctx)
 
 static duk_ret_t float3x3_InverseOrthogonalUniformScale(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     bool ret = thisObj->InverseOrthogonalUniformScale();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -415,14 +415,14 @@ static duk_ret_t float3x3_InverseOrthogonalUniformScale(duk_context* ctx)
 
 static duk_ret_t float3x3_InverseOrthonormal(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     thisObj->InverseOrthonormal();
     return 0;
 }
 
 static duk_ret_t float3x3_InverseSymmetric(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     bool ret = thisObj->InverseSymmetric();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -430,22 +430,22 @@ static duk_ret_t float3x3_InverseSymmetric(duk_context* ctx)
 
 static duk_ret_t float3x3_Transpose(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     thisObj->Transpose();
     return 0;
 }
 
 static duk_ret_t float3x3_Transposed(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3x3 ret = thisObj->Transposed();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_InverseTranspose(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     bool ret = thisObj->InverseTranspose();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -453,15 +453,15 @@ static duk_ret_t float3x3_InverseTranspose(duk_context* ctx)
 
 static duk_ret_t float3x3_InverseTransposed(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3x3 ret = thisObj->InverseTransposed();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_Trace(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float ret = thisObj->Trace();
     duk_push_number(ctx, ret);
     return 1;
@@ -469,7 +469,7 @@ static duk_ret_t float3x3_Trace(duk_context* ctx)
 
 static duk_ret_t float3x3_Orthonormalize_int_int_int(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     int firstColumn = (int)duk_require_number(ctx, 0);
     int secondColumn = (int)duk_require_number(ctx, 1);
     int thirdColumn = (int)duk_require_number(ctx, 2);
@@ -479,52 +479,52 @@ static duk_ret_t float3x3_Orthonormalize_int_int_int(duk_context* ctx)
 
 static duk_ret_t float3x3_RemoveScale(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     thisObj->RemoveScale();
     return 0;
 }
 
 static duk_ret_t float3x3_Transform_float3(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3* vector = GetObject<float3>(ctx, 0, float3_Id); if (!vector) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    float3* vector = GetCheckedObject<float3>(ctx, 0, float3_Id);
     float3 ret = thisObj->Transform(*vector);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_Transform_float_float_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float x = (float)duk_require_number(ctx, 0);
     float y = (float)duk_require_number(ctx, 1);
     float z = (float)duk_require_number(ctx, 2);
     float3 ret = thisObj->Transform(x, y, z);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_TransformLeft_float3(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3* lhs = GetObject<float3>(ctx, 0, float3_Id); if (!lhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    float3* lhs = GetCheckedObject<float3>(ctx, 0, float3_Id);
     float3 ret = thisObj->TransformLeft(*lhs);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_Transform_float4(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float4* vector = GetObject<float4>(ctx, 0, float4_Id); if (!vector) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    float4* vector = GetCheckedObject<float4>(ctx, 0, float4_Id);
     float4 ret = thisObj->Transform(*vector);
-    duk_push_object(ctx); SetObject(ctx, -1, new float4(ret), float4_Id); duk_push_c_function(ctx, float4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float4>(ctx, ret, float4_Id, float4_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_IsFinite(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     bool ret = thisObj->IsFinite();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -532,7 +532,7 @@ static duk_ret_t float3x3_IsFinite(duk_context* ctx)
 
 static duk_ret_t float3x3_IsIdentity_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->IsIdentity(epsilon);
     duk_push_boolean(ctx, ret);
@@ -541,7 +541,7 @@ static duk_ret_t float3x3_IsIdentity_float(duk_context* ctx)
 
 static duk_ret_t float3x3_IsLowerTriangular_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->IsLowerTriangular(epsilon);
     duk_push_boolean(ctx, ret);
@@ -550,7 +550,7 @@ static duk_ret_t float3x3_IsLowerTriangular_float(duk_context* ctx)
 
 static duk_ret_t float3x3_IsUpperTriangular_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->IsUpperTriangular(epsilon);
     duk_push_boolean(ctx, ret);
@@ -559,7 +559,7 @@ static duk_ret_t float3x3_IsUpperTriangular_float(duk_context* ctx)
 
 static duk_ret_t float3x3_IsInvertible_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->IsInvertible(epsilon);
     duk_push_boolean(ctx, ret);
@@ -568,7 +568,7 @@ static duk_ret_t float3x3_IsInvertible_float(duk_context* ctx)
 
 static duk_ret_t float3x3_IsSymmetric_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->IsSymmetric(epsilon);
     duk_push_boolean(ctx, ret);
@@ -577,7 +577,7 @@ static duk_ret_t float3x3_IsSymmetric_float(duk_context* ctx)
 
 static duk_ret_t float3x3_IsSkewSymmetric_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->IsSkewSymmetric(epsilon);
     duk_push_boolean(ctx, ret);
@@ -586,7 +586,7 @@ static duk_ret_t float3x3_IsSkewSymmetric_float(duk_context* ctx)
 
 static duk_ret_t float3x3_HasUnitaryScale_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float epsilonSq = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->HasUnitaryScale(epsilonSq);
     duk_push_boolean(ctx, ret);
@@ -595,7 +595,7 @@ static duk_ret_t float3x3_HasUnitaryScale_float(duk_context* ctx)
 
 static duk_ret_t float3x3_HasNegativeScale(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     bool ret = thisObj->HasNegativeScale();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -603,7 +603,7 @@ static duk_ret_t float3x3_HasNegativeScale(duk_context* ctx)
 
 static duk_ret_t float3x3_HasUniformScale_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->HasUniformScale(epsilon);
     duk_push_boolean(ctx, ret);
@@ -612,7 +612,7 @@ static duk_ret_t float3x3_HasUniformScale_float(duk_context* ctx)
 
 static duk_ret_t float3x3_IsRowOrthogonal_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->IsRowOrthogonal(epsilon);
     duk_push_boolean(ctx, ret);
@@ -621,7 +621,7 @@ static duk_ret_t float3x3_IsRowOrthogonal_float(duk_context* ctx)
 
 static duk_ret_t float3x3_IsColOrthogonal_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->IsColOrthogonal(epsilon);
     duk_push_boolean(ctx, ret);
@@ -630,7 +630,7 @@ static duk_ret_t float3x3_IsColOrthogonal_float(duk_context* ctx)
 
 static duk_ret_t float3x3_IsColOrthogonal3_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->IsColOrthogonal3(epsilon);
     duk_push_boolean(ctx, ret);
@@ -639,7 +639,7 @@ static duk_ret_t float3x3_IsColOrthogonal3_float(duk_context* ctx)
 
 static duk_ret_t float3x3_IsOrthonormal_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->IsOrthonormal(epsilon);
     duk_push_boolean(ctx, ret);
@@ -648,8 +648,8 @@ static duk_ret_t float3x3_IsOrthonormal_float(duk_context* ctx)
 
 static duk_ret_t float3x3_Equals_float3x3_float(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x3* other = GetObject<float3x3>(ctx, 0, float3x3_Id); if (!other) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    float3x3* other = GetCheckedObject<float3x3>(ctx, 0, float3x3_Id);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Equals(*other, epsilon);
     duk_push_boolean(ctx, ret);
@@ -658,213 +658,213 @@ static duk_ret_t float3x3_Equals_float3x3_float(duk_context* ctx)
 
 static duk_ret_t float3x3_ToEulerXYX(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->ToEulerXYX();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_ToEulerXZX(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->ToEulerXZX();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_ToEulerYXY(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->ToEulerYXY();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_ToEulerYZY(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->ToEulerYZY();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_ToEulerZXZ(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->ToEulerZXZ();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_ToEulerZYZ(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->ToEulerZYZ();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_ToEulerXYZ(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->ToEulerXYZ();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_ToEulerXZY(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->ToEulerXZY();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_ToEulerYXZ(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->ToEulerYXZ();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_ToEulerYZX(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->ToEulerYZX();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_ToEulerZXY(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->ToEulerZXY();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_ToEulerZYX(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->ToEulerZYX();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_ExtractScale(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
     float3 ret = thisObj->ExtractScale();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_Decompose_Quat_float3(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Quat* rotate = GetObject<Quat>(ctx, 0, Quat_Id); if (!rotate) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* scale = GetObject<float3>(ctx, 1, float3_Id); if (!scale) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    Quat* rotate = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
+    float3* scale = GetCheckedObject<float3>(ctx, 1, float3_Id);
     thisObj->Decompose(*rotate, *scale);
     return 0;
 }
 
 static duk_ret_t float3x3_Decompose_float3x3_float3(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x3* rotate = GetObject<float3x3>(ctx, 0, float3x3_Id); if (!rotate) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* scale = GetObject<float3>(ctx, 1, float3_Id); if (!scale) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    float3x3* rotate = GetCheckedObject<float3x3>(ctx, 0, float3x3_Id);
+    float3* scale = GetCheckedObject<float3>(ctx, 1, float3_Id);
     thisObj->Decompose(*rotate, *scale);
     return 0;
 }
 
 static duk_ret_t float3x3_Mul_float3x3(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x3* rhs = GetObject<float3x3>(ctx, 0, float3x3_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    float3x3* rhs = GetCheckedObject<float3x3>(ctx, 0, float3x3_Id);
     float3x3 ret = thisObj->Mul(*rhs);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_Mul_float3x4(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x4* rhs = GetObject<float3x4>(ctx, 0, float3x4_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    float3x4* rhs = GetCheckedObject<float3x4>(ctx, 0, float3x4_Id);
     float3x4 ret = thisObj->Mul(*rhs);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x4(ret), float3x4_Id); duk_push_c_function(ctx, float3x4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_Id, float3x4_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_Mul_float4x4(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float4x4* rhs = GetObject<float4x4>(ctx, 0, float4x4_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    float4x4* rhs = GetCheckedObject<float4x4>(ctx, 0, float4x4_Id);
     float4x4 ret = thisObj->Mul(*rhs);
-    duk_push_object(ctx); SetObject(ctx, -1, new float4x4(ret), float4x4_Id); duk_push_c_function(ctx, float4x4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float4x4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float4x4>(ctx, ret, float4x4_Id, float4x4_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_Mul_Quat(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Quat* rhs = GetObject<Quat>(ctx, 0, Quat_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    Quat* rhs = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
     float3x3 ret = thisObj->Mul(*rhs);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_Mul_float3(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3* rhs = GetObject<float3>(ctx, 0, float3_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    float3* rhs = GetCheckedObject<float3>(ctx, 0, float3_Id);
     float3 ret = thisObj->Mul(*rhs);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_Mul_float4(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float4* rhs = GetObject<float4>(ctx, 0, float4_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    float4* rhs = GetCheckedObject<float4>(ctx, 0, float4_Id);
     float4 ret = thisObj->Mul(*rhs);
-    duk_push_object(ctx); SetObject(ctx, -1, new float4(ret), float4_Id); duk_push_c_function(ctx, float4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float4>(ctx, ret, float4_Id, float4_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_MulPos_float3(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3* rhs = GetObject<float3>(ctx, 0, float3_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    float3* rhs = GetCheckedObject<float3>(ctx, 0, float3_Id);
     float3 ret = thisObj->MulPos(*rhs);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_MulPos_float4(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float4* rhs = GetObject<float4>(ctx, 0, float4_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    float4* rhs = GetCheckedObject<float4>(ctx, 0, float4_Id);
     float4 ret = thisObj->MulPos(*rhs);
-    duk_push_object(ctx); SetObject(ctx, -1, new float4(ret), float4_Id); duk_push_c_function(ctx, float4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float4>(ctx, ret, float4_Id, float4_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_MulDir_float3(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3* rhs = GetObject<float3>(ctx, 0, float3_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    float3* rhs = GetCheckedObject<float3>(ctx, 0, float3_Id);
     float3 ret = thisObj->MulDir(*rhs);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3(ret), float3_Id); duk_push_c_function(ctx, float3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3>(ctx, ret, float3_Id, float3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_MulDir_float4(duk_context* ctx)
 {
-    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float4* rhs = GetObject<float4>(ctx, 0, float4_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* thisObj = GetThisObject<float3x3>(ctx, float3x3_Id);
+    float4* rhs = GetCheckedObject<float4>(ctx, 0, float4_Id);
     float4 ret = thisObj->MulDir(*rhs);
-    duk_push_object(ctx); SetObject(ctx, -1, new float4(ret), float4_Id); duk_push_c_function(ctx, float4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float4>(ctx, ret, float4_Id, float4_Dtor);
     return 1;
 }
 
@@ -990,7 +990,7 @@ static duk_ret_t float3x3_RotateX_Static_float(duk_context* ctx)
 {
     float angleRadians = (float)duk_require_number(ctx, 0);
     float3x3 ret = float3x3::RotateX(angleRadians);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -998,7 +998,7 @@ static duk_ret_t float3x3_RotateY_Static_float(duk_context* ctx)
 {
     float angleRadians = (float)duk_require_number(ctx, 0);
     float3x3 ret = float3x3::RotateY(angleRadians);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -1006,80 +1006,80 @@ static duk_ret_t float3x3_RotateZ_Static_float(duk_context* ctx)
 {
     float angleRadians = (float)duk_require_number(ctx, 0);
     float3x3 ret = float3x3::RotateZ(angleRadians);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_RotateAxisAngle_Static_float3_float(duk_context* ctx)
 {
-    float3* axisDirection = GetObject<float3>(ctx, 0, float3_Id); if (!axisDirection) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3* axisDirection = GetCheckedObject<float3>(ctx, 0, float3_Id);
     float angleRadians = (float)duk_require_number(ctx, 1);
     float3x3 ret = float3x3::RotateAxisAngle(*axisDirection, angleRadians);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_RotateFromTo_Static_float3_float3(duk_context* ctx)
 {
-    float3* sourceDirection = GetObject<float3>(ctx, 0, float3_Id); if (!sourceDirection) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* targetDirection = GetObject<float3>(ctx, 1, float3_Id); if (!targetDirection) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3* sourceDirection = GetCheckedObject<float3>(ctx, 0, float3_Id);
+    float3* targetDirection = GetCheckedObject<float3>(ctx, 1, float3_Id);
     float3x3 ret = float3x3::RotateFromTo(*sourceDirection, *targetDirection);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_LookAt_Static_float3_float3_float3_float3(duk_context* ctx)
 {
-    float3* localForward = GetObject<float3>(ctx, 0, float3_Id); if (!localForward) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* targetDirection = GetObject<float3>(ctx, 1, float3_Id); if (!targetDirection) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* localUp = GetObject<float3>(ctx, 2, float3_Id); if (!localUp) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* worldUp = GetObject<float3>(ctx, 3, float3_Id); if (!worldUp) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3* localForward = GetCheckedObject<float3>(ctx, 0, float3_Id);
+    float3* targetDirection = GetCheckedObject<float3>(ctx, 1, float3_Id);
+    float3* localUp = GetCheckedObject<float3>(ctx, 2, float3_Id);
+    float3* worldUp = GetCheckedObject<float3>(ctx, 3, float3_Id);
     float3x3 ret = float3x3::LookAt(*localForward, *targetDirection, *localUp, *worldUp);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_RandomRotation_Static_LCG(duk_context* ctx)
 {
-    LCG* lcg = GetObject<LCG>(ctx, 0, LCG_Id); if (!lcg) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    LCG* lcg = GetCheckedObject<LCG>(ctx, 0, LCG_Id);
     float3x3 ret = float3x3::RandomRotation(*lcg);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_RandomGeneral_Static_LCG_float_float(duk_context* ctx)
 {
-    LCG* lcg = GetObject<LCG>(ctx, 0, LCG_Id); if (!lcg) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    LCG* lcg = GetCheckedObject<LCG>(ctx, 0, LCG_Id);
     float minElem = (float)duk_require_number(ctx, 1);
     float maxElem = (float)duk_require_number(ctx, 2);
     float3x3 ret = float3x3::RandomGeneral(*lcg, minElem, maxElem);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_FromQuat_Static_Quat(duk_context* ctx)
 {
-    Quat* orientation = GetObject<Quat>(ctx, 0, Quat_Id); if (!orientation) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* orientation = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
     float3x3 ret = float3x3::FromQuat(*orientation);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_FromRS_Static_Quat_float3(duk_context* ctx)
 {
-    Quat* rotate = GetObject<Quat>(ctx, 0, Quat_Id); if (!rotate) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* scale = GetObject<float3>(ctx, 1, float3_Id); if (!scale) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Quat* rotate = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
+    float3* scale = GetCheckedObject<float3>(ctx, 1, float3_Id);
     float3x3 ret = float3x3::FromRS(*rotate, *scale);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_FromRS_Static_float3x3_float3(duk_context* ctx)
 {
-    float3x3* rotate = GetObject<float3x3>(ctx, 0, float3x3_Id); if (!rotate) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3* scale = GetObject<float3>(ctx, 1, float3_Id); if (!scale) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3x3* rotate = GetCheckedObject<float3x3>(ctx, 0, float3x3_Id);
+    float3* scale = GetCheckedObject<float3>(ctx, 1, float3_Id);
     float3x3 ret = float3x3::FromRS(*rotate, *scale);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -1089,7 +1089,7 @@ static duk_ret_t float3x3_FromEulerXYX_Static_float_float_float(duk_context* ctx
     float ey = (float)duk_require_number(ctx, 1);
     float ex2 = (float)duk_require_number(ctx, 2);
     float3x3 ret = float3x3::FromEulerXYX(ex, ey, ex2);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -1099,7 +1099,7 @@ static duk_ret_t float3x3_FromEulerXZX_Static_float_float_float(duk_context* ctx
     float ez = (float)duk_require_number(ctx, 1);
     float ex2 = (float)duk_require_number(ctx, 2);
     float3x3 ret = float3x3::FromEulerXZX(ex, ez, ex2);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -1109,7 +1109,7 @@ static duk_ret_t float3x3_FromEulerYXY_Static_float_float_float(duk_context* ctx
     float ex = (float)duk_require_number(ctx, 1);
     float ey2 = (float)duk_require_number(ctx, 2);
     float3x3 ret = float3x3::FromEulerYXY(ey, ex, ey2);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -1119,7 +1119,7 @@ static duk_ret_t float3x3_FromEulerYZY_Static_float_float_float(duk_context* ctx
     float ez = (float)duk_require_number(ctx, 1);
     float ey2 = (float)duk_require_number(ctx, 2);
     float3x3 ret = float3x3::FromEulerYZY(ey, ez, ey2);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -1129,7 +1129,7 @@ static duk_ret_t float3x3_FromEulerZXZ_Static_float_float_float(duk_context* ctx
     float ex = (float)duk_require_number(ctx, 1);
     float ez2 = (float)duk_require_number(ctx, 2);
     float3x3 ret = float3x3::FromEulerZXZ(ez, ex, ez2);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -1139,7 +1139,7 @@ static duk_ret_t float3x3_FromEulerZYZ_Static_float_float_float(duk_context* ctx
     float ey = (float)duk_require_number(ctx, 1);
     float ez2 = (float)duk_require_number(ctx, 2);
     float3x3 ret = float3x3::FromEulerZYZ(ez, ey, ez2);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -1149,7 +1149,7 @@ static duk_ret_t float3x3_FromEulerXYZ_Static_float_float_float(duk_context* ctx
     float ey = (float)duk_require_number(ctx, 1);
     float ez = (float)duk_require_number(ctx, 2);
     float3x3 ret = float3x3::FromEulerXYZ(ex, ey, ez);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -1159,7 +1159,7 @@ static duk_ret_t float3x3_FromEulerXZY_Static_float_float_float(duk_context* ctx
     float ez = (float)duk_require_number(ctx, 1);
     float ey = (float)duk_require_number(ctx, 2);
     float3x3 ret = float3x3::FromEulerXZY(ex, ez, ey);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -1169,7 +1169,7 @@ static duk_ret_t float3x3_FromEulerYXZ_Static_float_float_float(duk_context* ctx
     float ex = (float)duk_require_number(ctx, 1);
     float ez = (float)duk_require_number(ctx, 2);
     float3x3 ret = float3x3::FromEulerYXZ(ey, ex, ez);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -1179,7 +1179,7 @@ static duk_ret_t float3x3_FromEulerYZX_Static_float_float_float(duk_context* ctx
     float ez = (float)duk_require_number(ctx, 1);
     float ex = (float)duk_require_number(ctx, 2);
     float3x3 ret = float3x3::FromEulerYZX(ey, ez, ex);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -1189,7 +1189,7 @@ static duk_ret_t float3x3_FromEulerZXY_Static_float_float_float(duk_context* ctx
     float ex = (float)duk_require_number(ctx, 1);
     float ey = (float)duk_require_number(ctx, 2);
     float3x3 ret = float3x3::FromEulerZXY(ez, ex, ey);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -1199,16 +1199,16 @@ static duk_ret_t float3x3_FromEulerZYX_Static_float_float_float(duk_context* ctx
     float ey = (float)duk_require_number(ctx, 1);
     float ex = (float)duk_require_number(ctx, 2);
     float3x3 ret = float3x3::FromEulerZYX(ez, ey, ex);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_ScaleAlongAxis_Static_float3_float(duk_context* ctx)
 {
-    float3* axis = GetObject<float3>(ctx, 0, float3_Id); if (!axis) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    float3* axis = GetCheckedObject<float3>(ctx, 0, float3_Id);
     float scalingFactor = (float)duk_require_number(ctx, 1);
     float3x3 ret = float3x3::ScaleAlongAxis(*axis, scalingFactor);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -1217,7 +1217,7 @@ static duk_ret_t float3x3_ShearX_Static_float_float(duk_context* ctx)
     float yFactor = (float)duk_require_number(ctx, 0);
     float zFactor = (float)duk_require_number(ctx, 1);
     float3x3 ret = float3x3::ShearX(yFactor, zFactor);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -1226,7 +1226,7 @@ static duk_ret_t float3x3_ShearY_Static_float_float(duk_context* ctx)
     float xFactor = (float)duk_require_number(ctx, 0);
     float zFactor = (float)duk_require_number(ctx, 1);
     float3x3 ret = float3x3::ShearY(xFactor, zFactor);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
@@ -1235,44 +1235,44 @@ static duk_ret_t float3x3_ShearZ_Static_float_float(duk_context* ctx)
     float xFactor = (float)duk_require_number(ctx, 0);
     float yFactor = (float)duk_require_number(ctx, 1);
     float3x3 ret = float3x3::ShearZ(xFactor, yFactor);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_Mirror_Static_Plane(duk_context* ctx)
 {
-    Plane* p = GetObject<Plane>(ctx, 0, Plane_Id); if (!p) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* p = GetCheckedObject<Plane>(ctx, 0, Plane_Id);
     float3x3 ret = float3x3::Mirror(*p);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_OrthographicProjection_Static_Plane(duk_context* ctx)
 {
-    Plane* target = GetObject<Plane>(ctx, 0, Plane_Id); if (!target) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Plane* target = GetCheckedObject<Plane>(ctx, 0, Plane_Id);
     float3x3 ret = float3x3::OrthographicProjection(*target);
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_OrthographicProjectionYZ_Static(duk_context* ctx)
 {
     float3x3 ret = float3x3::OrthographicProjectionYZ();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_OrthographicProjectionXZ_Static(duk_context* ctx)
 {
     float3x3 ret = float3x3::OrthographicProjectionXZ();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 
 static duk_ret_t float3x3_OrthographicProjectionXY_Static(duk_context* ctx)
 {
     float3x3 ret = float3x3::OrthographicProjectionXY();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x3(ret), float3x3_Id); duk_push_c_function(ctx, float3x3_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x3_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x3>(ctx, ret, float3x3_Id, float3x3_Dtor);
     return 1;
 }
 

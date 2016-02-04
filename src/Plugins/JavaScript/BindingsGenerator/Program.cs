@@ -170,8 +170,7 @@ namespace BindingsGenerator
                 if (!nullCheck)
                     return typeName + "* " + varName + " = GetObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
                 else
-                    return typeName + "* " + varName + " = GetObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + "); " +
-                            "if (!" + varName + ") duk_error(ctx, DUK_ERR_REFERENCE_ERROR, \"Null or invalid object argument\");";
+                    return typeName + "* " + varName + " = GetCheckedObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
             }
             else if (Symbol.IsNumberType(typeName))
             {
@@ -206,23 +205,13 @@ namespace BindingsGenerator
             else
             {
                 typeName = SanitateTypeName(typeName);
-                return "duk_push_object(ctx); " +
-                       "SetObject(ctx, -1, new " + typeName + "(" + source + "), " + ClassIdentifier(typeName) + "); " +
-                       "duk_push_c_function(ctx, " + typeName + "_Dtor, 1); " +
-                       "duk_set_finalizer(ctx, -2); " + 
-                       "duk_get_global_string(ctx, " + ClassIdentifier(typeName) + "); " +
-                       "duk_get_prop_string(ctx, -1, \"prototype\"); " +
-                       "duk_set_prototype(ctx, -3); " +
-                       "duk_pop(ctx);";
+                return "PushValueObjectCopy<" + typeName + ">(ctx, " + source + ", " + ClassIdentifier(typeName) + ", " + typeName + "_Dtor);";
             }           
         }
 
         static string GeneratePushConstructorResultToStack(string typeName, string source)
         {
-            return "duk_push_this(ctx); " +
-                   "SetObject(ctx, -1, " + source + ", " + ClassIdentifier(typeName) + "); " +
-                   "duk_push_c_function(ctx, " + typeName + "_Dtor, 1); " +
-                   "duk_set_finalizer(ctx, -2);";
+            return "PushConstructorResult<" + typeName + ">(ctx, " + source + ", " + ClassIdentifier(typeName) + ", " + typeName + "_Dtor);";
         }
 
         static string GenerateGetThis(Symbol classSymbol, string varName = "thisObj")
@@ -231,7 +220,7 @@ namespace BindingsGenerator
             if (typeName == null || typeName.Length == 0)
                 typeName = classSymbol.name;
 
-            return typeName + "* " + varName + " = GetThisObject<" + typeName + ">(ctx, " + ClassIdentifier(typeName) + "); if (!" + varName + ") duk_error(ctx, DUK_ERR_REFERENCE_ERROR, \"Null this pointer\");";
+            return typeName + "* " + varName + " = GetThisObject<" + typeName + ">(ctx, " + ClassIdentifier(typeName) + ");";
         }
 
         static string GenerateArgCheck(Parameter p, int stackIndex)

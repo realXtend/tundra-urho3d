@@ -71,120 +71,120 @@ duk_ret_t OBB_Dtor(duk_context* ctx)
 static duk_ret_t OBB_Ctor(duk_context* ctx)
 {
     OBB* newObj = new OBB();
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, OBB_Id); duk_push_c_function(ctx, OBB_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<OBB>(ctx, newObj, OBB_Id, OBB_Dtor);
     return 0;
 }
 
 static duk_ret_t OBB_Ctor_AABB(duk_context* ctx)
 {
-    AABB* aabb = GetObject<AABB>(ctx, 0, AABB_Id); if (!aabb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    AABB* aabb = GetCheckedObject<AABB>(ctx, 0, AABB_Id);
     OBB* newObj = new OBB(*aabb);
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, OBB_Id); duk_push_c_function(ctx, OBB_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<OBB>(ctx, newObj, OBB_Id, OBB_Dtor);
     return 0;
 }
 
 static duk_ret_t OBB_SetNegativeInfinity(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
     thisObj->SetNegativeInfinity();
     return 0;
 }
 
 static duk_ret_t OBB_SetFrom_AABB(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    AABB* aabb = GetObject<AABB>(ctx, 0, AABB_Id); if (!aabb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    AABB* aabb = GetCheckedObject<AABB>(ctx, 0, AABB_Id);
     thisObj->SetFrom(*aabb);
     return 0;
 }
 
 static duk_ret_t OBB_SetFrom_AABB_float3x3(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    AABB* aabb = GetObject<AABB>(ctx, 0, AABB_Id); if (!aabb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3x3* transform = GetObject<float3x3>(ctx, 1, float3x3_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    AABB* aabb = GetCheckedObject<AABB>(ctx, 0, AABB_Id);
+    float3x3* transform = GetCheckedObject<float3x3>(ctx, 1, float3x3_Id);
     thisObj->SetFrom(*aabb, *transform);
     return 0;
 }
 
 static duk_ret_t OBB_SetFrom_AABB_float3x4(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    AABB* aabb = GetObject<AABB>(ctx, 0, AABB_Id); if (!aabb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float3x4* transform = GetObject<float3x4>(ctx, 1, float3x4_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    AABB* aabb = GetCheckedObject<AABB>(ctx, 0, AABB_Id);
+    float3x4* transform = GetCheckedObject<float3x4>(ctx, 1, float3x4_Id);
     thisObj->SetFrom(*aabb, *transform);
     return 0;
 }
 
 static duk_ret_t OBB_SetFrom_AABB_float4x4(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    AABB* aabb = GetObject<AABB>(ctx, 0, AABB_Id); if (!aabb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    float4x4* transform = GetObject<float4x4>(ctx, 1, float4x4_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    AABB* aabb = GetCheckedObject<AABB>(ctx, 0, AABB_Id);
+    float4x4* transform = GetCheckedObject<float4x4>(ctx, 1, float4x4_Id);
     thisObj->SetFrom(*aabb, *transform);
     return 0;
 }
 
 static duk_ret_t OBB_SetFrom_AABB_Quat(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    AABB* aabb = GetObject<AABB>(ctx, 0, AABB_Id); if (!aabb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
-    Quat* transform = GetObject<Quat>(ctx, 1, Quat_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    AABB* aabb = GetCheckedObject<AABB>(ctx, 0, AABB_Id);
+    Quat* transform = GetCheckedObject<Quat>(ctx, 1, Quat_Id);
     thisObj->SetFrom(*aabb, *transform);
     return 0;
 }
 
 static duk_ret_t OBB_SetFrom_Sphere(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Sphere* sphere = GetObject<Sphere>(ctx, 0, Sphere_Id); if (!sphere) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    Sphere* sphere = GetCheckedObject<Sphere>(ctx, 0, Sphere_Id);
     thisObj->SetFrom(*sphere);
     return 0;
 }
 
 static duk_ret_t OBB_MinimalEnclosingAABB(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
     AABB ret = thisObj->MinimalEnclosingAABB();
-    duk_push_object(ctx); SetObject(ctx, -1, new AABB(ret), AABB_Id); duk_push_c_function(ctx, AABB_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, AABB_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<AABB>(ctx, ret, AABB_Id, AABB_Dtor);
     return 1;
 }
 
 static duk_ret_t OBB_MinimalEnclosingSphere(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
     Sphere ret = thisObj->MinimalEnclosingSphere();
-    duk_push_object(ctx); SetObject(ctx, -1, new Sphere(ret), Sphere_Id); duk_push_c_function(ctx, Sphere_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Sphere_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Sphere>(ctx, ret, Sphere_Id, Sphere_Dtor);
     return 1;
 }
 
 static duk_ret_t OBB_MaximalContainedSphere(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
     Sphere ret = thisObj->MaximalContainedSphere();
-    duk_push_object(ctx); SetObject(ctx, -1, new Sphere(ret), Sphere_Id); duk_push_c_function(ctx, Sphere_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Sphere_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Sphere>(ctx, ret, Sphere_Id, Sphere_Dtor);
     return 1;
 }
 
 static duk_ret_t OBB_WorldToLocal(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
     float3x4 ret = thisObj->WorldToLocal();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x4(ret), float3x4_Id); duk_push_c_function(ctx, float3x4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_Id, float3x4_Dtor);
     return 1;
 }
 
 static duk_ret_t OBB_LocalToWorld(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
     float3x4 ret = thisObj->LocalToWorld();
-    duk_push_object(ctx); SetObject(ctx, -1, new float3x4(ret), float3x4_Id); duk_push_c_function(ctx, float3x4_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, float3x4_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_Id, float3x4_Dtor);
     return 1;
 }
 
 static duk_ret_t OBB_IsFinite(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
     bool ret = thisObj->IsFinite();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -192,7 +192,7 @@ static duk_ret_t OBB_IsFinite(duk_context* ctx)
 
 static duk_ret_t OBB_IsDegenerate(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
     bool ret = thisObj->IsDegenerate();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -200,7 +200,7 @@ static duk_ret_t OBB_IsDegenerate(duk_context* ctx)
 
 static duk_ret_t OBB_Volume(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
     float ret = thisObj->Volume();
     duk_push_number(ctx, ret);
     return 1;
@@ -208,7 +208,7 @@ static duk_ret_t OBB_Volume(duk_context* ctx)
 
 static duk_ret_t OBB_SurfaceArea(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
     float ret = thisObj->SurfaceArea();
     duk_push_number(ctx, ret);
     return 1;
@@ -216,58 +216,58 @@ static duk_ret_t OBB_SurfaceArea(duk_context* ctx)
 
 static duk_ret_t OBB_Edge_int(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
     int edgeIndex = (int)duk_require_number(ctx, 0);
     LineSegment ret = thisObj->Edge(edgeIndex);
-    duk_push_object(ctx); SetObject(ctx, -1, new LineSegment(ret), LineSegment_Id); duk_push_c_function(ctx, LineSegment_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, LineSegment_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_Id, LineSegment_Dtor);
     return 1;
 }
 
 static duk_ret_t OBB_FacePlane_int(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
     int faceIndex = (int)duk_require_number(ctx, 0);
     Plane ret = thisObj->FacePlane(faceIndex);
-    duk_push_object(ctx); SetObject(ctx, -1, new Plane(ret), Plane_Id); duk_push_c_function(ctx, Plane_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Plane_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Plane>(ctx, ret, Plane_Id, Plane_Dtor);
     return 1;
 }
 
 static duk_ret_t OBB_Transform_float3x3(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x3* transform = GetObject<float3x3>(ctx, 0, float3x3_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    float3x3* transform = GetCheckedObject<float3x3>(ctx, 0, float3x3_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t OBB_Transform_float3x4(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x4* transform = GetObject<float3x4>(ctx, 0, float3x4_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    float3x4* transform = GetCheckedObject<float3x4>(ctx, 0, float3x4_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t OBB_Transform_float4x4(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float4x4* transform = GetObject<float4x4>(ctx, 0, float4x4_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    float4x4* transform = GetCheckedObject<float4x4>(ctx, 0, float4x4_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t OBB_Transform_Quat(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Quat* transform = GetObject<Quat>(ctx, 0, Quat_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    Quat* transform = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t OBB_Distance_Sphere(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Sphere* sphere = GetObject<Sphere>(ctx, 0, Sphere_Id); if (!sphere) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    Sphere* sphere = GetCheckedObject<Sphere>(ctx, 0, Sphere_Id);
     float ret = thisObj->Distance(*sphere);
     duk_push_number(ctx, ret);
     return 1;
@@ -275,8 +275,8 @@ static duk_ret_t OBB_Distance_Sphere(duk_context* ctx)
 
 static duk_ret_t OBB_Contains_LineSegment(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    LineSegment* lineSegment = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!lineSegment) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    LineSegment* lineSegment = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     bool ret = thisObj->Contains(*lineSegment);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -284,8 +284,8 @@ static duk_ret_t OBB_Contains_LineSegment(duk_context* ctx)
 
 static duk_ret_t OBB_Contains_AABB(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    AABB* aabb = GetObject<AABB>(ctx, 0, AABB_Id); if (!aabb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    AABB* aabb = GetCheckedObject<AABB>(ctx, 0, AABB_Id);
     bool ret = thisObj->Contains(*aabb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -293,8 +293,8 @@ static duk_ret_t OBB_Contains_AABB(duk_context* ctx)
 
 static duk_ret_t OBB_Contains_OBB(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    OBB* obb = GetObject<OBB>(ctx, 0, OBB_Id); if (!obb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    OBB* obb = GetCheckedObject<OBB>(ctx, 0, OBB_Id);
     bool ret = thisObj->Contains(*obb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -302,8 +302,8 @@ static duk_ret_t OBB_Contains_OBB(duk_context* ctx)
 
 static duk_ret_t OBB_Contains_Triangle(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Triangle* triangle = GetObject<Triangle>(ctx, 0, Triangle_Id); if (!triangle) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    Triangle* triangle = GetCheckedObject<Triangle>(ctx, 0, Triangle_Id);
     bool ret = thisObj->Contains(*triangle);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -311,8 +311,8 @@ static duk_ret_t OBB_Contains_Triangle(duk_context* ctx)
 
 static duk_ret_t OBB_Contains_Frustum(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Frustum* frustum = GetObject<Frustum>(ctx, 0, Frustum_Id); if (!frustum) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    Frustum* frustum = GetCheckedObject<Frustum>(ctx, 0, Frustum_Id);
     bool ret = thisObj->Contains(*frustum);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -320,8 +320,8 @@ static duk_ret_t OBB_Contains_Frustum(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_OBB_float(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    OBB* obb = GetObject<OBB>(ctx, 0, OBB_Id); if (!obb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    OBB* obb = GetCheckedObject<OBB>(ctx, 0, OBB_Id);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Intersects(*obb, epsilon);
     duk_push_boolean(ctx, ret);
@@ -330,8 +330,8 @@ static duk_ret_t OBB_Intersects_OBB_float(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_AABB(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    AABB* aabb = GetObject<AABB>(ctx, 0, AABB_Id); if (!aabb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    AABB* aabb = GetCheckedObject<AABB>(ctx, 0, AABB_Id);
     bool ret = thisObj->Intersects(*aabb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -339,8 +339,8 @@ static duk_ret_t OBB_Intersects_AABB(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_Plane(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Plane* plane = GetObject<Plane>(ctx, 0, Plane_Id); if (!plane) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    Plane* plane = GetCheckedObject<Plane>(ctx, 0, Plane_Id);
     bool ret = thisObj->Intersects(*plane);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -348,8 +348,8 @@ static duk_ret_t OBB_Intersects_Plane(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_Ray_float_float(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Ray* ray = GetObject<Ray>(ctx, 0, Ray_Id); if (!ray) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    Ray* ray = GetCheckedObject<Ray>(ctx, 0, Ray_Id);
     float dNear = (float)duk_require_number(ctx, 1);
     float dFar = (float)duk_require_number(ctx, 2);
     bool ret = thisObj->Intersects(*ray, dNear, dFar);
@@ -359,8 +359,8 @@ static duk_ret_t OBB_Intersects_Ray_float_float(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_Ray(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Ray* ray = GetObject<Ray>(ctx, 0, Ray_Id); if (!ray) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    Ray* ray = GetCheckedObject<Ray>(ctx, 0, Ray_Id);
     bool ret = thisObj->Intersects(*ray);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -368,8 +368,8 @@ static duk_ret_t OBB_Intersects_Ray(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_Line_float_float(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Line* line = GetObject<Line>(ctx, 0, Line_Id); if (!line) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    Line* line = GetCheckedObject<Line>(ctx, 0, Line_Id);
     float dNear = (float)duk_require_number(ctx, 1);
     float dFar = (float)duk_require_number(ctx, 2);
     bool ret = thisObj->Intersects(*line, dNear, dFar);
@@ -379,8 +379,8 @@ static duk_ret_t OBB_Intersects_Line_float_float(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_Line(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Line* line = GetObject<Line>(ctx, 0, Line_Id); if (!line) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    Line* line = GetCheckedObject<Line>(ctx, 0, Line_Id);
     bool ret = thisObj->Intersects(*line);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -388,8 +388,8 @@ static duk_ret_t OBB_Intersects_Line(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_LineSegment_float_float(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    LineSegment* lineSegment = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!lineSegment) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    LineSegment* lineSegment = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     float dNear = (float)duk_require_number(ctx, 1);
     float dFar = (float)duk_require_number(ctx, 2);
     bool ret = thisObj->Intersects(*lineSegment, dNear, dFar);
@@ -399,8 +399,8 @@ static duk_ret_t OBB_Intersects_LineSegment_float_float(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_LineSegment(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    LineSegment* lineSegment = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!lineSegment) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    LineSegment* lineSegment = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     bool ret = thisObj->Intersects(*lineSegment);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -408,8 +408,8 @@ static duk_ret_t OBB_Intersects_LineSegment(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_Capsule(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Capsule* capsule = GetObject<Capsule>(ctx, 0, Capsule_Id); if (!capsule) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    Capsule* capsule = GetCheckedObject<Capsule>(ctx, 0, Capsule_Id);
     bool ret = thisObj->Intersects(*capsule);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -417,8 +417,8 @@ static duk_ret_t OBB_Intersects_Capsule(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_Triangle(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Triangle* triangle = GetObject<Triangle>(ctx, 0, Triangle_Id); if (!triangle) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    Triangle* triangle = GetCheckedObject<Triangle>(ctx, 0, Triangle_Id);
     bool ret = thisObj->Intersects(*triangle);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -426,8 +426,8 @@ static duk_ret_t OBB_Intersects_Triangle(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_Frustum(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Frustum* frustum = GetObject<Frustum>(ctx, 0, Frustum_Id); if (!frustum) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    Frustum* frustum = GetCheckedObject<Frustum>(ctx, 0, Frustum_Id);
     bool ret = thisObj->Intersects(*frustum);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -435,8 +435,8 @@ static duk_ret_t OBB_Intersects_Frustum(duk_context* ctx)
 
 static duk_ret_t OBB_Equals_OBB_float(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    OBB* rhs = GetObject<OBB>(ctx, 0, OBB_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    OBB* rhs = GetCheckedObject<OBB>(ctx, 0, OBB_Id);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Equals(*rhs, epsilon);
     duk_push_boolean(ctx, ret);
@@ -445,8 +445,8 @@ static duk_ret_t OBB_Equals_OBB_float(duk_context* ctx)
 
 static duk_ret_t OBB_BitEquals_OBB(duk_context* ctx)
 {
-    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    OBB* other = GetObject<OBB>(ctx, 0, OBB_Id); if (!other) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    OBB* thisObj = GetThisObject<OBB>(ctx, OBB_Id);
+    OBB* other = GetCheckedObject<OBB>(ctx, 0, OBB_Id);
     bool ret = thisObj->BitEquals(*other);
     duk_push_boolean(ctx, ret);
     return 1;

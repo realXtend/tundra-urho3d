@@ -68,29 +68,29 @@ duk_ret_t Ray_Dtor(duk_context* ctx)
 static duk_ret_t Ray_Ctor(duk_context* ctx)
 {
     Ray* newObj = new Ray();
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, Ray_Id); duk_push_c_function(ctx, Ray_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<Ray>(ctx, newObj, Ray_Id, Ray_Dtor);
     return 0;
 }
 
 static duk_ret_t Ray_Ctor_Line(duk_context* ctx)
 {
-    Line* line = GetObject<Line>(ctx, 0, Line_Id); if (!line) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Line* line = GetCheckedObject<Line>(ctx, 0, Line_Id);
     Ray* newObj = new Ray(*line);
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, Ray_Id); duk_push_c_function(ctx, Ray_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<Ray>(ctx, newObj, Ray_Id, Ray_Dtor);
     return 0;
 }
 
 static duk_ret_t Ray_Ctor_LineSegment(duk_context* ctx)
 {
-    LineSegment* lineSegment = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!lineSegment) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    LineSegment* lineSegment = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     Ray* newObj = new Ray(*lineSegment);
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, Ray_Id); duk_push_c_function(ctx, Ray_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<Ray>(ctx, newObj, Ray_Id, Ray_Dtor);
     return 0;
 }
 
 static duk_ret_t Ray_IsFinite(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
     bool ret = thisObj->IsFinite();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -98,40 +98,40 @@ static duk_ret_t Ray_IsFinite(duk_context* ctx)
 
 static duk_ret_t Ray_Transform_float3x3(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x3* transform = GetObject<float3x3>(ctx, 0, float3x3_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    float3x3* transform = GetCheckedObject<float3x3>(ctx, 0, float3x3_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Ray_Transform_float3x4(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x4* transform = GetObject<float3x4>(ctx, 0, float3x4_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    float3x4* transform = GetCheckedObject<float3x4>(ctx, 0, float3x4_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Ray_Transform_float4x4(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float4x4* transform = GetObject<float4x4>(ctx, 0, float4x4_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    float4x4* transform = GetCheckedObject<float4x4>(ctx, 0, float4x4_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Ray_Transform_Quat(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Quat* transform = GetObject<Quat>(ctx, 0, Quat_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Quat* transform = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Ray_Contains_LineSegment_float(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    LineSegment* lineSegment = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!lineSegment) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    LineSegment* lineSegment = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     float distanceThreshold = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Contains(*lineSegment, distanceThreshold);
     duk_push_boolean(ctx, ret);
@@ -140,8 +140,8 @@ static duk_ret_t Ray_Contains_LineSegment_float(duk_context* ctx)
 
 static duk_ret_t Ray_Equals_Ray_float(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Ray* otherRay = GetObject<Ray>(ctx, 0, Ray_Id); if (!otherRay) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Ray* otherRay = GetCheckedObject<Ray>(ctx, 0, Ray_Id);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Equals(*otherRay, epsilon);
     duk_push_boolean(ctx, ret);
@@ -150,8 +150,8 @@ static duk_ret_t Ray_Equals_Ray_float(duk_context* ctx)
 
 static duk_ret_t Ray_BitEquals_Ray(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Ray* other = GetObject<Ray>(ctx, 0, Ray_Id); if (!other) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Ray* other = GetCheckedObject<Ray>(ctx, 0, Ray_Id);
     bool ret = thisObj->BitEquals(*other);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -159,8 +159,8 @@ static duk_ret_t Ray_BitEquals_Ray(duk_context* ctx)
 
 static duk_ret_t Ray_Distance_Ray(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Ray* other = GetObject<Ray>(ctx, 0, Ray_Id); if (!other) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Ray* other = GetCheckedObject<Ray>(ctx, 0, Ray_Id);
     float ret = thisObj->Distance(*other);
     duk_push_number(ctx, ret);
     return 1;
@@ -168,8 +168,8 @@ static duk_ret_t Ray_Distance_Ray(duk_context* ctx)
 
 static duk_ret_t Ray_Distance_Ray_float(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Ray* other = GetObject<Ray>(ctx, 0, Ray_Id); if (!other) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Ray* other = GetCheckedObject<Ray>(ctx, 0, Ray_Id);
     float d = (float)duk_require_number(ctx, 1);
     float ret = thisObj->Distance(*other, d);
     duk_push_number(ctx, ret);
@@ -178,8 +178,8 @@ static duk_ret_t Ray_Distance_Ray_float(duk_context* ctx)
 
 static duk_ret_t Ray_Distance_Ray_float_float(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Ray* other = GetObject<Ray>(ctx, 0, Ray_Id); if (!other) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Ray* other = GetCheckedObject<Ray>(ctx, 0, Ray_Id);
     float d = (float)duk_require_number(ctx, 1);
     float d2 = (float)duk_require_number(ctx, 2);
     float ret = thisObj->Distance(*other, d, d2);
@@ -189,8 +189,8 @@ static duk_ret_t Ray_Distance_Ray_float_float(duk_context* ctx)
 
 static duk_ret_t Ray_Distance_Line(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Line* other = GetObject<Line>(ctx, 0, Line_Id); if (!other) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Line* other = GetCheckedObject<Line>(ctx, 0, Line_Id);
     float ret = thisObj->Distance(*other);
     duk_push_number(ctx, ret);
     return 1;
@@ -198,8 +198,8 @@ static duk_ret_t Ray_Distance_Line(duk_context* ctx)
 
 static duk_ret_t Ray_Distance_Line_float(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Line* other = GetObject<Line>(ctx, 0, Line_Id); if (!other) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Line* other = GetCheckedObject<Line>(ctx, 0, Line_Id);
     float d = (float)duk_require_number(ctx, 1);
     float ret = thisObj->Distance(*other, d);
     duk_push_number(ctx, ret);
@@ -208,8 +208,8 @@ static duk_ret_t Ray_Distance_Line_float(duk_context* ctx)
 
 static duk_ret_t Ray_Distance_Line_float_float(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Line* other = GetObject<Line>(ctx, 0, Line_Id); if (!other) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Line* other = GetCheckedObject<Line>(ctx, 0, Line_Id);
     float d = (float)duk_require_number(ctx, 1);
     float d2 = (float)duk_require_number(ctx, 2);
     float ret = thisObj->Distance(*other, d, d2);
@@ -219,8 +219,8 @@ static duk_ret_t Ray_Distance_Line_float_float(duk_context* ctx)
 
 static duk_ret_t Ray_Distance_LineSegment(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    LineSegment* other = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!other) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    LineSegment* other = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     float ret = thisObj->Distance(*other);
     duk_push_number(ctx, ret);
     return 1;
@@ -228,8 +228,8 @@ static duk_ret_t Ray_Distance_LineSegment(duk_context* ctx)
 
 static duk_ret_t Ray_Distance_LineSegment_float(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    LineSegment* other = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!other) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    LineSegment* other = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     float d = (float)duk_require_number(ctx, 1);
     float ret = thisObj->Distance(*other, d);
     duk_push_number(ctx, ret);
@@ -238,8 +238,8 @@ static duk_ret_t Ray_Distance_LineSegment_float(duk_context* ctx)
 
 static duk_ret_t Ray_Distance_LineSegment_float_float(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    LineSegment* other = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!other) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    LineSegment* other = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     float d = (float)duk_require_number(ctx, 1);
     float d2 = (float)duk_require_number(ctx, 2);
     float ret = thisObj->Distance(*other, d, d2);
@@ -249,8 +249,8 @@ static duk_ret_t Ray_Distance_LineSegment_float_float(duk_context* ctx)
 
 static duk_ret_t Ray_Distance_Sphere(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Sphere* sphere = GetObject<Sphere>(ctx, 0, Sphere_Id); if (!sphere) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Sphere* sphere = GetCheckedObject<Sphere>(ctx, 0, Sphere_Id);
     float ret = thisObj->Distance(*sphere);
     duk_push_number(ctx, ret);
     return 1;
@@ -258,8 +258,8 @@ static duk_ret_t Ray_Distance_Sphere(duk_context* ctx)
 
 static duk_ret_t Ray_Distance_Capsule(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Capsule* capsule = GetObject<Capsule>(ctx, 0, Capsule_Id); if (!capsule) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Capsule* capsule = GetCheckedObject<Capsule>(ctx, 0, Capsule_Id);
     float ret = thisObj->Distance(*capsule);
     duk_push_number(ctx, ret);
     return 1;
@@ -267,8 +267,8 @@ static duk_ret_t Ray_Distance_Capsule(duk_context* ctx)
 
 static duk_ret_t Ray_Intersects_Triangle(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Triangle* triangle = GetObject<Triangle>(ctx, 0, Triangle_Id); if (!triangle) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Triangle* triangle = GetCheckedObject<Triangle>(ctx, 0, Triangle_Id);
     bool ret = thisObj->Intersects(*triangle);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -276,8 +276,8 @@ static duk_ret_t Ray_Intersects_Triangle(duk_context* ctx)
 
 static duk_ret_t Ray_Intersects_Plane(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Plane* plane = GetObject<Plane>(ctx, 0, Plane_Id); if (!plane) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Plane* plane = GetCheckedObject<Plane>(ctx, 0, Plane_Id);
     bool ret = thisObj->Intersects(*plane);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -285,8 +285,8 @@ static duk_ret_t Ray_Intersects_Plane(duk_context* ctx)
 
 static duk_ret_t Ray_Intersects_Sphere(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Sphere* s = GetObject<Sphere>(ctx, 0, Sphere_Id); if (!s) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Sphere* s = GetCheckedObject<Sphere>(ctx, 0, Sphere_Id);
     bool ret = thisObj->Intersects(*s);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -294,8 +294,8 @@ static duk_ret_t Ray_Intersects_Sphere(duk_context* ctx)
 
 static duk_ret_t Ray_Intersects_AABB_float_float(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    AABB* aabb = GetObject<AABB>(ctx, 0, AABB_Id); if (!aabb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    AABB* aabb = GetCheckedObject<AABB>(ctx, 0, AABB_Id);
     float dNear = (float)duk_require_number(ctx, 1);
     float dFar = (float)duk_require_number(ctx, 2);
     bool ret = thisObj->Intersects(*aabb, dNear, dFar);
@@ -305,8 +305,8 @@ static duk_ret_t Ray_Intersects_AABB_float_float(duk_context* ctx)
 
 static duk_ret_t Ray_Intersects_AABB(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    AABB* aabb = GetObject<AABB>(ctx, 0, AABB_Id); if (!aabb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    AABB* aabb = GetCheckedObject<AABB>(ctx, 0, AABB_Id);
     bool ret = thisObj->Intersects(*aabb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -314,8 +314,8 @@ static duk_ret_t Ray_Intersects_AABB(duk_context* ctx)
 
 static duk_ret_t Ray_Intersects_OBB_float_float(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    OBB* obb = GetObject<OBB>(ctx, 0, OBB_Id); if (!obb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    OBB* obb = GetCheckedObject<OBB>(ctx, 0, OBB_Id);
     float dNear = (float)duk_require_number(ctx, 1);
     float dFar = (float)duk_require_number(ctx, 2);
     bool ret = thisObj->Intersects(*obb, dNear, dFar);
@@ -325,8 +325,8 @@ static duk_ret_t Ray_Intersects_OBB_float_float(duk_context* ctx)
 
 static duk_ret_t Ray_Intersects_OBB(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    OBB* obb = GetObject<OBB>(ctx, 0, OBB_Id); if (!obb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    OBB* obb = GetCheckedObject<OBB>(ctx, 0, OBB_Id);
     bool ret = thisObj->Intersects(*obb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -334,8 +334,8 @@ static duk_ret_t Ray_Intersects_OBB(duk_context* ctx)
 
 static duk_ret_t Ray_Intersects_Capsule(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Capsule* capsule = GetObject<Capsule>(ctx, 0, Capsule_Id); if (!capsule) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Capsule* capsule = GetCheckedObject<Capsule>(ctx, 0, Capsule_Id);
     bool ret = thisObj->Intersects(*capsule);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -343,8 +343,8 @@ static duk_ret_t Ray_Intersects_Capsule(duk_context* ctx)
 
 static duk_ret_t Ray_Intersects_Frustum(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Frustum* frustum = GetObject<Frustum>(ctx, 0, Frustum_Id); if (!frustum) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Frustum* frustum = GetCheckedObject<Frustum>(ctx, 0, Frustum_Id);
     bool ret = thisObj->Intersects(*frustum);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -352,8 +352,8 @@ static duk_ret_t Ray_Intersects_Frustum(duk_context* ctx)
 
 static duk_ret_t Ray_IntersectsDisc_Circle(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Circle* disc = GetObject<Circle>(ctx, 0, Circle_Id); if (!disc) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
+    Circle* disc = GetCheckedObject<Circle>(ctx, 0, Circle_Id);
     bool ret = thisObj->IntersectsDisc(*disc);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -361,28 +361,28 @@ static duk_ret_t Ray_IntersectsDisc_Circle(duk_context* ctx)
 
 static duk_ret_t Ray_ToLine(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
     Line ret = thisObj->ToLine();
-    duk_push_object(ctx); SetObject(ctx, -1, new Line(ret), Line_Id); duk_push_c_function(ctx, Line_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Line_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Line>(ctx, ret, Line_Id, Line_Dtor);
     return 1;
 }
 
 static duk_ret_t Ray_ToLineSegment_float(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
     float d = (float)duk_require_number(ctx, 0);
     LineSegment ret = thisObj->ToLineSegment(d);
-    duk_push_object(ctx); SetObject(ctx, -1, new LineSegment(ret), LineSegment_Id); duk_push_c_function(ctx, LineSegment_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, LineSegment_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_Id, LineSegment_Dtor);
     return 1;
 }
 
 static duk_ret_t Ray_ToLineSegment_float_float(duk_context* ctx)
 {
-    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Ray* thisObj = GetThisObject<Ray>(ctx, Ray_Id);
     float dStart = (float)duk_require_number(ctx, 0);
     float dEnd = (float)duk_require_number(ctx, 1);
     LineSegment ret = thisObj->ToLineSegment(dStart, dEnd);
-    duk_push_object(ctx); SetObject(ctx, -1, new LineSegment(ret), LineSegment_Id); duk_push_c_function(ctx, LineSegment_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, LineSegment_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_Id, LineSegment_Dtor);
     return 1;
 }
 

@@ -70,7 +70,7 @@ duk_ret_t Capsule_Dtor(duk_context* ctx)
 
 static duk_ret_t Capsule_Set_r(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
     float r = (float)duk_require_number(ctx, 0);
     thisObj->r = r;
     return 0;
@@ -78,7 +78,7 @@ static duk_ret_t Capsule_Set_r(duk_context* ctx)
 
 static duk_ret_t Capsule_Get_r(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
     duk_push_number(ctx, thisObj->r);
     return 1;
 }
@@ -86,37 +86,37 @@ static duk_ret_t Capsule_Get_r(duk_context* ctx)
 static duk_ret_t Capsule_Ctor(duk_context* ctx)
 {
     Capsule* newObj = new Capsule();
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, Capsule_Id); duk_push_c_function(ctx, Capsule_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<Capsule>(ctx, newObj, Capsule_Id, Capsule_Dtor);
     return 0;
 }
 
 static duk_ret_t Capsule_Ctor_LineSegment_float(duk_context* ctx)
 {
-    LineSegment* endPoints = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!endPoints) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    LineSegment* endPoints = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     float radius = (float)duk_require_number(ctx, 1);
     Capsule* newObj = new Capsule(*endPoints, radius);
-    duk_push_this(ctx); SetObject(ctx, -1, newObj, Capsule_Id); duk_push_c_function(ctx, Capsule_Dtor, 1); duk_set_finalizer(ctx, -2);
+    PushConstructorResult<Capsule>(ctx, newObj, Capsule_Id, Capsule_Dtor);
     return 0;
 }
 
 static duk_ret_t Capsule_SetFrom_Sphere(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Sphere* s = GetObject<Sphere>(ctx, 0, Sphere_Id); if (!s) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Sphere* s = GetCheckedObject<Sphere>(ctx, 0, Sphere_Id);
     thisObj->SetFrom(*s);
     return 0;
 }
 
 static duk_ret_t Capsule_SetDegenerate(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
     thisObj->SetDegenerate();
     return 0;
 }
 
 static duk_ret_t Capsule_IsDegenerate(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
     bool ret = thisObj->IsDegenerate();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -124,7 +124,7 @@ static duk_ret_t Capsule_IsDegenerate(duk_context* ctx)
 
 static duk_ret_t Capsule_LineLength(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
     float ret = thisObj->LineLength();
     duk_push_number(ctx, ret);
     return 1;
@@ -132,7 +132,7 @@ static duk_ret_t Capsule_LineLength(duk_context* ctx)
 
 static duk_ret_t Capsule_Height(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
     float ret = thisObj->Height();
     duk_push_number(ctx, ret);
     return 1;
@@ -140,7 +140,7 @@ static duk_ret_t Capsule_Height(duk_context* ctx)
 
 static duk_ret_t Capsule_Diameter(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
     float ret = thisObj->Diameter();
     duk_push_number(ctx, ret);
     return 1;
@@ -148,7 +148,7 @@ static duk_ret_t Capsule_Diameter(duk_context* ctx)
 
 static duk_ret_t Capsule_Volume(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
     float ret = thisObj->Volume();
     duk_push_number(ctx, ret);
     return 1;
@@ -156,7 +156,7 @@ static duk_ret_t Capsule_Volume(duk_context* ctx)
 
 static duk_ret_t Capsule_SurfaceArea(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
     float ret = thisObj->SurfaceArea();
     duk_push_number(ctx, ret);
     return 1;
@@ -164,24 +164,24 @@ static duk_ret_t Capsule_SurfaceArea(duk_context* ctx)
 
 static duk_ret_t Capsule_CrossSection_float(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
     float l = (float)duk_require_number(ctx, 0);
     Circle ret = thisObj->CrossSection(l);
-    duk_push_object(ctx); SetObject(ctx, -1, new Circle(ret), Circle_Id); duk_push_c_function(ctx, Circle_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Circle_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Circle>(ctx, ret, Circle_Id, Circle_Dtor);
     return 1;
 }
 
 static duk_ret_t Capsule_HeightLineSegment(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
     LineSegment ret = thisObj->HeightLineSegment();
-    duk_push_object(ctx); SetObject(ctx, -1, new LineSegment(ret), LineSegment_Id); duk_push_c_function(ctx, LineSegment_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, LineSegment_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_Id, LineSegment_Dtor);
     return 1;
 }
 
 static duk_ret_t Capsule_IsFinite(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
     bool ret = thisObj->IsFinite();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -189,72 +189,72 @@ static duk_ret_t Capsule_IsFinite(duk_context* ctx)
 
 static duk_ret_t Capsule_SphereA(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
     Sphere ret = thisObj->SphereA();
-    duk_push_object(ctx); SetObject(ctx, -1, new Sphere(ret), Sphere_Id); duk_push_c_function(ctx, Sphere_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Sphere_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Sphere>(ctx, ret, Sphere_Id, Sphere_Dtor);
     return 1;
 }
 
 static duk_ret_t Capsule_SphereB(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
     Sphere ret = thisObj->SphereB();
-    duk_push_object(ctx); SetObject(ctx, -1, new Sphere(ret), Sphere_Id); duk_push_c_function(ctx, Sphere_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, Sphere_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<Sphere>(ctx, ret, Sphere_Id, Sphere_Dtor);
     return 1;
 }
 
 static duk_ret_t Capsule_MinimalEnclosingAABB(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
     AABB ret = thisObj->MinimalEnclosingAABB();
-    duk_push_object(ctx); SetObject(ctx, -1, new AABB(ret), AABB_Id); duk_push_c_function(ctx, AABB_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, AABB_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<AABB>(ctx, ret, AABB_Id, AABB_Dtor);
     return 1;
 }
 
 static duk_ret_t Capsule_MinimalEnclosingOBB(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
     OBB ret = thisObj->MinimalEnclosingOBB();
-    duk_push_object(ctx); SetObject(ctx, -1, new OBB(ret), OBB_Id); duk_push_c_function(ctx, OBB_Dtor, 1); duk_set_finalizer(ctx, -2); duk_get_global_string(ctx, OBB_Id); duk_get_prop_string(ctx, -1, "prototype"); duk_set_prototype(ctx, -3); duk_pop(ctx);
+    PushValueObjectCopy<OBB>(ctx, ret, OBB_Id, OBB_Dtor);
     return 1;
 }
 
 static duk_ret_t Capsule_Transform_float3x3(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x3* transform = GetObject<float3x3>(ctx, 0, float3x3_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    float3x3* transform = GetCheckedObject<float3x3>(ctx, 0, float3x3_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Capsule_Transform_float3x4(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float3x4* transform = GetObject<float3x4>(ctx, 0, float3x4_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    float3x4* transform = GetCheckedObject<float3x4>(ctx, 0, float3x4_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Capsule_Transform_float4x4(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    float4x4* transform = GetObject<float4x4>(ctx, 0, float4x4_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    float4x4* transform = GetCheckedObject<float4x4>(ctx, 0, float4x4_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Capsule_Transform_Quat(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Quat* transform = GetObject<Quat>(ctx, 0, Quat_Id); if (!transform) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Quat* transform = GetCheckedObject<Quat>(ctx, 0, Quat_Id);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Capsule_Distance_Plane(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Plane* plane = GetObject<Plane>(ctx, 0, Plane_Id); if (!plane) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Plane* plane = GetCheckedObject<Plane>(ctx, 0, Plane_Id);
     float ret = thisObj->Distance(*plane);
     duk_push_number(ctx, ret);
     return 1;
@@ -262,8 +262,8 @@ static duk_ret_t Capsule_Distance_Plane(duk_context* ctx)
 
 static duk_ret_t Capsule_Distance_Sphere(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Sphere* sphere = GetObject<Sphere>(ctx, 0, Sphere_Id); if (!sphere) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Sphere* sphere = GetCheckedObject<Sphere>(ctx, 0, Sphere_Id);
     float ret = thisObj->Distance(*sphere);
     duk_push_number(ctx, ret);
     return 1;
@@ -271,8 +271,8 @@ static duk_ret_t Capsule_Distance_Sphere(duk_context* ctx)
 
 static duk_ret_t Capsule_Distance_Ray(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Ray* ray = GetObject<Ray>(ctx, 0, Ray_Id); if (!ray) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Ray* ray = GetCheckedObject<Ray>(ctx, 0, Ray_Id);
     float ret = thisObj->Distance(*ray);
     duk_push_number(ctx, ret);
     return 1;
@@ -280,8 +280,8 @@ static duk_ret_t Capsule_Distance_Ray(duk_context* ctx)
 
 static duk_ret_t Capsule_Distance_Line(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Line* line = GetObject<Line>(ctx, 0, Line_Id); if (!line) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Line* line = GetCheckedObject<Line>(ctx, 0, Line_Id);
     float ret = thisObj->Distance(*line);
     duk_push_number(ctx, ret);
     return 1;
@@ -289,8 +289,8 @@ static duk_ret_t Capsule_Distance_Line(duk_context* ctx)
 
 static duk_ret_t Capsule_Distance_LineSegment(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    LineSegment* lineSegment = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!lineSegment) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    LineSegment* lineSegment = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     float ret = thisObj->Distance(*lineSegment);
     duk_push_number(ctx, ret);
     return 1;
@@ -298,8 +298,8 @@ static duk_ret_t Capsule_Distance_LineSegment(duk_context* ctx)
 
 static duk_ret_t Capsule_Distance_Capsule(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Capsule* capsule = GetObject<Capsule>(ctx, 0, Capsule_Id); if (!capsule) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Capsule* capsule = GetCheckedObject<Capsule>(ctx, 0, Capsule_Id);
     float ret = thisObj->Distance(*capsule);
     duk_push_number(ctx, ret);
     return 1;
@@ -307,8 +307,8 @@ static duk_ret_t Capsule_Distance_Capsule(duk_context* ctx)
 
 static duk_ret_t Capsule_Contains_LineSegment(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    LineSegment* lineSegment = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!lineSegment) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    LineSegment* lineSegment = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     bool ret = thisObj->Contains(*lineSegment);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -316,8 +316,8 @@ static duk_ret_t Capsule_Contains_LineSegment(duk_context* ctx)
 
 static duk_ret_t Capsule_Contains_Triangle(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Triangle* triangle = GetObject<Triangle>(ctx, 0, Triangle_Id); if (!triangle) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Triangle* triangle = GetCheckedObject<Triangle>(ctx, 0, Triangle_Id);
     bool ret = thisObj->Contains(*triangle);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -325,8 +325,8 @@ static duk_ret_t Capsule_Contains_Triangle(duk_context* ctx)
 
 static duk_ret_t Capsule_Contains_AABB(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    AABB* aabb = GetObject<AABB>(ctx, 0, AABB_Id); if (!aabb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    AABB* aabb = GetCheckedObject<AABB>(ctx, 0, AABB_Id);
     bool ret = thisObj->Contains(*aabb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -334,8 +334,8 @@ static duk_ret_t Capsule_Contains_AABB(duk_context* ctx)
 
 static duk_ret_t Capsule_Contains_OBB(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    OBB* obb = GetObject<OBB>(ctx, 0, OBB_Id); if (!obb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    OBB* obb = GetCheckedObject<OBB>(ctx, 0, OBB_Id);
     bool ret = thisObj->Contains(*obb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -343,8 +343,8 @@ static duk_ret_t Capsule_Contains_OBB(duk_context* ctx)
 
 static duk_ret_t Capsule_Contains_Frustum(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Frustum* frustum = GetObject<Frustum>(ctx, 0, Frustum_Id); if (!frustum) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Frustum* frustum = GetCheckedObject<Frustum>(ctx, 0, Frustum_Id);
     bool ret = thisObj->Contains(*frustum);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -352,8 +352,8 @@ static duk_ret_t Capsule_Contains_Frustum(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_Ray(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Ray* ray = GetObject<Ray>(ctx, 0, Ray_Id); if (!ray) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Ray* ray = GetCheckedObject<Ray>(ctx, 0, Ray_Id);
     bool ret = thisObj->Intersects(*ray);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -361,8 +361,8 @@ static duk_ret_t Capsule_Intersects_Ray(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_Line(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Line* line = GetObject<Line>(ctx, 0, Line_Id); if (!line) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Line* line = GetCheckedObject<Line>(ctx, 0, Line_Id);
     bool ret = thisObj->Intersects(*line);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -370,8 +370,8 @@ static duk_ret_t Capsule_Intersects_Line(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_LineSegment(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    LineSegment* lineSegment = GetObject<LineSegment>(ctx, 0, LineSegment_Id); if (!lineSegment) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    LineSegment* lineSegment = GetCheckedObject<LineSegment>(ctx, 0, LineSegment_Id);
     bool ret = thisObj->Intersects(*lineSegment);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -379,8 +379,8 @@ static duk_ret_t Capsule_Intersects_LineSegment(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_Plane(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Plane* plane = GetObject<Plane>(ctx, 0, Plane_Id); if (!plane) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Plane* plane = GetCheckedObject<Plane>(ctx, 0, Plane_Id);
     bool ret = thisObj->Intersects(*plane);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -388,8 +388,8 @@ static duk_ret_t Capsule_Intersects_Plane(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_Sphere(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Sphere* sphere = GetObject<Sphere>(ctx, 0, Sphere_Id); if (!sphere) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Sphere* sphere = GetCheckedObject<Sphere>(ctx, 0, Sphere_Id);
     bool ret = thisObj->Intersects(*sphere);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -397,8 +397,8 @@ static duk_ret_t Capsule_Intersects_Sphere(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_Capsule(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Capsule* capsule = GetObject<Capsule>(ctx, 0, Capsule_Id); if (!capsule) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Capsule* capsule = GetCheckedObject<Capsule>(ctx, 0, Capsule_Id);
     bool ret = thisObj->Intersects(*capsule);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -406,8 +406,8 @@ static duk_ret_t Capsule_Intersects_Capsule(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_AABB(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    AABB* aabb = GetObject<AABB>(ctx, 0, AABB_Id); if (!aabb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    AABB* aabb = GetCheckedObject<AABB>(ctx, 0, AABB_Id);
     bool ret = thisObj->Intersects(*aabb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -415,8 +415,8 @@ static duk_ret_t Capsule_Intersects_AABB(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_OBB(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    OBB* obb = GetObject<OBB>(ctx, 0, OBB_Id); if (!obb) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    OBB* obb = GetCheckedObject<OBB>(ctx, 0, OBB_Id);
     bool ret = thisObj->Intersects(*obb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -424,8 +424,8 @@ static duk_ret_t Capsule_Intersects_OBB(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_Triangle(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Triangle* triangle = GetObject<Triangle>(ctx, 0, Triangle_Id); if (!triangle) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Triangle* triangle = GetCheckedObject<Triangle>(ctx, 0, Triangle_Id);
     bool ret = thisObj->Intersects(*triangle);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -433,8 +433,8 @@ static duk_ret_t Capsule_Intersects_Triangle(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_Frustum(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Frustum* frustum = GetObject<Frustum>(ctx, 0, Frustum_Id); if (!frustum) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Frustum* frustum = GetCheckedObject<Frustum>(ctx, 0, Frustum_Id);
     bool ret = thisObj->Intersects(*frustum);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -442,8 +442,8 @@ static duk_ret_t Capsule_Intersects_Frustum(duk_context* ctx)
 
 static duk_ret_t Capsule_Equals_Capsule_float(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Capsule* rhs = GetObject<Capsule>(ctx, 0, Capsule_Id); if (!rhs) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Capsule* rhs = GetCheckedObject<Capsule>(ctx, 0, Capsule_Id);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Equals(*rhs, epsilon);
     duk_push_boolean(ctx, ret);
@@ -452,8 +452,8 @@ static duk_ret_t Capsule_Equals_Capsule_float(duk_context* ctx)
 
 static duk_ret_t Capsule_BitEquals_Capsule(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id); if (!thisObj) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null this pointer");
-    Capsule* other = GetObject<Capsule>(ctx, 0, Capsule_Id); if (!other) duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "Null or invalid object argument");
+    Capsule* thisObj = GetThisObject<Capsule>(ctx, Capsule_Id);
+    Capsule* other = GetCheckedObject<Capsule>(ctx, 0, Capsule_Id);
     bool ret = thisObj->BitEquals(*other);
     duk_push_boolean(ctx, ret);
     return 1;
