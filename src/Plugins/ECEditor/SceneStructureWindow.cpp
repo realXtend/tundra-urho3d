@@ -44,6 +44,8 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework) :
     window_->SetResizable(true);
     GetSubsystem<UI>()->GetRoot()->AddChild(window_);
 
+    SubscribeToEvent(window_, E_POSITIONED, URHO3D_HANDLER(SceneStructureWindow, OnContextMenuHide));
+
     {
         UIElement *topBar = new UIElement(framework->GetContext());
         topBar->SetMinHeight(22);
@@ -71,9 +73,10 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework) :
     listView_ = new ListView(framework->GetContext());
     listView_->SetStyle("HierarchyListView", style);
     listView_->SetMultiselect(true);
+    listView_->SetEnabled(true);
+    listView_->SetFocusMode(FocusMode::FM_FOCUSABLE_DEFOCUSABLE);
     window_->AddChild(listView_);
 
-    //SubscribeToEvent(listView_, E_SELECTIONCHANGED, URHO3D_HANDLER(SceneStructureWindow, OnItemSelected2));
     SubscribeToEvent(listView_, E_ITEMDOUBLECLICKED, URHO3D_HANDLER(SceneStructureWindow, OnItemDoubleClicked));
     SubscribeToEvent(listView_, E_ITEMCLICKED, URHO3D_HANDLER(SceneStructureWindow, OnItemClicked));
 
@@ -118,11 +121,11 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework) :
     contextMenu_ = new SceneContextMenu(framework->GetContext());
     contextMenu_->Widget()->SetStyle("Window", style);
     
-    Text *t = contextMenu_->CreateItem("newEntity", "New entity...");
-    t = contextMenu_->CreateItem("saveScene", "Save scene as...");
-    t = contextMenu_->CreateItem("exportScene", "Export...");
-    t = contextMenu_->CreateItem("importScene", "Import...");
-    t = contextMenu_->CreateItem("openScene", "Open new Scene...");
+    Menu *m = contextMenu_->CreateItem("newEntity", "New entity...");
+    m = contextMenu_->CreateItem("saveScene", "Save scene as...");
+    m = contextMenu_->CreateItem("exportScene", "Export...");
+    m = contextMenu_->CreateItem("importScene", "Import...");
+    m = contextMenu_->CreateItem("openScene", "Open new Scene...");
 
     contextMenu_->Widget()->SetPosition(IntVector2(100, 100));
     GetSubsystem<UI>()->GetRoot()->AddChild(contextMenu_->Widget());
@@ -194,12 +197,14 @@ void SceneStructureWindow::OnItemClicked(StringHash eventType, VariantMap &event
             /*unsigned index = listView_->FindItem(item);
             if (index != M_MAX_UNSIGNED)
                 listView_->ToggleSelection(index);*/
+            HideContextMenu();
         }
         else if (button == 4) // RIGHT BUTTON
         {
             Urho3D::Input* input = GetSubsystem<Urho3D::Input>();
             contextMenu_->Widget()->SetPosition(input->GetMousePosition().x_, input->GetMousePosition().y_);
             contextMenu_->Widget()->BringToFront();
+            contextMenu_->Open();
         }
     }
 }
@@ -221,6 +226,11 @@ void SceneStructureWindow::OnItemDoubleClicked(StringHash eventType, VariantMap 
 
         }
     }
+}
+
+void SceneStructureWindow::OnContextMenuHide(StringHash /*eventType*/, VariantMap &/*eventData*/)
+{
+    HideContextMenu();
 }
 
 void SceneStructureWindow::OnSceneCreated(Scene* scene, AttributeChange::Type change)
@@ -290,18 +300,20 @@ void SceneStructureWindow::AddScene(Scene *scene)
 
 }
 
+void SceneStructureWindow::HideContextMenu()
+{
+    if (contextMenu_.NotNull())
+        contextMenu_->Close();
+}
+
+void SceneStructureWindow::ShowContextMenu(int x, int y)
+{
+
+}
+
 void SceneStructureWindow::Clear()
 {
-    if (items_.Size() == 0)
-        return;
-
-    SceneStructureItemList::Iterator iter = items_.Begin();
-    while (iter != items_.End())
-    {
-        delete iter->Get();
-        iter.GotoNext();
-    }
-    items_.Clear();
+    
 }
 
 SceneStructureItem *SceneStructureWindow::FindItem(Object *obj)

@@ -31,8 +31,9 @@ namespace Tundra
 
 typedef WeakPtr<UIElement> UIElementWeakPtr;
 typedef WeakPtr<Text> TextWeakPtr;
+typedef WeakPtr<Menu> MenuWeakPtr;
 typedef WeakPtr<Window> WindowWeakPtr;
-typedef HashMap<String, TextWeakPtr> SceneContextItemMap;
+typedef HashMap<String, MenuWeakPtr> SceneContextItemMap;
 
 class ECEDITOR_API SceneContextMenu : public Object
 {
@@ -42,17 +43,25 @@ public:
     SceneContextMenu(Context* context);
     virtual ~SceneContextMenu();
     
-    Text *GetItem(const String &id);
-    Text *CreateItem(const String &id, const String &text);
+    Menu *GetItem(const String &id);
+    Menu *CreateItem(const String &id, const String &text);
     void Clear();
 
     UIElement *Widget();
 
-    //Signal1<SceneContextMenu* ARG(SceneContextMenu)> OnSelect;
+    bool IsVisible() const;
+    void Open();
+    void Close();
+
+    Signal2<SceneContextMenu*, String> OnActionSelected;
 
 protected:
 
+    String GetItemId(Menu *menu);
+
     void OnItemPressed(StringHash eventType, VariantMap& eventData);
+    void OnWindowDefocused(StringHash eventType, VariantMap& eventData);
+
     WindowWeakPtr window_;
     SceneContextItemMap contextItemMap_;
 };

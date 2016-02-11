@@ -85,26 +85,30 @@
         <attribute name="Focus Mode" value="NotFocusable" />
         <attribute name="Hover Image Offset" value="0 16" />
     </element>
-    <element type="RightArrow" style="Button" auto="false">    <!-- non-auto style is shown explicitly in the Editor's style drop down list for user selection -->
+    <element type="ArrowRight" style="Button" auto="false">    <!-- non-auto style is shown explicitly in the Editor's style drop down list for user selection -->
         <attribute name="Min Size" value="16 16" />
         <attribute name="Max Size" value="16 16" />
         <attribute name="Image Rect" value="176 0 192 16" />
         <attribute name="Focus Mode" value="NotFocusable" />
         <attribute name="Hover Image Offset" value="0 16" />
     </element>
-    <element type="DownArrow" style="Button" auto="false">    <!-- non-auto style is shown explicitly in the Editor's style drop down list for user selection -->
+    <element type="ArrowDown" style="Button" auto="false">    <!-- non-auto style is shown explicitly in the Editor's style drop down list for user selection -->
         <attribute name="Min Size" value="16 16" />
         <attribute name="Max Size" value="16 16" />
         <attribute name="Image Rect" value="192 0 208 16" />
         <attribute name="Focus Mode" value="NotFocusable" />
         <attribute name="Hover Image Offset" value="0 16" />
     </element>
-    
+    <element type="Menu" style="BorderImage">
+        <attribute name="Image Rect" value="112 0 128 16" />
+        <attribute name="Border" value="4 4 4 4" />
+        <attribute name="Pressed Image Offset" value="16 0" />
+        <attribute name="Hover Image Offset" value="0 16" />
+    </element>
     <element type="MenuBar" style="BorderImage" auto="false">
         <attribute name="Image Rect" value="112 0 128 16" />
         <attribute name="Border" value="4 4 4 4" />
     </element>
-    
     <element type="MenuBarPopup">
         <attribute name="Color" value="0.27 0.27 0.27 0.75" />
     </element>

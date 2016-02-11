@@ -39,7 +39,6 @@ typedef WeakPtr<Window> UIWindowWeakPtr;
 typedef WeakPtr<ListView> ListViewWeakPtr;
 typedef WeakPtr<Object> ObjectWeakPtr;
 typedef SharedPtr<SceneStructureItem> SceneStructureItemPtr;
-typedef List<SceneStructureItemPtr> SceneStructureItemList;
 
 class ECEDITOR_API SceneStructureWindow : public Object
 {
@@ -73,10 +72,6 @@ public:
 protected:
     SceneStructureItem *CreateItem(Object *obj, const String &text, SceneStructureItem *parent = 0);
 
-    void OnTogglePressed(SceneStructureItem *item);
-    void OnItemClicked(StringHash eventType, VariantMap &eventData);
-    void OnItemDoubleClicked(StringHash eventType, VariantMap &eventData);
-
     void OnSceneCreated(Scene* scene, Tundra::AttributeChange::Type change);
     void OnEntityCreated(Entity* entity, AttributeChange::Type change);
     void OnComponentCreated(IComponent* component, AttributeChange::Type change);
@@ -85,7 +80,16 @@ protected:
     void AddComponent(IComponent *component);
     void AddScene(Scene *scene);
 
-    Framework *framework_; 
+    void HideContextMenu();
+    void ShowContextMenu(int x, int y);
+
+    Framework *framework_;
+
+    // Events
+    void OnTogglePressed(SceneStructureItem *item);
+    void OnItemClicked(StringHash eventType, VariantMap &eventData);
+    void OnItemDoubleClicked(StringHash eventType, VariantMap &eventData);
+    void OnContextMenuHide(StringHash eventType, VariantMap &eventData);
 
 private:
     Scene *scene_;
@@ -93,7 +97,6 @@ private:
     UIWindowWeakPtr window_;
     SceneContextMenuWeakPtr contextMenu_;
     ListViewWeakPtr listView_;
-    SceneStructureItemList items_;
     Vector<ListViewItem> listItems_;
 };
 

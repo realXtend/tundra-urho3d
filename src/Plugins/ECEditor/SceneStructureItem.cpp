@@ -36,16 +36,16 @@ SceneStructureItem::SceneStructureItem(Context* context) :
 
 SceneStructureItem::~SceneStructureItem()
 {
-    if (text_.NotNull())
-    {
-        text_->Remove();
-        text_.Reset();
-    }
-
     if (toggleButton_.NotNull())
     {
         toggleButton_->Remove();
         toggleButton_.Reset();
+    }
+
+    if (text_.NotNull())
+    {
+        text_->Remove();
+        text_.Reset();
     }
 }
 

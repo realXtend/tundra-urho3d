@@ -54,7 +54,6 @@ public:
     ItemType Type() const;
 
     Signal1<SceneStructureItem* ARG(SceneStructureItem)> OnTogglePressed;
-    Signal1<SceneStructureItem* ARG(SceneStructureItem)> OnSelect;
 
 protected:
 
