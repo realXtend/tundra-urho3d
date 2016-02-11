@@ -136,7 +136,7 @@ namespace BindingsGenerator
             tw.WriteLine("");
             foreach (string s in dependencies)
             {
-                tw.WriteLine("duk_ret_t " + s + "_Dtor" + DukSignature() + ";");
+                tw.WriteLine("duk_ret_t " + s + "_Finalizer" + DukSignature() + ";");
             }
             tw.WriteLine("");
 
@@ -148,7 +148,7 @@ namespace BindingsGenerator
             Dictionary<string, List<Overload> > overloads = new Dictionary<string, List<Overload> >();
             Dictionary<string, List<Overload>> staticOverloads = new Dictionary<string, List<Overload>>();
             List<Property> properties = new List<Property>();
-            GenerateDestructor(classSymbol, tw);
+            GenerateFinalizer(classSymbol, tw);
             GeneratePropertyAccessors(classSymbol, tw, properties);
             GenerateMemberFunctions(classSymbol, tw, overloads, false);
             GenerateFunctionSelectors(classSymbol, tw, overloads);
@@ -253,13 +253,13 @@ namespace BindingsGenerator
             else
             {
                 typeName = SanitateTypeName(typeName);
-                return "PushValueObjectCopy<" + typeName + ">(ctx, " + source + ", " + ClassIdentifier(typeName) + ", " + typeName + "_Dtor);";
+                return "PushValueObjectCopy<" + typeName + ">(ctx, " + source + ", " + ClassIdentifier(typeName) + ", " + typeName + "_Finalizer);";
             }
         }
 
         static string GeneratePushConstructorResultToStack(string typeName, string source)
         {
-            return "PushConstructorResult<" + typeName + ">(ctx, " + source + ", " + ClassIdentifier(typeName) + ", " + typeName + "_Dtor);";
+            return "PushConstructorResult<" + typeName + ">(ctx, " + source + ", " + ClassIdentifier(typeName) + ", " + typeName + "_Finalizer);";
         }
 
         static string GenerateGetThis(Symbol classSymbol, string varName = "thisObj")
@@ -288,9 +288,9 @@ namespace BindingsGenerator
                 throw new System.Exception("Unsupported type " + typeName + " for GenerateArgCheck()!");
         }
 
-        static void GenerateDestructor(Symbol classSymbol, TextWriter tw)
+        static void GenerateFinalizer(Symbol classSymbol, TextWriter tw)
         {
-            tw.WriteLine("duk_ret_t " + StripNamespace(classSymbol.name) + "_Dtor" + DukSignature());
+            tw.WriteLine("duk_ret_t " + StripNamespace(classSymbol.name) + "_Finalizer" + DukSignature());
             tw.WriteLine("{");
             tw.WriteLine(Indent(1) + GenerateGetFromStack(classSymbol, 0, "obj"));
             tw.WriteLine(Indent(1) + "if (obj)");
