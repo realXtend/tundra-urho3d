@@ -144,7 +144,7 @@ namespace BindingsGenerator
             tw.WriteLine("const char* " + ClassIdentifier(className) + " = \"" + className + "\";");
             tw.WriteLine("");
 
-            // \todo Handle refcounted class destruction (wrap in a smart ptr)
+            // \todo Handle refcounted classes (wrap in a weak ptr)
             Dictionary<string, List<Overload> > overloads = new Dictionary<string, List<Overload> >();
             Dictionary<string, List<Overload>> staticOverloads = new Dictionary<string, List<Overload>>();
             List<Property> properties = new List<Property>();
@@ -157,10 +157,7 @@ namespace BindingsGenerator
             GenerateFunctionList(classSymbol, tw, overloads, false);
             GenerateFunctionList(classSymbol, tw, staticOverloads, true);
             GenerateExposeFunction(classSymbol, tw, overloads, staticOverloads, properties);
-       
-            // \todo Create bindings for static functions
-            // \todo Create code to instantiate the JS constructor + prototype
-
+            
             tw.WriteLine("}");
             tw.Close();
         }
