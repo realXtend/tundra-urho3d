@@ -629,7 +629,8 @@ namespace BindingsGenerator
 
         static bool IsRefCounted(Symbol classSymbol)
         {
-            return classSymbol.FindChildByName("Refs") != null && classSymbol.FindChildByName("WeakRefs") != null;
+            // We don't have access to Urho includes, but can check for the presence of macros. \todo Better checks or explicit listings of known refcounted classes if needed
+            return classSymbol.FindChildByName("URHO3D_OBJECT") != null || classSymbol.FindChildByName("COMPONENT_NAME") != null;
         }
 
         static bool IsRefCounted(string className)
