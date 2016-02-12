@@ -27,6 +27,7 @@ namespace BindingsGenerator
         static List<string> exposeTheseClasses = new List<string>();
         static string fileBasePath = "";
         static Dictionary<string, string> classHeaderFiles = new Dictionary<string, string>();
+        static Dictionary<string, bool> isRefCounted = new Dictionary<string, bool>();
         static string[] headerFiles = null;
 
         static void Main(string[] args)
@@ -68,17 +69,21 @@ namespace BindingsGenerator
             {
                 if (classSymbol.kind == "class" && (exposeTheseClasses.Count == 0 || exposeTheseClasses.Contains(StripNamespace(classSymbol.name))))
                 {
-                    classNames.Add(classSymbol.name);
+                    string typeName = SanitateTypeName(classSymbol.name);
+
+                    classNames.Add(typeName);
+                    isRefCounted[typeName] = IsRefCounted(classSymbol);
+
                     if (headerFiles != null)
                     {
                         foreach (string str in headerFiles)
                         {
-                            if (str.EndsWith(classSymbol.name + ".h"))
+                            if (str.EndsWith(typeName + ".h"))
                             {
                                 string sanitated = str.Substring(fileBasePath.Length).Replace('\\', '/');
                                 if (sanitated.StartsWith("/"))
                                     sanitated = sanitated.Substring(1);
-                                classHeaderFiles[classSymbol.name] = sanitated;
+                                classHeaderFiles[typeName] = sanitated;
                                 break;
                             }
                         }
@@ -88,7 +93,7 @@ namespace BindingsGenerator
 
             foreach (Symbol classSymbol in s.symbolsByName.Values)
             {
-                if (classNames.Contains(classSymbol.name))
+                if (classNames.Contains(SanitateTypeName(classSymbol.name)))
                     GenerateClassBindings(classSymbol, outputDirectory);
             }
         }
@@ -164,7 +169,7 @@ namespace BindingsGenerator
 
         static string FindIncludeForClass(string name)
         {
-            name = StripNamespace(name);
+            name = SanitateTypeName(name);
             if (classHeaderFiles.ContainsKey(name))
                 return classHeaderFiles[name];
             else
@@ -217,10 +222,20 @@ namespace BindingsGenerator
                 return typeName + " " + varName + "(duk_require_string(ctx, " + stackIndex + "));";
             else if (!Symbol.IsPODType(typeName))
             {
-                if (!nullCheck)
-                    return typeName + "* " + varName + " = GetObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
+                if (IsRefCounted(typeName) == false)
+                {
+                    if (!nullCheck)
+                        return typeName + "* " + varName + " = GetValueObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
+                    else
+                        return typeName + "* " + varName + " = GetCheckedValueObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
+                }
                 else
-                    return typeName + "* " + varName + " = GetCheckedObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
+                {
+                    if (!nullCheck)
+                        return typeName + "* " + varName + " = GetWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
+                    else
+                        return typeName + "* " + varName + " = GetCheckedWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
+                }
             }
             else
                 throw new System.Exception("Unsupported type " + typeName + " for GenerateGetVariable()!");
@@ -231,12 +246,6 @@ namespace BindingsGenerator
             string typeName = classSymbol.type;
             if (typeName == null || typeName.Length == 0)
                 typeName = classSymbol.name;
-
-            return GeneratePushToStack(typeName, source);
-        }
-
-        static string GeneratePushToStack(string typeName, string source)
-        {
             typeName = SanitateTypeName(typeName);
 
             if (Symbol.IsNumberType(typeName))
@@ -249,8 +258,10 @@ namespace BindingsGenerator
                 return "duk_push_string(ctx, " + source + ".c_str());";
             else
             {
-                typeName = SanitateTypeName(typeName);
-                return "PushValueObjectCopy<" + typeName + ">(ctx, " + source + ", " + ClassIdentifier(typeName) + ", " + typeName + "_Finalizer);";
+                if (!IsRefCounted(classSymbol))
+                    return "PushValueObjectCopy<" + typeName + ">(ctx, " + source + ", " + ClassIdentifier(typeName) + ", " + typeName + "_Finalizer);";
+                else
+                    return "PushWeakObject<" + typeName + ">(ctx, " + source + ");";
             }
         }
 
@@ -266,7 +277,10 @@ namespace BindingsGenerator
                 typeName = classSymbol.name;
             typeName = StripNamespace(typeName);
 
-            return typeName + "* " + varName + " = GetThisObject<" + typeName + ">(ctx, " + ClassIdentifier(typeName) + ");";
+            if (!IsRefCounted(classSymbol))
+                return typeName + "* " + varName + " = GetThisValueObject<" + typeName + ">(ctx, " + ClassIdentifier(typeName) + ");";
+            else
+                return typeName + "* " + varName + " = GetThisWeakObject<" + typeName + ">(ctx);";
         }
 
         static string GenerateArgCheck(Parameter p, int stackIndex)
@@ -280,7 +294,7 @@ namespace BindingsGenerator
             else if (typeName == "string" || typeName == "String")
                 return "duk_is_string(ctx, " + stackIndex + ")";
             if (!Symbol.IsPODType(typeName))
-                return "GetObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ")";
+                return "GetValueObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ")";
             else
                 throw new System.Exception("Unsupported type " + typeName + " for GenerateArgCheck()!");
         }
@@ -293,7 +307,7 @@ namespace BindingsGenerator
             tw.WriteLine(Indent(1) + "if (obj)");
             tw.WriteLine(Indent(1) + "{");
             tw.WriteLine(Indent(2) + "delete obj;");
-            tw.WriteLine(Indent(2) + "SetObject(ctx, 0, 0, " + ClassIdentifier(classSymbol.name) + ");");
+            tw.WriteLine(Indent(2) + "SetValueObject(ctx, 0, 0, " + ClassIdentifier(classSymbol.name) + ");");
             tw.WriteLine(Indent(1) + "}");
             tw.WriteLine(Indent(1) + "return 0;");
             tw.WriteLine("}");
@@ -368,7 +382,7 @@ namespace BindingsGenerator
                     if (!isClassCtor && !IsSupportedType(child.type))
                         continue;
                     // Bindings convention: refcounted objects like Scene or Component can not be constructed from script, but rather must be acquired from the framework
-                    if (isClassCtor && classSymbol.FindChildByName("Refs") != null && classSymbol.FindChildByName("WeakRefs") != null)
+                    if (isClassCtor && IsRefCounted(classSymbol))
                         continue;
 
                     bool badParameters = false;
@@ -480,7 +494,7 @@ namespace BindingsGenerator
                         else
                         {
                             tw.WriteLine(Indent(1) + child.type + " ret = " + callPrefix + child.name + "(" + args + ");");
-                            tw.WriteLine(Indent(1) + GeneratePushToStack(child.type, "ret"));
+                            tw.WriteLine(Indent(1) + GeneratePushToStack(child, "ret"));
                             tw.WriteLine(Indent(1) + "return 1;");
                         }
                         tw.WriteLine("}");
@@ -611,6 +625,19 @@ namespace BindingsGenerator
         static string ClassIdentifier(string className)
         {
             return className + "_Id";
+        }
+
+        static bool IsRefCounted(Symbol classSymbol)
+        {
+            return classSymbol.FindChildByName("Refs") != null && classSymbol.FindChildByName("WeakRefs") != null;
+        }
+
+        static bool IsRefCounted(string className)
+        {
+            if (isRefCounted.ContainsKey(className))
+                return isRefCounted[className];
+            else
+                return false;
         }
 
         static string SanitateTypeName(string type)

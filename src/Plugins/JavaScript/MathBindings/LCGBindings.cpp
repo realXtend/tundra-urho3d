@@ -15,13 +15,13 @@ namespace JSBindings
 
 const char* LCG_Id = "LCG";
 
-duk_ret_t LCG_Dtor(duk_context* ctx)
+duk_ret_t LCG_Finalizer(duk_context* ctx)
 {
-    LCG* obj = GetObject<LCG>(ctx, 0, LCG_Id);
+    LCG* obj = GetValueObject<LCG>(ctx, 0, LCG_Id);
     if (obj)
     {
         delete obj;
-        SetObject(ctx, 0, 0, LCG_Id);
+        SetValueObject(ctx, 0, 0, LCG_Id);
     }
     return 0;
 }
@@ -29,13 +29,13 @@ duk_ret_t LCG_Dtor(duk_context* ctx)
 static duk_ret_t LCG_Ctor(duk_context* ctx)
 {
     LCG* newObj = new LCG();
-    PushConstructorResult<LCG>(ctx, newObj, LCG_Id, LCG_Dtor);
+    PushConstructorResult<LCG>(ctx, newObj, LCG_Id, LCG_Finalizer);
     return 0;
 }
 
 static duk_ret_t LCG_Int_int_int(duk_context* ctx)
 {
-    LCG* thisObj = GetThisObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
     int a = (int)duk_require_number(ctx, 0);
     int b = (int)duk_require_number(ctx, 1);
     int ret = thisObj->Int(a, b);
@@ -45,7 +45,7 @@ static duk_ret_t LCG_Int_int_int(duk_context* ctx)
 
 static duk_ret_t LCG_Float(duk_context* ctx)
 {
-    LCG* thisObj = GetThisObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
     float ret = thisObj->Float();
     duk_push_number(ctx, ret);
     return 1;
@@ -53,7 +53,7 @@ static duk_ret_t LCG_Float(duk_context* ctx)
 
 static duk_ret_t LCG_Float01Incl(duk_context* ctx)
 {
-    LCG* thisObj = GetThisObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
     float ret = thisObj->Float01Incl();
     duk_push_number(ctx, ret);
     return 1;
@@ -61,7 +61,7 @@ static duk_ret_t LCG_Float01Incl(duk_context* ctx)
 
 static duk_ret_t LCG_FloatNeg1_1(duk_context* ctx)
 {
-    LCG* thisObj = GetThisObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
     float ret = thisObj->FloatNeg1_1();
     duk_push_number(ctx, ret);
     return 1;
@@ -69,7 +69,7 @@ static duk_ret_t LCG_FloatNeg1_1(duk_context* ctx)
 
 static duk_ret_t LCG_Float_float_float(duk_context* ctx)
 {
-    LCG* thisObj = GetThisObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
     float a = (float)duk_require_number(ctx, 0);
     float b = (float)duk_require_number(ctx, 1);
     float ret = thisObj->Float(a, b);
@@ -79,7 +79,7 @@ static duk_ret_t LCG_Float_float_float(duk_context* ctx)
 
 static duk_ret_t LCG_FloatIncl_float_float(duk_context* ctx)
 {
-    LCG* thisObj = GetThisObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
     float a = (float)duk_require_number(ctx, 0);
     float b = (float)duk_require_number(ctx, 1);
     float ret = thisObj->FloatIncl(a, b);
