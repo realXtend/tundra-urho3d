@@ -57,7 +57,7 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework) :
             button->SetName("CloseButton");
             button->SetStyle("CloseButton", style);
             button->SetAlignment(HA_RIGHT, VA_CENTER);
-            button->SetPosition(IntVector2(-3.0, 0.0));
+            button->SetPosition(IntVector2(-3, 0));
             topBar->AddChild(button);
 
             Text *windowHeader = new Text(framework->GetContext());
@@ -65,7 +65,7 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework) :
             windowHeader->SetName("WindowHeader");
             windowHeader->SetText("Scene Editor");
             windowHeader->SetAlignment(HA_LEFT, VA_CENTER);
-            windowHeader->SetPosition(IntVector2(3.0, 0.0));
+            windowHeader->SetPosition(IntVector2(3, 0));
             topBar->AddChild(windowHeader);
         }
     }
@@ -79,6 +79,7 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework) :
 
     SubscribeToEvent(listView_, E_ITEMDOUBLECLICKED, URHO3D_HANDLER(SceneStructureWindow, OnItemDoubleClicked));
     SubscribeToEvent(listView_, E_ITEMCLICKED, URHO3D_HANDLER(SceneStructureWindow, OnItemClicked));
+    SubscribeToEvent(listView_, E_SELECTIONCHANGED, URHO3D_HANDLER(SceneStructureWindow, OnSelectionChanged));
 
     {
         UIElement *bottomBar = new UIElement(framework->GetContext());
@@ -135,12 +136,7 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework) :
 
 SceneStructureWindow::~SceneStructureWindow()
 {
-    for (unsigned i = 0; i < listItems_.Size(); ++i)
-    {
-        listItems_[i].item_.Reset();
-        listItems_[i].object_.Reset();
-    }
-    listItems_.Clear();
+    Clear();
 
     if (contextMenu_.NotNull())
         contextMenu_->Widget()->Remove();
@@ -166,6 +162,7 @@ SceneStructureItem *SceneStructureWindow::CreateItem(Object *obj, const String &
     item->SetText(text);
     if (dynamic_cast<IComponent*>(obj) != NULL)
         item->SetType(SceneStructureItem::ItemType::Component);
+    item->SetData(obj);
     item->OnTogglePressed.Connect(this, &SceneStructureWindow::OnTogglePressed);
 
     ListViewItem info = ListViewItem();
@@ -186,7 +183,7 @@ void SceneStructureWindow::OnTogglePressed(SceneStructureItem *item)
     }
 }
 
-void SceneStructureWindow::OnItemClicked(StringHash eventType, VariantMap &eventData)
+void SceneStructureWindow::OnItemClicked(StringHash /*eventType*/, VariantMap &eventData)
 {
     UIElement *item = dynamic_cast<Text*>(eventData["Item"].GetPtr());
     if (item != NULL)
@@ -194,36 +191,27 @@ void SceneStructureWindow::OnItemClicked(StringHash eventType, VariantMap &event
         int button = eventData[Urho3D::MouseButtonDown::P_BUTTON].GetInt();
         if (button == 1) // LEFT BUTTON
         {
-            /*unsigned index = listView_->FindItem(item);
-            if (index != M_MAX_UNSIGNED)
-                listView_->ToggleSelection(index);*/
             HideContextMenu();
         }
         else if (button == 4) // RIGHT BUTTON
         {
             Urho3D::Input* input = GetSubsystem<Urho3D::Input>();
-            contextMenu_->Widget()->SetPosition(input->GetMousePosition().x_, input->GetMousePosition().y_);
-            contextMenu_->Widget()->BringToFront();
-            contextMenu_->Open();
+            ShowContextMenu(input->GetMousePosition().x_, input->GetMousePosition().y_);
         }
     }
 }
 
-void SceneStructureWindow::OnItemDoubleClicked(StringHash eventType, VariantMap &eventData)
+void SceneStructureWindow::OnItemDoubleClicked(StringHash /*eventType*/, VariantMap &eventData)
 {
     UIElement *item = dynamic_cast<Text*>(eventData["Item"].GetPtr());
     if (item != NULL)
     {
         int button = eventData[Urho3D::MouseButtonDown::P_BUTTON].GetInt();
-        if (button == 1)
+        if (button == 1) // LEFT BUTTON
         {
             unsigned index = listView_->FindItem(item);
             if (index != M_MAX_UNSIGNED)
                 listView_->ToggleExpand(index);
-        }
-        else if (button == 4)
-        {
-
         }
     }
 }
@@ -233,41 +221,37 @@ void SceneStructureWindow::OnContextMenuHide(StringHash /*eventType*/, VariantMa
     HideContextMenu();
 }
 
-void SceneStructureWindow::OnSceneCreated(Scene* scene, AttributeChange::Type change)
+void SceneStructureWindow::OnSelectionChanged(StringHash /*eventType*/, VariantMap &/*eventData*/)
+{
+    if (listView_.Null())
+        return;
+
+    PODVector<UIElement *> elements = listView_->GetSelectedItems();
+}
+
+void SceneStructureWindow::OnSceneCreated(Scene* /*scene*/, AttributeChange::Type /*change*/)
 {
     SceneMap scenes = framework_->Scene()->Scenes();
-    LogWarning(String(scenes.Size()));
     if (scenes.Values().Size() > 0)
         SetShownScene(scenes.Values()[0]);
 }
 
 void SceneStructureWindow::SetShownScene(Scene *newScene)
 {
-    LogWarning("Add scene");
     scene_ = newScene;
+    Clear();
     if (scene_ == NULL)
         return;
 
-    Vector<EntityPtr> entities = scene_->Entities().Values();
-    SceneStructureItem *sceneItem = CreateItem(scene_, "Scene");
-    sceneItem->SetType(SceneStructureItem::ItemType::Entity);
-    
-    //Entity*, AttributeChange::Type> EntityCreated;
-
-    for (unsigned i = 0; i < entities.Size(); ++i)
-    {
-        AddEntity(entities[i]);
-    }
-
-    scene_->EntityCreated.Connect(this, &SceneStructureWindow::OnEntityCreated);
+    RefreshView();
 }
 
-void SceneStructureWindow::OnEntityCreated(Entity* entity, AttributeChange::Type change)
+void SceneStructureWindow::OnEntityCreated(Entity* entity, AttributeChange::Type /*change*/)
 {
     AddEntity(entity);
 }
 
-void SceneStructureWindow::OnComponentCreated(IComponent* component, AttributeChange::Type change)
+void SceneStructureWindow::OnComponentCreated(IComponent* component, AttributeChange::Type /*change*/)
 {
     AddComponent(component);
 }
@@ -278,14 +262,15 @@ void SceneStructureWindow::AddEntity(Entity *entity)
     if (name.Length() == 0)
         name = "(no name)";
     CreateItem(entity, String(entity->Id()) + " " + name, FindItem(entity->ParentScene()));
-    HashMap<component_id_t, ComponentPtr>::ConstIterator iter = entity->Components().Begin();
 
+    HashMap<component_id_t, ComponentPtr>::ConstIterator iter = entity->Components().Begin();
     while (iter != entity->Components().End())
     {
         AddComponent(iter->second_);
         iter.GotoNext();
     }
 
+    entity->ComponentAdded.Disconnect(this, &SceneStructureWindow::OnComponentCreated);
     entity->ComponentAdded.Connect(this, &SceneStructureWindow::OnComponentCreated);
 }
 
@@ -297,7 +282,7 @@ void SceneStructureWindow::AddComponent(IComponent *component)
 
 void SceneStructureWindow::AddScene(Scene *scene)
 {
-
+    scene_ = scene;
 }
 
 void SceneStructureWindow::HideContextMenu()
@@ -308,12 +293,45 @@ void SceneStructureWindow::HideContextMenu()
 
 void SceneStructureWindow::ShowContextMenu(int x, int y)
 {
+    if (contextMenu_.Null())
+        return;
 
+    contextMenu_->Widget()->SetPosition(x, y);
+    contextMenu_->Widget()->BringToFront();
+    contextMenu_->Open();
 }
 
 void SceneStructureWindow::Clear()
 {
-    
+    Vector<ListViewItem>::Iterator iter = listItems_.Begin();
+    while (iter != listItems_.End())
+    {
+        iter->item_.Reset();
+        iter->object_.Reset();
+        iter++;
+    }
+    listItems_.Clear();
+
+    scene_->EntityCreated.Disconnect(this, &SceneStructureWindow::OnEntityCreated);
+}
+
+void SceneStructureWindow::RefreshView()
+{
+    // TODO optimize the refresh code.
+    Clear();
+    if (scene_ == NULL)
+        return;
+
+    Vector<EntityPtr> entities = scene_->Entities().Values();
+    SceneStructureItem *sceneItem = CreateItem(scene_, "Scene");
+    sceneItem->SetType(SceneStructureItem::ItemType::Entity);
+
+    for (unsigned i = 0; i < entities.Size(); ++i)
+    {
+        AddEntity(entities[i]);
+    }
+
+    scene_->EntityCreated.Connect(this, &SceneStructureWindow::OnEntityCreated);
 }
 
 SceneStructureItem *SceneStructureWindow::FindItem(Object *obj)

@@ -28,7 +28,7 @@ SceneStructureItem::SceneStructureItem(Context* context) :
     text_->SetStyle("FileSelectorListText", style);
 
     toggleButton_ = new Button(context_);
-    toggleButton_->SetStyle("ArrowDown", style);
+    toggleButton_->SetStyle("HierarchyArrowDown", style);
     toggleButton_->SetPosition(IntVector2(0, 0));
     SubscribeToEvent(toggleButton_, E_RELEASED, URHO3D_HANDLER(SceneStructureItem, OnItemPressed));
     text_->AddChild(toggleButton_);
@@ -75,6 +75,16 @@ void SceneStructureItem::SetType(ItemType type)
 SceneStructureItem::ItemType SceneStructureItem::Type() const
 {
     return type_;
+}
+
+void SceneStructureItem::SetData(Object *obj)
+{
+    data_ = ObjectWeakPtr(obj);
+}
+
+Object *SceneStructureItem::Data() const
+{
+    return data_.Get();
 }
 
 void SceneStructureItem::SetText(const String &text)

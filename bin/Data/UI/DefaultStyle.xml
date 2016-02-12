@@ -85,14 +85,14 @@
         <attribute name="Focus Mode" value="NotFocusable" />
         <attribute name="Hover Image Offset" value="0 16" />
     </element>
-    <element type="ArrowRight" style="Button" auto="false">    <!-- non-auto style is shown explicitly in the Editor's style drop down list for user selection -->
+    <element type="HierarchyArrowRight" style="Button" auto="false">    <!-- non-auto style is shown explicitly in the Editor's style drop down list for user selection -->
         <attribute name="Min Size" value="16 16" />
         <attribute name="Max Size" value="16 16" />
         <attribute name="Image Rect" value="176 0 192 16" />
         <attribute name="Focus Mode" value="NotFocusable" />
         <attribute name="Hover Image Offset" value="0 16" />
     </element>
-    <element type="ArrowDown" style="Button" auto="false">    <!-- non-auto style is shown explicitly in the Editor's style drop down list for user selection -->
+    <element type="HierarchyArrowDown" style="Button" auto="false">    <!-- non-auto style is shown explicitly in the Editor's style drop down list for user selection -->
         <attribute name="Min Size" value="16 16" />
         <attribute name="Max Size" value="16 16" />
         <attribute name="Image Rect" value="192 0 208 16" />

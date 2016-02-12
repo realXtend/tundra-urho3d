@@ -348,6 +348,7 @@ void LoginPanel::OnConnectPressed(StringHash /*eventType*/, VariantMap& /*eventD
     
     ShowMessage("Connecting...");
     clientPtr->Login(loginInfo_.serverAddress, (unsigned short)loginInfo_.port, loginInfo_.username, password_->GetText(), loginInfo_.protocol);
+    clientPtr->LoginFailed.Disconnect(this, &LoginPanel::OnConnectionFailed);
     clientPtr->LoginFailed.Connect(this, &LoginPanel::OnConnectionFailed);
     password_->SetText("");
 }

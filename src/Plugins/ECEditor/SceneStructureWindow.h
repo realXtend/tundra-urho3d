@@ -67,6 +67,8 @@ public:
 
     void Clear();
 
+    void RefreshView();
+
     SceneStructureItem *FindItem(Object *obj);
 
 protected:
@@ -90,6 +92,7 @@ protected:
     void OnItemClicked(StringHash eventType, VariantMap &eventData);
     void OnItemDoubleClicked(StringHash eventType, VariantMap &eventData);
     void OnContextMenuHide(StringHash eventType, VariantMap &eventData);
+    void OnSelectionChanged(StringHash eventType, VariantMap &eventData);
 
 private:
     Scene *scene_;

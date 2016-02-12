@@ -5,20 +5,9 @@
 #include "LoginScreen.h"
 #include "Framework.h"
 #include "Entity.h"
-#include "LoggingFunctions.h"
-#include "InputAPI.h"
-#include "InputContext.h"
 #include "TundraLogic.h"
 #include "Client.h"
 #include "LoginPanel.h"
-
-#include <Urho3D/Input/InputEvents.h>
-#include <Urho3D/Resource/ResourceCache.h>
-#include <Urho3D/Core/ProcessUtils.h>
-#include <Urho3D/Resource/XMLFile.h>
-#include <Urho3D/UI/UI.h>
-#include <Urho3D/UI/UIEvents.h>
-#include <Urho3D/UI/UIElement.h>
 
 namespace Tundra
 {

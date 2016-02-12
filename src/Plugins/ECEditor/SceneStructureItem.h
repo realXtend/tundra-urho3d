@@ -30,6 +30,7 @@ class SceneStructureWindow;
 
 typedef WeakPtr<Button> ButtonWeakPtr;
 typedef WeakPtr<Text> TextWeakPtr;
+typedef WeakPtr<Object> ObjectWeakPtr;
 
 class ECEDITOR_API SceneStructureItem : public Object
 {
@@ -53,6 +54,9 @@ public:
     void SetType(ItemType type);
     ItemType Type() const;
 
+    void SetData(Object *obj);
+    Object *Data() const;
+
     Signal1<SceneStructureItem* ARG(SceneStructureItem)> OnTogglePressed;
 
 protected:
@@ -62,6 +66,7 @@ protected:
     TextWeakPtr text_;
     ButtonWeakPtr toggleButton_;
     ItemType type_;
+    ObjectWeakPtr data_;
 };
 
 }
