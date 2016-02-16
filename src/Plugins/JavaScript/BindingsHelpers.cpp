@@ -58,4 +58,34 @@ duk_ret_t RefCounted_Finalizer(duk_context* ctx)
     return 0;
 }
 
+Urho3D::Vector<Urho3D::String> GetStringVector(duk_context* ctx, duk_idx_t stackIndex)
+{
+    Urho3D::Vector<Urho3D::String> ret;
+
+    if (duk_is_object(ctx, stackIndex))
+    {
+        duk_size_t len = duk_get_length(ctx, stackIndex);
+        for (duk_size_t i = 0; i < len; ++i)
+        {
+            duk_get_prop_index(ctx, stackIndex, i);
+            if (duk_is_string(ctx, -1))
+                ret.Push(Urho3D::String(duk_get_string(ctx, -1)));
+            duk_pop(ctx);
+        }
+    }
+
+    return ret;
+}
+
+void PushStringVector(duk_context* ctx, const Urho3D::Vector<Urho3D::String> vector)
+{
+    duk_push_array(ctx);
+
+    for (unsigned i = 0; i < vector.Size(); ++i)
+    {
+        duk_push_string(ctx, vector[i].CString());
+        duk_put_prop_index(ctx, -2, i);
+    }
+}
+
 }

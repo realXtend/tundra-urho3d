@@ -1,6 +1,8 @@
 #include "duktape.h"
 #include <Urho3D/Container/RefCounted.h>
 #include <Urho3D/Container/Ptr.h>
+#include <Urho3D/Container/Str.h>
+#include <Urho3D/Container/Vector.h>
 
 namespace JSBindings
 {
@@ -17,6 +19,12 @@ Urho3D::WeakPtr<Urho3D::RefCounted>* GetWeakPtr(duk_context* ctx, duk_idx_t stac
 
 /// Common WeakPtr<RefCounted> finalizer.
 duk_ret_t WeakPtr_Finalizer(duk_context* ctx);
+
+/// Get a string vector from a JS array.
+Urho3D::Vector<Urho3D::String> GetStringVector(duk_context* ctx, duk_idx_t stackIndex);
+
+/// Push a string vector to JS.
+void PushStringVector(duk_context* ctx, const Urho3D::Vector<Urho3D::String>& vector);
 
 /// Value object template functions
 
@@ -89,7 +97,7 @@ template<class T> void PushConstructorResult(duk_context* ctx, T* source, const 
 }
 
 /// Push a vector of value objects as an array.
-template<class T> void PushValueObjectArray(duk_context* ctx, Urho3D::Vector<T>& vector, const char* typeName, duk_c_function finalizer)
+template<class T> void PushValueObjectVector(duk_context* ctx, Urho3D::Vector<T>& vector, const char* typeName, duk_c_function finalizer)
 {
     duk_push_array(ctx);
 
@@ -136,7 +144,7 @@ template<class T> Urho3D::Vector<T> GetValueObjectVector(duk_context* ctx, duk_i
     Urho3D::Vector<T> ret;
     if (duk_is_object(ctx, stackIndex))
     {
-        duk_size_t len = duk_get_length(ctx, stactIndex);
+        duk_size_t len = duk_get_length(ctx, stackIndex);
         for (duk_size_t i = 0; i < len; ++i)
         {
             duk_get_prop_index(ctx, stackIndex, i);
@@ -156,7 +164,7 @@ template<class T> Urho3D::Vector<T*> GetWeakObjectVector(duk_context* ctx, duk_i
     Urho3D::Vector<T> ret;
     if (duk_is_object(ctx, stackIndex))
     {
-        duk_size_t len = duk_get_length(ctx, stactIndex);
+        duk_size_t len = duk_get_length(ctx, stackIndex);
         for (duk_size_t i = 0; i < len; ++i)
         {
             duk_get_prop_index(ctx, stackIndex, i);
@@ -176,7 +184,7 @@ template<class T> Urho3D::Vector<Urho3D::SharedPtr<T> > GetWeakObjectSharedPtrVe
     Urho3D::Vector<Urho3D::SharedPtr<T> > ret;
     if (duk_is_object(ctx, stackIndex))
     {
-        duk_size_t len = duk_get_length(ctx, stactIndex);
+        duk_size_t len = duk_get_length(ctx, stackIndex);
         for (duk_size_t i = 0; i < len; ++i)
         {
             duk_get_prop_index(ctx, stackIndex, i);
@@ -196,7 +204,7 @@ template<class T> Urho3D::Vector<Urho3D::WeakPtr<T> > GetWeakObjectWeakPtrVector
     Urho3D::Vector<Urho3D::WeakPtr<T> > ret;
     if (duk_is_object(ctx, stackIndex))
     {
-        duk_size_t len = duk_get_length(ctx, stactIndex);
+        duk_size_t len = duk_get_length(ctx, stackIndex);
         for (duk_size_t i = 0; i < len; ++i)
         {
             duk_get_prop_index(ctx, stackIndex, i);
@@ -227,7 +235,7 @@ template<class T> void PushWeakObject(duk_context* ctx, T* object)
 
 
 /// Push a vector of weak-refcounted objects as an array. Null indices are included as null objects.
-template<class T> void PushWeakObjectArray(duk_context* ctx, Urho3D::Vector<T*>& vector, const char* typeName, duk_c_function finalizer)
+template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<T*>& vector, const char* typeName, duk_c_function finalizer)
 {
     duk_push_array(ctx);
 
@@ -239,7 +247,7 @@ template<class T> void PushWeakObjectArray(duk_context* ctx, Urho3D::Vector<T*>&
 }
 
 /// Push a vector of weak-refcounted objects as an array. Null indices are included as null objects.
-template<class T> void PushWeakObjectArray(duk_context* ctx, Urho3D::Vector<Urho3D::SharedPtr<T> >& vector, const char* typeName, duk_c_function finalizer)
+template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<Urho3D::SharedPtr<T> >& vector, const char* typeName, duk_c_function finalizer)
 {
     duk_push_array(ctx);
 
@@ -251,7 +259,7 @@ template<class T> void PushWeakObjectArray(duk_context* ctx, Urho3D::Vector<Urho
 }
 
 /// Push a vector of weak-refcounted objects as an array. Null indices are included as null objects.
-template<class T> void PushWeakObjectArray(duk_context* ctx, Urho3D::Vector<Urho3D::WeakPtr<T> >& vector, const char* typeName, duk_c_function finalizer)
+template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<Urho3D::WeakPtr<T> >& vector, const char* typeName, duk_c_function finalizer)
 {
     duk_push_array(ctx);
 

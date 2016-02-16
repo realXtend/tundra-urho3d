@@ -44,7 +44,8 @@ namespace BindingsGenerator
 
         public bool IsAReference()
         {
-            return type.Trim().EndsWith("&");
+            // In terms of Tundra bindings, a reference to a shared ptr is interpreted as "not a reference"
+            return type.Trim().EndsWith("&") && !type.Contains("Ptr");
         }
 
         /// <summary>
@@ -421,12 +422,12 @@ namespace BindingsGenerator
 
         public static bool IsPODType(string type)
         {
-            return type == "bool" || type == "int" || type == "unsigned" || type == "double" || type == "float"; ///\todo Add more basic types here.
+            return type == "bool" || type == "int" || type == "unsigned" || type == "u32" || type == "uint" || type == "double" || type == "float" || type == "AttributeChange::Type" || type == "entity_id_t" || type == "component_id_t"; ///\todo Add more basic types here.
         }
 
         public static bool IsNumberType(string type)
         {
-            return type == "int" || type == "unsigned" || type == "double" || type == "float";
+            return type == "int" || type == "unsigned" || type == "u32" || type == "uint" || type == "double" || type == "float" || type == "AttributeChange::Type" || type == "entity_id_t" || type == "component_id_t";
         }
     };
 
