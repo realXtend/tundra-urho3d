@@ -1,6 +1,5 @@
 #include "duktape.h"
-#include <Urho3D/Container/RefCounted.h>
-#include <Urho3D/Container/Ptr.h>
+#include <Urho3D/Core/Object.h>
 #include <Urho3D/Container/Str.h>
 #include <Urho3D/Container/Vector.h>
 
@@ -14,11 +13,14 @@ void SetValueObject(duk_context* ctx, duk_idx_t stackIndex, void* obj, const cha
 /// Define a property to an object prototype at top of stack.
 void DefineProperty(duk_context* ctx, const char* propertyName, duk_c_function getFunc, duk_c_function setFunc);
 
-/// Get a WeakPtr<RefCounted> from a JS object.
-Urho3D::WeakPtr<Urho3D::RefCounted>* GetWeakPtr(duk_context* ctx, duk_idx_t stackIndex);
+/// Get a WeakPtr<Object> from a JS object.
+Urho3D::WeakPtr<Urho3D::Object>* GetWeakPtr(duk_context* ctx, duk_idx_t stackIndex);
 
-/// Common WeakPtr<RefCounted> finalizer.
+/// Common WeakPtr<Object> finalizer.
 duk_ret_t WeakPtr_Finalizer(duk_context* ctx);
+
+/// Push a weak-refcounted object that must derive from Urho3D::Object. Uses an internal "weak" property to store the object inside a heap-allocated weak ptr.
+void PushWeakObject(duk_context* ctx, Urho3D::Object* object);
 
 /// Get a string vector from a JS array.
 Urho3D::Vector<Urho3D::String> GetStringVector(duk_context* ctx, duk_idx_t stackIndex);
@@ -108,17 +110,17 @@ template<class T> void PushValueObjectVector(duk_context* ctx, Urho3D::Vector<T>
     }
 }
 
-/// Get a weak-refcounted object of type from JS object at stack index. Objects are stored internally using WeakPtr<RefCounted>, and cast accordingly.
+/// Get a weak-refcounted object of type from JS object at stack index. Objects are stored internally using WeakPtr<Object>, and cast accordingly.
 template<class T> T* GetWeakObject(duk_context* ctx, duk_idx_t stackIndex)
 {
     T* obj = nullptr;
-    WeakPtr<RefCounted>* ptr = GetWeakPtr(ctx, stackIndex);
+    WeakPtr<Object>* ptr = GetWeakPtr(ctx, stackIndex);
     if (ptr)
         obj = dynamic_cast<T*>(ptr->Get());
     return obj;
 }
 
-/// Get a weak refcounted object of type and raise a JS error if null or invalid.
+/// Get a weak-refcounted object of type and raise a JS error if null or invalid.
 template<class T> T* GetCheckedWeakObject(duk_context* ctx, duk_idx_t stackIndex)
 {
     T* obj = GetWeakObject<T>(ctx, stackIndex);
@@ -217,22 +219,6 @@ template<class T> Urho3D::Vector<Urho3D::WeakPtr<T> > GetWeakObjectWeakPtrVector
 
     return ret;
 }
-
-
-/// Push a weak-refcounted object. Uses an internal "weak" property to store the object inside a heap-allocated weak ptr.
-template<class T> void PushWeakObject(duk_context* ctx, T* object)
-{
-    duk_push_object(ctx);
-    
-    Urho3D::WeakPtr<T>* ptr = new Urho3D::WeakPtr<T>(object);
-    duk_push_pointer(ctx, ptr);
-    duk_put_prop_string(ctx, -2, "\xff""weak");
-    duk_push_pointer(ctx, (void*)typeName);
-    duk_put_prop_string(ctx, -2, "\xff""type");
-    duk_push_c_function(ctx, WeakPtr_Finalizer, 1);
-    duk_set_finalizer(ctx, -2);
-}
-
 
 /// Push a vector of weak-refcounted objects as an array. Null indices are included as null objects.
 template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<T*>& vector, const char* typeName, duk_c_function finalizer)

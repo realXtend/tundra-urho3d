@@ -32,23 +32,44 @@ void DefineProperty(duk_context* ctx, const char* propertyName, duk_c_function g
     }
 }
 
-Urho3D::WeakPtr<Urho3D::RefCounted>* GetWeakPtr(duk_context* ctx, duk_idx_t stackIndex)
+Urho3D::WeakPtr<Urho3D::Object>* GetWeakPtr(duk_context* ctx, duk_idx_t stackIndex)
 {
     if (!duk_is_object(ctx, stackIndex))
         return nullptr;
 
-    Urho3D::WeakPtr<Urho3D::RefCounted>* ptr = nullptr;
+    Urho3D::WeakPtr<Urho3D::Object>* ptr = nullptr;
     duk_get_prop_string(ctx, stackIndex, "\xff""weak");
     if (duk_is_pointer(ctx, -1))
-        ptr = static_cast<Urho3D::WeakPtr<Urho3D::RefCounted>* >(duk_to_pointer(ctx, -1));
+        ptr = static_cast<Urho3D::WeakPtr<Urho3D::Object>* >(duk_to_pointer(ctx, -1));
     duk_pop(ctx);
 
     return ptr;
 }
 
-duk_ret_t RefCounted_Finalizer(duk_context* ctx)
+void PushWeakObject(duk_context* ctx, Urho3D::Object* object)
 {
-    Urho3D::WeakPtr<Urho3D::RefCounted>* ptr = GetWeakPtr(ctx, 0);
+    duk_push_object(ctx);
+    Urho3D::WeakPtr<Urho3D::Object>* ptr = new Urho3D::WeakPtr<Urho3D::Object>(object);
+    duk_push_pointer(ctx, ptr);
+    duk_put_prop_string(ctx, -2, "\xff""weak");
+    duk_push_c_function(ctx, WeakPtr_Finalizer, 1);
+    duk_set_finalizer(ctx, -2);
+
+    // Set prototype. If not found, use base class prototype (e.g. IComponent)
+    duk_get_global_string(ctx, object->GetTypeName().CString());
+    if (!duk_is_object(ctx, -1))
+    {
+        duk_pop(ctx);
+        duk_get_global_string(ctx, object->GetTypeInfo()->GetBaseTypeInfo()->GetTypeName().CString());
+    }
+    duk_get_prop_string(ctx, -1, "prototype");
+    duk_set_prototype(ctx, -3);
+    duk_pop(ctx);
+}
+
+duk_ret_t WeakPtr_Finalizer(duk_context* ctx)
+{
+    Urho3D::WeakPtr<Urho3D::Object>* ptr = GetWeakPtr(ctx, 0);
     if (ptr)
     {
         delete ptr;
