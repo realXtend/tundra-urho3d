@@ -26,21 +26,21 @@ using namespace std;
 namespace JSBindings
 {
 
-extern const char* AABB_Id;
-extern const char* float3x3_Id;
-extern const char* float3x4_Id;
-extern const char* float4x4_Id;
-extern const char* Quat_Id;
-extern const char* Sphere_Id;
-extern const char* LineSegment_Id;
-extern const char* Plane_Id;
-extern const char* LCG_Id;
-extern const char* Triangle_Id;
-extern const char* Frustum_Id;
-extern const char* Ray_Id;
-extern const char* Line_Id;
-extern const char* Capsule_Id;
-extern const char* float2_Id;
+extern const char* AABB_ID;
+extern const char* float3x3_ID;
+extern const char* float3x4_ID;
+extern const char* float4x4_ID;
+extern const char* Quat_ID;
+extern const char* Sphere_ID;
+extern const char* LineSegment_ID;
+extern const char* Plane_ID;
+extern const char* LCG_ID;
+extern const char* Triangle_ID;
+extern const char* Frustum_ID;
+extern const char* Ray_ID;
+extern const char* Line_ID;
+extern const char* Capsule_ID;
+extern const char* float2_ID;
 
 duk_ret_t AABB_Finalizer(duk_context* ctx);
 duk_ret_t float3x3_Finalizer(duk_context* ctx);
@@ -58,15 +58,15 @@ duk_ret_t Line_Finalizer(duk_context* ctx);
 duk_ret_t Capsule_Finalizer(duk_context* ctx);
 duk_ret_t float2_Finalizer(duk_context* ctx);
 
-const char* OBB_Id = "OBB";
+const char* OBB_ID = "OBB";
 
 duk_ret_t OBB_Finalizer(duk_context* ctx)
 {
-    OBB* obj = GetValueObject<OBB>(ctx, 0, OBB_Id);
+    OBB* obj = GetValueObject<OBB>(ctx, 0, OBB_ID);
     if (obj)
     {
         delete obj;
-        SetValueObject(ctx, 0, 0, OBB_Id);
+        SetValueObject(ctx, 0, 0, OBB_ID);
     }
     return 0;
 }
@@ -74,120 +74,120 @@ duk_ret_t OBB_Finalizer(duk_context* ctx)
 static duk_ret_t OBB_Ctor(duk_context* ctx)
 {
     OBB* newObj = new OBB();
-    PushConstructorResult<OBB>(ctx, newObj, OBB_Id, OBB_Finalizer);
+    PushConstructorResult<OBB>(ctx, newObj, OBB_ID, OBB_Finalizer);
     return 0;
 }
 
 static duk_ret_t OBB_Ctor_AABB(duk_context* ctx)
 {
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_Id);
+    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
     OBB* newObj = new OBB(*aabb);
-    PushConstructorResult<OBB>(ctx, newObj, OBB_Id, OBB_Finalizer);
+    PushConstructorResult<OBB>(ctx, newObj, OBB_ID, OBB_Finalizer);
     return 0;
 }
 
 static duk_ret_t OBB_SetNegativeInfinity(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
     thisObj->SetNegativeInfinity();
     return 0;
 }
 
 static duk_ret_t OBB_SetFrom_AABB(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
     thisObj->SetFrom(*aabb);
     return 0;
 }
 
 static duk_ret_t OBB_SetFrom_AABB_float3x3(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_Id);
-    float3x3* transform = GetCheckedValueObject<float3x3>(ctx, 1, float3x3_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
+    float3x3* transform = GetCheckedValueObject<float3x3>(ctx, 1, float3x3_ID);
     thisObj->SetFrom(*aabb, *transform);
     return 0;
 }
 
 static duk_ret_t OBB_SetFrom_AABB_float3x4(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_Id);
-    float3x4* transform = GetCheckedValueObject<float3x4>(ctx, 1, float3x4_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
+    float3x4* transform = GetCheckedValueObject<float3x4>(ctx, 1, float3x4_ID);
     thisObj->SetFrom(*aabb, *transform);
     return 0;
 }
 
 static duk_ret_t OBB_SetFrom_AABB_float4x4(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_Id);
-    float4x4* transform = GetCheckedValueObject<float4x4>(ctx, 1, float4x4_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
+    float4x4* transform = GetCheckedValueObject<float4x4>(ctx, 1, float4x4_ID);
     thisObj->SetFrom(*aabb, *transform);
     return 0;
 }
 
 static duk_ret_t OBB_SetFrom_AABB_Quat(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_Id);
-    Quat* transform = GetCheckedValueObject<Quat>(ctx, 1, Quat_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
+    Quat* transform = GetCheckedValueObject<Quat>(ctx, 1, Quat_ID);
     thisObj->SetFrom(*aabb, *transform);
     return 0;
 }
 
 static duk_ret_t OBB_SetFrom_Sphere(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
     thisObj->SetFrom(*sphere);
     return 0;
 }
 
 static duk_ret_t OBB_MinimalEnclosingAABB(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
     AABB ret = thisObj->MinimalEnclosingAABB();
-    PushValueObjectCopy<AABB>(ctx, ret, AABB_Id, AABB_Finalizer);
+    PushValueObjectCopy<AABB>(ctx, ret, AABB_ID, AABB_Finalizer);
     return 1;
 }
 
 static duk_ret_t OBB_MinimalEnclosingSphere(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
     Sphere ret = thisObj->MinimalEnclosingSphere();
-    PushValueObjectCopy<Sphere>(ctx, ret, Sphere_Id, Sphere_Finalizer);
+    PushValueObjectCopy<Sphere>(ctx, ret, Sphere_ID, Sphere_Finalizer);
     return 1;
 }
 
 static duk_ret_t OBB_MaximalContainedSphere(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
     Sphere ret = thisObj->MaximalContainedSphere();
-    PushValueObjectCopy<Sphere>(ctx, ret, Sphere_Id, Sphere_Finalizer);
+    PushValueObjectCopy<Sphere>(ctx, ret, Sphere_ID, Sphere_Finalizer);
     return 1;
 }
 
 static duk_ret_t OBB_WorldToLocal(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
     float3x4 ret = thisObj->WorldToLocal();
-    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_Id, float3x4_Finalizer);
+    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_ID, float3x4_Finalizer);
     return 1;
 }
 
 static duk_ret_t OBB_LocalToWorld(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
     float3x4 ret = thisObj->LocalToWorld();
-    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_Id, float3x4_Finalizer);
+    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_ID, float3x4_Finalizer);
     return 1;
 }
 
 static duk_ret_t OBB_IsFinite(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
     bool ret = thisObj->IsFinite();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -195,7 +195,7 @@ static duk_ret_t OBB_IsFinite(duk_context* ctx)
 
 static duk_ret_t OBB_IsDegenerate(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
     bool ret = thisObj->IsDegenerate();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -203,7 +203,7 @@ static duk_ret_t OBB_IsDegenerate(duk_context* ctx)
 
 static duk_ret_t OBB_Volume(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
     float ret = thisObj->Volume();
     duk_push_number(ctx, ret);
     return 1;
@@ -211,7 +211,7 @@ static duk_ret_t OBB_Volume(duk_context* ctx)
 
 static duk_ret_t OBB_SurfaceArea(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
     float ret = thisObj->SurfaceArea();
     duk_push_number(ctx, ret);
     return 1;
@@ -219,58 +219,58 @@ static duk_ret_t OBB_SurfaceArea(duk_context* ctx)
 
 static duk_ret_t OBB_Edge_int(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
     int edgeIndex = (int)duk_require_number(ctx, 0);
     LineSegment ret = thisObj->Edge(edgeIndex);
-    PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_Id, LineSegment_Finalizer);
+    PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_ID, LineSegment_Finalizer);
     return 1;
 }
 
 static duk_ret_t OBB_FacePlane_int(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
     int faceIndex = (int)duk_require_number(ctx, 0);
     Plane ret = thisObj->FacePlane(faceIndex);
-    PushValueObjectCopy<Plane>(ctx, ret, Plane_Id, Plane_Finalizer);
+    PushValueObjectCopy<Plane>(ctx, ret, Plane_ID, Plane_Finalizer);
     return 1;
 }
 
 static duk_ret_t OBB_Transform_float3x3(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    float3x3* transform = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    float3x3* transform = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t OBB_Transform_float3x4(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    float3x4* transform = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    float3x4* transform = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t OBB_Transform_float4x4(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    float4x4* transform = GetCheckedValueObject<float4x4>(ctx, 0, float4x4_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    float4x4* transform = GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t OBB_Transform_Quat(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    Quat* transform = GetCheckedValueObject<Quat>(ctx, 0, Quat_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    Quat* transform = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t OBB_Distance_Sphere(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
     float ret = thisObj->Distance(*sphere);
     duk_push_number(ctx, ret);
     return 1;
@@ -278,8 +278,8 @@ static duk_ret_t OBB_Distance_Sphere(duk_context* ctx)
 
 static duk_ret_t OBB_Contains_LineSegment(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
     bool ret = thisObj->Contains(*lineSegment);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -287,8 +287,8 @@ static duk_ret_t OBB_Contains_LineSegment(duk_context* ctx)
 
 static duk_ret_t OBB_Contains_AABB(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
     bool ret = thisObj->Contains(*aabb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -296,8 +296,8 @@ static duk_ret_t OBB_Contains_AABB(duk_context* ctx)
 
 static duk_ret_t OBB_Contains_OBB(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
     bool ret = thisObj->Contains(*obb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -305,8 +305,8 @@ static duk_ret_t OBB_Contains_OBB(duk_context* ctx)
 
 static duk_ret_t OBB_Contains_Triangle(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
     bool ret = thisObj->Contains(*triangle);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -314,8 +314,8 @@ static duk_ret_t OBB_Contains_Triangle(duk_context* ctx)
 
 static duk_ret_t OBB_Contains_Frustum(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
     bool ret = thisObj->Contains(*frustum);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -323,8 +323,8 @@ static duk_ret_t OBB_Contains_Frustum(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_OBB_float(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Intersects(*obb, epsilon);
     duk_push_boolean(ctx, ret);
@@ -333,8 +333,8 @@ static duk_ret_t OBB_Intersects_OBB_float(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_AABB(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
     bool ret = thisObj->Intersects(*aabb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -342,8 +342,8 @@ static duk_ret_t OBB_Intersects_AABB(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_Plane(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
     bool ret = thisObj->Intersects(*plane);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -351,8 +351,8 @@ static duk_ret_t OBB_Intersects_Plane(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_Ray_float_float(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    Ray* ray = GetCheckedValueObject<Ray>(ctx, 0, Ray_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    Ray* ray = GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
     float dNear = (float)duk_require_number(ctx, 1);
     float dFar = (float)duk_require_number(ctx, 2);
     bool ret = thisObj->Intersects(*ray, dNear, dFar);
@@ -362,8 +362,8 @@ static duk_ret_t OBB_Intersects_Ray_float_float(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_Ray(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    Ray* ray = GetCheckedValueObject<Ray>(ctx, 0, Ray_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    Ray* ray = GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
     bool ret = thisObj->Intersects(*ray);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -371,8 +371,8 @@ static duk_ret_t OBB_Intersects_Ray(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_Line_float_float(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_ID);
     float dNear = (float)duk_require_number(ctx, 1);
     float dFar = (float)duk_require_number(ctx, 2);
     bool ret = thisObj->Intersects(*line, dNear, dFar);
@@ -382,8 +382,8 @@ static duk_ret_t OBB_Intersects_Line_float_float(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_Line(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_ID);
     bool ret = thisObj->Intersects(*line);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -391,8 +391,8 @@ static duk_ret_t OBB_Intersects_Line(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_LineSegment_float_float(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
     float dNear = (float)duk_require_number(ctx, 1);
     float dFar = (float)duk_require_number(ctx, 2);
     bool ret = thisObj->Intersects(*lineSegment, dNear, dFar);
@@ -402,8 +402,8 @@ static duk_ret_t OBB_Intersects_LineSegment_float_float(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_LineSegment(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
     bool ret = thisObj->Intersects(*lineSegment);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -411,8 +411,8 @@ static duk_ret_t OBB_Intersects_LineSegment(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_Capsule(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
     bool ret = thisObj->Intersects(*capsule);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -420,8 +420,8 @@ static duk_ret_t OBB_Intersects_Capsule(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_Triangle(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
     bool ret = thisObj->Intersects(*triangle);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -429,8 +429,8 @@ static duk_ret_t OBB_Intersects_Triangle(duk_context* ctx)
 
 static duk_ret_t OBB_Intersects_Frustum(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
     bool ret = thisObj->Intersects(*frustum);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -438,32 +438,32 @@ static duk_ret_t OBB_Intersects_Frustum(duk_context* ctx)
 
 static duk_ret_t OBB_ToString(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    std::string ret = thisObj->ToString();
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    string ret = thisObj->ToString();
     duk_push_string(ctx, ret.c_str());
     return 1;
 }
 
 static duk_ret_t OBB_SerializeToString(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    std::string ret = thisObj->SerializeToString();
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    string ret = thisObj->SerializeToString();
     duk_push_string(ctx, ret.c_str());
     return 1;
 }
 
 static duk_ret_t OBB_SerializeToCodeString(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    std::string ret = thisObj->SerializeToCodeString();
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    string ret = thisObj->SerializeToCodeString();
     duk_push_string(ctx, ret.c_str());
     return 1;
 }
 
 static duk_ret_t OBB_Equals_OBB_float(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    OBB* rhs = GetCheckedValueObject<OBB>(ctx, 0, OBB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    OBB* rhs = GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Equals(*rhs, epsilon);
     duk_push_boolean(ctx, ret);
@@ -472,8 +472,8 @@ static duk_ret_t OBB_Equals_OBB_float(duk_context* ctx)
 
 static duk_ret_t OBB_BitEquals_OBB(duk_context* ctx)
 {
-    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_Id);
-    OBB* other = GetCheckedValueObject<OBB>(ctx, 0, OBB_Id);
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    OBB* other = GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
     bool ret = thisObj->BitEquals(*other);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -484,7 +484,7 @@ static duk_ret_t OBB_Ctor_Selector(duk_context* ctx)
     int numArgs = duk_get_top(ctx);
     if (numArgs == 0)
         return OBB_Ctor(ctx);
-    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_Id))
+    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
         return OBB_Ctor_AABB(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -492,17 +492,17 @@ static duk_ret_t OBB_Ctor_Selector(duk_context* ctx)
 static duk_ret_t OBB_SetFrom_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_Id))
+    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
         return OBB_SetFrom_AABB(ctx);
-    if (numArgs == 2 && GetValueObject<AABB>(ctx, 0, AABB_Id) && GetValueObject<float3x3>(ctx, 1, float3x3_Id))
+    if (numArgs == 2 && GetValueObject<AABB>(ctx, 0, AABB_ID) && GetValueObject<float3x3>(ctx, 1, float3x3_ID))
         return OBB_SetFrom_AABB_float3x3(ctx);
-    if (numArgs == 2 && GetValueObject<AABB>(ctx, 0, AABB_Id) && GetValueObject<float3x4>(ctx, 1, float3x4_Id))
+    if (numArgs == 2 && GetValueObject<AABB>(ctx, 0, AABB_ID) && GetValueObject<float3x4>(ctx, 1, float3x4_ID))
         return OBB_SetFrom_AABB_float3x4(ctx);
-    if (numArgs == 2 && GetValueObject<AABB>(ctx, 0, AABB_Id) && GetValueObject<float4x4>(ctx, 1, float4x4_Id))
+    if (numArgs == 2 && GetValueObject<AABB>(ctx, 0, AABB_ID) && GetValueObject<float4x4>(ctx, 1, float4x4_ID))
         return OBB_SetFrom_AABB_float4x4(ctx);
-    if (numArgs == 2 && GetValueObject<AABB>(ctx, 0, AABB_Id) && GetValueObject<Quat>(ctx, 1, Quat_Id))
+    if (numArgs == 2 && GetValueObject<AABB>(ctx, 0, AABB_ID) && GetValueObject<Quat>(ctx, 1, Quat_ID))
         return OBB_SetFrom_AABB_Quat(ctx);
-    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_Id))
+    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
         return OBB_SetFrom_Sphere(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -510,13 +510,13 @@ static duk_ret_t OBB_SetFrom_Selector(duk_context* ctx)
 static duk_ret_t OBB_Transform_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_Id))
+    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
         return OBB_Transform_float3x3(ctx);
-    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_Id))
+    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_ID))
         return OBB_Transform_float3x4(ctx);
-    if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_Id))
+    if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_ID))
         return OBB_Transform_float4x4(ctx);
-    if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_Id))
+    if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_ID))
         return OBB_Transform_Quat(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -524,15 +524,15 @@ static duk_ret_t OBB_Transform_Selector(duk_context* ctx)
 static duk_ret_t OBB_Contains_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_Id))
+    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
         return OBB_Contains_LineSegment(ctx);
-    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_Id))
+    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
         return OBB_Contains_AABB(ctx);
-    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_Id))
+    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
         return OBB_Contains_OBB(ctx);
-    if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_Id))
+    if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
         return OBB_Contains_Triangle(ctx);
-    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_Id))
+    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_ID))
         return OBB_Contains_Frustum(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -540,29 +540,29 @@ static duk_ret_t OBB_Contains_Selector(duk_context* ctx)
 static duk_ret_t OBB_Intersects_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && GetValueObject<OBB>(ctx, 0, OBB_Id) && duk_is_number(ctx, 1))
+    if (numArgs == 2 && GetValueObject<OBB>(ctx, 0, OBB_ID) && duk_is_number(ctx, 1))
         return OBB_Intersects_OBB_float(ctx);
-    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_Id))
+    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
         return OBB_Intersects_AABB(ctx);
-    if (numArgs == 1 && GetValueObject<Plane>(ctx, 0, Plane_Id))
+    if (numArgs == 1 && GetValueObject<Plane>(ctx, 0, Plane_ID))
         return OBB_Intersects_Plane(ctx);
-    if (numArgs == 3 && GetValueObject<Ray>(ctx, 0, Ray_Id) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+    if (numArgs == 3 && GetValueObject<Ray>(ctx, 0, Ray_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
         return OBB_Intersects_Ray_float_float(ctx);
-    if (numArgs == 1 && GetValueObject<Ray>(ctx, 0, Ray_Id))
+    if (numArgs == 1 && GetValueObject<Ray>(ctx, 0, Ray_ID))
         return OBB_Intersects_Ray(ctx);
-    if (numArgs == 3 && GetValueObject<Line>(ctx, 0, Line_Id) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+    if (numArgs == 3 && GetValueObject<Line>(ctx, 0, Line_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
         return OBB_Intersects_Line_float_float(ctx);
-    if (numArgs == 1 && GetValueObject<Line>(ctx, 0, Line_Id))
+    if (numArgs == 1 && GetValueObject<Line>(ctx, 0, Line_ID))
         return OBB_Intersects_Line(ctx);
-    if (numArgs == 3 && GetValueObject<LineSegment>(ctx, 0, LineSegment_Id) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+    if (numArgs == 3 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
         return OBB_Intersects_LineSegment_float_float(ctx);
-    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_Id))
+    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
         return OBB_Intersects_LineSegment(ctx);
-    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_Id))
+    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
         return OBB_Intersects_Capsule(ctx);
-    if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_Id))
+    if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
         return OBB_Intersects_Triangle(ctx);
-    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_Id))
+    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_ID))
         return OBB_Intersects_Frustum(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -588,7 +588,7 @@ static duk_ret_t OBB_FromString_Static_string(duk_context* ctx)
 {
     string str(duk_require_string(ctx, 0));
     OBB ret = OBB::FromString(str);
-    PushValueObjectCopy<OBB>(ctx, ret, OBB_Id, OBB_Finalizer);
+    PushValueObjectCopy<OBB>(ctx, ret, OBB_ID, OBB_Finalizer);
     return 1;
 }
 
@@ -632,7 +632,7 @@ void Expose_OBB(duk_context* ctx)
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, OBB_Functions);
     duk_put_prop_string(ctx, -2, "prototype");
-    duk_put_global_string(ctx, OBB_Id);
+    duk_put_global_string(ctx, OBB_ID);
 }
 
 }

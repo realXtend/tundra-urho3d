@@ -13,22 +13,22 @@ namespace JSBindings
 
 
 
-const char* LCG_Id = "LCG";
+const char* LCG_ID = "LCG";
 
 duk_ret_t LCG_Finalizer(duk_context* ctx)
 {
-    LCG* obj = GetValueObject<LCG>(ctx, 0, LCG_Id);
+    LCG* obj = GetValueObject<LCG>(ctx, 0, LCG_ID);
     if (obj)
     {
         delete obj;
-        SetValueObject(ctx, 0, 0, LCG_Id);
+        SetValueObject(ctx, 0, 0, LCG_ID);
     }
     return 0;
 }
 
 static duk_ret_t LCG_Set_multiplier(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     u32 multiplier = (u32)duk_require_number(ctx, 0);
     thisObj->multiplier = multiplier;
     return 0;
@@ -36,14 +36,14 @@ static duk_ret_t LCG_Set_multiplier(duk_context* ctx)
 
 static duk_ret_t LCG_Get_multiplier(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     duk_push_number(ctx, thisObj->multiplier);
     return 1;
 }
 
 static duk_ret_t LCG_Set_increment(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     u32 increment = (u32)duk_require_number(ctx, 0);
     thisObj->increment = increment;
     return 0;
@@ -51,14 +51,14 @@ static duk_ret_t LCG_Set_increment(duk_context* ctx)
 
 static duk_ret_t LCG_Get_increment(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     duk_push_number(ctx, thisObj->increment);
     return 1;
 }
 
 static duk_ret_t LCG_Set_modulus(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     u32 modulus = (u32)duk_require_number(ctx, 0);
     thisObj->modulus = modulus;
     return 0;
@@ -66,14 +66,14 @@ static duk_ret_t LCG_Set_modulus(duk_context* ctx)
 
 static duk_ret_t LCG_Get_modulus(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     duk_push_number(ctx, thisObj->modulus);
     return 1;
 }
 
 static duk_ret_t LCG_Set_lastNumber(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     u32 lastNumber = (u32)duk_require_number(ctx, 0);
     thisObj->lastNumber = lastNumber;
     return 0;
@@ -81,7 +81,7 @@ static duk_ret_t LCG_Set_lastNumber(duk_context* ctx)
 
 static duk_ret_t LCG_Get_lastNumber(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     duk_push_number(ctx, thisObj->lastNumber);
     return 1;
 }
@@ -89,7 +89,7 @@ static duk_ret_t LCG_Get_lastNumber(duk_context* ctx)
 static duk_ret_t LCG_Ctor(duk_context* ctx)
 {
     LCG* newObj = new LCG();
-    PushConstructorResult<LCG>(ctx, newObj, LCG_Id, LCG_Finalizer);
+    PushConstructorResult<LCG>(ctx, newObj, LCG_ID, LCG_Finalizer);
     return 0;
 }
 
@@ -100,13 +100,13 @@ static duk_ret_t LCG_Ctor_u32_u32_u32_u32(duk_context* ctx)
     u32 increment = (u32)duk_require_number(ctx, 2);
     u32 modulus = (u32)duk_require_number(ctx, 3);
     LCG* newObj = new LCG(seed, multiplier, increment, modulus);
-    PushConstructorResult<LCG>(ctx, newObj, LCG_Id, LCG_Finalizer);
+    PushConstructorResult<LCG>(ctx, newObj, LCG_ID, LCG_Finalizer);
     return 0;
 }
 
 static duk_ret_t LCG_Seed_u32_u32_u32_u32(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     u32 seed = (u32)duk_require_number(ctx, 0);
     u32 multiplier = (u32)duk_require_number(ctx, 1);
     u32 increment = (u32)duk_require_number(ctx, 2);
@@ -117,7 +117,7 @@ static duk_ret_t LCG_Seed_u32_u32_u32_u32(duk_context* ctx)
 
 static duk_ret_t LCG_Int(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     u32 ret = thisObj->Int();
     duk_push_number(ctx, ret);
     return 1;
@@ -125,7 +125,7 @@ static duk_ret_t LCG_Int(duk_context* ctx)
 
 static duk_ret_t LCG_MaxInt(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     u32 ret = thisObj->MaxInt();
     duk_push_number(ctx, ret);
     return 1;
@@ -133,7 +133,7 @@ static duk_ret_t LCG_MaxInt(duk_context* ctx)
 
 static duk_ret_t LCG_IntFast(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     u32 ret = thisObj->IntFast();
     duk_push_number(ctx, ret);
     return 1;
@@ -141,7 +141,7 @@ static duk_ret_t LCG_IntFast(duk_context* ctx)
 
 static duk_ret_t LCG_Int_int_int(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     int a = (int)duk_require_number(ctx, 0);
     int b = (int)duk_require_number(ctx, 1);
     int ret = thisObj->Int(a, b);
@@ -151,7 +151,7 @@ static duk_ret_t LCG_Int_int_int(duk_context* ctx)
 
 static duk_ret_t LCG_Float(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     float ret = thisObj->Float();
     duk_push_number(ctx, ret);
     return 1;
@@ -159,7 +159,7 @@ static duk_ret_t LCG_Float(duk_context* ctx)
 
 static duk_ret_t LCG_Float01Incl(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     float ret = thisObj->Float01Incl();
     duk_push_number(ctx, ret);
     return 1;
@@ -167,7 +167,7 @@ static duk_ret_t LCG_Float01Incl(duk_context* ctx)
 
 static duk_ret_t LCG_FloatNeg1_1(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     float ret = thisObj->FloatNeg1_1();
     duk_push_number(ctx, ret);
     return 1;
@@ -175,7 +175,7 @@ static duk_ret_t LCG_FloatNeg1_1(duk_context* ctx)
 
 static duk_ret_t LCG_Float_float_float(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     float a = (float)duk_require_number(ctx, 0);
     float b = (float)duk_require_number(ctx, 1);
     float ret = thisObj->Float(a, b);
@@ -185,7 +185,7 @@ static duk_ret_t LCG_Float_float_float(duk_context* ctx)
 
 static duk_ret_t LCG_FloatIncl_float_float(duk_context* ctx)
 {
-    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_Id);
+    LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     float a = (float)duk_require_number(ctx, 0);
     float b = (float)duk_require_number(ctx, 1);
     float ret = thisObj->FloatIncl(a, b);
@@ -245,7 +245,7 @@ void Expose_LCG(duk_context* ctx)
     DefineProperty(ctx, "modulus", LCG_Get_modulus, LCG_Set_modulus);
     DefineProperty(ctx, "lastNumber", LCG_Get_lastNumber, LCG_Set_lastNumber);
     duk_put_prop_string(ctx, -2, "prototype");
-    duk_put_global_string(ctx, LCG_Id);
+    duk_put_global_string(ctx, LCG_ID);
 }
 
 }

@@ -221,7 +221,7 @@ template<class T> Urho3D::Vector<Urho3D::WeakPtr<T> > GetWeakObjectWeakPtrVector
 }
 
 /// Push a vector of weak-refcounted objects as an array. Null indices are included as null objects.
-template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<T*>& vector, const char* typeName, duk_c_function finalizer)
+template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<T*>& vector)
 {
     duk_push_array(ctx);
 
@@ -233,7 +233,7 @@ template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<T*>
 }
 
 /// Push a vector of weak-refcounted objects as an array. Null indices are included as null objects.
-template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<Urho3D::SharedPtr<T> >& vector, const char* typeName, duk_c_function finalizer)
+template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<Urho3D::SharedPtr<T> >& vector)
 {
     duk_push_array(ctx);
 
@@ -245,7 +245,7 @@ template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<Urh
 }
 
 /// Push a vector of weak-refcounted objects as an array. Null indices are included as null objects.
-template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<Urho3D::WeakPtr<T> >& vector, const char* typeName, duk_c_function finalizer)
+template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<Urho3D::WeakPtr<T> >& vector)
 {
     duk_push_array(ctx);
 

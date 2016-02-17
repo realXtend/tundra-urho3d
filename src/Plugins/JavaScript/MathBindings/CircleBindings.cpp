@@ -21,16 +21,16 @@ using namespace std;
 namespace JSBindings
 {
 
-extern const char* Plane_Id;
-extern const char* float3x3_Id;
-extern const char* float3x4_Id;
-extern const char* float4x4_Id;
-extern const char* Quat_Id;
-extern const char* Line_Id;
-extern const char* LineSegment_Id;
-extern const char* Ray_Id;
-extern const char* OBB_Id;
-extern const char* AABB_Id;
+extern const char* Plane_ID;
+extern const char* float3x3_ID;
+extern const char* float3x4_ID;
+extern const char* float4x4_ID;
+extern const char* Quat_ID;
+extern const char* Line_ID;
+extern const char* LineSegment_ID;
+extern const char* Ray_ID;
+extern const char* OBB_ID;
+extern const char* AABB_ID;
 
 duk_ret_t Plane_Finalizer(duk_context* ctx);
 duk_ret_t float3x3_Finalizer(duk_context* ctx);
@@ -43,22 +43,22 @@ duk_ret_t Ray_Finalizer(duk_context* ctx);
 duk_ret_t OBB_Finalizer(duk_context* ctx);
 duk_ret_t AABB_Finalizer(duk_context* ctx);
 
-const char* Circle_Id = "Circle";
+const char* Circle_ID = "Circle";
 
 duk_ret_t Circle_Finalizer(duk_context* ctx)
 {
-    Circle* obj = GetValueObject<Circle>(ctx, 0, Circle_Id);
+    Circle* obj = GetValueObject<Circle>(ctx, 0, Circle_ID);
     if (obj)
     {
         delete obj;
-        SetValueObject(ctx, 0, 0, Circle_Id);
+        SetValueObject(ctx, 0, 0, Circle_ID);
     }
     return 0;
 }
 
 static duk_ret_t Circle_Set_r(duk_context* ctx)
 {
-    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_Id);
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
     float r = (float)duk_require_number(ctx, 0);
     thisObj->r = r;
     return 0;
@@ -66,7 +66,7 @@ static duk_ret_t Circle_Set_r(duk_context* ctx)
 
 static duk_ret_t Circle_Get_r(duk_context* ctx)
 {
-    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_Id);
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
     duk_push_number(ctx, thisObj->r);
     return 1;
 }
@@ -74,54 +74,54 @@ static duk_ret_t Circle_Get_r(duk_context* ctx)
 static duk_ret_t Circle_Ctor(duk_context* ctx)
 {
     Circle* newObj = new Circle();
-    PushConstructorResult<Circle>(ctx, newObj, Circle_Id, Circle_Finalizer);
+    PushConstructorResult<Circle>(ctx, newObj, Circle_ID, Circle_Finalizer);
     return 0;
 }
 
 static duk_ret_t Circle_ContainingPlane(duk_context* ctx)
 {
-    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_Id);
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
     Plane ret = thisObj->ContainingPlane();
-    PushValueObjectCopy<Plane>(ctx, ret, Plane_Id, Plane_Finalizer);
+    PushValueObjectCopy<Plane>(ctx, ret, Plane_ID, Plane_Finalizer);
     return 1;
 }
 
 static duk_ret_t Circle_Transform_float3x3(duk_context* ctx)
 {
-    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_Id);
-    float3x3* transform = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_Id);
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float3x3* transform = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Circle_Transform_float3x4(duk_context* ctx)
 {
-    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_Id);
-    float3x4* transform = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_Id);
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float3x4* transform = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Circle_Transform_float4x4(duk_context* ctx)
 {
-    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_Id);
-    float4x4* transform = GetCheckedValueObject<float4x4>(ctx, 0, float4x4_Id);
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float4x4* transform = GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Circle_Transform_Quat(duk_context* ctx)
 {
-    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_Id);
-    Quat* transform = GetCheckedValueObject<Quat>(ctx, 0, Quat_Id);
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    Quat* transform = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Circle_Intersects_Plane(duk_context* ctx)
 {
-    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_Id);
-    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_Id);
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
     int ret = thisObj->Intersects(*plane);
     duk_push_number(ctx, ret);
     return 1;
@@ -129,8 +129,8 @@ static duk_ret_t Circle_Intersects_Plane(duk_context* ctx)
 
 static duk_ret_t Circle_IntersectsDisc_Line(duk_context* ctx)
 {
-    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_Id);
-    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_Id);
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_ID);
     bool ret = thisObj->IntersectsDisc(*line);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -138,8 +138,8 @@ static duk_ret_t Circle_IntersectsDisc_Line(duk_context* ctx)
 
 static duk_ret_t Circle_IntersectsDisc_LineSegment(duk_context* ctx)
 {
-    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_Id);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_Id);
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
     bool ret = thisObj->IntersectsDisc(*lineSegment);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -147,8 +147,8 @@ static duk_ret_t Circle_IntersectsDisc_LineSegment(duk_context* ctx)
 
 static duk_ret_t Circle_IntersectsDisc_Ray(duk_context* ctx)
 {
-    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_Id);
-    Ray* ray = GetCheckedValueObject<Ray>(ctx, 0, Ray_Id);
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    Ray* ray = GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
     bool ret = thisObj->IntersectsDisc(*ray);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -156,8 +156,8 @@ static duk_ret_t Circle_IntersectsDisc_Ray(duk_context* ctx)
 
 static duk_ret_t Circle_ToString(duk_context* ctx)
 {
-    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_Id);
-    std::string ret = thisObj->ToString();
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    string ret = thisObj->ToString();
     duk_push_string(ctx, ret.c_str());
     return 1;
 }
@@ -165,13 +165,13 @@ static duk_ret_t Circle_ToString(duk_context* ctx)
 static duk_ret_t Circle_Transform_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_Id))
+    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
         return Circle_Transform_float3x3(ctx);
-    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_Id))
+    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_ID))
         return Circle_Transform_float3x4(ctx);
-    if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_Id))
+    if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_ID))
         return Circle_Transform_float4x4(ctx);
-    if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_Id))
+    if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_ID))
         return Circle_Transform_Quat(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -179,11 +179,11 @@ static duk_ret_t Circle_Transform_Selector(duk_context* ctx)
 static duk_ret_t Circle_IntersectsDisc_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<Line>(ctx, 0, Line_Id))
+    if (numArgs == 1 && GetValueObject<Line>(ctx, 0, Line_ID))
         return Circle_IntersectsDisc_Line(ctx);
-    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_Id))
+    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
         return Circle_IntersectsDisc_LineSegment(ctx);
-    if (numArgs == 1 && GetValueObject<Ray>(ctx, 0, Ray_Id))
+    if (numArgs == 1 && GetValueObject<Ray>(ctx, 0, Ray_ID))
         return Circle_IntersectsDisc_Ray(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -204,7 +204,7 @@ void Expose_Circle(duk_context* ctx)
     duk_put_function_list(ctx, -1, Circle_Functions);
     DefineProperty(ctx, "r", Circle_Get_r, Circle_Set_r);
     duk_put_prop_string(ctx, -2, "prototype");
-    duk_put_global_string(ctx, Circle_Id);
+    duk_put_global_string(ctx, Circle_ID);
 }
 
 }

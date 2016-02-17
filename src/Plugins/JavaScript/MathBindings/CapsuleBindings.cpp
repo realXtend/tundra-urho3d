@@ -26,21 +26,21 @@ using namespace std;
 namespace JSBindings
 {
 
-extern const char* LineSegment_Id;
-extern const char* Sphere_Id;
-extern const char* Circle_Id;
-extern const char* AABB_Id;
-extern const char* OBB_Id;
-extern const char* LCG_Id;
-extern const char* float3x3_Id;
-extern const char* float3x4_Id;
-extern const char* float4x4_Id;
-extern const char* Quat_Id;
-extern const char* Plane_Id;
-extern const char* Ray_Id;
-extern const char* Line_Id;
-extern const char* Triangle_Id;
-extern const char* Frustum_Id;
+extern const char* LineSegment_ID;
+extern const char* Sphere_ID;
+extern const char* Circle_ID;
+extern const char* AABB_ID;
+extern const char* OBB_ID;
+extern const char* LCG_ID;
+extern const char* float3x3_ID;
+extern const char* float3x4_ID;
+extern const char* float4x4_ID;
+extern const char* Quat_ID;
+extern const char* Plane_ID;
+extern const char* Ray_ID;
+extern const char* Line_ID;
+extern const char* Triangle_ID;
+extern const char* Frustum_ID;
 
 duk_ret_t LineSegment_Finalizer(duk_context* ctx);
 duk_ret_t Sphere_Finalizer(duk_context* ctx);
@@ -58,22 +58,22 @@ duk_ret_t Line_Finalizer(duk_context* ctx);
 duk_ret_t Triangle_Finalizer(duk_context* ctx);
 duk_ret_t Frustum_Finalizer(duk_context* ctx);
 
-const char* Capsule_Id = "Capsule";
+const char* Capsule_ID = "Capsule";
 
 duk_ret_t Capsule_Finalizer(duk_context* ctx)
 {
-    Capsule* obj = GetValueObject<Capsule>(ctx, 0, Capsule_Id);
+    Capsule* obj = GetValueObject<Capsule>(ctx, 0, Capsule_ID);
     if (obj)
     {
         delete obj;
-        SetValueObject(ctx, 0, 0, Capsule_Id);
+        SetValueObject(ctx, 0, 0, Capsule_ID);
     }
     return 0;
 }
 
 static duk_ret_t Capsule_Set_r(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
     float r = (float)duk_require_number(ctx, 0);
     thisObj->r = r;
     return 0;
@@ -81,7 +81,7 @@ static duk_ret_t Capsule_Set_r(duk_context* ctx)
 
 static duk_ret_t Capsule_Get_r(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
     duk_push_number(ctx, thisObj->r);
     return 1;
 }
@@ -89,37 +89,37 @@ static duk_ret_t Capsule_Get_r(duk_context* ctx)
 static duk_ret_t Capsule_Ctor(duk_context* ctx)
 {
     Capsule* newObj = new Capsule();
-    PushConstructorResult<Capsule>(ctx, newObj, Capsule_Id, Capsule_Finalizer);
+    PushConstructorResult<Capsule>(ctx, newObj, Capsule_ID, Capsule_Finalizer);
     return 0;
 }
 
 static duk_ret_t Capsule_Ctor_LineSegment_float(duk_context* ctx)
 {
-    LineSegment* endPoints = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_Id);
+    LineSegment* endPoints = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
     float radius = (float)duk_require_number(ctx, 1);
     Capsule* newObj = new Capsule(*endPoints, radius);
-    PushConstructorResult<Capsule>(ctx, newObj, Capsule_Id, Capsule_Finalizer);
+    PushConstructorResult<Capsule>(ctx, newObj, Capsule_ID, Capsule_Finalizer);
     return 0;
 }
 
 static duk_ret_t Capsule_SetFrom_Sphere(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Sphere* s = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Sphere* s = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
     thisObj->SetFrom(*s);
     return 0;
 }
 
 static duk_ret_t Capsule_SetDegenerate(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
     thisObj->SetDegenerate();
     return 0;
 }
 
 static duk_ret_t Capsule_IsDegenerate(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
     bool ret = thisObj->IsDegenerate();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -127,7 +127,7 @@ static duk_ret_t Capsule_IsDegenerate(duk_context* ctx)
 
 static duk_ret_t Capsule_LineLength(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
     float ret = thisObj->LineLength();
     duk_push_number(ctx, ret);
     return 1;
@@ -135,7 +135,7 @@ static duk_ret_t Capsule_LineLength(duk_context* ctx)
 
 static duk_ret_t Capsule_Height(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
     float ret = thisObj->Height();
     duk_push_number(ctx, ret);
     return 1;
@@ -143,7 +143,7 @@ static duk_ret_t Capsule_Height(duk_context* ctx)
 
 static duk_ret_t Capsule_Diameter(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
     float ret = thisObj->Diameter();
     duk_push_number(ctx, ret);
     return 1;
@@ -151,7 +151,7 @@ static duk_ret_t Capsule_Diameter(duk_context* ctx)
 
 static duk_ret_t Capsule_Volume(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
     float ret = thisObj->Volume();
     duk_push_number(ctx, ret);
     return 1;
@@ -159,7 +159,7 @@ static duk_ret_t Capsule_Volume(duk_context* ctx)
 
 static duk_ret_t Capsule_SurfaceArea(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
     float ret = thisObj->SurfaceArea();
     duk_push_number(ctx, ret);
     return 1;
@@ -167,24 +167,24 @@ static duk_ret_t Capsule_SurfaceArea(duk_context* ctx)
 
 static duk_ret_t Capsule_CrossSection_float(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
     float l = (float)duk_require_number(ctx, 0);
     Circle ret = thisObj->CrossSection(l);
-    PushValueObjectCopy<Circle>(ctx, ret, Circle_Id, Circle_Finalizer);
+    PushValueObjectCopy<Circle>(ctx, ret, Circle_ID, Circle_Finalizer);
     return 1;
 }
 
 static duk_ret_t Capsule_HeightLineSegment(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
     LineSegment ret = thisObj->HeightLineSegment();
-    PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_Id, LineSegment_Finalizer);
+    PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_ID, LineSegment_Finalizer);
     return 1;
 }
 
 static duk_ret_t Capsule_IsFinite(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
     bool ret = thisObj->IsFinite();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -192,72 +192,72 @@ static duk_ret_t Capsule_IsFinite(duk_context* ctx)
 
 static duk_ret_t Capsule_SphereA(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
     Sphere ret = thisObj->SphereA();
-    PushValueObjectCopy<Sphere>(ctx, ret, Sphere_Id, Sphere_Finalizer);
+    PushValueObjectCopy<Sphere>(ctx, ret, Sphere_ID, Sphere_Finalizer);
     return 1;
 }
 
 static duk_ret_t Capsule_SphereB(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
     Sphere ret = thisObj->SphereB();
-    PushValueObjectCopy<Sphere>(ctx, ret, Sphere_Id, Sphere_Finalizer);
+    PushValueObjectCopy<Sphere>(ctx, ret, Sphere_ID, Sphere_Finalizer);
     return 1;
 }
 
 static duk_ret_t Capsule_MinimalEnclosingAABB(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
     AABB ret = thisObj->MinimalEnclosingAABB();
-    PushValueObjectCopy<AABB>(ctx, ret, AABB_Id, AABB_Finalizer);
+    PushValueObjectCopy<AABB>(ctx, ret, AABB_ID, AABB_Finalizer);
     return 1;
 }
 
 static duk_ret_t Capsule_MinimalEnclosingOBB(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
     OBB ret = thisObj->MinimalEnclosingOBB();
-    PushValueObjectCopy<OBB>(ctx, ret, OBB_Id, OBB_Finalizer);
+    PushValueObjectCopy<OBB>(ctx, ret, OBB_ID, OBB_Finalizer);
     return 1;
 }
 
 static duk_ret_t Capsule_Transform_float3x3(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    float3x3* transform = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float3x3* transform = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Capsule_Transform_float3x4(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    float3x4* transform = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float3x4* transform = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Capsule_Transform_float4x4(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    float4x4* transform = GetCheckedValueObject<float4x4>(ctx, 0, float4x4_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float4x4* transform = GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Capsule_Transform_Quat(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Quat* transform = GetCheckedValueObject<Quat>(ctx, 0, Quat_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Quat* transform = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Capsule_Distance_Plane(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
     float ret = thisObj->Distance(*plane);
     duk_push_number(ctx, ret);
     return 1;
@@ -265,8 +265,8 @@ static duk_ret_t Capsule_Distance_Plane(duk_context* ctx)
 
 static duk_ret_t Capsule_Distance_Sphere(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
     float ret = thisObj->Distance(*sphere);
     duk_push_number(ctx, ret);
     return 1;
@@ -274,8 +274,8 @@ static duk_ret_t Capsule_Distance_Sphere(duk_context* ctx)
 
 static duk_ret_t Capsule_Distance_Ray(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Ray* ray = GetCheckedValueObject<Ray>(ctx, 0, Ray_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Ray* ray = GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
     float ret = thisObj->Distance(*ray);
     duk_push_number(ctx, ret);
     return 1;
@@ -283,8 +283,8 @@ static duk_ret_t Capsule_Distance_Ray(duk_context* ctx)
 
 static duk_ret_t Capsule_Distance_Line(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_ID);
     float ret = thisObj->Distance(*line);
     duk_push_number(ctx, ret);
     return 1;
@@ -292,8 +292,8 @@ static duk_ret_t Capsule_Distance_Line(duk_context* ctx)
 
 static duk_ret_t Capsule_Distance_LineSegment(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
     float ret = thisObj->Distance(*lineSegment);
     duk_push_number(ctx, ret);
     return 1;
@@ -301,8 +301,8 @@ static duk_ret_t Capsule_Distance_LineSegment(duk_context* ctx)
 
 static duk_ret_t Capsule_Distance_Capsule(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
     float ret = thisObj->Distance(*capsule);
     duk_push_number(ctx, ret);
     return 1;
@@ -310,8 +310,8 @@ static duk_ret_t Capsule_Distance_Capsule(duk_context* ctx)
 
 static duk_ret_t Capsule_Contains_LineSegment(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
     bool ret = thisObj->Contains(*lineSegment);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -319,8 +319,8 @@ static duk_ret_t Capsule_Contains_LineSegment(duk_context* ctx)
 
 static duk_ret_t Capsule_Contains_Triangle(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
     bool ret = thisObj->Contains(*triangle);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -328,8 +328,8 @@ static duk_ret_t Capsule_Contains_Triangle(duk_context* ctx)
 
 static duk_ret_t Capsule_Contains_AABB(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
     bool ret = thisObj->Contains(*aabb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -337,8 +337,8 @@ static duk_ret_t Capsule_Contains_AABB(duk_context* ctx)
 
 static duk_ret_t Capsule_Contains_OBB(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
     bool ret = thisObj->Contains(*obb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -346,8 +346,8 @@ static duk_ret_t Capsule_Contains_OBB(duk_context* ctx)
 
 static duk_ret_t Capsule_Contains_Frustum(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
     bool ret = thisObj->Contains(*frustum);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -355,8 +355,8 @@ static duk_ret_t Capsule_Contains_Frustum(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_Ray(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Ray* ray = GetCheckedValueObject<Ray>(ctx, 0, Ray_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Ray* ray = GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
     bool ret = thisObj->Intersects(*ray);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -364,8 +364,8 @@ static duk_ret_t Capsule_Intersects_Ray(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_Line(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_ID);
     bool ret = thisObj->Intersects(*line);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -373,8 +373,8 @@ static duk_ret_t Capsule_Intersects_Line(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_LineSegment(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
     bool ret = thisObj->Intersects(*lineSegment);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -382,8 +382,8 @@ static duk_ret_t Capsule_Intersects_LineSegment(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_Plane(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
     bool ret = thisObj->Intersects(*plane);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -391,8 +391,8 @@ static duk_ret_t Capsule_Intersects_Plane(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_Sphere(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
     bool ret = thisObj->Intersects(*sphere);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -400,8 +400,8 @@ static duk_ret_t Capsule_Intersects_Sphere(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_Capsule(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
     bool ret = thisObj->Intersects(*capsule);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -409,8 +409,8 @@ static duk_ret_t Capsule_Intersects_Capsule(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_AABB(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
     bool ret = thisObj->Intersects(*aabb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -418,8 +418,8 @@ static duk_ret_t Capsule_Intersects_AABB(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_OBB(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
     bool ret = thisObj->Intersects(*obb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -427,8 +427,8 @@ static duk_ret_t Capsule_Intersects_OBB(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_Triangle(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
     bool ret = thisObj->Intersects(*triangle);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -436,8 +436,8 @@ static duk_ret_t Capsule_Intersects_Triangle(duk_context* ctx)
 
 static duk_ret_t Capsule_Intersects_Frustum(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
     bool ret = thisObj->Intersects(*frustum);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -445,32 +445,32 @@ static duk_ret_t Capsule_Intersects_Frustum(duk_context* ctx)
 
 static duk_ret_t Capsule_ToString(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    std::string ret = thisObj->ToString();
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    string ret = thisObj->ToString();
     duk_push_string(ctx, ret.c_str());
     return 1;
 }
 
 static duk_ret_t Capsule_SerializeToString(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    std::string ret = thisObj->SerializeToString();
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    string ret = thisObj->SerializeToString();
     duk_push_string(ctx, ret.c_str());
     return 1;
 }
 
 static duk_ret_t Capsule_SerializeToCodeString(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    std::string ret = thisObj->SerializeToCodeString();
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    string ret = thisObj->SerializeToCodeString();
     duk_push_string(ctx, ret.c_str());
     return 1;
 }
 
 static duk_ret_t Capsule_Equals_Capsule_float(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Capsule* rhs = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Capsule* rhs = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Equals(*rhs, epsilon);
     duk_push_boolean(ctx, ret);
@@ -479,8 +479,8 @@ static duk_ret_t Capsule_Equals_Capsule_float(duk_context* ctx)
 
 static duk_ret_t Capsule_BitEquals_Capsule(duk_context* ctx)
 {
-    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_Id);
-    Capsule* other = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_Id);
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    Capsule* other = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
     bool ret = thisObj->BitEquals(*other);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -491,7 +491,7 @@ static duk_ret_t Capsule_Ctor_Selector(duk_context* ctx)
     int numArgs = duk_get_top(ctx);
     if (numArgs == 0)
         return Capsule_Ctor(ctx);
-    if (numArgs == 2 && GetValueObject<LineSegment>(ctx, 0, LineSegment_Id) && duk_is_number(ctx, 1))
+    if (numArgs == 2 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID) && duk_is_number(ctx, 1))
         return Capsule_Ctor_LineSegment_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -499,13 +499,13 @@ static duk_ret_t Capsule_Ctor_Selector(duk_context* ctx)
 static duk_ret_t Capsule_Transform_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_Id))
+    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
         return Capsule_Transform_float3x3(ctx);
-    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_Id))
+    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_ID))
         return Capsule_Transform_float3x4(ctx);
-    if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_Id))
+    if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_ID))
         return Capsule_Transform_float4x4(ctx);
-    if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_Id))
+    if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_ID))
         return Capsule_Transform_Quat(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -513,17 +513,17 @@ static duk_ret_t Capsule_Transform_Selector(duk_context* ctx)
 static duk_ret_t Capsule_Distance_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<Plane>(ctx, 0, Plane_Id))
+    if (numArgs == 1 && GetValueObject<Plane>(ctx, 0, Plane_ID))
         return Capsule_Distance_Plane(ctx);
-    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_Id))
+    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
         return Capsule_Distance_Sphere(ctx);
-    if (numArgs == 1 && GetValueObject<Ray>(ctx, 0, Ray_Id))
+    if (numArgs == 1 && GetValueObject<Ray>(ctx, 0, Ray_ID))
         return Capsule_Distance_Ray(ctx);
-    if (numArgs == 1 && GetValueObject<Line>(ctx, 0, Line_Id))
+    if (numArgs == 1 && GetValueObject<Line>(ctx, 0, Line_ID))
         return Capsule_Distance_Line(ctx);
-    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_Id))
+    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
         return Capsule_Distance_LineSegment(ctx);
-    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_Id))
+    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
         return Capsule_Distance_Capsule(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -531,15 +531,15 @@ static duk_ret_t Capsule_Distance_Selector(duk_context* ctx)
 static duk_ret_t Capsule_Contains_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_Id))
+    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
         return Capsule_Contains_LineSegment(ctx);
-    if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_Id))
+    if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
         return Capsule_Contains_Triangle(ctx);
-    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_Id))
+    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
         return Capsule_Contains_AABB(ctx);
-    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_Id))
+    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
         return Capsule_Contains_OBB(ctx);
-    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_Id))
+    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_ID))
         return Capsule_Contains_Frustum(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -547,25 +547,25 @@ static duk_ret_t Capsule_Contains_Selector(duk_context* ctx)
 static duk_ret_t Capsule_Intersects_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<Ray>(ctx, 0, Ray_Id))
+    if (numArgs == 1 && GetValueObject<Ray>(ctx, 0, Ray_ID))
         return Capsule_Intersects_Ray(ctx);
-    if (numArgs == 1 && GetValueObject<Line>(ctx, 0, Line_Id))
+    if (numArgs == 1 && GetValueObject<Line>(ctx, 0, Line_ID))
         return Capsule_Intersects_Line(ctx);
-    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_Id))
+    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
         return Capsule_Intersects_LineSegment(ctx);
-    if (numArgs == 1 && GetValueObject<Plane>(ctx, 0, Plane_Id))
+    if (numArgs == 1 && GetValueObject<Plane>(ctx, 0, Plane_ID))
         return Capsule_Intersects_Plane(ctx);
-    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_Id))
+    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
         return Capsule_Intersects_Sphere(ctx);
-    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_Id))
+    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
         return Capsule_Intersects_Capsule(ctx);
-    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_Id))
+    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
         return Capsule_Intersects_AABB(ctx);
-    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_Id))
+    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
         return Capsule_Intersects_OBB(ctx);
-    if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_Id))
+    if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
         return Capsule_Intersects_Triangle(ctx);
-    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_Id))
+    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_ID))
         return Capsule_Intersects_Frustum(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -574,7 +574,7 @@ static duk_ret_t Capsule_FromString_Static_string(duk_context* ctx)
 {
     string str(duk_require_string(ctx, 0));
     Capsule ret = Capsule::FromString(str);
-    PushValueObjectCopy<Capsule>(ctx, ret, Capsule_Id, Capsule_Finalizer);
+    PushValueObjectCopy<Capsule>(ctx, ret, Capsule_ID, Capsule_Finalizer);
     return 1;
 }
 
@@ -619,7 +619,7 @@ void Expose_Capsule(duk_context* ctx)
     duk_put_function_list(ctx, -1, Capsule_Functions);
     DefineProperty(ctx, "r", Capsule_Get_r, Capsule_Set_r);
     duk_put_prop_string(ctx, -2, "prototype");
-    duk_put_global_string(ctx, Capsule_Id);
+    duk_put_global_string(ctx, Capsule_ID);
 }
 
 }

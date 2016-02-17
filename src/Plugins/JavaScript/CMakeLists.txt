@@ -6,6 +6,7 @@ file(GLOB CPP_FILES *.cpp)
 file(GLOB C_FILES *.c)
 file(GLOB H_FILES *.h)
 
+AddSourceFolder(CoreBindings)
 AddSourceFolder(MathBindings)
 
 set (SOURCE_FILES ${CPP_FILES} ${C_FILES} ${H_FILES})

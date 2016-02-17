@@ -26,21 +26,21 @@ using namespace std;
 namespace JSBindings
 {
 
-extern const char* Plane_Id;
-extern const char* LineSegment_Id;
-extern const char* float3x4_Id;
-extern const char* float4x4_Id;
-extern const char* Ray_Id;
-extern const char* float2_Id;
-extern const char* LCG_Id;
-extern const char* float3x3_Id;
-extern const char* Quat_Id;
-extern const char* AABB_Id;
-extern const char* OBB_Id;
-extern const char* Triangle_Id;
-extern const char* Line_Id;
-extern const char* Sphere_Id;
-extern const char* Capsule_Id;
+extern const char* Plane_ID;
+extern const char* LineSegment_ID;
+extern const char* float3x4_ID;
+extern const char* float4x4_ID;
+extern const char* Ray_ID;
+extern const char* float2_ID;
+extern const char* LCG_ID;
+extern const char* float3x3_ID;
+extern const char* Quat_ID;
+extern const char* AABB_ID;
+extern const char* OBB_ID;
+extern const char* Triangle_ID;
+extern const char* Line_ID;
+extern const char* Sphere_ID;
+extern const char* Capsule_ID;
 
 duk_ret_t Plane_Finalizer(duk_context* ctx);
 duk_ret_t LineSegment_Finalizer(duk_context* ctx);
@@ -58,15 +58,15 @@ duk_ret_t Line_Finalizer(duk_context* ctx);
 duk_ret_t Sphere_Finalizer(duk_context* ctx);
 duk_ret_t Capsule_Finalizer(duk_context* ctx);
 
-const char* Frustum_Id = "Frustum";
+const char* Frustum_ID = "Frustum";
 
 duk_ret_t Frustum_Finalizer(duk_context* ctx)
 {
-    Frustum* obj = GetValueObject<Frustum>(ctx, 0, Frustum_Id);
+    Frustum* obj = GetValueObject<Frustum>(ctx, 0, Frustum_ID);
     if (obj)
     {
         delete obj;
-        SetValueObject(ctx, 0, 0, Frustum_Id);
+        SetValueObject(ctx, 0, 0, Frustum_ID);
     }
     return 0;
 }
@@ -74,13 +74,13 @@ duk_ret_t Frustum_Finalizer(duk_context* ctx)
 static duk_ret_t Frustum_Ctor(duk_context* ctx)
 {
     Frustum* newObj = new Frustum();
-    PushConstructorResult<Frustum>(ctx, newObj, Frustum_Id, Frustum_Finalizer);
+    PushConstructorResult<Frustum>(ctx, newObj, Frustum_ID, Frustum_Finalizer);
     return 0;
 }
 
 static duk_ret_t Frustum_SetViewPlaneDistances_float_float(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float nearPlaneDistance = (float)duk_require_number(ctx, 0);
     float farPlaneDistance = (float)duk_require_number(ctx, 1);
     thisObj->SetViewPlaneDistances(nearPlaneDistance, farPlaneDistance);
@@ -89,7 +89,7 @@ static duk_ret_t Frustum_SetViewPlaneDistances_float_float(duk_context* ctx)
 
 static duk_ret_t Frustum_SetPerspective_float_float(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float horizontalFov = (float)duk_require_number(ctx, 0);
     float verticalFov = (float)duk_require_number(ctx, 1);
     thisObj->SetPerspective(horizontalFov, verticalFov);
@@ -98,7 +98,7 @@ static duk_ret_t Frustum_SetPerspective_float_float(duk_context* ctx)
 
 static duk_ret_t Frustum_SetOrthographic_float_float(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float orthographicWidth = (float)duk_require_number(ctx, 0);
     float orthographicHeight = (float)duk_require_number(ctx, 1);
     thisObj->SetOrthographic(orthographicWidth, orthographicHeight);
@@ -107,7 +107,7 @@ static duk_ret_t Frustum_SetOrthographic_float_float(duk_context* ctx)
 
 static duk_ret_t Frustum_NearPlaneDistance(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float ret = thisObj->NearPlaneDistance();
     duk_push_number(ctx, ret);
     return 1;
@@ -115,7 +115,7 @@ static duk_ret_t Frustum_NearPlaneDistance(duk_context* ctx)
 
 static duk_ret_t Frustum_FarPlaneDistance(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float ret = thisObj->FarPlaneDistance();
     duk_push_number(ctx, ret);
     return 1;
@@ -123,7 +123,7 @@ static duk_ret_t Frustum_FarPlaneDistance(duk_context* ctx)
 
 static duk_ret_t Frustum_HorizontalFov(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float ret = thisObj->HorizontalFov();
     duk_push_number(ctx, ret);
     return 1;
@@ -131,7 +131,7 @@ static duk_ret_t Frustum_HorizontalFov(duk_context* ctx)
 
 static duk_ret_t Frustum_VerticalFov(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float ret = thisObj->VerticalFov();
     duk_push_number(ctx, ret);
     return 1;
@@ -139,7 +139,7 @@ static duk_ret_t Frustum_VerticalFov(duk_context* ctx)
 
 static duk_ret_t Frustum_OrthographicWidth(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float ret = thisObj->OrthographicWidth();
     duk_push_number(ctx, ret);
     return 1;
@@ -147,7 +147,7 @@ static duk_ret_t Frustum_OrthographicWidth(duk_context* ctx)
 
 static duk_ret_t Frustum_OrthographicHeight(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float ret = thisObj->OrthographicHeight();
     duk_push_number(ctx, ret);
     return 1;
@@ -155,7 +155,7 @@ static duk_ret_t Frustum_OrthographicHeight(duk_context* ctx)
 
 static duk_ret_t Frustum_NumEdges(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     int ret = thisObj->NumEdges();
     duk_push_number(ctx, ret);
     return 1;
@@ -163,7 +163,7 @@ static duk_ret_t Frustum_NumEdges(duk_context* ctx)
 
 static duk_ret_t Frustum_AspectRatio(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float ret = thisObj->AspectRatio();
     duk_push_number(ctx, ret);
     return 1;
@@ -171,7 +171,7 @@ static duk_ret_t Frustum_AspectRatio(duk_context* ctx)
 
 static duk_ret_t Frustum_SetHorizontalFovAndAspectRatio_float_float(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float horizontalFov = (float)duk_require_number(ctx, 0);
     float aspectRatio = (float)duk_require_number(ctx, 1);
     thisObj->SetHorizontalFovAndAspectRatio(horizontalFov, aspectRatio);
@@ -180,7 +180,7 @@ static duk_ret_t Frustum_SetHorizontalFovAndAspectRatio_float_float(duk_context*
 
 static duk_ret_t Frustum_SetVerticalFovAndAspectRatio_float_float(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float verticalFov = (float)duk_require_number(ctx, 0);
     float aspectRatio = (float)duk_require_number(ctx, 1);
     thisObj->SetVerticalFovAndAspectRatio(verticalFov, aspectRatio);
@@ -189,15 +189,15 @@ static duk_ret_t Frustum_SetVerticalFovAndAspectRatio_float_float(duk_context* c
 
 static duk_ret_t Frustum_NearPlane(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     Plane ret = thisObj->NearPlane();
-    PushValueObjectCopy<Plane>(ctx, ret, Plane_Id, Plane_Finalizer);
+    PushValueObjectCopy<Plane>(ctx, ret, Plane_ID, Plane_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_NearPlaneWidth(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float ret = thisObj->NearPlaneWidth();
     duk_push_number(ctx, ret);
     return 1;
@@ -205,7 +205,7 @@ static duk_ret_t Frustum_NearPlaneWidth(duk_context* ctx)
 
 static duk_ret_t Frustum_NearPlaneHeight(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float ret = thisObj->NearPlaneHeight();
     duk_push_number(ctx, ret);
     return 1;
@@ -213,176 +213,176 @@ static duk_ret_t Frustum_NearPlaneHeight(duk_context* ctx)
 
 static duk_ret_t Frustum_FarPlane(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     Plane ret = thisObj->FarPlane();
-    PushValueObjectCopy<Plane>(ctx, ret, Plane_Id, Plane_Finalizer);
+    PushValueObjectCopy<Plane>(ctx, ret, Plane_ID, Plane_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_LeftPlane(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     Plane ret = thisObj->LeftPlane();
-    PushValueObjectCopy<Plane>(ctx, ret, Plane_Id, Plane_Finalizer);
+    PushValueObjectCopy<Plane>(ctx, ret, Plane_ID, Plane_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_RightPlane(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     Plane ret = thisObj->RightPlane();
-    PushValueObjectCopy<Plane>(ctx, ret, Plane_Id, Plane_Finalizer);
+    PushValueObjectCopy<Plane>(ctx, ret, Plane_ID, Plane_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_TopPlane(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     Plane ret = thisObj->TopPlane();
-    PushValueObjectCopy<Plane>(ctx, ret, Plane_Id, Plane_Finalizer);
+    PushValueObjectCopy<Plane>(ctx, ret, Plane_ID, Plane_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_BottomPlane(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     Plane ret = thisObj->BottomPlane();
-    PushValueObjectCopy<Plane>(ctx, ret, Plane_Id, Plane_Finalizer);
+    PushValueObjectCopy<Plane>(ctx, ret, Plane_ID, Plane_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_GetPlane_int(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     int faceIndex = (int)duk_require_number(ctx, 0);
     Plane ret = thisObj->GetPlane(faceIndex);
-    PushValueObjectCopy<Plane>(ctx, ret, Plane_Id, Plane_Finalizer);
+    PushValueObjectCopy<Plane>(ctx, ret, Plane_ID, Plane_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_Edge_int(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     int edgeIndex = (int)duk_require_number(ctx, 0);
     LineSegment ret = thisObj->Edge(edgeIndex);
-    PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_Id, LineSegment_Finalizer);
+    PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_ID, LineSegment_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_SetWorldMatrix_float3x4(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    float3x4* worldTransform = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3x4* worldTransform = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
     thisObj->SetWorldMatrix(*worldTransform);
     return 0;
 }
 
 static duk_ret_t Frustum_WorldMatrix(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float3x4 ret = thisObj->WorldMatrix();
-    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_Id, float3x4_Finalizer);
+    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_ID, float3x4_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_ComputeWorldMatrix(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float3x4 ret = thisObj->ComputeWorldMatrix();
-    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_Id, float3x4_Finalizer);
+    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_ID, float3x4_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_ViewMatrix(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float3x4 ret = thisObj->ViewMatrix();
-    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_Id, float3x4_Finalizer);
+    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_ID, float3x4_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_ComputeViewMatrix(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float3x4 ret = thisObj->ComputeViewMatrix();
-    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_Id, float3x4_Finalizer);
+    PushValueObjectCopy<float3x4>(ctx, ret, float3x4_ID, float3x4_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_ProjectionMatrix(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float4x4 ret = thisObj->ProjectionMatrix();
-    PushValueObjectCopy<float4x4>(ctx, ret, float4x4_Id, float4x4_Finalizer);
+    PushValueObjectCopy<float4x4>(ctx, ret, float4x4_ID, float4x4_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_ComputeProjectionMatrix(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float4x4 ret = thisObj->ComputeProjectionMatrix();
-    PushValueObjectCopy<float4x4>(ctx, ret, float4x4_Id, float4x4_Finalizer);
+    PushValueObjectCopy<float4x4>(ctx, ret, float4x4_ID, float4x4_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_ViewProjMatrix(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float4x4 ret = thisObj->ViewProjMatrix();
-    PushValueObjectCopy<float4x4>(ctx, ret, float4x4_Id, float4x4_Finalizer);
+    PushValueObjectCopy<float4x4>(ctx, ret, float4x4_ID, float4x4_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_ComputeViewProjMatrix(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float4x4 ret = thisObj->ComputeViewProjMatrix();
-    PushValueObjectCopy<float4x4>(ctx, ret, float4x4_Id, float4x4_Finalizer);
+    PushValueObjectCopy<float4x4>(ctx, ret, float4x4_ID, float4x4_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_UnProject_float_float(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float x = (float)duk_require_number(ctx, 0);
     float y = (float)duk_require_number(ctx, 1);
     Ray ret = thisObj->UnProject(x, y);
-    PushValueObjectCopy<Ray>(ctx, ret, Ray_Id, Ray_Finalizer);
+    PushValueObjectCopy<Ray>(ctx, ret, Ray_ID, Ray_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_UnProject_float2(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    float2* xy = GetCheckedValueObject<float2>(ctx, 0, float2_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float2* xy = GetCheckedValueObject<float2>(ctx, 0, float2_ID);
     Ray ret = thisObj->UnProject(*xy);
-    PushValueObjectCopy<Ray>(ctx, ret, Ray_Id, Ray_Finalizer);
+    PushValueObjectCopy<Ray>(ctx, ret, Ray_ID, Ray_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_UnProjectFromNearPlane_float_float(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float x = (float)duk_require_number(ctx, 0);
     float y = (float)duk_require_number(ctx, 1);
     Ray ret = thisObj->UnProjectFromNearPlane(x, y);
-    PushValueObjectCopy<Ray>(ctx, ret, Ray_Id, Ray_Finalizer);
+    PushValueObjectCopy<Ray>(ctx, ret, Ray_ID, Ray_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_UnProjectLineSegment_float_float(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float x = (float)duk_require_number(ctx, 0);
     float y = (float)duk_require_number(ctx, 1);
     LineSegment ret = thisObj->UnProjectLineSegment(x, y);
-    PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_Id, LineSegment_Finalizer);
+    PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_ID, LineSegment_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_IsFinite(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     bool ret = thisObj->IsFinite();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -390,7 +390,7 @@ static duk_ret_t Frustum_IsFinite(duk_context* ctx)
 
 static duk_ret_t Frustum_Volume(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float ret = thisObj->Volume();
     duk_push_number(ctx, ret);
     return 1;
@@ -398,57 +398,57 @@ static duk_ret_t Frustum_Volume(duk_context* ctx)
 
 static duk_ret_t Frustum_Transform_float3x3(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    float3x3* transform = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3x3* transform = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Frustum_Transform_float3x4(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    float3x4* transform = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3x4* transform = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Frustum_Transform_float4x4(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    float4x4* transform = GetCheckedValueObject<float4x4>(ctx, 0, float4x4_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float4x4* transform = GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Frustum_Transform_Quat(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    Quat* transform = GetCheckedValueObject<Quat>(ctx, 0, Quat_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    Quat* transform = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Frustum_MinimalEnclosingAABB(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     AABB ret = thisObj->MinimalEnclosingAABB();
-    PushValueObjectCopy<AABB>(ctx, ret, AABB_Id, AABB_Finalizer);
+    PushValueObjectCopy<AABB>(ctx, ret, AABB_ID, AABB_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_MinimalEnclosingOBB_float(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
     float expandGuardband = (float)duk_require_number(ctx, 0);
     OBB ret = thisObj->MinimalEnclosingOBB(expandGuardband);
-    PushValueObjectCopy<OBB>(ctx, ret, OBB_Id, OBB_Finalizer);
+    PushValueObjectCopy<OBB>(ctx, ret, OBB_ID, OBB_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_Contains_LineSegment(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
     bool ret = thisObj->Contains(*lineSegment);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -456,8 +456,8 @@ static duk_ret_t Frustum_Contains_LineSegment(duk_context* ctx)
 
 static duk_ret_t Frustum_Contains_Triangle(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
     bool ret = thisObj->Contains(*triangle);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -465,8 +465,8 @@ static duk_ret_t Frustum_Contains_Triangle(duk_context* ctx)
 
 static duk_ret_t Frustum_Contains_AABB(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
     bool ret = thisObj->Contains(*aabb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -474,8 +474,8 @@ static duk_ret_t Frustum_Contains_AABB(duk_context* ctx)
 
 static duk_ret_t Frustum_Contains_OBB(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
     bool ret = thisObj->Contains(*obb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -483,8 +483,8 @@ static duk_ret_t Frustum_Contains_OBB(duk_context* ctx)
 
 static duk_ret_t Frustum_Contains_Frustum(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
     bool ret = thisObj->Contains(*frustum);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -492,8 +492,8 @@ static duk_ret_t Frustum_Contains_Frustum(duk_context* ctx)
 
 static duk_ret_t Frustum_Intersects_Ray(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    Ray* ray = GetCheckedValueObject<Ray>(ctx, 0, Ray_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    Ray* ray = GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
     bool ret = thisObj->Intersects(*ray);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -501,8 +501,8 @@ static duk_ret_t Frustum_Intersects_Ray(duk_context* ctx)
 
 static duk_ret_t Frustum_Intersects_Line(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_ID);
     bool ret = thisObj->Intersects(*line);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -510,8 +510,8 @@ static duk_ret_t Frustum_Intersects_Line(duk_context* ctx)
 
 static duk_ret_t Frustum_Intersects_LineSegment(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
     bool ret = thisObj->Intersects(*lineSegment);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -519,8 +519,8 @@ static duk_ret_t Frustum_Intersects_LineSegment(duk_context* ctx)
 
 static duk_ret_t Frustum_Intersects_AABB(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
     bool ret = thisObj->Intersects(*aabb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -528,8 +528,8 @@ static duk_ret_t Frustum_Intersects_AABB(duk_context* ctx)
 
 static duk_ret_t Frustum_Intersects_OBB(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
     bool ret = thisObj->Intersects(*obb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -537,8 +537,8 @@ static duk_ret_t Frustum_Intersects_OBB(duk_context* ctx)
 
 static duk_ret_t Frustum_Intersects_Plane(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
     bool ret = thisObj->Intersects(*plane);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -546,8 +546,8 @@ static duk_ret_t Frustum_Intersects_Plane(duk_context* ctx)
 
 static duk_ret_t Frustum_Intersects_Triangle(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
     bool ret = thisObj->Intersects(*triangle);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -555,8 +555,8 @@ static duk_ret_t Frustum_Intersects_Triangle(duk_context* ctx)
 
 static duk_ret_t Frustum_Intersects_Sphere(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
     bool ret = thisObj->Intersects(*sphere);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -564,8 +564,8 @@ static duk_ret_t Frustum_Intersects_Sphere(duk_context* ctx)
 
 static duk_ret_t Frustum_Intersects_Capsule(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
     bool ret = thisObj->Intersects(*capsule);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -573,8 +573,8 @@ static duk_ret_t Frustum_Intersects_Capsule(duk_context* ctx)
 
 static duk_ret_t Frustum_Intersects_Frustum(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_Id);
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
     bool ret = thisObj->Intersects(*frustum);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -582,16 +582,16 @@ static duk_ret_t Frustum_Intersects_Frustum(duk_context* ctx)
 
 static duk_ret_t Frustum_ToString(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    std::string ret = thisObj->ToString();
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    string ret = thisObj->ToString();
     duk_push_string(ctx, ret.c_str());
     return 1;
 }
 
 static duk_ret_t Frustum_SerializeToString(duk_context* ctx)
 {
-    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_Id);
-    std::string ret = thisObj->SerializeToString();
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    string ret = thisObj->SerializeToString();
     duk_push_string(ctx, ret.c_str());
     return 1;
 }
@@ -601,7 +601,7 @@ static duk_ret_t Frustum_UnProject_Selector(duk_context* ctx)
     int numArgs = duk_get_top(ctx);
     if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
         return Frustum_UnProject_float_float(ctx);
-    if (numArgs == 1 && GetValueObject<float2>(ctx, 0, float2_Id))
+    if (numArgs == 1 && GetValueObject<float2>(ctx, 0, float2_ID))
         return Frustum_UnProject_float2(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -609,13 +609,13 @@ static duk_ret_t Frustum_UnProject_Selector(duk_context* ctx)
 static duk_ret_t Frustum_Transform_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_Id))
+    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
         return Frustum_Transform_float3x3(ctx);
-    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_Id))
+    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_ID))
         return Frustum_Transform_float3x4(ctx);
-    if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_Id))
+    if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_ID))
         return Frustum_Transform_float4x4(ctx);
-    if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_Id))
+    if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_ID))
         return Frustum_Transform_Quat(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -623,15 +623,15 @@ static duk_ret_t Frustum_Transform_Selector(duk_context* ctx)
 static duk_ret_t Frustum_Contains_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_Id))
+    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
         return Frustum_Contains_LineSegment(ctx);
-    if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_Id))
+    if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
         return Frustum_Contains_Triangle(ctx);
-    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_Id))
+    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
         return Frustum_Contains_AABB(ctx);
-    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_Id))
+    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
         return Frustum_Contains_OBB(ctx);
-    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_Id))
+    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_ID))
         return Frustum_Contains_Frustum(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -639,25 +639,25 @@ static duk_ret_t Frustum_Contains_Selector(duk_context* ctx)
 static duk_ret_t Frustum_Intersects_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<Ray>(ctx, 0, Ray_Id))
+    if (numArgs == 1 && GetValueObject<Ray>(ctx, 0, Ray_ID))
         return Frustum_Intersects_Ray(ctx);
-    if (numArgs == 1 && GetValueObject<Line>(ctx, 0, Line_Id))
+    if (numArgs == 1 && GetValueObject<Line>(ctx, 0, Line_ID))
         return Frustum_Intersects_Line(ctx);
-    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_Id))
+    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
         return Frustum_Intersects_LineSegment(ctx);
-    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_Id))
+    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
         return Frustum_Intersects_AABB(ctx);
-    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_Id))
+    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
         return Frustum_Intersects_OBB(ctx);
-    if (numArgs == 1 && GetValueObject<Plane>(ctx, 0, Plane_Id))
+    if (numArgs == 1 && GetValueObject<Plane>(ctx, 0, Plane_ID))
         return Frustum_Intersects_Plane(ctx);
-    if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_Id))
+    if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
         return Frustum_Intersects_Triangle(ctx);
-    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_Id))
+    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
         return Frustum_Intersects_Sphere(ctx);
-    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_Id))
+    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
         return Frustum_Intersects_Capsule(ctx);
-    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_Id))
+    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_ID))
         return Frustum_Intersects_Frustum(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -669,17 +669,17 @@ static duk_ret_t Frustum_ViewportToScreenSpace_Static_float_float_int_int(duk_co
     int screenWidth = (int)duk_require_number(ctx, 2);
     int screenHeight = (int)duk_require_number(ctx, 3);
     float2 ret = Frustum::ViewportToScreenSpace(x, y, screenWidth, screenHeight);
-    PushValueObjectCopy<float2>(ctx, ret, float2_Id, float2_Finalizer);
+    PushValueObjectCopy<float2>(ctx, ret, float2_ID, float2_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_ViewportToScreenSpace_Static_float2_int_int(duk_context* ctx)
 {
-    float2* point = GetCheckedValueObject<float2>(ctx, 0, float2_Id);
+    float2* point = GetCheckedValueObject<float2>(ctx, 0, float2_ID);
     int screenWidth = (int)duk_require_number(ctx, 1);
     int screenHeight = (int)duk_require_number(ctx, 2);
     float2 ret = Frustum::ViewportToScreenSpace(*point, screenWidth, screenHeight);
-    PushValueObjectCopy<float2>(ctx, ret, float2_Id, float2_Finalizer);
+    PushValueObjectCopy<float2>(ctx, ret, float2_ID, float2_Finalizer);
     return 1;
 }
 
@@ -690,17 +690,17 @@ static duk_ret_t Frustum_ScreenToViewportSpace_Static_float_float_int_int(duk_co
     int screenWidth = (int)duk_require_number(ctx, 2);
     int screenHeight = (int)duk_require_number(ctx, 3);
     float2 ret = Frustum::ScreenToViewportSpace(x, y, screenWidth, screenHeight);
-    PushValueObjectCopy<float2>(ctx, ret, float2_Id, float2_Finalizer);
+    PushValueObjectCopy<float2>(ctx, ret, float2_ID, float2_Finalizer);
     return 1;
 }
 
 static duk_ret_t Frustum_ScreenToViewportSpace_Static_float2_int_int(duk_context* ctx)
 {
-    float2* point = GetCheckedValueObject<float2>(ctx, 0, float2_Id);
+    float2* point = GetCheckedValueObject<float2>(ctx, 0, float2_ID);
     int screenWidth = (int)duk_require_number(ctx, 1);
     int screenHeight = (int)duk_require_number(ctx, 2);
     float2 ret = Frustum::ScreenToViewportSpace(*point, screenWidth, screenHeight);
-    PushValueObjectCopy<float2>(ctx, ret, float2_Id, float2_Finalizer);
+    PushValueObjectCopy<float2>(ctx, ret, float2_ID, float2_Finalizer);
     return 1;
 }
 
@@ -709,7 +709,7 @@ static duk_ret_t Frustum_ViewportToScreenSpace_Static_Selector(duk_context* ctx)
     int numArgs = duk_get_top(ctx);
     if (numArgs == 4 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3))
         return Frustum_ViewportToScreenSpace_Static_float_float_int_int(ctx);
-    if (numArgs == 3 && GetValueObject<float2>(ctx, 0, float2_Id) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+    if (numArgs == 3 && GetValueObject<float2>(ctx, 0, float2_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
         return Frustum_ViewportToScreenSpace_Static_float2_int_int(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -719,7 +719,7 @@ static duk_ret_t Frustum_ScreenToViewportSpace_Static_Selector(duk_context* ctx)
     int numArgs = duk_get_top(ctx);
     if (numArgs == 4 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3))
         return Frustum_ScreenToViewportSpace_Static_float_float_int_int(ctx);
-    if (numArgs == 3 && GetValueObject<float2>(ctx, 0, float2_Id) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+    if (numArgs == 3 && GetValueObject<float2>(ctx, 0, float2_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
         return Frustum_ScreenToViewportSpace_Static_float2_int_int(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -785,7 +785,7 @@ void Expose_Frustum(duk_context* ctx)
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Frustum_Functions);
     duk_put_prop_string(ctx, -2, "prototype");
-    duk_put_global_string(ctx, Frustum_Id);
+    duk_put_global_string(ctx, Frustum_ID);
 }
 
 }

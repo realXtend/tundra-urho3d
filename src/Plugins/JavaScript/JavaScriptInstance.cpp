@@ -8,6 +8,7 @@
 #include "LoggingFunctions.h"
 #include "AssetAPI.h"
 #include "MathBindings/MathBindings.h"
+#include "CoreBindings/CoreBindings.h"
 
 #include <Urho3D/Core/Profiler.h>
 #include <Urho3D/IO/FileSystem.h>
@@ -65,8 +66,11 @@ void JavaScriptInstance::CreateEngine()
 
     {
         JS_PROFILE(ExposeMathClasses);
-        // Expose default math classes
         ExposeMathClasses(ctx_);
+    }
+    {
+        JS_PROFILE(ExposeCoreClasses);
+        ExposeCoreClasses(ctx_);
     }
 
     module_->ScriptInstanceCreated.Emit(this);

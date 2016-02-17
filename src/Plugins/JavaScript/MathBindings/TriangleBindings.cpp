@@ -26,21 +26,21 @@ using namespace std;
 namespace JSBindings
 {
 
-extern const char* float3x3_Id;
-extern const char* float3x4_Id;
-extern const char* float4x4_Id;
-extern const char* Quat_Id;
-extern const char* float3_Id;
-extern const char* float2_Id;
-extern const char* LineSegment_Id;
-extern const char* Plane_Id;
-extern const char* AABB_Id;
-extern const char* Sphere_Id;
-extern const char* Capsule_Id;
-extern const char* OBB_Id;
-extern const char* Frustum_Id;
-extern const char* Line_Id;
-extern const char* LCG_Id;
+extern const char* float3x3_ID;
+extern const char* float3x4_ID;
+extern const char* float4x4_ID;
+extern const char* Quat_ID;
+extern const char* float3_ID;
+extern const char* float2_ID;
+extern const char* LineSegment_ID;
+extern const char* Plane_ID;
+extern const char* AABB_ID;
+extern const char* Sphere_ID;
+extern const char* Capsule_ID;
+extern const char* OBB_ID;
+extern const char* Frustum_ID;
+extern const char* Line_ID;
+extern const char* LCG_ID;
 
 duk_ret_t float3x3_Finalizer(duk_context* ctx);
 duk_ret_t float3x4_Finalizer(duk_context* ctx);
@@ -58,15 +58,15 @@ duk_ret_t Frustum_Finalizer(duk_context* ctx);
 duk_ret_t Line_Finalizer(duk_context* ctx);
 duk_ret_t LCG_Finalizer(duk_context* ctx);
 
-const char* Triangle_Id = "Triangle";
+const char* Triangle_ID = "Triangle";
 
 duk_ret_t Triangle_Finalizer(duk_context* ctx)
 {
-    Triangle* obj = GetValueObject<Triangle>(ctx, 0, Triangle_Id);
+    Triangle* obj = GetValueObject<Triangle>(ctx, 0, Triangle_ID);
     if (obj)
     {
         delete obj;
-        SetValueObject(ctx, 0, 0, Triangle_Id);
+        SetValueObject(ctx, 0, 0, Triangle_ID);
     }
     return 0;
 }
@@ -74,45 +74,45 @@ duk_ret_t Triangle_Finalizer(duk_context* ctx)
 static duk_ret_t Triangle_Ctor(duk_context* ctx)
 {
     Triangle* newObj = new Triangle();
-    PushConstructorResult<Triangle>(ctx, newObj, Triangle_Id, Triangle_Finalizer);
+    PushConstructorResult<Triangle>(ctx, newObj, Triangle_ID, Triangle_Finalizer);
     return 0;
 }
 
 static duk_ret_t Triangle_Transform_float3x3(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    float3x3* transform = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3x3* transform = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Triangle_Transform_float3x4(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    float3x4* transform = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3x4* transform = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Triangle_Transform_float4x4(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    float4x4* transform = GetCheckedValueObject<float4x4>(ctx, 0, float4x4_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float4x4* transform = GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Triangle_Transform_Quat(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    Quat* transform = GetCheckedValueObject<Quat>(ctx, 0, Quat_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    Quat* transform = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
     thisObj->Transform(*transform);
     return 0;
 }
 
 static duk_ret_t Triangle_Area(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
     float ret = thisObj->Area();
     duk_push_number(ctx, ret);
     return 1;
@@ -120,7 +120,7 @@ static duk_ret_t Triangle_Area(duk_context* ctx)
 
 static duk_ret_t Triangle_Perimeter(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
     float ret = thisObj->Perimeter();
     duk_push_number(ctx, ret);
     return 1;
@@ -128,40 +128,40 @@ static duk_ret_t Triangle_Perimeter(duk_context* ctx)
 
 static duk_ret_t Triangle_Edge_int(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
     int i = (int)duk_require_number(ctx, 0);
     LineSegment ret = thisObj->Edge(i);
-    PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_Id, LineSegment_Finalizer);
+    PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_ID, LineSegment_Finalizer);
     return 1;
 }
 
 static duk_ret_t Triangle_PlaneCCW(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
     Plane ret = thisObj->PlaneCCW();
-    PushValueObjectCopy<Plane>(ctx, ret, Plane_Id, Plane_Finalizer);
+    PushValueObjectCopy<Plane>(ctx, ret, Plane_ID, Plane_Finalizer);
     return 1;
 }
 
 static duk_ret_t Triangle_PlaneCW(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
     Plane ret = thisObj->PlaneCW();
-    PushValueObjectCopy<Plane>(ctx, ret, Plane_Id, Plane_Finalizer);
+    PushValueObjectCopy<Plane>(ctx, ret, Plane_ID, Plane_Finalizer);
     return 1;
 }
 
 static duk_ret_t Triangle_BoundingAABB(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
     AABB ret = thisObj->BoundingAABB();
-    PushValueObjectCopy<AABB>(ctx, ret, AABB_Id, AABB_Finalizer);
+    PushValueObjectCopy<AABB>(ctx, ret, AABB_ID, AABB_Finalizer);
     return 1;
 }
 
 static duk_ret_t Triangle_IsFinite(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
     bool ret = thisObj->IsFinite();
     duk_push_boolean(ctx, ret);
     return 1;
@@ -169,7 +169,7 @@ static duk_ret_t Triangle_IsFinite(duk_context* ctx)
 
 static duk_ret_t Triangle_IsDegenerate_float(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
     float epsilon = (float)duk_require_number(ctx, 0);
     bool ret = thisObj->IsDegenerate(epsilon);
     duk_push_boolean(ctx, ret);
@@ -178,8 +178,8 @@ static duk_ret_t Triangle_IsDegenerate_float(duk_context* ctx)
 
 static duk_ret_t Triangle_Contains_LineSegment_float(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
     float triangleThickness = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Contains(*lineSegment, triangleThickness);
     duk_push_boolean(ctx, ret);
@@ -188,8 +188,8 @@ static duk_ret_t Triangle_Contains_LineSegment_float(duk_context* ctx)
 
 static duk_ret_t Triangle_Contains_Triangle_float(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
     float triangleThickness = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Contains(*triangle, triangleThickness);
     duk_push_boolean(ctx, ret);
@@ -198,8 +198,8 @@ static duk_ret_t Triangle_Contains_Triangle_float(duk_context* ctx)
 
 static duk_ret_t Triangle_Distance_Sphere(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
     float ret = thisObj->Distance(*sphere);
     duk_push_number(ctx, ret);
     return 1;
@@ -207,8 +207,8 @@ static duk_ret_t Triangle_Distance_Sphere(duk_context* ctx)
 
 static duk_ret_t Triangle_Distance_Capsule(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
     float ret = thisObj->Distance(*capsule);
     duk_push_number(ctx, ret);
     return 1;
@@ -216,8 +216,8 @@ static duk_ret_t Triangle_Distance_Capsule(duk_context* ctx)
 
 static duk_ret_t Triangle_Intersects_Plane(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
     bool ret = thisObj->Intersects(*plane);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -225,8 +225,8 @@ static duk_ret_t Triangle_Intersects_Plane(duk_context* ctx)
 
 static duk_ret_t Triangle_Intersects_Sphere(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
     bool ret = thisObj->Intersects(*sphere);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -234,8 +234,8 @@ static duk_ret_t Triangle_Intersects_Sphere(duk_context* ctx)
 
 static duk_ret_t Triangle_Intersects_AABB(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
     bool ret = thisObj->Intersects(*aabb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -243,8 +243,8 @@ static duk_ret_t Triangle_Intersects_AABB(duk_context* ctx)
 
 static duk_ret_t Triangle_Intersects_OBB(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
     bool ret = thisObj->Intersects(*obb);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -252,8 +252,8 @@ static duk_ret_t Triangle_Intersects_OBB(duk_context* ctx)
 
 static duk_ret_t Triangle_Intersects_Frustum(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
     bool ret = thisObj->Intersects(*frustum);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -261,8 +261,8 @@ static duk_ret_t Triangle_Intersects_Frustum(duk_context* ctx)
 
 static duk_ret_t Triangle_Intersects_Capsule(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
     bool ret = thisObj->Intersects(*capsule);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -270,32 +270,32 @@ static duk_ret_t Triangle_Intersects_Capsule(duk_context* ctx)
 
 static duk_ret_t Triangle_ToString(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    std::string ret = thisObj->ToString();
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    string ret = thisObj->ToString();
     duk_push_string(ctx, ret.c_str());
     return 1;
 }
 
 static duk_ret_t Triangle_SerializeToString(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    std::string ret = thisObj->SerializeToString();
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    string ret = thisObj->SerializeToString();
     duk_push_string(ctx, ret.c_str());
     return 1;
 }
 
 static duk_ret_t Triangle_SerializeToCodeString(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    std::string ret = thisObj->SerializeToCodeString();
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    string ret = thisObj->SerializeToCodeString();
     duk_push_string(ctx, ret.c_str());
     return 1;
 }
 
 static duk_ret_t Triangle_Equals_Triangle_float(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    Triangle* rhs = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    Triangle* rhs = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
     float epsilon = (float)duk_require_number(ctx, 1);
     bool ret = thisObj->Equals(*rhs, epsilon);
     duk_push_boolean(ctx, ret);
@@ -304,8 +304,8 @@ static duk_ret_t Triangle_Equals_Triangle_float(duk_context* ctx)
 
 static duk_ret_t Triangle_BitEquals_Triangle(duk_context* ctx)
 {
-    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_Id);
-    Triangle* other = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_Id);
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    Triangle* other = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
     bool ret = thisObj->BitEquals(*other);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -314,13 +314,13 @@ static duk_ret_t Triangle_BitEquals_Triangle(duk_context* ctx)
 static duk_ret_t Triangle_Transform_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_Id))
+    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
         return Triangle_Transform_float3x3(ctx);
-    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_Id))
+    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_ID))
         return Triangle_Transform_float3x4(ctx);
-    if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_Id))
+    if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_ID))
         return Triangle_Transform_float4x4(ctx);
-    if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_Id))
+    if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_ID))
         return Triangle_Transform_Quat(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -328,9 +328,9 @@ static duk_ret_t Triangle_Transform_Selector(duk_context* ctx)
 static duk_ret_t Triangle_Contains_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && GetValueObject<LineSegment>(ctx, 0, LineSegment_Id) && duk_is_number(ctx, 1))
+    if (numArgs == 2 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID) && duk_is_number(ctx, 1))
         return Triangle_Contains_LineSegment_float(ctx);
-    if (numArgs == 2 && GetValueObject<Triangle>(ctx, 0, Triangle_Id) && duk_is_number(ctx, 1))
+    if (numArgs == 2 && GetValueObject<Triangle>(ctx, 0, Triangle_ID) && duk_is_number(ctx, 1))
         return Triangle_Contains_Triangle_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -338,9 +338,9 @@ static duk_ret_t Triangle_Contains_Selector(duk_context* ctx)
 static duk_ret_t Triangle_Distance_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_Id))
+    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
         return Triangle_Distance_Sphere(ctx);
-    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_Id))
+    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
         return Triangle_Distance_Capsule(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
@@ -348,24 +348,24 @@ static duk_ret_t Triangle_Distance_Selector(duk_context* ctx)
 static duk_ret_t Triangle_Intersects_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<Plane>(ctx, 0, Plane_Id))
+    if (numArgs == 1 && GetValueObject<Plane>(ctx, 0, Plane_ID))
         return Triangle_Intersects_Plane(ctx);
-    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_Id))
+    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
         return Triangle_Intersects_Sphere(ctx);
-    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_Id))
+    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
         return Triangle_Intersects_AABB(ctx);
-    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_Id))
+    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
         return Triangle_Intersects_OBB(ctx);
-    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_Id))
+    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_ID))
         return Triangle_Intersects_Frustum(ctx);
-    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_Id))
+    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
         return Triangle_Intersects_Capsule(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Triangle_BarycentricInsideTriangle_Static_float3(duk_context* ctx)
 {
-    float3* uvw = GetCheckedValueObject<float3>(ctx, 0, float3_Id);
+    float3* uvw = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
     bool ret = Triangle::BarycentricInsideTriangle(*uvw);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -373,9 +373,9 @@ static duk_ret_t Triangle_BarycentricInsideTriangle_Static_float3(duk_context* c
 
 static duk_ret_t Triangle_Area2D_Static_float2_float2_float2(duk_context* ctx)
 {
-    float2* p1 = GetCheckedValueObject<float2>(ctx, 0, float2_Id);
-    float2* p2 = GetCheckedValueObject<float2>(ctx, 1, float2_Id);
-    float2* p3 = GetCheckedValueObject<float2>(ctx, 2, float2_Id);
+    float2* p1 = GetCheckedValueObject<float2>(ctx, 0, float2_ID);
+    float2* p2 = GetCheckedValueObject<float2>(ctx, 1, float2_ID);
+    float2* p3 = GetCheckedValueObject<float2>(ctx, 2, float2_ID);
     float ret = Triangle::Area2D(*p1, *p2, *p3);
     duk_push_number(ctx, ret);
     return 1;
@@ -385,7 +385,7 @@ static duk_ret_t Triangle_FromString_Static_string(duk_context* ctx)
 {
     string str(duk_require_string(ctx, 0));
     Triangle ret = Triangle::FromString(str);
-    PushValueObjectCopy<Triangle>(ctx, ret, Triangle_Id, Triangle_Finalizer);
+    PushValueObjectCopy<Triangle>(ctx, ret, Triangle_ID, Triangle_Finalizer);
     return 1;
 }
 
@@ -424,7 +424,7 @@ void Expose_Triangle(duk_context* ctx)
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Triangle_Functions);
     duk_put_prop_string(ctx, -2, "prototype");
-    duk_put_global_string(ctx, Triangle_Id);
+    duk_put_global_string(ctx, Triangle_ID);
 }
 
 }
