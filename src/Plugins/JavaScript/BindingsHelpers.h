@@ -114,7 +114,7 @@ template<class T> void PushValueObjectVector(duk_context* ctx, Urho3D::Vector<T>
 template<class T> T* GetWeakObject(duk_context* ctx, duk_idx_t stackIndex)
 {
     T* obj = nullptr;
-    WeakPtr<Object>* ptr = GetWeakPtr(ctx, stackIndex);
+    Urho3D::WeakPtr<Urho3D::Object>* ptr = GetWeakPtr(ctx, stackIndex);
     if (ptr)
         obj = dynamic_cast<T*>(ptr->Get());
     return obj;
@@ -150,7 +150,7 @@ template<class T> Urho3D::Vector<T> GetValueObjectVector(duk_context* ctx, duk_i
         for (duk_size_t i = 0; i < len; ++i)
         {
             duk_get_prop_index(ctx, stackIndex, i);
-            T* obj = GetObject(ctx, -1, typeName);
+            T* obj = GetValueObject<T>(ctx, -1, typeName);
             if (obj)
                 ret.Push(T(*obj));
             duk_pop(ctx);
@@ -170,7 +170,7 @@ template<class T> Urho3D::Vector<T*> GetWeakObjectVector(duk_context* ctx, duk_i
         for (duk_size_t i = 0; i < len; ++i)
         {
             duk_get_prop_index(ctx, stackIndex, i);
-            T* obj = GetWeakObject(ctx, -1);
+            T* obj = GetWeakObject<T>(ctx, -1);
             if (obj)
                 ret.Push(obj);
             duk_pop(ctx);
@@ -190,7 +190,7 @@ template<class T> Urho3D::Vector<Urho3D::SharedPtr<T> > GetWeakObjectSharedPtrVe
         for (duk_size_t i = 0; i < len; ++i)
         {
             duk_get_prop_index(ctx, stackIndex, i);
-            T* obj = GetWeakObject(ctx, -1);
+            T* obj = GetWeakObject<T>(ctx, -1);
             if (obj)
                 ret.Push(Urho3D::SharedPtr<T>(obj));
             duk_pop(ctx);
@@ -210,7 +210,7 @@ template<class T> Urho3D::Vector<Urho3D::WeakPtr<T> > GetWeakObjectWeakPtrVector
         for (duk_size_t i = 0; i < len; ++i)
         {
             duk_get_prop_index(ctx, stackIndex, i);
-            T* obj = GetWeakObject(ctx, -1);
+            T* obj = GetWeakObject<T>(ctx, -1);
             if (obj)
                 ret.Push(Urho3D::WeakPtr<T>(obj));
             duk_pop(ctx);
