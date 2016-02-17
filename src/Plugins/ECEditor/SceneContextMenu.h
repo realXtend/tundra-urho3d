@@ -56,7 +56,6 @@ public:
     Signal2<SceneContextMenu*, String> OnActionSelected;
 
 protected:
-
     String GetItemId(Menu *menu);
 
     void OnItemPressed(StringHash eventType, VariantMap& eventData);

@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "EcEditorApi.h"
+#include "ECEditorApi.h"
 #include "CoreTypes.h"
 #include "FrameworkFwd.h"
 

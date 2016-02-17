@@ -28,9 +28,16 @@ namespace Tundra
 {
 
 class Scene;
+class Entity;
+class IComponent;
+
 class TreeView;
 class SceneStructureItem;
 class SceneContextMenu;
+class ECEditorCommandStack;
+
+typedef WeakPtr<Entity> EntityWeakPtr;
+typedef WeakPtr<IComponent> ComponentWeakPtr;
 
 typedef WeakPtr<SceneContextMenu> SceneContextMenuWeakPtr;
 typedef WeakPtr<TreeView> TreeViewWeakPtr;
@@ -39,6 +46,7 @@ typedef WeakPtr<Window> UIWindowWeakPtr;
 typedef WeakPtr<ListView> ListViewWeakPtr;
 typedef WeakPtr<Object> ObjectWeakPtr;
 typedef SharedPtr<SceneStructureItem> SceneStructureItemPtr;
+typedef SharedPtr<ECEditorCommandStack> CommandStackPtr;
 
 class ECEDITOR_API SceneStructureWindow : public Object
 {
@@ -72,6 +80,7 @@ public:
     SceneStructureItem *FindItem(Object *obj);
 
 protected:
+    SceneStructureItem *FindItem(UIElement *element);
     SceneStructureItem *CreateItem(Object *obj, const String &text, SceneStructureItem *parent = 0);
 
     void OnSceneCreated(Scene* scene, Tundra::AttributeChange::Type change);
@@ -83,9 +92,7 @@ protected:
     void AddScene(Scene *scene);
 
     void HideContextMenu();
-    void ShowContextMenu(int x, int y);
-
-    Framework *framework_;
+    void ShowContextMenu(Object *obj, int x, int y);
 
     // Events
     void OnTogglePressed(SceneStructureItem *item);
@@ -94,6 +101,16 @@ protected:
     void OnContextMenuHide(StringHash eventType, VariantMap &eventData);
     void OnSelectionChanged(StringHash eventType, VariantMap &eventData);
 
+    void OnActionSelected(SceneContextMenu *contextMenu, String id);
+
+    bool ComponentSelected(IComponent *component) const;
+    bool EntitySelected(Entity *component) const;
+    void ClearSelection();
+    void SelectEntity(Entity *entity);
+    void SelectComponent(IComponent *component);
+
+    Framework *framework_;
+
 private:
     Scene *scene_;
 
@@ -101,6 +118,9 @@ private:
     SceneContextMenuWeakPtr contextMenu_;
     ListViewWeakPtr listView_;
     Vector<ListViewItem> listItems_;
+
+    Vector<EntityWeakPtr> selectedEntities_;
+    Vector<ComponentWeakPtr> selectedComponents_;
 };
 
 }

@@ -72,7 +72,7 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework) :
 
     listView_ = new ListView(framework->GetContext());
     listView_->SetStyle("HierarchyListView", style);
-    listView_->SetMultiselect(true);
+    //listView_->SetMultiselect(true);
     listView_->SetEnabled(true);
     listView_->SetFocusMode(FocusMode::FM_FOCUSABLE_DEFOCUSABLE);
     window_->AddChild(listView_);
@@ -121,14 +121,9 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework) :
 
     contextMenu_ = new SceneContextMenu(framework->GetContext());
     contextMenu_->Widget()->SetStyle("Window", style);
-    
-    Menu *m = contextMenu_->CreateItem("newEntity", "New entity...");
-    m = contextMenu_->CreateItem("saveScene", "Save scene as...");
-    m = contextMenu_->CreateItem("exportScene", "Export...");
-    m = contextMenu_->CreateItem("importScene", "Import...");
-    m = contextMenu_->CreateItem("openScene", "Open new Scene...");
 
     contextMenu_->Widget()->SetPosition(IntVector2(100, 100));
+    contextMenu_->OnActionSelected.Connect(this, &SceneStructureWindow::OnActionSelected);
     GetSubsystem<UI>()->GetRoot()->AddChild(contextMenu_->Widget());
 
     framework->Scene()->SceneCreated.Connect(this, &SceneStructureWindow::OnSceneCreated);
@@ -195,8 +190,25 @@ void SceneStructureWindow::OnItemClicked(StringHash /*eventType*/, VariantMap &e
         }
         else if (button == 4) // RIGHT BUTTON
         {
-            Urho3D::Input* input = GetSubsystem<Urho3D::Input>();
-            ShowContextMenu(input->GetMousePosition().x_, input->GetMousePosition().y_);
+            ClearSelection();
+            listView_->SetSelection(listView_->FindItem(item));
+            SceneStructureItem *strucutureItem = FindItem(item);
+            Object *data = strucutureItem->Data();
+            if (IComponent *c = dynamic_cast<IComponent*>(data))
+            {
+                SelectComponent(c);
+            }
+            else if (Entity *e = dynamic_cast<Entity*>(data))
+            {
+                SelectEntity(e);
+            }
+
+
+            if (strucutureItem != NULL)
+            {
+                Urho3D::Input* input = GetSubsystem<Urho3D::Input>();
+                ShowContextMenu(strucutureItem->Data(), input->GetMousePosition().x_, input->GetMousePosition().y_);
+            }
         }
     }
 }
@@ -291,10 +303,23 @@ void SceneStructureWindow::HideContextMenu()
         contextMenu_->Close();
 }
 
-void SceneStructureWindow::ShowContextMenu(int x, int y)
+void SceneStructureWindow::ShowContextMenu(Object *obj, int x, int y)
 {
     if (contextMenu_.Null())
         return;
+
+    contextMenu_->Clear();
+    if (dynamic_cast<IComponent*>(obj) != NULL)
+    {
+        Menu *m = contextMenu_->CreateItem("removeComponent", "Remove");
+        m = contextMenu_->CreateItem("editComponent", "Edit");
+    }
+    else if (dynamic_cast<Entity*>(obj) != NULL)
+    {
+        Menu *m = contextMenu_->CreateItem("removeEntity", "Remove");
+        m = contextMenu_->CreateItem("addComponent", "New Component");
+        m = contextMenu_->CreateItem("editEntity", "Edit");
+    }
 
     contextMenu_->Widget()->SetPosition(x, y);
     contextMenu_->Widget()->BringToFront();
@@ -342,6 +367,78 @@ SceneStructureItem *SceneStructureWindow::FindItem(Object *obj)
             return listItems_[i].item_;
     }
     return NULL;
+}
+
+SceneStructureItem *SceneStructureWindow::FindItem(UIElement *element)
+{
+    for (unsigned i = 0; i < listItems_.Size(); ++i)
+    {
+        if (listItems_[i].item_->Widget() == element)
+            return listItems_[i].item_;
+    }
+    return NULL;
+}
+
+void SceneStructureWindow::OnActionSelected(SceneContextMenu *contextMenu, String id)
+{
+    if (id == "addComponent")
+    {
+        for (unsigned int i = 0; i < selectedComponents_.Size(); i++)
+            selectedComponents_[i]->ParentEntity()->RemoveComponent(selectedComponents_[i]->TypeName());
+    }
+    if (id == "removeComponent")
+    {
+        for (unsigned int i = 0; i < selectedComponents_.Size(); i++)
+            selectedComponents_[i]->ParentEntity()->RemoveComponent(selectedComponents_[i]->TypeName());
+    }
+    else if (id == "removeEntity")
+    {
+        for (unsigned int i = 0; i < selectedEntities_.Size(); i++)
+            selectedEntities_[i]->ParentScene()->RemoveEntity(selectedEntities_[i]->Id());
+    }
+    RefreshView();
+}
+
+bool SceneStructureWindow::ComponentSelected(IComponent *component) const
+{
+    for (unsigned int i = 0; i < selectedComponents_.Size(); ++i)
+    {
+        if (component == selectedComponents_[i])
+            return true;
+    }
+    return false;
+}
+
+bool SceneStructureWindow::EntitySelected(Entity *entity) const
+{
+    for (unsigned int i = 0; i < selectedEntities_.Size(); ++i)
+    {
+        if (entity == selectedEntities_[i])
+            return true;
+    }
+    return false;
+}
+
+void SceneStructureWindow::SelectEntity(Entity *entity)
+{
+    if (!EntitySelected(entity))
+    {
+        selectedEntities_.Push(EntityWeakPtr(entity));
+    }
+}
+
+void SceneStructureWindow::SelectComponent(IComponent *component)
+{
+    if (!ComponentSelected(component))
+    {
+        selectedComponents_.Push(ComponentWeakPtr(component));
+    }
+}
+
+void SceneStructureWindow::ClearSelection()
+{
+    selectedEntities_.Clear();
+    selectedComponents_.Clear();
 }
 
 }
