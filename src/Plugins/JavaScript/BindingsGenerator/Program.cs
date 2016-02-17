@@ -305,9 +305,9 @@ namespace BindingsGenerator
                 {
                     /// \todo This needs the id & finalizer, mark dependencies
                     if (!IsRefCounted(templateType))
-                        return "PushValueObjectArray<" + templateType + ">(ctx, " + source + ", " +  ClassIdentifier(typeName) + ", " + typeName + "_Finalizer);";
+                        return "PushValueObjectVector<" + templateType + ">(ctx, " + source + ", " +  ClassIdentifier(typeName) + ", " + typeName + "_Finalizer);";
                     else
-                        return "PushWeakObjectArray<" + templateType + ">(ctx, " + source + ");";
+                        return "PushWeakObjectVector<" + templateType + ">(ctx, " + source + ");";
                 }
             }
             else
