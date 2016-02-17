@@ -27,6 +27,7 @@ namespace BindingsGenerator
         static List<string> exposeTheseClasses = new List<string>();
         static string fileBasePath = "";
         static Dictionary<string, string> classHeaderFiles = new Dictionary<string, string>();
+        static Dictionary<string, bool> isRefCounted = new Dictionary<string, bool>();
         static string[] headerFiles = null;
 
         static void Main(string[] args)
@@ -68,17 +69,21 @@ namespace BindingsGenerator
             {
                 if (classSymbol.kind == "class" && (exposeTheseClasses.Count == 0 || exposeTheseClasses.Contains(StripNamespace(classSymbol.name))))
                 {
-                    classNames.Add(classSymbol.name);
+                    string typeName = SanitateTypeName(classSymbol.name);
+
+                    classNames.Add(typeName);
+                    isRefCounted[typeName] = IsRefCounted(classSymbol);
+
                     if (headerFiles != null)
                     {
                         foreach (string str in headerFiles)
                         {
-                            if (str.EndsWith(classSymbol.name + ".h"))
+                            if (str.EndsWith(typeName + ".h"))
                             {
                                 string sanitated = str.Substring(fileBasePath.Length).Replace('\\', '/');
                                 if (sanitated.StartsWith("/"))
                                     sanitated = sanitated.Substring(1);
-                                classHeaderFiles[classSymbol.name] = sanitated;
+                                classHeaderFiles[typeName] = sanitated;
                                 break;
                             }
                         }
@@ -88,7 +93,7 @@ namespace BindingsGenerator
 
             foreach (Symbol classSymbol in s.symbolsByName.Values)
             {
-                if (classNames.Contains(classSymbol.name))
+                if (classNames.Contains(SanitateTypeName(classSymbol.name)))
                     GenerateClassBindings(classSymbol, outputDirectory);
             }
         }
@@ -164,7 +169,7 @@ namespace BindingsGenerator
 
         static string FindIncludeForClass(string name)
         {
-            name = StripNamespace(name);
+            name = SanitateTypeName(name);
             if (classHeaderFiles.ContainsKey(name))
                 return classHeaderFiles[name];
             else
@@ -174,7 +179,7 @@ namespace BindingsGenerator
         static string ExtractNamespace(string className)
         {
             int separatorIndex = className.LastIndexOf("::");
-            if (separatorIndex > 0)
+            if (separatorIndex > 0 && !className.StartsWith("AttributeChange"))
                 return className.Substring(0, separatorIndex);
             else
                 return "";
@@ -183,7 +188,7 @@ namespace BindingsGenerator
         static string StripNamespace(string className)
         {
             int separatorIndex = className.LastIndexOf("::");
-            if (separatorIndex > 0)
+            if (separatorIndex > 0 && !className.StartsWith("AttributeChange"))
                 return className.Substring(separatorIndex + 2);
             else
                 return className;
@@ -202,6 +207,13 @@ namespace BindingsGenerator
         {
             typeName = SanitateTypeName(typeName);
 
+            if (typeName.EndsWith("Ptr"))
+            {
+                typeName = typeName.Substring(0, typeName.Length - 3);
+                if (typeName == "Component")
+                    typeName = "IComponent";
+            }
+
             if (Symbol.IsNumberType(typeName))
             {
                 if (typeName == "double")
@@ -217,10 +229,38 @@ namespace BindingsGenerator
                 return typeName + " " + varName + "(duk_require_string(ctx, " + stackIndex + "));";
             else if (!Symbol.IsPODType(typeName))
             {
-                if (!nullCheck)
-                    return typeName + "* " + varName + " = GetObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
+                if (typeName.EndsWith("Vector"))
+                {
+                    string templateType = typeName.Substring(0, typeName.Length - 6);
+                    if (templateType == "Component")
+                        templateType = "IComponent";
+
+                    if (templateType == "String" || templateType == "string")
+                        return typeName + " " + varName + " = GetStringVector(ctx, " + stackIndex + ");";
+                    else
+                    {
+                        if (!IsRefCounted(templateType))
+                            return typeName + " " + varName + " = GetValueObjectVector<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
+                        else
+                            return typeName + " " + varName + " = GetWeakObjectVector<" + typeName + ">(ctx, " + stackIndex + ");";
+                    }
+                }
                 else
-                    return typeName + "* " + varName + " = GetCheckedObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
+
+                if (!IsRefCounted(typeName))
+                {
+                    if (!nullCheck)
+                        return typeName + "* " + varName + " = GetValueObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
+                    else
+                        return typeName + "* " + varName + " = GetCheckedValueObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
+                }
+                else
+                {
+                    if (!nullCheck)
+                        return typeName + "* " + varName + " = GetWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
+                    else
+                        return typeName + "* " + varName + " = GetCheckedWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
+                }
             }
             else
                 throw new System.Exception("Unsupported type " + typeName + " for GenerateGetVariable()!");
@@ -238,6 +278,12 @@ namespace BindingsGenerator
         static string GeneratePushToStack(string typeName, string source)
         {
             typeName = SanitateTypeName(typeName);
+            if (typeName.EndsWith("Ptr"))
+            {
+                typeName = typeName.Substring(0, typeName.Length - 3);
+                if (typeName == "Component")
+                    typeName = "IComponent";
+            }
 
             if (Symbol.IsNumberType(typeName))
                 return "duk_push_number(ctx, " + source + ");";
@@ -247,10 +293,29 @@ namespace BindingsGenerator
                 return "duk_push_string(ctx, " + source + ".c_str());";
             else if (typeName == "String")
                 return "duk_push_string(ctx, " + source + ".c_str());";
+            else if (typeName.EndsWith("Vector"))
+            {
+                string templateType = typeName.Substring(0, typeName.Length - 6);
+                if (templateType == "Component")
+                    templateType = "IComponent";
+
+                if (templateType == "String" || templateType == "string")
+                    return "PushStringVector(ctx, " + source + ");";
+                else
+                {
+                    /// \todo This needs the id & finalizer, mark dependencies
+                    if (!IsRefCounted(templateType))
+                        return "PushValueObjectVector<" + templateType + ">(ctx, " + source + ", " +  ClassIdentifier(typeName) + ", " + typeName + "_Finalizer);";
+                    else
+                        return "PushWeakObjectVector<" + templateType + ">(ctx, " + source + ");";
+                }
+            }
             else
             {
-                typeName = SanitateTypeName(typeName);
-                return "PushValueObjectCopy<" + typeName + ">(ctx, " + source + ", " + ClassIdentifier(typeName) + ", " + typeName + "_Finalizer);";
+                if (!IsRefCounted(typeName))
+                    return "PushValueObjectCopy<" + typeName + ">(ctx, " + source + ", " + ClassIdentifier(typeName) + ", " + typeName + "_Finalizer);";
+                else
+                    return "PushWeakObject<" + typeName + ">(ctx, " + source + ");";
             }
         }
 
@@ -266,7 +331,10 @@ namespace BindingsGenerator
                 typeName = classSymbol.name;
             typeName = StripNamespace(typeName);
 
-            return typeName + "* " + varName + " = GetThisObject<" + typeName + ">(ctx, " + ClassIdentifier(typeName) + ");";
+            if (!IsRefCounted(classSymbol))
+                return typeName + "* " + varName + " = GetThisValueObject<" + typeName + ">(ctx, " + ClassIdentifier(typeName) + ");";
+            else
+                return typeName + "* " + varName + " = GetThisWeakObject<" + typeName + ">(ctx);";
         }
 
         static string GenerateArgCheck(Parameter p, int stackIndex)
@@ -280,7 +348,7 @@ namespace BindingsGenerator
             else if (typeName == "string" || typeName == "String")
                 return "duk_is_string(ctx, " + stackIndex + ")";
             if (!Symbol.IsPODType(typeName))
-                return "GetObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ")";
+                return "GetValueObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ")";
             else
                 throw new System.Exception("Unsupported type " + typeName + " for GenerateArgCheck()!");
         }
@@ -293,7 +361,7 @@ namespace BindingsGenerator
             tw.WriteLine(Indent(1) + "if (obj)");
             tw.WriteLine(Indent(1) + "{");
             tw.WriteLine(Indent(2) + "delete obj;");
-            tw.WriteLine(Indent(2) + "SetObject(ctx, 0, 0, " + ClassIdentifier(classSymbol.name) + ");");
+            tw.WriteLine(Indent(2) + "SetValueObject(ctx, 0, 0, " + ClassIdentifier(classSymbol.name) + ");");
             tw.WriteLine(Indent(1) + "}");
             tw.WriteLine(Indent(1) + "return 0;");
             tw.WriteLine("}");
@@ -356,7 +424,10 @@ namespace BindingsGenerator
                 if (child.isStatic == generateStatic && child.kind == "function" && !child.name.Contains("operator") && child.visibilityLevel == VisibilityLevel.Public)
                 {
                     if (!IsScriptable(child))
+                    {
+                        Console.WriteLine(child.name + " in class " + classSymbol.name + " is not scriptable");
                         continue;
+                    }
 
                     // \hack Unimplemented MathGeolib functions. Remove these checks when fixed
                     if (className == "float4" && child.name == "Orthogonalize")
@@ -366,28 +437,42 @@ namespace BindingsGenerator
 
                     bool isClassCtor = !child.isStatic && (child.name == className);
                     if (!isClassCtor && !IsSupportedType(child.type))
+                    {
+                        Console.WriteLine(child.name + " in class " + classSymbol.name + " unsupported return value type " + child.type);
                         continue;
+                    }
                     // Bindings convention: refcounted objects like Scene or Component can not be constructed from script, but rather must be acquired from the framework
-                    if (isClassCtor && classSymbol.FindChildByName("Refs") != null && classSymbol.FindChildByName("WeakRefs") != null)
+                    if (isClassCtor && IsRefCounted(classSymbol))
                         continue;
 
                     bool badParameters = false;
                     for (int i = 0; i < child.parameters.Count; ++i)
                     {
-                        if (!IsSupportedType(child.parameters[i].BasicType()))
+                        string t = child.parameters[i].BasicType();
+
+                        if (!IsSupportedType(t))
                         {
+                            Console.WriteLine("Unsupported parameter type " + t + " in function " + child.name + " of " + className);
                             badParameters = true;
                             break;
                         }
-                        // For now skip all pointers. Will be needed later when exposing scene & components
-                        if (child.parameters[i].BasicType().Contains('*'))
+                        // If it's a pointer, it must be one of the exposed classes which is refcounted
+                        if (t.Contains('*'))
                         {
-                            badParameters = true;
-                            break;
+                            string st = SanitateTypeName(t);
+                            if (!IsRefCounted(st) || !classNames.Contains(st))
+                            {
+                                Console.WriteLine("Unsupported pointer parameter " + t + " in function " + child.name + " of " + className);
+                                badParameters = true;
+                                break;
+                            }
                         }
                     }
                     if (badParameters)
+                    {
+                        Console.WriteLine(child.name + " in class " + classSymbol.name + " unsupported parameters");
                         continue;
+                    }
 
                     string baseFunctionName = "";
                     if (!isClassCtor)
@@ -434,20 +519,24 @@ namespace BindingsGenerator
                         string args = "";
                         for (int i = 0; i < child.parameters.Count; ++i)
                         {
-                            tw.WriteLine(Indent(1) + GenerateGetFromStack(child.parameters[i].BasicType(), i, child.parameters[i].name, child.parameters[i].IsAReference())); 
+                            tw.WriteLine(Indent(1) + GenerateGetFromStack(child.parameters[i].BasicType(), i, child.parameters[i].name, child.parameters[i].IsAReference()));
                             if (i > 0)
                                 args += ", ";
                             if (NeedDereference(child.parameters[i]))
                                 args += "*";
-                                  
-                            args += child.parameters[i].name;
+                            
+                            // Instantiate shared ptr now if needed
+                            if (!child.parameters[i].BasicType().EndsWith("Ptr"))
+                                args += child.parameters[i].name;
+                            else
+                                args += child.parameters[i].BasicType() + "(" + child.parameters[i].name + ")";
                         }
                         tw.WriteLine(Indent(1) + className + "* newObj = new " + className + "(" + args + ");");
                         tw.WriteLine(Indent(1) + GeneratePushConstructorResultToStack(className, "newObj"));
                         tw.WriteLine(Indent(1) + "return 0;");
                         tw.WriteLine("}");
-                        tw.WriteLine("");   
-                    }          
+                        tw.WriteLine("");
+                    }
                     else
                     {
                         tw.WriteLine("static duk_ret_t " + functionName + DukSignature());
@@ -470,7 +559,11 @@ namespace BindingsGenerator
                             if (NeedDereference(child.parameters[i]))
                                 args += "*";
 
-                            args += child.parameters[i].name;
+                            // Instantiate shared ptr now if needed
+                            if (!child.parameters[i].BasicType().EndsWith("Ptr"))
+                                args += child.parameters[i].name;
+                            else
+                                args += child.parameters[i].BasicType() + "(" + child.parameters[i].name + ")";
                         }
                         if (child.type == "void")
                         {
@@ -533,7 +626,7 @@ namespace BindingsGenerator
 
                 string prefix = first ? "" : ",";
 
-                if (kvp.Value.Count >= 2)    
+                if (kvp.Value.Count >= 2)
                     tw.WriteLine(Indent(1) + prefix + "{\"" + kvp.Value[0].function.name + "\", " + kvp.Key + "_Selector, DUK_VARARGS}");
                 else
                     tw.WriteLine(Indent(1) + prefix + "{\"" + kvp.Value[0].function.name + "\", " + kvp.Value[0].functionName + ", " + kvp.Value[0].parameters.Count + "}");
@@ -613,6 +706,20 @@ namespace BindingsGenerator
             return className + "_Id";
         }
 
+        static bool IsRefCounted(Symbol classSymbol)
+        {
+            // We don't have access to Urho includes, but can check for the presence of macros. \todo Better checks or explicit listings of known refcounted classes if needed
+            return classSymbol.FindChildByName("URHO3D_OBJECT") != null || classSymbol.FindChildByName("COMPONENT_NAME") != null;
+        }
+
+        static bool IsRefCounted(string className)
+        {
+            if (isRefCounted.ContainsKey(className))
+                return isRefCounted[className];
+            else
+                return false;
+        }
+
         static string SanitateTypeName(string type)
         {
             string t = type.Trim();
@@ -640,7 +747,7 @@ namespace BindingsGenerator
         static bool IsSupportedType(string typeName)
         {
             string t = SanitateTypeName(typeName);
-            return t == "void" || Symbol.IsPODType(t) || classNames.Contains(t) || t == "string" || t == "String";
+            return t == "void" || Symbol.IsPODType(t) || classNames.Contains(t) || t.EndsWith("Ptr") || t == "string" || t == "String" || t.EndsWith("Vector");
         }
 
         static bool IsBadType(string type)
@@ -653,7 +760,7 @@ namespace BindingsGenerator
 
         static bool NeedDereference(Parameter p)
         {
-            if (p.IsAPointer())
+            if (p.IsAPointer() || p.BasicType().EndsWith("Ptr"))
                 return false;
             if (Symbol.IsPODType(p.BasicType()))
                 return false;
