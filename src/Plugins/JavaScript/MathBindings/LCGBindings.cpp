@@ -6,6 +6,11 @@
 #include "BindingsHelpers.h"
 #include "Algorithm/Random/LCG.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4800)
+#endif
+
+
 using namespace std;
 
 namespace JSBindings

@@ -5,6 +5,12 @@
 #include "CoreTypes.h"
 #include "BindingsHelpers.h"
 #include "Geometry/Circle.h"
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4800)
+#endif
+
+#include "Math/float3.h"
 #include "Geometry/Plane.h"
 #include "Math/float3x3.h"
 #include "Math/float3x4.h"
@@ -21,6 +27,7 @@ using namespace std;
 namespace JSBindings
 {
 
+extern const char* float3_ID;
 extern const char* Plane_ID;
 extern const char* float3x3_ID;
 extern const char* float3x4_ID;
@@ -32,6 +39,7 @@ extern const char* Ray_ID;
 extern const char* OBB_ID;
 extern const char* AABB_ID;
 
+duk_ret_t float3_Finalizer(duk_context* ctx);
 duk_ret_t Plane_Finalizer(duk_context* ctx);
 duk_ret_t float3x3_Finalizer(duk_context* ctx);
 duk_ret_t float3x4_Finalizer(duk_context* ctx);
@@ -78,12 +86,90 @@ static duk_ret_t Circle_Ctor(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Circle_Ctor_float3_float3_float(duk_context* ctx)
+{
+    float3* center = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3* normal = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float radius = (float)duk_require_number(ctx, 2);
+    Circle* newObj = new Circle(*center, *normal, radius);
+    PushConstructorResult<Circle>(ctx, newObj, Circle_ID, Circle_Finalizer);
+    return 0;
+}
+
+static duk_ret_t Circle_BasisU(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float3 ret = thisObj->BasisU();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Circle_BasisV(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float3 ret = thisObj->BasisV();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Circle_GetPoint_float(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float angleRadians = (float)duk_require_number(ctx, 0);
+    float3 ret = thisObj->GetPoint(angleRadians);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Circle_GetPoint_float_float(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float angleRadians = (float)duk_require_number(ctx, 0);
+    float d = (float)duk_require_number(ctx, 1);
+    float3 ret = thisObj->GetPoint(angleRadians, d);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Circle_CenterPoint(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float3 ret = thisObj->CenterPoint();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Circle_Centroid(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float3 ret = thisObj->Centroid();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Circle_ExtremePoint_float3(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float3* direction = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ExtremePoint(*direction);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
 static duk_ret_t Circle_ContainingPlane(duk_context* ctx)
 {
     Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
     Plane ret = thisObj->ContainingPlane();
     PushValueObjectCopy<Plane>(ctx, ret, Plane_ID, Plane_Finalizer);
     return 1;
+}
+
+static duk_ret_t Circle_Translate_float3(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float3* offset = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->Translate(*offset);
+    return 0;
 }
 
 static duk_ret_t Circle_Transform_float3x3(duk_context* ctx)
@@ -116,6 +202,52 @@ static duk_ret_t Circle_Transform_Quat(duk_context* ctx)
     Quat* transform = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
     thisObj->Transform(*transform);
     return 0;
+}
+
+static duk_ret_t Circle_EdgeContains_float3_float(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float maxDistance = (float)duk_require_number(ctx, 1);
+    bool ret = thisObj->EdgeContains(*point, maxDistance);
+    duk_push_boolean(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Circle_DistanceToEdge_float3(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float ret = thisObj->DistanceToEdge(*point);
+    duk_push_number(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Circle_DistanceToDisc_float3(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float ret = thisObj->DistanceToDisc(*point);
+    duk_push_number(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Circle_ClosestPointToEdge_float3(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ClosestPointToEdge(*point);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Circle_ClosestPointToDisc_float3(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ClosestPointToDisc(*point);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
 }
 
 static duk_ret_t Circle_Intersects_Plane(duk_context* ctx)
@@ -162,6 +294,26 @@ static duk_ret_t Circle_ToString(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Circle_Ctor_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 0)
+        return Circle_Ctor(ctx);
+    if (numArgs == 3 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && duk_is_number(ctx, 2))
+        return Circle_Ctor_float3_float3_float(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t Circle_GetPoint_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 1 && duk_is_number(ctx, 0))
+        return Circle_GetPoint_float(ctx);
+    if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
+        return Circle_GetPoint_float_float(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
 static duk_ret_t Circle_Transform_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -189,8 +341,20 @@ static duk_ret_t Circle_IntersectsDisc_Selector(duk_context* ctx)
 }
 
 static const duk_function_list_entry Circle_Functions[] = {
-    {"ContainingPlane", Circle_ContainingPlane, 0}
+    {"BasisU", Circle_BasisU, 0}
+    ,{"BasisV", Circle_BasisV, 0}
+    ,{"GetPoint", Circle_GetPoint_Selector, DUK_VARARGS}
+    ,{"CenterPoint", Circle_CenterPoint, 0}
+    ,{"Centroid", Circle_Centroid, 0}
+    ,{"ExtremePoint", Circle_ExtremePoint_float3, 1}
+    ,{"ContainingPlane", Circle_ContainingPlane, 0}
+    ,{"Translate", Circle_Translate_float3, 1}
     ,{"Transform", Circle_Transform_Selector, DUK_VARARGS}
+    ,{"EdgeContains", Circle_EdgeContains_float3_float, 2}
+    ,{"DistanceToEdge", Circle_DistanceToEdge_float3, 1}
+    ,{"DistanceToDisc", Circle_DistanceToDisc_float3, 1}
+    ,{"ClosestPointToEdge", Circle_ClosestPointToEdge_float3, 1}
+    ,{"ClosestPointToDisc", Circle_ClosestPointToDisc_float3, 1}
     ,{"Intersects", Circle_Intersects_Plane, 1}
     ,{"IntersectsDisc", Circle_IntersectsDisc_Selector, DUK_VARARGS}
     ,{"ToString", Circle_ToString, 0}
@@ -199,7 +363,7 @@ static const duk_function_list_entry Circle_Functions[] = {
 
 void Expose_Circle(duk_context* ctx)
 {
-    duk_push_c_function(ctx, Circle_Ctor, DUK_VARARGS);
+    duk_push_c_function(ctx, Circle_Ctor_Selector, DUK_VARARGS);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Circle_Functions);
     DefineProperty(ctx, "r", Circle_Get_r, Circle_Set_r);

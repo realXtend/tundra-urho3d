@@ -5,11 +5,16 @@
 #include "CoreTypes.h"
 #include "BindingsHelpers.h"
 #include "Geometry/Triangle.h"
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4800)
+#endif
+
+#include "Math/float3.h"
 #include "Math/float3x3.h"
 #include "Math/float3x4.h"
 #include "Math/float4x4.h"
 #include "Math/Quat.h"
-#include "Math/float3.h"
 #include "Math/float2.h"
 #include "Geometry/LineSegment.h"
 #include "Geometry/Plane.h"
@@ -18,7 +23,6 @@
 #include "Geometry/Capsule.h"
 #include "Geometry/OBB.h"
 #include "Geometry/Frustum.h"
-#include "Geometry/Line.h"
 #include "Algorithm/Random/LCG.h"
 
 using namespace std;
@@ -26,11 +30,11 @@ using namespace std;
 namespace JSBindings
 {
 
+extern const char* float3_ID;
 extern const char* float3x3_ID;
 extern const char* float3x4_ID;
 extern const char* float4x4_ID;
 extern const char* Quat_ID;
-extern const char* float3_ID;
 extern const char* float2_ID;
 extern const char* LineSegment_ID;
 extern const char* Plane_ID;
@@ -39,14 +43,13 @@ extern const char* Sphere_ID;
 extern const char* Capsule_ID;
 extern const char* OBB_ID;
 extern const char* Frustum_ID;
-extern const char* Line_ID;
 extern const char* LCG_ID;
 
+duk_ret_t float3_Finalizer(duk_context* ctx);
 duk_ret_t float3x3_Finalizer(duk_context* ctx);
 duk_ret_t float3x4_Finalizer(duk_context* ctx);
 duk_ret_t float4x4_Finalizer(duk_context* ctx);
 duk_ret_t Quat_Finalizer(duk_context* ctx);
-duk_ret_t float3_Finalizer(duk_context* ctx);
 duk_ret_t float2_Finalizer(duk_context* ctx);
 duk_ret_t LineSegment_Finalizer(duk_context* ctx);
 duk_ret_t Plane_Finalizer(duk_context* ctx);
@@ -55,7 +58,6 @@ duk_ret_t Sphere_Finalizer(duk_context* ctx);
 duk_ret_t Capsule_Finalizer(duk_context* ctx);
 duk_ret_t OBB_Finalizer(duk_context* ctx);
 duk_ret_t Frustum_Finalizer(duk_context* ctx);
-duk_ret_t Line_Finalizer(duk_context* ctx);
 duk_ret_t LCG_Finalizer(duk_context* ctx);
 
 const char* Triangle_ID = "Triangle";
@@ -75,6 +77,24 @@ static duk_ret_t Triangle_Ctor(duk_context* ctx)
 {
     Triangle* newObj = new Triangle();
     PushConstructorResult<Triangle>(ctx, newObj, Triangle_ID, Triangle_Finalizer);
+    return 0;
+}
+
+static duk_ret_t Triangle_Ctor_float3_float3_float3(duk_context* ctx)
+{
+    float3* a = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3* b = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3* c = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    Triangle* newObj = new Triangle(*a, *b, *c);
+    PushConstructorResult<Triangle>(ctx, newObj, Triangle_ID, Triangle_Finalizer);
+    return 0;
+}
+
+static duk_ret_t Triangle_Translate_float3(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3* offset = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->Translate(*offset);
     return 0;
 }
 
@@ -110,6 +130,79 @@ static duk_ret_t Triangle_Transform_Quat(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Triangle_BarycentricUVW_float3(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->BarycentricUVW(*point);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_BarycentricUV_float3(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float2 ret = thisObj->BarycentricUV(*point);
+    PushValueObjectCopy<float2>(ctx, ret, float2_ID, float2_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_Point_float3(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3* uvw = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->Point(*uvw);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_Point_float_float_float(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float u = (float)duk_require_number(ctx, 0);
+    float v = (float)duk_require_number(ctx, 1);
+    float w = (float)duk_require_number(ctx, 2);
+    float3 ret = thisObj->Point(u, v, w);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_Point_float2(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float2* uv = GetCheckedValueObject<float2>(ctx, 0, float2_ID);
+    float3 ret = thisObj->Point(*uv);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_Point_float_float(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float u = (float)duk_require_number(ctx, 0);
+    float v = (float)duk_require_number(ctx, 1);
+    float3 ret = thisObj->Point(u, v);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_Centroid(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3 ret = thisObj->Centroid();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_CenterPoint(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3 ret = thisObj->CenterPoint();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
 static duk_ret_t Triangle_Area(duk_context* ctx)
 {
     Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
@@ -123,6 +216,24 @@ static duk_ret_t Triangle_Perimeter(duk_context* ctx)
     Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
     float ret = thisObj->Perimeter();
     duk_push_number(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Triangle_Vertex_int(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    int i = (int)duk_require_number(ctx, 0);
+    float3 ret = thisObj->Vertex(i);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_CornerPoint_int(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    int i = (int)duk_require_number(ctx, 0);
+    float3 ret = thisObj->CornerPoint(i);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
 
@@ -151,6 +262,65 @@ static duk_ret_t Triangle_PlaneCW(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Triangle_NormalCCW(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3 ret = thisObj->NormalCCW();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_NormalCW(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3 ret = thisObj->NormalCW();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_UnnormalizedNormalCCW(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3 ret = thisObj->UnnormalizedNormalCCW();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_UnnormalizedNormalCW(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3 ret = thisObj->UnnormalizedNormalCW();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_AnyPointFast(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3 ret = thisObj->AnyPointFast();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_ExtremePoint_float3(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3* direction = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ExtremePoint(*direction);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_ExtremePoint_float3_float(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3* direction = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float projectionDistance = (float)duk_require_number(ctx, 1);
+    float3 ret = thisObj->ExtremePoint(*direction, projectionDistance);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
 static duk_ret_t Triangle_BoundingAABB(duk_context* ctx)
 {
     Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
@@ -176,6 +346,16 @@ static duk_ret_t Triangle_IsDegenerate_float(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Triangle_Contains_float3_float(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float triangleThicknessSq = (float)duk_require_number(ctx, 1);
+    bool ret = thisObj->Contains(*point, triangleThicknessSq);
+    duk_push_boolean(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t Triangle_Contains_LineSegment_float(duk_context* ctx)
 {
     Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
@@ -196,6 +376,15 @@ static duk_ret_t Triangle_Contains_Triangle_float(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Triangle_Distance_float3(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float ret = thisObj->Distance(*point);
+    duk_push_number(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t Triangle_Distance_Sphere(duk_context* ctx)
 {
     Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
@@ -210,6 +399,15 @@ static duk_ret_t Triangle_Distance_Capsule(duk_context* ctx)
     Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
     Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
     float ret = thisObj->Distance(*capsule);
+    duk_push_number(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Triangle_DistanceSq_float3(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float ret = thisObj->DistanceSq(*point);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -268,6 +466,52 @@ static duk_ret_t Triangle_Intersects_Capsule(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Triangle_ProjectToAxis_float3_float_float(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3* axis = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float dMin = (float)duk_require_number(ctx, 1);
+    float dMax = (float)duk_require_number(ctx, 2);
+    thisObj->ProjectToAxis(*axis, dMin, dMax);
+    return 0;
+}
+
+static duk_ret_t Triangle_ClosestPoint_float3(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ClosestPoint(*point);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_RandomPointInside_LCG(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    LCG* rng = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float3 ret = thisObj->RandomPointInside(*rng);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_RandomVertex_LCG(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    LCG* rng = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float3 ret = thisObj->RandomVertex(*rng);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Triangle_RandomPointOnEdge_LCG(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    LCG* rng = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float3 ret = thisObj->RandomPointOnEdge(*rng);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
 static duk_ret_t Triangle_ToString(duk_context* ctx)
 {
     Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
@@ -311,6 +555,16 @@ static duk_ret_t Triangle_BitEquals_Triangle(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Triangle_Ctor_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 0)
+        return Triangle_Ctor(ctx);
+    if (numArgs == 3 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<float3>(ctx, 2, float3_ID))
+        return Triangle_Ctor_float3_float3_float3(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
 static duk_ret_t Triangle_Transform_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -325,9 +579,35 @@ static duk_ret_t Triangle_Transform_Selector(duk_context* ctx)
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
+static duk_ret_t Triangle_Point_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Triangle_Point_float3(ctx);
+    if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+        return Triangle_Point_float_float_float(ctx);
+    if (numArgs == 1 && GetValueObject<float2>(ctx, 0, float2_ID))
+        return Triangle_Point_float2(ctx);
+    if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
+        return Triangle_Point_float_float(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t Triangle_ExtremePoint_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Triangle_ExtremePoint_float3(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
+        return Triangle_ExtremePoint_float3_float(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
 static duk_ret_t Triangle_Contains_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
+        return Triangle_Contains_float3_float(ctx);
     if (numArgs == 2 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID) && duk_is_number(ctx, 1))
         return Triangle_Contains_LineSegment_float(ctx);
     if (numArgs == 2 && GetValueObject<Triangle>(ctx, 0, Triangle_ID) && duk_is_number(ctx, 1))
@@ -338,6 +618,8 @@ static duk_ret_t Triangle_Contains_Selector(duk_context* ctx)
 static duk_ret_t Triangle_Distance_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Triangle_Distance_float3(ctx);
     if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
         return Triangle_Distance_Sphere(ctx);
     if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
@@ -381,6 +663,42 @@ static duk_ret_t Triangle_Area2D_Static_float2_float2_float2(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Triangle_SignedArea_Static_float3_float3_float3_float3(duk_context* ctx)
+{
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3* a = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3* b = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    float3* c = GetCheckedValueObject<float3>(ctx, 3, float3_ID);
+    float ret = Triangle::SignedArea(*point, *a, *b, *c);
+    duk_push_number(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Triangle_IsDegenerate_Static_float3_float3_float3_float(duk_context* ctx)
+{
+    float3* p1 = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3* p2 = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3* p3 = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    float epsilon = (float)duk_require_number(ctx, 3);
+    bool ret = Triangle::IsDegenerate(*p1, *p2, *p3, epsilon);
+    duk_push_boolean(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Triangle_IntersectLineTri_Static_float3_float3_float3_float3_float3_float_float(duk_context* ctx)
+{
+    float3* linePos = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3* lineDir = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3* v0 = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    float3* v1 = GetCheckedValueObject<float3>(ctx, 3, float3_ID);
+    float3* v2 = GetCheckedValueObject<float3>(ctx, 4, float3_ID);
+    float u = (float)duk_require_number(ctx, 5);
+    float v = (float)duk_require_number(ctx, 6);
+    float ret = Triangle::IntersectLineTri(*linePos, *lineDir, *v0, *v1, *v2, u, v);
+    duk_push_number(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t Triangle_FromString_Static_string(duk_context* ctx)
 {
     string str(duk_require_string(ctx, 0));
@@ -390,18 +708,38 @@ static duk_ret_t Triangle_FromString_Static_string(duk_context* ctx)
 }
 
 static const duk_function_list_entry Triangle_Functions[] = {
-    {"Transform", Triangle_Transform_Selector, DUK_VARARGS}
+    {"Translate", Triangle_Translate_float3, 1}
+    ,{"Transform", Triangle_Transform_Selector, DUK_VARARGS}
+    ,{"BarycentricUVW", Triangle_BarycentricUVW_float3, 1}
+    ,{"BarycentricUV", Triangle_BarycentricUV_float3, 1}
+    ,{"Point", Triangle_Point_Selector, DUK_VARARGS}
+    ,{"Centroid", Triangle_Centroid, 0}
+    ,{"CenterPoint", Triangle_CenterPoint, 0}
     ,{"Area", Triangle_Area, 0}
     ,{"Perimeter", Triangle_Perimeter, 0}
+    ,{"Vertex", Triangle_Vertex_int, 1}
+    ,{"CornerPoint", Triangle_CornerPoint_int, 1}
     ,{"Edge", Triangle_Edge_int, 1}
     ,{"PlaneCCW", Triangle_PlaneCCW, 0}
     ,{"PlaneCW", Triangle_PlaneCW, 0}
+    ,{"NormalCCW", Triangle_NormalCCW, 0}
+    ,{"NormalCW", Triangle_NormalCW, 0}
+    ,{"UnnormalizedNormalCCW", Triangle_UnnormalizedNormalCCW, 0}
+    ,{"UnnormalizedNormalCW", Triangle_UnnormalizedNormalCW, 0}
+    ,{"AnyPointFast", Triangle_AnyPointFast, 0}
+    ,{"ExtremePoint", Triangle_ExtremePoint_Selector, DUK_VARARGS}
     ,{"BoundingAABB", Triangle_BoundingAABB, 0}
     ,{"IsFinite", Triangle_IsFinite, 0}
     ,{"IsDegenerate", Triangle_IsDegenerate_float, 1}
     ,{"Contains", Triangle_Contains_Selector, DUK_VARARGS}
     ,{"Distance", Triangle_Distance_Selector, DUK_VARARGS}
+    ,{"DistanceSq", Triangle_DistanceSq_float3, 1}
     ,{"Intersects", Triangle_Intersects_Selector, DUK_VARARGS}
+    ,{"ProjectToAxis", Triangle_ProjectToAxis_float3_float_float, 3}
+    ,{"ClosestPoint", Triangle_ClosestPoint_float3, 1}
+    ,{"RandomPointInside", Triangle_RandomPointInside_LCG, 1}
+    ,{"RandomVertex", Triangle_RandomVertex_LCG, 1}
+    ,{"RandomPointOnEdge", Triangle_RandomPointOnEdge_LCG, 1}
     ,{"ToString", Triangle_ToString, 0}
     ,{"SerializeToString", Triangle_SerializeToString, 0}
     ,{"SerializeToCodeString", Triangle_SerializeToCodeString, 0}
@@ -413,13 +751,16 @@ static const duk_function_list_entry Triangle_Functions[] = {
 static const duk_function_list_entry Triangle_StaticFunctions[] = {
     {"BarycentricInsideTriangle", Triangle_BarycentricInsideTriangle_Static_float3, 1}
     ,{"Area2D", Triangle_Area2D_Static_float2_float2_float2, 3}
+    ,{"SignedArea", Triangle_SignedArea_Static_float3_float3_float3_float3, 4}
+    ,{"IsDegenerate", Triangle_IsDegenerate_Static_float3_float3_float3_float, 4}
+    ,{"IntersectLineTri", Triangle_IntersectLineTri_Static_float3_float3_float3_float3_float3_float_float, 7}
     ,{"FromString", Triangle_FromString_Static_string, 1}
     ,{nullptr, nullptr, 0}
 };
 
 void Expose_Triangle(duk_context* ctx)
 {
-    duk_push_c_function(ctx, Triangle_Ctor, DUK_VARARGS);
+    duk_push_c_function(ctx, Triangle_Ctor_Selector, DUK_VARARGS);
     duk_put_function_list(ctx, -1, Triangle_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Triangle_Functions);

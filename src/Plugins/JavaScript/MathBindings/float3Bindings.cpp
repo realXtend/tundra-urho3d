@@ -5,6 +5,11 @@
 #include "CoreTypes.h"
 #include "BindingsHelpers.h"
 #include "Math/float3.h"
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4800)
+#endif
+
 #include "Math/float2.h"
 #include "Math/float4.h"
 #include "Geometry/Line.h"

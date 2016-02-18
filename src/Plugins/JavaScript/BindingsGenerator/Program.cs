@@ -69,7 +69,6 @@ namespace BindingsGenerator
             {
                 if (classSymbol.kind == "class" && (exposeTheseClasses.Count == 0 || exposeTheseClasses.Contains(StripNamespace(classSymbol.name))))
                 {
-                    Console.WriteLine("CLASS: " + classSymbol.name);
                     string typeName = SanitateTypeName(classSymbol.name);
 
                     classNames.Add(typeName);
@@ -117,6 +116,13 @@ namespace BindingsGenerator
             tw.WriteLine("#include \"CoreTypes.h\"");
             tw.WriteLine("#include \"BindingsHelpers.h\"");
             tw.WriteLine("#include \"" + FindIncludeForClass(classSymbol.name) + "\"");
+            tw.WriteLine("");
+            // Disable bool conversion warnings
+            tw.WriteLine("#ifdef _MSC_VER");
+            tw.WriteLine("#pragma warning(disable: 4800)");
+            tw.WriteLine("#endif");
+            tw.WriteLine("");
+
             // Find dependency classes and refer to them
             HashSet<string> dependencies = FindDependencies(classSymbol);
             // Includes
@@ -255,7 +261,6 @@ namespace BindingsGenerator
                             return typeName + " " + varName + " = GetWeakObjectVector<" + typeName + ">(ctx, " + stackIndex + ");";
                     }
                 }
-                else
 
                 if (!IsRefCounted(typeName))
                 {
@@ -315,10 +320,18 @@ namespace BindingsGenerator
                 {
                     /// \todo This needs the id & finalizer, mark dependencies
                     if (!IsRefCounted(templateType))
-                        return "PushValueObjectVector<" + templateType + ">(ctx, " + source + ", " +  ClassIdentifier(templateType) + ", " + templateType + "_Finalizer);";
+                        return "PushValueObjectArray(ctx, " + source + ", " +  ClassIdentifier(templateType) + ", " + templateType + "_Finalizer);";
                     else
-                        return "PushWeakObjectVector<" + templateType + ">(ctx, " + source + ");";
+                        return "PushWeakObjectArray(ctx, " + source + ");";
                 }
+            }
+            else if (typeName.EndsWith("Map"))
+            {
+                string templateType = typeName.Substring(0, typeName.Length - 3);
+                if (templateType == "Component")
+                    templateType = "IComponent";
+
+                return "PushWeakObjectMap(ctx, " + source + ");";
             }
             else
             {
@@ -453,7 +466,7 @@ namespace BindingsGenerator
                 {
                     if (!IsScriptable(child))
                     {
-                        //Console.WriteLine(child.name + " in class " + classSymbol.name + " is not scriptable");
+                        Console.WriteLine(child.name + " in class " + classSymbol.name + " is not scriptable");
                         continue;
                     }
 
@@ -466,7 +479,7 @@ namespace BindingsGenerator
                     bool isClassCtor = !child.isStatic && (child.name == className);
                     if (!isClassCtor && !IsSupportedType(child.type))
                     {
-                        //Console.WriteLine(child.name + " in class " + classSymbol.name + " unsupported return value type " + child.type);
+                        Console.WriteLine(child.name + " in class " + classSymbol.name + " unsupported return value type " + child.type);
                         continue;
                     }
                     // Bindings convention: refcounted objects like Scene or Component can not be constructed from script, but rather must be acquired from the framework
@@ -480,7 +493,7 @@ namespace BindingsGenerator
 
                         if (!IsSupportedType(t))
                         {
-                            //Console.WriteLine("Unsupported parameter type " + t + " in function " + child.name + " of " + className);
+                            Console.WriteLine("Unsupported parameter type " + t + " in function " + child.name + " of " + className);
                             badParameters = true;
                             break;
                         }
@@ -490,7 +503,7 @@ namespace BindingsGenerator
                             string st = SanitateTypeName(t);
                             if (!IsRefCounted(st) || !classNames.Contains(st))
                             {
-                                //Console.WriteLine("Unsupported pointer parameter " + t + " in function " + child.name + " of " + className);
+                                Console.WriteLine("Unsupported pointer parameter " + t + " in function " + child.name + " of " + className);
                                 badParameters = true;
                                 break;
                             }
@@ -498,7 +511,6 @@ namespace BindingsGenerator
                     }
                     if (badParameters)
                     {
-                        //Console.WriteLine(child.name + " in class " + classSymbol.name + " unsupported parameters");
                         continue;
                     }
 
@@ -755,23 +767,25 @@ namespace BindingsGenerator
         static string SanitateTypeName(string type)
         {
             string t = type.Trim();
+            if (t.StartsWith("const"))
+                t = t.Substring(5).Trim();
             if (t.EndsWith("&") || t.EndsWith("*"))
-            {
                 t = t.Substring(0, t.Length - 1).Trim();
-                if (t.StartsWith("const"))
-                    t = t.Substring(5).Trim();
-            }
             if (t.EndsWith("const"))
                 t = t.Substring(0, t.Length - 5).Trim();
+            if (t == "vec")
+                t = "float3";
             return StripNamespace(t);
         }
 
         static string SanitateTypeForFunction(string type)
         {
             type = StripNamespace(type);
-            // ComponentVector is actually defined inside Entity
-            if (type == "ComponentVector")
-                type = "Entity::ComponentVector";
+            type = type.Replace("EntityMap", "Scene::EntityMap");
+            type = type.Replace("ComponentVector", "Entity::ComponentVector");
+            type = type.Replace("ComponentMap", "Entity::ComponentMap");
+            if (type == "vec")
+                type = "float3";
             return type;
         }
 
@@ -790,7 +804,14 @@ namespace BindingsGenerator
             string t = SanitateTypeName(typeName);
             if (t.EndsWith("Vector"))
             {
-                string templateType = typeName.Substring(0, typeName.Length - 6);
+                string templateType = t.Substring(0, t.Length - 6);
+                if (templateType == "Component")
+                    templateType = "IComponent";
+                return classNames.Contains(templateType);
+            }
+            else if (t.EndsWith("Map"))
+            {
+                string templateType = t.Substring(0, t.Length - 3);
                 if (templateType == "Component")
                     templateType = "IComponent";
                 return classNames.Contains(templateType);
@@ -804,7 +825,7 @@ namespace BindingsGenerator
             string t = SanitateTypeName(type);
             if (t == "string" || t == "String")
                 return false;
-            return type.Contains("bool *") || type.EndsWith("float *") || type.EndsWith("float3 *") || type.Contains("std::") || type.Contains("char*") || type.Contains("char *") || type.Contains("[");
+            return type.Contains("bool *") || type.EndsWith("float *") || type.EndsWith("float3 *") || type.EndsWith("vec *") || type.Contains("std::") || type.Contains("char*") || type.Contains("char *") || type.Contains("[");
         }
 
         static bool NeedDereference(Parameter p)

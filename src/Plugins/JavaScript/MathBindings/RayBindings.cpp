@@ -5,6 +5,12 @@
 #include "CoreTypes.h"
 #include "BindingsHelpers.h"
 #include "Geometry/Ray.h"
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4800)
+#endif
+
+#include "Math/float3.h"
 #include "Geometry/Line.h"
 #include "Geometry/LineSegment.h"
 #include "Math/float3x3.h"
@@ -25,6 +31,7 @@ using namespace std;
 namespace JSBindings
 {
 
+extern const char* float3_ID;
 extern const char* Line_ID;
 extern const char* LineSegment_ID;
 extern const char* float3x3_ID;
@@ -40,6 +47,7 @@ extern const char* OBB_ID;
 extern const char* Frustum_ID;
 extern const char* Circle_ID;
 
+duk_ret_t float3_Finalizer(duk_context* ctx);
 duk_ret_t Line_Finalizer(duk_context* ctx);
 duk_ret_t LineSegment_Finalizer(duk_context* ctx);
 duk_ret_t float3x3_Finalizer(duk_context* ctx);
@@ -75,6 +83,15 @@ static duk_ret_t Ray_Ctor(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Ray_Ctor_float3_float3(duk_context* ctx)
+{
+    float3* pos = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3* dir = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    Ray* newObj = new Ray(*pos, *dir);
+    PushConstructorResult<Ray>(ctx, newObj, Ray_ID, Ray_Finalizer);
+    return 0;
+}
+
 static duk_ret_t Ray_Ctor_Line(duk_context* ctx)
 {
     Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_ID);
@@ -97,6 +114,23 @@ static duk_ret_t Ray_IsFinite(duk_context* ctx)
     bool ret = thisObj->IsFinite();
     duk_push_boolean(ctx, ret);
     return 1;
+}
+
+static duk_ret_t Ray_GetPoint_float(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    float distance = (float)duk_require_number(ctx, 0);
+    float3 ret = thisObj->GetPoint(distance);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Ray_Translate_float3(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    float3* offset = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->Translate(*offset);
+    return 0;
 }
 
 static duk_ret_t Ray_Transform_float3x3(duk_context* ctx)
@@ -131,6 +165,16 @@ static duk_ret_t Ray_Transform_Quat(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Ray_Contains_float3_float(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float distanceThreshold = (float)duk_require_number(ctx, 1);
+    bool ret = thisObj->Contains(*point, distanceThreshold);
+    duk_push_boolean(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t Ray_Contains_LineSegment_float(duk_context* ctx)
 {
     Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
@@ -157,6 +201,25 @@ static duk_ret_t Ray_BitEquals_Ray(duk_context* ctx)
     Ray* other = GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
     bool ret = thisObj->BitEquals(*other);
     duk_push_boolean(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Ray_Distance_float3(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float ret = thisObj->Distance(*point);
+    duk_push_number(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Ray_Distance_float3_float(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float d = (float)duk_require_number(ctx, 1);
+    float ret = thisObj->Distance(*point, d);
+    duk_push_number(ctx, ret);
     return 1;
 }
 
@@ -265,6 +328,115 @@ static duk_ret_t Ray_Distance_Capsule(duk_context* ctx)
     Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
     float ret = thisObj->Distance(*capsule);
     duk_push_number(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Ray_ClosestPoint_float3(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    float3* targetPoint = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ClosestPoint(*targetPoint);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Ray_ClosestPoint_float3_float(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    float3* targetPoint = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float d = (float)duk_require_number(ctx, 1);
+    float3 ret = thisObj->ClosestPoint(*targetPoint, d);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Ray_ClosestPoint_Ray(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    Ray* other = GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
+    float3 ret = thisObj->ClosestPoint(*other);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Ray_ClosestPoint_Ray_float(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    Ray* other = GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
+    float d = (float)duk_require_number(ctx, 1);
+    float3 ret = thisObj->ClosestPoint(*other, d);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Ray_ClosestPoint_Ray_float_float(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    Ray* other = GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
+    float d = (float)duk_require_number(ctx, 1);
+    float d2 = (float)duk_require_number(ctx, 2);
+    float3 ret = thisObj->ClosestPoint(*other, d, d2);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Ray_ClosestPoint_Line(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    Line* other = GetCheckedValueObject<Line>(ctx, 0, Line_ID);
+    float3 ret = thisObj->ClosestPoint(*other);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Ray_ClosestPoint_Line_float(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    Line* other = GetCheckedValueObject<Line>(ctx, 0, Line_ID);
+    float d = (float)duk_require_number(ctx, 1);
+    float3 ret = thisObj->ClosestPoint(*other, d);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Ray_ClosestPoint_Line_float_float(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    Line* other = GetCheckedValueObject<Line>(ctx, 0, Line_ID);
+    float d = (float)duk_require_number(ctx, 1);
+    float d2 = (float)duk_require_number(ctx, 2);
+    float3 ret = thisObj->ClosestPoint(*other, d, d2);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Ray_ClosestPoint_LineSegment(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    LineSegment* other = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
+    float3 ret = thisObj->ClosestPoint(*other);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Ray_ClosestPoint_LineSegment_float(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    LineSegment* other = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
+    float d = (float)duk_require_number(ctx, 1);
+    float3 ret = thisObj->ClosestPoint(*other, d);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Ray_ClosestPoint_LineSegment_float_float(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    LineSegment* other = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
+    float d = (float)duk_require_number(ctx, 1);
+    float d2 = (float)duk_require_number(ctx, 2);
+    float3 ret = thisObj->ClosestPoint(*other, d, d2);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
 
@@ -379,6 +551,16 @@ static duk_ret_t Ray_ToLineSegment_float(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Ray_ProjectToAxis_float3_float_float(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    float3* direction = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float outMin = (float)duk_require_number(ctx, 1);
+    float outMax = (float)duk_require_number(ctx, 2);
+    thisObj->ProjectToAxis(*direction, outMin, outMax);
+    return 0;
+}
+
 static duk_ret_t Ray_ToLineSegment_float_float(duk_context* ctx)
 {
     Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
@@ -418,6 +600,8 @@ static duk_ret_t Ray_Ctor_Selector(duk_context* ctx)
     int numArgs = duk_get_top(ctx);
     if (numArgs == 0)
         return Ray_Ctor(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
+        return Ray_Ctor_float3_float3(ctx);
     if (numArgs == 1 && GetValueObject<Line>(ctx, 0, Line_ID))
         return Ray_Ctor_Line(ctx);
     if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
@@ -439,9 +623,23 @@ static duk_ret_t Ray_Transform_Selector(duk_context* ctx)
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
+static duk_ret_t Ray_Contains_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
+        return Ray_Contains_float3_float(ctx);
+    if (numArgs == 2 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID) && duk_is_number(ctx, 1))
+        return Ray_Contains_LineSegment_float(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
 static duk_ret_t Ray_Distance_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Ray_Distance_float3(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
+        return Ray_Distance_float3_float(ctx);
     if (numArgs == 1 && GetValueObject<Ray>(ctx, 0, Ray_ID))
         return Ray_Distance_Ray(ctx);
     if (numArgs == 2 && GetValueObject<Ray>(ctx, 0, Ray_ID) && duk_is_number(ctx, 1))
@@ -464,6 +662,34 @@ static duk_ret_t Ray_Distance_Selector(duk_context* ctx)
         return Ray_Distance_Sphere(ctx);
     if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
         return Ray_Distance_Capsule(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t Ray_ClosestPoint_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Ray_ClosestPoint_float3(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
+        return Ray_ClosestPoint_float3_float(ctx);
+    if (numArgs == 1 && GetValueObject<Ray>(ctx, 0, Ray_ID))
+        return Ray_ClosestPoint_Ray(ctx);
+    if (numArgs == 2 && GetValueObject<Ray>(ctx, 0, Ray_ID) && duk_is_number(ctx, 1))
+        return Ray_ClosestPoint_Ray_float(ctx);
+    if (numArgs == 3 && GetValueObject<Ray>(ctx, 0, Ray_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+        return Ray_ClosestPoint_Ray_float_float(ctx);
+    if (numArgs == 1 && GetValueObject<Line>(ctx, 0, Line_ID))
+        return Ray_ClosestPoint_Line(ctx);
+    if (numArgs == 2 && GetValueObject<Line>(ctx, 0, Line_ID) && duk_is_number(ctx, 1))
+        return Ray_ClosestPoint_Line_float(ctx);
+    if (numArgs == 3 && GetValueObject<Line>(ctx, 0, Line_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+        return Ray_ClosestPoint_Line_float_float(ctx);
+    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
+        return Ray_ClosestPoint_LineSegment(ctx);
+    if (numArgs == 2 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID) && duk_is_number(ctx, 1))
+        return Ray_ClosestPoint_LineSegment_float(ctx);
+    if (numArgs == 3 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+        return Ray_ClosestPoint_LineSegment_float_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -511,15 +737,19 @@ static duk_ret_t Ray_FromString_Static_string(duk_context* ctx)
 
 static const duk_function_list_entry Ray_Functions[] = {
     {"IsFinite", Ray_IsFinite, 0}
+    ,{"GetPoint", Ray_GetPoint_float, 1}
+    ,{"Translate", Ray_Translate_float3, 1}
     ,{"Transform", Ray_Transform_Selector, DUK_VARARGS}
-    ,{"Contains", Ray_Contains_LineSegment_float, 2}
+    ,{"Contains", Ray_Contains_Selector, DUK_VARARGS}
     ,{"Equals", Ray_Equals_Ray_float, 2}
     ,{"BitEquals", Ray_BitEquals_Ray, 1}
     ,{"Distance", Ray_Distance_Selector, DUK_VARARGS}
+    ,{"ClosestPoint", Ray_ClosestPoint_Selector, DUK_VARARGS}
     ,{"Intersects", Ray_Intersects_Selector, DUK_VARARGS}
     ,{"IntersectsDisc", Ray_IntersectsDisc_Circle, 1}
     ,{"ToLine", Ray_ToLine, 0}
     ,{"ToLineSegment", Ray_ToLineSegment_Selector, DUK_VARARGS}
+    ,{"ProjectToAxis", Ray_ProjectToAxis_float3_float_float, 3}
     ,{"ToString", Ray_ToString, 0}
     ,{"SerializeToString", Ray_SerializeToString, 0}
     ,{"SerializeToCodeString", Ray_SerializeToCodeString, 0}

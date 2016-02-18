@@ -5,6 +5,12 @@
 #include "CoreTypes.h"
 #include "BindingsHelpers.h"
 #include "Geometry/AABB.h"
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4800)
+#endif
+
+#include "Math/float3.h"
 #include "Geometry/OBB.h"
 #include "Geometry/Sphere.h"
 #include "Geometry/LineSegment.h"
@@ -19,13 +25,13 @@
 #include "Geometry/Capsule.h"
 #include "Geometry/Ray.h"
 #include "Geometry/Line.h"
-#include "Math/float2.h"
 
 using namespace std;
 
 namespace JSBindings
 {
 
+extern const char* float3_ID;
 extern const char* OBB_ID;
 extern const char* Sphere_ID;
 extern const char* LineSegment_ID;
@@ -40,8 +46,8 @@ extern const char* Frustum_ID;
 extern const char* Capsule_ID;
 extern const char* Ray_ID;
 extern const char* Line_ID;
-extern const char* float2_ID;
 
+duk_ret_t float3_Finalizer(duk_context* ctx);
 duk_ret_t OBB_Finalizer(duk_context* ctx);
 duk_ret_t Sphere_Finalizer(duk_context* ctx);
 duk_ret_t LineSegment_Finalizer(duk_context* ctx);
@@ -56,7 +62,6 @@ duk_ret_t Frustum_Finalizer(duk_context* ctx);
 duk_ret_t Capsule_Finalizer(duk_context* ctx);
 duk_ret_t Ray_Finalizer(duk_context* ctx);
 duk_ret_t Line_Finalizer(duk_context* ctx);
-duk_ret_t float2_Finalizer(duk_context* ctx);
 
 const char* AABB_ID = "AABB";
 
@@ -74,6 +79,15 @@ duk_ret_t AABB_Finalizer(duk_context* ctx)
 static duk_ret_t AABB_Ctor(duk_context* ctx)
 {
     AABB* newObj = new AABB();
+    PushConstructorResult<AABB>(ctx, newObj, AABB_ID, AABB_Finalizer);
+    return 0;
+}
+
+static duk_ret_t AABB_Ctor_float3_float3(duk_context* ctx)
+{
+    float3* minPoint = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3* maxPoint = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    AABB* newObj = new AABB(*minPoint, *maxPoint);
     PushConstructorResult<AABB>(ctx, newObj, AABB_ID, AABB_Finalizer);
     return 0;
 }
@@ -149,6 +163,15 @@ static duk_ret_t AABB_SetNegativeInfinity(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t AABB_SetFromCenterAndSize_float3_float3(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* center = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3* size = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    thisObj->SetFromCenterAndSize(*center, *size);
+    return 0;
+}
+
 static duk_ret_t AABB_SetFrom_OBB(duk_context* ctx)
 {
     AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
@@ -205,6 +228,41 @@ static duk_ret_t AABB_IsDegenerate(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t AABB_CenterPoint(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3 ret = thisObj->CenterPoint();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_Centroid(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3 ret = thisObj->Centroid();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_AnyPointFast(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3 ret = thisObj->AnyPointFast();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_PointInside_float_float_float(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float x = (float)duk_require_number(ctx, 0);
+    float y = (float)duk_require_number(ctx, 1);
+    float z = (float)duk_require_number(ctx, 2);
+    float3 ret = thisObj->PointInside(x, y, z);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
 static duk_ret_t AABB_Edge_int(duk_context* ctx)
 {
     AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
@@ -214,12 +272,111 @@ static duk_ret_t AABB_Edge_int(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t AABB_CornerPoint_int(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    int cornerIndex = (int)duk_require_number(ctx, 0);
+    float3 ret = thisObj->CornerPoint(cornerIndex);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_ExtremePoint_float3(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* direction = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ExtremePoint(*direction);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_ExtremePoint_float3_float(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* direction = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float projectionDistance = (float)duk_require_number(ctx, 1);
+    float3 ret = thisObj->ExtremePoint(*direction, projectionDistance);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_PointOnEdge_int_float(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    int edgeIndex = (int)duk_require_number(ctx, 0);
+    float u = (float)duk_require_number(ctx, 1);
+    float3 ret = thisObj->PointOnEdge(edgeIndex, u);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_FaceCenterPoint_int(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    int faceIndex = (int)duk_require_number(ctx, 0);
+    float3 ret = thisObj->FaceCenterPoint(faceIndex);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_FacePoint_int_float_float(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    int faceIndex = (int)duk_require_number(ctx, 0);
+    float u = (float)duk_require_number(ctx, 1);
+    float v = (float)duk_require_number(ctx, 2);
+    float3 ret = thisObj->FacePoint(faceIndex, u, v);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_FaceNormal_int(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    int faceIndex = (int)duk_require_number(ctx, 0);
+    float3 ret = thisObj->FaceNormal(faceIndex);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
 static duk_ret_t AABB_FacePlane_int(duk_context* ctx)
 {
     AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
     int faceIndex = (int)duk_require_number(ctx, 0);
     Plane ret = thisObj->FacePlane(faceIndex);
     PushValueObjectCopy<Plane>(ctx, ret, Plane_ID, Plane_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_Size(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3 ret = thisObj->Size();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_HalfSize(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3 ret = thisObj->HalfSize();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_Diagonal(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3 ret = thisObj->Diagonal();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_HalfDiagonal(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3 ret = thisObj->HalfDiagonal();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
 
@@ -237,6 +394,68 @@ static duk_ret_t AABB_SurfaceArea(duk_context* ctx)
     float ret = thisObj->SurfaceArea();
     duk_push_number(ctx, ret);
     return 1;
+}
+
+static duk_ret_t AABB_RandomPointInside_LCG(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    LCG* rng = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float3 ret = thisObj->RandomPointInside(*rng);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_RandomPointOnSurface_LCG(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    LCG* rng = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float3 ret = thisObj->RandomPointOnSurface(*rng);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_RandomPointOnEdge_LCG(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    LCG* rng = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float3 ret = thisObj->RandomPointOnEdge(*rng);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_RandomCornerPoint_LCG(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    LCG* rng = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float3 ret = thisObj->RandomCornerPoint(*rng);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_Translate_float3(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* offset = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->Translate(*offset);
+    return 0;
+}
+
+static duk_ret_t AABB_Scale_float3_float(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* centerPoint = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float scaleFactor = (float)duk_require_number(ctx, 1);
+    thisObj->Scale(*centerPoint, scaleFactor);
+    return 0;
+}
+
+static duk_ret_t AABB_Scale_float3_float3(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* centerPoint = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3* scaleFactor = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    thisObj->Scale(*centerPoint, *scaleFactor);
+    return 0;
 }
 
 static duk_ret_t AABB_TransformAsAABB_float3x3(duk_context* ctx)
@@ -307,6 +526,24 @@ static duk_ret_t AABB_Transform_Quat(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t AABB_ClosestPoint_float3(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* targetPoint = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ClosestPoint(*targetPoint);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t AABB_Distance_float3(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float ret = thisObj->Distance(*point);
+    duk_push_number(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t AABB_Distance_Sphere(duk_context* ctx)
 {
     AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
@@ -316,11 +553,30 @@ static duk_ret_t AABB_Distance_Sphere(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t AABB_Contains_float3(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    bool ret = thisObj->Contains(*point);
+    duk_push_boolean(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t AABB_Contains_LineSegment(duk_context* ctx)
 {
     AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
     LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
     bool ret = thisObj->Contains(*lineSegment);
+    duk_push_boolean(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t AABB_Contains_float3_float3(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* aabbMinPoint = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3* aabbMaxPoint = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    bool ret = thisObj->Contains(*aabbMinPoint, *aabbMaxPoint);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -493,6 +749,33 @@ static duk_ret_t AABB_Intersects_Frustum(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t AABB_ProjectToAxis_float3_float_float(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* axis = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float dMin = (float)duk_require_number(ctx, 1);
+    float dMax = (float)duk_require_number(ctx, 2);
+    thisObj->ProjectToAxis(*axis, dMin, dMax);
+    return 0;
+}
+
+static duk_ret_t AABB_Enclose_float3(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->Enclose(*point);
+    return 0;
+}
+
+static duk_ret_t AABB_Enclose_float3_float3(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* aabbMinPoint = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3* aabbMaxPoint = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    thisObj->Enclose(*aabbMinPoint, *aabbMaxPoint);
+    return 0;
+}
+
 static duk_ret_t AABB_Enclose_LineSegment(duk_context* ctx)
 {
     AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
@@ -582,6 +865,30 @@ static duk_ret_t AABB_Intersection_AABB(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t AABB_IntersectLineAABB_float3_float3_float_float(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* linePos = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3* lineDir = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float tNear = (float)duk_require_number(ctx, 2);
+    float tFar = (float)duk_require_number(ctx, 3);
+    bool ret = thisObj->IntersectLineAABB(*linePos, *lineDir, tNear, tFar);
+    duk_push_boolean(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t AABB_IntersectLineAABB_CPP_float3_float3_float_float(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* linePos = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3* lineDir = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float tNear = (float)duk_require_number(ctx, 2);
+    float tFar = (float)duk_require_number(ctx, 3);
+    bool ret = thisObj->IntersectLineAABB_CPP(*linePos, *lineDir, tNear, tFar);
+    duk_push_boolean(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t AABB_Equals_AABB_float(duk_context* ctx)
 {
     AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
@@ -606,6 +913,8 @@ static duk_ret_t AABB_Ctor_Selector(duk_context* ctx)
     int numArgs = duk_get_top(ctx);
     if (numArgs == 0)
         return AABB_Ctor(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
+        return AABB_Ctor_float3_float3(ctx);
     if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
         return AABB_Ctor_OBB(ctx);
     if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
@@ -620,6 +929,26 @@ static duk_ret_t AABB_SetFrom_Selector(duk_context* ctx)
         return AABB_SetFrom_OBB(ctx);
     if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
         return AABB_SetFrom_Sphere(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t AABB_ExtremePoint_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return AABB_ExtremePoint_float3(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
+        return AABB_ExtremePoint_float3_float(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t AABB_Scale_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
+        return AABB_Scale_float3_float(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
+        return AABB_Scale_float3_float3(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -651,11 +980,25 @@ static duk_ret_t AABB_Transform_Selector(duk_context* ctx)
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
+static duk_ret_t AABB_Distance_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return AABB_Distance_float3(ctx);
+    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
+        return AABB_Distance_Sphere(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
 static duk_ret_t AABB_Contains_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return AABB_Contains_float3(ctx);
     if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
         return AABB_Contains_LineSegment(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
+        return AABB_Contains_float3_float3(ctx);
     if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
         return AABB_Contains_AABB(ctx);
     if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
@@ -704,6 +1047,10 @@ static duk_ret_t AABB_Intersects_Selector(duk_context* ctx)
 static duk_ret_t AABB_Enclose_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return AABB_Enclose_float3(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
+        return AABB_Enclose_float3_float3(ctx);
     if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
         return AABB_Enclose_LineSegment(ctx);
     if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
@@ -719,6 +1066,15 @@ static duk_ret_t AABB_Enclose_Selector(duk_context* ctx)
     if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_ID))
         return AABB_Enclose_Frustum(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t AABB_FromCenterAndSize_Static_float3_float3(duk_context* ctx)
+{
+    float3* aabbCenterPos = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3* aabbSize = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    AABB ret = AABB::FromCenterAndSize(*aabbCenterPos, *aabbSize);
+    PushValueObjectCopy<AABB>(ctx, ret, AABB_ID, AABB_Finalizer);
+    return 1;
 }
 
 static duk_ret_t AABB_NumVerticesInTriangulation_Static_int_int_int(duk_context* ctx)
@@ -754,33 +1110,59 @@ static const duk_function_list_entry AABB_Functions[] = {
     ,{"MaxY", AABB_MaxY, 0}
     ,{"MaxZ", AABB_MaxZ, 0}
     ,{"SetNegativeInfinity", AABB_SetNegativeInfinity, 0}
+    ,{"SetFromCenterAndSize", AABB_SetFromCenterAndSize_float3_float3, 2}
     ,{"SetFrom", AABB_SetFrom_Selector, DUK_VARARGS}
     ,{"ToOBB", AABB_ToOBB, 0}
     ,{"MinimalEnclosingSphere", AABB_MinimalEnclosingSphere, 0}
     ,{"MaximalContainedSphere", AABB_MaximalContainedSphere, 0}
     ,{"IsFinite", AABB_IsFinite, 0}
     ,{"IsDegenerate", AABB_IsDegenerate, 0}
+    ,{"CenterPoint", AABB_CenterPoint, 0}
+    ,{"Centroid", AABB_Centroid, 0}
+    ,{"AnyPointFast", AABB_AnyPointFast, 0}
+    ,{"PointInside", AABB_PointInside_float_float_float, 3}
     ,{"Edge", AABB_Edge_int, 1}
+    ,{"CornerPoint", AABB_CornerPoint_int, 1}
+    ,{"ExtremePoint", AABB_ExtremePoint_Selector, DUK_VARARGS}
+    ,{"PointOnEdge", AABB_PointOnEdge_int_float, 2}
+    ,{"FaceCenterPoint", AABB_FaceCenterPoint_int, 1}
+    ,{"FacePoint", AABB_FacePoint_int_float_float, 3}
+    ,{"FaceNormal", AABB_FaceNormal_int, 1}
     ,{"FacePlane", AABB_FacePlane_int, 1}
+    ,{"Size", AABB_Size, 0}
+    ,{"HalfSize", AABB_HalfSize, 0}
+    ,{"Diagonal", AABB_Diagonal, 0}
+    ,{"HalfDiagonal", AABB_HalfDiagonal, 0}
     ,{"Volume", AABB_Volume, 0}
     ,{"SurfaceArea", AABB_SurfaceArea, 0}
+    ,{"RandomPointInside", AABB_RandomPointInside_LCG, 1}
+    ,{"RandomPointOnSurface", AABB_RandomPointOnSurface_LCG, 1}
+    ,{"RandomPointOnEdge", AABB_RandomPointOnEdge_LCG, 1}
+    ,{"RandomCornerPoint", AABB_RandomCornerPoint_LCG, 1}
+    ,{"Translate", AABB_Translate_float3, 1}
+    ,{"Scale", AABB_Scale_Selector, DUK_VARARGS}
     ,{"TransformAsAABB", AABB_TransformAsAABB_Selector, DUK_VARARGS}
     ,{"Transform", AABB_Transform_Selector, DUK_VARARGS}
-    ,{"Distance", AABB_Distance_Sphere, 1}
+    ,{"ClosestPoint", AABB_ClosestPoint_float3, 1}
+    ,{"Distance", AABB_Distance_Selector, DUK_VARARGS}
     ,{"Contains", AABB_Contains_Selector, DUK_VARARGS}
     ,{"Intersects", AABB_Intersects_Selector, DUK_VARARGS}
+    ,{"ProjectToAxis", AABB_ProjectToAxis_float3_float_float, 3}
     ,{"Enclose", AABB_Enclose_Selector, DUK_VARARGS}
     ,{"ToString", AABB_ToString, 0}
     ,{"SerializeToString", AABB_SerializeToString, 0}
     ,{"SerializeToCodeString", AABB_SerializeToCodeString, 0}
     ,{"Intersection", AABB_Intersection_AABB, 1}
+    ,{"IntersectLineAABB", AABB_IntersectLineAABB_float3_float3_float_float, 4}
+    ,{"IntersectLineAABB_CPP", AABB_IntersectLineAABB_CPP_float3_float3_float_float, 4}
     ,{"Equals", AABB_Equals_AABB_float, 2}
     ,{"BitEquals", AABB_BitEquals_AABB, 1}
     ,{nullptr, nullptr, 0}
 };
 
 static const duk_function_list_entry AABB_StaticFunctions[] = {
-    {"NumVerticesInTriangulation", AABB_NumVerticesInTriangulation_Static_int_int_int, 3}
+    {"FromCenterAndSize", AABB_FromCenterAndSize_Static_float3_float3, 2}
+    ,{"NumVerticesInTriangulation", AABB_NumVerticesInTriangulation_Static_int_int_int, 3}
     ,{"NumVerticesInEdgeList", AABB_NumVerticesInEdgeList_Static, 0}
     ,{"FromString", AABB_FromString_Static_string, 1}
     ,{nullptr, nullptr, 0}

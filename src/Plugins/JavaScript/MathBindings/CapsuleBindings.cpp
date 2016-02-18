@@ -5,7 +5,13 @@
 #include "CoreTypes.h"
 #include "BindingsHelpers.h"
 #include "Geometry/Capsule.h"
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4800)
+#endif
+
 #include "Geometry/LineSegment.h"
+#include "Math/float3.h"
 #include "Geometry/Sphere.h"
 #include "Geometry/Circle.h"
 #include "Geometry/AABB.h"
@@ -27,6 +33,7 @@ namespace JSBindings
 {
 
 extern const char* LineSegment_ID;
+extern const char* float3_ID;
 extern const char* Sphere_ID;
 extern const char* Circle_ID;
 extern const char* AABB_ID;
@@ -43,6 +50,7 @@ extern const char* Triangle_ID;
 extern const char* Frustum_ID;
 
 duk_ret_t LineSegment_Finalizer(duk_context* ctx);
+duk_ret_t float3_Finalizer(duk_context* ctx);
 duk_ret_t Sphere_Finalizer(duk_context* ctx);
 duk_ret_t Circle_Finalizer(duk_context* ctx);
 duk_ret_t AABB_Finalizer(duk_context* ctx);
@@ -102,6 +110,16 @@ static duk_ret_t Capsule_Ctor_LineSegment_float(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Capsule_Ctor_float3_float3_float(duk_context* ctx)
+{
+    float3* bottomPoint = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3* topPoint = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float radius = (float)duk_require_number(ctx, 2);
+    Capsule* newObj = new Capsule(*bottomPoint, *topPoint, radius);
+    PushConstructorResult<Capsule>(ctx, newObj, Capsule_ID, Capsule_Finalizer);
+    return 0;
+}
+
 static duk_ret_t Capsule_SetFrom_Sphere(duk_context* ctx)
 {
     Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
@@ -149,6 +167,83 @@ static duk_ret_t Capsule_Diameter(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Capsule_Bottom(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float3 ret = thisObj->Bottom();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Capsule_Center(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float3 ret = thisObj->Center();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Capsule_Centroid(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float3 ret = thisObj->Centroid();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Capsule_AnyPointFast(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float3 ret = thisObj->AnyPointFast();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Capsule_ExtremePoint_float3(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float3* direction = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ExtremePoint(*direction);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Capsule_ExtremePoint_float3_float(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float3* direction = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float projectionDistance = (float)duk_require_number(ctx, 1);
+    float3 ret = thisObj->ExtremePoint(*direction, projectionDistance);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Capsule_ProjectToAxis_float3_float_float(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float3* direction = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float outMin = (float)duk_require_number(ctx, 1);
+    float outMax = (float)duk_require_number(ctx, 2);
+    thisObj->ProjectToAxis(*direction, outMin, outMax);
+    return 0;
+}
+
+static duk_ret_t Capsule_Top(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float3 ret = thisObj->Top();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Capsule_UpDirection(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float3 ret = thisObj->UpDirection();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
 static duk_ret_t Capsule_Volume(duk_context* ctx)
 {
     Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
@@ -190,6 +285,28 @@ static duk_ret_t Capsule_IsFinite(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Capsule_PointInside_float_float_float(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float height = (float)duk_require_number(ctx, 0);
+    float angle = (float)duk_require_number(ctx, 1);
+    float dist = (float)duk_require_number(ctx, 2);
+    float3 ret = thisObj->PointInside(height, angle, dist);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Capsule_UniformPointPerhapsInside_float_float_float(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float height = (float)duk_require_number(ctx, 0);
+    float x = (float)duk_require_number(ctx, 1);
+    float y = (float)duk_require_number(ctx, 2);
+    float3 ret = thisObj->UniformPointPerhapsInside(height, x, y);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
 static duk_ret_t Capsule_SphereA(duk_context* ctx)
 {
     Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
@@ -222,6 +339,41 @@ static duk_ret_t Capsule_MinimalEnclosingOBB(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Capsule_RandomPointInside_LCG(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    LCG* rng = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float3 ret = thisObj->RandomPointInside(*rng);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Capsule_RandomPointOnSurface_LCG(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    LCG* rng = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float3 ret = thisObj->RandomPointOnSurface(*rng);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Capsule_Translate_float3(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float3* offset = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->Translate(*offset);
+    return 0;
+}
+
+static duk_ret_t Capsule_Scale_float3_float(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float3* centerPoint = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float scaleFactor = (float)duk_require_number(ctx, 1);
+    thisObj->Scale(*centerPoint, scaleFactor);
+    return 0;
+}
+
 static duk_ret_t Capsule_Transform_float3x3(duk_context* ctx)
 {
     Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
@@ -252,6 +404,24 @@ static duk_ret_t Capsule_Transform_Quat(duk_context* ctx)
     Quat* transform = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
     thisObj->Transform(*transform);
     return 0;
+}
+
+static duk_ret_t Capsule_ClosestPoint_float3(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float3* targetPoint = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ClosestPoint(*targetPoint);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Capsule_Distance_float3(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float ret = thisObj->Distance(*point);
+    duk_push_number(ctx, ret);
+    return 1;
 }
 
 static duk_ret_t Capsule_Distance_Plane(duk_context* ctx)
@@ -305,6 +475,15 @@ static duk_ret_t Capsule_Distance_Capsule(duk_context* ctx)
     Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
     float ret = thisObj->Distance(*capsule);
     duk_push_number(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Capsule_Contains_float3(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    bool ret = thisObj->Contains(*point);
+    duk_push_boolean(ctx, ret);
     return 1;
 }
 
@@ -493,6 +672,18 @@ static duk_ret_t Capsule_Ctor_Selector(duk_context* ctx)
         return Capsule_Ctor(ctx);
     if (numArgs == 2 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID) && duk_is_number(ctx, 1))
         return Capsule_Ctor_LineSegment_float(ctx);
+    if (numArgs == 3 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && duk_is_number(ctx, 2))
+        return Capsule_Ctor_float3_float3_float(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t Capsule_ExtremePoint_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Capsule_ExtremePoint_float3(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
+        return Capsule_ExtremePoint_float3_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -513,6 +704,8 @@ static duk_ret_t Capsule_Transform_Selector(duk_context* ctx)
 static duk_ret_t Capsule_Distance_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Capsule_Distance_float3(ctx);
     if (numArgs == 1 && GetValueObject<Plane>(ctx, 0, Plane_ID))
         return Capsule_Distance_Plane(ctx);
     if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
@@ -531,6 +724,8 @@ static duk_ret_t Capsule_Distance_Selector(duk_context* ctx)
 static duk_ret_t Capsule_Contains_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Capsule_Contains_float3(ctx);
     if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
         return Capsule_Contains_LineSegment(ctx);
     if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
@@ -585,16 +780,31 @@ static const duk_function_list_entry Capsule_Functions[] = {
     ,{"LineLength", Capsule_LineLength, 0}
     ,{"Height", Capsule_Height, 0}
     ,{"Diameter", Capsule_Diameter, 0}
+    ,{"Bottom", Capsule_Bottom, 0}
+    ,{"Center", Capsule_Center, 0}
+    ,{"Centroid", Capsule_Centroid, 0}
+    ,{"AnyPointFast", Capsule_AnyPointFast, 0}
+    ,{"ExtremePoint", Capsule_ExtremePoint_Selector, DUK_VARARGS}
+    ,{"ProjectToAxis", Capsule_ProjectToAxis_float3_float_float, 3}
+    ,{"Top", Capsule_Top, 0}
+    ,{"UpDirection", Capsule_UpDirection, 0}
     ,{"Volume", Capsule_Volume, 0}
     ,{"SurfaceArea", Capsule_SurfaceArea, 0}
     ,{"CrossSection", Capsule_CrossSection_float, 1}
     ,{"HeightLineSegment", Capsule_HeightLineSegment, 0}
     ,{"IsFinite", Capsule_IsFinite, 0}
+    ,{"PointInside", Capsule_PointInside_float_float_float, 3}
+    ,{"UniformPointPerhapsInside", Capsule_UniformPointPerhapsInside_float_float_float, 3}
     ,{"SphereA", Capsule_SphereA, 0}
     ,{"SphereB", Capsule_SphereB, 0}
     ,{"MinimalEnclosingAABB", Capsule_MinimalEnclosingAABB, 0}
     ,{"MinimalEnclosingOBB", Capsule_MinimalEnclosingOBB, 0}
+    ,{"RandomPointInside", Capsule_RandomPointInside_LCG, 1}
+    ,{"RandomPointOnSurface", Capsule_RandomPointOnSurface_LCG, 1}
+    ,{"Translate", Capsule_Translate_float3, 1}
+    ,{"Scale", Capsule_Scale_float3_float, 2}
     ,{"Transform", Capsule_Transform_Selector, DUK_VARARGS}
+    ,{"ClosestPoint", Capsule_ClosestPoint_float3, 1}
     ,{"Distance", Capsule_Distance_Selector, DUK_VARARGS}
     ,{"Contains", Capsule_Contains_Selector, DUK_VARARGS}
     ,{"Intersects", Capsule_Intersects_Selector, DUK_VARARGS}

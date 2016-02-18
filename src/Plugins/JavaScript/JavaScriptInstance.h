@@ -26,17 +26,17 @@ public:
     /// Creates script engine for this script instance and loads the script but doesn't run it yet.
     /** @param scriptRef Script asset reference.
     @param module Javascript module. */
-    JavaScriptInstance(const String &fileName, JavaScript *module, Script* owner = 0);
+    JavaScriptInstance(const String &fileName, JavaScript *module, Script* owner = nullptr);
 
     /// Creates script engine for this script instance and loads the script but doesn't run it yet.
     /** @param scriptRef Script asset reference.
     @param module Javascript module. */
-    JavaScriptInstance(ScriptAssetPtr scriptRef, JavaScript *module, Script* owner = 0);
+    JavaScriptInstance(ScriptAssetPtr scriptRef, JavaScript *module, Script* owner = nullptr);
 
     /// Creates script engine for this script instance and loads the script but doesn't run it yet.
     /** @param scriptRefs Script asset references.
     @param module Javascript module. */
-    JavaScriptInstance(const Vector<ScriptAssetPtr>& scriptRefs, JavaScript *module, Script* owner = 0);
+    JavaScriptInstance(const Vector<ScriptAssetPtr>& scriptRefs, JavaScript *module, Script* owner = nullptr);
 
     /// Destroys script engine created for this script instance.
     virtual ~JavaScriptInstance();

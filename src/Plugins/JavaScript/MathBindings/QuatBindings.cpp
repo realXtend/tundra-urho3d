@@ -5,6 +5,11 @@
 #include "CoreTypes.h"
 #include "BindingsHelpers.h"
 #include "Math/Quat.h"
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4800)
+#endif
+
 #include "Math/float3x3.h"
 #include "Math/float3x4.h"
 #include "Math/float4x4.h"
@@ -170,6 +175,38 @@ static duk_ret_t Quat_Ctor_float4_float(duk_context* ctx)
     Quat* newObj = new Quat(*rotationAxis, rotationAngleRadians);
     PushConstructorResult<Quat>(ctx, newObj, Quat_ID, Quat_Finalizer);
     return 0;
+}
+
+static duk_ret_t Quat_WorldX(duk_context* ctx)
+{
+    Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
+    float3 ret = thisObj->WorldX();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Quat_WorldY(duk_context* ctx)
+{
+    Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
+    float3 ret = thisObj->WorldY();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Quat_WorldZ(duk_context* ctx)
+{
+    Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
+    float3 ret = thisObj->WorldZ();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Quat_Axis(duk_context* ctx)
+{
+    Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
+    float3 ret = thisObj->Axis();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
 }
 
 static duk_ret_t Quat_Angle(duk_context* ctx)
@@ -359,6 +396,15 @@ static duk_ret_t Quat_AngleBetween_Quat(duk_context* ctx)
     Quat* target = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
      float ret = thisObj->AngleBetween(*target);
     duk_push_number(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Quat_AxisFromTo_Quat(duk_context* ctx)
+{
+    Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
+    Quat* target = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
+    float3 ret = thisObj->AxisFromTo(*target);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
 
@@ -991,7 +1037,11 @@ static duk_ret_t Quat_RotateFromTo_Static_Selector(duk_context* ctx)
 }
 
 static const duk_function_list_entry Quat_Functions[] = {
-    {"Angle", Quat_Angle, 0}
+    {"WorldX", Quat_WorldX, 0}
+    ,{"WorldY", Quat_WorldY, 0}
+    ,{"WorldZ", Quat_WorldZ, 0}
+    ,{"Axis", Quat_Axis, 0}
+    ,{"Angle", Quat_Angle, 0}
     ,{"Dot", Quat_Dot_Quat, 1}
     ,{"LengthSq", Quat_LengthSq, 0}
     ,{"Length", Quat_Length, 0}
@@ -1011,6 +1061,7 @@ static const duk_function_list_entry Quat_Functions[] = {
     ,{"Lerp", Quat_Lerp_Quat_float, 2}
     ,{"Slerp", Quat_Slerp_Quat_float, 2}
     ,{"AngleBetween", Quat_AngleBetween_Quat, 1}
+    ,{"AxisFromTo", Quat_AxisFromTo_Quat, 1}
     ,{"ToAxisAngle", Quat_ToAxisAngle_Selector, DUK_VARARGS}
     ,{"SetFromAxisAngle", Quat_SetFromAxisAngle_Selector, DUK_VARARGS}
     ,{"Set", Quat_Set_Selector, DUK_VARARGS}

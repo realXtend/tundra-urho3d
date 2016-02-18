@@ -5,6 +5,12 @@
 #include "CoreTypes.h"
 #include "BindingsHelpers.h"
 #include "Geometry/Frustum.h"
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4800)
+#endif
+
+#include "Math/float3.h"
 #include "Geometry/Plane.h"
 #include "Geometry/LineSegment.h"
 #include "Math/float3x4.h"
@@ -26,6 +32,7 @@ using namespace std;
 namespace JSBindings
 {
 
+extern const char* float3_ID;
 extern const char* Plane_ID;
 extern const char* LineSegment_ID;
 extern const char* float3x4_ID;
@@ -42,6 +49,7 @@ extern const char* Line_ID;
 extern const char* Sphere_ID;
 extern const char* Capsule_ID;
 
+duk_ret_t float3_Finalizer(duk_context* ctx);
 duk_ret_t Plane_Finalizer(duk_context* ctx);
 duk_ret_t LineSegment_Finalizer(duk_context* ctx);
 duk_ret_t float3x4_Finalizer(duk_context* ctx);
@@ -87,6 +95,40 @@ static duk_ret_t Frustum_SetViewPlaneDistances_float_float(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Frustum_SetFrame_float3_float3_float3(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3* pos = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3* front = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3* up = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    thisObj->SetFrame(*pos, *front, *up);
+    return 0;
+}
+
+static duk_ret_t Frustum_SetPos_float3(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3* pos = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->SetPos(*pos);
+    return 0;
+}
+
+static duk_ret_t Frustum_SetFront_float3(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3* front = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->SetFront(*front);
+    return 0;
+}
+
+static duk_ret_t Frustum_SetUp_float3(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3* up = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->SetUp(*up);
+    return 0;
+}
+
 static duk_ret_t Frustum_SetPerspective_float_float(duk_context* ctx)
 {
     Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
@@ -103,6 +145,30 @@ static duk_ret_t Frustum_SetOrthographic_float_float(duk_context* ctx)
     float orthographicHeight = (float)duk_require_number(ctx, 1);
     thisObj->SetOrthographic(orthographicWidth, orthographicHeight);
     return 0;
+}
+
+static duk_ret_t Frustum_Pos(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    const vec & ret = thisObj->Pos();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Frustum_Front(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    const vec & ret = thisObj->Front();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Frustum_Up(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    const vec & ret = thisObj->Up();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
 }
 
 static duk_ret_t Frustum_NearPlaneDistance(duk_context* ctx)
@@ -187,6 +253,14 @@ static duk_ret_t Frustum_SetVerticalFovAndAspectRatio_float_float(duk_context* c
     return 0;
 }
 
+static duk_ret_t Frustum_WorldRight(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3 ret = thisObj->WorldRight();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
 static duk_ret_t Frustum_NearPlane(duk_context* ctx)
 {
     Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
@@ -260,6 +334,14 @@ static duk_ret_t Frustum_GetPlane_int(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Frustum_CenterPoint(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3 ret = thisObj->CenterPoint();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
 static duk_ret_t Frustum_Edge_int(duk_context* ctx)
 {
     Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
@@ -267,6 +349,52 @@ static duk_ret_t Frustum_Edge_int(duk_context* ctx)
     LineSegment ret = thisObj->Edge(edgeIndex);
     PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_ID, LineSegment_Finalizer);
     return 1;
+}
+
+static duk_ret_t Frustum_CornerPoint_int(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    int cornerIndex = (int)duk_require_number(ctx, 0);
+    float3 ret = thisObj->CornerPoint(cornerIndex);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Frustum_AnyPointFast(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3 ret = thisObj->AnyPointFast();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Frustum_ExtremePoint_float3(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3* direction = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ExtremePoint(*direction);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Frustum_ExtremePoint_float3_float(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3* direction = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float projectionDistance = (float)duk_require_number(ctx, 1);
+    float3 ret = thisObj->ExtremePoint(*direction, projectionDistance);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Frustum_ProjectToAxis_float3_float_float(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3* direction = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float outMin = (float)duk_require_number(ctx, 1);
+    float outMax = (float)duk_require_number(ctx, 2);
+    thisObj->ProjectToAxis(*direction, outMin, outMax);
+    return 0;
 }
 
 static duk_ret_t Frustum_SetWorldMatrix_float3x4(duk_context* ctx)
@@ -380,6 +508,73 @@ static duk_ret_t Frustum_UnProjectLineSegment_float_float(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Frustum_PointInside_float_float_float(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float x = (float)duk_require_number(ctx, 0);
+    float y = (float)duk_require_number(ctx, 1);
+    float z = (float)duk_require_number(ctx, 2);
+    float3 ret = thisObj->PointInside(x, y, z);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Frustum_PointInside_float3(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3* xyz = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->PointInside(*xyz);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Frustum_Project_float3(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->Project(*point);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Frustum_NearPlanePos_float_float(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float x = (float)duk_require_number(ctx, 0);
+    float y = (float)duk_require_number(ctx, 1);
+    float3 ret = thisObj->NearPlanePos(x, y);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Frustum_NearPlanePos_float2(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float2* point = GetCheckedValueObject<float2>(ctx, 0, float2_ID);
+    float3 ret = thisObj->NearPlanePos(*point);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Frustum_FarPlanePos_float_float(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float x = (float)duk_require_number(ctx, 0);
+    float y = (float)duk_require_number(ctx, 1);
+    float3 ret = thisObj->FarPlanePos(x, y);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Frustum_FarPlanePos_float2(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float2* point = GetCheckedValueObject<float2>(ctx, 0, float2_ID);
+    float3 ret = thisObj->FarPlanePos(*point);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
 static duk_ret_t Frustum_IsFinite(duk_context* ctx)
 {
     Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
@@ -394,6 +589,32 @@ static duk_ret_t Frustum_Volume(duk_context* ctx)
     float ret = thisObj->Volume();
     duk_push_number(ctx, ret);
     return 1;
+}
+
+static duk_ret_t Frustum_FastRandomPointInside_LCG(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    LCG* rng = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float3 ret = thisObj->FastRandomPointInside(*rng);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Frustum_UniformRandomPointInside_LCG(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    LCG* rng = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float3 ret = thisObj->UniformRandomPointInside(*rng);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Frustum_Translate_float3(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3* offset = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->Translate(*offset);
+    return 0;
 }
 
 static duk_ret_t Frustum_Transform_float3x3(duk_context* ctx)
@@ -445,6 +666,15 @@ static duk_ret_t Frustum_MinimalEnclosingOBB_float(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Frustum_Contains_float3(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    bool ret = thisObj->Contains(*point);
+    duk_push_boolean(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t Frustum_Contains_LineSegment(duk_context* ctx)
 {
     Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
@@ -487,6 +717,24 @@ static duk_ret_t Frustum_Contains_Frustum(duk_context* ctx)
     Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
     bool ret = thisObj->Contains(*frustum);
     duk_push_boolean(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Frustum_ClosestPoint_float3(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ClosestPoint(*point);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Frustum_Distance_float3(duk_context* ctx)
+{
+    Frustum* thisObj = GetThisValueObject<Frustum>(ctx, Frustum_ID);
+    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float ret = thisObj->Distance(*point);
+    duk_push_number(ctx, ret);
     return 1;
 }
 
@@ -596,6 +844,16 @@ static duk_ret_t Frustum_SerializeToString(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Frustum_ExtremePoint_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Frustum_ExtremePoint_float3(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
+        return Frustum_ExtremePoint_float3_float(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
 static duk_ret_t Frustum_UnProject_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -603,6 +861,36 @@ static duk_ret_t Frustum_UnProject_Selector(duk_context* ctx)
         return Frustum_UnProject_float_float(ctx);
     if (numArgs == 1 && GetValueObject<float2>(ctx, 0, float2_ID))
         return Frustum_UnProject_float2(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t Frustum_PointInside_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+        return Frustum_PointInside_float_float_float(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Frustum_PointInside_float3(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t Frustum_NearPlanePos_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
+        return Frustum_NearPlanePos_float_float(ctx);
+    if (numArgs == 1 && GetValueObject<float2>(ctx, 0, float2_ID))
+        return Frustum_NearPlanePos_float2(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t Frustum_FarPlanePos_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
+        return Frustum_FarPlanePos_float_float(ctx);
+    if (numArgs == 1 && GetValueObject<float2>(ctx, 0, float2_ID))
+        return Frustum_FarPlanePos_float2(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -623,6 +911,8 @@ static duk_ret_t Frustum_Transform_Selector(duk_context* ctx)
 static duk_ret_t Frustum_Contains_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Frustum_Contains_float3(ctx);
     if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
         return Frustum_Contains_LineSegment(ctx);
     if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
@@ -726,8 +1016,15 @@ static duk_ret_t Frustum_ScreenToViewportSpace_Static_Selector(duk_context* ctx)
 
 static const duk_function_list_entry Frustum_Functions[] = {
     {"SetViewPlaneDistances", Frustum_SetViewPlaneDistances_float_float, 2}
+    ,{"SetFrame", Frustum_SetFrame_float3_float3_float3, 3}
+    ,{"SetPos", Frustum_SetPos_float3, 1}
+    ,{"SetFront", Frustum_SetFront_float3, 1}
+    ,{"SetUp", Frustum_SetUp_float3, 1}
     ,{"SetPerspective", Frustum_SetPerspective_float_float, 2}
     ,{"SetOrthographic", Frustum_SetOrthographic_float_float, 2}
+    ,{"Pos", Frustum_Pos, 0}
+    ,{"Front", Frustum_Front, 0}
+    ,{"Up", Frustum_Up, 0}
     ,{"NearPlaneDistance", Frustum_NearPlaneDistance, 0}
     ,{"FarPlaneDistance", Frustum_FarPlaneDistance, 0}
     ,{"HorizontalFov", Frustum_HorizontalFov, 0}
@@ -738,6 +1035,7 @@ static const duk_function_list_entry Frustum_Functions[] = {
     ,{"AspectRatio", Frustum_AspectRatio, 0}
     ,{"SetHorizontalFovAndAspectRatio", Frustum_SetHorizontalFovAndAspectRatio_float_float, 2}
     ,{"SetVerticalFovAndAspectRatio", Frustum_SetVerticalFovAndAspectRatio_float_float, 2}
+    ,{"WorldRight", Frustum_WorldRight, 0}
     ,{"NearPlane", Frustum_NearPlane, 0}
     ,{"NearPlaneWidth", Frustum_NearPlaneWidth, 0}
     ,{"NearPlaneHeight", Frustum_NearPlaneHeight, 0}
@@ -747,7 +1045,12 @@ static const duk_function_list_entry Frustum_Functions[] = {
     ,{"TopPlane", Frustum_TopPlane, 0}
     ,{"BottomPlane", Frustum_BottomPlane, 0}
     ,{"GetPlane", Frustum_GetPlane_int, 1}
+    ,{"CenterPoint", Frustum_CenterPoint, 0}
     ,{"Edge", Frustum_Edge_int, 1}
+    ,{"CornerPoint", Frustum_CornerPoint_int, 1}
+    ,{"AnyPointFast", Frustum_AnyPointFast, 0}
+    ,{"ExtremePoint", Frustum_ExtremePoint_Selector, DUK_VARARGS}
+    ,{"ProjectToAxis", Frustum_ProjectToAxis_float3_float_float, 3}
     ,{"SetWorldMatrix", Frustum_SetWorldMatrix_float3x4, 1}
     ,{"WorldMatrix", Frustum_WorldMatrix, 0}
     ,{"ComputeWorldMatrix", Frustum_ComputeWorldMatrix, 0}
@@ -760,12 +1063,21 @@ static const duk_function_list_entry Frustum_Functions[] = {
     ,{"UnProject", Frustum_UnProject_Selector, DUK_VARARGS}
     ,{"UnProjectFromNearPlane", Frustum_UnProjectFromNearPlane_float_float, 2}
     ,{"UnProjectLineSegment", Frustum_UnProjectLineSegment_float_float, 2}
+    ,{"PointInside", Frustum_PointInside_Selector, DUK_VARARGS}
+    ,{"Project", Frustum_Project_float3, 1}
+    ,{"NearPlanePos", Frustum_NearPlanePos_Selector, DUK_VARARGS}
+    ,{"FarPlanePos", Frustum_FarPlanePos_Selector, DUK_VARARGS}
     ,{"IsFinite", Frustum_IsFinite, 0}
     ,{"Volume", Frustum_Volume, 0}
+    ,{"FastRandomPointInside", Frustum_FastRandomPointInside_LCG, 1}
+    ,{"UniformRandomPointInside", Frustum_UniformRandomPointInside_LCG, 1}
+    ,{"Translate", Frustum_Translate_float3, 1}
     ,{"Transform", Frustum_Transform_Selector, DUK_VARARGS}
     ,{"MinimalEnclosingAABB", Frustum_MinimalEnclosingAABB, 0}
     ,{"MinimalEnclosingOBB", Frustum_MinimalEnclosingOBB_float, 1}
     ,{"Contains", Frustum_Contains_Selector, DUK_VARARGS}
+    ,{"ClosestPoint", Frustum_ClosestPoint_float3, 1}
+    ,{"Distance", Frustum_Distance_float3, 1}
     ,{"Intersects", Frustum_Intersects_Selector, DUK_VARARGS}
     ,{"ToString", Frustum_ToString, 0}
     ,{"SerializeToString", Frustum_SerializeToString, 0}

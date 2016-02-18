@@ -5,6 +5,11 @@
 #include "CoreTypes.h"
 #include "BindingsHelpers.h"
 #include "Scene/Scene.h"
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4800)
+#endif
+
 #include "Scene/Entity.h"
 #include "Scene/IComponent.h"
 
@@ -24,6 +29,14 @@ static duk_ret_t Scene_Name(duk_context* ctx)
     Scene* thisObj = GetThisWeakObject<Scene>(ctx);
     const String & ret = thisObj->Name();
     duk_push_string(ctx, ret.CString());
+    return 1;
+}
+
+static duk_ret_t Scene_Entities(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    const Scene::EntityMap & ret = thisObj->Entities();
+    PushWeakObjectMap(ctx, ret);
     return 1;
 }
 
@@ -111,7 +124,7 @@ static duk_ret_t Scene_EntitiesWithComponent_String(duk_context* ctx)
     Scene* thisObj = GetThisWeakObject<Scene>(ctx);
     String name(duk_require_string(ctx, 0));
     EntityVector ret = thisObj->EntitiesWithComponent(name);
-    PushWeakObjectVector<Entity>(ctx, ret);
+    PushWeakObjectArray(ctx, ret);
     return 1;
 }
 
@@ -208,7 +221,7 @@ static duk_ret_t Scene_EntitiesWithComponent_u32_String(duk_context* ctx)
     u32 typeId = (u32)duk_require_number(ctx, 0);
     String name(duk_require_string(ctx, 1));
     EntityVector ret = thisObj->EntitiesWithComponent(typeId, name);
-    PushWeakObjectVector<Entity>(ctx, ret);
+    PushWeakObjectArray(ctx, ret);
     return 1;
 }
 
@@ -218,7 +231,7 @@ static duk_ret_t Scene_EntitiesWithComponent_String_String(duk_context* ctx)
     String typeName(duk_require_string(ctx, 0));
     String name(duk_require_string(ctx, 1));
     EntityVector ret = thisObj->EntitiesWithComponent(typeName, name);
-    PushWeakObjectVector<Entity>(ctx, ret);
+    PushWeakObjectArray(ctx, ret);
     return 1;
 }
 
@@ -227,7 +240,27 @@ static duk_ret_t Scene_EntitiesOfGroup_String(duk_context* ctx)
     Scene* thisObj = GetThisWeakObject<Scene>(ctx);
     String groupName(duk_require_string(ctx, 0));
     EntityVector ret = thisObj->EntitiesOfGroup(groupName);
-    PushWeakObjectVector<Entity>(ctx, ret);
+    PushWeakObjectArray(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Scene_Components_u32_String(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    u32 typeId = (u32)duk_require_number(ctx, 0);
+    String name(duk_require_string(ctx, 1));
+    Entity::ComponentVector ret = thisObj->Components(typeId, name);
+    PushWeakObjectArray(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Scene_Components_String_String(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    String typeName(duk_require_string(ctx, 0));
+    String name(duk_require_string(ctx, 1));
+    Entity::ComponentVector ret = thisObj->Components(typeName, name);
+    PushWeakObjectArray(ctx, ret);
     return 1;
 }
 
@@ -237,7 +270,7 @@ static duk_ret_t Scene_FindEntitiesContaining_String_bool(duk_context* ctx)
     String substring(duk_require_string(ctx, 0));
     bool caseSensitive = duk_require_boolean(ctx, 1);
     EntityVector ret = thisObj->FindEntitiesContaining(substring, caseSensitive);
-    PushWeakObjectVector<Entity>(ctx, ret);
+    PushWeakObjectArray(ctx, ret);
     return 1;
 }
 
@@ -247,7 +280,7 @@ static duk_ret_t Scene_FindEntitiesByName_String_bool(duk_context* ctx)
     String name(duk_require_string(ctx, 0));
     bool caseSensitive = duk_require_boolean(ctx, 1);
     EntityVector ret = thisObj->FindEntitiesByName(name, caseSensitive);
-    PushWeakObjectVector<Entity>(ctx, ret);
+    PushWeakObjectArray(ctx, ret);
     return 1;
 }
 
@@ -255,7 +288,7 @@ static duk_ret_t Scene_RootLevelEntities(duk_context* ctx)
 {
     Scene* thisObj = GetThisWeakObject<Scene>(ctx);
     EntityVector ret = thisObj->RootLevelEntities();
-    PushWeakObjectVector<Entity>(ctx, ret);
+    PushWeakObjectArray(ctx, ret);
     return 1;
 }
 
@@ -331,8 +364,19 @@ static duk_ret_t Scene_EntitiesWithComponent_Selector(duk_context* ctx)
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
+static duk_ret_t Scene_Components_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_string(ctx, 1))
+        return Scene_Components_u32_String(ctx);
+    if (numArgs == 2 && duk_is_string(ctx, 0) && duk_is_string(ctx, 1))
+        return Scene_Components_String_String(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
 static const duk_function_list_entry Scene_Functions[] = {
     {"Name", Scene_Name, 0}
+    ,{"Entities", Scene_Entities, 0}
     ,{"ChangeEntityId", Scene_ChangeEntityId_entity_id_t_entity_id_t, 2}
     ,{"EndAllAttributeInterpolations", Scene_EndAllAttributeInterpolations, 0}
     ,{"UpdateAttributeInterpolations", Scene_UpdateAttributeInterpolations_float, 1}
@@ -354,6 +398,7 @@ static const duk_function_list_entry Scene_Functions[] = {
     ,{"NextFreeId", Scene_NextFreeId, 0}
     ,{"NextFreeIdLocal", Scene_NextFreeIdLocal, 0}
     ,{"EntitiesOfGroup", Scene_EntitiesOfGroup_String, 1}
+    ,{"Components", Scene_Components_Selector, DUK_VARARGS}
     ,{"FindEntitiesContaining", Scene_FindEntitiesContaining_String_bool, 2}
     ,{"FindEntitiesByName", Scene_FindEntitiesByName_String_bool, 2}
     ,{"RootLevelEntities", Scene_RootLevelEntities, 0}

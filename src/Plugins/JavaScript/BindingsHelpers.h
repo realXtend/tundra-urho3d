@@ -99,7 +99,7 @@ template<class T> void PushConstructorResult(duk_context* ctx, T* source, const 
 }
 
 /// Push a vector of value objects as an array.
-template<class T> void PushValueObjectVector(duk_context* ctx, Urho3D::Vector<T>& vector, const char* typeName, duk_c_function finalizer)
+template<class T> void PushValueObjectArray(duk_context* ctx, const Urho3D::Vector<T>& vector, const char* typeName, duk_c_function finalizer)
 {
     duk_push_array(ctx);
 
@@ -221,7 +221,7 @@ template<class T> Urho3D::Vector<Urho3D::WeakPtr<T> > GetWeakObjectWeakPtrVector
 }
 
 /// Push a vector of weak-refcounted objects as an array. Null indices are included as null objects.
-template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<T*>& vector)
+template<class T> void PushWeakObjectArray(duk_context* ctx, const Urho3D::Vector<T*>& vector)
 {
     duk_push_array(ctx);
 
@@ -233,7 +233,7 @@ template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<T*>
 }
 
 /// Push a vector of weak-refcounted objects as an array. Null indices are included as null objects.
-template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<Urho3D::SharedPtr<T> >& vector)
+template<class T> void PushWeakObjectArray(duk_context* ctx, const Urho3D::Vector<Urho3D::SharedPtr<T> >& vector)
 {
     duk_push_array(ctx);
 
@@ -245,7 +245,7 @@ template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<Urh
 }
 
 /// Push a vector of weak-refcounted objects as an array. Null indices are included as null objects.
-template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<Urho3D::WeakPtr<T> >& vector)
+template<class T> void PushWeakObjectArray(duk_context* ctx, const Urho3D::Vector<Urho3D::WeakPtr<T> >& vector)
 {
     duk_push_array(ctx);
 
@@ -253,6 +253,30 @@ template<class T> void PushWeakObjectVector(duk_context* ctx, Urho3D::Vector<Urh
     {
         PushWeakObject(ctx, vector[i].Get());
         duk_put_prop_index(ctx, -2, i);
+    }
+}
+
+/// Push a map of weak-refcounted objects.
+template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const Urho3D::HashMap<T, Urho3D::SharedPtr<U> >& map)
+{
+    duk_push_array(ctx);
+
+    for (Urho3D::HashMap<T, Urho3D::SharedPtr<U> >::ConstIterator i = map.Begin(); i != map.End(); ++i)
+    {
+        PushWeakObject(ctx, i->second_.Get());
+        duk_put_prop_string(ctx, -2, Urho3D::String(i->first_).CString());
+    }
+}
+
+/// Push a map of weak-refcounted objects.
+template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const Urho3D::HashMap<T, Urho3D::WeakPtr<U> >& map)
+{
+    duk_push_array(ctx);
+
+    for (Urho3D::HashMap<T, Urho3D::WeakPtr<U> >::ConstIterator i = map.Begin(); i != map.End(); ++i)
+    {
+        PushWeakObject(ctx, i->second_.Get());
+        duk_put_prop_string(ctx, -2, Urho3D::String(i->first_).CString());
     }
 }
 

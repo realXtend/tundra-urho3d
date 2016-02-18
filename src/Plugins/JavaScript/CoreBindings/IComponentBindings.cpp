@@ -5,6 +5,11 @@
 #include "CoreTypes.h"
 #include "BindingsHelpers.h"
 #include "Scene/IComponent.h"
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4800)
+#endif
+
 #include "Scene/Entity.h"
 #include "Scene/Scene.h"
 

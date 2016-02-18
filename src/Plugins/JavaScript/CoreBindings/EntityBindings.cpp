@@ -5,6 +5,11 @@
 #include "CoreTypes.h"
 #include "BindingsHelpers.h"
 #include "Scene/Entity.h"
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4800)
+#endif
+
 #include "Scene/Scene.h"
 #include "Scene/IComponent.h"
 
@@ -69,6 +74,14 @@ static duk_ret_t Entity_CreateComponentWithId_component_id_t_u32_String_Attribut
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 3);
     ComponentPtr ret = thisObj->CreateComponentWithId(compId, typeId, name, change);
     PushWeakObject(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Entity_Components(duk_context* ctx)
+{
+    Entity* thisObj = GetThisWeakObject<Entity>(ctx);
+    const Entity::ComponentMap & ret = thisObj->Components();
+    PushWeakObjectMap(ctx, ret);
     return 1;
 }
 
@@ -346,7 +359,7 @@ static duk_ret_t Entity_ComponentsOfType_u32(duk_context* ctx)
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     u32 typeId = (u32)duk_require_number(ctx, 0);
     Entity::ComponentVector ret = thisObj->ComponentsOfType(typeId);
-    PushWeakObjectVector<IComponent>(ctx, ret);
+    PushWeakObjectArray(ctx, ret);
     return 1;
 }
 
@@ -355,7 +368,7 @@ static duk_ret_t Entity_ComponentsOfType_String(duk_context* ctx)
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     String typeName(duk_require_string(ctx, 0));
     Entity::ComponentVector ret = thisObj->ComponentsOfType(typeName);
-    PushWeakObjectVector<IComponent>(ctx, ret);
+    PushWeakObjectArray(ctx, ret);
     return 1;
 }
 
@@ -580,7 +593,7 @@ static duk_ret_t Entity_Children_bool(duk_context* ctx)
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     bool recursive = duk_require_boolean(ctx, 0);
     EntityVector ret = thisObj->Children(recursive);
-    PushWeakObjectVector<Entity>(ctx, ret);
+    PushWeakObjectArray(ctx, ret);
     return 1;
 }
 
@@ -706,6 +719,7 @@ static const duk_function_list_entry Entity_Functions[] = {
     ,{"EmitLeaveView", Entity_EmitLeaveView_IComponent, 1}
     ,{"ChangeComponentId", Entity_ChangeComponentId_component_id_t_component_id_t, 2}
     ,{"CreateComponentWithId", Entity_CreateComponentWithId_component_id_t_u32_String_AttributeChange__Type, 4}
+    ,{"Components", Entity_Components, 0}
     ,{"NumComponents", Entity_NumComponents, 0}
     ,{"ComponentById", Entity_ComponentById_component_id_t, 1}
     ,{"Component", Entity_Component_Selector, DUK_VARARGS}
