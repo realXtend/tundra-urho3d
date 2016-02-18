@@ -17,24 +17,26 @@
 namespace Tundra
 {
 
-/// Javascript script instance used wit EC_Script.
+class Script;
+
+/// Javascript script instance used with Script component.
 class JAVASCRIPT_API JavaScriptInstance : public IScriptInstance
 {
 public:
     /// Creates script engine for this script instance and loads the script but doesn't run it yet.
     /** @param scriptRef Script asset reference.
     @param module Javascript module. */
-    JavaScriptInstance(const String &fileName, JavaScript *module);
+    JavaScriptInstance(const String &fileName, JavaScript *module, Script* owner = 0);
 
     /// Creates script engine for this script instance and loads the script but doesn't run it yet.
     /** @param scriptRef Script asset reference.
     @param module Javascript module. */
-    JavaScriptInstance(ScriptAssetPtr scriptRef, JavaScript *module);
+    JavaScriptInstance(ScriptAssetPtr scriptRef, JavaScript *module, Script* owner = 0);
 
     /// Creates script engine for this script instance and loads the script but doesn't run it yet.
     /** @param scriptRefs Script asset references.
     @param module Javascript module. */
-    JavaScriptInstance(const Vector<ScriptAssetPtr>& scriptRefs, JavaScript *module);
+    JavaScriptInstance(const Vector<ScriptAssetPtr>& scriptRefs, JavaScript *module, Script* owner = 0);
 
     /// Destroys script engine created for this script instance.
     virtual ~JavaScriptInstance();
@@ -55,11 +57,7 @@ public:
     bool Execute(const String& functionName);
 
     /// Return the Duktape context.
-    duk_context* Context() const;
-
-    /// Sets owner (EC_Script) component.
-    /** @param owner Owner component. */
-    void SetOwner(const ComponentPtr &owner) { owner_ = owner; }
+    duk_context* Context() const { return ctx_; }
 
     /// Return owner component
     ComponentWeakPtr Owner() const { return owner_; }
@@ -68,6 +66,10 @@ public:
     /** Multiple inclusion of same file is prevented. (by using simple string compare)
     @param path is relative path from bin/ to file. Example jsmodules/apitest/myscript.js */
     void IncludeFile(const String &file);
+
+    /// Register a service object under a global property. It must derive from Urho3D::Object for type identification.
+    /** The object is held in a weak pointer on the JS side, so it must be strongly held alive elsewhere. */
+    void RegisterService(const String& name, Urho3D::Object* object);
 
     /// Return whether has been evaluated
     virtual bool IsEvaluated() const { return evaluated; }

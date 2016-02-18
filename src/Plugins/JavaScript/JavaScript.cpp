@@ -10,8 +10,12 @@
 #include "Script.h"
 #include "ScriptAsset.h"
 #include "JavaScriptInstance.h"
+#include "MathBindings/MathBindings.h"
+#include "CoreBindings/CoreBindings.h"
 
 #include <Urho3D/Core/Profiler.h>
+
+using namespace JSBindings;
 
 namespace Tundra
 {
@@ -69,7 +73,7 @@ void JavaScript::OnComponentAdded(Entity* entity, IComponent* comp, AttributeCha
     }
 }
 
-void JavaScript::OnComponentRemoved(Entity* entity, IComponent* comp, AttributeChange::Type change)
+void JavaScript::OnComponentRemoved(Entity* /*entity*/, IComponent* comp, AttributeChange::Type /*change*/)
 {
     if (comp->TypeName() == Script::TypeNameStatic())
     {
@@ -93,14 +97,9 @@ void JavaScript::OnScriptAssetsChanged(Script* scriptComp, const Vector<ScriptAs
 
     if (newScripts[0]->Name().EndsWith(".js")) // We're positively using QtScript.
     {
-        JavaScriptInstance *jsInstance = new JavaScriptInstance(newScripts, this);
+        JavaScriptInstance *jsInstance = new JavaScriptInstance(newScripts, this, scriptComp);
 
-        jsInstance->SetOwner(ComponentPtr(scriptComp));
         scriptComp->SetScriptInstance(jsInstance);
-
-        // Register all core APIs and names to this script engine.
-        /// \todo Bindings
-        // PrepareScriptInstance(jsInstance, scriptComp);
 
         // If this component is a script application, connect to the evaluate / unload signals so that we can create or delete script objects as needed
         /// \todo Implement, skipped for now
@@ -119,6 +118,30 @@ void JavaScript::OnScriptAssetsChanged(Script* scriptComp, const Vector<ScriptAs
                 return;
             jsInstance->Run();
         }
+    }
+}
+
+void JavaScript::PrepareScriptInstance(JavaScriptInstance* instance, Script* scriptComp)
+{
+    URHO3D_PROFILE(PrepareScriptInstance);
+
+    duk_context* ctx = instance->Context();
+
+    {
+        URHO3D_PROFILE(ExposeMathClasses);
+        ExposeMathClasses(ctx);
+    }
+    {
+        URHO3D_PROFILE(ExposeCoreClasses);
+        ExposeCoreClasses(ctx);
+    }
+
+    /// \todo Register framework, engine and other services
+
+    if (scriptComp)
+    {
+        instance->RegisterService("me", scriptComp->ParentEntity());
+        instance->RegisterService("scene", scriptComp->ParentScene());
     }
 }
 

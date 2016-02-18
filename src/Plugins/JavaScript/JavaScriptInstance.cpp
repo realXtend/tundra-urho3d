@@ -7,8 +7,8 @@
 #include "Framework.h"
 #include "LoggingFunctions.h"
 #include "AssetAPI.h"
-#include "MathBindings/MathBindings.h"
-#include "CoreBindings/CoreBindings.h"
+#include "Script.h"
+#include "BindingsHelpers.h"
 
 #include <Urho3D/Core/Profiler.h>
 #include <Urho3D/IO/FileSystem.h>
@@ -21,10 +21,11 @@ namespace Tundra
 
 #define JS_PROFILE(name) Urho3D::AutoProfileBlock profile_ ## name (module_->GetSubsystem<Urho3D::Profiler>(), #name)
 
-JavaScriptInstance::JavaScriptInstance(const String &fileName, JavaScript *module) :
+JavaScriptInstance::JavaScriptInstance(const String &fileName, JavaScript *module, Script* owner) :
     ctx_(0),
     sourceFile(fileName),
     module_(module),
+    owner_(owner),
     evaluated(false)
 {
     assert(module);
@@ -32,9 +33,10 @@ JavaScriptInstance::JavaScriptInstance(const String &fileName, JavaScript *modul
     Load();
 }
 
-JavaScriptInstance::JavaScriptInstance(ScriptAssetPtr scriptRef, JavaScript *module) :
+JavaScriptInstance::JavaScriptInstance(ScriptAssetPtr scriptRef, JavaScript *module, Script* owner) :
     ctx_(0),
     module_(module),
+    owner_(owner),
     evaluated(false)
 {
     assert(module);
@@ -46,9 +48,10 @@ JavaScriptInstance::JavaScriptInstance(ScriptAssetPtr scriptRef, JavaScript *mod
     Load();
 }
 
-JavaScriptInstance::JavaScriptInstance(const Vector<ScriptAssetPtr>& scriptRefs, JavaScript *module) :
+JavaScriptInstance::JavaScriptInstance(const Vector<ScriptAssetPtr>& scriptRefs, JavaScript *module, Script* owner) :
     ctx_(0),
     module_(module),
+    owner_(owner),
     evaluated(false)
 {
     assert(module);
@@ -64,14 +67,8 @@ void JavaScriptInstance::CreateEngine()
 {
     ctx_ = duk_create_heap_default();
 
-    {
-        JS_PROFILE(ExposeMathClasses);
-        ExposeMathClasses(ctx_);
-    }
-    {
-        JS_PROFILE(ExposeCoreClasses);
-        ExposeCoreClasses(ctx_);
-    }
+    Script *ec = dynamic_cast<Script*>(owner_.Get());
+    module_->PrepareScriptInstance(this, ec);
 
     module_->ScriptInstanceCreated.Emit(this);
 }
@@ -118,7 +115,6 @@ void JavaScriptInstance::Load()
     }
 
     bool useAssetAPI = !scriptRefs_.Empty();
-    size_t numScripts = useAssetAPI ? scriptRefs_.Size() : 1;
 
     // Determine based on code origin whether it can be trusted with system access or not
     if (useAssetAPI)
@@ -217,7 +213,7 @@ void JavaScriptInstance::Run()
 
     if (!ctx_)
     {
-        LogError("JavascriptInstance::Run: Cannot run, script engine not loaded.");
+        LogError("JavascriptInstance::Run: Cannot run, script engine not created.");
         return;
     }
 
@@ -245,6 +241,12 @@ void JavaScriptInstance::Run()
 
 bool JavaScriptInstance::Evaluate(const String& script)
 {
+    if (!ctx_)
+    {
+        LogError("JavascriptInstance::Run: Cannot evaluate, script engine not created.");
+        return false;
+    }
+
     duk_push_string(ctx_, script.CString());
     bool success = duk_peval(ctx_) == 0;
     if (!success)
@@ -256,6 +258,12 @@ bool JavaScriptInstance::Evaluate(const String& script)
 
 bool JavaScriptInstance::Execute(const String& functionName)
 {
+    if (!ctx_)
+    {
+        LogError("JavascriptInstance::Run: Cannot execute function " + functionName + ", script engine not created.");
+        return false;
+    }
+
     duk_push_global_object(ctx_);
     duk_get_prop_string(ctx_, -1, functionName.CString());
     bool success = duk_pcall(ctx_, 0) == 0;
@@ -265,6 +273,39 @@ bool JavaScriptInstance::Execute(const String& functionName)
     duk_pop(ctx_); // Pop result/error
     duk_pop(ctx_); // Pop global object
     return success;
+}
+
+void JavaScriptInstance::IncludeFile(const String &path)
+{
+    for(uint i = 0; i < includedFiles.Size(); ++i)
+        if (includedFiles[i].ToLower() == path.ToLower())
+        {
+            LogDebug("JavaScript::IncludeFile: Not including already included file " + path);
+            return;
+        }
+
+    String script = LoadScript(path);
+
+    /*
+    context->setActivationObject(context->parentContext()->activationObject());
+    context->setThisObject(context->parentContext()->thisObject());
+    */
+
+    Evaluate(script);
+    includedFiles.Push(path);
+}
+
+void JavaScriptInstance::RegisterService(const String& name, Urho3D::Object* object)
+{
+    if (!ctx_)
+    {
+        LogError("JavascriptInstance::RegisterService: Cannot register object, script engine not created.");
+    }
+
+    duk_push_global_object(ctx_);
+    PushWeakObject(ctx_, object);
+    duk_put_prop_string(ctx_, -2, name.CString());
+    duk_pop(ctx_);
 }
 
 }

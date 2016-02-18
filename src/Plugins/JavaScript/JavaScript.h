@@ -11,6 +11,9 @@
 namespace Tundra
 {
 
+class JavaScriptInstance;
+class Script;
+
 /// JavaScript scripting module using the Duktape VM
 class JAVASCRIPT_API JavaScript : public IModule
 {
@@ -22,6 +25,9 @@ public:
 
     /// Emitted when a new JavaScript engine instance has been created. Use this to expose more classes to the instance.
     Signal1<JavaScriptInstance*> ScriptInstanceCreated;
+
+    /// Prepare a script engine by registering the API and service objects.
+    void PrepareScriptInstance(JavaScriptInstance* instance, Script* scriptComp);
 
 private:
     void Load() override;
