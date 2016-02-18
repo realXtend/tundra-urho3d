@@ -261,7 +261,7 @@ template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const Urho3D
 {
     duk_push_array(ctx);
 
-    for (Urho3D::HashMap<T, Urho3D::SharedPtr<U> >::ConstIterator i = map.Begin(); i != map.End(); ++i)
+    for (typename Urho3D::HashMap<T, Urho3D::SharedPtr<U> >::ConstIterator i = map.Begin(); i != map.End(); ++i)
     {
         PushWeakObject(ctx, i->second_.Get());
         duk_put_prop_string(ctx, -2, Urho3D::String(i->first_).CString());
@@ -273,7 +273,7 @@ template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const Urho3D
 {
     duk_push_array(ctx);
 
-    for (Urho3D::HashMap<T, Urho3D::WeakPtr<U> >::ConstIterator i = map.Begin(); i != map.End(); ++i)
+    for (typename Urho3D::HashMap<T, Urho3D::WeakPtr<U> >::ConstIterator i = map.Begin(); i != map.End(); ++i)
     {
         PushWeakObject(ctx, i->second_.Get());
         duk_put_prop_string(ctx, -2, Urho3D::String(i->first_).CString());
