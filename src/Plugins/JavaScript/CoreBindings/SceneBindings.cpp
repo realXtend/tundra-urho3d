@@ -20,7 +20,9 @@ using namespace std;
 namespace JSBindings
 {
 
+extern const char* float3_ID;
 
+duk_ret_t float3_Finalizer(duk_context* ctx);
 
 const char* Scene_ID = "Scene";
 
@@ -125,6 +127,30 @@ static duk_ret_t Scene_EntitiesWithComponent_String(duk_context* ctx)
     String name(duk_require_string(ctx, 0));
     EntityVector ret = thisObj->EntitiesWithComponent(name);
     PushWeakObjectArray(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Scene_UpVector(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    float3 ret = thisObj->UpVector();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Scene_RightVector(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    float3 ret = thisObj->RightVector();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Scene_ForwardVector(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    float3 ret = thisObj->ForwardVector();
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
 
@@ -387,6 +413,9 @@ static const duk_function_list_entry Scene_Functions[] = {
     ,{"EmitEntityAcked", Scene_EmitEntityAcked_Entity_entity_id_t, 2}
     ,{"EmitComponentAcked", Scene_EmitComponentAcked_IComponent_component_id_t, 2}
     ,{"EntitiesWithComponent", Scene_EntitiesWithComponent_Selector, DUK_VARARGS}
+    ,{"UpVector", Scene_UpVector, 0}
+    ,{"RightVector", Scene_RightVector, 0}
+    ,{"ForwardVector", Scene_ForwardVector, 0}
     ,{"ViewEnabled", Scene_ViewEnabled, 0}
     ,{"IsAuthority", Scene_IsAuthority, 0}
     ,{"EntityById", Scene_EntityById_entity_id_t, 1}

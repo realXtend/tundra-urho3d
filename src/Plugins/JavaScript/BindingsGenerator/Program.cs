@@ -62,7 +62,10 @@ namespace BindingsGenerator
             if (args.Length > 3)
             {
                 for (int i = 3; i < args.Length; ++i)
+                {
+                    classNames.Add(args[i]);
                     exposeTheseClasses.Add(args[i]);
+                }
             }
 
             foreach (Symbol classSymbol in s.symbolsByName.Values)
@@ -71,7 +74,9 @@ namespace BindingsGenerator
                 {
                     string typeName = SanitateTypeName(classSymbol.name);
 
-                    classNames.Add(typeName);
+                    if (!classNames.Contains(typeName))
+                        classNames.Add(typeName);
+
                     isRefCounted[typeName] = IsRefCounted(classSymbol);
 
                     if (headerFiles != null)
@@ -123,13 +128,17 @@ namespace BindingsGenerator
             tw.WriteLine("#endif");
             tw.WriteLine("");
 
-            // Find dependency classes and refer to them
+            // Find dependency classes and add their includes
             HashSet<string> dependencies = FindDependencies(classSymbol);
-            // Includes
             foreach (string s in dependencies)
-                tw.WriteLine("#include \"" + FindIncludeForClass(s) + "\"");
+            {
+                string include = FindIncludeForClass(s);
+                if (include.Length > 0)
+                    tw.WriteLine("#include \"" + FindIncludeForClass(s) + "\"");
+            }
             tw.WriteLine("");
 
+            // Use namespaces
             if (namespaceName.Length > 0)
             {
                 tw.WriteLine("");
@@ -187,7 +196,7 @@ namespace BindingsGenerator
             if (classHeaderFiles.ContainsKey(name))
                 return classHeaderFiles[name];
             else
-                return name + ".h";
+                return "";
         }
 
         static string ExtractNamespace(string className)
