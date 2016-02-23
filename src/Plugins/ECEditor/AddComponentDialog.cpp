@@ -99,7 +99,6 @@ AddComponentDialog::AddComponentDialog(Framework *framework) :
             for (unsigned int i = 0; i < componentTypes.Size(); ++i)
             {
                 String componentType = componentTypes[i];
-
                 Text *label = new Text(framework->GetContext());
                 label->SetStyle("FileSelectorListText", style);
                 label->SetName(componentType);
@@ -161,12 +160,14 @@ AddComponentDialog::AddComponentDialog(Framework *framework) :
                 localCheckBox_->SetAlignment(HA_LEFT, VA_CENTER);
                 localArea->AddChild(localCheckBox_);
 
-                Text *label = new Text(framework->GetContext());
-                label->SetStyle("Text", style);
-                label->SetText("Creating as Replicated");
-                label->SetAlignment(HA_LEFT, VA_CENTER);
-                label->SetPosition(IntVector2(22, 0));
-                localArea->AddChild(label);
+                SubscribeToEvent(localCheckBox_, E_TOGGLED, URHO3D_HANDLER(AddComponentDialog, OnCheckboxChanged));
+
+                localText_ = TextPtr(new Text(framework->GetContext()));
+                localText_->SetStyle("Text", style);
+                localText_->SetText("Creating as Replicated");
+                localText_->SetAlignment(HA_LEFT, VA_CENTER);
+                localText_->SetPosition(IntVector2(22, 0));
+                localArea->AddChild(localText_);
             }
         }
 
@@ -235,6 +236,7 @@ AddComponentDialog::~AddComponentDialog()
 {
     dropDownList_.Reset();
     nameLineEdit_.Reset();
+    localText_.Reset();
 
     if (window_.NotNull())
         window_->Remove();
@@ -295,5 +297,16 @@ void AddComponentDialog::OnButtonPressed(StringHash /*eventType*/, VariantMap &e
         DialogClosed.Emit(this, true);
     else if (element->GetName() == "CloseButton")
         DialogClosed.Emit(this, false);
+}
+
+void AddComponentDialog::OnCheckboxChanged(StringHash /*eventType*/, VariantMap &eventData)
+{
+    CheckBox *check = dynamic_cast<CheckBox*>(eventData["Element"].GetPtr());
+    if (check != NULL && check->GetName() == "localCheckBox")
+    {
+        bool checked = check->IsChecked();
+        String t = checked ? "Creating as Local" : "Creating as Replicated";
+        localText_->SetText(t);
+    }
 }
 }

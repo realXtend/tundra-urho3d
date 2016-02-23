@@ -73,7 +73,7 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework) :
 
     listView_ = new ListView(framework->GetContext());
     listView_->SetStyle("HierarchyListView", style);
-    //listView_->SetMultiselect(true);
+    listView_->SetMultiselect(true);
     listView_->SetEnabled(true);
     listView_->SetFocusMode(FocusMode::FM_FOCUSABLE_DEFOCUSABLE);
     window_->AddChild(listView_);
@@ -161,8 +161,26 @@ SceneStructureItem *SceneStructureWindow::CreateItem(Object *obj, const String &
         item->SetIndent(parent->Widget()->GetIndent() + listView_->GetBaseIndent(), listView_->GetIndentSpacing());
     }
     item->SetText(text);
-    if (dynamic_cast<IComponent*>(obj) != NULL)
+    if (IComponent *comp = dynamic_cast<IComponent*>(obj))
+    {
         item->SetType(SceneStructureItem::ItemType::Component);
+        if (comp->ParentEntity() != NULL)
+        {
+            if (comp->ParentEntity()->IsTemporary())
+                item->SetColor(Color(0.9, 0.3, 0.3));
+            else if (comp->ParentEntity()->IsLocal())
+                item->SetColor(Color(0.3, 0.3, 0.9));
+        }
+    }
+    else if (Entity *entity = dynamic_cast<Entity*>(obj))
+    {
+        item->SetType(SceneStructureItem::ItemType::Entity);
+        if (entity->IsTemporary())
+            item->SetColor(Color(0.9, 0.3, 0.3));
+        else if (entity->IsLocal())
+            item->SetColor(Color(0.3, 0.3, 0.9));
+    }
+
     item->SetData(obj);
     item->OnTogglePressed.Connect(this, &SceneStructureWindow::OnTogglePressed);
 

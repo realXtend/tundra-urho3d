@@ -87,6 +87,11 @@ Object *SceneStructureItem::Data() const
     return data_.Get();
 }
 
+void SceneStructureItem::SetColor(Color color)
+{
+    text_->SetColor(color);
+}
+
 void SceneStructureItem::SetText(const String &text)
 {
     text_->SetText(text);

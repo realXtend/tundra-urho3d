@@ -76,7 +76,6 @@ public:
     }
 
     void Clear();
-
     void RefreshView();
 
     SceneStructureItem *FindItem(Object *obj);

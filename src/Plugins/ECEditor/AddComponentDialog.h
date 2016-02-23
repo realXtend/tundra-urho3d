@@ -22,6 +22,7 @@ namespace Urho3D
     class Window;
     class CheckBox;
     class UIElement;
+    class Text;
 }
 
 using namespace Urho3D;
@@ -33,6 +34,7 @@ typedef SharedPtr<DropDownList> DropDownListPtr;
 typedef SharedPtr<LineEdit> LineEditPtr;
 typedef SharedPtr<Window> WindowPtr;
 typedef SharedPtr<CheckBox> CheckBoxPtr;
+typedef SharedPtr<Text> TextPtr;
 
 class ECEDITOR_API AddComponentDialog : public Object
 {
@@ -55,6 +57,7 @@ public:
 
 protected:
     void OnButtonPressed(StringHash eventType, VariantMap &eventData);
+    void OnCheckboxChanged(StringHash eventType, VariantMap &eventData);
 
     Framework *framework_;
 
@@ -63,6 +66,7 @@ protected:
     WindowPtr window_;
     CheckBoxPtr localCheckBox_;
     CheckBoxPtr temporaryCheckBox_;
+    TextPtr localText_;
 };
 
 }

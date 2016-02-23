@@ -57,6 +57,8 @@ public:
     void SetData(Object *obj);
     Object *Data() const;
 
+    void SetColor(Color color);
+
     Signal1<SceneStructureItem* ARG(SceneStructureItem)> OnTogglePressed;
 
 protected:
