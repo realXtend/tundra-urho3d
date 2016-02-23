@@ -35,6 +35,7 @@ class TreeView;
 class SceneStructureItem;
 class SceneContextMenu;
 class ECEditorCommandStack;
+class AddComponentDialog;
 
 typedef WeakPtr<Entity> EntityWeakPtr;
 typedef WeakPtr<IComponent> ComponentWeakPtr;
@@ -47,6 +48,7 @@ typedef WeakPtr<ListView> ListViewWeakPtr;
 typedef WeakPtr<Object> ObjectWeakPtr;
 typedef SharedPtr<SceneStructureItem> SceneStructureItemPtr;
 typedef SharedPtr<ECEditorCommandStack> CommandStackPtr;
+typedef SharedPtr<AddComponentDialog> AddComponentDialogPtr;
 
 class ECEDITOR_API SceneStructureWindow : public Object
 {
@@ -100,6 +102,7 @@ protected:
     void OnItemDoubleClicked(StringHash eventType, VariantMap &eventData);
     void OnContextMenuHide(StringHash eventType, VariantMap &eventData);
     void OnSelectionChanged(StringHash eventType, VariantMap &eventData);
+    void OnComponentDialogClosed(AddComponentDialog *dialog, bool okPressed);
 
     void OnActionSelected(SceneContextMenu *contextMenu, String id);
 
@@ -113,6 +116,8 @@ protected:
 
 private:
     Scene *scene_;
+
+    AddComponentDialogPtr addComponentDialog_;
 
     UIWindowWeakPtr window_;
     SceneContextMenuWeakPtr contextMenu_;

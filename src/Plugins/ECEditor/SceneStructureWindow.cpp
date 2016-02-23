@@ -8,6 +8,7 @@
 #include "Framework.h"
 #include "Scene.h"
 #include "SceneAPI.h"
+#include "AddComponentDialog.h"
 
 #include <Urho3D/Engine/Engine.h>
 #include <Urho3D/UI/UIEvents.h>
@@ -91,31 +92,31 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework) :
         {
             Button *button = new Button(framework->GetContext());
             button->SetName("UndoButton");
+            Text *text = new Text(framework->GetContext());
+            text->SetText("Undo");
+            text->SetAlignment(HA_CENTER, VA_CENTER);
+            text->SetInternal(true);
+            
+            button->AddChild(text);
             button->SetStyle("Button", style);
             button->SetMinWidth(50);
             button->SetMaxWidth(50);
             button->SetVerticalAlignment(VA_CENTER);
             bottomBar->AddChild(button);
-
-            Text *text = new Text(framework->GetContext());
-            text->SetText("Undo");
-            text->SetStyle("Text", style);
-            text->SetAlignment(HA_CENTER, VA_CENTER);
-            button->AddChild(text);
 
             button = new Button(framework->GetContext());
             button->SetName("RedoButton");
+            button->SetVerticalAlignment(VA_CENTER);
+            text = new Text(framework->GetContext());
+            text->SetText("Redo");
+            text->SetInternal(true);
+
+            button->AddChild(text);
             button->SetStyle("Button", style);
             button->SetMinWidth(50);
             button->SetMaxWidth(50);
-            button->SetVerticalAlignment(VA_CENTER);
-            bottomBar->AddChild(button);
-
-            text = new Text(framework->GetContext());
-            text->SetText("Redo");
-            text->SetStyle("Text", style);
             text->SetAlignment(HA_CENTER, VA_CENTER);
-            button->AddChild(text);
+            bottomBar->AddChild(button);
         }
     }
 
@@ -126,12 +127,17 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework) :
     contextMenu_->OnActionSelected.Connect(this, &SceneStructureWindow::OnActionSelected);
     GetSubsystem<UI>()->GetRoot()->AddChild(contextMenu_->Widget());
 
+    addComponentDialog_ = AddComponentDialogPtr(new AddComponentDialog(framework_));
+    addComponentDialog_->DialogClosed.Connect(this, &SceneStructureWindow::OnComponentDialogClosed);
+    addComponentDialog_->Hide();
+
     framework->Scene()->SceneCreated.Connect(this, &SceneStructureWindow::OnSceneCreated);
 }
 
 SceneStructureWindow::~SceneStructureWindow()
 {
     Clear();
+    addComponentDialog_.Reset();
 
     if (contextMenu_.NotNull())
         contextMenu_->Widget()->Remove();
@@ -239,6 +245,31 @@ void SceneStructureWindow::OnSelectionChanged(StringHash /*eventType*/, VariantM
         return;
 
     PODVector<UIElement *> elements = listView_->GetSelectedItems();
+}
+
+void SceneStructureWindow::OnComponentDialogClosed(AddComponentDialog *dialog, bool okPressed)
+{
+    if (okPressed == false || selectedEntities_.Size() == 0 || addComponentDialog_.Null())
+        return;
+
+    String componentType = addComponentDialog_->SelectedComponentType();
+    String name = addComponentDialog_->Name();
+    bool replicated = !addComponentDialog_->IsLocal();
+    bool temporary = addComponentDialog_->IsTemporary();
+
+    if (componentType.Length() == 0)
+        return;
+
+    for (unsigned int i = 0; i < selectedEntities_.Size(); ++i)
+    {
+        EntityWeakPtr entity = selectedEntities_[i];
+        if (entity.NotNull())
+        {
+            ComponentPtr comp = entity->CreateComponent(componentType, name, AttributeChange::Default, replicated);
+            comp->SetTemporary(temporary);
+        }
+    }
+    RefreshView();
 }
 
 void SceneStructureWindow::OnSceneCreated(Scene* /*scene*/, AttributeChange::Type /*change*/)
@@ -395,6 +426,13 @@ void SceneStructureWindow::OnActionSelected(SceneContextMenu *contextMenu, Strin
     {
         for (unsigned int i = 0; i < selectedEntities_.Size(); i++)
             selectedEntities_[i]->ParentScene()->RemoveEntity(selectedEntities_[i]->Id());
+    }
+    else if (id == "addComponent")
+    {
+        addComponentDialog_->Show();
+        IntVector2 pos = window_->GetPosition();
+        pos.x_ += 100;
+        addComponentDialog_->Widget()->SetPosition(pos);
     }
     RefreshView();
 }
