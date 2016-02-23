@@ -136,7 +136,8 @@ void JavaScript::PrepareScriptInstance(JavaScriptInstance* instance, Script* scr
         ExposeCoreClasses(ctx);
     }
 
-    /// \todo Register framework, engine and other services
+    /// \todo Register engine and other services
+    instance->RegisterService("framework", Fw());
 
     if (scriptComp)
     {

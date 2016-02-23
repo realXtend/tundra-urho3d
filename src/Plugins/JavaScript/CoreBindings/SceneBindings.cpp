@@ -11,6 +11,7 @@
 #endif
 
 #include "Scene/Entity.h"
+#include "Framework/Framework.h"
 #include "Scene/IComponent.h"
 
 
@@ -74,6 +75,14 @@ static duk_ret_t Scene_IsInterpolating(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Scene_GetFramework(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    Framework * ret = thisObj->GetFramework();
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t Scene_EmitComponentAdded_Entity_IComponent_AttributeChange__Type(duk_context* ctx)
 {
     Scene* thisObj = GetThisWeakObject<Scene>(ctx);
@@ -126,7 +135,54 @@ static duk_ret_t Scene_EntitiesWithComponent_String(duk_context* ctx)
     Scene* thisObj = GetThisWeakObject<Scene>(ctx);
     String name(duk_require_string(ctx, 0));
     EntityVector ret = thisObj->EntitiesWithComponent(name);
-    PushWeakObjectArray(ctx, ret);
+    PushWeakObjectVector(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Scene_CreateEntity_entity_id_t_StringVector_AttributeChange__Type_bool_bool_bool(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    entity_id_t id = (entity_id_t)duk_require_number(ctx, 0);
+    StringVector components = GetStringVector(ctx, 1);
+    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
+    bool replicated = duk_require_boolean(ctx, 3);
+    bool componentsReplicated = duk_require_boolean(ctx, 4);
+    bool temporary = duk_require_boolean(ctx, 5);
+    EntityPtr ret = thisObj->CreateEntity(id, components, change, replicated, componentsReplicated, temporary);
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Scene_CreateLocalEntity_StringVector_AttributeChange__Type_bool_bool(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    StringVector components = GetStringVector(ctx, 0);
+    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    bool componentsReplicated = duk_require_boolean(ctx, 2);
+    bool temporary = duk_require_boolean(ctx, 3);
+    EntityPtr ret = thisObj->CreateLocalEntity(components, change, componentsReplicated, temporary);
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Scene_CreateTemporaryEntity_StringVector_AttributeChange__Type_bool(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    StringVector components = GetStringVector(ctx, 0);
+    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    bool componentsReplicated = duk_require_boolean(ctx, 2);
+    EntityPtr ret = thisObj->CreateTemporaryEntity(components, change, componentsReplicated);
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Scene_CreateLocalTemporaryEntity_StringVector_AttributeChange__Type(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    StringVector components = GetStringVector(ctx, 0);
+    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    EntityPtr ret = thisObj->CreateLocalTemporaryEntity(components, change);
+    PushWeakObject(ctx, ret);
     return 1;
 }
 
@@ -247,7 +303,7 @@ static duk_ret_t Scene_EntitiesWithComponent_u32_String(duk_context* ctx)
     u32 typeId = (u32)duk_require_number(ctx, 0);
     String name(duk_require_string(ctx, 1));
     EntityVector ret = thisObj->EntitiesWithComponent(typeId, name);
-    PushWeakObjectArray(ctx, ret);
+    PushWeakObjectVector(ctx, ret);
     return 1;
 }
 
@@ -257,7 +313,7 @@ static duk_ret_t Scene_EntitiesWithComponent_String_String(duk_context* ctx)
     String typeName(duk_require_string(ctx, 0));
     String name(duk_require_string(ctx, 1));
     EntityVector ret = thisObj->EntitiesWithComponent(typeName, name);
-    PushWeakObjectArray(ctx, ret);
+    PushWeakObjectVector(ctx, ret);
     return 1;
 }
 
@@ -266,7 +322,7 @@ static duk_ret_t Scene_EntitiesOfGroup_String(duk_context* ctx)
     Scene* thisObj = GetThisWeakObject<Scene>(ctx);
     String groupName(duk_require_string(ctx, 0));
     EntityVector ret = thisObj->EntitiesOfGroup(groupName);
-    PushWeakObjectArray(ctx, ret);
+    PushWeakObjectVector(ctx, ret);
     return 1;
 }
 
@@ -276,7 +332,7 @@ static duk_ret_t Scene_Components_u32_String(duk_context* ctx)
     u32 typeId = (u32)duk_require_number(ctx, 0);
     String name(duk_require_string(ctx, 1));
     Entity::ComponentVector ret = thisObj->Components(typeId, name);
-    PushWeakObjectArray(ctx, ret);
+    PushWeakObjectVector(ctx, ret);
     return 1;
 }
 
@@ -286,7 +342,7 @@ static duk_ret_t Scene_Components_String_String(duk_context* ctx)
     String typeName(duk_require_string(ctx, 0));
     String name(duk_require_string(ctx, 1));
     Entity::ComponentVector ret = thisObj->Components(typeName, name);
-    PushWeakObjectArray(ctx, ret);
+    PushWeakObjectVector(ctx, ret);
     return 1;
 }
 
@@ -296,7 +352,7 @@ static duk_ret_t Scene_FindEntitiesContaining_String_bool(duk_context* ctx)
     String substring(duk_require_string(ctx, 0));
     bool caseSensitive = duk_require_boolean(ctx, 1);
     EntityVector ret = thisObj->FindEntitiesContaining(substring, caseSensitive);
-    PushWeakObjectArray(ctx, ret);
+    PushWeakObjectVector(ctx, ret);
     return 1;
 }
 
@@ -306,7 +362,7 @@ static duk_ret_t Scene_FindEntitiesByName_String_bool(duk_context* ctx)
     String name(duk_require_string(ctx, 0));
     bool caseSensitive = duk_require_boolean(ctx, 1);
     EntityVector ret = thisObj->FindEntitiesByName(name, caseSensitive);
-    PushWeakObjectArray(ctx, ret);
+    PushWeakObjectVector(ctx, ret);
     return 1;
 }
 
@@ -314,7 +370,7 @@ static duk_ret_t Scene_RootLevelEntities(duk_context* ctx)
 {
     Scene* thisObj = GetThisWeakObject<Scene>(ctx);
     EntityVector ret = thisObj->RootLevelEntities();
-    PushWeakObjectArray(ctx, ret);
+    PushWeakObjectVector(ctx, ret);
     return 1;
 }
 
@@ -407,12 +463,17 @@ static const duk_function_list_entry Scene_Functions[] = {
     ,{"EndAllAttributeInterpolations", Scene_EndAllAttributeInterpolations, 0}
     ,{"UpdateAttributeInterpolations", Scene_UpdateAttributeInterpolations_float, 1}
     ,{"IsInterpolating", Scene_IsInterpolating, 0}
+    ,{"GetFramework", Scene_GetFramework, 0}
     ,{"EmitComponentAdded", Scene_EmitComponentAdded_Entity_IComponent_AttributeChange__Type, 3}
     ,{"EmitComponentRemoved", Scene_EmitComponentRemoved_Entity_IComponent_AttributeChange__Type, 3}
     ,{"EmitEntityRemoved", Scene_EmitEntityRemoved_Entity_AttributeChange__Type, 2}
     ,{"EmitEntityAcked", Scene_EmitEntityAcked_Entity_entity_id_t, 2}
     ,{"EmitComponentAcked", Scene_EmitComponentAcked_IComponent_component_id_t, 2}
     ,{"EntitiesWithComponent", Scene_EntitiesWithComponent_Selector, DUK_VARARGS}
+    ,{"CreateEntity", Scene_CreateEntity_entity_id_t_StringVector_AttributeChange__Type_bool_bool_bool, 6}
+    ,{"CreateLocalEntity", Scene_CreateLocalEntity_StringVector_AttributeChange__Type_bool_bool, 4}
+    ,{"CreateTemporaryEntity", Scene_CreateTemporaryEntity_StringVector_AttributeChange__Type_bool, 3}
+    ,{"CreateLocalTemporaryEntity", Scene_CreateLocalTemporaryEntity_StringVector_AttributeChange__Type, 2}
     ,{"UpVector", Scene_UpVector, 0}
     ,{"RightVector", Scene_RightVector, 0}
     ,{"ForwardVector", Scene_ForwardVector, 0}

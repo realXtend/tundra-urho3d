@@ -329,9 +329,9 @@ namespace BindingsGenerator
                 {
                     /// \todo This needs the id & finalizer, mark dependencies
                     if (!IsRefCounted(templateType))
-                        return "PushValueObjectArray(ctx, " + source + ", " +  ClassIdentifier(templateType) + ", " + templateType + "_Finalizer);";
+                        return "PushValueObjectVector(ctx, " + source + ", " +  ClassIdentifier(templateType) + ", " + templateType + "_Finalizer);";
                     else
-                        return "PushWeakObjectArray(ctx, " + source + ");";
+                        return "PushWeakObjectVector(ctx, " + source + ");";
                 }
             }
             else if (typeName.EndsWith("Map"))
@@ -488,7 +488,7 @@ namespace BindingsGenerator
                     bool isClassCtor = !child.isStatic && (child.name == className);
                     if (!isClassCtor && !IsSupportedType(child.type))
                     {
-                        Console.WriteLine(child.name + " in class " + classSymbol.name + " unsupported return value type " + child.type);
+                        Console.WriteLine(child.name + " in class " + classSymbol.name + " unsupported return value type " + SanitateTypeName(child.type));
                         continue;
                     }
                     // Bindings convention: refcounted objects like Scene or Component can not be constructed from script, but rather must be acquired from the framework
@@ -502,7 +502,7 @@ namespace BindingsGenerator
 
                         if (!IsSupportedType(t))
                         {
-                            Console.WriteLine("Unsupported parameter type " + t + " in function " + child.name + " of " + className);
+                            Console.WriteLine("Unsupported parameter type " + SanitateTypeName(t) + " in function " + child.name + " of " + className);
                             badParameters = true;
                             break;
                         }
@@ -512,7 +512,7 @@ namespace BindingsGenerator
                             string st = SanitateTypeName(t);
                             if (!IsRefCounted(st) || !classNames.Contains(st))
                             {
-                                Console.WriteLine("Unsupported pointer parameter " + t + " in function " + child.name + " of " + className);
+                                Console.WriteLine("Unsupported pointer parameter " + st + " in function " + child.name + " of " + className);
                                 badParameters = true;
                                 break;
                             }
@@ -716,7 +716,8 @@ namespace BindingsGenerator
             if (staticOverloads.Count > 0)
                 tw.WriteLine(Indent(1) + "duk_put_function_list(ctx, -1, " + className + "_StaticFunctions);");
             tw.WriteLine(Indent(1) + "duk_push_object(ctx);");
-            tw.WriteLine(Indent(1) + "duk_put_function_list(ctx, -1, " + className + "_Functions);");
+            if (overloads.Count > 0)
+                tw.WriteLine(Indent(1) + "duk_put_function_list(ctx, -1, " + className + "_Functions);");
             foreach (Property p in properties)
             {
                 if (!p.readOnly)
@@ -775,7 +776,7 @@ namespace BindingsGenerator
 
         static string SanitateTypeName(string type)
         {
-            string t = type.Trim();
+            string t = type.Trim().Replace("< ", "<").Replace(" >", ">");
             if (t.StartsWith("const"))
                 t = t.Substring(5).Trim();
             if (t.EndsWith("&") || t.EndsWith("*"))
@@ -784,6 +785,9 @@ namespace BindingsGenerator
                 t = t.Substring(0, t.Length - 5).Trim();
             if (t == "vec")
                 t = "float3";
+            if (t.StartsWith("Vector<"))
+                t = t.Substring(7).Replace(">", "") + "Vector";
+
             return StripNamespace(t);
         }
 
@@ -814,11 +818,13 @@ namespace BindingsGenerator
             if (t.EndsWith("Vector"))
             {
                 string templateType = t.Substring(0, t.Length - 6);
+                if (templateType == "String")
+                    return true;
                 if (templateType == "Component")
                     templateType = "IComponent";
                 return classNames.Contains(templateType);
             }
-            else if (t.EndsWith("Map"))
+            else if (t.EndsWith("Map") || t.EndsWith("Ptr"))
             {
                 string templateType = t.Substring(0, t.Length - 3);
                 if (templateType == "Component")
@@ -826,7 +832,7 @@ namespace BindingsGenerator
                 return classNames.Contains(templateType);
             }
 
-            return t == "void" || Symbol.IsPODType(t) || classNames.Contains(t) || t.EndsWith("Ptr") || t == "string" || t == "String";
+            return t == "void" || Symbol.IsPODType(t) || classNames.Contains(t) || t == "string" || t == "String";
         }
 
         static bool IsBadType(string type)
