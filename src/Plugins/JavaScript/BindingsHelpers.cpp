@@ -98,7 +98,7 @@ Urho3D::Vector<Urho3D::String> GetStringVector(duk_context* ctx, duk_idx_t stack
     return ret;
 }
 
-void PushStringVector(duk_context* ctx, const Urho3D::Vector<Urho3D::String> vector)
+void PushStringVector(duk_context* ctx, const Urho3D::Vector<Urho3D::String>& vector)
 {
     duk_push_array(ctx);
 

@@ -11,6 +11,7 @@
 #endif
 
 #include "Scene/Entity.h"
+#include "Framework/Framework.h"
 #include "Scene/Scene.h"
 
 
@@ -70,6 +71,14 @@ static duk_ret_t IComponent_SetReplicated_bool(duk_context* ctx)
     bool enable = duk_require_boolean(ctx, 0);
     thisObj->SetReplicated(enable);
     return 0;
+}
+
+static duk_ret_t IComponent_GetFramework(duk_context* ctx)
+{
+    IComponent* thisObj = GetThisWeakObject<IComponent>(ctx);
+    Framework * ret = thisObj->GetFramework();
+    PushWeakObject(ctx, ret);
+    return 1;
 }
 
 static duk_ret_t IComponent_IsReplicated(duk_context* ctx)
@@ -201,6 +210,22 @@ static duk_ret_t IComponent_ViewEnabled(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t IComponent_AttributeNames(duk_context* ctx)
+{
+    IComponent* thisObj = GetThisWeakObject<IComponent>(ctx);
+    StringVector ret = thisObj->AttributeNames();
+    PushStringVector(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t IComponent_AttributeIds(duk_context* ctx)
+{
+    IComponent* thisObj = GetThisWeakObject<IComponent>(ctx);
+    StringVector ret = thisObj->AttributeIds();
+    PushStringVector(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t IComponent_ShouldBeSerialized_bool_bool(duk_context* ctx)
 {
     IComponent* thisObj = GetThisWeakObject<IComponent>(ctx);
@@ -226,6 +251,7 @@ static const duk_function_list_entry IComponent_Functions[] = {
     ,{"SetName", IComponent_SetName_String, 1}
     ,{"SetParentEntity", IComponent_SetParentEntity_Entity, 1}
     ,{"SetReplicated", IComponent_SetReplicated_bool, 1}
+    ,{"GetFramework", IComponent_GetFramework, 0}
     ,{"IsReplicated", IComponent_IsReplicated, 0}
     ,{"IsLocal", IComponent_IsLocal, 0}
     ,{"IsUnacked", IComponent_IsUnacked, 0}
@@ -242,6 +268,8 @@ static const duk_function_list_entry IComponent_Functions[] = {
     ,{"SetTemporary", IComponent_SetTemporary_bool, 1}
     ,{"IsTemporary", IComponent_IsTemporary, 0}
     ,{"ViewEnabled", IComponent_ViewEnabled, 0}
+    ,{"AttributeNames", IComponent_AttributeNames, 0}
+    ,{"AttributeIds", IComponent_AttributeIds, 0}
     ,{"ShouldBeSerialized", IComponent_ShouldBeSerialized_bool_bool, 2}
     ,{nullptr, nullptr, 0}
 };

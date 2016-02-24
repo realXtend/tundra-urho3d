@@ -12,6 +12,7 @@
 
 #include "Scene/Scene.h"
 #include "Scene/IComponent.h"
+#include "Framework/Framework.h"
 
 
 using namespace Tundra;
@@ -359,7 +360,7 @@ static duk_ret_t Entity_ComponentsOfType_u32(duk_context* ctx)
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     u32 typeId = (u32)duk_require_number(ctx, 0);
     Entity::ComponentVector ret = thisObj->ComponentsOfType(typeId);
-    PushWeakObjectArray(ctx, ret);
+    PushWeakObjectVector(ctx, ret);
     return 1;
 }
 
@@ -368,7 +369,7 @@ static duk_ret_t Entity_ComponentsOfType_String(duk_context* ctx)
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     String typeName(duk_require_string(ctx, 0));
     Entity::ComponentVector ret = thisObj->ComponentsOfType(typeName);
-    PushWeakObjectArray(ctx, ret);
+    PushWeakObjectVector(ctx, ret);
     return 1;
 }
 
@@ -493,6 +494,14 @@ static duk_ret_t Entity_Id(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Entity_GetFramework(duk_context* ctx)
+{
+    Entity* thisObj = GetThisWeakObject<Entity>(ctx);
+    Framework * ret = thisObj->GetFramework();
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t Entity_ParentScene(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
@@ -545,6 +554,32 @@ static duk_ret_t Entity_SetParent_EntityPtr_AttributeChange__Type(duk_context* c
     return 0;
 }
 
+static duk_ret_t Entity_CreateChild_entity_id_t_StringVector_AttributeChange__Type_bool_bool_bool(duk_context* ctx)
+{
+    Entity* thisObj = GetThisWeakObject<Entity>(ctx);
+    entity_id_t id = (entity_id_t)duk_require_number(ctx, 0);
+    StringVector components = GetStringVector(ctx, 1);
+    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
+    bool replicated = duk_require_boolean(ctx, 3);
+    bool componentsReplicated = duk_require_boolean(ctx, 4);
+    bool temporary = duk_require_boolean(ctx, 5);
+    EntityPtr ret = thisObj->CreateChild(id, components, change, replicated, componentsReplicated, temporary);
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Entity_CreateLocalChild_StringVector_AttributeChange__Type_bool_bool(duk_context* ctx)
+{
+    Entity* thisObj = GetThisWeakObject<Entity>(ctx);
+    StringVector components = GetStringVector(ctx, 0);
+    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    bool componentsReplicated = duk_require_boolean(ctx, 2);
+    bool temporary = duk_require_boolean(ctx, 3);
+    EntityPtr ret = thisObj->CreateLocalChild(components, change, componentsReplicated, temporary);
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t Entity_Parent(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
@@ -593,7 +628,7 @@ static duk_ret_t Entity_Children_bool(duk_context* ctx)
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     bool recursive = duk_require_boolean(ctx, 0);
     EntityVector ret = thisObj->Children(recursive);
-    PushWeakObjectArray(ctx, ret);
+    PushWeakObjectVector(ctx, ret);
     return 1;
 }
 
@@ -747,12 +782,15 @@ static const duk_function_list_entry Entity_Functions[] = {
     ,{"IsUnacked", Entity_IsUnacked, 0}
     ,{"ToString", Entity_ToString, 0}
     ,{"Id", Entity_Id, 0}
+    ,{"GetFramework", Entity_GetFramework, 0}
     ,{"ParentScene", Entity_ParentScene, 0}
     ,{"AddChild", Entity_AddChild_EntityPtr_AttributeChange__Type, 2}
     ,{"RemoveChild", Entity_RemoveChild_EntityPtr_AttributeChange__Type, 2}
     ,{"RemoveAllChildren", Entity_RemoveAllChildren_AttributeChange__Type, 1}
     ,{"DetachChild", Entity_DetachChild_EntityPtr_AttributeChange__Type, 2}
     ,{"SetParent", Entity_SetParent_EntityPtr_AttributeChange__Type, 2}
+    ,{"CreateChild", Entity_CreateChild_entity_id_t_StringVector_AttributeChange__Type_bool_bool_bool, 6}
+    ,{"CreateLocalChild", Entity_CreateLocalChild_StringVector_AttributeChange__Type_bool_bool, 4}
     ,{"Parent", Entity_Parent, 0}
     ,{"HasParent", Entity_HasParent, 0}
     ,{"NumChildren", Entity_NumChildren, 0}

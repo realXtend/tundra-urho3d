@@ -25,21 +25,21 @@ public:
     explicit Framework(Urho3D::Context* ctx);
     ~Framework();
 
-    /// Reads cmd line parameters, loads modules and setups the Urho engine.
+    /// Reads cmd line parameters, loads modules and setups the Urho engine. [noscript]
     /** @note You must call this function before Go() or pumping your own main loop with ProcessOneFrame. */
     void Initialize();
 
-    /// Clears Framework and unloads all plugins. Call this before destructing Framework.
+    /// Clears Framework and unloads all plugins. Call this before destructing Framework. [noscript]
     void Uninitialize();
 
-    /// Run the main loop until exit requested.
+    /// Run the main loop until exit requested. [noscript]
     void Go();
 
-    /// Alternative to Go(). This function will process once frame and return.
+    /// Alternative to Go(). This function will process once frame and return. [noscript]
     /** @return False if Framework or Engine is exiting and no processing was done, othewise true. */
     bool Pump();
 
-    /// Runs through a single frame of logic update and rendering.
+    /// Runs through a single frame of logic update and rendering. [noscript]
     void ProcessOneFrame();
 
     /// Returns module by class T.
@@ -56,27 +56,27 @@ public:
     /** Framework will take ownership of the module pointer, so it is safe to pass in a raw pointer. */
     void RegisterModule(IModule *module);
 
-    /// Sets the current working directory. Use with caution.
+    /// Sets the current working directory. Use with caution. [noscript]
     void SetCurrentWorkingDirectory(const String& newCwd);
 
-    /// Returns the cwd of the current environment.
+    /// Returns the cwd of the current environment. [noscript]
     /** This directory should not be relied, since it might change due to external code running.
         Always prefer to use InstallationDirectory, UserDataDirectory and UserDocumentsDirectory instead.
         The returned path contains a trailing slash. */
     String CurrentWorkingDirectory() const;
 
-    /// Returns the directory where Tundra was installed to.
+    /// Returns the directory where Tundra was installed to. [noscript]
     /** This is *always* the directory Tundra.exe resides in.
         E.g. on Windows 7 this is usually of form "C:\Program Files (x86)\Tundra 1.0.5\".
         The returned path contains a trailing slash. */
     String InstallationDirectory() const;
 
-    /// Returns the directory that is used for Tundra data storage on the current user.
+    /// Returns the directory that is used for Tundra data storage on the current user. [noscript]
     /** E.g. on Windows 7 this is usually of form "C:\Users\username\AppData\Roaming\Tundra\".
         The returned path contains a trailing slash. */
     String UserDataDirectory() const;
 
-    /// Returns the directory where the documents (for Tundra) of the current user are located in.
+    /// Returns the directory where the documents (for Tundra) of the current user are located in. [noscript]
     /** E.g. on Windows 7 this is usually of form "C:\Users\username\Documents\Tundra\".
         The returned path contains a trailing slash. */
     String UserDocumentsDirectory() const;
@@ -115,7 +115,7 @@ public:
     /// Returns list of all the config XML filenames specified on command line or within another config XML
     Vector<String> ConfigFiles() const { return configFiles; }
 
-    /// Lookup a filename relative to either the installation or current working directory.
+    /// Lookup a filename relative to either the installation or current working directory. [noscript]
     String LookupRelativePath(String path) const;
 
     /// Request application exit. Exit request signal will be sent and the exit can be canceled by calling CancelExit();
