@@ -9,6 +9,8 @@
 #include "Scene.h"
 #include "SceneAPI.h"
 #include "AddComponentDialog.h"
+#include "AddEntityDialog.h"
+#include "SceneAPI.h"
 
 #include <Urho3D/Engine/Engine.h>
 #include <Urho3D/UI/UIEvents.h>
@@ -131,6 +133,10 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework) :
     addComponentDialog_->DialogClosed.Connect(this, &SceneStructureWindow::OnComponentDialogClosed);
     addComponentDialog_->Hide();
 
+    addEntityDialog_ = AddEntityDialogPtr(new AddEntityDialog(framework_));
+    addEntityDialog_->DialogClosed.Connect(this, &SceneStructureWindow::OnEntityDialogClosed);
+    addEntityDialog_->Hide();
+
     framework->Scene()->SceneCreated.Connect(this, &SceneStructureWindow::OnSceneCreated);
 }
 
@@ -138,6 +144,7 @@ SceneStructureWindow::~SceneStructureWindow()
 {
     Clear();
     addComponentDialog_.Reset();
+    addEntityDialog_.Reset();
 
     if (contextMenu_.NotNull())
         contextMenu_->Widget()->Remove();
@@ -265,9 +272,9 @@ void SceneStructureWindow::OnSelectionChanged(StringHash /*eventType*/, VariantM
     PODVector<UIElement *> elements = listView_->GetSelectedItems();
 }
 
-void SceneStructureWindow::OnComponentDialogClosed(AddComponentDialog *dialog, bool okPressed)
+void SceneStructureWindow::OnComponentDialogClosed(AddComponentDialog *dialog, bool confirmed)
 {
-    if (okPressed == false || selectedEntities_.Size() == 0 || addComponentDialog_.Null())
+    if (confirmed == false || selectedEntities_.Size() == 0 || addComponentDialog_.Null())
         return;
 
     String componentType = addComponentDialog_->SelectedComponentType();
@@ -288,6 +295,25 @@ void SceneStructureWindow::OnComponentDialogClosed(AddComponentDialog *dialog, b
         }
     }
     RefreshView();
+}
+
+void SceneStructureWindow::OnEntityDialogClosed(AddEntityDialog *dialog, bool confirmed)
+{
+    if (confirmed == false || addEntityDialog_.Null())
+        return;
+
+    String name = addEntityDialog_->Name();
+    bool replicated = !addEntityDialog_->IsLocal();
+    bool temporary = addEntityDialog_->IsTemporary();
+
+    Scene *scene = framework_->Scene()->MainCameraScene();
+    Entity *entity = 0;
+    if (replicated)
+        entity = scene->CreateEntity();
+    else
+        entity = scene->CreateLocalEntity();
+    entity->SetTemporary(temporary);
+    entity->SetName(name);
 }
 
 void SceneStructureWindow::OnSceneCreated(Scene* /*scene*/, AttributeChange::Type /*change*/)
@@ -365,7 +391,8 @@ void SceneStructureWindow::ShowContextMenu(Object *obj, int x, int y)
     }
     else if (dynamic_cast<Entity*>(obj) != NULL)
     {
-        Menu *m = contextMenu_->CreateItem("removeEntity", "Remove");
+        Menu *m = contextMenu_->CreateItem("addEntity", "New Entity...");
+        m = contextMenu_->CreateItem("removeEntity", "Remove");
         m = contextMenu_->CreateItem("addComponent", "New Component");
         m = contextMenu_->CreateItem("editEntity", "Edit");
     }
@@ -430,6 +457,13 @@ SceneStructureItem *SceneStructureWindow::FindItem(UIElement *element)
 
 void SceneStructureWindow::OnActionSelected(SceneContextMenu *contextMenu, String id)
 {
+    if (id == "addEntity")
+    {
+        addEntityDialog_->Show();
+        IntVector2 pos = window_->GetPosition();
+        pos.x_ += 100;
+        addEntityDialog_->Widget()->SetPosition(pos);
+    }
     if (id == "addComponent")
     {
         for (unsigned int i = 0; i < selectedComponents_.Size(); i++)

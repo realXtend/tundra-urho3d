@@ -71,6 +71,12 @@
             <attribute name="Vert Alignment" value="Center" />
         </element>
     </element>
+    <element type="DialogButton" style="ButtonBase" auto="false">
+        <element type="Text" internal="true">
+            <attribute name="Horiz Alignment" value="Center" />
+            <attribute name="Vert Alignment" value="Center" />
+        </element>
+    </element>
     <element type="ButtonSelected" style="Button" auto="false">
         <attribute name="Image Rect" value="33 17 47 31" />
         <attribute name="Border" value="4 4 4 4" />

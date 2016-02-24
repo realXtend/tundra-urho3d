@@ -36,19 +36,18 @@ typedef SharedPtr<Window> WindowPtr;
 typedef SharedPtr<CheckBox> CheckBoxPtr;
 typedef SharedPtr<Text> TextPtr;
 
-class ECEDITOR_API AddComponentDialog : public Object
+class ECEDITOR_API AddEntityDialog : public Object
 {
-    URHO3D_OBJECT(AddComponentDialog, Object);
+    URHO3D_OBJECT(AddEntityDialog, Object);
 
 public:
-    explicit AddComponentDialog(Framework *framework);
-    virtual ~AddComponentDialog();
+    explicit AddEntityDialog(Framework *framework);
+    virtual ~AddEntityDialog();
 
-    Signal2<AddComponentDialog * ARG(dialog), bool ARG(confirmed)> DialogClosed;
+    Signal2<AddEntityDialog * ARG(dialog), bool ARG(confirmed)> DialogClosed;
 
     UIElement *Widget() const;
     String Name() const;
-    String SelectedComponentType() const;
     bool IsTemporary() const;
     bool IsLocal() const;
 
@@ -60,8 +59,7 @@ protected:
     void OnCheckboxChanged(StringHash eventType, VariantMap &eventData);
 
     Framework *framework_;
-
-    DropDownListPtr dropDownList_;
+    
     LineEditPtr nameLineEdit_;
     WindowPtr window_;
     CheckBoxPtr localCheckBox_;

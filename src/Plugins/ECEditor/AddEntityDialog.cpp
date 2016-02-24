@@ -2,7 +2,7 @@
 
 #include "StableHeaders.h"
 
-#include "AddComponentDialog.h"
+#include "AddEntityDialog.h"
 #include "Framework.h"
 #include "SceneAPI.h"
 
@@ -24,14 +24,14 @@
 namespace Tundra
 {
 
-AddComponentDialog::AddComponentDialog(Framework *framework) :
+AddEntityDialog::AddEntityDialog(Framework *framework) :
     Object(framework->GetContext()),
     framework_(framework)
 {
     XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/DefaultStyle.xml");
 
     window_ = new Window(framework->GetContext());
-    window_->SetLayout(LayoutMode::LM_VERTICAL, 8, IntRect(8, 8, 8, 8));
+    window_->SetLayout(LayoutMode::LM_VERTICAL, 8, IntRect(2, 2, 2, 2));
     window_->SetSize(IntVector2(340, 170));
     window_->SetMinSize(IntVector2(340, 170));
     window_->SetMovable(true);
@@ -53,7 +53,7 @@ AddComponentDialog::AddComponentDialog(Framework *framework) :
             button->SetPosition(IntVector2(-3, 0));
             topBar->AddChild(button);
 
-            SubscribeToEvent(button, E_RELEASED, URHO3D_HANDLER(AddComponentDialog, OnButtonPressed));
+            SubscribeToEvent(button, E_RELEASED, URHO3D_HANDLER(AddEntityDialog, OnButtonPressed));
 
             Text *windowHeader = new Text(framework->GetContext());
             windowHeader->SetStyle("Text", style);
@@ -79,34 +79,18 @@ AddComponentDialog::AddComponentDialog(Framework *framework) :
         {
             Text *label = new Text(framework->GetContext());
             label->SetStyle("Text", style);
-            label->SetName("Label");
-            label->SetText("Component");
+            label->SetName("nameLabel");
+            label->SetText("Name");
             label->SetAlignment(HA_LEFT, VA_CENTER);
             label->SetPosition(IntVector2(12, 0));
             contentOne->AddChild(label);
 
-            dropDownList_ = DropDownListPtr(new DropDownList(framework->GetContext()));
-            dropDownList_->SetStyle("DropDownList", style);
-            dropDownList_->SetName("ComponentDropDownList");
-            dropDownList_->SetAlignment(HA_RIGHT, VA_CENTER);
-            dropDownList_->SetPosition(IntVector2(-16, 0));
-            dropDownList_->SetSize(IntVector2(182, 22));
-            dropDownList_->SetResizePopup(true);
-            contentOne->AddChild(dropDownList_);
-
-            SceneAPI* sceneAPI = framework_->Scene();
-            StringVector componentTypes = sceneAPI->ComponentTypes();
-            for (unsigned int i = 0; i < componentTypes.Size(); ++i)
-            {
-                String componentType = componentTypes[i];
-                Text *label = new Text(framework->GetContext());
-                label->SetStyle("FileSelectorListText", style);
-                label->SetName(componentType);
-                label->SetText(componentType);
-
-                dropDownList_->AddItem(label);
-            }
-
+            nameLineEdit_ = LineEditPtr(new LineEdit(framework->GetContext()));
+            nameLineEdit_->SetStyle("LineEdit", style);
+            nameLineEdit_->SetAlignment(HA_RIGHT, VA_CENTER);
+            nameLineEdit_->SetPosition(IntVector2(-16, 0));
+            nameLineEdit_->SetSize(IntVector2(182, 22));
+            contentOne->AddChild(nameLineEdit_);
         }
 
         UIElement *contentTwo = new UIElement(framework->GetContext());
@@ -117,33 +101,11 @@ AddComponentDialog::AddComponentDialog(Framework *framework) :
         {
             Text *label = new Text(framework->GetContext());
             label->SetStyle("Text", style);
-            label->SetName("nameLabel");
-            label->SetText("Name");
-            label->SetAlignment(HA_LEFT, VA_CENTER);
-            label->SetPosition(IntVector2(12, 0));
-            contentTwo->AddChild(label);
-
-            nameLineEdit_ = LineEditPtr(new LineEdit(framework->GetContext()));
-            nameLineEdit_->SetStyle("LineEdit", style);
-            nameLineEdit_->SetAlignment(HA_RIGHT, VA_CENTER);
-            nameLineEdit_->SetPosition(IntVector2(-16, 0));
-            nameLineEdit_->SetSize(IntVector2(182, 22));
-            contentTwo->AddChild(nameLineEdit_);
-        }
-
-        UIElement *contentThree = new UIElement(framework->GetContext());
-        contentThree->SetMinHeight(22);
-        contentThree->SetMaxHeight(22);
-        content->AddChild(contentThree);
-
-        {
-            Text *label = new Text(framework->GetContext());
-            label->SetStyle("Text", style);
             label->SetName("localLabel");
             label->SetText("Local");
             label->SetAlignment(HA_LEFT, VA_CENTER);
             label->SetPosition(IntVector2(12, 0));
-            contentThree->AddChild(label);
+            contentTwo->AddChild(label);
 
             UIElement *localArea = new UIElement(framework->GetContext());
             localArea->SetMinHeight(22);
@@ -151,7 +113,7 @@ AddComponentDialog::AddComponentDialog(Framework *framework) :
             localArea->SetAlignment(HA_RIGHT, VA_CENTER);
             localArea->SetPosition(IntVector2(-26, 0));
             localArea->SetSize(IntVector2(172, 22));
-            contentThree->AddChild(localArea);
+            contentTwo->AddChild(localArea);
 
             {
                 localCheckBox_ = CheckBoxPtr(new CheckBox(framework->GetContext()));
@@ -160,7 +122,7 @@ AddComponentDialog::AddComponentDialog(Framework *framework) :
                 localCheckBox_->SetAlignment(HA_LEFT, VA_CENTER);
                 localArea->AddChild(localCheckBox_);
 
-                SubscribeToEvent(localCheckBox_, E_TOGGLED, URHO3D_HANDLER(AddComponentDialog, OnCheckboxChanged));
+                SubscribeToEvent(localCheckBox_, E_TOGGLED, URHO3D_HANDLER(AddEntityDialog, OnCheckboxChanged));
 
                 localText_ = TextPtr(new Text(framework->GetContext()));
                 localText_->SetStyle("Text", style);
@@ -171,10 +133,10 @@ AddComponentDialog::AddComponentDialog(Framework *framework) :
             }
         }
 
-        UIElement *contentFour = new UIElement(framework->GetContext());
-        contentFour->SetMinHeight(22);
-        contentFour->SetMaxHeight(22);
-        content->AddChild(contentFour);
+        UIElement *contentThree = new UIElement(framework->GetContext());
+        contentThree->SetMinHeight(22);
+        contentThree->SetMaxHeight(22);
+        content->AddChild(contentThree);
 
         {
             Text *label = new Text(framework->GetContext());
@@ -183,7 +145,7 @@ AddComponentDialog::AddComponentDialog(Framework *framework) :
             label->SetText("Temporary");
             label->SetAlignment(HA_LEFT, VA_CENTER);
             label->SetPosition(IntVector2(12, 0));
-            contentFour->AddChild(label);
+            contentThree->AddChild(label);
 
             UIElement *temporaryArea = new UIElement(framework->GetContext());
             temporaryArea->SetMinHeight(22);
@@ -191,7 +153,7 @@ AddComponentDialog::AddComponentDialog(Framework *framework) :
             temporaryArea->SetAlignment(HA_RIGHT, VA_CENTER);
             temporaryArea->SetPosition(IntVector2(-26, 0));
             temporaryArea->SetSize(IntVector2(172, 22));
-            contentFour->AddChild(temporaryArea);
+            contentThree->AddChild(temporaryArea);
 
             {
                 temporaryCheckBox_ = CheckBoxPtr(new CheckBox(framework->GetContext()));
@@ -208,7 +170,7 @@ AddComponentDialog::AddComponentDialog(Framework *framework) :
         bottomBar->SetMinHeight(30);
         bottomBar->SetMaxHeight(30);
         bottomBar->SetLayoutSpacing(12);
-        bottomBar->SetLayoutBorder(IntRect(2, 2, 2, 2));
+        bottomBar->SetLayoutBorder(IntRect(12, 2, 12, 2));
         bottomBar->SetLayout(LayoutMode::LM_HORIZONTAL, 8, IntRect(16, 2, 16, 2));
         window_->AddChild(bottomBar);
 
@@ -225,7 +187,7 @@ AddComponentDialog::AddComponentDialog(Framework *framework) :
             button->SetAlignment(HA_RIGHT, VA_CENTER);
             bottomBar->AddChild(button);
 
-            SubscribeToEvent(button, E_RELEASED, URHO3D_HANDLER(AddComponentDialog, OnButtonPressed));
+            SubscribeToEvent(button, E_RELEASED, URHO3D_HANDLER(AddEntityDialog, OnButtonPressed));
 
             button = new Button(framework->GetContext());
             button->SetName("CancelButton");
@@ -239,14 +201,13 @@ AddComponentDialog::AddComponentDialog(Framework *framework) :
             button->SetAlignment(HA_LEFT, VA_CENTER);
             bottomBar->AddChild(button);
 
-            SubscribeToEvent(button, E_RELEASED, URHO3D_HANDLER(AddComponentDialog, OnButtonPressed));
+            SubscribeToEvent(button, E_RELEASED, URHO3D_HANDLER(AddEntityDialog, OnButtonPressed));
         }
     }
 }
 
-AddComponentDialog::~AddComponentDialog()
+AddEntityDialog::~AddEntityDialog()
 {
-    dropDownList_.Reset();
     nameLineEdit_.Reset();
     localText_.Reset();
 
@@ -255,49 +216,41 @@ AddComponentDialog::~AddComponentDialog()
     window_.Reset();
 }
 
-UIElement *AddComponentDialog::Widget() const
+UIElement *AddEntityDialog::Widget() const
 {
     return window_;
 }
 
-String AddComponentDialog::Name() const
+String AddEntityDialog::Name() const
 {
     if (nameLineEdit_)
         return nameLineEdit_->GetText();
     return "";
 }
 
-String AddComponentDialog::SelectedComponentType() const
-{
-    UIElement *element = dropDownList_->GetSelectedItem();
-    if (element != NULL)
-        return element->GetName();
-    return "";
-}
-
-bool AddComponentDialog::IsTemporary() const
+bool AddEntityDialog::IsTemporary() const
 {
     return temporaryCheckBox_->IsChecked();
 }
 
-bool AddComponentDialog::IsLocal() const
+bool AddEntityDialog::IsLocal() const
 {
     return localCheckBox_->IsChecked();
 }
 
-void AddComponentDialog::Show()
+void AddEntityDialog::Show()
 {
     window_->SetVisible(true);
     window_->SetModal(true);
 }
 
-void AddComponentDialog::Hide()
+void AddEntityDialog::Hide()
 {
     window_->SetVisible(false);
     window_->SetModal(false);
 }
 
-void AddComponentDialog::OnButtonPressed(StringHash /*eventType*/, VariantMap &eventData)
+void AddEntityDialog::OnButtonPressed(StringHash /*eventType*/, VariantMap &eventData)
 {
     Hide();
 
@@ -307,11 +260,11 @@ void AddComponentDialog::OnButtonPressed(StringHash /*eventType*/, VariantMap &e
 
     if (element->GetName() == "AddButton")
         DialogClosed.Emit(this, true);
-    else if (element->GetName() == "CancelButton" || element->GetName() == "CloseButton")
+    else if (element->GetName() == "CloseButton")
         DialogClosed.Emit(this, false);
 }
 
-void AddComponentDialog::OnCheckboxChanged(StringHash /*eventType*/, VariantMap &eventData)
+void AddEntityDialog::OnCheckboxChanged(StringHash /*eventType*/, VariantMap &eventData)
 {
     CheckBox *check = dynamic_cast<CheckBox*>(eventData["Element"].GetPtr());
     if (check != NULL && check->GetName() == "localCheckBox")
