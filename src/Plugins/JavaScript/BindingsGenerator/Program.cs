@@ -492,6 +492,37 @@ namespace BindingsGenerator
                     tw.WriteLine("};");
                     tw.WriteLine("");
 
+                    // Receiver class definition
+                    string receiverClassName = "SignalReceiver" + "_" + className + "_" + child.name;
+
+                    tw.WriteLine("class " + receiverClassName + " : public SignalReceiver");
+                    tw.WriteLine("{");
+                    tw.WriteLine("public:");
+                    string signatureLine = "void ForwardSignal(";
+                    for (int i = 0; i < parameters.Count; ++i)
+                    {
+                        if (i > 0)
+                            signatureLine += ", ";
+                        signatureLine += parameters[i] + " param" + i;
+                    }
+                    signatureLine += ")";
+                    tw.WriteLine(Indent(1) + signatureLine);
+                    tw.WriteLine(Indent(1) + "{");
+                    tw.WriteLine(Indent(2) + "duk_context* ctx = ctx_;");
+                    tw.WriteLine(Indent(2) + "duk_push_global_object(ctx);");
+                    tw.WriteLine(Indent(2) + "duk_get_prop_string(ctx, -1, \"_DispatchSignal\");");
+                    for (int i = 0; i < parameters.Count; ++i)
+                    {
+                        tw.WriteLine(Indent(2) + GeneratePushToStack(parameters[i], "param" + i));
+                    }
+                    /// \todo Error logging
+                    tw.WriteLine(Indent(2) + "duk_pcall(ctx, " + parameters.Count + ");");
+                    tw.WriteLine(Indent(2) + "duk_pop(ctx);"); // Result
+                    tw.WriteLine(Indent(2) + "duk_pop(ctx);"); // Global object
+                    tw.WriteLine(Indent(1) + "}");
+                    tw.WriteLine("};");
+                    tw.WriteLine("");
+
                     // Finalizer
                     GenerateFinalizer(wrapperClassName, tw);
 
@@ -504,7 +535,7 @@ namespace BindingsGenerator
                     {
                         tw.WriteLine(Indent(1) + GenerateGetFromStack(parameters[i], i, "param" + i));
                     }
-                    string callLine = Indent(1) + "wrapper->signal_->Emit(";
+                    string callLine = "wrapper->signal_->Emit(";
                     for (int i = 0; i < parameters.Count; ++i)
                     {
                         if (i > 0)
@@ -512,7 +543,7 @@ namespace BindingsGenerator
                         callLine += "param" + i;
                     }
                     callLine += ");";
-                    tw.WriteLine(callLine);
+                    tw.WriteLine(Indent(1) + callLine);
                     tw.WriteLine(Indent(1) + "return 0;");
                     tw.WriteLine("}");
                     tw.WriteLine("");
@@ -884,6 +915,17 @@ namespace BindingsGenerator
             return StripNamespace(t);
         }
 
+        static string SanitateTypeNameNoPtrNoConst(string type)
+        {
+            string t = type.Trim().Replace("< ", "<").Replace(" >", ">");
+            if (t == "vec")
+                t = "float3";
+            if (t.StartsWith("Vector<"))
+                t = t.Substring(7).Replace(">", "") + "Vector";
+
+            return StripNamespace(t);
+        }
+
         static string SanitateSignalType(string type)
         {
             for (;;)
@@ -909,7 +951,7 @@ namespace BindingsGenerator
             type = type.Substring(idx, idx2 - idx);
             string[] strings = type.Split(',');
             foreach (string s in strings)
-                ret.Add(SanitateTypeName(s.Trim()));
+                ret.Add(SanitateTypeNameNoPtrNoConst(s.Trim()));
             return ret;
         }
 

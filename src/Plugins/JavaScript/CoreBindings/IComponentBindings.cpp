@@ -40,6 +40,22 @@ public:
     Signal2< const String &, const String & >* signal_;
 };
 
+class SignalReceiver_IComponent_ComponentNameChanged : public SignalReceiver
+{
+public:
+    void ForwardSignal(const String & param0, const String & param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        duk_push_string(ctx, param0.CString());
+        duk_push_string(ctx, param1.CString());
+        duk_pcall(ctx, 2);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
+};
+
 duk_ret_t SignalWrapper_IComponent_ComponentNameChanged_Finalizer(duk_context* ctx)
 {
     SignalWrapper_IComponent_ComponentNameChanged* obj = GetValueObject<SignalWrapper_IComponent_ComponentNameChanged>(ctx, 0, SignalWrapper_IComponent_ComponentNameChanged_ID);
@@ -86,6 +102,20 @@ public:
     Signal0< void >* signal_;
 };
 
+class SignalReceiver_IComponent_ParentEntitySet : public SignalReceiver
+{
+public:
+    void ForwardSignal()
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        duk_pcall(ctx, 0);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
+};
+
 duk_ret_t SignalWrapper_IComponent_ParentEntitySet_Finalizer(duk_context* ctx)
 {
     SignalWrapper_IComponent_ParentEntitySet* obj = GetValueObject<SignalWrapper_IComponent_ParentEntitySet>(ctx, 0, SignalWrapper_IComponent_ParentEntitySet_ID);
@@ -128,6 +158,20 @@ public:
 
     Urho3D::WeakPtr<Urho3D::Object> owner_;
     Signal0< void >* signal_;
+};
+
+class SignalReceiver_IComponent_ParentEntityAboutToBeDetached : public SignalReceiver
+{
+public:
+    void ForwardSignal()
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        duk_pcall(ctx, 0);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
 };
 
 duk_ret_t SignalWrapper_IComponent_ParentEntityAboutToBeDetached_Finalizer(duk_context* ctx)

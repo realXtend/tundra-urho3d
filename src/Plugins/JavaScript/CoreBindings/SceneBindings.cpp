@@ -42,6 +42,23 @@ public:
     Signal3< Entity *, IComponent *, AttributeChange::Type >* signal_;
 };
 
+class SignalReceiver_Scene_ComponentAdded : public SignalReceiver
+{
+public:
+    void ForwardSignal(Entity * param0, IComponent * param1, AttributeChange::Type param2)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        PushWeakObject(ctx, param1);
+        duk_push_number(ctx, param2);
+        duk_pcall(ctx, 3);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
+};
+
 duk_ret_t SignalWrapper_Scene_ComponentAdded_Finalizer(duk_context* ctx)
 {
     SignalWrapper_Scene_ComponentAdded* obj = GetValueObject<SignalWrapper_Scene_ComponentAdded>(ctx, 0, SignalWrapper_Scene_ComponentAdded_ID);
@@ -87,6 +104,23 @@ public:
 
     Urho3D::WeakPtr<Urho3D::Object> owner_;
     Signal3< Entity *, IComponent *, AttributeChange::Type >* signal_;
+};
+
+class SignalReceiver_Scene_ComponentRemoved : public SignalReceiver
+{
+public:
+    void ForwardSignal(Entity * param0, IComponent * param1, AttributeChange::Type param2)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        PushWeakObject(ctx, param1);
+        duk_push_number(ctx, param2);
+        duk_pcall(ctx, 3);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
 };
 
 duk_ret_t SignalWrapper_Scene_ComponentRemoved_Finalizer(duk_context* ctx)
@@ -136,6 +170,22 @@ public:
     Signal2< Entity *, AttributeChange::Type >* signal_;
 };
 
+class SignalReceiver_Scene_EntityCreated : public SignalReceiver
+{
+public:
+    void ForwardSignal(Entity * param0, AttributeChange::Type param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        duk_push_number(ctx, param1);
+        duk_pcall(ctx, 2);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
+};
+
 duk_ret_t SignalWrapper_Scene_EntityCreated_Finalizer(duk_context* ctx)
 {
     SignalWrapper_Scene_EntityCreated* obj = GetValueObject<SignalWrapper_Scene_EntityCreated>(ctx, 0, SignalWrapper_Scene_EntityCreated_ID);
@@ -180,6 +230,22 @@ public:
 
     Urho3D::WeakPtr<Urho3D::Object> owner_;
     Signal2< Entity *, AttributeChange::Type >* signal_;
+};
+
+class SignalReceiver_Scene_EntityRemoved : public SignalReceiver
+{
+public:
+    void ForwardSignal(Entity * param0, AttributeChange::Type param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        duk_push_number(ctx, param1);
+        duk_pcall(ctx, 2);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
 };
 
 duk_ret_t SignalWrapper_Scene_EntityRemoved_Finalizer(duk_context* ctx)
@@ -228,6 +294,22 @@ public:
     Signal2< Entity *, entity_id_t >* signal_;
 };
 
+class SignalReceiver_Scene_EntityAcked : public SignalReceiver
+{
+public:
+    void ForwardSignal(Entity * param0, entity_id_t param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        duk_push_number(ctx, param1);
+        duk_pcall(ctx, 2);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
+};
+
 duk_ret_t SignalWrapper_Scene_EntityAcked_Finalizer(duk_context* ctx)
 {
     SignalWrapper_Scene_EntityAcked* obj = GetValueObject<SignalWrapper_Scene_EntityAcked>(ctx, 0, SignalWrapper_Scene_EntityAcked_ID);
@@ -272,6 +354,22 @@ public:
 
     Urho3D::WeakPtr<Urho3D::Object> owner_;
     Signal2< Entity *, AttributeChange::Type >* signal_;
+};
+
+class SignalReceiver_Scene_EntityTemporaryStateToggled : public SignalReceiver
+{
+public:
+    void ForwardSignal(Entity * param0, AttributeChange::Type param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        duk_push_number(ctx, param1);
+        duk_pcall(ctx, 2);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
 };
 
 duk_ret_t SignalWrapper_Scene_EntityTemporaryStateToggled_Finalizer(duk_context* ctx)
@@ -320,6 +418,22 @@ public:
     Signal2< IComponent *, component_id_t >* signal_;
 };
 
+class SignalReceiver_Scene_ComponentAcked : public SignalReceiver
+{
+public:
+    void ForwardSignal(IComponent * param0, component_id_t param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        duk_push_number(ctx, param1);
+        duk_pcall(ctx, 2);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
+};
+
 duk_ret_t SignalWrapper_Scene_ComponentAcked_Finalizer(duk_context* ctx)
 {
     SignalWrapper_Scene_ComponentAcked* obj = GetValueObject<SignalWrapper_Scene_ComponentAcked>(ctx, 0, SignalWrapper_Scene_ComponentAcked_ID);
@@ -364,6 +478,21 @@ public:
 
     Urho3D::WeakPtr<Urho3D::Object> owner_;
     Signal1< Scene * >* signal_;
+};
+
+class SignalReceiver_Scene_Removed : public SignalReceiver
+{
+public:
+    void ForwardSignal(Scene * param0)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        duk_pcall(ctx, 1);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
 };
 
 duk_ret_t SignalWrapper_Scene_Removed_Finalizer(duk_context* ctx)
@@ -411,6 +540,21 @@ public:
     Signal1< Scene * >* signal_;
 };
 
+class SignalReceiver_Scene_SceneCleared : public SignalReceiver
+{
+public:
+    void ForwardSignal(Scene * param0)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        duk_pcall(ctx, 1);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
+};
+
 duk_ret_t SignalWrapper_Scene_SceneCleared_Finalizer(duk_context* ctx)
 {
     SignalWrapper_Scene_SceneCleared* obj = GetValueObject<SignalWrapper_Scene_SceneCleared>(ctx, 0, SignalWrapper_Scene_SceneCleared_ID);
@@ -454,6 +598,23 @@ public:
 
     Urho3D::WeakPtr<Urho3D::Object> owner_;
     Signal3< Entity *, Entity *, AttributeChange::Type >* signal_;
+};
+
+class SignalReceiver_Scene_EntityParentChanged : public SignalReceiver
+{
+public:
+    void ForwardSignal(Entity * param0, Entity * param1, AttributeChange::Type param2)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        PushWeakObject(ctx, param1);
+        duk_push_number(ctx, param2);
+        duk_pcall(ctx, 3);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
 };
 
 duk_ret_t SignalWrapper_Scene_EntityParentChanged_Finalizer(duk_context* ctx)

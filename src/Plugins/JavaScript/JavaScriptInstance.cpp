@@ -271,7 +271,7 @@ bool JavaScriptInstance::Execute(const String& functionName)
     duk_push_global_object(ctx_);
     duk_get_prop_string(ctx_, -1, functionName.CString());
     bool success = duk_pcall(ctx_, 0) == 0;
-    if (duk_pcall(ctx_, 0) != 0)
+    if (!success)
         LogError("[JavaScript] Execute: " + String(duk_safe_to_string(ctx_, -1)));
 
     duk_pop(ctx_); // Pop result/error

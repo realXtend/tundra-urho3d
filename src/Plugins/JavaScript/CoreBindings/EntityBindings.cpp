@@ -40,6 +40,22 @@ public:
     Signal2< IComponent *, AttributeChange::Type >* signal_;
 };
 
+class SignalReceiver_Entity_ComponentAdded : public SignalReceiver
+{
+public:
+    void ForwardSignal(IComponent * param0, AttributeChange::Type param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        duk_push_number(ctx, param1);
+        duk_pcall(ctx, 2);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
+};
+
 duk_ret_t SignalWrapper_Entity_ComponentAdded_Finalizer(duk_context* ctx)
 {
     SignalWrapper_Entity_ComponentAdded* obj = GetValueObject<SignalWrapper_Entity_ComponentAdded>(ctx, 0, SignalWrapper_Entity_ComponentAdded_ID);
@@ -84,6 +100,22 @@ public:
 
     Urho3D::WeakPtr<Urho3D::Object> owner_;
     Signal2< IComponent *, AttributeChange::Type >* signal_;
+};
+
+class SignalReceiver_Entity_ComponentRemoved : public SignalReceiver
+{
+public:
+    void ForwardSignal(IComponent * param0, AttributeChange::Type param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        duk_push_number(ctx, param1);
+        duk_pcall(ctx, 2);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
 };
 
 duk_ret_t SignalWrapper_Entity_ComponentRemoved_Finalizer(duk_context* ctx)
@@ -132,6 +164,22 @@ public:
     Signal2< Entity *, AttributeChange::Type >* signal_;
 };
 
+class SignalReceiver_Entity_EntityRemoved : public SignalReceiver
+{
+public:
+    void ForwardSignal(Entity * param0, AttributeChange::Type param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        duk_push_number(ctx, param1);
+        duk_pcall(ctx, 2);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
+};
+
 duk_ret_t SignalWrapper_Entity_EntityRemoved_Finalizer(duk_context* ctx)
 {
     SignalWrapper_Entity_EntityRemoved* obj = GetValueObject<SignalWrapper_Entity_EntityRemoved>(ctx, 0, SignalWrapper_Entity_EntityRemoved_ID);
@@ -176,6 +224,22 @@ public:
 
     Urho3D::WeakPtr<Urho3D::Object> owner_;
     Signal2< Entity *, AttributeChange::Type >* signal_;
+};
+
+class SignalReceiver_Entity_TemporaryStateToggled : public SignalReceiver
+{
+public:
+    void ForwardSignal(Entity * param0, AttributeChange::Type param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        duk_push_number(ctx, param1);
+        duk_pcall(ctx, 2);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
 };
 
 duk_ret_t SignalWrapper_Entity_TemporaryStateToggled_Finalizer(duk_context* ctx)
@@ -224,6 +288,21 @@ public:
     Signal1< IComponent * >* signal_;
 };
 
+class SignalReceiver_Entity_EnterView : public SignalReceiver
+{
+public:
+    void ForwardSignal(IComponent * param0)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        duk_pcall(ctx, 1);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
+};
+
 duk_ret_t SignalWrapper_Entity_EnterView_Finalizer(duk_context* ctx)
 {
     SignalWrapper_Entity_EnterView* obj = GetValueObject<SignalWrapper_Entity_EnterView>(ctx, 0, SignalWrapper_Entity_EnterView_ID);
@@ -269,6 +348,21 @@ public:
     Signal1< IComponent * >* signal_;
 };
 
+class SignalReceiver_Entity_LeaveView : public SignalReceiver
+{
+public:
+    void ForwardSignal(IComponent * param0)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        duk_pcall(ctx, 1);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
+};
+
 duk_ret_t SignalWrapper_Entity_LeaveView_Finalizer(duk_context* ctx)
 {
     SignalWrapper_Entity_LeaveView* obj = GetValueObject<SignalWrapper_Entity_LeaveView>(ctx, 0, SignalWrapper_Entity_LeaveView_ID);
@@ -312,6 +406,23 @@ public:
 
     Urho3D::WeakPtr<Urho3D::Object> owner_;
     Signal3< Entity *, Entity *, AttributeChange::Type >* signal_;
+};
+
+class SignalReceiver_Entity_ParentChanged : public SignalReceiver
+{
+public:
+    void ForwardSignal(Entity * param0, Entity * param1, AttributeChange::Type param2)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        PushWeakObject(ctx, param1);
+        duk_push_number(ctx, param2);
+        duk_pcall(ctx, 3);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
 };
 
 duk_ret_t SignalWrapper_Entity_ParentChanged_Finalizer(duk_context* ctx)

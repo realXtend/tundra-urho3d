@@ -40,6 +40,22 @@ public:
     Signal2< Scene *, AttributeChange::Type >* signal_;
 };
 
+class SignalReceiver_SceneAPI_SceneCreated : public SignalReceiver
+{
+public:
+    void ForwardSignal(Scene * param0, AttributeChange::Type param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        duk_push_number(ctx, param1);
+        duk_pcall(ctx, 2);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
+};
+
 duk_ret_t SignalWrapper_SceneAPI_SceneCreated_Finalizer(duk_context* ctx)
 {
     SignalWrapper_SceneAPI_SceneCreated* obj = GetValueObject<SignalWrapper_SceneAPI_SceneCreated>(ctx, 0, SignalWrapper_SceneAPI_SceneCreated_ID);
@@ -86,6 +102,22 @@ public:
     Signal2< Scene *, AttributeChange::Type >* signal_;
 };
 
+class SignalReceiver_SceneAPI_SceneAboutToBeRemoved : public SignalReceiver
+{
+public:
+    void ForwardSignal(Scene * param0, AttributeChange::Type param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        PushWeakObject(ctx, param0);
+        duk_push_number(ctx, param1);
+        duk_pcall(ctx, 2);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
+};
+
 duk_ret_t SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Finalizer(duk_context* ctx)
 {
     SignalWrapper_SceneAPI_SceneAboutToBeRemoved* obj = GetValueObject<SignalWrapper_SceneAPI_SceneAboutToBeRemoved>(ctx, 0, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID);
@@ -130,6 +162,23 @@ public:
 
     Urho3D::WeakPtr<Urho3D::Object> owner_;
     Signal3< u32, const String &, AttributeChange::Type >* signal_;
+};
+
+class SignalReceiver_SceneAPI_PlaceholderComponentTypeRegistered : public SignalReceiver
+{
+public:
+    void ForwardSignal(u32 param0, const String & param1, AttributeChange::Type param2)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        duk_push_number(ctx, param0);
+        duk_push_string(ctx, param1.CString());
+        duk_push_number(ctx, param2);
+        duk_pcall(ctx, 3);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
 };
 
 duk_ret_t SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Finalizer(duk_context* ctx)

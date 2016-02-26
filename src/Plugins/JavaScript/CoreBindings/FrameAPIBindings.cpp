@@ -38,6 +38,21 @@ public:
     Signal1< float >* signal_;
 };
 
+class SignalReceiver_FrameAPI_Updated : public SignalReceiver
+{
+public:
+    void ForwardSignal(float param0)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        duk_push_number(ctx, param0);
+        duk_pcall(ctx, 1);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
+};
+
 duk_ret_t SignalWrapper_FrameAPI_Updated_Finalizer(duk_context* ctx)
 {
     SignalWrapper_FrameAPI_Updated* obj = GetValueObject<SignalWrapper_FrameAPI_Updated>(ctx, 0, SignalWrapper_FrameAPI_Updated_ID);
@@ -81,6 +96,21 @@ public:
 
     Urho3D::WeakPtr<Urho3D::Object> owner_;
     Signal1< float >* signal_;
+};
+
+class SignalReceiver_FrameAPI_PostFrameUpdate : public SignalReceiver
+{
+public:
+    void ForwardSignal(float param0)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        duk_push_number(ctx, param0);
+        duk_pcall(ctx, 1);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
 };
 
 duk_ret_t SignalWrapper_FrameAPI_PostFrameUpdate_Finalizer(duk_context* ctx)

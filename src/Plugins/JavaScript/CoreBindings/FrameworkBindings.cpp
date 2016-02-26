@@ -39,6 +39,20 @@ public:
     Signal0< void >* signal_;
 };
 
+class SignalReceiver_Framework_ExitRequested : public SignalReceiver
+{
+public:
+    void ForwardSignal()
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_DispatchSignal");
+        duk_pcall(ctx, 0);
+        duk_pop(ctx);
+        duk_pop(ctx);
+    }
+};
+
 duk_ret_t SignalWrapper_Framework_ExitRequested_Finalizer(duk_context* ctx)
 {
     SignalWrapper_Framework_ExitRequested* obj = GetValueObject<SignalWrapper_Framework_ExitRequested>(ctx, 0, SignalWrapper_Framework_ExitRequested_ID);
