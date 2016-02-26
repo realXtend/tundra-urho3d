@@ -1,3 +1,5 @@
+#pragma once
+
 #include "duktape.h"
 #include <Urho3D/Core/Object.h>
 #include <Urho3D/Container/Str.h>
@@ -87,6 +89,23 @@ template<class T> void PushValueObjectCopy(duk_context* ctx, const T& source, co
     duk_get_prop_string(ctx, -1, "prototype");
     duk_set_prototype(ctx, -3);
     duk_pop(ctx);
+}
+
+/// Push a value object on the stack. Finalizer function for the object needs to be specified. Optionally set prototype.
+template<class T> void PushValueObject(duk_context* ctx, T* source, const char* typeName, duk_c_function finalizer, bool setPrototype)
+{
+    duk_push_object(ctx);
+    SetValueObject(ctx, -1, source, typeName);
+    duk_push_c_function(ctx, finalizer, 1);
+    duk_set_finalizer(ctx, -2);
+    // When pushing an object without going through the constructor, have to set prototype manually
+    if (setPrototype)
+    {
+        duk_get_global_string(ctx, typeName);
+        duk_get_prop_string(ctx, -1, "prototype");
+        duk_set_prototype(ctx, -3);
+        duk_pop(ctx);
+    }
 }
 
 /// Push the result of a value object constructor. Finalizer function for the object needs to be specified.
@@ -279,5 +298,15 @@ template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const Urho3D
         duk_put_prop_string(ctx, -2, Urho3D::String(i->first_).CString());
     }
 }
+
+/// Base class for signal receivers.
+class SignalReceiver : public Urho3D::RefCounted
+{
+public:
+    /// Duktape context pointer
+    duk_context* ctx_;
+    /// Key (signal pointer) which is used to lookup the receiver on the JS side
+    void* key_;
+};
 
 }

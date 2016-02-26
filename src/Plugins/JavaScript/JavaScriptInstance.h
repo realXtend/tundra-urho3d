@@ -10,7 +10,7 @@
 #include "IScriptInstance.h"
 
 #include "Win.h" // Duktape config will include Windows.h on Windows, include beforehand to avoid problems with ConsoleAPI
-#include "duktape.h"
+#include "BindingsHelpers.h"
 
 #include <Urho3D/Container/RefCounted.h>
 
@@ -72,7 +72,7 @@ public:
     void RegisterService(const String& name, Urho3D::Object* object);
 
     /// Return whether has been evaluated
-    virtual bool IsEvaluated() const { return evaluated; }
+    virtual bool IsEvaluated() const { return evaluated_; }
 
     /// Dumps engine information into a string. Used for debugging/profiling.
     virtual HashMap<String, uint> DumpEngineInformation();
@@ -82,6 +82,15 @@ public:
 
     /// The script engine is about to unload.
     Signal0<void> ScriptUnloading;
+
+    /// Lookup instance by context.
+    static JavaScriptInstance* InstanceFromContext(duk_context* ctx);
+
+    /// Store a signal-slot connection. The signal receiver object (depending on signal type) must be allocated by caller. Function (1 parameter) or function and object (2 parameters) are assumed to be at context stack top. The C++ -side signal connection must have been made by the caller.
+    static void ConnectSignal(duk_context* ctx, void* signal, JSBindings::SignalReceiver* receiver);
+    
+    /// Remove a signal-slot connection. The C++ side signal receiver will be deleted when no connections to the specified signal exist no longer.
+    static void DisconnectSignal(duk_context* ctx, void* signal);
 
 private:
     /// Creates new script context/engine.
@@ -102,18 +111,24 @@ private:
     String program_;
 
     /// Specifies the absolute path of the source file where the script is loaded from, if the content is directly loaded from file.
-    String sourceFile;
+    String sourceFile_;
 
     /// Current script name that is loaded into this instance.
-    String currentScriptName;
+    String currentScriptName_;
 
     ComponentWeakPtr owner_; ///< Owner (Script) component, if existing.
     JavaScript *module_; ///< Javascript module.
     duk_context* ctx_; ///< DukTape context.
-    bool evaluated; ///< Has the script program been evaluated.
+    bool evaluated_; ///< Has the script program been evaluated.
 
     /// Already included files for preventing multi-inclusion
-    Vector<String> includedFiles;
+    Vector<String> includedFiles_;
+
+    /// Registered JavaScript signal receivers. The key is the signal pointer.
+    HashMap<void*, SharedPtr<JSBindings::SignalReceiver> > signalReceivers_;
+
+    /// Context to instance map.
+    static HashMap<void*, JavaScriptInstance*> instanceMap;
 };
 
 }

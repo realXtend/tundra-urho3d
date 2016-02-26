@@ -25,6 +25,140 @@ namespace JSBindings
 
 const char* IComponent_ID = "IComponent";
 
+const char* SignalWrapper_IComponent_ComponentNameChanged_ID = "SignalWrapper_IComponent_ComponentNameChanged";
+
+class SignalWrapper_IComponent_ComponentNameChanged
+{
+public:
+    SignalWrapper_IComponent_ComponentNameChanged(Urho3D::Object* owner, Signal2< const String &, const String & >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal2< const String &, const String & >* signal_;
+};
+
+duk_ret_t SignalWrapper_IComponent_ComponentNameChanged_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_IComponent_ComponentNameChanged* obj = GetValueObject<SignalWrapper_IComponent_ComponentNameChanged>(ctx, 0, SignalWrapper_IComponent_ComponentNameChanged_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_IComponent_ComponentNameChanged_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_IComponent_ComponentNameChanged_Emit(duk_context* ctx)
+{
+    SignalWrapper_IComponent_ComponentNameChanged* wrapper = GetThisValueObject<SignalWrapper_IComponent_ComponentNameChanged>(ctx, SignalWrapper_IComponent_ComponentNameChanged_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    String param0(duk_require_string(ctx, 0));
+    String param1(duk_require_string(ctx, 1));
+    wrapper->signal_->Emit(param0, param1);
+    return 0;
+}
+
+static duk_ret_t IComponent_Get_ComponentNameChanged(duk_context* ctx)
+{
+    IComponent* thisObj = GetThisWeakObject<IComponent>(ctx);
+    SignalWrapper_IComponent_ComponentNameChanged* wrapper = new SignalWrapper_IComponent_ComponentNameChanged(thisObj, &thisObj->ComponentNameChanged);
+    PushValueObject(ctx, wrapper, SignalWrapper_IComponent_ComponentNameChanged_ID, SignalWrapper_IComponent_ComponentNameChanged_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_IComponent_ComponentNameChanged_Emit, 2);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_IComponent_ParentEntitySet_ID = "SignalWrapper_IComponent_ParentEntitySet";
+
+class SignalWrapper_IComponent_ParentEntitySet
+{
+public:
+    SignalWrapper_IComponent_ParentEntitySet(Urho3D::Object* owner, Signal0< void >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal0< void >* signal_;
+};
+
+duk_ret_t SignalWrapper_IComponent_ParentEntitySet_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_IComponent_ParentEntitySet* obj = GetValueObject<SignalWrapper_IComponent_ParentEntitySet>(ctx, 0, SignalWrapper_IComponent_ParentEntitySet_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_IComponent_ParentEntitySet_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_IComponent_ParentEntitySet_Emit(duk_context* ctx)
+{
+    SignalWrapper_IComponent_ParentEntitySet* wrapper = GetThisValueObject<SignalWrapper_IComponent_ParentEntitySet>(ctx, SignalWrapper_IComponent_ParentEntitySet_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    wrapper->signal_->Emit();
+    return 0;
+}
+
+static duk_ret_t IComponent_Get_ParentEntitySet(duk_context* ctx)
+{
+    IComponent* thisObj = GetThisWeakObject<IComponent>(ctx);
+    SignalWrapper_IComponent_ParentEntitySet* wrapper = new SignalWrapper_IComponent_ParentEntitySet(thisObj, &thisObj->ParentEntitySet);
+    PushValueObject(ctx, wrapper, SignalWrapper_IComponent_ParentEntitySet_ID, SignalWrapper_IComponent_ParentEntitySet_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_IComponent_ParentEntitySet_Emit, 0);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_IComponent_ParentEntityAboutToBeDetached_ID = "SignalWrapper_IComponent_ParentEntityAboutToBeDetached";
+
+class SignalWrapper_IComponent_ParentEntityAboutToBeDetached
+{
+public:
+    SignalWrapper_IComponent_ParentEntityAboutToBeDetached(Urho3D::Object* owner, Signal0< void >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal0< void >* signal_;
+};
+
+duk_ret_t SignalWrapper_IComponent_ParentEntityAboutToBeDetached_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_IComponent_ParentEntityAboutToBeDetached* obj = GetValueObject<SignalWrapper_IComponent_ParentEntityAboutToBeDetached>(ctx, 0, SignalWrapper_IComponent_ParentEntityAboutToBeDetached_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_IComponent_ParentEntityAboutToBeDetached_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_IComponent_ParentEntityAboutToBeDetached_Emit(duk_context* ctx)
+{
+    SignalWrapper_IComponent_ParentEntityAboutToBeDetached* wrapper = GetThisValueObject<SignalWrapper_IComponent_ParentEntityAboutToBeDetached>(ctx, SignalWrapper_IComponent_ParentEntityAboutToBeDetached_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    wrapper->signal_->Emit();
+    return 0;
+}
+
+static duk_ret_t IComponent_Get_ParentEntityAboutToBeDetached(duk_context* ctx)
+{
+    IComponent* thisObj = GetThisWeakObject<IComponent>(ctx);
+    SignalWrapper_IComponent_ParentEntityAboutToBeDetached* wrapper = new SignalWrapper_IComponent_ParentEntityAboutToBeDetached(thisObj, &thisObj->ParentEntityAboutToBeDetached);
+    PushValueObject(ctx, wrapper, SignalWrapper_IComponent_ParentEntityAboutToBeDetached_ID, SignalWrapper_IComponent_ParentEntityAboutToBeDetached_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_IComponent_ParentEntityAboutToBeDetached_Emit, 0);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
 static duk_ret_t IComponent_TypeName(duk_context* ctx)
 {
     IComponent* thisObj = GetThisWeakObject<IComponent>(ctx);
@@ -285,6 +419,9 @@ void Expose_IComponent(duk_context* ctx)
     duk_put_function_list(ctx, -1, IComponent_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, IComponent_Functions);
+    DefineProperty(ctx, "componentNameChanged", IComponent_Get_ComponentNameChanged, nullptr);
+    DefineProperty(ctx, "parentEntitySet", IComponent_Get_ParentEntitySet, nullptr);
+    DefineProperty(ctx, "parentEntityAboutToBeDetached", IComponent_Get_ParentEntityAboutToBeDetached, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, IComponent_ID);
 }

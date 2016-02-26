@@ -24,6 +24,50 @@ namespace JSBindings
 
 const char* Framework_ID = "Framework";
 
+const char* SignalWrapper_Framework_ExitRequested_ID = "SignalWrapper_Framework_ExitRequested";
+
+class SignalWrapper_Framework_ExitRequested
+{
+public:
+    SignalWrapper_Framework_ExitRequested(Urho3D::Object* owner, Signal0< void >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal0< void >* signal_;
+};
+
+duk_ret_t SignalWrapper_Framework_ExitRequested_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Framework_ExitRequested* obj = GetValueObject<SignalWrapper_Framework_ExitRequested>(ctx, 0, SignalWrapper_Framework_ExitRequested_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Framework_ExitRequested_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Framework_ExitRequested_Emit(duk_context* ctx)
+{
+    SignalWrapper_Framework_ExitRequested* wrapper = GetThisValueObject<SignalWrapper_Framework_ExitRequested>(ctx, SignalWrapper_Framework_ExitRequested_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    wrapper->signal_->Emit();
+    return 0;
+}
+
+static duk_ret_t Framework_Get_ExitRequested(duk_context* ctx)
+{
+    Framework* thisObj = GetThisWeakObject<Framework>(ctx);
+    SignalWrapper_Framework_ExitRequested* wrapper = new SignalWrapper_Framework_ExitRequested(thisObj, &thisObj->ExitRequested);
+    PushValueObject(ctx, wrapper, SignalWrapper_Framework_ExitRequested_ID, SignalWrapper_Framework_ExitRequested_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Framework_ExitRequested_Emit, 0);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
 static duk_ret_t Framework_ParseWildCardFilename_String(duk_context* ctx)
 {
     Framework* thisObj = GetThisWeakObject<Framework>(ctx);
@@ -160,6 +204,7 @@ void Expose_Framework(duk_context* ctx)
     duk_put_function_list(ctx, -1, Framework_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Framework_Functions);
+    DefineProperty(ctx, "exitRequested", Framework_Get_ExitRequested, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Framework_ID);
 }

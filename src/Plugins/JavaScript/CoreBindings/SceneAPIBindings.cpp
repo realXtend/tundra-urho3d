@@ -25,6 +25,145 @@ namespace JSBindings
 
 const char* SceneAPI_ID = "SceneAPI";
 
+const char* SignalWrapper_SceneAPI_SceneCreated_ID = "SignalWrapper_SceneAPI_SceneCreated";
+
+class SignalWrapper_SceneAPI_SceneCreated
+{
+public:
+    SignalWrapper_SceneAPI_SceneCreated(Urho3D::Object* owner, Signal2< Scene *, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal2< Scene *, AttributeChange::Type >* signal_;
+};
+
+duk_ret_t SignalWrapper_SceneAPI_SceneCreated_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_SceneCreated* obj = GetValueObject<SignalWrapper_SceneAPI_SceneCreated>(ctx, 0, SignalWrapper_SceneAPI_SceneCreated_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_SceneAPI_SceneCreated_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_SceneAPI_SceneCreated_Emit(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_SceneCreated* wrapper = GetThisValueObject<SignalWrapper_SceneAPI_SceneCreated>(ctx, SignalWrapper_SceneAPI_SceneCreated_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    Scene* param0 = GetWeakObject<Scene>(ctx, 0);
+    AttributeChange::Type param1 = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    wrapper->signal_->Emit(param0, param1);
+    return 0;
+}
+
+static duk_ret_t SceneAPI_Get_SceneCreated(duk_context* ctx)
+{
+    SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
+    SignalWrapper_SceneAPI_SceneCreated* wrapper = new SignalWrapper_SceneAPI_SceneCreated(thisObj, &thisObj->SceneCreated);
+    PushValueObject(ctx, wrapper, SignalWrapper_SceneAPI_SceneCreated_ID, SignalWrapper_SceneAPI_SceneCreated_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneCreated_Emit, 2);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID = "SignalWrapper_SceneAPI_SceneAboutToBeRemoved";
+
+class SignalWrapper_SceneAPI_SceneAboutToBeRemoved
+{
+public:
+    SignalWrapper_SceneAPI_SceneAboutToBeRemoved(Urho3D::Object* owner, Signal2< Scene *, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal2< Scene *, AttributeChange::Type >* signal_;
+};
+
+duk_ret_t SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_SceneAboutToBeRemoved* obj = GetValueObject<SignalWrapper_SceneAPI_SceneAboutToBeRemoved>(ctx, 0, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Emit(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_SceneAboutToBeRemoved* wrapper = GetThisValueObject<SignalWrapper_SceneAPI_SceneAboutToBeRemoved>(ctx, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    Scene* param0 = GetWeakObject<Scene>(ctx, 0);
+    AttributeChange::Type param1 = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    wrapper->signal_->Emit(param0, param1);
+    return 0;
+}
+
+static duk_ret_t SceneAPI_Get_SceneAboutToBeRemoved(duk_context* ctx)
+{
+    SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
+    SignalWrapper_SceneAPI_SceneAboutToBeRemoved* wrapper = new SignalWrapper_SceneAPI_SceneAboutToBeRemoved(thisObj, &thisObj->SceneAboutToBeRemoved);
+    PushValueObject(ctx, wrapper, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Emit, 2);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID = "SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered";
+
+class SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered
+{
+public:
+    SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered(Urho3D::Object* owner, Signal3< u32, const String &, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal3< u32, const String &, AttributeChange::Type >* signal_;
+};
+
+duk_ret_t SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered* obj = GetValueObject<SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered>(ctx, 0, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Emit(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered* wrapper = GetThisValueObject<SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered>(ctx, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    u32 param0 = (u32)duk_require_number(ctx, 0);
+    String param1(duk_require_string(ctx, 1));
+    AttributeChange::Type param2 = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
+    wrapper->signal_->Emit(param0, param1, param2);
+    return 0;
+}
+
+static duk_ret_t SceneAPI_Get_PlaceholderComponentTypeRegistered(duk_context* ctx)
+{
+    SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
+    SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered* wrapper = new SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered(thisObj, &thisObj->PlaceholderComponentTypeRegistered);
+    PushValueObject(ctx, wrapper, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Emit, 3);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
 static duk_ret_t SceneAPI_Scenes(duk_context* ctx)
 {
     SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
@@ -210,6 +349,9 @@ void Expose_SceneAPI(duk_context* ctx)
     duk_put_function_list(ctx, -1, SceneAPI_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, SceneAPI_Functions);
+    DefineProperty(ctx, "sceneCreated", SceneAPI_Get_SceneCreated, nullptr);
+    DefineProperty(ctx, "sceneAboutToBeRemoved", SceneAPI_Get_SceneAboutToBeRemoved, nullptr);
+    DefineProperty(ctx, "placeholderComponentTypeRegistered", SceneAPI_Get_PlaceholderComponentTypeRegistered, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, SceneAPI_ID);
 }

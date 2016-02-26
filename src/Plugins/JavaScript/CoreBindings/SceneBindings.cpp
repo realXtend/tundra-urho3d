@@ -27,6 +27,467 @@ duk_ret_t float3_Finalizer(duk_context* ctx);
 
 const char* Scene_ID = "Scene";
 
+const char* SignalWrapper_Scene_ComponentAdded_ID = "SignalWrapper_Scene_ComponentAdded";
+
+class SignalWrapper_Scene_ComponentAdded
+{
+public:
+    SignalWrapper_Scene_ComponentAdded(Urho3D::Object* owner, Signal3< Entity *, IComponent *, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal3< Entity *, IComponent *, AttributeChange::Type >* signal_;
+};
+
+duk_ret_t SignalWrapper_Scene_ComponentAdded_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Scene_ComponentAdded* obj = GetValueObject<SignalWrapper_Scene_ComponentAdded>(ctx, 0, SignalWrapper_Scene_ComponentAdded_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_ComponentAdded_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Scene_ComponentAdded_Emit(duk_context* ctx)
+{
+    SignalWrapper_Scene_ComponentAdded* wrapper = GetThisValueObject<SignalWrapper_Scene_ComponentAdded>(ctx, SignalWrapper_Scene_ComponentAdded_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    Entity* param0 = GetWeakObject<Entity>(ctx, 0);
+    IComponent* param1 = GetWeakObject<IComponent>(ctx, 1);
+    AttributeChange::Type param2 = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
+    wrapper->signal_->Emit(param0, param1, param2);
+    return 0;
+}
+
+static duk_ret_t Scene_Get_ComponentAdded(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    SignalWrapper_Scene_ComponentAdded* wrapper = new SignalWrapper_Scene_ComponentAdded(thisObj, &thisObj->ComponentAdded);
+    PushValueObject(ctx, wrapper, SignalWrapper_Scene_ComponentAdded_ID, SignalWrapper_Scene_ComponentAdded_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Scene_ComponentAdded_Emit, 3);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_Scene_ComponentRemoved_ID = "SignalWrapper_Scene_ComponentRemoved";
+
+class SignalWrapper_Scene_ComponentRemoved
+{
+public:
+    SignalWrapper_Scene_ComponentRemoved(Urho3D::Object* owner, Signal3< Entity *, IComponent *, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal3< Entity *, IComponent *, AttributeChange::Type >* signal_;
+};
+
+duk_ret_t SignalWrapper_Scene_ComponentRemoved_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Scene_ComponentRemoved* obj = GetValueObject<SignalWrapper_Scene_ComponentRemoved>(ctx, 0, SignalWrapper_Scene_ComponentRemoved_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_ComponentRemoved_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Scene_ComponentRemoved_Emit(duk_context* ctx)
+{
+    SignalWrapper_Scene_ComponentRemoved* wrapper = GetThisValueObject<SignalWrapper_Scene_ComponentRemoved>(ctx, SignalWrapper_Scene_ComponentRemoved_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    Entity* param0 = GetWeakObject<Entity>(ctx, 0);
+    IComponent* param1 = GetWeakObject<IComponent>(ctx, 1);
+    AttributeChange::Type param2 = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
+    wrapper->signal_->Emit(param0, param1, param2);
+    return 0;
+}
+
+static duk_ret_t Scene_Get_ComponentRemoved(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    SignalWrapper_Scene_ComponentRemoved* wrapper = new SignalWrapper_Scene_ComponentRemoved(thisObj, &thisObj->ComponentRemoved);
+    PushValueObject(ctx, wrapper, SignalWrapper_Scene_ComponentRemoved_ID, SignalWrapper_Scene_ComponentRemoved_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Scene_ComponentRemoved_Emit, 3);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_Scene_EntityCreated_ID = "SignalWrapper_Scene_EntityCreated";
+
+class SignalWrapper_Scene_EntityCreated
+{
+public:
+    SignalWrapper_Scene_EntityCreated(Urho3D::Object* owner, Signal2< Entity *, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal2< Entity *, AttributeChange::Type >* signal_;
+};
+
+duk_ret_t SignalWrapper_Scene_EntityCreated_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Scene_EntityCreated* obj = GetValueObject<SignalWrapper_Scene_EntityCreated>(ctx, 0, SignalWrapper_Scene_EntityCreated_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_EntityCreated_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Scene_EntityCreated_Emit(duk_context* ctx)
+{
+    SignalWrapper_Scene_EntityCreated* wrapper = GetThisValueObject<SignalWrapper_Scene_EntityCreated>(ctx, SignalWrapper_Scene_EntityCreated_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    Entity* param0 = GetWeakObject<Entity>(ctx, 0);
+    AttributeChange::Type param1 = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    wrapper->signal_->Emit(param0, param1);
+    return 0;
+}
+
+static duk_ret_t Scene_Get_EntityCreated(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    SignalWrapper_Scene_EntityCreated* wrapper = new SignalWrapper_Scene_EntityCreated(thisObj, &thisObj->EntityCreated);
+    PushValueObject(ctx, wrapper, SignalWrapper_Scene_EntityCreated_ID, SignalWrapper_Scene_EntityCreated_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Scene_EntityCreated_Emit, 2);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_Scene_EntityRemoved_ID = "SignalWrapper_Scene_EntityRemoved";
+
+class SignalWrapper_Scene_EntityRemoved
+{
+public:
+    SignalWrapper_Scene_EntityRemoved(Urho3D::Object* owner, Signal2< Entity *, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal2< Entity *, AttributeChange::Type >* signal_;
+};
+
+duk_ret_t SignalWrapper_Scene_EntityRemoved_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Scene_EntityRemoved* obj = GetValueObject<SignalWrapper_Scene_EntityRemoved>(ctx, 0, SignalWrapper_Scene_EntityRemoved_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_EntityRemoved_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Scene_EntityRemoved_Emit(duk_context* ctx)
+{
+    SignalWrapper_Scene_EntityRemoved* wrapper = GetThisValueObject<SignalWrapper_Scene_EntityRemoved>(ctx, SignalWrapper_Scene_EntityRemoved_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    Entity* param0 = GetWeakObject<Entity>(ctx, 0);
+    AttributeChange::Type param1 = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    wrapper->signal_->Emit(param0, param1);
+    return 0;
+}
+
+static duk_ret_t Scene_Get_EntityRemoved(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    SignalWrapper_Scene_EntityRemoved* wrapper = new SignalWrapper_Scene_EntityRemoved(thisObj, &thisObj->EntityRemoved);
+    PushValueObject(ctx, wrapper, SignalWrapper_Scene_EntityRemoved_ID, SignalWrapper_Scene_EntityRemoved_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Scene_EntityRemoved_Emit, 2);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_Scene_EntityAcked_ID = "SignalWrapper_Scene_EntityAcked";
+
+class SignalWrapper_Scene_EntityAcked
+{
+public:
+    SignalWrapper_Scene_EntityAcked(Urho3D::Object* owner, Signal2< Entity *, entity_id_t >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal2< Entity *, entity_id_t >* signal_;
+};
+
+duk_ret_t SignalWrapper_Scene_EntityAcked_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Scene_EntityAcked* obj = GetValueObject<SignalWrapper_Scene_EntityAcked>(ctx, 0, SignalWrapper_Scene_EntityAcked_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_EntityAcked_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Scene_EntityAcked_Emit(duk_context* ctx)
+{
+    SignalWrapper_Scene_EntityAcked* wrapper = GetThisValueObject<SignalWrapper_Scene_EntityAcked>(ctx, SignalWrapper_Scene_EntityAcked_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    Entity* param0 = GetWeakObject<Entity>(ctx, 0);
+    entity_id_t param1 = (entity_id_t)duk_require_number(ctx, 1);
+    wrapper->signal_->Emit(param0, param1);
+    return 0;
+}
+
+static duk_ret_t Scene_Get_EntityAcked(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    SignalWrapper_Scene_EntityAcked* wrapper = new SignalWrapper_Scene_EntityAcked(thisObj, &thisObj->EntityAcked);
+    PushValueObject(ctx, wrapper, SignalWrapper_Scene_EntityAcked_ID, SignalWrapper_Scene_EntityAcked_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Scene_EntityAcked_Emit, 2);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_Scene_EntityTemporaryStateToggled_ID = "SignalWrapper_Scene_EntityTemporaryStateToggled";
+
+class SignalWrapper_Scene_EntityTemporaryStateToggled
+{
+public:
+    SignalWrapper_Scene_EntityTemporaryStateToggled(Urho3D::Object* owner, Signal2< Entity *, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal2< Entity *, AttributeChange::Type >* signal_;
+};
+
+duk_ret_t SignalWrapper_Scene_EntityTemporaryStateToggled_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Scene_EntityTemporaryStateToggled* obj = GetValueObject<SignalWrapper_Scene_EntityTemporaryStateToggled>(ctx, 0, SignalWrapper_Scene_EntityTemporaryStateToggled_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_EntityTemporaryStateToggled_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Scene_EntityTemporaryStateToggled_Emit(duk_context* ctx)
+{
+    SignalWrapper_Scene_EntityTemporaryStateToggled* wrapper = GetThisValueObject<SignalWrapper_Scene_EntityTemporaryStateToggled>(ctx, SignalWrapper_Scene_EntityTemporaryStateToggled_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    Entity* param0 = GetWeakObject<Entity>(ctx, 0);
+    AttributeChange::Type param1 = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    wrapper->signal_->Emit(param0, param1);
+    return 0;
+}
+
+static duk_ret_t Scene_Get_EntityTemporaryStateToggled(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    SignalWrapper_Scene_EntityTemporaryStateToggled* wrapper = new SignalWrapper_Scene_EntityTemporaryStateToggled(thisObj, &thisObj->EntityTemporaryStateToggled);
+    PushValueObject(ctx, wrapper, SignalWrapper_Scene_EntityTemporaryStateToggled_ID, SignalWrapper_Scene_EntityTemporaryStateToggled_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Scene_EntityTemporaryStateToggled_Emit, 2);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_Scene_ComponentAcked_ID = "SignalWrapper_Scene_ComponentAcked";
+
+class SignalWrapper_Scene_ComponentAcked
+{
+public:
+    SignalWrapper_Scene_ComponentAcked(Urho3D::Object* owner, Signal2< IComponent *, component_id_t >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal2< IComponent *, component_id_t >* signal_;
+};
+
+duk_ret_t SignalWrapper_Scene_ComponentAcked_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Scene_ComponentAcked* obj = GetValueObject<SignalWrapper_Scene_ComponentAcked>(ctx, 0, SignalWrapper_Scene_ComponentAcked_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_ComponentAcked_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Scene_ComponentAcked_Emit(duk_context* ctx)
+{
+    SignalWrapper_Scene_ComponentAcked* wrapper = GetThisValueObject<SignalWrapper_Scene_ComponentAcked>(ctx, SignalWrapper_Scene_ComponentAcked_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    IComponent* param0 = GetWeakObject<IComponent>(ctx, 0);
+    component_id_t param1 = (component_id_t)duk_require_number(ctx, 1);
+    wrapper->signal_->Emit(param0, param1);
+    return 0;
+}
+
+static duk_ret_t Scene_Get_ComponentAcked(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    SignalWrapper_Scene_ComponentAcked* wrapper = new SignalWrapper_Scene_ComponentAcked(thisObj, &thisObj->ComponentAcked);
+    PushValueObject(ctx, wrapper, SignalWrapper_Scene_ComponentAcked_ID, SignalWrapper_Scene_ComponentAcked_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Scene_ComponentAcked_Emit, 2);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_Scene_Removed_ID = "SignalWrapper_Scene_Removed";
+
+class SignalWrapper_Scene_Removed
+{
+public:
+    SignalWrapper_Scene_Removed(Urho3D::Object* owner, Signal1< Scene * >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal1< Scene * >* signal_;
+};
+
+duk_ret_t SignalWrapper_Scene_Removed_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Scene_Removed* obj = GetValueObject<SignalWrapper_Scene_Removed>(ctx, 0, SignalWrapper_Scene_Removed_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_Removed_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Scene_Removed_Emit(duk_context* ctx)
+{
+    SignalWrapper_Scene_Removed* wrapper = GetThisValueObject<SignalWrapper_Scene_Removed>(ctx, SignalWrapper_Scene_Removed_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    Scene* param0 = GetWeakObject<Scene>(ctx, 0);
+    wrapper->signal_->Emit(param0);
+    return 0;
+}
+
+static duk_ret_t Scene_Get_Removed(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    SignalWrapper_Scene_Removed* wrapper = new SignalWrapper_Scene_Removed(thisObj, &thisObj->Removed);
+    PushValueObject(ctx, wrapper, SignalWrapper_Scene_Removed_ID, SignalWrapper_Scene_Removed_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Scene_Removed_Emit, 1);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_Scene_SceneCleared_ID = "SignalWrapper_Scene_SceneCleared";
+
+class SignalWrapper_Scene_SceneCleared
+{
+public:
+    SignalWrapper_Scene_SceneCleared(Urho3D::Object* owner, Signal1< Scene * >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal1< Scene * >* signal_;
+};
+
+duk_ret_t SignalWrapper_Scene_SceneCleared_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Scene_SceneCleared* obj = GetValueObject<SignalWrapper_Scene_SceneCleared>(ctx, 0, SignalWrapper_Scene_SceneCleared_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_SceneCleared_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Scene_SceneCleared_Emit(duk_context* ctx)
+{
+    SignalWrapper_Scene_SceneCleared* wrapper = GetThisValueObject<SignalWrapper_Scene_SceneCleared>(ctx, SignalWrapper_Scene_SceneCleared_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    Scene* param0 = GetWeakObject<Scene>(ctx, 0);
+    wrapper->signal_->Emit(param0);
+    return 0;
+}
+
+static duk_ret_t Scene_Get_SceneCleared(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    SignalWrapper_Scene_SceneCleared* wrapper = new SignalWrapper_Scene_SceneCleared(thisObj, &thisObj->SceneCleared);
+    PushValueObject(ctx, wrapper, SignalWrapper_Scene_SceneCleared_ID, SignalWrapper_Scene_SceneCleared_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Scene_SceneCleared_Emit, 1);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_Scene_EntityParentChanged_ID = "SignalWrapper_Scene_EntityParentChanged";
+
+class SignalWrapper_Scene_EntityParentChanged
+{
+public:
+    SignalWrapper_Scene_EntityParentChanged(Urho3D::Object* owner, Signal3< Entity *, Entity *, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    Signal3< Entity *, Entity *, AttributeChange::Type >* signal_;
+};
+
+duk_ret_t SignalWrapper_Scene_EntityParentChanged_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Scene_EntityParentChanged* obj = GetValueObject<SignalWrapper_Scene_EntityParentChanged>(ctx, 0, SignalWrapper_Scene_EntityParentChanged_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_EntityParentChanged_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Scene_EntityParentChanged_Emit(duk_context* ctx)
+{
+    SignalWrapper_Scene_EntityParentChanged* wrapper = GetThisValueObject<SignalWrapper_Scene_EntityParentChanged>(ctx, SignalWrapper_Scene_EntityParentChanged_ID);
+    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    Entity* param0 = GetWeakObject<Entity>(ctx, 0);
+    Entity* param1 = GetWeakObject<Entity>(ctx, 1);
+    AttributeChange::Type param2 = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
+    wrapper->signal_->Emit(param0, param1, param2);
+    return 0;
+}
+
+static duk_ret_t Scene_Get_EntityParentChanged(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    SignalWrapper_Scene_EntityParentChanged* wrapper = new SignalWrapper_Scene_EntityParentChanged(thisObj, &thisObj->EntityParentChanged);
+    PushValueObject(ctx, wrapper, SignalWrapper_Scene_EntityParentChanged_ID, SignalWrapper_Scene_EntityParentChanged_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Scene_EntityParentChanged_Emit, 3);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
 static duk_ret_t Scene_Name(duk_context* ctx)
 {
     Scene* thisObj = GetThisWeakObject<Scene>(ctx);
@@ -506,6 +967,16 @@ void Expose_Scene(duk_context* ctx)
     duk_push_object(ctx);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Scene_Functions);
+    DefineProperty(ctx, "componentAdded", Scene_Get_ComponentAdded, nullptr);
+    DefineProperty(ctx, "componentRemoved", Scene_Get_ComponentRemoved, nullptr);
+    DefineProperty(ctx, "entityCreated", Scene_Get_EntityCreated, nullptr);
+    DefineProperty(ctx, "entityRemoved", Scene_Get_EntityRemoved, nullptr);
+    DefineProperty(ctx, "entityAcked", Scene_Get_EntityAcked, nullptr);
+    DefineProperty(ctx, "entityTemporaryStateToggled", Scene_Get_EntityTemporaryStateToggled, nullptr);
+    DefineProperty(ctx, "componentAcked", Scene_Get_ComponentAcked, nullptr);
+    DefineProperty(ctx, "removed", Scene_Get_Removed, nullptr);
+    DefineProperty(ctx, "sceneCleared", Scene_Get_SceneCleared, nullptr);
+    DefineProperty(ctx, "entityParentChanged", Scene_Get_EntityParentChanged, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Scene_ID);
 }
