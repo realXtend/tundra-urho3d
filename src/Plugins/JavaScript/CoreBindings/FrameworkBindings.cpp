@@ -3,7 +3,8 @@
 
 #include "StableHeaders.h"
 #include "CoreTypes.h"
-#include "BindingsHelpers.h"
+#include "JavaScriptInstance.h"
+#include "LoggingFunctions.h"
 #include "Framework/Framework.h"
 
 #ifdef _MSC_VER
@@ -29,26 +30,29 @@ const char* SignalWrapper_Framework_ExitRequested_ID = "SignalWrapper_Framework_
 class SignalWrapper_Framework_ExitRequested
 {
 public:
-    SignalWrapper_Framework_ExitRequested(Urho3D::Object* owner, Signal0< void >* signal) :
+    SignalWrapper_Framework_ExitRequested(Object* owner, Signal0< void >* signal) :
         owner_(owner),
         signal_(signal)
     {
     }
 
-    Urho3D::WeakPtr<Urho3D::Object> owner_;
+    WeakPtr<Object> owner_;
     Signal0< void >* signal_;
 };
 
 class SignalReceiver_Framework_ExitRequested : public SignalReceiver
 {
 public:
-    void ForwardSignal()
+    void OnSignal()
     {
         duk_context* ctx = ctx_;
         duk_push_global_object(ctx);
-        duk_get_prop_string(ctx, -1, "_DispatchSignal");
-        duk_pcall(ctx, 0);
-        duk_pop(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
         duk_pop(ctx);
     }
 };
@@ -64,10 +68,56 @@ duk_ret_t SignalWrapper_Framework_ExitRequested_Finalizer(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t SignalWrapper_Framework_ExitRequested_Connect(duk_context* ctx)
+{
+    SignalWrapper_Framework_ExitRequested* wrapper = GetThisValueObject<SignalWrapper_Framework_ExitRequested>(ctx, SignalWrapper_Framework_ExitRequested_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_Framework_ExitRequested* receiver = new SignalReceiver_Framework_ExitRequested();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_Framework_ExitRequested::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_ConnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Framework_ExitRequested_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_Framework_ExitRequested* wrapper = GetThisValueObject<SignalWrapper_Framework_ExitRequested>(ctx, SignalWrapper_Framework_ExitRequested_ID);
+    if (!wrapper->owner_) return 0;
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    if (duk_get_boolean(ctx, -1))
+    {
+        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+        signalReceivers.Erase(wrapper->signal_);
+    }
+    duk_pop(ctx);
+    return 0;
+}
+
 static duk_ret_t SignalWrapper_Framework_ExitRequested_Emit(duk_context* ctx)
 {
     SignalWrapper_Framework_ExitRequested* wrapper = GetThisValueObject<SignalWrapper_Framework_ExitRequested>(ctx, SignalWrapper_Framework_ExitRequested_ID);
-    if (!wrapper->owner_) return 0; // Check signal owner expiration
+    if (!wrapper->owner_) return 0;
     wrapper->signal_->Emit();
     return 0;
 }
@@ -77,6 +127,10 @@ static duk_ret_t Framework_Get_ExitRequested(duk_context* ctx)
     Framework* thisObj = GetThisWeakObject<Framework>(ctx);
     SignalWrapper_Framework_ExitRequested* wrapper = new SignalWrapper_Framework_ExitRequested(thisObj, &thisObj->ExitRequested);
     PushValueObject(ctx, wrapper, SignalWrapper_Framework_ExitRequested_ID, SignalWrapper_Framework_ExitRequested_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Framework_ExitRequested_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Framework_ExitRequested_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
     duk_push_c_function(ctx, SignalWrapper_Framework_ExitRequested_Emit, 0);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;

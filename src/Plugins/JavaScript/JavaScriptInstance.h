@@ -86,11 +86,8 @@ public:
     /// Lookup instance by context.
     static JavaScriptInstance* InstanceFromContext(duk_context* ctx);
 
-    /// Store a signal-slot connection. The signal receiver object (depending on signal type) must be allocated by caller. Function (1 parameter) or function and object (2 parameters) are assumed to be at context stack top. The C++ -side signal connection must have been made by the caller.
-    static void ConnectSignal(duk_context* ctx, void* signal, JSBindings::SignalReceiver* receiver);
-    
-    /// Remove a signal-slot connection. The C++ side signal receiver will be deleted when no connections to the specified signal exist no longer.
-    static void DisconnectSignal(duk_context* ctx, void* signal);
+    /// Return the instance's signal receiver map.
+    HashMap<void*, SharedPtr<JSBindings::SignalReceiver> >& SignalReceivers() { return signalReceivers_; }
 
 private:
     /// Creates new script context/engine.

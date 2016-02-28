@@ -278,7 +278,7 @@ template<class T> void PushWeakObjectVector(duk_context* ctx, const Urho3D::Vect
 /// Push a map of weak-refcounted objects.
 template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const Urho3D::HashMap<T, Urho3D::SharedPtr<U> >& map)
 {
-    duk_push_array(ctx);
+    duk_push_object(ctx);
 
     for (typename Urho3D::HashMap<T, Urho3D::SharedPtr<U> >::ConstIterator i = map.Begin(); i != map.End(); ++i)
     {
@@ -290,7 +290,7 @@ template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const Urho3D
 /// Push a map of weak-refcounted objects.
 template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const Urho3D::HashMap<T, Urho3D::WeakPtr<U> >& map)
 {
-    duk_push_array(ctx);
+    duk_push_object(ctx);
 
     for (typename Urho3D::HashMap<T, Urho3D::WeakPtr<U> >::ConstIterator i = map.Begin(); i != map.End(); ++i)
     {
@@ -303,9 +303,9 @@ template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const Urho3D
 class SignalReceiver : public Urho3D::RefCounted
 {
 public:
-    /// Duktape context pointer
+    /// Duktape context pointer.
     duk_context* ctx_;
-    /// Key (signal pointer) which is used to lookup the receiver on the JS side
+    /// Key (signal pointer) which is used to lookup the receiver on the JS side.
     void* key_;
 };
 

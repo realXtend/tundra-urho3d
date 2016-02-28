@@ -23,6 +23,29 @@ namespace Tundra
 
 HashMap<void*, JavaScriptInstance*> JavaScriptInstance::instanceMap;
 
+static const String signalSupportCode =
+    "_connections = {};\n"
+    "function _ConnectSignal(key, obj, func) {\n"
+    "if (!_connections.hasOwnProperty(key)) _connections[key] = [];\n"
+    "var connections = _connections[key];\n"
+    "if (!func) { func = obj; obj = null; }\n"
+    "if (!func || typeof func != 'function') return;\n"
+    "for (var i = 0; i < connections.length; ++i) { if (connections[i].obj == obj && connections[i].func == func) return; }\n" // Check duplicate
+    "connections.push({ 'obj' : obj, 'func' : func });\n"
+    "}\n"
+    "function _DisconnectSignal(key, obj, func) {\n"
+    "if (!_connections.hasOwnProperty(key)) return;\n"
+    "var connections = _connections[key];\n"
+    "if (!func) { func = obj; obj = null; }\n"
+    "for (var i = 0; i < connections.length; ++i) { if (connections[i].obj == obj && connections[i].func == func) { connections.splice(i, 1); return; } }\n"
+    "return connections.length == 0;\n" // Return true if all connections removed, in which case the C++ wrapper can be removed
+    "}\n"
+    "function _OnSignal(key, params) {\n"
+    "if (!_connections.hasOwnProperty(key)) return\n"
+    "var connections = _connections[key]\n"
+    "for (var i = 0; i < connections.length; ++i) { connections[i].func.apply(connections[i].obj, params); }\n"
+    "}\n";
+
 JavaScriptInstance::JavaScriptInstance(const String &fileName, JavaScript *module, Script* owner) :
     ctx_(0),
     sourceFile_(fileName),
@@ -69,6 +92,7 @@ void JavaScriptInstance::CreateEngine()
 {
     ctx_ = duk_create_heap_default();
     instanceMap[ctx_] = this;
+    Evaluate(signalSupportCode);
 
     Script *ec = dynamic_cast<Script*>(owner_.Get());
     module_->PrepareScriptInstance(this, ec);
@@ -316,16 +340,6 @@ JavaScriptInstance* JavaScriptInstance::InstanceFromContext(duk_context* ctx)
 {
     HashMap<void*, JavaScriptInstance*>::ConstIterator i = instanceMap.Find(ctx);
     return i != instanceMap.End() ? i->second_ : nullptr;
-}
-
-void JavaScriptInstance::ConnectSignal(duk_context* ctx, void* signal, JSBindings::SignalReceiver* receiver)
-{
-    /// \todo Implement
-}
-
-void JavaScriptInstance::DisconnectSignal(duk_context* ctx, void* signal)
-{
-    /// \todo Implement
 }
 
 }

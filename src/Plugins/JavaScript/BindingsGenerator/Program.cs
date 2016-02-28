@@ -119,7 +119,8 @@ namespace BindingsGenerator
             tw.WriteLine("");
             tw.WriteLine("#include \"StableHeaders.h\"");
             tw.WriteLine("#include \"CoreTypes.h\"");
-            tw.WriteLine("#include \"BindingsHelpers.h\"");
+            tw.WriteLine("#include \"JavaScriptInstance.h\"");
+            tw.WriteLine("#include \"LoggingFunctions.h\"");
             tw.WriteLine("#include \"" + FindIncludeForClass(classSymbol.name) + "\"");
             tw.WriteLine("");
             // Disable bool conversion warnings
@@ -167,11 +168,10 @@ namespace BindingsGenerator
             tw.WriteLine("");
 
             // Own type identifier
-            // Included also for refcounted classes, since it's needed anyway when registering the prototype
+            // Included also for refcounted classes, since it's needed when registering the prototype
             tw.WriteLine("const char* " + ClassIdentifier(className) + " = \"" + className + "\";");
             tw.WriteLine("");
 
-            // \todo Handle refcounted classes (wrap in a weak ptr)
             Dictionary<string, List<Overload> > overloads = new Dictionary<string, List<Overload> >();
             Dictionary<string, List<Overload>> staticOverloads = new Dictionary<string, List<Overload>>();
             List<Property> properties = new List<Property>();
@@ -481,13 +481,13 @@ namespace BindingsGenerator
                     tw.WriteLine("class " + wrapperClassName);
                     tw.WriteLine("{");
                     tw.WriteLine("public:");
-                    tw.WriteLine(Indent(1) + wrapperClassName + "(Urho3D::Object* owner, " + signalType + "* signal) :");
+                    tw.WriteLine(Indent(1) + wrapperClassName + "(Object* owner, " + signalType + "* signal) :");
                     tw.WriteLine(Indent(2) + "owner_(owner),");
                     tw.WriteLine(Indent(2) + "signal_(signal)");
                     tw.WriteLine(Indent(1) + "{");
                     tw.WriteLine(Indent(1) + "}");
                     tw.WriteLine("");
-                    tw.WriteLine(Indent(1) + "Urho3D::WeakPtr<Urho3D::Object> owner_;");
+                    tw.WriteLine(Indent(1) + "WeakPtr<Object> owner_;");
                     tw.WriteLine(Indent(1) + signalType + "* signal_;");
                     tw.WriteLine("};");
                     tw.WriteLine("");
@@ -498,7 +498,7 @@ namespace BindingsGenerator
                     tw.WriteLine("class " + receiverClassName + " : public SignalReceiver");
                     tw.WriteLine("{");
                     tw.WriteLine("public:");
-                    string signatureLine = "void ForwardSignal(";
+                    string signatureLine = "void OnSignal(";
                     for (int i = 0; i < parameters.Count; ++i)
                     {
                         if (i > 0)
@@ -510,15 +510,18 @@ namespace BindingsGenerator
                     tw.WriteLine(Indent(1) + "{");
                     tw.WriteLine(Indent(2) + "duk_context* ctx = ctx_;");
                     tw.WriteLine(Indent(2) + "duk_push_global_object(ctx);");
-                    tw.WriteLine(Indent(2) + "duk_get_prop_string(ctx, -1, \"_DispatchSignal\");");
+                    tw.WriteLine(Indent(2) + "duk_get_prop_string(ctx, -1, \"_OnSignal\");");
+                    tw.WriteLine(Indent(2) + "duk_remove(ctx, -2);"); // Global object
+                    tw.WriteLine(Indent(2) + "duk_push_number(ctx, (size_t)key_);"); // Signal identifier for looking up receiver(s)
+                    tw.WriteLine(Indent(2) + "duk_push_array(ctx);"); // Parameter array
                     for (int i = 0; i < parameters.Count; ++i)
                     {
                         tw.WriteLine(Indent(2) + GeneratePushToStack(parameters[i], "param" + i));
+                        tw.WriteLine(Indent(2) + "duk_put_prop_index(ctx, -2, " + i + ");");
                     }
-                    /// \todo Error logging
-                    tw.WriteLine(Indent(2) + "duk_pcall(ctx, " + parameters.Count + ");");
+                    tw.WriteLine(Indent(2) + "bool success = duk_pcall(ctx, 2) == 0;");
+                    tw.WriteLine(Indent(2) + "if (!success) LogError(\"[JavaScript] OnSignal: \" + String(duk_safe_to_string(ctx, -1)));");
                     tw.WriteLine(Indent(2) + "duk_pop(ctx);"); // Result
-                    tw.WriteLine(Indent(2) + "duk_pop(ctx);"); // Global object
                     tw.WriteLine(Indent(1) + "}");
                     tw.WriteLine("};");
                     tw.WriteLine("");
@@ -526,11 +529,61 @@ namespace BindingsGenerator
                     // Finalizer
                     GenerateFinalizer(wrapperClassName, tw);
 
+                    // Connect wrapper function
+                    tw.WriteLine("static duk_ret_t " + wrapperClassName + "_Connect" + DukSignature());
+                    tw.WriteLine("{");
+                    tw.WriteLine(Indent(1) + wrapperClassName + "* wrapper = GetThisValueObject<" + wrapperClassName + ">(ctx, " + ClassIdentifier(wrapperClassName) + ");");
+                    tw.WriteLine(Indent(1) + "if (!wrapper->owner_) return 0;"); // Check signal owner expiration
+                    tw.WriteLine(Indent(1) + "HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();");
+                    tw.WriteLine(Indent(1) + "if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())");
+                    tw.WriteLine(Indent(1) + "{");
+                    tw.WriteLine(Indent(2) + receiverClassName + "* receiver = new " + receiverClassName + "();");
+                    tw.WriteLine(Indent(2) + "receiver->ctx_ = ctx;");
+                    tw.WriteLine(Indent(2) + "receiver->key_ = wrapper->signal_;");
+                    tw.WriteLine(Indent(2) + "wrapper->signal_->Connect(receiver, &" + receiverClassName + "::OnSignal);");
+                    tw.WriteLine(Indent(2) + "signalReceivers[wrapper->signal_] = receiver;");
+                    tw.WriteLine(Indent(1) + "}");
+                    tw.WriteLine(Indent(1) + "int numArgs = duk_get_top(ctx);");
+                    tw.WriteLine(Indent(1) + "duk_push_number(ctx, (size_t)wrapper->signal_);");
+                    tw.WriteLine(Indent(1) + "duk_insert(ctx, 0);");
+                    tw.WriteLine(Indent(1) + "duk_push_global_object(ctx);");
+                    tw.WriteLine(Indent(1) + "duk_get_prop_string(ctx, -1, \"_ConnectSignal\");");
+                    tw.WriteLine(Indent(1) + "duk_remove(ctx, -2);"); // Global object
+                    tw.WriteLine(Indent(1) + "duk_insert(ctx, 0);");
+                    tw.WriteLine(Indent(1) + "duk_pcall(ctx, numArgs + 1);");
+                    tw.WriteLine(Indent(1) + "duk_pop(ctx);"); // Result
+                    tw.WriteLine(Indent(1) + "return 0;");
+                    tw.WriteLine("}");
+                    tw.WriteLine("");
+
+                    // Disconnect wrapper function
+                    tw.WriteLine("static duk_ret_t " + wrapperClassName + "_Disconnect" + DukSignature());
+                    tw.WriteLine("{");
+                    tw.WriteLine(Indent(1) + wrapperClassName + "* wrapper = GetThisValueObject<" + wrapperClassName + ">(ctx, " + ClassIdentifier(wrapperClassName) + ");");
+                    tw.WriteLine(Indent(1) + "if (!wrapper->owner_) return 0;"); // Check signal owner expiration
+                    tw.WriteLine(Indent(1) + "int numArgs = duk_get_top(ctx);");
+                    tw.WriteLine(Indent(1) + "duk_push_number(ctx, (size_t)wrapper->signal_);");
+                    tw.WriteLine(Indent(1) + "duk_insert(ctx, 0);");
+                    tw.WriteLine(Indent(1) + "duk_push_global_object(ctx);");
+                    tw.WriteLine(Indent(1) + "duk_get_prop_string(ctx, -1, \"_DisconnectSignal\");");
+                    tw.WriteLine(Indent(1) + "duk_remove(ctx, -2);"); // Global object
+                    tw.WriteLine(Indent(1) + "duk_insert(ctx, 0);");
+                    tw.WriteLine(Indent(1) + "duk_pcall(ctx, numArgs + 1);");
+                    tw.WriteLine(Indent(1) + "if (duk_get_boolean(ctx, -1))"); // Last receiver disconnected
+                    tw.WriteLine(Indent(1) + "{");
+                    tw.WriteLine(Indent(2) + "HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();");
+                    tw.WriteLine(Indent(2) + "signalReceivers.Erase(wrapper->signal_);");
+                    tw.WriteLine(Indent(1) + "}");
+                    tw.WriteLine(Indent(1) + "duk_pop(ctx);"); // Result
+                    tw.WriteLine(Indent(1) + "return 0;");
+                    tw.WriteLine("}");
+                    tw.WriteLine("");
+
                     // Emit wrapper function
                     tw.WriteLine("static duk_ret_t " + wrapperClassName + "_Emit" + DukSignature());
                     tw.WriteLine("{");
                     tw.WriteLine(Indent(1) + wrapperClassName + "* wrapper = GetThisValueObject<" + wrapperClassName + ">(ctx, " + ClassIdentifier(wrapperClassName) + ");");
-                    tw.WriteLine(Indent(1) + "if (!wrapper->owner_) return 0; // Check signal owner expiration");
+                    tw.WriteLine(Indent(1) + "if (!wrapper->owner_) return 0;"); // Check signal owner expiration
                     for (int i = 0; i < parameters.Count; ++i)
                     {
                         tw.WriteLine(Indent(1) + GenerateGetFromStack(parameters[i], i, "param" + i));
@@ -548,12 +601,15 @@ namespace BindingsGenerator
                     tw.WriteLine("}");
                     tw.WriteLine("");
 
-
                     tw.WriteLine("static duk_ret_t " + className + "_Get_" + child.name + DukSignature());
                     tw.WriteLine("{");
                     tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
                     tw.WriteLine(Indent(1) + wrapperClassName + "* wrapper = new " + wrapperClassName + "(thisObj, &thisObj->" + child.name + ");");
                     tw.WriteLine(Indent(1) + "PushValueObject(ctx, wrapper, " + ClassIdentifier(wrapperClassName) + ", " + wrapperClassName + "_Finalizer, false);");
+                    tw.WriteLine(Indent(1) + "duk_push_c_function(ctx, " + wrapperClassName + "_Connect" + ", DUK_VARARGS);");
+                    tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"Connect\");");
+                    tw.WriteLine(Indent(1) + "duk_push_c_function(ctx, " + wrapperClassName + "_Disconnect" + ", DUK_VARARGS);");
+                    tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"Disconnect\");");
                     tw.WriteLine(Indent(1) + "duk_push_c_function(ctx, " + wrapperClassName + "_Emit" + ", " + parameters.Count + ");");
                     tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"Emit\");");
                     tw.WriteLine(Indent(1) + "return 1;");
