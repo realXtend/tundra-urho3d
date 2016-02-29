@@ -109,4 +109,43 @@ void PushStringVector(duk_context* ctx, const Urho3D::Vector<Urho3D::String>& ve
     }
 }
 
+void PushVariant(duk_context* ctx, const Urho3D::Variant& variant)
+{
+    switch (variant.GetType())
+    {
+    case Urho3D::VAR_BOOL:
+        duk_push_boolean(ctx, variant.GetBool() ? 1 : 0);
+        break;
+    case Urho3D::VAR_INT:
+        duk_push_number(ctx, (duk_double_t)variant.GetInt());
+        break;
+    case Urho3D::VAR_FLOAT:
+        duk_push_number(ctx, variant.GetFloat());
+        break;
+    case Urho3D::VAR_DOUBLE:
+        duk_push_number(ctx, variant.GetFloat());
+        break;
+    case Urho3D::VAR_STRING:
+        duk_push_string(ctx, variant.GetString().CString());
+        break;
+    default:
+        /// \todo More types
+        duk_push_null(ctx);
+        break;
+    }
+}
+
+Urho3D::Variant GetVariant(duk_context* ctx, duk_idx_t stackIndex)
+{
+    if (duk_is_boolean(ctx, stackIndex))
+        return Urho3D::Variant(duk_get_boolean(ctx, stackIndex) ? true : false);
+    if (duk_is_number(ctx, stackIndex))
+        return Urho3D::Variant(duk_get_number(ctx, stackIndex));
+    else if (duk_is_string(ctx, stackIndex))
+        return Urho3D::Variant(Urho3D::String(duk_get_string(ctx, stackIndex)));
+    else
+        /// \todo More types
+        return Urho3D::Variant();
+}
+
 }

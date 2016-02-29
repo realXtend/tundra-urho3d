@@ -2,6 +2,7 @@
 
 #include "duktape.h"
 #include <Urho3D/Core/Object.h>
+#include <Urho3D/Core/Variant.h>
 #include <Urho3D/Container/Str.h>
 #include <Urho3D/Container/Vector.h>
 
@@ -29,6 +30,12 @@ Urho3D::Vector<Urho3D::String> GetStringVector(duk_context* ctx, duk_idx_t stack
 
 /// Push a string vector to JS array.
 void PushStringVector(duk_context* ctx, const Urho3D::Vector<Urho3D::String>& vector);
+
+/// Convert and push a variant.
+void PushVariant(duk_context* ctx, const Urho3D::Variant& variant);
+
+/// Get a variant from JS stack.
+Urho3D::Variant GetVariant(duk_context* ctx, duk_idx_t stackIndex);
 
 /// Value object template functions
 
