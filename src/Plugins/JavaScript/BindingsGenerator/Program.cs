@@ -211,12 +211,13 @@ namespace BindingsGenerator
         static string GenerateGetFromStack(string typeName, int stackIndex, string varName, bool nullCheck = false)
         {
             typeName = SanitateTypeName(typeName);
+            bool isPtr = false;
 
             if (typeName.EndsWith("Ptr"))
             {
                 typeName = typeName.Substring(0, typeName.Length - 3);
-                if (typeName == "Component")
-                    typeName = "IComponent";
+                typeName = SanitateTemplateType(typeName);
+                isPtr = true;
             }
 
             if (Symbol.IsNumberType(typeName))
@@ -234,13 +235,14 @@ namespace BindingsGenerator
                 return typeName + " " + varName + "(duk_require_string(ctx, " + stackIndex + "));";
             else if (typeName == "String")
                 return typeName + " " + varName + "(duk_require_string(ctx, " + stackIndex + "));";
+            else if (typeName == "Variant")
+                return typeName + " " + varName + " = GetVariant(ctx, " + stackIndex + ");";
             else if (!Symbol.IsPODType(typeName))
             {
                 if (typeName.EndsWith("Vector"))
                 {
                     string templateType = typeName.Substring(0, typeName.Length - 6);
-                    if (templateType == "Component")
-                        templateType = "IComponent";
+                    templateType = SanitateTemplateType(templateType);
 
                     if (templateType == "String" || templateType == "string")
                         return typeName + " " + varName + " = GetStringVector(ctx, " + stackIndex + ");";
@@ -262,10 +264,20 @@ namespace BindingsGenerator
                 }
                 else
                 {
-                    if (!nullCheck)
-                        return typeName + "* " + varName + " = GetWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
+                    if (!isPtr)
+                    {
+                        if (!nullCheck)
+                            return typeName + "* " + varName + " = GetWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
+                        else
+                            return typeName + "* " + varName + " = GetCheckedWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
+                    }
                     else
-                        return typeName + "* " + varName + " = GetCheckedWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
+                    {
+                        if (!nullCheck)
+                            return "SharedPtr<" + typeName + "> " + varName + "(GetWeakObject<" + typeName + ">(ctx, " + stackIndex + "));";
+                        else
+                            return "SharedPtr<" + typeName + "> " + varName + "(GetCheckedWeakObject<" + typeName + ">(ctx, " + stackIndex + "));";
+                    }
                 }
             }
             else
@@ -287,8 +299,7 @@ namespace BindingsGenerator
             if (typeName.EndsWith("Ptr"))
             {
                 typeName = typeName.Substring(0, typeName.Length - 3);
-                if (typeName == "Component")
-                    typeName = "IComponent";
+                typeName = SanitateTemplateType(typeName);
             }
 
             if (Symbol.IsNumberType(typeName))
@@ -299,11 +310,12 @@ namespace BindingsGenerator
                 return "duk_push_string(ctx, " + source + ".c_str());";
             else if (typeName == "String")
                 return "duk_push_string(ctx, " + source + ".CString());";
+            else if (typeName == "Variant")
+                return "PushVariant(ctx, " + source + ");";
             else if (typeName.EndsWith("Vector"))
             {
                 string templateType = typeName.Substring(0, typeName.Length - 6);
-                if (templateType == "Component")
-                    templateType = "IComponent";
+                templateType = SanitateTemplateType(templateType);
 
                 if (templateType == "String" || templateType == "string")
                     return "PushStringVector(ctx, " + source + ");";
@@ -319,8 +331,7 @@ namespace BindingsGenerator
             else if (typeName.EndsWith("Map"))
             {
                 string templateType = typeName.Substring(0, typeName.Length - 3);
-                if (templateType == "Component")
-                    templateType = "IComponent";
+                templateType = SanitateTemplateType(templateType);
 
                 return "PushWeakObjectMap(ctx, " + source + ");";
             }
@@ -357,8 +368,7 @@ namespace BindingsGenerator
             if (typeName.EndsWith("Ptr"))
             {
                 typeName = typeName.Substring(0, typeName.Length - 3);
-                if (typeName == "Component")
-                    typeName = "IComponent";
+                typeName = SanitateTemplateType(typeName);
             }
 
             if (Symbol.IsNumberType(typeName))
@@ -729,12 +739,7 @@ namespace BindingsGenerator
                                 args += ", ";
                             if (NeedDereference(child.parameters[i]))
                                 args += "*";
-                            
-                            // Instantiate shared ptr now if needed
-                            if (!child.parameters[i].BasicType().EndsWith("Ptr"))
-                                args += child.parameters[i].name;
-                            else
-                                args += child.parameters[i].BasicType() + "(" + child.parameters[i].name + ")";
+                            args += child.parameters[i].name;
                         }
                         tw.WriteLine(Indent(1) + className + "* newObj = new " + className + "(" + args + ");");
                         tw.WriteLine(Indent(1) + GeneratePushConstructorResultToStack(className, "newObj"));
@@ -763,12 +768,7 @@ namespace BindingsGenerator
                                 args += ", ";
                             if (NeedDereference(child.parameters[i]))
                                 args += "*";
-
-                            // Instantiate shared ptr now if needed
-                            if (!child.parameters[i].BasicType().EndsWith("Ptr"))
-                                args += child.parameters[i].name;
-                            else
-                                args += child.parameters[i].BasicType() + "(" + child.parameters[i].name + ")";
+                            args += child.parameters[i].name;
                         }
                         if (child.type == "void")
                         {
@@ -999,6 +999,15 @@ namespace BindingsGenerator
             return type;
         }
 
+        static string SanitateTemplateType(string typeName)
+        {
+            if (typeName == "Component")
+                typeName = "IComponent";
+            if (typeName == "Asset")
+                typeName = "IAsset";
+            return typeName;
+        }
+
         static List<string> ExtractSignalParameterTypes(string type)
         {
             List<string> ret = new List<string>();
@@ -1040,19 +1049,17 @@ namespace BindingsGenerator
                 string templateType = t.Substring(0, t.Length - 6);
                 if (templateType == "String")
                     return true;
-                if (templateType == "Component")
-                    templateType = "IComponent";
+                templateType = SanitateTemplateType(templateType);
                 return classNames.Contains(templateType);
             }
             else if (t.EndsWith("Map") || t.EndsWith("Ptr"))
             {
                 string templateType = t.Substring(0, t.Length - 3);
-                if (templateType == "Component")
-                    templateType = "IComponent";
+                templateType = SanitateTemplateType(templateType);
                 return classNames.Contains(templateType);
             }
 
-            return t == "void" || Symbol.IsPODType(t) || classNames.Contains(t) || t == "string" || t == "String";
+            return t == "void" || Symbol.IsPODType(t) || classNames.Contains(t) || t == "string" || t == "String" || t == "Variant";
         }
 
         static bool IsBadType(string type)
@@ -1071,6 +1078,8 @@ namespace BindingsGenerator
                 return false;
             if (p.BasicType().Contains("string") || p.BasicType().Contains("String"))
                 return false;
+            if (p.BasicType().Contains("Variant"))
+                return false;
 
             return true;
         }
@@ -1082,7 +1091,7 @@ namespace BindingsGenerator
                 return false;
             if (Symbol.IsPODType(type))
                 return false;
-            if (type.Contains("string") || type.Contains("String"))
+            if (type.Contains("string") || type.Contains("String") || type.Contains("Variant"))
                 return false;
 
             return true;

@@ -11,8 +11,10 @@
 #pragma warning(disable: 4800)
 #endif
 
+#include "Framework/ConfigAPI.h"
 #include "Framework/FrameAPI.h"
 #include "Scene/SceneAPI.h"
+#include "Asset/AssetAPI.h"
 
 
 using namespace Tundra;
@@ -200,6 +202,14 @@ static duk_ret_t Framework_IsHeadless(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Framework_Config(duk_context* ctx)
+{
+    Framework* thisObj = GetThisWeakObject<Framework>(ctx);
+    ConfigAPI * ret = thisObj->Config();
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t Framework_Frame(duk_context* ctx)
 {
     Framework* thisObj = GetThisWeakObject<Framework>(ctx);
@@ -212,6 +222,14 @@ static duk_ret_t Framework_Scene(duk_context* ctx)
 {
     Framework* thisObj = GetThisWeakObject<Framework>(ctx);
     SceneAPI * ret = thisObj->Scene();
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Framework_Asset(duk_context* ctx)
+{
+    Framework* thisObj = GetThisWeakObject<Framework>(ctx);
+    AssetAPI * ret = thisObj->Asset();
     PushWeakObject(ctx, ret);
     return 1;
 }
@@ -253,8 +271,10 @@ static const duk_function_list_entry Framework_Functions[] = {
     ,{"ForceExit", Framework_ForceExit, 0}
     ,{"CancelExit", Framework_CancelExit, 0}
     ,{"IsHeadless", Framework_IsHeadless, 0}
+    ,{"Config", Framework_Config, 0}
     ,{"Frame", Framework_Frame, 0}
     ,{"Scene", Framework_Scene, 0}
+    ,{"Asset", Framework_Asset, 0}
     ,{nullptr, nullptr, 0}
 };
 

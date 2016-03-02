@@ -1091,9 +1091,9 @@ static duk_ret_t Entity_CreateLocalComponent_String_String(duk_context* ctx)
 static duk_ret_t Entity_AddComponent_ComponentPtr_AttributeChange__Type(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    IComponent* component = GetWeakObject<IComponent>(ctx, 0);
+    SharedPtr<IComponent> component(GetWeakObject<IComponent>(ctx, 0));
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    thisObj->AddComponent(ComponentPtr(component), change);
+    thisObj->AddComponent(component, change);
     return 0;
 }
 
@@ -1101,18 +1101,18 @@ static duk_ret_t Entity_AddComponent_component_id_t_ComponentPtr_AttributeChange
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     component_id_t id = (component_id_t)duk_require_number(ctx, 0);
-    IComponent* component = GetWeakObject<IComponent>(ctx, 1);
+    SharedPtr<IComponent> component(GetWeakObject<IComponent>(ctx, 1));
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
-    thisObj->AddComponent(id, ComponentPtr(component), change);
+    thisObj->AddComponent(id, component, change);
     return 0;
 }
 
 static duk_ret_t Entity_RemoveComponent_ComponentPtr_AttributeChange__Type(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    IComponent* component = GetWeakObject<IComponent>(ctx, 0);
+    SharedPtr<IComponent> component(GetWeakObject<IComponent>(ctx, 0));
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    thisObj->RemoveComponent(ComponentPtr(component), change);
+    thisObj->RemoveComponent(component, change);
     return 0;
 }
 
@@ -1330,18 +1330,18 @@ static duk_ret_t Entity_ParentScene(duk_context* ctx)
 static duk_ret_t Entity_AddChild_EntityPtr_AttributeChange__Type(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    Entity* child = GetWeakObject<Entity>(ctx, 0);
+    SharedPtr<Entity> child(GetWeakObject<Entity>(ctx, 0));
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    thisObj->AddChild(EntityPtr(child), change);
+    thisObj->AddChild(child, change);
     return 0;
 }
 
 static duk_ret_t Entity_RemoveChild_EntityPtr_AttributeChange__Type(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    Entity* child = GetWeakObject<Entity>(ctx, 0);
+    SharedPtr<Entity> child(GetWeakObject<Entity>(ctx, 0));
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    thisObj->RemoveChild(EntityPtr(child), change);
+    thisObj->RemoveChild(child, change);
     return 0;
 }
 
@@ -1356,18 +1356,18 @@ static duk_ret_t Entity_RemoveAllChildren_AttributeChange__Type(duk_context* ctx
 static duk_ret_t Entity_DetachChild_EntityPtr_AttributeChange__Type(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    Entity* child = GetWeakObject<Entity>(ctx, 0);
+    SharedPtr<Entity> child(GetWeakObject<Entity>(ctx, 0));
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    thisObj->DetachChild(EntityPtr(child), change);
+    thisObj->DetachChild(child, change);
     return 0;
 }
 
 static duk_ret_t Entity_SetParent_EntityPtr_AttributeChange__Type(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    Entity* parent = GetWeakObject<Entity>(ctx, 0);
+    SharedPtr<Entity> parent(GetWeakObject<Entity>(ctx, 0));
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    thisObj->SetParent(EntityPtr(parent), change);
+    thisObj->SetParent(parent, change);
     return 0;
 }
 

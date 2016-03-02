@@ -12,6 +12,9 @@ void Expose_Scene(duk_context* ctx);
 void Expose_Framework(duk_context* ctx);
 void Expose_FrameAPI(duk_context* ctx);
 void Expose_SceneAPI(duk_context* ctx);
+void Expose_ConfigAPI(duk_context* ctx);
+void Expose_AssetAPI(duk_context* ctx);
+void Expose_IAsset(duk_context* ctx);
 
 void ExposeCoreClasses(duk_context* ctx)
 {
@@ -21,6 +24,9 @@ void ExposeCoreClasses(duk_context* ctx)
     Expose_Framework(ctx);
     Expose_FrameAPI(ctx);
     Expose_SceneAPI(ctx);
+    Expose_ConfigAPI(ctx);
+    Expose_AssetAPI(ctx);
+    Expose_IAsset(ctx);
 }
 
 }

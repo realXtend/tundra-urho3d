@@ -5,6 +5,7 @@
 #include <Urho3D/Core/Variant.h>
 #include <Urho3D/Container/Str.h>
 #include <Urho3D/Container/Vector.h>
+#include <map>
 
 namespace JSBindings
 {
@@ -291,6 +292,30 @@ template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const Urho3D
     {
         PushWeakObject(ctx, i->second_.Get());
         duk_put_prop_string(ctx, -2, Urho3D::String(i->first_).CString());
+    }
+}
+
+/// Push a std::map of weak-refcounted objects.
+template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const std::map<T, Urho3D::SharedPtr<U> >& map)
+{
+    duk_push_object(ctx);
+
+    for (typename std::map<T, Urho3D::SharedPtr<U> >::const_iterator i = map.begin(); i != map.end(); ++i)
+    {
+        PushWeakObject(ctx, i->second.Get());
+        duk_put_prop_string(ctx, -2, Urho3D::String(i->first).CString());
+    }
+}
+
+/// Push a std::map of weak-refcounted objects with custom comparator
+template<class T, class U, class V> void PushWeakObjectMap(duk_context* ctx, const std::map<T, Urho3D::SharedPtr<U>, V>& map)
+{
+    duk_push_object(ctx);
+
+    for (typename std::map<T, Urho3D::SharedPtr<U>, V>::const_iterator i = map.begin(); i != map.end(); ++i)
+    {
+        PushWeakObject(ctx, i->second.Get());
+        duk_put_prop_string(ctx, -2, Urho3D::String(i->first).CString());
     }
 }
 
