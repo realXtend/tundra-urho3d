@@ -5,12 +5,37 @@
 #include "Scene/Entity.h"
 #include "Scene/IComponent.h"
 #include "LoggingFunctions.h"
+#include "Math/float2.h"
+#include "Math/float3.h"
+#include "Math/float4.h"
+#include "Math/Quat.h"
+
 #include <Urho3D/Core/StringUtils.h>
 
 using namespace Tundra;
 
 namespace JSBindings
 {
+
+extern const char* float2_ID;
+extern const char* float3_ID;
+extern const char* float4_ID;
+extern const char* Quat_ID;
+
+duk_ret_t float2_Finalizer(duk_context* ctx);
+duk_ret_t float3_Finalizer(duk_context* ctx);
+duk_ret_t float4_Finalizer(duk_context* ctx);
+duk_ret_t Quat_Finalizer(duk_context* ctx);
+
+const char* GetValueObjectType(duk_context* ctx, duk_idx_t stackIndex)
+{
+    duk_get_prop_string(ctx, stackIndex, "\xff""type");
+    const char* objTypeName = nullptr;
+    if (duk_is_pointer(ctx, -1))
+        objTypeName = (const char*)duk_to_pointer(ctx, -1);
+    duk_pop(ctx);
+    return objTypeName;
+}
 
 void SetValueObject(duk_context* ctx, duk_idx_t stackIndex, void* obj, const char* typeName)
 {
@@ -46,7 +71,7 @@ WeakPtr<Object>* GetWeakPtr(duk_context* ctx, duk_idx_t stackIndex)
     WeakPtr<Object>* ptr = nullptr;
     duk_get_prop_string(ctx, stackIndex, "\xff""weak");
     if (duk_is_pointer(ctx, -1))
-        ptr = static_cast<WeakPtr<Object>* >(duk_to_pointer(ctx, -1));
+        ptr = static_cast<WeakPtr<Object>*>(duk_to_pointer(ctx, -1));
     duk_pop(ctx);
 
     return ptr;
@@ -237,18 +262,39 @@ void PushVariant(duk_context* ctx, const Variant& variant)
     case Urho3D::VAR_BOOL:
         duk_push_boolean(ctx, variant.GetBool() ? 1 : 0);
         break;
+    
     case Urho3D::VAR_INT:
         duk_push_number(ctx, (duk_double_t)variant.GetInt());
         break;
+    
     case Urho3D::VAR_FLOAT:
         duk_push_number(ctx, variant.GetFloat());
         break;
+    
     case Urho3D::VAR_DOUBLE:
         duk_push_number(ctx, variant.GetFloat());
         break;
+    
     case Urho3D::VAR_STRING:
         duk_push_string(ctx, variant.GetString().CString());
         break;
+    
+    case Urho3D::VAR_VECTOR2:
+        PushValueObjectCopy<float2>(ctx, float2(variant.GetVector2()), float2_ID, float2_Finalizer);
+        break;
+    
+    case Urho3D::VAR_VECTOR3:
+        PushValueObjectCopy<float3>(ctx, float3(variant.GetVector3()), float3_ID, float3_Finalizer);
+        break;
+    
+    case Urho3D::VAR_VECTOR4:
+        PushValueObjectCopy<float4>(ctx, float4(variant.GetVector4()), float4_ID, float4_Finalizer);
+        break;
+    
+    case Urho3D::VAR_QUATERNION:
+        PushValueObjectCopy<Quat>(ctx, Quat(variant.GetQuaternion()), Quat_ID, Quat_Finalizer);
+        break;
+    
     default:
         /// \todo More types
         duk_push_null(ctx);
@@ -264,9 +310,21 @@ Variant GetVariant(duk_context* ctx, duk_idx_t stackIndex)
         return Variant(duk_get_number(ctx, stackIndex));
     else if (duk_is_string(ctx, stackIndex))
         return Variant(String(duk_get_string(ctx, stackIndex)));
-    else
-        /// \todo More types
-        return Variant();
+    else if (duk_is_object(ctx, stackIndex))
+    {
+        const char* objTypeName = GetValueObjectType(ctx, stackIndex);
+        if (objTypeName == float2_ID)
+            return Variant(Urho3D::Vector2(*GetValueObject<float2>(ctx, stackIndex, nullptr)));
+        else if (objTypeName == float3_ID)
+            return Variant(Urho3D::Vector3(*GetValueObject<float3>(ctx, stackIndex, nullptr)));
+        else if (objTypeName == float4_ID)
+            return Variant(Urho3D::Vector4(*GetValueObject<float4>(ctx, stackIndex, nullptr)));
+        else if (objTypeName == Quat_ID)
+            return Variant(Urho3D::Quaternion(*GetValueObject<Quat>(ctx, stackIndex, nullptr)));
+    }
+
+    /// \todo More types
+    return Variant();
 }
 
 void AssignAttributeValue(duk_context* ctx, duk_idx_t stackIndex, IAttribute* destAttr, AttributeChange::Type change)
@@ -277,19 +335,43 @@ void AssignAttributeValue(duk_context* ctx, duk_idx_t stackIndex, IAttribute* de
     switch (destAttr->TypeId())
     {
     case IAttribute::BoolId:
-        static_cast<Attribute<bool>* >(destAttr)->Set(duk_get_boolean(ctx, stackIndex) ? true : false, change);
+        static_cast<Attribute<bool>*>(destAttr)->Set(duk_get_boolean(ctx, stackIndex) ? true : false, change);
         break;
+    
     case IAttribute::IntId:
-        static_cast<Attribute<int>* >(destAttr)->Set((int)duk_get_number(ctx, stackIndex), change);
+        static_cast<Attribute<int>*>(destAttr)->Set((int)duk_get_number(ctx, stackIndex), change);
         break;
+    
     case IAttribute::UIntId:
-        static_cast<Attribute<uint>* >(destAttr)->Set((uint)duk_get_number(ctx, stackIndex), change);
+        static_cast<Attribute<uint>*>(destAttr)->Set((uint)duk_get_number(ctx, stackIndex), change);
         break;
+    
     case IAttribute::RealId:
-        static_cast<Attribute<float>* >(destAttr)->Set((float)duk_get_number(ctx, stackIndex), change);
+        static_cast<Attribute<float>*>(destAttr)->Set((float)duk_get_number(ctx, stackIndex), change);
         break;
+    
     case IAttribute::StringId:
-        static_cast<Attribute<String>* >(destAttr)->Set(String(duk_get_string(ctx, stackIndex)), change);
+        static_cast<Attribute<String>*>(destAttr)->Set(String(duk_get_string(ctx, stackIndex)), change);
+        break;
+    
+    case IAttribute::Float2Id:
+        if (duk_is_object(ctx, stackIndex) && GetValueObjectType(ctx, stackIndex) == float2_ID)
+            static_cast<Attribute<float2>*>(destAttr)->Set(*GetValueObject<float2>(ctx, stackIndex, nullptr), change);
+        break;
+    
+    case IAttribute::Float3Id:
+        if (duk_is_object(ctx, stackIndex) && GetValueObjectType(ctx, stackIndex) == float3_ID)
+            static_cast<Attribute<float3>*>(destAttr)->Set(*GetValueObject<float3>(ctx, stackIndex, nullptr), change);
+        break;
+    
+    case IAttribute::Float4Id:
+        if (duk_is_object(ctx, stackIndex) && GetValueObjectType(ctx, stackIndex) == float4_ID)
+            static_cast<Attribute<float4>*>(destAttr)->Set(*GetValueObject<float4>(ctx, stackIndex, nullptr), change);
+        break;
+    
+    case IAttribute::QuatId:
+        if (duk_is_object(ctx, stackIndex) && GetValueObjectType(ctx, stackIndex) == Quat_ID)
+            static_cast<Attribute<Quat>*>(destAttr)->Set(*GetValueObject<Quat>(ctx, stackIndex, nullptr), change);
         break;
     }
 }
@@ -301,19 +383,39 @@ void PushAttributeValue(duk_context* ctx, IAttribute* attr)
         switch (attr->TypeId())
         {
         case IAttribute::BoolId:
-            duk_push_boolean(ctx, static_cast<Attribute<bool>* >(attr)->Get() ? 1 : 0);
+            duk_push_boolean(ctx, static_cast<Attribute<bool>*>(attr)->Get() ? 1 : 0);
             return;
+        
         case IAttribute::IntId:
-            duk_push_number(ctx, static_cast<Attribute<int>* >(attr)->Get());
+            duk_push_number(ctx, static_cast<Attribute<int>*>(attr)->Get());
             return;
+        
         case IAttribute::UIntId:
-            duk_push_number(ctx, static_cast<Attribute<uint>* >(attr)->Get());
+            duk_push_number(ctx, static_cast<Attribute<uint>*>(attr)->Get());
             return;
+        
         case IAttribute::RealId:
-            duk_push_number(ctx, static_cast<Attribute<float>* >(attr)->Get());
+            duk_push_number(ctx, static_cast<Attribute<float>*>(attr)->Get());
             return;
+        
         case IAttribute::StringId:
-            duk_push_string(ctx, static_cast<Attribute<String>* >(attr)->Get().CString());
+            duk_push_string(ctx, static_cast<Attribute<String>*>(attr)->Get().CString());
+            return;
+        
+        case IAttribute::Float2Id:
+            PushValueObjectCopy<float2>(ctx, static_cast<Attribute<float2>*>(attr)->Get(), float2_ID, float2_Finalizer);
+            return;
+        
+        case IAttribute::Float3Id:
+            PushValueObjectCopy<float3>(ctx, static_cast<Attribute<float3>*>(attr)->Get(), float3_ID, float3_Finalizer);
+            return;
+        
+        case IAttribute::Float4Id:
+            PushValueObjectCopy<float4>(ctx, static_cast<Attribute<float4>*>(attr)->Get(), float4_ID, float4_Finalizer);
+            return;
+        
+        case IAttribute::QuatId:
+            PushValueObjectCopy<Quat>(ctx, static_cast<Attribute<Quat>*>(attr)->Get(), Quat_ID, Quat_Finalizer);
             return;
             /// \todo More types
         }

@@ -11,6 +11,9 @@
 namespace JSBindings
 {
 
+/// Return type of a value object at stack index, or null if not valid
+const char* GetValueObjectType(duk_context* ctx, duk_idx_t stackIndex);
+
 /// Non-template functions
 /// Set a C++ object to a JS object at stack index, using the "obj" (pointer) and "type" (string) internal properties.
 void SetValueObject(duk_context* ctx, duk_idx_t stackIndex, void* obj, const char* typeName);
@@ -109,7 +112,7 @@ template<class T> void PushValueObjectCopy(duk_context* ctx, const T& source, co
     duk_pop(ctx);
 }
 
-/// Push a value object on the stack. Finalizer function for the object needs to be specified. Optionally set prototype.
+/// Push a value object on the stack. The object must have been heap-allocated and its lifetime will be managed by the JS context from this point on. Finalizer function for the object needs to be specified. Optionally set prototype.
 template<class T> void PushValueObject(duk_context* ctx, T* source, const char* typeName, duk_c_function finalizer, bool setPrototype)
 {
     duk_push_object(ctx);
