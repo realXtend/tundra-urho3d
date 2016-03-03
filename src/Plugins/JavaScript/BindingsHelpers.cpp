@@ -9,6 +9,7 @@
 #include "Math/float3.h"
 #include "Math/float4.h"
 #include "Math/Quat.h"
+#include "Math/Transform.h"
 
 #include <Urho3D/Core/StringUtils.h>
 
@@ -21,11 +22,13 @@ extern const char* float2_ID;
 extern const char* float3_ID;
 extern const char* float4_ID;
 extern const char* Quat_ID;
+extern const char* Transform_ID;
 
 duk_ret_t float2_Finalizer(duk_context* ctx);
 duk_ret_t float3_Finalizer(duk_context* ctx);
 duk_ret_t float4_Finalizer(duk_context* ctx);
 duk_ret_t Quat_Finalizer(duk_context* ctx);
+duk_ret_t Transform_Finalizer(duk_context* ctx);
 
 const char* GetValueObjectType(duk_context* ctx, duk_idx_t stackIndex)
 {
@@ -373,6 +376,11 @@ void AssignAttributeValue(duk_context* ctx, duk_idx_t stackIndex, IAttribute* de
         if (duk_is_object(ctx, stackIndex) && GetValueObjectType(ctx, stackIndex) == Quat_ID)
             static_cast<Attribute<Quat>*>(destAttr)->Set(*GetValueObject<Quat>(ctx, stackIndex, nullptr), change);
         break;
+
+    case IAttribute::TransformId:
+        if (duk_is_object(ctx, stackIndex) && GetValueObjectType(ctx, stackIndex) == Transform_ID)
+            static_cast<Attribute<Transform>*>(destAttr)->Set(*GetValueObject<Transform>(ctx, stackIndex, nullptr), change);
+        break;
     }
 }
 
@@ -416,6 +424,10 @@ void PushAttributeValue(duk_context* ctx, IAttribute* attr)
         
         case IAttribute::QuatId:
             PushValueObjectCopy<Quat>(ctx, static_cast<Attribute<Quat>*>(attr)->Get(), Quat_ID, Quat_Finalizer);
+            return;
+
+        case IAttribute::TransformId:
+            PushValueObjectCopy<Transform>(ctx, static_cast<Attribute<Transform>*>(attr)->Get(), Transform_ID, Transform_Finalizer);
             return;
             /// \todo More types
         }

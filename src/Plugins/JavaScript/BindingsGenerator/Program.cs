@@ -425,42 +425,8 @@ namespace BindingsGenerator
             
             foreach (Symbol child in classSymbol.children)
             {
-                // \todo Handle non-POD accessors
-                if (child.kind == "variable" && !child.isStatic && IsScriptable(child) && child.visibilityLevel == VisibilityLevel.Public && Symbol.IsPODType(child.type))
-                {
-                    Property newProperty;
-                    newProperty.name = child.name;
-                    newProperty.readOnly = true;
-
-                    // Set accessor
-                    if (!child.IsConst())
-                    {
-                        tw.WriteLine("static duk_ret_t " + className + "_Set_" + child.name + DukSignature());
-                        tw.WriteLine("{");
-                        tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
-                        tw.WriteLine(Indent(1) + GenerateGetFromStack(child, 0, child.name));
-                        tw.WriteLine(Indent(1) + "thisObj->" + child.name + " = " + child.name + ";");
-                        tw.WriteLine(Indent(1) + "return 0;");
-                        tw.WriteLine("}");
-                        tw.WriteLine("");
-                        newProperty.readOnly = false;
-                    }
-
-                    // Get accessor
-                    {
-                        tw.WriteLine("static duk_ret_t " + className + "_Get_" + child.name + DukSignature());
-                        tw.WriteLine("{");
-                        tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
-                        tw.WriteLine(Indent(1) + GeneratePushToStack(child, "thisObj->" + child.name));
-                        tw.WriteLine(Indent(1) + "return 1;");
-                        tw.WriteLine("}");
-                        tw.WriteLine("");
-                    }
-
-                    properties.Add(newProperty);
-                }
                 // Signal wrappers
-                else if (child.kind == "variable" && child.type.StartsWith("Signal"))
+                if (child.kind == "variable" && child.type.StartsWith("Signal"))
                 {
                     Property newProperty;
                     newProperty.name = child.name;
@@ -625,6 +591,43 @@ namespace BindingsGenerator
                     tw.WriteLine(Indent(1) + "return 1;");
                     tw.WriteLine("}");
                     tw.WriteLine("");
+
+                    properties.Add(newProperty);
+                }
+                // Other POD or non-POD public variables
+                else if (child.kind == "variable" && !child.isStatic && IsScriptable(child) && child.visibilityLevel == VisibilityLevel.Public && IsSupportedType(child.type))
+                {
+                    Property newProperty;
+                    newProperty.name = child.name;
+                    newProperty.readOnly = true;
+
+                    // Set accessor
+                    if (!child.IsConst())
+                    {
+                        tw.WriteLine("static duk_ret_t " + className + "_Set_" + child.name + DukSignature());
+                        tw.WriteLine("{");
+                        tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
+                        tw.WriteLine(Indent(1) + GenerateGetFromStack(child, 0, child.name));
+                        if (Symbol.IsPODType(child.type))
+                            tw.WriteLine(Indent(1) + "thisObj->" + child.name + " = " + child.name + ";");
+                        else
+                            tw.WriteLine(Indent(1) + "if (" + child.name + ") thisObj->" + child.name + " = *" + child.name + ";");
+                        tw.WriteLine(Indent(1) + "return 0;");
+                        tw.WriteLine("}");
+                        tw.WriteLine("");
+                        newProperty.readOnly = false;
+                    }
+
+                    // Get accessor
+                    {
+                        tw.WriteLine("static duk_ret_t " + className + "_Get_" + child.name + DukSignature());
+                        tw.WriteLine("{");
+                        tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
+                        tw.WriteLine(Indent(1) + GeneratePushToStack(child, "thisObj->" + child.name));
+                        tw.WriteLine(Indent(1) + "return 1;");
+                        tw.WriteLine("}");
+                        tw.WriteLine("");
+                    }
 
                     properties.Add(newProperty);
                 }
@@ -877,7 +880,7 @@ namespace BindingsGenerator
             foreach (Property p in properties)
             {
                 if (!p.readOnly)
-                    tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + SanitatePropertyName(p.name) + "\", " + className + "_Get_" + p.name + ", " + classSymbol.name + "_Set_" + p.name + ");");
+                    tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + SanitatePropertyName(p.name) + "\", " + className + "_Get_" + p.name + ", " + className + "_Set_" + p.name + ");");
                 else
                     tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + SanitatePropertyName(p.name) + "\", " + className + "_Get_" + p.name + ", nullptr);");
             }

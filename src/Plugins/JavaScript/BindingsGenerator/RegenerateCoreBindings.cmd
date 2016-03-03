@@ -7,4 +7,4 @@ copy %CD%\CoreBindings.doxyfile %TUNDRACORE_DIR%
 cd %TUNDRACORE_DIR%
 doxygen CoreBindings.doxyfile
 cd %ORIGINAL_DIR%
-bin\release\BindingsGenerator.exe %TUNDRACORE_DIR%\CoreDocs\xml ../CoreBindings %TUNDRACORE_DIR% Scene Entity IComponent Framework FrameAPI SceneAPI ConfigAPI AssetAPI IAsset float3
+bin\release\BindingsGenerator.exe %TUNDRACORE_DIR%\CoreDocs\xml ../CoreBindings %TUNDRACORE_DIR% Scene Entity IComponent Framework FrameAPI SceneAPI ConfigAPI AssetAPI IAsset Transform float3 float4 Quat float3x3 float3x4 float4x4
