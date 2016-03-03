@@ -2,6 +2,11 @@
 
 #include "StableHeaders.h"
 #include "BindingsHelpers.h"
+#include "Scene/Entity.h"
+#include "Scene/IComponent.h"
+#include <Urho3D/Core/StringUtils.h>
+
+using namespace Tundra;
 
 namespace JSBindings
 {
@@ -46,6 +51,52 @@ Urho3D::WeakPtr<Urho3D::Object>* GetWeakPtr(duk_context* ctx, duk_idx_t stackInd
     return ptr;
 }
 
+static duk_ret_t Entity_GetProperty(duk_context* ctx)
+{
+    /* 'this' binding: handler
+     * [0]: target
+     * [1]: key
+     * [2]: receiver (proxy)
+     */
+    const char* compTypeName = duk_to_string(ctx, 1);
+    // Component properties must be lowercase, to distinguish e.g. between name component, and entity's Name() function
+    // (also speeds up entity function calls)
+    if (compTypeName && compTypeName[0] >= 'a' && compTypeName[0] <= 'z')
+    {
+        Entity* entity = GetWeakObject<Entity>(ctx, 0);
+        if (entity)
+        {
+            // Now convert to uppercase so that the type comparision will work
+            String compTypeStr(compTypeName);
+            compTypeStr[0] = (char)Urho3D::ToUpper(compTypeStr[0]);
+            IComponent* comp = entity->Component(compTypeStr);
+            if (comp)
+            {
+                PushWeakObject(ctx, comp);
+                return 1;
+            }
+        }
+    }
+
+    // Fallthrough to ordinary properties
+    duk_dup(ctx, 1);
+    duk_get_prop(ctx, 0);
+    return 1;
+}
+
+static const duk_function_list_entry EntityProxyFunctions[] = {
+    { "get", Entity_GetProperty, 3 },
+    { NULL, NULL, 0 }
+};
+
+/*
+static const duk_function_list_entry ComponentProxyFunctions[] = {
+    { "get", Component_GetProperty, 3 },
+    { "set", Component_SetProperty, 4 },
+    { NULL, NULL, 0 }
+};
+*/
+
 void PushWeakObject(duk_context* ctx, Urho3D::Object* object)
 {
     duk_push_object(ctx);
@@ -65,6 +116,26 @@ void PushWeakObject(duk_context* ctx, Urho3D::Object* object)
     duk_get_prop_string(ctx, -1, "prototype");
     duk_set_prototype(ctx, -3);
     duk_pop(ctx);
+
+    // Proxied property access handling for entity & component
+    if (object->GetType() == Entity::GetTypeStatic())
+        SetupProxy(ctx, EntityProxyFunctions);
+    /*
+    else if (dynamic_cast<IComponent*>(object))
+        SetupProxy(ctx, ComponentProxyFunctions);
+    */
+}
+
+void SetupProxy(duk_context* ctx, const duk_function_list_entry* funcs)
+{
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "Proxy");
+    duk_dup(ctx, -3); // Duplicate target at stack top
+    duk_remove(ctx, -4); // Remove original target
+    duk_push_object(ctx); // Handler
+    duk_put_function_list(ctx, -1, funcs);
+    duk_new(ctx, 2); // Create proxy
+    duk_remove(ctx, -2); // Remove global object
 }
 
 duk_ret_t WeakPtr_Finalizer(duk_context* ctx)

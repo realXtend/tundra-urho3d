@@ -26,6 +26,9 @@ duk_ret_t WeakPtr_Finalizer(duk_context* ctx);
 /// Push a weak-refcounted object that must derive from Urho3D::Object. Uses an internal "weak" property to store the object inside a heap-allocated weak ptr.
 void PushWeakObject(duk_context* ctx, Urho3D::Object* object);
 
+/// Setup proxying for the weak-refcounted object at stack top.
+void SetupProxy(duk_context* ctx, const duk_function_list_entry* funcs);
+
 /// Get a string vector from a JS array.
 Urho3D::Vector<Urho3D::String> GetStringVector(duk_context* ctx, duk_idx_t stackIndex);
 
