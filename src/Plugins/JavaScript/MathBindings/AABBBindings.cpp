@@ -77,6 +77,36 @@ duk_ret_t AABB_Finalizer(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t AABB_Set_minPoint(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* minPoint = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (minPoint) thisObj->minPoint = *minPoint;
+    return 0;
+}
+
+static duk_ret_t AABB_Get_minPoint(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    PushValueObject<float3>(ctx, &thisObj->minPoint, float3_ID, nullptr, true);
+    return 1;
+}
+
+static duk_ret_t AABB_Set_maxPoint(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    float3* maxPoint = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (maxPoint) thisObj->maxPoint = *maxPoint;
+    return 0;
+}
+
+static duk_ret_t AABB_Get_maxPoint(duk_context* ctx)
+{
+    AABB* thisObj = GetThisValueObject<AABB>(ctx, AABB_ID);
+    PushValueObject<float3>(ctx, &thisObj->maxPoint, float3_ID, nullptr, true);
+    return 1;
+}
+
 static duk_ret_t AABB_Ctor(duk_context* ctx)
 {
     AABB* newObj = new AABB();
@@ -1175,6 +1205,8 @@ void Expose_AABB(duk_context* ctx)
     duk_put_function_list(ctx, -1, AABB_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, AABB_Functions);
+    DefineProperty(ctx, "minPoint", AABB_Get_minPoint, AABB_Set_minPoint);
+    DefineProperty(ctx, "maxPoint", AABB_Get_maxPoint, AABB_Set_maxPoint);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, AABB_ID);
 }

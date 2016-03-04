@@ -74,6 +74,51 @@ duk_ret_t Triangle_Finalizer(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Triangle_Set_a(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3* a = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (a) thisObj->a = *a;
+    return 0;
+}
+
+static duk_ret_t Triangle_Get_a(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    PushValueObject<float3>(ctx, &thisObj->a, float3_ID, nullptr, true);
+    return 1;
+}
+
+static duk_ret_t Triangle_Set_b(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3* b = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (b) thisObj->b = *b;
+    return 0;
+}
+
+static duk_ret_t Triangle_Get_b(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    PushValueObject<float3>(ctx, &thisObj->b, float3_ID, nullptr, true);
+    return 1;
+}
+
+static duk_ret_t Triangle_Set_c(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    float3* c = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (c) thisObj->c = *c;
+    return 0;
+}
+
+static duk_ret_t Triangle_Get_c(duk_context* ctx)
+{
+    Triangle* thisObj = GetThisValueObject<Triangle>(ctx, Triangle_ID);
+    PushValueObject<float3>(ctx, &thisObj->c, float3_ID, nullptr, true);
+    return 1;
+}
+
 static duk_ret_t Triangle_Ctor(duk_context* ctx)
 {
     Triangle* newObj = new Triangle();
@@ -765,6 +810,9 @@ void Expose_Triangle(duk_context* ctx)
     duk_put_function_list(ctx, -1, Triangle_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Triangle_Functions);
+    DefineProperty(ctx, "a", Triangle_Get_a, Triangle_Set_a);
+    DefineProperty(ctx, "b", Triangle_Get_b, Triangle_Set_b);
+    DefineProperty(ctx, "c", Triangle_Get_c, Triangle_Set_c);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Triangle_ID);
 }

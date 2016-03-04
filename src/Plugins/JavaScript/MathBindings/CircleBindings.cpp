@@ -65,6 +65,36 @@ duk_ret_t Circle_Finalizer(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Circle_Set_pos(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float3* pos = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (pos) thisObj->pos = *pos;
+    return 0;
+}
+
+static duk_ret_t Circle_Get_pos(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    PushValueObject<float3>(ctx, &thisObj->pos, float3_ID, nullptr, true);
+    return 1;
+}
+
+static duk_ret_t Circle_Set_normal(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    float3* normal = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (normal) thisObj->normal = *normal;
+    return 0;
+}
+
+static duk_ret_t Circle_Get_normal(duk_context* ctx)
+{
+    Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
+    PushValueObject<float3>(ctx, &thisObj->normal, float3_ID, nullptr, true);
+    return 1;
+}
+
 static duk_ret_t Circle_Set_r(duk_context* ctx)
 {
     Circle* thisObj = GetThisValueObject<Circle>(ctx, Circle_ID);
@@ -367,6 +397,8 @@ void Expose_Circle(duk_context* ctx)
     duk_push_c_function(ctx, Circle_Ctor_Selector, DUK_VARARGS);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Circle_Functions);
+    DefineProperty(ctx, "pos", Circle_Get_pos, Circle_Set_pos);
+    DefineProperty(ctx, "normal", Circle_Get_normal, Circle_Set_normal);
     DefineProperty(ctx, "r", Circle_Get_r, Circle_Set_r);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Circle_ID);

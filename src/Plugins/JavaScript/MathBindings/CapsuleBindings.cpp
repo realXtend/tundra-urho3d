@@ -80,6 +80,21 @@ duk_ret_t Capsule_Finalizer(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Capsule_Set_l(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    LineSegment* l = GetValueObject<LineSegment>(ctx, 0, LineSegment_ID);
+    if (l) thisObj->l = *l;
+    return 0;
+}
+
+static duk_ret_t Capsule_Get_l(duk_context* ctx)
+{
+    Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
+    PushValueObject<LineSegment>(ctx, &thisObj->l, LineSegment_ID, nullptr, true);
+    return 1;
+}
+
 static duk_ret_t Capsule_Set_r(duk_context* ctx)
 {
     Capsule* thisObj = GetThisValueObject<Capsule>(ctx, Capsule_ID);
@@ -828,6 +843,7 @@ void Expose_Capsule(duk_context* ctx)
     duk_put_function_list(ctx, -1, Capsule_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Capsule_Functions);
+    DefineProperty(ctx, "l", Capsule_Get_l, Capsule_Set_l);
     DefineProperty(ctx, "r", Capsule_Get_r, Capsule_Set_r);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Capsule_ID);

@@ -103,8 +103,11 @@ template<class T> void PushValueObjectCopy(duk_context* ctx, const T& source, co
 {
     duk_push_object(ctx);
     SetValueObject(ctx, -1, new T(source), typeName);
-    duk_push_c_function(ctx, finalizer, 1);
-    duk_set_finalizer(ctx, -2);
+    if (finalizer)
+    {
+        duk_push_c_function(ctx, finalizer, 1);
+        duk_set_finalizer(ctx, -2);
+    }
     // When pushing an object without going through the constructor, have to set prototype manually
     duk_get_global_string(ctx, typeName);
     duk_get_prop_string(ctx, -1, "prototype");
@@ -117,8 +120,11 @@ template<class T> void PushValueObject(duk_context* ctx, T* source, const char* 
 {
     duk_push_object(ctx);
     SetValueObject(ctx, -1, source, typeName);
-    duk_push_c_function(ctx, finalizer, 1);
-    duk_set_finalizer(ctx, -2);
+    if (finalizer)
+    {
+        duk_push_c_function(ctx, finalizer, 1);
+        duk_set_finalizer(ctx, -2);
+    }
     // When pushing an object without going through the constructor, have to set prototype manually
     if (setPrototype)
     {
@@ -132,10 +138,13 @@ template<class T> void PushValueObject(duk_context* ctx, T* source, const char* 
 /// Push the result of a value object constructor. Finalizer function for the object needs to be specified.
 template<class T> void PushConstructorResult(duk_context* ctx, T* source, const char* typeName, duk_c_function finalizer)
 {
-   duk_push_this(ctx);
-   SetValueObject(ctx, -1, source, typeName);
-   duk_push_c_function(ctx, finalizer, 1);
-   duk_set_finalizer(ctx, -2);
+    duk_push_this(ctx);
+    SetValueObject(ctx, -1, source, typeName);
+    if (finalizer)
+    {
+        duk_push_c_function(ctx, finalizer, 1);
+        duk_set_finalizer(ctx, -2);
+    }
 }
 
 /// Push a vector of value objects as an array.

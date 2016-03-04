@@ -80,6 +80,21 @@ duk_ret_t Plane_Finalizer(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Plane_Set_normal(duk_context* ctx)
+{
+    Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
+    float3* normal = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (normal) thisObj->normal = *normal;
+    return 0;
+}
+
+static duk_ret_t Plane_Get_normal(duk_context* ctx)
+{
+    Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
+    PushValueObject<float3>(ctx, &thisObj->normal, float3_ID, nullptr, true);
+    return 1;
+}
+
 static duk_ret_t Plane_Set_d(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
@@ -1025,6 +1040,7 @@ void Expose_Plane(duk_context* ctx)
     duk_put_function_list(ctx, -1, Plane_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Plane_Functions);
+    DefineProperty(ctx, "normal", Plane_Get_normal, Plane_Set_normal);
     DefineProperty(ctx, "d", Plane_Get_d, Plane_Set_d);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Plane_ID);

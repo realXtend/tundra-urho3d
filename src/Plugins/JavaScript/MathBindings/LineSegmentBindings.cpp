@@ -74,6 +74,36 @@ duk_ret_t LineSegment_Finalizer(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t LineSegment_Set_a(duk_context* ctx)
+{
+    LineSegment* thisObj = GetThisValueObject<LineSegment>(ctx, LineSegment_ID);
+    float3* a = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (a) thisObj->a = *a;
+    return 0;
+}
+
+static duk_ret_t LineSegment_Get_a(duk_context* ctx)
+{
+    LineSegment* thisObj = GetThisValueObject<LineSegment>(ctx, LineSegment_ID);
+    PushValueObject<float3>(ctx, &thisObj->a, float3_ID, nullptr, true);
+    return 1;
+}
+
+static duk_ret_t LineSegment_Set_b(duk_context* ctx)
+{
+    LineSegment* thisObj = GetThisValueObject<LineSegment>(ctx, LineSegment_ID);
+    float3* b = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (b) thisObj->b = *b;
+    return 0;
+}
+
+static duk_ret_t LineSegment_Get_b(duk_context* ctx)
+{
+    LineSegment* thisObj = GetThisValueObject<LineSegment>(ctx, LineSegment_ID);
+    PushValueObject<float3>(ctx, &thisObj->b, float3_ID, nullptr, true);
+    return 1;
+}
+
 static duk_ret_t LineSegment_Ctor(duk_context* ctx)
 {
     LineSegment* newObj = new LineSegment();
@@ -859,6 +889,8 @@ void Expose_LineSegment(duk_context* ctx)
     duk_put_function_list(ctx, -1, LineSegment_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, LineSegment_Functions);
+    DefineProperty(ctx, "a", LineSegment_Get_a, LineSegment_Set_a);
+    DefineProperty(ctx, "b", LineSegment_Get_b, LineSegment_Set_b);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, LineSegment_ID);
 }

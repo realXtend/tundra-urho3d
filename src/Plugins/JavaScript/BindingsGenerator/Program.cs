@@ -623,7 +623,16 @@ namespace BindingsGenerator
                         tw.WriteLine("static duk_ret_t " + className + "_Get_" + child.name + DukSignature());
                         tw.WriteLine("{");
                         tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
-                        tw.WriteLine(Indent(1) + GeneratePushToStack(child, "thisObj->" + child.name));
+                        if (Symbol.IsPODType(child.type) || IsRefCounted(child.type))
+                            tw.WriteLine(Indent(1) + GeneratePushToStack(child, "thisObj->" + child.name));
+                        else
+                        {
+                            string typeName = SanitateTypeName(child.type);
+                            // Non-POD value variable within a larger object: do not create value copy, but point to the data within the object itself,
+                            // so that partial access and modification such as transform.pos.x is possible
+                            // Note: this is unsafe, should find a better way
+                            tw.WriteLine(Indent(1) + "PushValueObject<" + typeName + ">(ctx, &thisObj->" + child.name + ", " + ClassIdentifier(typeName) + ", nullptr, true);");
+                        }
                         tw.WriteLine(Indent(1) + "return 1;");
                         tw.WriteLine("}");
                         tw.WriteLine("");

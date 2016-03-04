@@ -77,6 +77,36 @@ duk_ret_t OBB_Finalizer(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t OBB_Set_pos(duk_context* ctx)
+{
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    float3* pos = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (pos) thisObj->pos = *pos;
+    return 0;
+}
+
+static duk_ret_t OBB_Get_pos(duk_context* ctx)
+{
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    PushValueObject<float3>(ctx, &thisObj->pos, float3_ID, nullptr, true);
+    return 1;
+}
+
+static duk_ret_t OBB_Set_r(duk_context* ctx)
+{
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    float3* r = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (r) thisObj->r = *r;
+    return 0;
+}
+
+static duk_ret_t OBB_Get_r(duk_context* ctx)
+{
+    OBB* thisObj = GetThisValueObject<OBB>(ctx, OBB_ID);
+    PushValueObject<float3>(ctx, &thisObj->r, float3_ID, nullptr, true);
+    return 1;
+}
+
 static duk_ret_t OBB_Ctor(duk_context* ctx)
 {
     OBB* newObj = new OBB();
@@ -937,6 +967,8 @@ void Expose_OBB(duk_context* ctx)
     duk_put_function_list(ctx, -1, OBB_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, OBB_Functions);
+    DefineProperty(ctx, "pos", OBB_Get_pos, OBB_Set_pos);
+    DefineProperty(ctx, "r", OBB_Get_r, OBB_Set_r);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, OBB_ID);
 }

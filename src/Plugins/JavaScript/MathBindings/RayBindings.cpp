@@ -77,6 +77,36 @@ duk_ret_t Ray_Finalizer(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Ray_Set_pos(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    float3* pos = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (pos) thisObj->pos = *pos;
+    return 0;
+}
+
+static duk_ret_t Ray_Get_pos(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    PushValueObject<float3>(ctx, &thisObj->pos, float3_ID, nullptr, true);
+    return 1;
+}
+
+static duk_ret_t Ray_Set_dir(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    float3* dir = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (dir) thisObj->dir = *dir;
+    return 0;
+}
+
+static duk_ret_t Ray_Get_dir(duk_context* ctx)
+{
+    Ray* thisObj = GetThisValueObject<Ray>(ctx, Ray_ID);
+    PushValueObject<float3>(ctx, &thisObj->dir, float3_ID, nullptr, true);
+    return 1;
+}
+
 static duk_ret_t Ray_Ctor(duk_context* ctx)
 {
     Ray* newObj = new Ray();
@@ -768,6 +798,8 @@ void Expose_Ray(duk_context* ctx)
     duk_put_function_list(ctx, -1, Ray_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Ray_Functions);
+    DefineProperty(ctx, "pos", Ray_Get_pos, Ray_Set_pos);
+    DefineProperty(ctx, "dir", Ray_Get_dir, Ray_Set_dir);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Ray_ID);
 }

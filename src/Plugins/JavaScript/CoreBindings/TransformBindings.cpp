@@ -55,7 +55,7 @@ static duk_ret_t Transform_Set_pos(duk_context* ctx)
 static duk_ret_t Transform_Get_pos(duk_context* ctx)
 {
     Transform* thisObj = GetThisValueObject<Transform>(ctx, Transform_ID);
-    PushValueObjectCopy<float3>(ctx, thisObj->pos, float3_ID, float3_Finalizer);
+    PushValueObject<float3>(ctx, &thisObj->pos, float3_ID, nullptr, true);
     return 1;
 }
 
@@ -70,7 +70,7 @@ static duk_ret_t Transform_Set_rot(duk_context* ctx)
 static duk_ret_t Transform_Get_rot(duk_context* ctx)
 {
     Transform* thisObj = GetThisValueObject<Transform>(ctx, Transform_ID);
-    PushValueObjectCopy<float3>(ctx, thisObj->rot, float3_ID, float3_Finalizer);
+    PushValueObject<float3>(ctx, &thisObj->rot, float3_ID, nullptr, true);
     return 1;
 }
 
@@ -85,7 +85,7 @@ static duk_ret_t Transform_Set_scale(duk_context* ctx)
 static duk_ret_t Transform_Get_scale(duk_context* ctx)
 {
     Transform* thisObj = GetThisValueObject<Transform>(ctx, Transform_ID);
-    PushValueObjectCopy<float3>(ctx, thisObj->scale, float3_ID, float3_Finalizer);
+    PushValueObject<float3>(ctx, &thisObj->scale, float3_ID, nullptr, true);
     return 1;
 }
 

@@ -77,6 +77,36 @@ duk_ret_t Line_Finalizer(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Line_Set_pos(duk_context* ctx)
+{
+    Line* thisObj = GetThisValueObject<Line>(ctx, Line_ID);
+    float3* pos = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (pos) thisObj->pos = *pos;
+    return 0;
+}
+
+static duk_ret_t Line_Get_pos(duk_context* ctx)
+{
+    Line* thisObj = GetThisValueObject<Line>(ctx, Line_ID);
+    PushValueObject<float3>(ctx, &thisObj->pos, float3_ID, nullptr, true);
+    return 1;
+}
+
+static duk_ret_t Line_Set_dir(duk_context* ctx)
+{
+    Line* thisObj = GetThisValueObject<Line>(ctx, Line_ID);
+    float3* dir = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (dir) thisObj->dir = *dir;
+    return 0;
+}
+
+static duk_ret_t Line_Get_dir(duk_context* ctx)
+{
+    Line* thisObj = GetThisValueObject<Line>(ctx, Line_ID);
+    PushValueObject<float3>(ctx, &thisObj->dir, float3_ID, nullptr, true);
+    return 1;
+}
+
 static duk_ret_t Line_Ctor(duk_context* ctx)
 {
     Line* newObj = new Line();
@@ -808,6 +838,8 @@ void Expose_Line(duk_context* ctx)
     duk_put_function_list(ctx, -1, Line_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Line_Functions);
+    DefineProperty(ctx, "pos", Line_Get_pos, Line_Set_pos);
+    DefineProperty(ctx, "dir", Line_Get_dir, Line_Set_dir);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Line_ID);
 }

@@ -80,6 +80,21 @@ duk_ret_t Sphere_Finalizer(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Sphere_Set_pos(duk_context* ctx)
+{
+    Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
+    float3* pos = GetValueObject<float3>(ctx, 0, float3_ID);
+    if (pos) thisObj->pos = *pos;
+    return 0;
+}
+
+static duk_ret_t Sphere_Get_pos(duk_context* ctx)
+{
+    Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
+    PushValueObject<float3>(ctx, &thisObj->pos, float3_ID, nullptr, true);
+    return 1;
+}
+
 static duk_ret_t Sphere_Set_r(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
@@ -1022,6 +1037,7 @@ void Expose_Sphere(duk_context* ctx)
     duk_put_function_list(ctx, -1, Sphere_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Sphere_Functions);
+    DefineProperty(ctx, "pos", Sphere_Get_pos, Sphere_Set_pos);
     DefineProperty(ctx, "r", Sphere_Get_r, Sphere_Set_r);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Sphere_ID);
