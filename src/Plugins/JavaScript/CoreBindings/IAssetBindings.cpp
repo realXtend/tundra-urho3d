@@ -388,7 +388,7 @@ static duk_ret_t IAsset_Name(duk_context* ctx)
 static duk_ret_t IAsset_SetDiskSource_String(duk_context* ctx)
 {
     IAsset* thisObj = GetThisWeakObject<IAsset>(ctx);
-    String diskSource(duk_require_string(ctx, 0));
+    String diskSource = duk_require_string(ctx, 0);
     thisObj->SetDiskSource(diskSource);
     return 0;
 }
@@ -404,7 +404,7 @@ static duk_ret_t IAsset_DiskSource(duk_context* ctx)
 static duk_ret_t IAsset_LoadFromFile_String(duk_context* ctx)
 {
     IAsset* thisObj = GetThisWeakObject<IAsset>(ctx);
-    String filename(duk_require_string(ctx, 0));
+    String filename = duk_require_string(ctx, 0);
     bool ret = thisObj->LoadFromFile(filename);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -474,7 +474,7 @@ static duk_ret_t IAsset_IsModified(duk_context* ctx)
 static duk_ret_t IAsset_Clone_String(duk_context* ctx)
 {
     IAsset* thisObj = GetThisWeakObject<IAsset>(ctx);
-    String newAssetName(duk_require_string(ctx, 0));
+    String newAssetName = duk_require_string(ctx, 0);
     AssetPtr ret = thisObj->Clone(newAssetName);
     PushWeakObject(ctx, ret);
     return 1;
@@ -482,9 +482,10 @@ static duk_ret_t IAsset_Clone_String(duk_context* ctx)
 
 static duk_ret_t IAsset_SaveToFile_String_String(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     IAsset* thisObj = GetThisWeakObject<IAsset>(ctx);
-    String filename(duk_require_string(ctx, 0));
-    String serializationParameters(duk_require_string(ctx, 1));
+    String filename = duk_require_string(ctx, 0);
+    String serializationParameters = numArgs > 1 ? duk_require_string(ctx, 1) : "";
     bool ret = thisObj->SaveToFile(filename, serializationParameters);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -493,7 +494,7 @@ static duk_ret_t IAsset_SaveToFile_String_String(duk_context* ctx)
 static duk_ret_t IAsset_SaveCachedCopyToFile_String(duk_context* ctx)
 {
     IAsset* thisObj = GetThisWeakObject<IAsset>(ctx);
-    String filename(duk_require_string(ctx, 0));
+    String filename = duk_require_string(ctx, 0);
     bool ret = thisObj->SaveCachedCopyToFile(filename);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -561,7 +562,7 @@ static const duk_function_list_entry IAsset_Functions[] = {
     ,{"ClearModified", IAsset_ClearModified, 0}
     ,{"IsModified", IAsset_IsModified, 0}
     ,{"Clone", IAsset_Clone_String, 1}
-    ,{"SaveToFile", IAsset_SaveToFile_String_String, 2}
+    ,{"SaveToFile", IAsset_SaveToFile_String_String, DUK_VARARGS}
     ,{"SaveCachedCopyToFile", IAsset_SaveCachedCopyToFile_String, 1}
     ,{"GetAssetAPI", IAsset_GetAssetAPI, 0}
     ,{"ToString", IAsset_ToString, 0}

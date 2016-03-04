@@ -141,7 +141,7 @@ static duk_ret_t Framework_Get_ExitRequested(duk_context* ctx)
 static duk_ret_t Framework_ParseWildCardFilename_String(duk_context* ctx)
 {
     Framework* thisObj = GetThisWeakObject<Framework>(ctx);
-    String input(duk_require_string(ctx, 0));
+    String input = duk_require_string(ctx, 0);
     String ret = thisObj->ParseWildCardFilename(input);
     duk_push_string(ctx, ret.CString());
     return 1;
@@ -150,7 +150,7 @@ static duk_ret_t Framework_ParseWildCardFilename_String(duk_context* ctx)
 static duk_ret_t Framework_HasCommandLineParameter_String(duk_context* ctx)
 {
     Framework* thisObj = GetThisWeakObject<Framework>(ctx);
-    String value(duk_require_string(ctx, 0));
+    String value = duk_require_string(ctx, 0);
     bool ret = thisObj->HasCommandLineParameter(value);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -159,7 +159,7 @@ static duk_ret_t Framework_HasCommandLineParameter_String(duk_context* ctx)
 static duk_ret_t Framework_CommandLineParameters_String(duk_context* ctx)
 {
     Framework* thisObj = GetThisWeakObject<Framework>(ctx);
-    String key(duk_require_string(ctx, 0));
+    String key = duk_require_string(ctx, 0);
     Vector< String > ret = thisObj->CommandLineParameters(key);
     PushStringVector(ctx, ret);
     return 1;

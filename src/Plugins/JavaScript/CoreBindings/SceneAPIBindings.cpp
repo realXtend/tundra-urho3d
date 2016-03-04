@@ -360,7 +360,7 @@ static duk_ret_t SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Emit(
     SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered* wrapper = GetThisValueObject<SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered>(ctx, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID);
     if (!wrapper->owner_) return 0;
     u32 param0 = (u32)duk_require_number(ctx, 0);
-    String param1(duk_require_string(ctx, 1));
+    String param1 = duk_require_string(ctx, 1);
     AttributeChange::Type param2 = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
     wrapper->signal_->Emit(param0, param1, param2);
     return 0;
@@ -391,7 +391,7 @@ static duk_ret_t SceneAPI_Scenes(duk_context* ctx)
 static duk_ret_t SceneAPI_SceneByName_String(duk_context* ctx)
 {
     SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
-    String name(duk_require_string(ctx, 0));
+    String name = duk_require_string(ctx, 0);
     ScenePtr ret = thisObj->SceneByName(name);
     PushWeakObject(ctx, ret);
     return 1;
@@ -407,11 +407,12 @@ static duk_ret_t SceneAPI_MainCameraScene(duk_context* ctx)
 
 static duk_ret_t SceneAPI_CreateScene_String_bool_bool_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
-    String name(duk_require_string(ctx, 0));
+    String name = duk_require_string(ctx, 0);
     bool viewEnabled = duk_require_boolean(ctx, 1);
     bool authority = duk_require_boolean(ctx, 2);
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 3);
+    AttributeChange::Type change = numArgs > 3 ? (AttributeChange::Type)(int)duk_require_number(ctx, 3) : AttributeChange::Default;
     ScenePtr ret = thisObj->CreateScene(name, viewEnabled, authority, change);
     PushWeakObject(ctx, ret);
     return 1;
@@ -419,9 +420,10 @@ static duk_ret_t SceneAPI_CreateScene_String_bool_bool_AttributeChange__Type(duk
 
 static duk_ret_t SceneAPI_RemoveScene_String_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
-    String name(duk_require_string(ctx, 0));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    String name = duk_require_string(ctx, 0);
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
     bool ret = thisObj->RemoveScene(name, change);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -430,7 +432,7 @@ static duk_ret_t SceneAPI_RemoveScene_String_AttributeChange__Type(duk_context* 
 static duk_ret_t SceneAPI_IsComponentFactoryRegistered_String(duk_context* ctx)
 {
     SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
-    String typeName(duk_require_string(ctx, 0));
+    String typeName = duk_require_string(ctx, 0);
     bool ret = thisObj->IsComponentFactoryRegistered(typeName);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -439,7 +441,7 @@ static duk_ret_t SceneAPI_IsComponentFactoryRegistered_String(duk_context* ctx)
 static duk_ret_t SceneAPI_IsPlaceholderComponentRegistered_String(duk_context* ctx)
 {
     SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
-    String typeName(duk_require_string(ctx, 0));
+    String typeName = duk_require_string(ctx, 0);
     bool ret = thisObj->IsPlaceholderComponentRegistered(typeName);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -448,7 +450,7 @@ static duk_ret_t SceneAPI_IsPlaceholderComponentRegistered_String(duk_context* c
 static duk_ret_t SceneAPI_IsComponentTypeRegistered_String(duk_context* ctx)
 {
     SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
-    String typeName(duk_require_string(ctx, 0));
+    String typeName = duk_require_string(ctx, 0);
     bool ret = thisObj->IsComponentTypeRegistered(typeName);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -456,10 +458,11 @@ static duk_ret_t SceneAPI_IsComponentTypeRegistered_String(duk_context* ctx)
 
 static duk_ret_t SceneAPI_CreateComponentByName_Scene_String_String(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
     Scene* scene = GetWeakObject<Scene>(ctx, 0);
-    String componentTypeName(duk_require_string(ctx, 1));
-    String newComponentName(duk_require_string(ctx, 2));
+    String componentTypeName = duk_require_string(ctx, 1);
+    String newComponentName = numArgs > 2 ? duk_require_string(ctx, 2) : "";
     ComponentPtr ret = thisObj->CreateComponentByName(scene, componentTypeName, newComponentName);
     PushWeakObject(ctx, ret);
     return 1;
@@ -467,10 +470,11 @@ static duk_ret_t SceneAPI_CreateComponentByName_Scene_String_String(duk_context*
 
 static duk_ret_t SceneAPI_CreateComponentById_Scene_u32_String(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
     Scene* scene = GetWeakObject<Scene>(ctx, 0);
     u32 componentTypeid = (u32)duk_require_number(ctx, 1);
-    String newComponentName(duk_require_string(ctx, 2));
+    String newComponentName = numArgs > 2 ? duk_require_string(ctx, 2) : "";
     ComponentPtr ret = thisObj->CreateComponentById(scene, componentTypeid, newComponentName);
     PushWeakObject(ctx, ret);
     return 1;
@@ -488,7 +492,7 @@ static duk_ret_t SceneAPI_ComponentTypeNameForTypeId_u32(duk_context* ctx)
 static duk_ret_t SceneAPI_ComponentTypeIdForTypeName_String(duk_context* ctx)
 {
     SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
-    String componentTypeName(duk_require_string(ctx, 0));
+    String componentTypeName = duk_require_string(ctx, 0);
     u32 ret = thisObj->ComponentTypeIdForTypeName(componentTypeName);
     duk_push_number(ctx, ret);
     return 1;
@@ -505,7 +509,7 @@ static duk_ret_t SceneAPI_ComponentTypes(duk_context* ctx)
 static duk_ret_t SceneAPI_RegisterComponentType_String_IComponent(duk_context* ctx)
 {
     SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
-    String typeName(duk_require_string(ctx, 0));
+    String typeName = duk_require_string(ctx, 0);
     IComponent* component = GetWeakObject<IComponent>(ctx, 1);
     thisObj->RegisterComponentType(typeName, component);
     return 0;
@@ -528,7 +532,7 @@ static duk_ret_t SceneAPI_AttributeTypeNameForTypeId_Static_u32(duk_context* ctx
 
 static duk_ret_t SceneAPI_AttributeTypeIdForTypeName_Static_String(duk_context* ctx)
 {
-    String attributeTypeName(duk_require_string(ctx, 0));
+    String attributeTypeName = duk_require_string(ctx, 0);
     u32 ret = SceneAPI::AttributeTypeIdForTypeName(attributeTypeName);
     duk_push_number(ctx, ret);
     return 1;
@@ -538,13 +542,13 @@ static const duk_function_list_entry SceneAPI_Functions[] = {
     {"Scenes", SceneAPI_Scenes, 0}
     ,{"SceneByName", SceneAPI_SceneByName_String, 1}
     ,{"MainCameraScene", SceneAPI_MainCameraScene, 0}
-    ,{"CreateScene", SceneAPI_CreateScene_String_bool_bool_AttributeChange__Type, 4}
-    ,{"RemoveScene", SceneAPI_RemoveScene_String_AttributeChange__Type, 2}
+    ,{"CreateScene", SceneAPI_CreateScene_String_bool_bool_AttributeChange__Type, DUK_VARARGS}
+    ,{"RemoveScene", SceneAPI_RemoveScene_String_AttributeChange__Type, DUK_VARARGS}
     ,{"IsComponentFactoryRegistered", SceneAPI_IsComponentFactoryRegistered_String, 1}
     ,{"IsPlaceholderComponentRegistered", SceneAPI_IsPlaceholderComponentRegistered_String, 1}
     ,{"IsComponentTypeRegistered", SceneAPI_IsComponentTypeRegistered_String, 1}
-    ,{"CreateComponentByName", SceneAPI_CreateComponentByName_Scene_String_String, 3}
-    ,{"CreateComponentById", SceneAPI_CreateComponentById_Scene_u32_String, 3}
+    ,{"CreateComponentByName", SceneAPI_CreateComponentByName_Scene_String_String, DUK_VARARGS}
+    ,{"CreateComponentById", SceneAPI_CreateComponentById_Scene_u32_String, DUK_VARARGS}
     ,{"ComponentTypeNameForTypeId", SceneAPI_ComponentTypeNameForTypeId_u32, 1}
     ,{"ComponentTypeIdForTypeName", SceneAPI_ComponentTypeIdForTypeName_String, 1}
     ,{"ComponentTypes", SceneAPI_ComponentTypes, 0}

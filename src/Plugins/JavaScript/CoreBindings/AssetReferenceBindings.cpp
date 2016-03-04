@@ -37,7 +37,7 @@ duk_ret_t AssetReference_Finalizer(duk_context* ctx)
 static duk_ret_t AssetReference_Set_ref(duk_context* ctx)
 {
     AssetReference* thisObj = GetThisValueObject<AssetReference>(ctx, AssetReference_ID);
-    String ref(duk_require_string(ctx, 0));
+    String ref = duk_require_string(ctx, 0);
     thisObj->ref = ref;
     return 0;
 }
@@ -52,7 +52,7 @@ static duk_ret_t AssetReference_Get_ref(duk_context* ctx)
 static duk_ret_t AssetReference_Set_type(duk_context* ctx)
 {
     AssetReference* thisObj = GetThisValueObject<AssetReference>(ctx, AssetReference_ID);
-    String type(duk_require_string(ctx, 0));
+    String type = duk_require_string(ctx, 0);
     thisObj->type = type;
     return 0;
 }
@@ -73,7 +73,7 @@ static duk_ret_t AssetReference_Ctor(duk_context* ctx)
 
 static duk_ret_t AssetReference_Ctor_String(duk_context* ctx)
 {
-    String reference(duk_require_string(ctx, 0));
+    String reference = duk_require_string(ctx, 0);
     AssetReference* newObj = new AssetReference(reference);
     PushConstructorResult<AssetReference>(ctx, newObj, AssetReference_ID, AssetReference_Finalizer);
     return 0;
@@ -81,8 +81,8 @@ static duk_ret_t AssetReference_Ctor_String(duk_context* ctx)
 
 static duk_ret_t AssetReference_Ctor_String_String(duk_context* ctx)
 {
-    String reference(duk_require_string(ctx, 0));
-    String type_(duk_require_string(ctx, 1));
+    String reference = duk_require_string(ctx, 0);
+    String type_ = duk_require_string(ctx, 1);
     AssetReference* newObj = new AssetReference(reference, type_);
     PushConstructorResult<AssetReference>(ctx, newObj, AssetReference_ID, AssetReference_Finalizer);
     return 0;
@@ -99,12 +99,12 @@ static duk_ret_t AssetReference_ToHash(duk_context* ctx)
 static duk_ret_t AssetReference_Ctor_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 0)
-        return AssetReference_Ctor(ctx);
-    if (numArgs == 1 && duk_is_string(ctx, 0))
-        return AssetReference_Ctor_String(ctx);
     if (numArgs == 2 && duk_is_string(ctx, 0) && duk_is_string(ctx, 1))
         return AssetReference_Ctor_String_String(ctx);
+    if (numArgs == 1 && duk_is_string(ctx, 0))
+        return AssetReference_Ctor_String(ctx);
+    if (numArgs == 0)
+        return AssetReference_Ctor(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 

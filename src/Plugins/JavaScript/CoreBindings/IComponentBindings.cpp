@@ -123,8 +123,8 @@ static duk_ret_t SignalWrapper_IComponent_ComponentNameChanged_Emit(duk_context*
 {
     SignalWrapper_IComponent_ComponentNameChanged* wrapper = GetThisValueObject<SignalWrapper_IComponent_ComponentNameChanged>(ctx, SignalWrapper_IComponent_ComponentNameChanged_ID);
     if (!wrapper->owner_) return 0;
-    String param0(duk_require_string(ctx, 0));
-    String param1(duk_require_string(ctx, 1));
+    String param0 = duk_require_string(ctx, 0);
+    String param1 = duk_require_string(ctx, 1);
     wrapper->signal_->Emit(param0, param1);
     return 0;
 }
@@ -392,7 +392,7 @@ static duk_ret_t IComponent_Name(duk_context* ctx)
 static duk_ret_t IComponent_SetName_String(duk_context* ctx)
 {
     IComponent* thisObj = GetThisWeakObject<IComponent>(ctx);
-    String name(duk_require_string(ctx, 0));
+    String name = duk_require_string(ctx, 0);
     thisObj->SetName(name);
     return 0;
 }
@@ -496,7 +496,7 @@ static duk_ret_t IComponent_NumStaticAttributes(duk_context* ctx)
 static duk_ret_t IComponent_EmitAttributeChanged_String_AttributeChange__Type(duk_context* ctx)
 {
     IComponent* thisObj = GetThisWeakObject<IComponent>(ctx);
-    String attributeName(duk_require_string(ctx, 0));
+    String attributeName = duk_require_string(ctx, 0);
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
     thisObj->EmitAttributeChanged(attributeName, change);
     return 0;
@@ -578,7 +578,7 @@ static duk_ret_t IComponent_ShouldBeSerialized_bool_bool(duk_context* ctx)
 
 static duk_ret_t IComponent_EnsureTypeNameWithoutPrefix_Static_String(duk_context* ctx)
 {
-    String tn(duk_require_string(ctx, 0));
+    String tn = duk_require_string(ctx, 0);
     String ret = IComponent::EnsureTypeNameWithoutPrefix(tn);
     duk_push_string(ctx, ret.CString());
     return 1;

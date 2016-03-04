@@ -276,26 +276,26 @@ static duk_ret_t Transform_SerializeToString(duk_context* ctx)
 static duk_ret_t Transform_Ctor_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 0)
-        return Transform_Ctor(ctx);
     if (numArgs == 3 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<float3>(ctx, 2, float3_ID))
         return Transform_Ctor_float3_float3_float3(ctx);
-    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
-        return Transform_Ctor_float3x3(ctx);
     if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_ID))
         return Transform_Ctor_float3x4(ctx);
     if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_ID))
         return Transform_Ctor_float4x4(ctx);
+    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
+        return Transform_Ctor_float3x3(ctx);
+    if (numArgs == 0)
+        return Transform_Ctor(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Transform_SetPos_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
-        return Transform_SetPos_float3(ctx);
     if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
         return Transform_SetPos_float_float_float(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Transform_SetPos_float3(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -312,16 +312,16 @@ static duk_ret_t Transform_SetScale_Selector(duk_context* ctx)
 static duk_ret_t Transform_SetOrientation_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
-        return Transform_SetOrientation_float3x3(ctx);
     if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_ID))
         return Transform_SetOrientation_Quat(ctx);
+    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
+        return Transform_SetOrientation_float3x3(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Transform_FromString_Static_String(duk_context* ctx)
 {
-    String str(duk_require_string(ctx, 0));
+    String str = duk_require_string(ctx, 0);
     Transform ret = Transform::FromString(str);
     PushValueObjectCopy<Transform>(ctx, ret, Transform_ID, Transform_Finalizer);
     return 1;

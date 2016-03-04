@@ -55,7 +55,7 @@ static duk_ret_t AssetReferenceList_Get_refs(duk_context* ctx)
 static duk_ret_t AssetReferenceList_Set_type(duk_context* ctx)
 {
     AssetReferenceList* thisObj = GetThisValueObject<AssetReferenceList>(ctx, AssetReferenceList_ID);
-    String type(duk_require_string(ctx, 0));
+    String type = duk_require_string(ctx, 0);
     thisObj->type = type;
     return 0;
 }
@@ -76,7 +76,7 @@ static duk_ret_t AssetReferenceList_Ctor(duk_context* ctx)
 
 static duk_ret_t AssetReferenceList_Ctor_String(duk_context* ctx)
 {
-    String preferredType(duk_require_string(ctx, 0));
+    String preferredType = duk_require_string(ctx, 0);
     AssetReferenceList* newObj = new AssetReferenceList(preferredType);
     PushConstructorResult<AssetReferenceList>(ctx, newObj, AssetReferenceList_ID, AssetReferenceList_Finalizer);
     return 0;
@@ -132,10 +132,10 @@ static duk_ret_t AssetReferenceList_Set_uint_AssetReference(duk_context* ctx)
 static duk_ret_t AssetReferenceList_Ctor_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 0)
-        return AssetReferenceList_Ctor(ctx);
     if (numArgs == 1 && duk_is_string(ctx, 0))
         return AssetReferenceList_Ctor_String(ctx);
+    if (numArgs == 0)
+        return AssetReferenceList_Ctor(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 

@@ -578,7 +578,7 @@ static duk_ret_t SignalWrapper_AssetAPI_AssetUploaded_Emit(duk_context* ctx)
 {
     SignalWrapper_AssetAPI_AssetUploaded* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_AssetUploaded>(ctx, SignalWrapper_AssetAPI_AssetUploaded_ID);
     if (!wrapper->owner_) return 0;
-    String param0(duk_require_string(ctx, 0));
+    String param0 = duk_require_string(ctx, 0);
     wrapper->signal_->Emit(param0);
     return 0;
 }
@@ -692,7 +692,7 @@ static duk_ret_t SignalWrapper_AssetAPI_AssetDeletedFromStorage_Emit(duk_context
 {
     SignalWrapper_AssetAPI_AssetDeletedFromStorage* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_AssetDeletedFromStorage>(ctx, SignalWrapper_AssetAPI_AssetDeletedFromStorage_ID);
     if (!wrapper->owner_) return 0;
-    String param0(duk_require_string(ctx, 0));
+    String param0 = duk_require_string(ctx, 0);
     wrapper->signal_->Emit(param0);
     return 0;
 }
@@ -722,7 +722,7 @@ static duk_ret_t AssetAPI_Update_float(duk_context* ctx)
 static duk_ret_t AssetAPI_AssetLoadCompleted_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String assetRef(duk_require_string(ctx, 0));
+    String assetRef = duk_require_string(ctx, 0);
     thisObj->AssetLoadCompleted(assetRef);
     return 0;
 }
@@ -730,7 +730,7 @@ static duk_ret_t AssetAPI_AssetLoadCompleted_String(duk_context* ctx)
 static duk_ret_t AssetAPI_AssetLoadFailed_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String assetRef(duk_require_string(ctx, 0));
+    String assetRef = duk_require_string(ctx, 0);
     thisObj->AssetLoadFailed(assetRef);
     return 0;
 }
@@ -770,7 +770,7 @@ static duk_ret_t AssetAPI_Assets(duk_context* ctx)
 static duk_ret_t AssetAPI_AssetsOfType_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String type(duk_require_string(ctx, 0));
+    String type = duk_require_string(ctx, 0);
     AssetMap ret = thisObj->AssetsOfType(type);
     PushWeakObjectMap(ctx, ret);
     return 1;
@@ -779,7 +779,7 @@ static duk_ret_t AssetAPI_AssetsOfType_String(duk_context* ctx)
 static duk_ret_t AssetAPI_OpenAssetCache_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String directory(duk_require_string(ctx, 0));
+    String directory = duk_require_string(ctx, 0);
     thisObj->OpenAssetCache(directory);
     return 0;
 }
@@ -787,8 +787,8 @@ static duk_ret_t AssetAPI_OpenAssetCache_String(duk_context* ctx)
 static duk_ret_t AssetAPI_CreateNewAsset_String_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String type(duk_require_string(ctx, 0));
-    String name(duk_require_string(ctx, 1));
+    String type = duk_require_string(ctx, 0);
+    String name = duk_require_string(ctx, 1);
     AssetPtr ret = thisObj->CreateNewAsset(type, name);
     PushWeakObject(ctx, ret);
     return 1;
@@ -797,8 +797,8 @@ static duk_ret_t AssetAPI_CreateNewAsset_String_String(duk_context* ctx)
 static duk_ret_t AssetAPI_CreateAssetFromFile_String_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String assetType(duk_require_string(ctx, 0));
-    String assetFile(duk_require_string(ctx, 1));
+    String assetType = duk_require_string(ctx, 0);
+    String assetFile = duk_require_string(ctx, 1);
     AssetPtr ret = thisObj->CreateAssetFromFile(assetType, assetFile);
     PushWeakObject(ctx, ret);
     return 1;
@@ -807,8 +807,8 @@ static duk_ret_t AssetAPI_CreateAssetFromFile_String_String(duk_context* ctx)
 static duk_ret_t AssetAPI_GenerateUniqueAssetName_String_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String assetTypePrefix(duk_require_string(ctx, 0));
-    String assetNamePrefix(duk_require_string(ctx, 1));
+    String assetTypePrefix = duk_require_string(ctx, 0);
+    String assetNamePrefix = duk_require_string(ctx, 1);
     String ret = thisObj->GenerateUniqueAssetName(assetTypePrefix, assetNamePrefix);
     duk_push_string(ctx, ret.CString());
     return 1;
@@ -817,7 +817,7 @@ static duk_ret_t AssetAPI_GenerateUniqueAssetName_String_String(duk_context* ctx
 static duk_ret_t AssetAPI_GenerateTemporaryNonexistingAssetFilename_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String filename(duk_require_string(ctx, 0));
+    String filename = duk_require_string(ctx, 0);
     String ret = thisObj->GenerateTemporaryNonexistingAssetFilename(filename);
     duk_push_string(ctx, ret.CString());
     return 1;
@@ -826,7 +826,7 @@ static duk_ret_t AssetAPI_GenerateTemporaryNonexistingAssetFilename_String(duk_c
 static duk_ret_t AssetAPI_FindAsset_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String assetRef(duk_require_string(ctx, 0));
+    String assetRef = duk_require_string(ctx, 0);
     AssetPtr ret = thisObj->FindAsset(assetRef);
     PushWeakObject(ctx, ret);
     return 1;
@@ -835,7 +835,7 @@ static duk_ret_t AssetAPI_FindAsset_String(duk_context* ctx)
 static duk_ret_t AssetAPI_RemoveAssetStorage_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String name(duk_require_string(ctx, 0));
+    String name = duk_require_string(ctx, 0);
     bool ret = thisObj->RemoveAssetStorage(name);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -844,7 +844,7 @@ static duk_ret_t AssetAPI_RemoveAssetStorage_String(duk_context* ctx)
 static duk_ret_t AssetAPI_ResourceTypeForAssetRef_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String assetRef(duk_require_string(ctx, 0));
+    String assetRef = duk_require_string(ctx, 0);
     String ret = thisObj->ResourceTypeForAssetRef(assetRef);
     duk_push_string(ctx, ret.CString());
     return 1;
@@ -862,8 +862,8 @@ static duk_ret_t AssetAPI_ResourceTypeForAssetRef_AssetReference(duk_context* ct
 static duk_ret_t AssetAPI_ResolveAssetRef_String_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String context(duk_require_string(ctx, 0));
-    String ref(duk_require_string(ctx, 1));
+    String context = duk_require_string(ctx, 0);
+    String ref = duk_require_string(ctx, 1);
     String ret = thisObj->ResolveAssetRef(context, ref);
     duk_push_string(ctx, ret.CString());
     return 1;
@@ -882,7 +882,7 @@ static duk_ret_t AssetAPI_ForgetAsset_AssetPtr_bool(duk_context* ctx)
 static duk_ret_t AssetAPI_ForgetAsset_String_bool(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String assetRef(duk_require_string(ctx, 0));
+    String assetRef = duk_require_string(ctx, 0);
     bool removeDiskSource = duk_require_boolean(ctx, 1);
     bool ret = thisObj->ForgetAsset(assetRef, removeDiskSource);
     duk_push_boolean(ctx, ret);
@@ -892,7 +892,7 @@ static duk_ret_t AssetAPI_ForgetAsset_String_bool(duk_context* ctx)
 static duk_ret_t AssetAPI_ForgetBundle_String_bool(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String bundleRef(duk_require_string(ctx, 0));
+    String bundleRef = duk_require_string(ctx, 0);
     bool removeDiskSource = duk_require_boolean(ctx, 1);
     bool ret = thisObj->ForgetBundle(bundleRef, removeDiskSource);
     duk_push_boolean(ctx, ret);
@@ -902,7 +902,7 @@ static duk_ret_t AssetAPI_ForgetBundle_String_bool(duk_context* ctx)
 static duk_ret_t AssetAPI_DeleteAssetFromStorage_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String assetRef(duk_require_string(ctx, 0));
+    String assetRef = duk_require_string(ctx, 0);
     thisObj->DeleteAssetFromStorage(assetRef);
     return 0;
 }
@@ -943,8 +943,8 @@ static duk_ret_t AssetAPI_HasPendingDependencies_AssetPtr(duk_context* ctx)
 static duk_ret_t AssetAPI_HandleAssetDiscovery_String_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String assetRef(duk_require_string(ctx, 0));
-    String assetType(duk_require_string(ctx, 1));
+    String assetRef = duk_require_string(ctx, 0);
+    String assetType = duk_require_string(ctx, 1);
     thisObj->HandleAssetDiscovery(assetRef, assetType);
     return 0;
 }
@@ -952,7 +952,7 @@ static duk_ret_t AssetAPI_HandleAssetDiscovery_String_String(duk_context* ctx)
 static duk_ret_t AssetAPI_HandleAssetDeleted_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String assetRef(duk_require_string(ctx, 0));
+    String assetRef = duk_require_string(ctx, 0);
     thisObj->HandleAssetDeleted(assetRef);
     return 0;
 }
@@ -960,7 +960,7 @@ static duk_ret_t AssetAPI_HandleAssetDeleted_String(duk_context* ctx)
 static duk_ret_t AssetAPI_EmitAssetDeletedFromStorage_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String assetRef(duk_require_string(ctx, 0));
+    String assetRef = duk_require_string(ctx, 0);
     thisObj->EmitAssetDeletedFromStorage(assetRef);
     return 0;
 }
@@ -968,26 +968,26 @@ static duk_ret_t AssetAPI_EmitAssetDeletedFromStorage_String(duk_context* ctx)
 static duk_ret_t AssetAPI_ResourceTypeForAssetRef_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && duk_is_string(ctx, 0))
-        return AssetAPI_ResourceTypeForAssetRef_String(ctx);
     if (numArgs == 1 && GetValueObject<AssetReference>(ctx, 0, AssetReference_ID))
         return AssetAPI_ResourceTypeForAssetRef_AssetReference(ctx);
+    if (numArgs == 1 && duk_is_string(ctx, 0))
+        return AssetAPI_ResourceTypeForAssetRef_String(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t AssetAPI_ForgetAsset_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && duk_is_boolean(ctx, 1))
-        return AssetAPI_ForgetAsset_AssetPtr_bool(ctx);
     if (numArgs == 2 && duk_is_string(ctx, 0) && duk_is_boolean(ctx, 1))
         return AssetAPI_ForgetAsset_String_bool(ctx);
+    if (numArgs == 2 && duk_is_boolean(ctx, 1))
+        return AssetAPI_ForgetAsset_AssetPtr_bool(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t AssetAPI_SanitateAssetRef_Static_String(duk_context* ctx)
 {
-    String ref(duk_require_string(ctx, 0));
+    String ref = duk_require_string(ctx, 0);
     String ret = AssetAPI::SanitateAssetRef(ref);
     duk_push_string(ctx, ret.CString());
     return 1;
@@ -995,7 +995,7 @@ static duk_ret_t AssetAPI_SanitateAssetRef_Static_String(duk_context* ctx)
 
 static duk_ret_t AssetAPI_SanitateAssetRef_Static_string(duk_context* ctx)
 {
-    string ref(duk_require_string(ctx, 0));
+    string ref = duk_require_string(ctx, 0);
     string ret = AssetAPI::SanitateAssetRef(ref);
     duk_push_string(ctx, ret.c_str());
     return 1;
@@ -1003,7 +1003,7 @@ static duk_ret_t AssetAPI_SanitateAssetRef_Static_string(duk_context* ctx)
 
 static duk_ret_t AssetAPI_DesanitateAssetRef_Static_String(duk_context* ctx)
 {
-    String ref(duk_require_string(ctx, 0));
+    String ref = duk_require_string(ctx, 0);
     String ret = AssetAPI::DesanitateAssetRef(ref);
     duk_push_string(ctx, ret.CString());
     return 1;
@@ -1011,7 +1011,7 @@ static duk_ret_t AssetAPI_DesanitateAssetRef_Static_String(duk_context* ctx)
 
 static duk_ret_t AssetAPI_DesanitateAssetRef_Static_string(duk_context* ctx)
 {
-    string ref(duk_require_string(ctx, 0));
+    string ref = duk_require_string(ctx, 0);
     string ret = AssetAPI::DesanitateAssetRef(ref);
     duk_push_string(ctx, ret.c_str());
     return 1;
@@ -1019,7 +1019,7 @@ static duk_ret_t AssetAPI_DesanitateAssetRef_Static_string(duk_context* ctx)
 
 static duk_ret_t AssetAPI_ExtractFilenameFromAssetRef_Static_String(duk_context* ctx)
 {
-    String ref(duk_require_string(ctx, 0));
+    String ref = duk_require_string(ctx, 0);
     String ret = AssetAPI::ExtractFilenameFromAssetRef(ref);
     duk_push_string(ctx, ret.CString());
     return 1;
@@ -1027,8 +1027,8 @@ static duk_ret_t AssetAPI_ExtractFilenameFromAssetRef_Static_String(duk_context*
 
 static duk_ret_t AssetAPI_RecursiveFindFile_Static_String_String(duk_context* ctx)
 {
-    String basePath(duk_require_string(ctx, 0));
-    String filename(duk_require_string(ctx, 1));
+    String basePath = duk_require_string(ctx, 0);
+    String filename = duk_require_string(ctx, 1);
     String ret = AssetAPI::RecursiveFindFile(basePath, filename);
     duk_push_string(ctx, ret.CString());
     return 1;
@@ -1038,9 +1038,9 @@ static duk_ret_t AssetAPI_SanitateAssetRef_Static_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
     if (numArgs == 1 && duk_is_string(ctx, 0))
-        return AssetAPI_SanitateAssetRef_Static_String(ctx);
-    if (numArgs == 1 && duk_is_string(ctx, 0))
         return AssetAPI_SanitateAssetRef_Static_string(ctx);
+    if (numArgs == 1 && duk_is_string(ctx, 0))
+        return AssetAPI_SanitateAssetRef_Static_String(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -1048,9 +1048,9 @@ static duk_ret_t AssetAPI_DesanitateAssetRef_Static_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
     if (numArgs == 1 && duk_is_string(ctx, 0))
-        return AssetAPI_DesanitateAssetRef_Static_String(ctx);
-    if (numArgs == 1 && duk_is_string(ctx, 0))
         return AssetAPI_DesanitateAssetRef_Static_string(ctx);
+    if (numArgs == 1 && duk_is_string(ctx, 0))
+        return AssetAPI_DesanitateAssetRef_Static_String(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 

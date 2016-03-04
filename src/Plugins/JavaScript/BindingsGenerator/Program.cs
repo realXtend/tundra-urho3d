@@ -14,7 +14,17 @@ namespace BindingsGenerator
         public Symbol function;
         public List<Parameter> parameters;
         public bool hasDefaultParameters;
+        public int numSignificantParameters;
     }
+
+    class OverloadComparer : IComparer<Overload>
+    {
+        public int Compare(Overload x, Overload y)
+        {
+            return y.numSignificantParameters.CompareTo(x.numSignificantParameters);
+        }
+    }
+
 
     struct Property
     {
@@ -241,9 +251,9 @@ namespace BindingsGenerator
             else if (typeName == "bool")
                 return typeName + " " + varName + " = duk_require_boolean(ctx, " + stackIndex + ");";
             else if (typeName == "string")
-                return typeName + " " + varName + "(duk_require_string(ctx, " + stackIndex + "));";
+                return typeName + " " + varName + " = duk_require_string(ctx, " + stackIndex + ");";
             else if (typeName == "String")
-                return typeName + " " + varName + "(duk_require_string(ctx, " + stackIndex + "));";
+                return typeName + " " + varName + " = duk_require_string(ctx, " + stackIndex + ");";
             else if (typeName == "Variant")
                 return typeName + " " + varName + " = GetVariant(ctx, " + stackIndex + ");";
             else if (!Symbol.IsPODType(typeName))
@@ -291,6 +301,16 @@ namespace BindingsGenerator
             }
             else
                 throw new System.Exception("Unsupported type " + typeName + " for GenerateGetVariable()!");
+        }
+
+        static string GenerateGetFromStackDefaultValue(string typeName, int stackIndex, string varName, bool nullCheck, int paramIndex, string defaultValue)
+        {
+            string ret = GenerateGetFromStack(typeName, stackIndex, varName, nullCheck);
+            int equalsIdx = ret.IndexOf('=');
+            ret = ret.Insert(equalsIdx + 2, "numArgs > " + paramIndex + " ? ");
+            ret = ret.Substring(0, ret.Length - 1);
+            ret += " : " + defaultValue + ";";
+            return ret;
         }
 
         static string GeneratePushToStack(Symbol classSymbol, string source)
@@ -745,12 +765,14 @@ namespace BindingsGenerator
                     newOverload.function = child;
                     newOverload.parameters = child.parameters;
                     newOverload.hasDefaultParameters = false;
+                    newOverload.numSignificantParameters = child.parameters.Count;
 
                     for (int i = 0; i < child.parameters.Count; ++i)
                     {
                         if (child.parameters[i].defaultValue != null && child.parameters[i].defaultValue.Length > 0)
                         {
                             newOverload.hasDefaultParameters = true;
+                            newOverload.numSignificantParameters = i;
                             break;
                         }
                     }
@@ -761,12 +783,18 @@ namespace BindingsGenerator
                     {
                         tw.WriteLine("static duk_ret_t " + functionName + DukSignature());
                         tw.WriteLine("{");
+                        if (newOverload.hasDefaultParameters)
+                            tw.WriteLine(Indent(1) + "int numArgs = duk_get_top(ctx);");
 
                         // \todo Remove unusable arguments, such as pointers
                         string args = "";
                         for (int i = 0; i < child.parameters.Count; ++i)
                         {
-                            tw.WriteLine(Indent(1) + GenerateGetFromStack(child.parameters[i].BasicType(), i, child.parameters[i].name, child.parameters[i].IsAReference()));
+                            if (child.parameters[i].defaultValue == null || child.parameters[i].defaultValue.Length == 0)
+                                tw.WriteLine(Indent(1) + GenerateGetFromStack(child.parameters[i].BasicType(), i, child.parameters[i].name, child.parameters[i].IsAReference()));
+                            else
+                                tw.WriteLine(Indent(1) + GenerateGetFromStackDefaultValue(child.parameters[i].BasicType(), i, child.parameters[i].name, child.parameters[i].IsAReference(), i, child.parameters[i].defaultValue));
+                            
                             if (i > 0)
                                 args += ", ";
                             if (NeedDereference(child.parameters[i]))
@@ -783,6 +811,9 @@ namespace BindingsGenerator
                     {
                         tw.WriteLine("static duk_ret_t " + functionName + DukSignature());
                         tw.WriteLine("{");
+                        if (newOverload.hasDefaultParameters)
+                            tw.WriteLine(Indent(1) + "int numArgs = duk_get_top(ctx);");
+
                         string callPrefix = "";
                         if (!child.isStatic)
                         {
@@ -795,7 +826,11 @@ namespace BindingsGenerator
                         string args = "";
                         for (int i = 0; i < child.parameters.Count; ++i)
                         {
-                            tw.WriteLine(Indent(1) + GenerateGetFromStack(child.parameters[i].BasicType(), i, child.parameters[i].name, child.parameters[i].IsAReference()));
+                            if (child.parameters[i].defaultValue == null || child.parameters[i].defaultValue.Length == 0)
+                                tw.WriteLine(Indent(1) + GenerateGetFromStack(child.parameters[i].BasicType(), i, child.parameters[i].name, child.parameters[i].IsAReference()));
+                            else
+                                tw.WriteLine(Indent(1) + GenerateGetFromStackDefaultValue(child.parameters[i].BasicType(), i, child.parameters[i].name, child.parameters[i].IsAReference(), i, child.parameters[i].defaultValue));
+
                             if (i > 0)
                                 args += ", ";
                             if (NeedDereference(child.parameters[i]))
@@ -826,6 +861,8 @@ namespace BindingsGenerator
             {
                 if (kvp.Value.Count >= 2)
                 {
+                    kvp.Value.Sort(new OverloadComparer());
+
                     tw.WriteLine("static duk_ret_t " + kvp.Key + "_Selector" + DukSignature());
                     tw.WriteLine("{");
                     tw.WriteLine(Indent(1) + "int numArgs = duk_get_top(ctx);");

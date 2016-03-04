@@ -846,7 +846,7 @@ static duk_ret_t Entity_Get_ParentChanged(duk_context* ctx)
 static duk_ret_t Entity_SetGroup_String(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String groupName(duk_require_string(ctx, 0));
+    String groupName = duk_require_string(ctx, 0);
     thisObj->SetGroup(groupName);
     return 0;
 }
@@ -886,11 +886,12 @@ static duk_ret_t Entity_ChangeComponentId_component_id_t_component_id_t(duk_cont
 
 static duk_ret_t Entity_CreateComponentWithId_component_id_t_u32_String_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     component_id_t compId = (component_id_t)duk_require_number(ctx, 0);
     u32 typeId = (u32)duk_require_number(ctx, 1);
-    String name(duk_require_string(ctx, 2));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 3);
+    String name = duk_require_string(ctx, 2);
+    AttributeChange::Type change = numArgs > 3 ? (AttributeChange::Type)(int)duk_require_number(ctx, 3) : AttributeChange::Default;
     ComponentPtr ret = thisObj->CreateComponentWithId(compId, typeId, name, change);
     PushWeakObject(ctx, ret);
     return 1;
@@ -924,7 +925,7 @@ static duk_ret_t Entity_ComponentById_component_id_t(duk_context* ctx)
 static duk_ret_t Entity_Component_String(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String typeName(duk_require_string(ctx, 0));
+    String typeName = duk_require_string(ctx, 0);
     ComponentPtr ret = thisObj->Component(typeName);
     PushWeakObject(ctx, ret);
     return 1;
@@ -942,8 +943,8 @@ static duk_ret_t Entity_Component_u32(duk_context* ctx)
 static duk_ret_t Entity_Component_String_String(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String typeName(duk_require_string(ctx, 0));
-    String name(duk_require_string(ctx, 1));
+    String typeName = duk_require_string(ctx, 0);
+    String name = duk_require_string(ctx, 1);
     ComponentPtr ret = thisObj->Component(typeName, name);
     PushWeakObject(ctx, ret);
     return 1;
@@ -953,7 +954,7 @@ static duk_ret_t Entity_Component_u32_String(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     u32 typeId = (u32)duk_require_number(ctx, 0);
-    String name(duk_require_string(ctx, 1));
+    String name = duk_require_string(ctx, 1);
     ComponentPtr ret = thisObj->Component(typeId, name);
     PushWeakObject(ctx, ret);
     return 1;
@@ -961,10 +962,11 @@ static duk_ret_t Entity_Component_u32_String(duk_context* ctx)
 
 static duk_ret_t Entity_GetOrCreateComponent_String_AttributeChange__Type_bool(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String typeName(duk_require_string(ctx, 0));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    bool replicated = duk_require_boolean(ctx, 2);
+    String typeName = duk_require_string(ctx, 0);
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
+    bool replicated = numArgs > 2 ? duk_require_boolean(ctx, 2) : true;
     ComponentPtr ret = thisObj->GetOrCreateComponent(typeName, change, replicated);
     PushWeakObject(ctx, ret);
     return 1;
@@ -972,11 +974,12 @@ static duk_ret_t Entity_GetOrCreateComponent_String_AttributeChange__Type_bool(d
 
 static duk_ret_t Entity_GetOrCreateComponent_String_String_AttributeChange__Type_bool(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String typeName(duk_require_string(ctx, 0));
-    String name(duk_require_string(ctx, 1));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
-    bool replicated = duk_require_boolean(ctx, 3);
+    String typeName = duk_require_string(ctx, 0);
+    String name = duk_require_string(ctx, 1);
+    AttributeChange::Type change = numArgs > 2 ? (AttributeChange::Type)(int)duk_require_number(ctx, 2) : AttributeChange::Default;
+    bool replicated = numArgs > 3 ? duk_require_boolean(ctx, 3) : true;
     ComponentPtr ret = thisObj->GetOrCreateComponent(typeName, name, change, replicated);
     PushWeakObject(ctx, ret);
     return 1;
@@ -984,10 +987,11 @@ static duk_ret_t Entity_GetOrCreateComponent_String_String_AttributeChange__Type
 
 static duk_ret_t Entity_GetOrCreateComponent_u32_AttributeChange__Type_bool(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     u32 typeId = (u32)duk_require_number(ctx, 0);
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    bool replicated = duk_require_boolean(ctx, 2);
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
+    bool replicated = numArgs > 2 ? duk_require_boolean(ctx, 2) : true;
     ComponentPtr ret = thisObj->GetOrCreateComponent(typeId, change, replicated);
     PushWeakObject(ctx, ret);
     return 1;
@@ -995,11 +999,12 @@ static duk_ret_t Entity_GetOrCreateComponent_u32_AttributeChange__Type_bool(duk_
 
 static duk_ret_t Entity_GetOrCreateComponent_u32_String_AttributeChange__Type_bool(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     u32 typeId = (u32)duk_require_number(ctx, 0);
-    String name(duk_require_string(ctx, 1));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
-    bool replicated = duk_require_boolean(ctx, 3);
+    String name = duk_require_string(ctx, 1);
+    AttributeChange::Type change = numArgs > 2 ? (AttributeChange::Type)(int)duk_require_number(ctx, 2) : AttributeChange::Default;
+    bool replicated = numArgs > 3 ? duk_require_boolean(ctx, 3) : true;
     ComponentPtr ret = thisObj->GetOrCreateComponent(typeId, name, change, replicated);
     PushWeakObject(ctx, ret);
     return 1;
@@ -1008,7 +1013,7 @@ static duk_ret_t Entity_GetOrCreateComponent_u32_String_AttributeChange__Type_bo
 static duk_ret_t Entity_GetOrCreateLocalComponent_String(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String typeName(duk_require_string(ctx, 0));
+    String typeName = duk_require_string(ctx, 0);
     ComponentPtr ret = thisObj->GetOrCreateLocalComponent(typeName);
     PushWeakObject(ctx, ret);
     return 1;
@@ -1017,8 +1022,8 @@ static duk_ret_t Entity_GetOrCreateLocalComponent_String(duk_context* ctx)
 static duk_ret_t Entity_GetOrCreateLocalComponent_String_String(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String typeName(duk_require_string(ctx, 0));
-    String name(duk_require_string(ctx, 1));
+    String typeName = duk_require_string(ctx, 0);
+    String name = duk_require_string(ctx, 1);
     ComponentPtr ret = thisObj->GetOrCreateLocalComponent(typeName, name);
     PushWeakObject(ctx, ret);
     return 1;
@@ -1026,10 +1031,11 @@ static duk_ret_t Entity_GetOrCreateLocalComponent_String_String(duk_context* ctx
 
 static duk_ret_t Entity_CreateComponent_String_AttributeChange__Type_bool(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String typeName(duk_require_string(ctx, 0));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    bool replicated = duk_require_boolean(ctx, 2);
+    String typeName = duk_require_string(ctx, 0);
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
+    bool replicated = numArgs > 2 ? duk_require_boolean(ctx, 2) : true;
     ComponentPtr ret = thisObj->CreateComponent(typeName, change, replicated);
     PushWeakObject(ctx, ret);
     return 1;
@@ -1037,11 +1043,12 @@ static duk_ret_t Entity_CreateComponent_String_AttributeChange__Type_bool(duk_co
 
 static duk_ret_t Entity_CreateComponent_String_String_AttributeChange__Type_bool(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String typeName(duk_require_string(ctx, 0));
-    String name(duk_require_string(ctx, 1));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
-    bool replicated = duk_require_boolean(ctx, 3);
+    String typeName = duk_require_string(ctx, 0);
+    String name = duk_require_string(ctx, 1);
+    AttributeChange::Type change = numArgs > 2 ? (AttributeChange::Type)(int)duk_require_number(ctx, 2) : AttributeChange::Default;
+    bool replicated = numArgs > 3 ? duk_require_boolean(ctx, 3) : true;
     ComponentPtr ret = thisObj->CreateComponent(typeName, name, change, replicated);
     PushWeakObject(ctx, ret);
     return 1;
@@ -1049,10 +1056,11 @@ static duk_ret_t Entity_CreateComponent_String_String_AttributeChange__Type_bool
 
 static duk_ret_t Entity_CreateComponent_u32_AttributeChange__Type_bool(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     u32 typeId = (u32)duk_require_number(ctx, 0);
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    bool replicated = duk_require_boolean(ctx, 2);
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
+    bool replicated = numArgs > 2 ? duk_require_boolean(ctx, 2) : true;
     ComponentPtr ret = thisObj->CreateComponent(typeId, change, replicated);
     PushWeakObject(ctx, ret);
     return 1;
@@ -1060,11 +1068,12 @@ static duk_ret_t Entity_CreateComponent_u32_AttributeChange__Type_bool(duk_conte
 
 static duk_ret_t Entity_CreateComponent_u32_String_AttributeChange__Type_bool(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     u32 typeId = (u32)duk_require_number(ctx, 0);
-    String name(duk_require_string(ctx, 1));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
-    bool replicated = duk_require_boolean(ctx, 3);
+    String name = duk_require_string(ctx, 1);
+    AttributeChange::Type change = numArgs > 2 ? (AttributeChange::Type)(int)duk_require_number(ctx, 2) : AttributeChange::Default;
+    bool replicated = numArgs > 3 ? duk_require_boolean(ctx, 3) : true;
     ComponentPtr ret = thisObj->CreateComponent(typeId, name, change, replicated);
     PushWeakObject(ctx, ret);
     return 1;
@@ -1073,7 +1082,7 @@ static duk_ret_t Entity_CreateComponent_u32_String_AttributeChange__Type_bool(du
 static duk_ret_t Entity_CreateLocalComponent_String(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String typeName(duk_require_string(ctx, 0));
+    String typeName = duk_require_string(ctx, 0);
     ComponentPtr ret = thisObj->CreateLocalComponent(typeName);
     PushWeakObject(ctx, ret);
     return 1;
@@ -1082,8 +1091,8 @@ static duk_ret_t Entity_CreateLocalComponent_String(duk_context* ctx)
 static duk_ret_t Entity_CreateLocalComponent_String_String(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String typeName(duk_require_string(ctx, 0));
-    String name(duk_require_string(ctx, 1));
+    String typeName = duk_require_string(ctx, 0);
+    String name = duk_require_string(ctx, 1);
     ComponentPtr ret = thisObj->CreateLocalComponent(typeName, name);
     PushWeakObject(ctx, ret);
     return 1;
@@ -1091,65 +1100,72 @@ static duk_ret_t Entity_CreateLocalComponent_String_String(duk_context* ctx)
 
 static duk_ret_t Entity_AddComponent_ComponentPtr_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     SharedPtr<IComponent> component(GetWeakObject<IComponent>(ctx, 0));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
     thisObj->AddComponent(component, change);
     return 0;
 }
 
 static duk_ret_t Entity_AddComponent_component_id_t_ComponentPtr_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     component_id_t id = (component_id_t)duk_require_number(ctx, 0);
     SharedPtr<IComponent> component(GetWeakObject<IComponent>(ctx, 1));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
+    AttributeChange::Type change = numArgs > 2 ? (AttributeChange::Type)(int)duk_require_number(ctx, 2) : AttributeChange::Default;
     thisObj->AddComponent(id, component, change);
     return 0;
 }
 
 static duk_ret_t Entity_RemoveComponent_ComponentPtr_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     SharedPtr<IComponent> component(GetWeakObject<IComponent>(ctx, 0));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
     thisObj->RemoveComponent(component, change);
     return 0;
 }
 
 static duk_ret_t Entity_RemoveComponent_String_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String typeName(duk_require_string(ctx, 0));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    String typeName = duk_require_string(ctx, 0);
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
     thisObj->RemoveComponent(typeName, change);
     return 0;
 }
 
 static duk_ret_t Entity_RemoveComponent_String_String_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String typeName(duk_require_string(ctx, 0));
-    String name(duk_require_string(ctx, 1));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
+    String typeName = duk_require_string(ctx, 0);
+    String name = duk_require_string(ctx, 1);
+    AttributeChange::Type change = numArgs > 2 ? (AttributeChange::Type)(int)duk_require_number(ctx, 2) : AttributeChange::Default;
     thisObj->RemoveComponent(typeName, name, change);
     return 0;
 }
 
 static duk_ret_t Entity_RemoveComponentById_component_id_t_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     component_id_t id = (component_id_t)duk_require_number(ctx, 0);
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
     thisObj->RemoveComponentById(id, change);
     return 0;
 }
 
 static duk_ret_t Entity_RemoveComponents_String_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String typeName(duk_require_string(ctx, 0));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    String typeName = duk_require_string(ctx, 0);
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
     uint ret = thisObj->RemoveComponents(typeName, change);
     duk_push_number(ctx, ret);
     return 1;
@@ -1157,9 +1173,10 @@ static duk_ret_t Entity_RemoveComponents_String_AttributeChange__Type(duk_contex
 
 static duk_ret_t Entity_RemoveComponents_u32_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     u32 typeId = (u32)duk_require_number(ctx, 0);
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
     uint ret = thisObj->RemoveComponents(typeId, change);
     duk_push_number(ctx, ret);
     return 1;
@@ -1167,8 +1184,9 @@ static duk_ret_t Entity_RemoveComponents_u32_AttributeChange__Type(duk_context* 
 
 static duk_ret_t Entity_RemoveAllComponents_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 0);
+    AttributeChange::Type change = numArgs > 0 ? (AttributeChange::Type)(int)duk_require_number(ctx, 0) : AttributeChange::Default;
     thisObj->RemoveAllComponents(change);
     return 0;
 }
@@ -1185,7 +1203,7 @@ static duk_ret_t Entity_ComponentsOfType_u32(duk_context* ctx)
 static duk_ret_t Entity_ComponentsOfType_String(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String typeName(duk_require_string(ctx, 0));
+    String typeName = duk_require_string(ctx, 0);
     Entity::ComponentVector ret = thisObj->ComponentsOfType(typeName);
     PushWeakObjectVector(ctx, ret);
     return 1;
@@ -1193,11 +1211,12 @@ static duk_ret_t Entity_ComponentsOfType_String(duk_context* ctx)
 
 static duk_ret_t Entity_Clone_bool_bool_String_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     bool createAsLocal = duk_require_boolean(ctx, 0);
     bool createAsTemporary = duk_require_boolean(ctx, 1);
-    String cloneName(duk_require_string(ctx, 2));
-    AttributeChange::Type changeType = (AttributeChange::Type)(int)duk_require_number(ctx, 3);
+    String cloneName = numArgs > 2 ? duk_require_string(ctx, 2) : "";
+    AttributeChange::Type changeType = numArgs > 3 ? (AttributeChange::Type)(int)duk_require_number(ctx, 3) : AttributeChange::Default;
     EntityPtr ret = thisObj->Clone(createAsLocal, createAsTemporary, cloneName, changeType);
     PushWeakObject(ctx, ret);
     return 1;
@@ -1205,11 +1224,12 @@ static duk_ret_t Entity_Clone_bool_bool_String_AttributeChange__Type(duk_context
 
 static duk_ret_t Entity_SerializeToXMLString_bool_bool_bool_bool(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    bool serializeTemporary = duk_require_boolean(ctx, 0);
-    bool serializeLocal = duk_require_boolean(ctx, 1);
-    bool serializeChildren = duk_require_boolean(ctx, 2);
-    bool createSceneElement = duk_require_boolean(ctx, 3);
+    bool serializeTemporary = numArgs > 0 ? duk_require_boolean(ctx, 0) : false;
+    bool serializeLocal = numArgs > 1 ? duk_require_boolean(ctx, 1) : true;
+    bool serializeChildren = numArgs > 2 ? duk_require_boolean(ctx, 2) : true;
+    bool createSceneElement = numArgs > 3 ? duk_require_boolean(ctx, 3) : false;
     String ret = thisObj->SerializeToXMLString(serializeTemporary, serializeLocal, serializeChildren, createSceneElement);
     duk_push_string(ctx, ret.CString());
     return 1;
@@ -1218,7 +1238,7 @@ static duk_ret_t Entity_SerializeToXMLString_bool_bool_bool_bool(duk_context* ct
 static duk_ret_t Entity_SetName_String(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String name(duk_require_string(ctx, 0));
+    String name = duk_require_string(ctx, 0);
     thisObj->SetName(name);
     return 0;
 }
@@ -1234,7 +1254,7 @@ static duk_ret_t Entity_Name(duk_context* ctx)
 static duk_ret_t Entity_SetDescription_String(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String desc(duk_require_string(ctx, 0));
+    String desc = duk_require_string(ctx, 0);
     thisObj->SetDescription(desc);
     return 0;
 }
@@ -1250,16 +1270,17 @@ static duk_ret_t Entity_Description(duk_context* ctx)
 static duk_ret_t Entity_RemoveAction_String(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String name(duk_require_string(ctx, 0));
+    String name = duk_require_string(ctx, 0);
     thisObj->RemoveAction(name);
     return 0;
 }
 
 static duk_ret_t Entity_SetTemporary_bool_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     bool enable = duk_require_boolean(ctx, 0);
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
     thisObj->SetTemporary(enable, change);
     return 0;
 }
@@ -1330,57 +1351,63 @@ static duk_ret_t Entity_ParentScene(duk_context* ctx)
 
 static duk_ret_t Entity_AddChild_EntityPtr_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     SharedPtr<Entity> child(GetWeakObject<Entity>(ctx, 0));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
     thisObj->AddChild(child, change);
     return 0;
 }
 
 static duk_ret_t Entity_RemoveChild_EntityPtr_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     SharedPtr<Entity> child(GetWeakObject<Entity>(ctx, 0));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
     thisObj->RemoveChild(child, change);
     return 0;
 }
 
 static duk_ret_t Entity_RemoveAllChildren_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 0);
+    AttributeChange::Type change = numArgs > 0 ? (AttributeChange::Type)(int)duk_require_number(ctx, 0) : AttributeChange::Default;
     thisObj->RemoveAllChildren(change);
     return 0;
 }
 
 static duk_ret_t Entity_DetachChild_EntityPtr_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     SharedPtr<Entity> child(GetWeakObject<Entity>(ctx, 0));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
     thisObj->DetachChild(child, change);
     return 0;
 }
 
 static duk_ret_t Entity_SetParent_EntityPtr_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     SharedPtr<Entity> parent(GetWeakObject<Entity>(ctx, 0));
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
     thisObj->SetParent(parent, change);
     return 0;
 }
 
 static duk_ret_t Entity_CreateChild_entity_id_t_StringVector_AttributeChange__Type_bool_bool_bool(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    entity_id_t id = (entity_id_t)duk_require_number(ctx, 0);
-    StringVector components = GetStringVector(ctx, 1);
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
-    bool replicated = duk_require_boolean(ctx, 3);
-    bool componentsReplicated = duk_require_boolean(ctx, 4);
-    bool temporary = duk_require_boolean(ctx, 5);
+    entity_id_t id = numArgs > 0 ? (entity_id_t)duk_require_number(ctx, 0) : 0;
+    StringVector components = numArgs > 1 ? GetStringVector(ctx, 1) : StringVector();
+    AttributeChange::Type change = numArgs > 2 ? (AttributeChange::Type)(int)duk_require_number(ctx, 2) : AttributeChange::Default;
+    bool replicated = numArgs > 3 ? duk_require_boolean(ctx, 3) : true;
+    bool componentsReplicated = numArgs > 4 ? duk_require_boolean(ctx, 4) : true;
+    bool temporary = numArgs > 5 ? duk_require_boolean(ctx, 5) : false;
     EntityPtr ret = thisObj->CreateChild(id, components, change, replicated, componentsReplicated, temporary);
     PushWeakObject(ctx, ret);
     return 1;
@@ -1388,11 +1415,12 @@ static duk_ret_t Entity_CreateChild_entity_id_t_StringVector_AttributeChange__Ty
 
 static duk_ret_t Entity_CreateLocalChild_StringVector_AttributeChange__Type_bool_bool(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    StringVector components = GetStringVector(ctx, 0);
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    bool componentsReplicated = duk_require_boolean(ctx, 2);
-    bool temporary = duk_require_boolean(ctx, 3);
+    StringVector components = numArgs > 0 ? GetStringVector(ctx, 0) : StringVector();
+    AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
+    bool componentsReplicated = numArgs > 2 ? duk_require_boolean(ctx, 2) : false;
+    bool temporary = numArgs > 3 ? duk_require_boolean(ctx, 3) : false;
     EntityPtr ret = thisObj->CreateLocalChild(components, change, componentsReplicated, temporary);
     PushWeakObject(ctx, ret);
     return 1;
@@ -1433,9 +1461,10 @@ static duk_ret_t Entity_Child_uint(duk_context* ctx)
 
 static duk_ret_t Entity_ChildByName_String_bool(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    String name(duk_require_string(ctx, 0));
-    bool recursive = duk_require_boolean(ctx, 1);
+    String name = duk_require_string(ctx, 0);
+    bool recursive = numArgs > 1 ? duk_require_boolean(ctx, 1) : false;
     EntityPtr ret = thisObj->ChildByName(name, recursive);
     PushWeakObject(ctx, ret);
     return 1;
@@ -1443,8 +1472,9 @@ static duk_ret_t Entity_ChildByName_String_bool(duk_context* ctx)
 
 static duk_ret_t Entity_Children_bool(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    bool recursive = duk_require_boolean(ctx, 0);
+    bool recursive = numArgs > 0 ? duk_require_boolean(ctx, 0) : false;
     EntityVector ret = thisObj->Children(recursive);
     PushWeakObjectVector(ctx, ret);
     return 1;
@@ -1464,104 +1494,104 @@ static duk_ret_t Entity_ShouldBeSerialized_bool_bool_bool(duk_context* ctx)
 static duk_ret_t Entity_Component_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && duk_is_string(ctx, 0))
-        return Entity_Component_String(ctx);
-    if (numArgs == 1 && duk_is_number(ctx, 0))
-        return Entity_Component_u32(ctx);
     if (numArgs == 2 && duk_is_string(ctx, 0) && duk_is_string(ctx, 1))
         return Entity_Component_String_String(ctx);
     if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_string(ctx, 1))
         return Entity_Component_u32_String(ctx);
+    if (numArgs == 1 && duk_is_string(ctx, 0))
+        return Entity_Component_String(ctx);
+    if (numArgs == 1 && duk_is_number(ctx, 0))
+        return Entity_Component_u32(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Entity_GetOrCreateComponent_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 3 && duk_is_string(ctx, 0) && duk_is_number(ctx, 1) && duk_is_boolean(ctx, 2))
-        return Entity_GetOrCreateComponent_String_AttributeChange__Type_bool(ctx);
-    if (numArgs == 4 && duk_is_string(ctx, 0) && duk_is_string(ctx, 1) && duk_is_number(ctx, 2) && duk_is_boolean(ctx, 3))
-        return Entity_GetOrCreateComponent_String_String_AttributeChange__Type_bool(ctx);
-    if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_boolean(ctx, 2))
-        return Entity_GetOrCreateComponent_u32_AttributeChange__Type_bool(ctx);
-    if (numArgs == 4 && duk_is_number(ctx, 0) && duk_is_string(ctx, 1) && duk_is_number(ctx, 2) && duk_is_boolean(ctx, 3))
+    if (numArgs >= 2 && duk_is_number(ctx, 0) && duk_is_string(ctx, 1))
         return Entity_GetOrCreateComponent_u32_String_AttributeChange__Type_bool(ctx);
+    if (numArgs >= 2 && duk_is_string(ctx, 0) && duk_is_string(ctx, 1))
+        return Entity_GetOrCreateComponent_String_String_AttributeChange__Type_bool(ctx);
+    if (numArgs >= 1 && duk_is_string(ctx, 0))
+        return Entity_GetOrCreateComponent_String_AttributeChange__Type_bool(ctx);
+    if (numArgs >= 1 && duk_is_number(ctx, 0))
+        return Entity_GetOrCreateComponent_u32_AttributeChange__Type_bool(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Entity_GetOrCreateLocalComponent_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && duk_is_string(ctx, 0))
-        return Entity_GetOrCreateLocalComponent_String(ctx);
     if (numArgs == 2 && duk_is_string(ctx, 0) && duk_is_string(ctx, 1))
         return Entity_GetOrCreateLocalComponent_String_String(ctx);
+    if (numArgs == 1 && duk_is_string(ctx, 0))
+        return Entity_GetOrCreateLocalComponent_String(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Entity_CreateComponent_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 3 && duk_is_string(ctx, 0) && duk_is_number(ctx, 1) && duk_is_boolean(ctx, 2))
-        return Entity_CreateComponent_String_AttributeChange__Type_bool(ctx);
-    if (numArgs == 4 && duk_is_string(ctx, 0) && duk_is_string(ctx, 1) && duk_is_number(ctx, 2) && duk_is_boolean(ctx, 3))
-        return Entity_CreateComponent_String_String_AttributeChange__Type_bool(ctx);
-    if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_boolean(ctx, 2))
-        return Entity_CreateComponent_u32_AttributeChange__Type_bool(ctx);
-    if (numArgs == 4 && duk_is_number(ctx, 0) && duk_is_string(ctx, 1) && duk_is_number(ctx, 2) && duk_is_boolean(ctx, 3))
+    if (numArgs >= 2 && duk_is_number(ctx, 0) && duk_is_string(ctx, 1))
         return Entity_CreateComponent_u32_String_AttributeChange__Type_bool(ctx);
+    if (numArgs >= 2 && duk_is_string(ctx, 0) && duk_is_string(ctx, 1))
+        return Entity_CreateComponent_String_String_AttributeChange__Type_bool(ctx);
+    if (numArgs >= 1 && duk_is_string(ctx, 0))
+        return Entity_CreateComponent_String_AttributeChange__Type_bool(ctx);
+    if (numArgs >= 1 && duk_is_number(ctx, 0))
+        return Entity_CreateComponent_u32_AttributeChange__Type_bool(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Entity_CreateLocalComponent_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && duk_is_string(ctx, 0))
-        return Entity_CreateLocalComponent_String(ctx);
     if (numArgs == 2 && duk_is_string(ctx, 0) && duk_is_string(ctx, 1))
         return Entity_CreateLocalComponent_String_String(ctx);
+    if (numArgs == 1 && duk_is_string(ctx, 0))
+        return Entity_CreateLocalComponent_String(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Entity_AddComponent_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && duk_is_number(ctx, 1))
-        return Entity_AddComponent_ComponentPtr_AttributeChange__Type(ctx);
-    if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_number(ctx, 2))
+    if (numArgs >= 2 && duk_is_number(ctx, 0))
         return Entity_AddComponent_component_id_t_ComponentPtr_AttributeChange__Type(ctx);
+    if (numArgs >= 1)
+        return Entity_AddComponent_ComponentPtr_AttributeChange__Type(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Entity_RemoveComponent_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && duk_is_number(ctx, 1))
-        return Entity_RemoveComponent_ComponentPtr_AttributeChange__Type(ctx);
-    if (numArgs == 2 && duk_is_string(ctx, 0) && duk_is_number(ctx, 1))
-        return Entity_RemoveComponent_String_AttributeChange__Type(ctx);
-    if (numArgs == 3 && duk_is_string(ctx, 0) && duk_is_string(ctx, 1) && duk_is_number(ctx, 2))
+    if (numArgs >= 2 && duk_is_string(ctx, 0) && duk_is_string(ctx, 1))
         return Entity_RemoveComponent_String_String_AttributeChange__Type(ctx);
+    if (numArgs >= 1)
+        return Entity_RemoveComponent_ComponentPtr_AttributeChange__Type(ctx);
+    if (numArgs >= 1 && duk_is_string(ctx, 0))
+        return Entity_RemoveComponent_String_AttributeChange__Type(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Entity_RemoveComponents_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && duk_is_string(ctx, 0) && duk_is_number(ctx, 1))
-        return Entity_RemoveComponents_String_AttributeChange__Type(ctx);
-    if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
+    if (numArgs >= 1 && duk_is_number(ctx, 0))
         return Entity_RemoveComponents_u32_AttributeChange__Type(ctx);
+    if (numArgs >= 1 && duk_is_string(ctx, 0))
+        return Entity_RemoveComponents_String_AttributeChange__Type(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Entity_ComponentsOfType_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && duk_is_number(ctx, 0))
-        return Entity_ComponentsOfType_u32(ctx);
     if (numArgs == 1 && duk_is_string(ctx, 0))
         return Entity_ComponentsOfType_String(ctx);
+    if (numArgs == 1 && duk_is_number(ctx, 0))
+        return Entity_ComponentsOfType_u32(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -1571,7 +1601,7 @@ static const duk_function_list_entry Entity_Functions[] = {
     ,{"EmitEnterView", Entity_EmitEnterView_IComponent, 1}
     ,{"EmitLeaveView", Entity_EmitLeaveView_IComponent, 1}
     ,{"ChangeComponentId", Entity_ChangeComponentId_component_id_t_component_id_t, 2}
-    ,{"CreateComponentWithId", Entity_CreateComponentWithId_component_id_t_u32_String_AttributeChange__Type, 4}
+    ,{"CreateComponentWithId", Entity_CreateComponentWithId_component_id_t_u32_String_AttributeChange__Type, DUK_VARARGS}
     ,{"Components", Entity_Components, 0}
     ,{"NumComponents", Entity_NumComponents, 0}
     ,{"ComponentById", Entity_ComponentById_component_id_t, 1}
@@ -1582,18 +1612,18 @@ static const duk_function_list_entry Entity_Functions[] = {
     ,{"CreateLocalComponent", Entity_CreateLocalComponent_Selector, DUK_VARARGS}
     ,{"AddComponent", Entity_AddComponent_Selector, DUK_VARARGS}
     ,{"RemoveComponent", Entity_RemoveComponent_Selector, DUK_VARARGS}
-    ,{"RemoveComponentById", Entity_RemoveComponentById_component_id_t_AttributeChange__Type, 2}
+    ,{"RemoveComponentById", Entity_RemoveComponentById_component_id_t_AttributeChange__Type, DUK_VARARGS}
     ,{"RemoveComponents", Entity_RemoveComponents_Selector, DUK_VARARGS}
-    ,{"RemoveAllComponents", Entity_RemoveAllComponents_AttributeChange__Type, 1}
+    ,{"RemoveAllComponents", Entity_RemoveAllComponents_AttributeChange__Type, DUK_VARARGS}
     ,{"ComponentsOfType", Entity_ComponentsOfType_Selector, DUK_VARARGS}
-    ,{"Clone", Entity_Clone_bool_bool_String_AttributeChange__Type, 4}
-    ,{"SerializeToXMLString", Entity_SerializeToXMLString_bool_bool_bool_bool, 4}
+    ,{"Clone", Entity_Clone_bool_bool_String_AttributeChange__Type, DUK_VARARGS}
+    ,{"SerializeToXMLString", Entity_SerializeToXMLString_bool_bool_bool_bool, DUK_VARARGS}
     ,{"SetName", Entity_SetName_String, 1}
     ,{"Name", Entity_Name, 0}
     ,{"SetDescription", Entity_SetDescription_String, 1}
     ,{"Description", Entity_Description, 0}
     ,{"RemoveAction", Entity_RemoveAction_String, 1}
-    ,{"SetTemporary", Entity_SetTemporary_bool_AttributeChange__Type, 2}
+    ,{"SetTemporary", Entity_SetTemporary_bool_AttributeChange__Type, DUK_VARARGS}
     ,{"IsTemporary", Entity_IsTemporary, 0}
     ,{"IsLocal", Entity_IsLocal, 0}
     ,{"IsReplicated", Entity_IsReplicated, 0}
@@ -1602,19 +1632,19 @@ static const duk_function_list_entry Entity_Functions[] = {
     ,{"Id", Entity_Id, 0}
     ,{"GetFramework", Entity_GetFramework, 0}
     ,{"ParentScene", Entity_ParentScene, 0}
-    ,{"AddChild", Entity_AddChild_EntityPtr_AttributeChange__Type, 2}
-    ,{"RemoveChild", Entity_RemoveChild_EntityPtr_AttributeChange__Type, 2}
-    ,{"RemoveAllChildren", Entity_RemoveAllChildren_AttributeChange__Type, 1}
-    ,{"DetachChild", Entity_DetachChild_EntityPtr_AttributeChange__Type, 2}
-    ,{"SetParent", Entity_SetParent_EntityPtr_AttributeChange__Type, 2}
-    ,{"CreateChild", Entity_CreateChild_entity_id_t_StringVector_AttributeChange__Type_bool_bool_bool, 6}
-    ,{"CreateLocalChild", Entity_CreateLocalChild_StringVector_AttributeChange__Type_bool_bool, 4}
+    ,{"AddChild", Entity_AddChild_EntityPtr_AttributeChange__Type, DUK_VARARGS}
+    ,{"RemoveChild", Entity_RemoveChild_EntityPtr_AttributeChange__Type, DUK_VARARGS}
+    ,{"RemoveAllChildren", Entity_RemoveAllChildren_AttributeChange__Type, DUK_VARARGS}
+    ,{"DetachChild", Entity_DetachChild_EntityPtr_AttributeChange__Type, DUK_VARARGS}
+    ,{"SetParent", Entity_SetParent_EntityPtr_AttributeChange__Type, DUK_VARARGS}
+    ,{"CreateChild", Entity_CreateChild_entity_id_t_StringVector_AttributeChange__Type_bool_bool_bool, DUK_VARARGS}
+    ,{"CreateLocalChild", Entity_CreateLocalChild_StringVector_AttributeChange__Type_bool_bool, DUK_VARARGS}
     ,{"Parent", Entity_Parent, 0}
     ,{"HasParent", Entity_HasParent, 0}
     ,{"NumChildren", Entity_NumChildren, 0}
     ,{"Child", Entity_Child_uint, 1}
-    ,{"ChildByName", Entity_ChildByName_String_bool, 2}
-    ,{"Children", Entity_Children_bool, 1}
+    ,{"ChildByName", Entity_ChildByName_String_bool, DUK_VARARGS}
+    ,{"Children", Entity_Children_bool, DUK_VARARGS}
     ,{"ShouldBeSerialized", Entity_ShouldBeSerialized_bool_bool_bool, 3}
     ,{nullptr, nullptr, 0}
 };

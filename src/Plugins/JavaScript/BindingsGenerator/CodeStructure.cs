@@ -780,7 +780,7 @@ namespace BindingsGenerator
                             {
                                 p.type = GetXmlElementChildNodeValue(param, "type", true);
                                 p.name = GetXmlElementChildNodeValue(param, "declname");
-                                p.defaultValue = GetXmlElementChildNodeValue(param, "defval");
+                                p.defaultValue = GetXmlElementChildNodeValue(param, "defval", true);
                             }
                             member.parameters.Add(p);
                         }
