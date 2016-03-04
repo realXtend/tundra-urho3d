@@ -13,6 +13,7 @@ namespace BindingsGenerator
         public string functionName;
         public Symbol function;
         public List<Parameter> parameters;
+        public bool hasDefaultParameters;
     }
 
     struct Property
@@ -743,6 +744,17 @@ namespace BindingsGenerator
                     newOverload.functionName = functionName;
                     newOverload.function = child;
                     newOverload.parameters = child.parameters;
+                    newOverload.hasDefaultParameters = false;
+
+                    for (int i = 0; i < child.parameters.Count; ++i)
+                    {
+                        if (child.parameters[i].defaultValue != null && child.parameters[i].defaultValue.Length > 0)
+                        {
+                            newOverload.hasDefaultParameters = true;
+                            break;
+                        }
+                    }
+
                     overloads[baseFunctionName].Add(newOverload);
 
                     if (isClassCtor)
@@ -819,8 +831,23 @@ namespace BindingsGenerator
                     tw.WriteLine(Indent(1) + "int numArgs = duk_get_top(ctx);");
                     foreach (Overload o in kvp.Value)
                     {
-                        string argsCheck = "if (numArgs == " + o.parameters.Count;
+                        int paramCount = o.parameters.Count;
                         for (int i = 0; i < o.parameters.Count; ++i)
+                        {
+                            if (o.parameters[i].defaultValue != null && o.parameters[i].defaultValue.Length > 0)
+                            {
+                                paramCount = i;
+                                break;
+                            }
+                        }
+
+                        string argsCheck = "";
+                        if (paramCount == o.parameters.Count)
+                            argsCheck = "if (numArgs == " + paramCount;
+                        else
+                            argsCheck = "if (numArgs >= " + paramCount;
+
+                        for (int i = 0; i < paramCount; ++i)
                         {
                             string argCheck = GenerateArgCheck(o.parameters[i], i);
                             if (argCheck.Length > 0)
@@ -858,7 +885,7 @@ namespace BindingsGenerator
                 if (kvp.Value.Count >= 2)
                     tw.WriteLine(Indent(1) + prefix + "{\"" + kvp.Value[0].function.name + "\", " + kvp.Key + "_Selector, DUK_VARARGS}");
                 else
-                    tw.WriteLine(Indent(1) + prefix + "{\"" + kvp.Value[0].function.name + "\", " + kvp.Value[0].functionName + ", " + kvp.Value[0].parameters.Count + "}");
+                    tw.WriteLine(Indent(1) + prefix + "{\"" + kvp.Value[0].function.name + "\", " + kvp.Value[0].functionName + ", " + (kvp.Value[0].hasDefaultParameters ? "DUK_VARARGS" : kvp.Value[0].parameters.Count.ToString()) + "}");
 
                 first = false;
             }
