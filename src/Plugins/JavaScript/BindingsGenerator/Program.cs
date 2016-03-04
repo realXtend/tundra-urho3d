@@ -70,7 +70,7 @@ namespace BindingsGenerator
 
             foreach (Symbol classSymbol in s.symbolsByName.Values)
             {
-                if (classSymbol.kind == "class" && (exposeTheseClasses.Count == 0 || exposeTheseClasses.Contains(StripNamespace(classSymbol.name))))
+                if ((classSymbol.kind == "class" || classSymbol.kind == "struct") && (exposeTheseClasses.Count == 0 || exposeTheseClasses.Contains(StripNamespace(classSymbol.name))))
                 {
                     string typeName = SanitateTypeName(classSymbol.name);
 
@@ -98,7 +98,7 @@ namespace BindingsGenerator
 
             foreach (Symbol classSymbol in s.symbolsByName.Values)
             {
-                if (classSymbol.kind == "class")
+                if (classSymbol.kind == "class" || classSymbol.kind == "struct")
                 {
                     if (classNames.Contains(SanitateTypeName(classSymbol.name)))
                         GenerateClassBindings(classSymbol, outputDirectory);
@@ -121,7 +121,11 @@ namespace BindingsGenerator
             tw.WriteLine("#include \"CoreTypes.h\"");
             tw.WriteLine("#include \"JavaScriptInstance.h\"");
             tw.WriteLine("#include \"LoggingFunctions.h\"");
-            tw.WriteLine("#include \"" + FindIncludeForClass(classSymbol.name) + "\"");
+            {
+                string include = FindIncludeForClass(classSymbol.name);
+                if (include.Length > 0)
+                    tw.WriteLine("#include \"" + include + "\"");
+            }
             tw.WriteLine("");
             // Disable bool conversion warnings
             tw.WriteLine("#ifdef _MSC_VER");
@@ -135,7 +139,7 @@ namespace BindingsGenerator
             {
                 string include = FindIncludeForClass(s);
                 if (include.Length > 0)
-                    tw.WriteLine("#include \"" + FindIncludeForClass(s) + "\"");
+                    tw.WriteLine("#include \"" + include + "\"");
             }
             tw.WriteLine("");
 
@@ -193,6 +197,10 @@ namespace BindingsGenerator
         static string FindIncludeForClass(string name)
         {
             name = SanitateTypeName(name);
+            // Hack: these classes are in the same include file
+            if (name == "AssetReferenceList")
+                name = "AssetReference";
+
             if (classHeaderFiles.ContainsKey(name))
                 return classHeaderFiles[name];
             else
@@ -249,9 +257,9 @@ namespace BindingsGenerator
                     else
                     {
                         if (!IsRefCounted(templateType))
-                            return typeName + " " + varName + " = GetValueObjectVector<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
+                            return typeName + " " + varName + " = GetValueObjectVector<" + templateType + ">(ctx, " + stackIndex + ", " + ClassIdentifier(templateType) + ");";
                         else
-                            return typeName + " " + varName + " = GetWeakObjectVector<" + typeName + ">(ctx, " + stackIndex + ");";
+                            return typeName + " " + varName + " = GetWeakObjectVector<" + templateType + ">(ctx, " + stackIndex + ");";
                     }
                 }
 
@@ -608,7 +616,7 @@ namespace BindingsGenerator
                         tw.WriteLine("{");
                         tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
                         tw.WriteLine(Indent(1) + GenerateGetFromStack(child, 0, child.name));
-                        if (Symbol.IsPODType(child.type))
+                        if (Symbol.IsPODType(child.type) || child.type == "String" || child.type == "string" || child.type.Contains("Vector"))
                             tw.WriteLine(Indent(1) + "thisObj->" + child.name + " = " + child.name + ";");
                         else
                             tw.WriteLine(Indent(1) + "if (" + child.name + ") thisObj->" + child.name + " = *" + child.name + ";");
@@ -623,7 +631,7 @@ namespace BindingsGenerator
                         tw.WriteLine("static duk_ret_t " + className + "_Get_" + child.name + DukSignature());
                         tw.WriteLine("{");
                         tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
-                        if (Symbol.IsPODType(child.type) || IsRefCounted(child.type))
+                        if (Symbol.IsPODType(child.type) || IsRefCounted(child.type) || child.type == "String" || child.type == "string" || child.type.Contains("Vector"))
                             tw.WriteLine(Indent(1) + GeneratePushToStack(child, "thisObj->" + child.name));
                         else
                         {
@@ -1048,7 +1056,12 @@ namespace BindingsGenerator
             string t = SanitateTypeName(typeName);
             if (SanitateTypeName(classSymbol.name) == t)
                 return; // Do not add self as dependency
-                
+            if (t.EndsWith("Vector"))
+            {
+                string templateType = t.Substring(0, t.Length - 6);
+                t = SanitateTemplateType(templateType);
+            }
+
             if (!Symbol.IsPODType(t) && classNames.Contains(t))
                 dependencyNames.Add(t);
         }

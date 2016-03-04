@@ -12,6 +12,7 @@
 #endif
 
 #include "Scene/Scene.h"
+#include "Scene/Entity.h"
 #include "Scene/IComponent.h"
 #include "Framework/Framework.h"
 

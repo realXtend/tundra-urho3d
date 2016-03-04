@@ -128,4 +128,6 @@ struct TUNDRACORE_API AssetReferenceList
     String type;
 };
 
+typedef Vector<AssetReference> AssetReferenceVector;
+
 }

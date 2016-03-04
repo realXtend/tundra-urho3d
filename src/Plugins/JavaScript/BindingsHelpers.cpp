@@ -10,6 +10,7 @@
 #include "Math/float4.h"
 #include "Math/Quat.h"
 #include "Math/Transform.h"
+#include "Asset/AssetReference.h"
 
 #include <Urho3D/Core/StringUtils.h>
 
@@ -23,12 +24,16 @@ extern const char* float3_ID;
 extern const char* float4_ID;
 extern const char* Quat_ID;
 extern const char* Transform_ID;
+extern const char* AssetReference_ID;
+extern const char* AssetReferenceList_ID;
 
 duk_ret_t float2_Finalizer(duk_context* ctx);
 duk_ret_t float3_Finalizer(duk_context* ctx);
 duk_ret_t float4_Finalizer(duk_context* ctx);
 duk_ret_t Quat_Finalizer(duk_context* ctx);
 duk_ret_t Transform_Finalizer(duk_context* ctx);
+duk_ret_t AssetReference_Finalizer(duk_context* ctx);
+duk_ret_t AssetReferenceList_Finalizer(duk_context* ctx);
 
 const char* GetValueObjectType(duk_context* ctx, duk_idx_t stackIndex)
 {
@@ -381,6 +386,16 @@ void AssignAttributeValue(duk_context* ctx, duk_idx_t stackIndex, IAttribute* de
         if (duk_is_object(ctx, stackIndex) && GetValueObjectType(ctx, stackIndex) == Transform_ID)
             static_cast<Attribute<Transform>*>(destAttr)->Set(*GetValueObject<Transform>(ctx, stackIndex, nullptr), change);
         break;
+
+    case IAttribute::AssetReferenceId:
+        if (duk_is_object(ctx, stackIndex) && GetValueObjectType(ctx, stackIndex) == AssetReference_ID)
+            static_cast<Attribute<AssetReference>*>(destAttr)->Set(*GetValueObject<AssetReference>(ctx, stackIndex, nullptr), change);
+        break;
+
+    case IAttribute::AssetReferenceListId:
+        if (duk_is_object(ctx, stackIndex) && GetValueObjectType(ctx, stackIndex) == AssetReferenceList_ID)
+            static_cast<Attribute<AssetReferenceList>*>(destAttr)->Set(*GetValueObject<AssetReferenceList>(ctx, stackIndex, nullptr), change);
+        break;
     }
 }
 
@@ -429,6 +444,15 @@ void PushAttributeValue(duk_context* ctx, IAttribute* attr)
         case IAttribute::TransformId:
             PushValueObjectCopy<Transform>(ctx, static_cast<Attribute<Transform>*>(attr)->Get(), Transform_ID, Transform_Finalizer);
             return;
+
+        case IAttribute::AssetReferenceId:
+            PushValueObjectCopy<AssetReference>(ctx, static_cast<Attribute<AssetReference>*>(attr)->Get(), AssetReference_ID, AssetReference_Finalizer);
+            return;
+
+        case IAttribute::AssetReferenceListId:
+            PushValueObjectCopy<AssetReferenceList>(ctx, static_cast<Attribute<AssetReferenceList>*>(attr)->Get(), AssetReferenceList_ID, AssetReferenceList_Finalizer);
+            return;
+
             /// \todo More types
         }
     }

@@ -12,6 +12,7 @@
 #endif
 
 #include "Framework/Framework.h"
+#include "Asset/AssetReference.h"
 
 
 using namespace Tundra;
@@ -20,7 +21,9 @@ using namespace std;
 namespace JSBindings
 {
 
+extern const char* AssetReference_ID;
 
+duk_ret_t AssetReference_Finalizer(duk_context* ctx);
 
 const char* AssetAPI_ID = "AssetAPI";
 
@@ -847,6 +850,15 @@ static duk_ret_t AssetAPI_ResourceTypeForAssetRef_String(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t AssetAPI_ResourceTypeForAssetRef_AssetReference(duk_context* ctx)
+{
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    AssetReference* ref = GetCheckedValueObject<AssetReference>(ctx, 0, AssetReference_ID);
+    String ret = thisObj->ResourceTypeForAssetRef(*ref);
+    duk_push_string(ctx, ret.CString());
+    return 1;
+}
+
 static duk_ret_t AssetAPI_ResolveAssetRef_String_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
@@ -953,6 +965,16 @@ static duk_ret_t AssetAPI_EmitAssetDeletedFromStorage_String(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t AssetAPI_ResourceTypeForAssetRef_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 1 && duk_is_string(ctx, 0))
+        return AssetAPI_ResourceTypeForAssetRef_String(ctx);
+    if (numArgs == 1 && GetValueObject<AssetReference>(ctx, 0, AssetReference_ID))
+        return AssetAPI_ResourceTypeForAssetRef_AssetReference(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
 static duk_ret_t AssetAPI_ForgetAsset_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -1048,7 +1070,7 @@ static const duk_function_list_entry AssetAPI_Functions[] = {
     ,{"GenerateTemporaryNonexistingAssetFilename", AssetAPI_GenerateTemporaryNonexistingAssetFilename_String, 1}
     ,{"FindAsset", AssetAPI_FindAsset_String, 1}
     ,{"RemoveAssetStorage", AssetAPI_RemoveAssetStorage_String, 1}
-    ,{"ResourceTypeForAssetRef", AssetAPI_ResourceTypeForAssetRef_String, 1}
+    ,{"ResourceTypeForAssetRef", AssetAPI_ResourceTypeForAssetRef_Selector, DUK_VARARGS}
     ,{"ResolveAssetRef", AssetAPI_ResolveAssetRef_String_String, 2}
     ,{"ForgetAsset", AssetAPI_ForgetAsset_Selector, DUK_VARARGS}
     ,{"ForgetBundle", AssetAPI_ForgetBundle_String_bool, 2}

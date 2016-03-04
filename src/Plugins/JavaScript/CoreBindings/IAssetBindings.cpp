@@ -12,6 +12,7 @@
 #endif
 
 #include "Asset/AssetAPI.h"
+#include "Asset/AssetReference.h"
 
 
 using namespace Tundra;
@@ -20,7 +21,9 @@ using namespace std;
 namespace JSBindings
 {
 
+extern const char* AssetReference_ID;
 
+duk_ret_t AssetReference_Finalizer(duk_context* ctx);
 
 const char* IAsset_ID = "IAsset";
 
@@ -527,6 +530,22 @@ static duk_ret_t IAsset_DependencyLoaded_AssetPtr(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t IAsset_FindReferences(duk_context* ctx)
+{
+    IAsset* thisObj = GetThisWeakObject<IAsset>(ctx);
+    Vector< AssetReference > ret = thisObj->FindReferences();
+    PushValueObjectVector(ctx, ret, AssetReference_ID, AssetReference_Finalizer);
+    return 1;
+}
+
+static duk_ret_t IAsset_FindReferencesRecursive(duk_context* ctx)
+{
+    IAsset* thisObj = GetThisWeakObject<IAsset>(ctx);
+    Vector< AssetReference > ret = thisObj->FindReferencesRecursive();
+    PushValueObjectVector(ctx, ret, AssetReference_ID, AssetReference_Finalizer);
+    return 1;
+}
+
 static const duk_function_list_entry IAsset_Functions[] = {
     {"Type", IAsset_Type, 0}
     ,{"Name", IAsset_Name, 0}
@@ -548,6 +567,8 @@ static const duk_function_list_entry IAsset_Functions[] = {
     ,{"ToString", IAsset_ToString, 0}
     ,{"LoadCompleted", IAsset_LoadCompleted, 0}
     ,{"DependencyLoaded", IAsset_DependencyLoaded_AssetPtr, 1}
+    ,{"FindReferences", IAsset_FindReferences, 0}
+    ,{"FindReferencesRecursive", IAsset_FindReferencesRecursive, 0}
     ,{nullptr, nullptr, 0}
 };
 
