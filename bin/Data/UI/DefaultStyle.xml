@@ -148,6 +148,12 @@
             </element>
         </element>
     </element>
+    <element type="EditorDivider" style="BorderImage" auto="false">
+        <attribute name="Image Rect" value="144 32 160 43" />
+        <attribute name="Border" value="4 4 4 4" />
+        <attribute name="Min Size" value="0 11" />
+        <attribute name="Max Size" value="2147483647 11" />
+    </element>
 
     <!-- Base styles that get inherited and extended -->
 

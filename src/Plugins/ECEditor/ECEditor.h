@@ -11,12 +11,15 @@
 #include "ECEditorApi.h"
 #include "CoreStringUtils.h"
 #include "UserConnectedResponseData.h"
+#include "IAttribute.h"
 
 namespace Tundra
 {
 
 class SceneStructureWindow;
+class ECEditorWindow;
 typedef SharedPtr<SceneStructureWindow> SceneWindowPtr;
+typedef SharedPtr<ECEditorWindow> EditorWindowPtr;
 
 class ECEDITOR_API ECEditor : public IModule
 {
@@ -26,11 +29,17 @@ public:
     ECEditor(Framework* owner);
     ~ECEditor();
 
-private:
     void Initialize() override;
-    void Uninitialize() override;
 
-    SceneWindowPtr sceneEditor;
+    void OpenSceneEditor();
+    void OpenSceneEditor(Scene *scene);
+    void OpenEntityEditor(Entity *entity);
+
+private:
+    void OnSceneCreated(Scene *scene, AttributeChange::Type type);
+
+    SceneWindowPtr sceneEditor_;
+    EditorWindowPtr entityEditor_;
 };
 
 }

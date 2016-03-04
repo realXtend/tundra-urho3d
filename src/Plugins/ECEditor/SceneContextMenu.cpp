@@ -28,7 +28,6 @@ SceneContextMenu::SceneContextMenu(Context* context) :
     window_->SetStyle("Window", style);
     window_->SetName("SceneContextMenu");
     window_->SetMinWidth(150);
-    window_->SetMinHeight(67);
     window_->SetLayoutMode(LM_VERTICAL);
     window_->SetLayout(LM_VERTICAL, 4, IntRect(6, 6, 6, 6));
     window_->SetMovable(false);

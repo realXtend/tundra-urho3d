@@ -4,43 +4,258 @@
 
 #include "ECEditorWindow.h"
 #include "Framework.h"
+#include "Scene.h"
+#include "SceneAPI.h"
+#include "AttributeEditor.h"
 
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Engine/Engine.h>
+#include <Urho3D/UI/UIEvents.h>
+#include <Urho3D/Resource/ResourceCache.h>
+
+#include "LoggingFunctions.h"
+
+#include <Urho3D/UI/UI.h>
+#include <Urho3D/UI/UIElement.h>
+#include <Urho3D/UI/ListView.h>
+#include <Urho3D/UI/Text.h>
+#include <Urho3D/UI/Button.h>
+#include <Urho3D/UI/Window.h>
+
+using namespace Urho3D;
 
 namespace Tundra
 {
+
+ComponentContainer::ComponentContainer(Framework *framework, ComponentPtr component) :
+    Object(framework->GetContext()),
+    framework_(framework)
+{
+    XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/DefaultStyle.xml");
+
+    window_ = new Window(framework->GetContext());
+    window_->SetLayout(LayoutMode::LM_VERTICAL, 2, IntRect(8, 2, 8, 2));
+    window_->SetMinHeight(150);
+    window_->SetStyle("Window", style);
+    window_->SetMovable(false);
+
+    {
+        UIElement *topBar = new UIElement(framework->GetContext());
+        topBar->SetMinHeight(22);
+        topBar->SetMaxHeight(22);
+        window_->AddChild(topBar);
+
+        {
+            header_ = new Text(framework->GetContext());
+            header_->SetStyle("Text", style);
+            header_->SetName("WindowHeader");
+            header_->SetText("Transform");
+            header_->SetAlignment(HA_LEFT, VA_CENTER);
+            header_->SetPosition(IntVector2(3, 0));
+            topBar->AddChild(header_);
+        }
+    }
+
+    list_ = new ListView(framework->GetContext());
+    list_->SetName("HierarchyList");
+    list_->SetHighlightMode(HighlightMode::HM_ALWAYS);
+    list_->SetStyle("ListView", style);
+    window_->AddChild(list_);
+
+    {
+        AttributeVector attributes = component->Attributes();
+        for (unsigned int i = 0; i < attributes.Size(); ++i)
+        {
+            IAttributeEditor *editor = CreateAttributeEditor(framework_, attributes[i]);
+            if (editor)
+            {
+                attributeEditors_[i] = editor;
+                list_->AddItem(editor->Widget());
+            }
+        }
+    }
+
+    window_->SetEnabled(false);
+}
+
+ComponentContainer::~ComponentContainer()
+{
+    for (unsigned int i = 0; i < attributeEditors_.Values().Size(); ++i)
+        attributeEditors_.Values()[i].Reset();
+}
+
+void ComponentContainer::SetTitleText(const String &text)
+{
+    if (header_)
+        header_->SetText(text);
+}
+
+String ComponentContainer::TitleText() const
+{
+    if (header_)
+        return header_->GetText();
+    return "";
+}
+
+UIElement *ComponentContainer::Widget() const
+{
+    return window_;
+}
+
+IAttributeEditor *ComponentContainer::CreateAttributeEditor(Framework *framework, IAttribute *attribute)
+{
+    IAttributeEditor *editor = 0;
+    u32 type = attribute->TypeId();
+    switch (type)
+    {
+    case IAttribute::TypeId::StringId:
+        editor = new AttributeEditor<String>(framework);
+        break;
+    case IAttribute::TypeId::Float3Id:
+        editor = new AttributeEditor<Vector3>(framework);
+        break;
+    case IAttribute::TypeId::BoolId:
+        editor = new AttributeEditor<bool>(framework);
+        break;
+    case IAttribute::TypeId::TransformId:
+        editor = new AttributeEditor<Transform>(framework);
+        break;
+    }
+
+    if (editor != NULL)
+        editor->SetTitle(attribute->Name());
+
+    return editor;
+}
 
 ECEditorWindow::ECEditorWindow(Framework *framework) :
     Object(framework->GetContext()),
     framework_(framework)
 {
+    XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/DefaultStyle.xml");
+
+    window_ = new Window(framework->GetContext());
+    window_->SetLayout(LayoutMode::LM_VERTICAL, 2, IntRect(2, 2, 2, 2));
+    window_->SetSize(IntVector2(300, 500));
+    window_->SetMinSize(IntVector2(300, 500));
+    window_->SetStyle("Window", style);
+    window_->SetMovable(true);
+    window_->SetResizable(true);
+    GetSubsystem<UI>()->GetRoot()->AddChild(window_);
+
+    {
+        UIElement *topBar = new UIElement(framework->GetContext());
+        topBar->SetMinHeight(22);
+        topBar->SetMaxHeight(22);
+        window_->AddChild(topBar);
+
+        {
+            Button *button = new Button(framework->GetContext());
+            button->SetName("CloseButton");
+            button->SetStyle("CloseButton", style);
+            button->SetAlignment(HA_RIGHT, VA_CENTER);
+            button->SetPosition(IntVector2(-3, 0));
+            topBar->AddChild(button);
+
+            Text *windowHeader = new Text(framework->GetContext());
+            windowHeader->SetStyle("Text", style);
+            windowHeader->SetName("WindowHeader");
+            windowHeader->SetText("Attribute Inspector");
+            windowHeader->SetAlignment(HA_LEFT, VA_CENTER);
+            windowHeader->SetPosition(IntVector2(3, 0));
+            topBar->AddChild(windowHeader);
+        }
+    }
+
+    list_ = new ListView(framework->GetContext());
+    list_->SetName("HierarchyList");
+    list_->SetHighlightMode(HighlightMode::HM_ALWAYS);
+    list_->SetStyle("ListView", style);
+    window_->AddChild(list_);
+
+    {
         
+    }
 }
 
 ECEditorWindow::~ECEditorWindow()
 {
-    
+    LogWarning("ECEditorWindow");
+    Clear();
+    if (window_)
+        window_->Remove();
+    window_.Reset();
+}
+
+void ECEditorWindow::Show()
+{
+    window_->SetVisible(true);
+}
+
+void ECEditorWindow::Hide()
+{
+    window_->SetVisible(false);
+}
+
+void ECEditorWindow::AddEntity(EntityPtr entity, bool updateUi)
+{
+    if (!entity)
+        return;
+
+    entities_[entity->Id()] = EntityWeakPtr(entity);
+    if (updateUi)
+        Refresh();
 }
 
 void ECEditorWindow::AddEntity(entity_id_t id, bool updateUi)
 {
-
+    EntityPtr entity = framework_->Scene()->MainCameraScene()->EntityById(id);
+    if (entity != NULL)
+        AddEntity(entity, updateUi);
 }
 
 void ECEditorWindow::RemoveEntity(entity_id_t id, bool updateUi)
 {
-
+    if (entities_.Contains(id))
+    {
+        entities_.Erase(id);
+    }
+    Refresh();
 }
 
 void ECEditorWindow::Clear()
 {
-
+    for (unsigned int i = 0; i < containers_.Values().Size(); ++i)
+    {
+        containers_.Values()[i].Reset();
+    }
+    containers_.Clear();
 }
 
 void ECEditorWindow::Refresh()
 {
+    Clear();
 
+    Entity *entity = entities_.Values()[0];
+    Entity::ComponentMap components = entity->Components();
+    ComponentContainer *container = 0;
+    ComponentPtr comp;
+    for (unsigned int i = 0; i < components.Values().Size(); ++i)
+    {
+        comp = components.Values()[i];
+        if (comp == NULL)
+            continue;
+
+        container = new ComponentContainer(framework_, comp);
+        container->SetTitleText(comp->GetTypeName());
+        list_->AddItem(container->Widget());
+        containers_[comp] = container;
+    }
+}
+
+UIElement *ECEditorWindow::Widget() const
+{
+    return window_;
 }
 
 }

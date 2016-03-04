@@ -30,6 +30,7 @@ namespace Tundra
 class Scene;
 class Entity;
 class IComponent;
+class IModule;
 
 class TreeView;
 class SceneStructureItem;
@@ -38,6 +39,7 @@ class ECEditorCommandStack;
 class AddComponentDialog;
 class AddEntityDialog;
 
+typedef WeakPtr<IModule> ModuleWeakPtr;
 typedef WeakPtr<Entity> EntityWeakPtr;
 typedef WeakPtr<IComponent> ComponentWeakPtr;
 
@@ -63,7 +65,7 @@ public:
         ObjectWeakPtr object_;
     };
 
-    SceneStructureWindow(Framework *framework);
+    explicit SceneStructureWindow(Framework *framework, IModule *owner);
     virtual ~SceneStructureWindow();
 
     /// Sets new scene to be shown in the tree view.
@@ -86,7 +88,6 @@ protected:
     SceneStructureItem *FindItem(UIElement *element);
     SceneStructureItem *CreateItem(Object *obj, const String &text, SceneStructureItem *parent = 0);
 
-    void OnSceneCreated(Scene* scene, Tundra::AttributeChange::Type change);
     void OnEntityCreated(Entity* entity, AttributeChange::Type change);
     void OnComponentCreated(IComponent* component, AttributeChange::Type change);
 
@@ -97,8 +98,11 @@ protected:
     void HideContextMenu();
     void ShowContextMenu(Object *obj, int x, int y);
 
+    void EditSelection();
+
     // Events
     void OnTogglePressed(SceneStructureItem *item);
+    void OnElementClicked(StringHash eventType, VariantMap &eventData);
     void OnItemClicked(StringHash eventType, VariantMap &eventData);
     void OnItemDoubleClicked(StringHash eventType, VariantMap &eventData);
     void OnContextMenuHide(StringHash eventType, VariantMap &eventData);
@@ -130,6 +134,8 @@ private:
 
     Vector<EntityWeakPtr> selectedEntities_;
     Vector<ComponentWeakPtr> selectedComponents_;
+
+    ModuleWeakPtr owner_;
 };
 
 }

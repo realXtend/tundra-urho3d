@@ -11,6 +11,7 @@
 #include "AddComponentDialog.h"
 #include "AddEntityDialog.h"
 #include "SceneAPI.h"
+#include "ECEditor.h"
 
 #include <Urho3D/Engine/Engine.h>
 #include <Urho3D/UI/UIEvents.h>
@@ -32,8 +33,9 @@ using namespace Urho3D;
 namespace Tundra
 {
 
-SceneStructureWindow::SceneStructureWindow(Framework *framework) :
+SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module) :
     Object(framework->GetContext()),
+    owner_(module),
     framework_(framework)
 {
     XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/DefaultStyle.xml");
@@ -74,6 +76,7 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework) :
     }
 
     listView_ = new ListView(framework->GetContext());
+    listView_->SetName("SceneHierarchyList");
     listView_->SetStyle("HierarchyListView", style);
     listView_->SetMultiselect(true);
     listView_->SetEnabled(true);
@@ -83,6 +86,7 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework) :
     SubscribeToEvent(listView_, E_ITEMDOUBLECLICKED, URHO3D_HANDLER(SceneStructureWindow, OnItemDoubleClicked));
     SubscribeToEvent(listView_, E_ITEMCLICKED, URHO3D_HANDLER(SceneStructureWindow, OnItemClicked));
     SubscribeToEvent(listView_, E_SELECTIONCHANGED, URHO3D_HANDLER(SceneStructureWindow, OnSelectionChanged));
+    SubscribeToEvent(E_UIMOUSECLICK, URHO3D_HANDLER(SceneStructureWindow, OnElementClicked));
 
     {
         UIElement *bottomBar = new UIElement(framework->GetContext());
@@ -136,8 +140,6 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework) :
     addEntityDialog_ = AddEntityDialogPtr(new AddEntityDialog(framework_));
     addEntityDialog_->DialogClosed.Connect(this, &SceneStructureWindow::OnEntityDialogClosed);
     addEntityDialog_->Hide();
-
-    framework->Scene()->SceneCreated.Connect(this, &SceneStructureWindow::OnSceneCreated);
 }
 
 SceneStructureWindow::~SceneStructureWindow()
@@ -157,7 +159,7 @@ SceneStructureWindow::~SceneStructureWindow()
 
 SceneStructureItem *SceneStructureWindow::CreateItem(Object *obj, const String &text, SceneStructureItem *parent)
 {
-    SceneStructureItem *item = new SceneStructureItem(context_);
+    SceneStructureItem *item = new SceneStructureItem(context_, listView_);
     if (parent == NULL)
     {
         listView_->InsertItem(listView_->GetNumItems(), item->Widget());
@@ -209,9 +211,26 @@ void SceneStructureWindow::OnTogglePressed(SceneStructureItem *item)
     }
 }
 
+void SceneStructureWindow::OnElementClicked(StringHash /*eventType*/, VariantMap &eventData)
+{
+    if (eventData[Urho3D::MouseButtonDown::P_BUTTON].GetInt() != 4)
+        return;
+
+    UIElement *element = dynamic_cast<UIElement*>(eventData["Element"].GetPtr());
+    if (element != NULL && element->GetParent() != NULL)
+        element = element->GetParent();
+
+    if (element == listView_)
+    {
+        ClearSelection();
+        Urho3D::Input* input = GetSubsystem<Urho3D::Input>();
+        ShowContextMenu(element, input->GetMousePosition().x_, input->GetMousePosition().y_);
+    }
+}
+
 void SceneStructureWindow::OnItemClicked(StringHash /*eventType*/, VariantMap &eventData)
 {
-    UIElement *item = dynamic_cast<Text*>(eventData["Item"].GetPtr());
+    UIElement *item = dynamic_cast<UIElement*>(eventData["Item"].GetPtr());
     if (item != NULL)
     {
         int button = eventData[Urho3D::MouseButtonDown::P_BUTTON].GetInt();
@@ -225,14 +244,11 @@ void SceneStructureWindow::OnItemClicked(StringHash /*eventType*/, VariantMap &e
             listView_->SetSelection(listView_->FindItem(item));
             SceneStructureItem *strucutureItem = FindItem(item);
             Object *data = strucutureItem->Data();
+
             if (IComponent *c = dynamic_cast<IComponent*>(data))
-            {
                 SelectComponent(c);
-            }
             else if (Entity *e = dynamic_cast<Entity*>(data))
-            {
                 SelectEntity(e);
-            }
 
 
             if (strucutureItem != NULL)
@@ -316,20 +332,10 @@ void SceneStructureWindow::OnEntityDialogClosed(AddEntityDialog *dialog, bool co
     entity->SetName(name);
 }
 
-void SceneStructureWindow::OnSceneCreated(Scene* /*scene*/, AttributeChange::Type /*change*/)
-{
-    SceneMap scenes = framework_->Scene()->Scenes();
-    if (scenes.Values().Size() > 0)
-        SetShownScene(scenes.Values()[0]);
-}
-
 void SceneStructureWindow::SetShownScene(Scene *newScene)
 {
     scene_ = newScene;
     Clear();
-    if (scene_ == NULL)
-        return;
-
     RefreshView();
 }
 
@@ -391,15 +397,31 @@ void SceneStructureWindow::ShowContextMenu(Object *obj, int x, int y)
     }
     else if (dynamic_cast<Entity*>(obj) != NULL)
     {
-        Menu *m = contextMenu_->CreateItem("addEntity", "New Entity...");
-        m = contextMenu_->CreateItem("removeEntity", "Remove");
+        Menu *m = contextMenu_->CreateItem("removeEntity", "Remove");
+        m = contextMenu_->CreateItem("addEntity", "New Entity...");
         m = contextMenu_->CreateItem("addComponent", "New Component");
         m = contextMenu_->CreateItem("editEntity", "Edit");
+    }
+    else
+    {
+        Menu *m = contextMenu_->CreateItem("addEntity", "New Entity...");
     }
 
     contextMenu_->Widget()->SetPosition(x, y);
     contextMenu_->Widget()->BringToFront();
     contextMenu_->Open();
+}
+
+void SceneStructureWindow::EditSelection()
+{
+    if (selectedEntities_.Size() == 0)
+        return;
+
+    ECEditor *editor = dynamic_cast<ECEditor*>(owner_.Get());
+    if (editor)
+    {
+        editor->OpenEntityEditor(selectedEntities_[0]);
+    }
 }
 
 void SceneStructureWindow::Clear()
@@ -413,7 +435,8 @@ void SceneStructureWindow::Clear()
     }
     listItems_.Clear();
 
-    scene_->EntityCreated.Disconnect(this, &SceneStructureWindow::OnEntityCreated);
+    if (scene_ != NULL)
+        scene_->EntityCreated.Disconnect(this, &SceneStructureWindow::OnEntityCreated);
 }
 
 void SceneStructureWindow::RefreshView()
@@ -479,6 +502,10 @@ void SceneStructureWindow::OnActionSelected(SceneContextMenu *contextMenu, Strin
         for (unsigned int i = 0; i < selectedEntities_.Size(); i++)
             selectedEntities_[i]->ParentScene()->RemoveEntity(selectedEntities_[i]->Id());
     }
+    else if (id == "editEntity")
+    {
+        EditSelection();
+    }
     else if (id == "addComponent")
     {
         addComponentDialog_->Show();
@@ -486,6 +513,7 @@ void SceneStructureWindow::OnActionSelected(SceneContextMenu *contextMenu, Strin
         pos.x_ += 100;
         addComponentDialog_->Widget()->SetPosition(pos);
     }
+    
     RefreshView();
 }
 

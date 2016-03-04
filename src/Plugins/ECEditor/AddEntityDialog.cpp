@@ -204,6 +204,8 @@ AddEntityDialog::AddEntityDialog(Framework *framework) :
             SubscribeToEvent(button, E_RELEASED, URHO3D_HANDLER(AddEntityDialog, OnButtonPressed));
         }
     }
+
+    GetSubsystem<UI>()->SetFocusElement(nameLineEdit_);
 }
 
 AddEntityDialog::~AddEntityDialog()

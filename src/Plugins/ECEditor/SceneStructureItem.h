@@ -19,6 +19,8 @@ namespace Urho3D
     class Text;
     class Button;
     class UIElement;
+    class ListView;
+    class XMLFile;
 }
 
 using namespace Urho3D;
@@ -31,6 +33,7 @@ class SceneStructureWindow;
 typedef WeakPtr<Button> ButtonWeakPtr;
 typedef WeakPtr<Text> TextWeakPtr;
 typedef WeakPtr<Object> ObjectWeakPtr;
+typedef WeakPtr<ListView> ListViewWeakPtr;
 
 class ECEDITOR_API SceneStructureItem : public Object
 {
@@ -44,7 +47,7 @@ public:
         Attribute
     };
 
-    SceneStructureItem(Context* context);
+    SceneStructureItem(Context *context, ListView *list);
     virtual ~SceneStructureItem();
 
     void SetText(const String &text);
@@ -59,12 +62,16 @@ public:
 
     void SetColor(Color color);
 
+    void Refresh();
+
     Signal1<SceneStructureItem* ARG(SceneStructureItem)> OnTogglePressed;
 
 protected:
 
     void OnItemPressed(StringHash eventType, VariantMap& eventData);
     
+    XMLFile *style_;
+    ListViewWeakPtr list_;
     TextWeakPtr text_;
     ButtonWeakPtr toggleButton_;
     ItemType type_;

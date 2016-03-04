@@ -242,6 +242,8 @@ AddComponentDialog::AddComponentDialog(Framework *framework) :
             SubscribeToEvent(button, E_RELEASED, URHO3D_HANDLER(AddComponentDialog, OnButtonPressed));
         }
     }
+
+    GetSubsystem<UI>()->SetFocusElement(nameLineEdit_);
 }
 
 AddComponentDialog::~AddComponentDialog()

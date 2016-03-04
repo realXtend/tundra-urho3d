@@ -15,22 +15,26 @@
 #include <Urho3D/UI/UIElement.h>
 #include <Urho3D/UI/Text.h>
 #include <Urho3D/UI/Button.h>
+#include <Urho3D/UI/ListView.h>
 
 namespace Tundra
 {
 
-SceneStructureItem::SceneStructureItem(Context* context) :
+SceneStructureItem::SceneStructureItem(Context* context, ListView *list) :
     Object(context)
 {
-    XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/DefaultStyle.xml");
+    list_ = ListViewWeakPtr(list);
+    style_ = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/DefaultStyle.xml");
 
     text_ = new Text(context_);
-    text_->SetStyle("FileSelectorListText", style);
+    text_->SetStyle("FileSelectorListText", style_);
 
     toggleButton_ = new Button(context_);
-    toggleButton_->SetStyle("HierarchyArrowDown", style);
+    toggleButton_->SetStyle("HierarchyArrowDown", style_);
     toggleButton_->SetPosition(IntVector2(0, 0));
+    toggleButton_->SetVisible(false);
     SubscribeToEvent(toggleButton_, E_RELEASED, URHO3D_HANDLER(SceneStructureItem, OnItemPressed));
+
     text_->AddChild(toggleButton_);
 }
 
@@ -90,6 +94,18 @@ Object *SceneStructureItem::Data() const
 void SceneStructureItem::SetColor(Color color)
 {
     text_->SetColor(color);
+}
+
+void SceneStructureItem::Refresh()
+{
+    if (list_.NotNull())
+    {
+        bool expanded = list_->IsExpanded(list_->FindItem(text_));
+        if (expanded)
+            toggleButton_->SetStyle("HierarchyArrowDown", style_);
+        else
+            toggleButton_->SetStyle("HierarchyArrowRight", style_);
+    }
 }
 
 void SceneStructureItem::SetText(const String &text)
