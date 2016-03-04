@@ -3,7 +3,8 @@
 
 #include "StableHeaders.h"
 #include "CoreTypes.h"
-#include "BindingsHelpers.h"
+#include "JavaScriptInstance.h"
+#include "LoggingFunctions.h"
 #include "Algorithm/Random/LCG.h"
 
 #ifdef _MSC_VER

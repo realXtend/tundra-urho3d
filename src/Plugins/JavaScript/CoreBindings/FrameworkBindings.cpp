@@ -3,15 +3,18 @@
 
 #include "StableHeaders.h"
 #include "CoreTypes.h"
-#include "BindingsHelpers.h"
+#include "JavaScriptInstance.h"
+#include "LoggingFunctions.h"
 #include "Framework/Framework.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4800)
 #endif
 
+#include "Framework/ConfigAPI.h"
 #include "Framework/FrameAPI.h"
 #include "Scene/SceneAPI.h"
+#include "Asset/AssetAPI.h"
 
 
 using namespace Tundra;
@@ -23,6 +26,117 @@ namespace JSBindings
 
 
 const char* Framework_ID = "Framework";
+
+const char* SignalWrapper_Framework_ExitRequested_ID = "SignalWrapper_Framework_ExitRequested";
+
+class SignalWrapper_Framework_ExitRequested
+{
+public:
+    SignalWrapper_Framework_ExitRequested(Object* owner, Signal0< void >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal0< void >* signal_;
+};
+
+class SignalReceiver_Framework_ExitRequested : public SignalReceiver
+{
+public:
+    void OnSignal()
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        duk_pop(ctx);
+    }
+};
+
+duk_ret_t SignalWrapper_Framework_ExitRequested_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Framework_ExitRequested* obj = GetValueObject<SignalWrapper_Framework_ExitRequested>(ctx, 0, SignalWrapper_Framework_ExitRequested_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Framework_ExitRequested_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Framework_ExitRequested_Connect(duk_context* ctx)
+{
+    SignalWrapper_Framework_ExitRequested* wrapper = GetThisValueObject<SignalWrapper_Framework_ExitRequested>(ctx, SignalWrapper_Framework_ExitRequested_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_Framework_ExitRequested* receiver = new SignalReceiver_Framework_ExitRequested();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_Framework_ExitRequested::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_ConnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Framework_ExitRequested_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_Framework_ExitRequested* wrapper = GetThisValueObject<SignalWrapper_Framework_ExitRequested>(ctx, SignalWrapper_Framework_ExitRequested_ID);
+    if (!wrapper->owner_) return 0;
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    if (duk_get_boolean(ctx, -1))
+    {
+        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+        signalReceivers.Erase(wrapper->signal_);
+    }
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Framework_ExitRequested_Emit(duk_context* ctx)
+{
+    SignalWrapper_Framework_ExitRequested* wrapper = GetThisValueObject<SignalWrapper_Framework_ExitRequested>(ctx, SignalWrapper_Framework_ExitRequested_ID);
+    if (!wrapper->owner_) return 0;
+    wrapper->signal_->Emit();
+    return 0;
+}
+
+static duk_ret_t Framework_Get_ExitRequested(duk_context* ctx)
+{
+    Framework* thisObj = GetThisWeakObject<Framework>(ctx);
+    SignalWrapper_Framework_ExitRequested* wrapper = new SignalWrapper_Framework_ExitRequested(thisObj, &thisObj->ExitRequested);
+    PushValueObject(ctx, wrapper, SignalWrapper_Framework_ExitRequested_ID, SignalWrapper_Framework_ExitRequested_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Framework_ExitRequested_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Framework_ExitRequested_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Framework_ExitRequested_Emit, 0);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
 
 static duk_ret_t Framework_ParseWildCardFilename_String(duk_context* ctx)
 {
@@ -88,6 +202,14 @@ static duk_ret_t Framework_IsHeadless(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Framework_Config(duk_context* ctx)
+{
+    Framework* thisObj = GetThisWeakObject<Framework>(ctx);
+    ConfigAPI * ret = thisObj->Config();
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t Framework_Frame(duk_context* ctx)
 {
     Framework* thisObj = GetThisWeakObject<Framework>(ctx);
@@ -100,6 +222,14 @@ static duk_ret_t Framework_Scene(duk_context* ctx)
 {
     Framework* thisObj = GetThisWeakObject<Framework>(ctx);
     SceneAPI * ret = thisObj->Scene();
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Framework_Asset(duk_context* ctx)
+{
+    Framework* thisObj = GetThisWeakObject<Framework>(ctx);
+    AssetAPI * ret = thisObj->Asset();
     PushWeakObject(ctx, ret);
     return 1;
 }
@@ -141,8 +271,10 @@ static const duk_function_list_entry Framework_Functions[] = {
     ,{"ForceExit", Framework_ForceExit, 0}
     ,{"CancelExit", Framework_CancelExit, 0}
     ,{"IsHeadless", Framework_IsHeadless, 0}
+    ,{"Config", Framework_Config, 0}
     ,{"Frame", Framework_Frame, 0}
     ,{"Scene", Framework_Scene, 0}
+    ,{"Asset", Framework_Asset, 0}
     ,{nullptr, nullptr, 0}
 };
 
@@ -160,6 +292,7 @@ void Expose_Framework(duk_context* ctx)
     duk_put_function_list(ctx, -1, Framework_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Framework_Functions);
+    DefineProperty(ctx, "exitRequested", Framework_Get_ExitRequested, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Framework_ID);
 }

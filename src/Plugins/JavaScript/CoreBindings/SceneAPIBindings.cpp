@@ -3,7 +3,8 @@
 
 #include "StableHeaders.h"
 #include "CoreTypes.h"
-#include "BindingsHelpers.h"
+#include "JavaScriptInstance.h"
+#include "LoggingFunctions.h"
 #include "Scene/SceneAPI.h"
 
 #ifdef _MSC_VER
@@ -24,6 +25,360 @@ namespace JSBindings
 
 
 const char* SceneAPI_ID = "SceneAPI";
+
+const char* SignalWrapper_SceneAPI_SceneCreated_ID = "SignalWrapper_SceneAPI_SceneCreated";
+
+class SignalWrapper_SceneAPI_SceneCreated
+{
+public:
+    SignalWrapper_SceneAPI_SceneCreated(Object* owner, Signal2< Scene *, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal2< Scene *, AttributeChange::Type >* signal_;
+};
+
+class SignalReceiver_SceneAPI_SceneCreated : public SignalReceiver
+{
+public:
+    void OnSignal(Scene * param0, AttributeChange::Type param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        duk_push_number(ctx, param1);
+        duk_put_prop_index(ctx, -2, 1);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        duk_pop(ctx);
+    }
+};
+
+duk_ret_t SignalWrapper_SceneAPI_SceneCreated_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_SceneCreated* obj = GetValueObject<SignalWrapper_SceneAPI_SceneCreated>(ctx, 0, SignalWrapper_SceneAPI_SceneCreated_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_SceneAPI_SceneCreated_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_SceneAPI_SceneCreated_Connect(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_SceneCreated* wrapper = GetThisValueObject<SignalWrapper_SceneAPI_SceneCreated>(ctx, SignalWrapper_SceneAPI_SceneCreated_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_SceneAPI_SceneCreated* receiver = new SignalReceiver_SceneAPI_SceneCreated();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_SceneAPI_SceneCreated::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_ConnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_SceneAPI_SceneCreated_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_SceneCreated* wrapper = GetThisValueObject<SignalWrapper_SceneAPI_SceneCreated>(ctx, SignalWrapper_SceneAPI_SceneCreated_ID);
+    if (!wrapper->owner_) return 0;
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    if (duk_get_boolean(ctx, -1))
+    {
+        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+        signalReceivers.Erase(wrapper->signal_);
+    }
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_SceneAPI_SceneCreated_Emit(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_SceneCreated* wrapper = GetThisValueObject<SignalWrapper_SceneAPI_SceneCreated>(ctx, SignalWrapper_SceneAPI_SceneCreated_ID);
+    if (!wrapper->owner_) return 0;
+    Scene* param0 = GetWeakObject<Scene>(ctx, 0);
+    AttributeChange::Type param1 = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    wrapper->signal_->Emit(param0, param1);
+    return 0;
+}
+
+static duk_ret_t SceneAPI_Get_SceneCreated(duk_context* ctx)
+{
+    SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
+    SignalWrapper_SceneAPI_SceneCreated* wrapper = new SignalWrapper_SceneAPI_SceneCreated(thisObj, &thisObj->SceneCreated);
+    PushValueObject(ctx, wrapper, SignalWrapper_SceneAPI_SceneCreated_ID, SignalWrapper_SceneAPI_SceneCreated_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneCreated_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneCreated_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneCreated_Emit, 2);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID = "SignalWrapper_SceneAPI_SceneAboutToBeRemoved";
+
+class SignalWrapper_SceneAPI_SceneAboutToBeRemoved
+{
+public:
+    SignalWrapper_SceneAPI_SceneAboutToBeRemoved(Object* owner, Signal2< Scene *, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal2< Scene *, AttributeChange::Type >* signal_;
+};
+
+class SignalReceiver_SceneAPI_SceneAboutToBeRemoved : public SignalReceiver
+{
+public:
+    void OnSignal(Scene * param0, AttributeChange::Type param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        duk_push_number(ctx, param1);
+        duk_put_prop_index(ctx, -2, 1);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        duk_pop(ctx);
+    }
+};
+
+duk_ret_t SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_SceneAboutToBeRemoved* obj = GetValueObject<SignalWrapper_SceneAPI_SceneAboutToBeRemoved>(ctx, 0, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Connect(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_SceneAboutToBeRemoved* wrapper = GetThisValueObject<SignalWrapper_SceneAPI_SceneAboutToBeRemoved>(ctx, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_SceneAPI_SceneAboutToBeRemoved* receiver = new SignalReceiver_SceneAPI_SceneAboutToBeRemoved();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_SceneAPI_SceneAboutToBeRemoved::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_ConnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_SceneAboutToBeRemoved* wrapper = GetThisValueObject<SignalWrapper_SceneAPI_SceneAboutToBeRemoved>(ctx, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID);
+    if (!wrapper->owner_) return 0;
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    if (duk_get_boolean(ctx, -1))
+    {
+        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+        signalReceivers.Erase(wrapper->signal_);
+    }
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Emit(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_SceneAboutToBeRemoved* wrapper = GetThisValueObject<SignalWrapper_SceneAPI_SceneAboutToBeRemoved>(ctx, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID);
+    if (!wrapper->owner_) return 0;
+    Scene* param0 = GetWeakObject<Scene>(ctx, 0);
+    AttributeChange::Type param1 = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    wrapper->signal_->Emit(param0, param1);
+    return 0;
+}
+
+static duk_ret_t SceneAPI_Get_SceneAboutToBeRemoved(duk_context* ctx)
+{
+    SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
+    SignalWrapper_SceneAPI_SceneAboutToBeRemoved* wrapper = new SignalWrapper_SceneAPI_SceneAboutToBeRemoved(thisObj, &thisObj->SceneAboutToBeRemoved);
+    PushValueObject(ctx, wrapper, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Emit, 2);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID = "SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered";
+
+class SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered
+{
+public:
+    SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered(Object* owner, Signal3< u32, const String &, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal3< u32, const String &, AttributeChange::Type >* signal_;
+};
+
+class SignalReceiver_SceneAPI_PlaceholderComponentTypeRegistered : public SignalReceiver
+{
+public:
+    void OnSignal(u32 param0, const String & param1, AttributeChange::Type param2)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        duk_push_number(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        duk_push_string(ctx, param1.CString());
+        duk_put_prop_index(ctx, -2, 1);
+        duk_push_number(ctx, param2);
+        duk_put_prop_index(ctx, -2, 2);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        duk_pop(ctx);
+    }
+};
+
+duk_ret_t SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered* obj = GetValueObject<SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered>(ctx, 0, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Connect(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered* wrapper = GetThisValueObject<SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered>(ctx, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_SceneAPI_PlaceholderComponentTypeRegistered* receiver = new SignalReceiver_SceneAPI_PlaceholderComponentTypeRegistered();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_SceneAPI_PlaceholderComponentTypeRegistered::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_ConnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered* wrapper = GetThisValueObject<SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered>(ctx, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID);
+    if (!wrapper->owner_) return 0;
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    if (duk_get_boolean(ctx, -1))
+    {
+        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+        signalReceivers.Erase(wrapper->signal_);
+    }
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Emit(duk_context* ctx)
+{
+    SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered* wrapper = GetThisValueObject<SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered>(ctx, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID);
+    if (!wrapper->owner_) return 0;
+    u32 param0 = (u32)duk_require_number(ctx, 0);
+    String param1(duk_require_string(ctx, 1));
+    AttributeChange::Type param2 = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
+    wrapper->signal_->Emit(param0, param1, param2);
+    return 0;
+}
+
+static duk_ret_t SceneAPI_Get_PlaceholderComponentTypeRegistered(duk_context* ctx)
+{
+    SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
+    SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered* wrapper = new SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered(thisObj, &thisObj->PlaceholderComponentTypeRegistered);
+    PushValueObject(ctx, wrapper, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Emit, 3);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
 
 static duk_ret_t SceneAPI_Scenes(duk_context* ctx)
 {
@@ -210,6 +565,9 @@ void Expose_SceneAPI(duk_context* ctx)
     duk_put_function_list(ctx, -1, SceneAPI_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, SceneAPI_Functions);
+    DefineProperty(ctx, "sceneCreated", SceneAPI_Get_SceneCreated, nullptr);
+    DefineProperty(ctx, "sceneAboutToBeRemoved", SceneAPI_Get_SceneAboutToBeRemoved, nullptr);
+    DefineProperty(ctx, "placeholderComponentTypeRegistered", SceneAPI_Get_PlaceholderComponentTypeRegistered, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, SceneAPI_ID);
 }

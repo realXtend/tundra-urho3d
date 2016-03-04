@@ -3,7 +3,8 @@
 
 #include "StableHeaders.h"
 #include "CoreTypes.h"
-#include "BindingsHelpers.h"
+#include "JavaScriptInstance.h"
+#include "LoggingFunctions.h"
 #include "Scene/Entity.h"
 
 #ifdef _MSC_VER
@@ -24,6 +25,822 @@ namespace JSBindings
 
 
 const char* Entity_ID = "Entity";
+
+const char* SignalWrapper_Entity_ComponentAdded_ID = "SignalWrapper_Entity_ComponentAdded";
+
+class SignalWrapper_Entity_ComponentAdded
+{
+public:
+    SignalWrapper_Entity_ComponentAdded(Object* owner, Signal2< IComponent *, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal2< IComponent *, AttributeChange::Type >* signal_;
+};
+
+class SignalReceiver_Entity_ComponentAdded : public SignalReceiver
+{
+public:
+    void OnSignal(IComponent * param0, AttributeChange::Type param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        duk_push_number(ctx, param1);
+        duk_put_prop_index(ctx, -2, 1);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        duk_pop(ctx);
+    }
+};
+
+duk_ret_t SignalWrapper_Entity_ComponentAdded_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Entity_ComponentAdded* obj = GetValueObject<SignalWrapper_Entity_ComponentAdded>(ctx, 0, SignalWrapper_Entity_ComponentAdded_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Entity_ComponentAdded_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_ComponentAdded_Connect(duk_context* ctx)
+{
+    SignalWrapper_Entity_ComponentAdded* wrapper = GetThisValueObject<SignalWrapper_Entity_ComponentAdded>(ctx, SignalWrapper_Entity_ComponentAdded_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_Entity_ComponentAdded* receiver = new SignalReceiver_Entity_ComponentAdded();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_Entity_ComponentAdded::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_ConnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_ComponentAdded_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_Entity_ComponentAdded* wrapper = GetThisValueObject<SignalWrapper_Entity_ComponentAdded>(ctx, SignalWrapper_Entity_ComponentAdded_ID);
+    if (!wrapper->owner_) return 0;
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    if (duk_get_boolean(ctx, -1))
+    {
+        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+        signalReceivers.Erase(wrapper->signal_);
+    }
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_ComponentAdded_Emit(duk_context* ctx)
+{
+    SignalWrapper_Entity_ComponentAdded* wrapper = GetThisValueObject<SignalWrapper_Entity_ComponentAdded>(ctx, SignalWrapper_Entity_ComponentAdded_ID);
+    if (!wrapper->owner_) return 0;
+    IComponent* param0 = GetWeakObject<IComponent>(ctx, 0);
+    AttributeChange::Type param1 = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    wrapper->signal_->Emit(param0, param1);
+    return 0;
+}
+
+static duk_ret_t Entity_Get_ComponentAdded(duk_context* ctx)
+{
+    Entity* thisObj = GetThisWeakObject<Entity>(ctx);
+    SignalWrapper_Entity_ComponentAdded* wrapper = new SignalWrapper_Entity_ComponentAdded(thisObj, &thisObj->ComponentAdded);
+    PushValueObject(ctx, wrapper, SignalWrapper_Entity_ComponentAdded_ID, SignalWrapper_Entity_ComponentAdded_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Entity_ComponentAdded_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Entity_ComponentAdded_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Entity_ComponentAdded_Emit, 2);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_Entity_ComponentRemoved_ID = "SignalWrapper_Entity_ComponentRemoved";
+
+class SignalWrapper_Entity_ComponentRemoved
+{
+public:
+    SignalWrapper_Entity_ComponentRemoved(Object* owner, Signal2< IComponent *, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal2< IComponent *, AttributeChange::Type >* signal_;
+};
+
+class SignalReceiver_Entity_ComponentRemoved : public SignalReceiver
+{
+public:
+    void OnSignal(IComponent * param0, AttributeChange::Type param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        duk_push_number(ctx, param1);
+        duk_put_prop_index(ctx, -2, 1);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        duk_pop(ctx);
+    }
+};
+
+duk_ret_t SignalWrapper_Entity_ComponentRemoved_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Entity_ComponentRemoved* obj = GetValueObject<SignalWrapper_Entity_ComponentRemoved>(ctx, 0, SignalWrapper_Entity_ComponentRemoved_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Entity_ComponentRemoved_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_ComponentRemoved_Connect(duk_context* ctx)
+{
+    SignalWrapper_Entity_ComponentRemoved* wrapper = GetThisValueObject<SignalWrapper_Entity_ComponentRemoved>(ctx, SignalWrapper_Entity_ComponentRemoved_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_Entity_ComponentRemoved* receiver = new SignalReceiver_Entity_ComponentRemoved();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_Entity_ComponentRemoved::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_ConnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_ComponentRemoved_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_Entity_ComponentRemoved* wrapper = GetThisValueObject<SignalWrapper_Entity_ComponentRemoved>(ctx, SignalWrapper_Entity_ComponentRemoved_ID);
+    if (!wrapper->owner_) return 0;
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    if (duk_get_boolean(ctx, -1))
+    {
+        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+        signalReceivers.Erase(wrapper->signal_);
+    }
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_ComponentRemoved_Emit(duk_context* ctx)
+{
+    SignalWrapper_Entity_ComponentRemoved* wrapper = GetThisValueObject<SignalWrapper_Entity_ComponentRemoved>(ctx, SignalWrapper_Entity_ComponentRemoved_ID);
+    if (!wrapper->owner_) return 0;
+    IComponent* param0 = GetWeakObject<IComponent>(ctx, 0);
+    AttributeChange::Type param1 = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    wrapper->signal_->Emit(param0, param1);
+    return 0;
+}
+
+static duk_ret_t Entity_Get_ComponentRemoved(duk_context* ctx)
+{
+    Entity* thisObj = GetThisWeakObject<Entity>(ctx);
+    SignalWrapper_Entity_ComponentRemoved* wrapper = new SignalWrapper_Entity_ComponentRemoved(thisObj, &thisObj->ComponentRemoved);
+    PushValueObject(ctx, wrapper, SignalWrapper_Entity_ComponentRemoved_ID, SignalWrapper_Entity_ComponentRemoved_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Entity_ComponentRemoved_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Entity_ComponentRemoved_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Entity_ComponentRemoved_Emit, 2);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_Entity_EntityRemoved_ID = "SignalWrapper_Entity_EntityRemoved";
+
+class SignalWrapper_Entity_EntityRemoved
+{
+public:
+    SignalWrapper_Entity_EntityRemoved(Object* owner, Signal2< Entity *, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal2< Entity *, AttributeChange::Type >* signal_;
+};
+
+class SignalReceiver_Entity_EntityRemoved : public SignalReceiver
+{
+public:
+    void OnSignal(Entity * param0, AttributeChange::Type param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        duk_push_number(ctx, param1);
+        duk_put_prop_index(ctx, -2, 1);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        duk_pop(ctx);
+    }
+};
+
+duk_ret_t SignalWrapper_Entity_EntityRemoved_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Entity_EntityRemoved* obj = GetValueObject<SignalWrapper_Entity_EntityRemoved>(ctx, 0, SignalWrapper_Entity_EntityRemoved_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Entity_EntityRemoved_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_EntityRemoved_Connect(duk_context* ctx)
+{
+    SignalWrapper_Entity_EntityRemoved* wrapper = GetThisValueObject<SignalWrapper_Entity_EntityRemoved>(ctx, SignalWrapper_Entity_EntityRemoved_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_Entity_EntityRemoved* receiver = new SignalReceiver_Entity_EntityRemoved();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_Entity_EntityRemoved::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_ConnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_EntityRemoved_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_Entity_EntityRemoved* wrapper = GetThisValueObject<SignalWrapper_Entity_EntityRemoved>(ctx, SignalWrapper_Entity_EntityRemoved_ID);
+    if (!wrapper->owner_) return 0;
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    if (duk_get_boolean(ctx, -1))
+    {
+        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+        signalReceivers.Erase(wrapper->signal_);
+    }
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_EntityRemoved_Emit(duk_context* ctx)
+{
+    SignalWrapper_Entity_EntityRemoved* wrapper = GetThisValueObject<SignalWrapper_Entity_EntityRemoved>(ctx, SignalWrapper_Entity_EntityRemoved_ID);
+    if (!wrapper->owner_) return 0;
+    Entity* param0 = GetWeakObject<Entity>(ctx, 0);
+    AttributeChange::Type param1 = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    wrapper->signal_->Emit(param0, param1);
+    return 0;
+}
+
+static duk_ret_t Entity_Get_EntityRemoved(duk_context* ctx)
+{
+    Entity* thisObj = GetThisWeakObject<Entity>(ctx);
+    SignalWrapper_Entity_EntityRemoved* wrapper = new SignalWrapper_Entity_EntityRemoved(thisObj, &thisObj->EntityRemoved);
+    PushValueObject(ctx, wrapper, SignalWrapper_Entity_EntityRemoved_ID, SignalWrapper_Entity_EntityRemoved_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Entity_EntityRemoved_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Entity_EntityRemoved_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Entity_EntityRemoved_Emit, 2);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_Entity_TemporaryStateToggled_ID = "SignalWrapper_Entity_TemporaryStateToggled";
+
+class SignalWrapper_Entity_TemporaryStateToggled
+{
+public:
+    SignalWrapper_Entity_TemporaryStateToggled(Object* owner, Signal2< Entity *, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal2< Entity *, AttributeChange::Type >* signal_;
+};
+
+class SignalReceiver_Entity_TemporaryStateToggled : public SignalReceiver
+{
+public:
+    void OnSignal(Entity * param0, AttributeChange::Type param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        duk_push_number(ctx, param1);
+        duk_put_prop_index(ctx, -2, 1);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        duk_pop(ctx);
+    }
+};
+
+duk_ret_t SignalWrapper_Entity_TemporaryStateToggled_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Entity_TemporaryStateToggled* obj = GetValueObject<SignalWrapper_Entity_TemporaryStateToggled>(ctx, 0, SignalWrapper_Entity_TemporaryStateToggled_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Entity_TemporaryStateToggled_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_TemporaryStateToggled_Connect(duk_context* ctx)
+{
+    SignalWrapper_Entity_TemporaryStateToggled* wrapper = GetThisValueObject<SignalWrapper_Entity_TemporaryStateToggled>(ctx, SignalWrapper_Entity_TemporaryStateToggled_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_Entity_TemporaryStateToggled* receiver = new SignalReceiver_Entity_TemporaryStateToggled();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_Entity_TemporaryStateToggled::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_ConnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_TemporaryStateToggled_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_Entity_TemporaryStateToggled* wrapper = GetThisValueObject<SignalWrapper_Entity_TemporaryStateToggled>(ctx, SignalWrapper_Entity_TemporaryStateToggled_ID);
+    if (!wrapper->owner_) return 0;
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    if (duk_get_boolean(ctx, -1))
+    {
+        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+        signalReceivers.Erase(wrapper->signal_);
+    }
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_TemporaryStateToggled_Emit(duk_context* ctx)
+{
+    SignalWrapper_Entity_TemporaryStateToggled* wrapper = GetThisValueObject<SignalWrapper_Entity_TemporaryStateToggled>(ctx, SignalWrapper_Entity_TemporaryStateToggled_ID);
+    if (!wrapper->owner_) return 0;
+    Entity* param0 = GetWeakObject<Entity>(ctx, 0);
+    AttributeChange::Type param1 = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
+    wrapper->signal_->Emit(param0, param1);
+    return 0;
+}
+
+static duk_ret_t Entity_Get_TemporaryStateToggled(duk_context* ctx)
+{
+    Entity* thisObj = GetThisWeakObject<Entity>(ctx);
+    SignalWrapper_Entity_TemporaryStateToggled* wrapper = new SignalWrapper_Entity_TemporaryStateToggled(thisObj, &thisObj->TemporaryStateToggled);
+    PushValueObject(ctx, wrapper, SignalWrapper_Entity_TemporaryStateToggled_ID, SignalWrapper_Entity_TemporaryStateToggled_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Entity_TemporaryStateToggled_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Entity_TemporaryStateToggled_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Entity_TemporaryStateToggled_Emit, 2);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_Entity_EnterView_ID = "SignalWrapper_Entity_EnterView";
+
+class SignalWrapper_Entity_EnterView
+{
+public:
+    SignalWrapper_Entity_EnterView(Object* owner, Signal1< IComponent * >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal1< IComponent * >* signal_;
+};
+
+class SignalReceiver_Entity_EnterView : public SignalReceiver
+{
+public:
+    void OnSignal(IComponent * param0)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        duk_pop(ctx);
+    }
+};
+
+duk_ret_t SignalWrapper_Entity_EnterView_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Entity_EnterView* obj = GetValueObject<SignalWrapper_Entity_EnterView>(ctx, 0, SignalWrapper_Entity_EnterView_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Entity_EnterView_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_EnterView_Connect(duk_context* ctx)
+{
+    SignalWrapper_Entity_EnterView* wrapper = GetThisValueObject<SignalWrapper_Entity_EnterView>(ctx, SignalWrapper_Entity_EnterView_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_Entity_EnterView* receiver = new SignalReceiver_Entity_EnterView();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_Entity_EnterView::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_ConnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_EnterView_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_Entity_EnterView* wrapper = GetThisValueObject<SignalWrapper_Entity_EnterView>(ctx, SignalWrapper_Entity_EnterView_ID);
+    if (!wrapper->owner_) return 0;
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    if (duk_get_boolean(ctx, -1))
+    {
+        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+        signalReceivers.Erase(wrapper->signal_);
+    }
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_EnterView_Emit(duk_context* ctx)
+{
+    SignalWrapper_Entity_EnterView* wrapper = GetThisValueObject<SignalWrapper_Entity_EnterView>(ctx, SignalWrapper_Entity_EnterView_ID);
+    if (!wrapper->owner_) return 0;
+    IComponent* param0 = GetWeakObject<IComponent>(ctx, 0);
+    wrapper->signal_->Emit(param0);
+    return 0;
+}
+
+static duk_ret_t Entity_Get_EnterView(duk_context* ctx)
+{
+    Entity* thisObj = GetThisWeakObject<Entity>(ctx);
+    SignalWrapper_Entity_EnterView* wrapper = new SignalWrapper_Entity_EnterView(thisObj, &thisObj->EnterView);
+    PushValueObject(ctx, wrapper, SignalWrapper_Entity_EnterView_ID, SignalWrapper_Entity_EnterView_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Entity_EnterView_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Entity_EnterView_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Entity_EnterView_Emit, 1);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_Entity_LeaveView_ID = "SignalWrapper_Entity_LeaveView";
+
+class SignalWrapper_Entity_LeaveView
+{
+public:
+    SignalWrapper_Entity_LeaveView(Object* owner, Signal1< IComponent * >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal1< IComponent * >* signal_;
+};
+
+class SignalReceiver_Entity_LeaveView : public SignalReceiver
+{
+public:
+    void OnSignal(IComponent * param0)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        duk_pop(ctx);
+    }
+};
+
+duk_ret_t SignalWrapper_Entity_LeaveView_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Entity_LeaveView* obj = GetValueObject<SignalWrapper_Entity_LeaveView>(ctx, 0, SignalWrapper_Entity_LeaveView_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Entity_LeaveView_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_LeaveView_Connect(duk_context* ctx)
+{
+    SignalWrapper_Entity_LeaveView* wrapper = GetThisValueObject<SignalWrapper_Entity_LeaveView>(ctx, SignalWrapper_Entity_LeaveView_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_Entity_LeaveView* receiver = new SignalReceiver_Entity_LeaveView();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_Entity_LeaveView::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_ConnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_LeaveView_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_Entity_LeaveView* wrapper = GetThisValueObject<SignalWrapper_Entity_LeaveView>(ctx, SignalWrapper_Entity_LeaveView_ID);
+    if (!wrapper->owner_) return 0;
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    if (duk_get_boolean(ctx, -1))
+    {
+        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+        signalReceivers.Erase(wrapper->signal_);
+    }
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_LeaveView_Emit(duk_context* ctx)
+{
+    SignalWrapper_Entity_LeaveView* wrapper = GetThisValueObject<SignalWrapper_Entity_LeaveView>(ctx, SignalWrapper_Entity_LeaveView_ID);
+    if (!wrapper->owner_) return 0;
+    IComponent* param0 = GetWeakObject<IComponent>(ctx, 0);
+    wrapper->signal_->Emit(param0);
+    return 0;
+}
+
+static duk_ret_t Entity_Get_LeaveView(duk_context* ctx)
+{
+    Entity* thisObj = GetThisWeakObject<Entity>(ctx);
+    SignalWrapper_Entity_LeaveView* wrapper = new SignalWrapper_Entity_LeaveView(thisObj, &thisObj->LeaveView);
+    PushValueObject(ctx, wrapper, SignalWrapper_Entity_LeaveView_ID, SignalWrapper_Entity_LeaveView_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Entity_LeaveView_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Entity_LeaveView_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Entity_LeaveView_Emit, 1);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_Entity_ParentChanged_ID = "SignalWrapper_Entity_ParentChanged";
+
+class SignalWrapper_Entity_ParentChanged
+{
+public:
+    SignalWrapper_Entity_ParentChanged(Object* owner, Signal3< Entity *, Entity *, AttributeChange::Type >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal3< Entity *, Entity *, AttributeChange::Type >* signal_;
+};
+
+class SignalReceiver_Entity_ParentChanged : public SignalReceiver
+{
+public:
+    void OnSignal(Entity * param0, Entity * param1, AttributeChange::Type param2)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        PushWeakObject(ctx, param1);
+        duk_put_prop_index(ctx, -2, 1);
+        duk_push_number(ctx, param2);
+        duk_put_prop_index(ctx, -2, 2);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        duk_pop(ctx);
+    }
+};
+
+duk_ret_t SignalWrapper_Entity_ParentChanged_Finalizer(duk_context* ctx)
+{
+    SignalWrapper_Entity_ParentChanged* obj = GetValueObject<SignalWrapper_Entity_ParentChanged>(ctx, 0, SignalWrapper_Entity_ParentChanged_ID);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, SignalWrapper_Entity_ParentChanged_ID);
+    }
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_ParentChanged_Connect(duk_context* ctx)
+{
+    SignalWrapper_Entity_ParentChanged* wrapper = GetThisValueObject<SignalWrapper_Entity_ParentChanged>(ctx, SignalWrapper_Entity_ParentChanged_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_Entity_ParentChanged* receiver = new SignalReceiver_Entity_ParentChanged();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_Entity_ParentChanged::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_ConnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_ParentChanged_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_Entity_ParentChanged* wrapper = GetThisValueObject<SignalWrapper_Entity_ParentChanged>(ctx, SignalWrapper_Entity_ParentChanged_ID);
+    if (!wrapper->owner_) return 0;
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)wrapper->signal_);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
+    duk_remove(ctx, -2);
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    if (duk_get_boolean(ctx, -1))
+    {
+        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+        signalReceivers.Erase(wrapper->signal_);
+    }
+    duk_pop(ctx);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Entity_ParentChanged_Emit(duk_context* ctx)
+{
+    SignalWrapper_Entity_ParentChanged* wrapper = GetThisValueObject<SignalWrapper_Entity_ParentChanged>(ctx, SignalWrapper_Entity_ParentChanged_ID);
+    if (!wrapper->owner_) return 0;
+    Entity* param0 = GetWeakObject<Entity>(ctx, 0);
+    Entity* param1 = GetWeakObject<Entity>(ctx, 1);
+    AttributeChange::Type param2 = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
+    wrapper->signal_->Emit(param0, param1, param2);
+    return 0;
+}
+
+static duk_ret_t Entity_Get_ParentChanged(duk_context* ctx)
+{
+    Entity* thisObj = GetThisWeakObject<Entity>(ctx);
+    SignalWrapper_Entity_ParentChanged* wrapper = new SignalWrapper_Entity_ParentChanged(thisObj, &thisObj->ParentChanged);
+    PushValueObject(ctx, wrapper, SignalWrapper_Entity_ParentChanged_ID, SignalWrapper_Entity_ParentChanged_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Entity_ParentChanged_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Entity_ParentChanged_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Entity_ParentChanged_Emit, 3);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
 
 static duk_ret_t Entity_SetGroup_String(duk_context* ctx)
 {
@@ -274,9 +1091,9 @@ static duk_ret_t Entity_CreateLocalComponent_String_String(duk_context* ctx)
 static duk_ret_t Entity_AddComponent_ComponentPtr_AttributeChange__Type(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    IComponent* component = GetWeakObject<IComponent>(ctx, 0);
+    SharedPtr<IComponent> component(GetWeakObject<IComponent>(ctx, 0));
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    thisObj->AddComponent(ComponentPtr(component), change);
+    thisObj->AddComponent(component, change);
     return 0;
 }
 
@@ -284,18 +1101,18 @@ static duk_ret_t Entity_AddComponent_component_id_t_ComponentPtr_AttributeChange
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
     component_id_t id = (component_id_t)duk_require_number(ctx, 0);
-    IComponent* component = GetWeakObject<IComponent>(ctx, 1);
+    SharedPtr<IComponent> component(GetWeakObject<IComponent>(ctx, 1));
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
-    thisObj->AddComponent(id, ComponentPtr(component), change);
+    thisObj->AddComponent(id, component, change);
     return 0;
 }
 
 static duk_ret_t Entity_RemoveComponent_ComponentPtr_AttributeChange__Type(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    IComponent* component = GetWeakObject<IComponent>(ctx, 0);
+    SharedPtr<IComponent> component(GetWeakObject<IComponent>(ctx, 0));
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    thisObj->RemoveComponent(ComponentPtr(component), change);
+    thisObj->RemoveComponent(component, change);
     return 0;
 }
 
@@ -513,18 +1330,18 @@ static duk_ret_t Entity_ParentScene(duk_context* ctx)
 static duk_ret_t Entity_AddChild_EntityPtr_AttributeChange__Type(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    Entity* child = GetWeakObject<Entity>(ctx, 0);
+    SharedPtr<Entity> child(GetWeakObject<Entity>(ctx, 0));
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    thisObj->AddChild(EntityPtr(child), change);
+    thisObj->AddChild(child, change);
     return 0;
 }
 
 static duk_ret_t Entity_RemoveChild_EntityPtr_AttributeChange__Type(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    Entity* child = GetWeakObject<Entity>(ctx, 0);
+    SharedPtr<Entity> child(GetWeakObject<Entity>(ctx, 0));
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    thisObj->RemoveChild(EntityPtr(child), change);
+    thisObj->RemoveChild(child, change);
     return 0;
 }
 
@@ -539,18 +1356,18 @@ static duk_ret_t Entity_RemoveAllChildren_AttributeChange__Type(duk_context* ctx
 static duk_ret_t Entity_DetachChild_EntityPtr_AttributeChange__Type(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    Entity* child = GetWeakObject<Entity>(ctx, 0);
+    SharedPtr<Entity> child(GetWeakObject<Entity>(ctx, 0));
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    thisObj->DetachChild(EntityPtr(child), change);
+    thisObj->DetachChild(child, change);
     return 0;
 }
 
 static duk_ret_t Entity_SetParent_EntityPtr_AttributeChange__Type(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
-    Entity* parent = GetWeakObject<Entity>(ctx, 0);
+    SharedPtr<Entity> parent(GetWeakObject<Entity>(ctx, 0));
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
-    thisObj->SetParent(EntityPtr(parent), change);
+    thisObj->SetParent(parent, change);
     return 0;
 }
 
@@ -806,6 +1623,13 @@ void Expose_Entity(duk_context* ctx)
     duk_push_object(ctx);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Entity_Functions);
+    DefineProperty(ctx, "componentAdded", Entity_Get_ComponentAdded, nullptr);
+    DefineProperty(ctx, "componentRemoved", Entity_Get_ComponentRemoved, nullptr);
+    DefineProperty(ctx, "entityRemoved", Entity_Get_EntityRemoved, nullptr);
+    DefineProperty(ctx, "temporaryStateToggled", Entity_Get_TemporaryStateToggled, nullptr);
+    DefineProperty(ctx, "enterView", Entity_Get_EnterView, nullptr);
+    DefineProperty(ctx, "leaveView", Entity_Get_LeaveView, nullptr);
+    DefineProperty(ctx, "parentChanged", Entity_Get_ParentChanged, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Entity_ID);
 }

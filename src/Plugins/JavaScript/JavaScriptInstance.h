@@ -10,7 +10,7 @@
 #include "IScriptInstance.h"
 
 #include "Win.h" // Duktape config will include Windows.h on Windows, include beforehand to avoid problems with ConsoleAPI
-#include "duktape.h"
+#include "BindingsHelpers.h"
 
 #include <Urho3D/Container/RefCounted.h>
 
@@ -72,7 +72,7 @@ public:
     void RegisterService(const String& name, Urho3D::Object* object);
 
     /// Return whether has been evaluated
-    virtual bool IsEvaluated() const { return evaluated; }
+    virtual bool IsEvaluated() const { return evaluated_; }
 
     /// Dumps engine information into a string. Used for debugging/profiling.
     virtual HashMap<String, uint> DumpEngineInformation();
@@ -82,6 +82,12 @@ public:
 
     /// The script engine is about to unload.
     Signal0<void> ScriptUnloading;
+
+    /// Lookup instance by context.
+    static JavaScriptInstance* InstanceFromContext(duk_context* ctx);
+
+    /// Return the instance's signal receiver map.
+    HashMap<void*, SharedPtr<JSBindings::SignalReceiver> >& SignalReceivers() { return signalReceivers_; }
 
 private:
     /// Creates new script context/engine.
@@ -102,18 +108,24 @@ private:
     String program_;
 
     /// Specifies the absolute path of the source file where the script is loaded from, if the content is directly loaded from file.
-    String sourceFile;
+    String sourceFile_;
 
     /// Current script name that is loaded into this instance.
-    String currentScriptName;
+    String currentScriptName_;
 
     ComponentWeakPtr owner_; ///< Owner (Script) component, if existing.
     JavaScript *module_; ///< Javascript module.
     duk_context* ctx_; ///< DukTape context.
-    bool evaluated; ///< Has the script program been evaluated.
+    bool evaluated_; ///< Has the script program been evaluated.
 
     /// Already included files for preventing multi-inclusion
-    Vector<String> includedFiles;
+    Vector<String> includedFiles_;
+
+    /// Registered JavaScript signal receivers. The key is the signal pointer.
+    HashMap<void*, SharedPtr<JSBindings::SignalReceiver> > signalReceivers_;
+
+    /// Context to instance map.
+    static HashMap<void*, JavaScriptInstance*> instanceMap;
 };
 
 }

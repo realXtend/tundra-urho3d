@@ -21,12 +21,37 @@ namespace Tundra
 
 #define JS_PROFILE(name) Urho3D::AutoProfileBlock profile_ ## name (module_->GetSubsystem<Urho3D::Profiler>(), #name)
 
+HashMap<void*, JavaScriptInstance*> JavaScriptInstance::instanceMap;
+
+static const String signalSupportCode =
+    "_connections = {};\n"
+    "function _ConnectSignal(key, obj, func) {\n"
+    "if (!_connections.hasOwnProperty(key)) _connections[key] = [];\n"
+    "var connections = _connections[key];\n"
+    "if (!func) { func = obj; obj = null; }\n"
+    "if (!func || typeof func != 'function') return;\n"
+    "for (var i = 0; i < connections.length; ++i) { if (connections[i].obj == obj && connections[i].func == func) return; }\n" // Check duplicate
+    "connections.push({ 'obj' : obj, 'func' : func });\n"
+    "}\n"
+    "function _DisconnectSignal(key, obj, func) {\n"
+    "if (!_connections.hasOwnProperty(key)) return;\n"
+    "var connections = _connections[key];\n"
+    "if (!func) { func = obj; obj = null; }\n"
+    "for (var i = 0; i < connections.length; ++i) { if (connections[i].obj == obj && connections[i].func == func) { connections.splice(i, 1); return; } }\n"
+    "return connections.length == 0;\n" // Return true if all connections removed, in which case the C++ wrapper can be removed
+    "}\n"
+    "function _OnSignal(key, params) {\n"
+    "if (!_connections.hasOwnProperty(key)) return\n"
+    "var connections = _connections[key]\n"
+    "for (var i = 0; i < connections.length; ++i) { connections[i].func.apply(connections[i].obj, params); }\n"
+    "}\n";
+
 JavaScriptInstance::JavaScriptInstance(const String &fileName, JavaScript *module, Script* owner) :
     ctx_(0),
-    sourceFile(fileName),
+    sourceFile_(fileName),
     module_(module),
     owner_(owner),
-    evaluated(false)
+    evaluated_(false)
 {
     assert(module);
     CreateEngine();
@@ -37,7 +62,7 @@ JavaScriptInstance::JavaScriptInstance(ScriptAssetPtr scriptRef, JavaScript *mod
     ctx_(0),
     module_(module),
     owner_(owner),
-    evaluated(false)
+    evaluated_(false)
 {
     assert(module);
     // Make sure we do not push null or empty script assets as sources
@@ -52,7 +77,7 @@ JavaScriptInstance::JavaScriptInstance(const Vector<ScriptAssetPtr>& scriptRefs,
     ctx_(0),
     module_(module),
     owner_(owner),
-    evaluated(false)
+    evaluated_(false)
 {
     assert(module);
     // Make sure we do not push null or empty script assets as sources
@@ -66,6 +91,8 @@ JavaScriptInstance::JavaScriptInstance(const Vector<ScriptAssetPtr>& scriptRefs,
 void JavaScriptInstance::CreateEngine()
 {
     ctx_ = duk_create_heap_default();
+    instanceMap[ctx_] = this;
+    Evaluate(signalSupportCode);
 
     Script *ec = dynamic_cast<Script*>(owner_.Get());
     module_->PrepareScriptInstance(this, ec);
@@ -80,6 +107,7 @@ void JavaScriptInstance::DeleteEngine()
         program_ = "";
         ScriptUnloading.Emit();
 
+        instanceMap.Erase(ctx_);
         duk_destroy_heap(ctx_);
         ctx_ = 0;
     }
@@ -102,13 +130,13 @@ void JavaScriptInstance::Load()
     if (!ctx_)
         CreateEngine();
 
-    if (sourceFile.Empty() && scriptRefs_.Empty())
+    if (sourceFile_.Empty() && scriptRefs_.Empty())
     {
         LogError("JavascriptInstance::Load: No script content to load!");
         return;
     }
     // Can't specify both a file source and an Asset API source.
-    if (!sourceFile.Empty() && !scriptRefs_.Empty())
+    if (!sourceFile_.Empty() && !scriptRefs_.Empty())
     {
         LogError("JavascriptInstance::Load: Cannot specify both an local input source file and a list of script refs to load!");
         return;
@@ -125,7 +153,7 @@ void JavaScriptInstance::Load()
     }
     else // Local file: always trusted.
     {
-        program_ = LoadScript(sourceFile);
+        program_ = LoadScript(sourceFile_);
         trusted_ = true; // This is a file on the local filesystem. We are making an assumption nobody can inject untrusted code here.
         // Actually, we are assuming the attacker does not know the absolute location of the asset cache locally here, since if he makes
         // the client to load a script into local cache, he could use this code path to automatically load that unsafe script from cache, and make it trusted. -jj.
@@ -200,12 +228,12 @@ void JavaScriptInstance::Run()
     }
 
     // Can't specify both a file source and an Asset API source.
-    assert(sourceFile.Empty() || scriptRefs_.Empty());
+    assert(sourceFile_.Empty() || scriptRefs_.Empty());
 
     // If we've already evaluated this script once before, create a new script engine to run it again, or otherwise
     // the effects would stack (we'd possibly register into signals twice, or other odd side effects).
     // We never allow a script to be run twice in this kind of "stacking" manner.
-    if (evaluated)
+    if (evaluated_)
     {
         Unload();
         Load();
@@ -223,19 +251,19 @@ void JavaScriptInstance::Run()
 
     bool useAssets = !scriptRefs_.Empty();
     size_t numScripts = useAssets ? scriptRefs_.Size() : 1;
-    includedFiles.Clear();
+    includedFiles_.Clear();
 
     for (size_t i = 0; i < numScripts; ++i)
     {
         JS_PROFILE(JSInstance_Evaluate);
-        String scriptSourceFilename = (useAssets ? scriptRefs_[i]->Name() : sourceFile);
+        String scriptSourceFilename = (useAssets ? scriptRefs_[i]->Name() : sourceFile_);
         const String &scriptContent = (useAssets ? scriptRefs_[i]->scriptContent : program_);
 
         if (!Evaluate(scriptContent))
             break;
     }
 
-    evaluated = true;
+    evaluated_ = true;
     ScriptEvaluated.Emit();
 }
 
@@ -267,7 +295,7 @@ bool JavaScriptInstance::Execute(const String& functionName)
     duk_push_global_object(ctx_);
     duk_get_prop_string(ctx_, -1, functionName.CString());
     bool success = duk_pcall(ctx_, 0) == 0;
-    if (duk_pcall(ctx_, 0) != 0)
+    if (!success)
         LogError("[JavaScript] Execute: " + String(duk_safe_to_string(ctx_, -1)));
 
     duk_pop(ctx_); // Pop result/error
@@ -277,8 +305,8 @@ bool JavaScriptInstance::Execute(const String& functionName)
 
 void JavaScriptInstance::IncludeFile(const String &path)
 {
-    for(uint i = 0; i < includedFiles.Size(); ++i)
-        if (includedFiles[i].ToLower() == path.ToLower())
+    for(uint i = 0; i < includedFiles_.Size(); ++i)
+        if (includedFiles_[i].ToLower() == path.ToLower())
         {
             LogDebug("JavaScript::IncludeFile: Not including already included file " + path);
             return;
@@ -292,7 +320,7 @@ void JavaScriptInstance::IncludeFile(const String &path)
     */
 
     Evaluate(script);
-    includedFiles.Push(path);
+    includedFiles_.Push(path);
 }
 
 void JavaScriptInstance::RegisterService(const String& name, Urho3D::Object* object)
@@ -306,6 +334,12 @@ void JavaScriptInstance::RegisterService(const String& name, Urho3D::Object* obj
     PushWeakObject(ctx_, object);
     duk_put_prop_string(ctx_, -2, name.CString());
     duk_pop(ctx_);
+}
+
+JavaScriptInstance* JavaScriptInstance::InstanceFromContext(duk_context* ctx)
+{
+    HashMap<void*, JavaScriptInstance*>::ConstIterator i = instanceMap.Find(ctx);
+    return i != instanceMap.End() ? i->second_ : nullptr;
 }
 
 }

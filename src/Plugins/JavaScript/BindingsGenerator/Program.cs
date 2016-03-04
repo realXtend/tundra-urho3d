@@ -119,7 +119,8 @@ namespace BindingsGenerator
             tw.WriteLine("");
             tw.WriteLine("#include \"StableHeaders.h\"");
             tw.WriteLine("#include \"CoreTypes.h\"");
-            tw.WriteLine("#include \"BindingsHelpers.h\"");
+            tw.WriteLine("#include \"JavaScriptInstance.h\"");
+            tw.WriteLine("#include \"LoggingFunctions.h\"");
             tw.WriteLine("#include \"" + FindIncludeForClass(classSymbol.name) + "\"");
             tw.WriteLine("");
             // Disable bool conversion warnings
@@ -167,11 +168,10 @@ namespace BindingsGenerator
             tw.WriteLine("");
 
             // Own type identifier
-            // Included also for refcounted classes, since it's needed anyway when registering the prototype
+            // Included also for refcounted classes, since it's needed when registering the prototype
             tw.WriteLine("const char* " + ClassIdentifier(className) + " = \"" + className + "\";");
             tw.WriteLine("");
 
-            // \todo Handle refcounted classes (wrap in a weak ptr)
             Dictionary<string, List<Overload> > overloads = new Dictionary<string, List<Overload> >();
             Dictionary<string, List<Overload>> staticOverloads = new Dictionary<string, List<Overload>>();
             List<Property> properties = new List<Property>();
@@ -199,24 +199,6 @@ namespace BindingsGenerator
                 return "";
         }
 
-        static string ExtractNamespace(string className)
-        {
-            int separatorIndex = className.LastIndexOf("::");
-            if (separatorIndex > 0 && !className.StartsWith("AttributeChange"))
-                return className.Substring(0, separatorIndex);
-            else
-                return "";
-        }
-
-        static string StripNamespace(string className)
-        {
-            int separatorIndex = className.LastIndexOf("::");
-            if (separatorIndex > 0 && !className.StartsWith("AttributeChange"))
-                return className.Substring(separatorIndex + 2);
-            else
-                return className;
-        }
-
         static string GenerateGetFromStack(Symbol classSymbol, int stackIndex, string varName, bool nullCheck = false)
         {
             string typeName = classSymbol.type;
@@ -229,12 +211,13 @@ namespace BindingsGenerator
         static string GenerateGetFromStack(string typeName, int stackIndex, string varName, bool nullCheck = false)
         {
             typeName = SanitateTypeName(typeName);
+            bool isPtr = false;
 
             if (typeName.EndsWith("Ptr"))
             {
                 typeName = typeName.Substring(0, typeName.Length - 3);
-                if (typeName == "Component")
-                    typeName = "IComponent";
+                typeName = SanitateTemplateType(typeName);
+                isPtr = true;
             }
 
             if (Symbol.IsNumberType(typeName))
@@ -252,13 +235,14 @@ namespace BindingsGenerator
                 return typeName + " " + varName + "(duk_require_string(ctx, " + stackIndex + "));";
             else if (typeName == "String")
                 return typeName + " " + varName + "(duk_require_string(ctx, " + stackIndex + "));";
+            else if (typeName == "Variant")
+                return typeName + " " + varName + " = GetVariant(ctx, " + stackIndex + ");";
             else if (!Symbol.IsPODType(typeName))
             {
                 if (typeName.EndsWith("Vector"))
                 {
                     string templateType = typeName.Substring(0, typeName.Length - 6);
-                    if (templateType == "Component")
-                        templateType = "IComponent";
+                    templateType = SanitateTemplateType(templateType);
 
                     if (templateType == "String" || templateType == "string")
                         return typeName + " " + varName + " = GetStringVector(ctx, " + stackIndex + ");";
@@ -280,10 +264,20 @@ namespace BindingsGenerator
                 }
                 else
                 {
-                    if (!nullCheck)
-                        return typeName + "* " + varName + " = GetWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
+                    if (!isPtr)
+                    {
+                        if (!nullCheck)
+                            return typeName + "* " + varName + " = GetWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
+                        else
+                            return typeName + "* " + varName + " = GetCheckedWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
+                    }
                     else
-                        return typeName + "* " + varName + " = GetCheckedWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
+                    {
+                        if (!nullCheck)
+                            return "SharedPtr<" + typeName + "> " + varName + "(GetWeakObject<" + typeName + ">(ctx, " + stackIndex + "));";
+                        else
+                            return "SharedPtr<" + typeName + "> " + varName + "(GetCheckedWeakObject<" + typeName + ">(ctx, " + stackIndex + "));";
+                    }
                 }
             }
             else
@@ -305,8 +299,7 @@ namespace BindingsGenerator
             if (typeName.EndsWith("Ptr"))
             {
                 typeName = typeName.Substring(0, typeName.Length - 3);
-                if (typeName == "Component")
-                    typeName = "IComponent";
+                typeName = SanitateTemplateType(typeName);
             }
 
             if (Symbol.IsNumberType(typeName))
@@ -317,11 +310,12 @@ namespace BindingsGenerator
                 return "duk_push_string(ctx, " + source + ".c_str());";
             else if (typeName == "String")
                 return "duk_push_string(ctx, " + source + ".CString());";
+            else if (typeName == "Variant")
+                return "PushVariant(ctx, " + source + ");";
             else if (typeName.EndsWith("Vector"))
             {
                 string templateType = typeName.Substring(0, typeName.Length - 6);
-                if (templateType == "Component")
-                    templateType = "IComponent";
+                templateType = SanitateTemplateType(templateType);
 
                 if (templateType == "String" || templateType == "string")
                     return "PushStringVector(ctx, " + source + ");";
@@ -337,8 +331,7 @@ namespace BindingsGenerator
             else if (typeName.EndsWith("Map"))
             {
                 string templateType = typeName.Substring(0, typeName.Length - 3);
-                if (templateType == "Component")
-                    templateType = "IComponent";
+                templateType = SanitateTemplateType(templateType);
 
                 return "PushWeakObjectMap(ctx, " + source + ");";
             }
@@ -375,8 +368,7 @@ namespace BindingsGenerator
             if (typeName.EndsWith("Ptr"))
             {
                 typeName = typeName.Substring(0, typeName.Length - 3);
-                if (typeName == "Component")
-                    typeName = "IComponent";
+                typeName = SanitateTemplateType(typeName);
             }
 
             if (Symbol.IsNumberType(typeName))
@@ -405,9 +397,14 @@ namespace BindingsGenerator
         static void GenerateFinalizer(Symbol classSymbol, TextWriter tw)
         {
             String typeName = SanitateTypeName(classSymbol.name);
+            GenerateFinalizer(typeName, tw);
+        }
+
+        static void GenerateFinalizer(string typeName, TextWriter tw)
+        {
             tw.WriteLine("duk_ret_t " + typeName + "_Finalizer" + DukSignature());
             tw.WriteLine("{");
-            tw.WriteLine(Indent(1) + GenerateGetFromStack(classSymbol, 0, "obj"));
+            tw.WriteLine(Indent(1) + GenerateGetFromStack(typeName, 0, "obj"));
             tw.WriteLine(Indent(1) + "if (obj)");
             tw.WriteLine(Indent(1) + "{");
             tw.WriteLine(Indent(2) + "delete obj;");
@@ -428,8 +425,177 @@ namespace BindingsGenerator
             
             foreach (Symbol child in classSymbol.children)
             {
-                // \todo Handle non-POD accessors
-                if (child.kind == "variable" && !child.isStatic && IsScriptable(child) && child.visibilityLevel == VisibilityLevel.Public && Symbol.IsPODType(child.type))
+                // Signal wrappers
+                if (child.kind == "variable" && child.type.StartsWith("Signal"))
+                {
+                    Property newProperty;
+                    newProperty.name = child.name;
+                    newProperty.readOnly = true;
+
+                    string signalType = SanitateSignalType(child.type);
+                    List<string> parameters = ExtractSignalParameterTypes(signalType);
+                    if (parameters.Count == 1 && parameters[0] == "void")
+                        parameters.Clear();
+
+                    bool badParameters = false;
+                    foreach (string p in parameters)
+                    {
+                        if (!IsSupportedType(p))
+                        {
+                            badParameters = true;
+                            break;
+                        }
+                    }
+                    if (badParameters)
+                        continue;
+
+                    string wrapperClassName = "SignalWrapper" + "_" + className + "_" + child.name;
+                    tw.WriteLine("const char* " + ClassIdentifier(wrapperClassName) + " = \"" + wrapperClassName + "\";");
+                    tw.WriteLine("");
+
+                    // Wrapper class definition
+                    tw.WriteLine("class " + wrapperClassName);
+                    tw.WriteLine("{");
+                    tw.WriteLine("public:");
+                    tw.WriteLine(Indent(1) + wrapperClassName + "(Object* owner, " + signalType + "* signal) :");
+                    tw.WriteLine(Indent(2) + "owner_(owner),");
+                    tw.WriteLine(Indent(2) + "signal_(signal)");
+                    tw.WriteLine(Indent(1) + "{");
+                    tw.WriteLine(Indent(1) + "}");
+                    tw.WriteLine("");
+                    tw.WriteLine(Indent(1) + "WeakPtr<Object> owner_;");
+                    tw.WriteLine(Indent(1) + signalType + "* signal_;");
+                    tw.WriteLine("};");
+                    tw.WriteLine("");
+
+                    // Receiver class definition
+                    string receiverClassName = "SignalReceiver" + "_" + className + "_" + child.name;
+
+                    tw.WriteLine("class " + receiverClassName + " : public SignalReceiver");
+                    tw.WriteLine("{");
+                    tw.WriteLine("public:");
+                    string signatureLine = "void OnSignal(";
+                    for (int i = 0; i < parameters.Count; ++i)
+                    {
+                        if (i > 0)
+                            signatureLine += ", ";
+                        signatureLine += parameters[i] + " param" + i;
+                    }
+                    signatureLine += ")";
+                    tw.WriteLine(Indent(1) + signatureLine);
+                    tw.WriteLine(Indent(1) + "{");
+                    tw.WriteLine(Indent(2) + "duk_context* ctx = ctx_;");
+                    tw.WriteLine(Indent(2) + "duk_push_global_object(ctx);");
+                    tw.WriteLine(Indent(2) + "duk_get_prop_string(ctx, -1, \"_OnSignal\");");
+                    tw.WriteLine(Indent(2) + "duk_remove(ctx, -2);"); // Global object
+                    tw.WriteLine(Indent(2) + "duk_push_number(ctx, (size_t)key_);"); // Signal identifier for looking up receiver(s)
+                    tw.WriteLine(Indent(2) + "duk_push_array(ctx);"); // Parameter array
+                    for (int i = 0; i < parameters.Count; ++i)
+                    {
+                        tw.WriteLine(Indent(2) + GeneratePushToStack(parameters[i], "param" + i));
+                        tw.WriteLine(Indent(2) + "duk_put_prop_index(ctx, -2, " + i + ");");
+                    }
+                    tw.WriteLine(Indent(2) + "bool success = duk_pcall(ctx, 2) == 0;");
+                    tw.WriteLine(Indent(2) + "if (!success) LogError(\"[JavaScript] OnSignal: \" + String(duk_safe_to_string(ctx, -1)));");
+                    tw.WriteLine(Indent(2) + "duk_pop(ctx);"); // Result
+                    tw.WriteLine(Indent(1) + "}");
+                    tw.WriteLine("};");
+                    tw.WriteLine("");
+
+                    // Finalizer
+                    GenerateFinalizer(wrapperClassName, tw);
+
+                    // Connect wrapper function
+                    tw.WriteLine("static duk_ret_t " + wrapperClassName + "_Connect" + DukSignature());
+                    tw.WriteLine("{");
+                    tw.WriteLine(Indent(1) + wrapperClassName + "* wrapper = GetThisValueObject<" + wrapperClassName + ">(ctx, " + ClassIdentifier(wrapperClassName) + ");");
+                    tw.WriteLine(Indent(1) + "if (!wrapper->owner_) return 0;"); // Check signal owner expiration
+                    tw.WriteLine(Indent(1) + "HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();");
+                    tw.WriteLine(Indent(1) + "if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())");
+                    tw.WriteLine(Indent(1) + "{");
+                    tw.WriteLine(Indent(2) + receiverClassName + "* receiver = new " + receiverClassName + "();");
+                    tw.WriteLine(Indent(2) + "receiver->ctx_ = ctx;");
+                    tw.WriteLine(Indent(2) + "receiver->key_ = wrapper->signal_;");
+                    tw.WriteLine(Indent(2) + "wrapper->signal_->Connect(receiver, &" + receiverClassName + "::OnSignal);");
+                    tw.WriteLine(Indent(2) + "signalReceivers[wrapper->signal_] = receiver;");
+                    tw.WriteLine(Indent(1) + "}");
+                    tw.WriteLine(Indent(1) + "int numArgs = duk_get_top(ctx);");
+                    tw.WriteLine(Indent(1) + "duk_push_number(ctx, (size_t)wrapper->signal_);");
+                    tw.WriteLine(Indent(1) + "duk_insert(ctx, 0);");
+                    tw.WriteLine(Indent(1) + "duk_push_global_object(ctx);");
+                    tw.WriteLine(Indent(1) + "duk_get_prop_string(ctx, -1, \"_ConnectSignal\");");
+                    tw.WriteLine(Indent(1) + "duk_remove(ctx, -2);"); // Global object
+                    tw.WriteLine(Indent(1) + "duk_insert(ctx, 0);");
+                    tw.WriteLine(Indent(1) + "duk_pcall(ctx, numArgs + 1);");
+                    tw.WriteLine(Indent(1) + "duk_pop(ctx);"); // Result
+                    tw.WriteLine(Indent(1) + "return 0;");
+                    tw.WriteLine("}");
+                    tw.WriteLine("");
+
+                    // Disconnect wrapper function
+                    tw.WriteLine("static duk_ret_t " + wrapperClassName + "_Disconnect" + DukSignature());
+                    tw.WriteLine("{");
+                    tw.WriteLine(Indent(1) + wrapperClassName + "* wrapper = GetThisValueObject<" + wrapperClassName + ">(ctx, " + ClassIdentifier(wrapperClassName) + ");");
+                    tw.WriteLine(Indent(1) + "if (!wrapper->owner_) return 0;"); // Check signal owner expiration
+                    tw.WriteLine(Indent(1) + "int numArgs = duk_get_top(ctx);");
+                    tw.WriteLine(Indent(1) + "duk_push_number(ctx, (size_t)wrapper->signal_);");
+                    tw.WriteLine(Indent(1) + "duk_insert(ctx, 0);");
+                    tw.WriteLine(Indent(1) + "duk_push_global_object(ctx);");
+                    tw.WriteLine(Indent(1) + "duk_get_prop_string(ctx, -1, \"_DisconnectSignal\");");
+                    tw.WriteLine(Indent(1) + "duk_remove(ctx, -2);"); // Global object
+                    tw.WriteLine(Indent(1) + "duk_insert(ctx, 0);");
+                    tw.WriteLine(Indent(1) + "duk_pcall(ctx, numArgs + 1);");
+                    tw.WriteLine(Indent(1) + "if (duk_get_boolean(ctx, -1))"); // Last receiver disconnected
+                    tw.WriteLine(Indent(1) + "{");
+                    tw.WriteLine(Indent(2) + "HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();");
+                    tw.WriteLine(Indent(2) + "signalReceivers.Erase(wrapper->signal_);");
+                    tw.WriteLine(Indent(1) + "}");
+                    tw.WriteLine(Indent(1) + "duk_pop(ctx);"); // Result
+                    tw.WriteLine(Indent(1) + "return 0;");
+                    tw.WriteLine("}");
+                    tw.WriteLine("");
+
+                    // Emit wrapper function
+                    tw.WriteLine("static duk_ret_t " + wrapperClassName + "_Emit" + DukSignature());
+                    tw.WriteLine("{");
+                    tw.WriteLine(Indent(1) + wrapperClassName + "* wrapper = GetThisValueObject<" + wrapperClassName + ">(ctx, " + ClassIdentifier(wrapperClassName) + ");");
+                    tw.WriteLine(Indent(1) + "if (!wrapper->owner_) return 0;"); // Check signal owner expiration
+                    for (int i = 0; i < parameters.Count; ++i)
+                    {
+                        tw.WriteLine(Indent(1) + GenerateGetFromStack(parameters[i], i, "param" + i));
+                    }
+                    string callLine = "wrapper->signal_->Emit(";
+                    for (int i = 0; i < parameters.Count; ++i)
+                    {
+                        if (i > 0)
+                            callLine += ", ";
+                        callLine += "param" + i;
+                    }
+                    callLine += ");";
+                    tw.WriteLine(Indent(1) + callLine);
+                    tw.WriteLine(Indent(1) + "return 0;");
+                    tw.WriteLine("}");
+                    tw.WriteLine("");
+
+                    tw.WriteLine("static duk_ret_t " + className + "_Get_" + child.name + DukSignature());
+                    tw.WriteLine("{");
+                    tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
+                    tw.WriteLine(Indent(1) + wrapperClassName + "* wrapper = new " + wrapperClassName + "(thisObj, &thisObj->" + child.name + ");");
+                    tw.WriteLine(Indent(1) + "PushValueObject(ctx, wrapper, " + ClassIdentifier(wrapperClassName) + ", " + wrapperClassName + "_Finalizer, false);");
+                    tw.WriteLine(Indent(1) + "duk_push_c_function(ctx, " + wrapperClassName + "_Connect" + ", DUK_VARARGS);");
+                    tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"Connect\");");
+                    tw.WriteLine(Indent(1) + "duk_push_c_function(ctx, " + wrapperClassName + "_Disconnect" + ", DUK_VARARGS);");
+                    tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"Disconnect\");");
+                    tw.WriteLine(Indent(1) + "duk_push_c_function(ctx, " + wrapperClassName + "_Emit" + ", " + parameters.Count + ");");
+                    tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"Emit\");");
+                    tw.WriteLine(Indent(1) + "return 1;");
+                    tw.WriteLine("}");
+                    tw.WriteLine("");
+
+                    properties.Add(newProperty);
+                }
+                // Other POD or non-POD public variables
+                else if (child.kind == "variable" && !child.isStatic && IsScriptable(child) && child.visibilityLevel == VisibilityLevel.Public && IsSupportedType(child.type))
                 {
                     Property newProperty;
                     newProperty.name = child.name;
@@ -442,7 +608,10 @@ namespace BindingsGenerator
                         tw.WriteLine("{");
                         tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
                         tw.WriteLine(Indent(1) + GenerateGetFromStack(child, 0, child.name));
-                        tw.WriteLine(Indent(1) + "thisObj->" + child.name + " = " + child.name + ";");
+                        if (Symbol.IsPODType(child.type))
+                            tw.WriteLine(Indent(1) + "thisObj->" + child.name + " = " + child.name + ";");
+                        else
+                            tw.WriteLine(Indent(1) + "if (" + child.name + ") thisObj->" + child.name + " = *" + child.name + ";");
                         tw.WriteLine(Indent(1) + "return 0;");
                         tw.WriteLine("}");
                         tw.WriteLine("");
@@ -573,12 +742,7 @@ namespace BindingsGenerator
                                 args += ", ";
                             if (NeedDereference(child.parameters[i]))
                                 args += "*";
-                            
-                            // Instantiate shared ptr now if needed
-                            if (!child.parameters[i].BasicType().EndsWith("Ptr"))
-                                args += child.parameters[i].name;
-                            else
-                                args += child.parameters[i].BasicType() + "(" + child.parameters[i].name + ")";
+                            args += child.parameters[i].name;
                         }
                         tw.WriteLine(Indent(1) + className + "* newObj = new " + className + "(" + args + ");");
                         tw.WriteLine(Indent(1) + GeneratePushConstructorResultToStack(className, "newObj"));
@@ -607,12 +771,7 @@ namespace BindingsGenerator
                                 args += ", ";
                             if (NeedDereference(child.parameters[i]))
                                 args += "*";
-
-                            // Instantiate shared ptr now if needed
-                            if (!child.parameters[i].BasicType().EndsWith("Ptr"))
-                                args += child.parameters[i].name;
-                            else
-                                args += child.parameters[i].BasicType() + "(" + child.parameters[i].name + ")";
+                            args += child.parameters[i].name;
                         }
                         if (child.type == "void")
                         {
@@ -721,9 +880,9 @@ namespace BindingsGenerator
             foreach (Property p in properties)
             {
                 if (!p.readOnly)
-                    tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + p.name + "\", " + className + "_Get_" + p.name + ", " + classSymbol.name + "_Set_" + p.name + ");");
+                    tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + SanitatePropertyName(p.name) + "\", " + className + "_Get_" + p.name + ", " + className + "_Set_" + p.name + ");");
                 else
-                    tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + p.name + "\", " + className + "_Get_" + p.name + ", nullptr);");
+                    tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + SanitatePropertyName(p.name) + "\", " + className + "_Get_" + p.name + ", nullptr);");
             }
             tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"prototype\");");
             tw.WriteLine(Indent(1) + "duk_put_global_string(ctx, " + ClassIdentifier(className) + ");");
@@ -773,6 +932,30 @@ namespace BindingsGenerator
             else
                 return false;
         }
+        
+        static string ExtractNamespace(string className)
+        {
+            int separatorIndex = className.LastIndexOf("::");
+            if (separatorIndex > 0 && !className.StartsWith("AttributeChange"))
+                return className.Substring(0, separatorIndex);
+            else
+                return "";
+        }
+
+        static string StripNamespace(string className)
+        {
+            int separatorIndex = className.LastIndexOf("::");
+            if (separatorIndex > 0 && !className.StartsWith("AttributeChange"))
+                return className.Substring(separatorIndex + 2);
+            else
+                return className;
+        }
+
+        static string SanitatePropertyName(string name)
+        {
+            // Convention: start with lowercase letter
+            return Char.ToLower(name[0]) + name.Substring(1);
+        }
 
         static string SanitateTypeName(string type)
         {
@@ -789,6 +972,55 @@ namespace BindingsGenerator
                 t = t.Substring(7).Replace(">", "") + "Vector";
 
             return StripNamespace(t);
+        }
+
+        static string SanitateTypeNameNoPtrNoConst(string type)
+        {
+            string t = type.Trim().Replace("< ", "<").Replace(" >", ">");
+            if (t == "vec")
+                t = "float3";
+            if (t.StartsWith("Vector<"))
+                t = t.Substring(7).Replace(">", "") + "Vector";
+
+            return StripNamespace(t);
+        }
+
+        static string SanitateSignalType(string type)
+        {
+            for (;;)
+            {
+                int idx = type.IndexOf("ARG(");
+                if (idx < 0)
+                    break;
+                int idx2 = type.IndexOf(')', idx);
+                if (idx2 < 0)
+                    break;
+                ++idx2;
+                type = type.Replace(type.Substring(idx, idx2 - idx), "");
+            }
+
+            return type;
+        }
+
+        static string SanitateTemplateType(string typeName)
+        {
+            if (typeName == "Component")
+                typeName = "IComponent";
+            if (typeName == "Asset")
+                typeName = "IAsset";
+            return typeName;
+        }
+
+        static List<string> ExtractSignalParameterTypes(string type)
+        {
+            List<string> ret = new List<string>();
+            int idx = type.IndexOf('<') + 1;
+            int idx2 = type.IndexOf('>');
+            type = type.Substring(idx, idx2 - idx);
+            string[] strings = type.Split(',');
+            foreach (string s in strings)
+                ret.Add(SanitateTypeNameNoPtrNoConst(s.Trim()));
+            return ret;
         }
 
         static string SanitateTypeForFunction(string type)
@@ -820,19 +1052,17 @@ namespace BindingsGenerator
                 string templateType = t.Substring(0, t.Length - 6);
                 if (templateType == "String")
                     return true;
-                if (templateType == "Component")
-                    templateType = "IComponent";
+                templateType = SanitateTemplateType(templateType);
                 return classNames.Contains(templateType);
             }
             else if (t.EndsWith("Map") || t.EndsWith("Ptr"))
             {
                 string templateType = t.Substring(0, t.Length - 3);
-                if (templateType == "Component")
-                    templateType = "IComponent";
+                templateType = SanitateTemplateType(templateType);
                 return classNames.Contains(templateType);
             }
 
-            return t == "void" || Symbol.IsPODType(t) || classNames.Contains(t) || t == "string" || t == "String";
+            return t == "void" || Symbol.IsPODType(t) || classNames.Contains(t) || t == "string" || t == "String" || t == "Variant";
         }
 
         static bool IsBadType(string type)
@@ -850,6 +1080,21 @@ namespace BindingsGenerator
             if (Symbol.IsPODType(p.BasicType()))
                 return false;
             if (p.BasicType().Contains("string") || p.BasicType().Contains("String"))
+                return false;
+            if (p.BasicType().Contains("Variant"))
+                return false;
+
+            return true;
+        }
+
+        static bool NeedDereference(string type)
+        {
+            type = type.Trim();
+            if (type.EndsWith("*") || type.EndsWith("Ptr"))
+                return false;
+            if (Symbol.IsPODType(type))
+                return false;
+            if (type.Contains("string") || type.Contains("String") || type.Contains("Variant"))
                 return false;
 
             return true;

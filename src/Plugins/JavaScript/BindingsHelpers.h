@@ -1,10 +1,18 @@
+#pragma once
+
 #include "duktape.h"
+#include "CoreTypes.h"
+#include "Scene/IAttribute.h"
 #include <Urho3D/Core/Object.h>
-#include <Urho3D/Container/Str.h>
+#include <Urho3D/Core/Variant.h>
 #include <Urho3D/Container/Vector.h>
+#include <map>
 
 namespace JSBindings
 {
+
+/// Return type of a value object at stack index, or null if not valid
+const char* GetValueObjectType(duk_context* ctx, duk_idx_t stackIndex);
 
 /// Non-template functions
 /// Set a C++ object to a JS object at stack index, using the "obj" (pointer) and "type" (string) internal properties.
@@ -14,19 +22,34 @@ void SetValueObject(duk_context* ctx, duk_idx_t stackIndex, void* obj, const cha
 void DefineProperty(duk_context* ctx, const char* propertyName, duk_c_function getFunc, duk_c_function setFunc);
 
 /// Get a WeakPtr<Object> from a JS object.
-Urho3D::WeakPtr<Urho3D::Object>* GetWeakPtr(duk_context* ctx, duk_idx_t stackIndex);
+Tundra::WeakPtr<Tundra::Object>* GetWeakPtr(duk_context* ctx, duk_idx_t stackIndex);
 
 /// Common WeakPtr<Object> finalizer.
 duk_ret_t WeakPtr_Finalizer(duk_context* ctx);
 
-/// Push a weak-refcounted object that must derive from Urho3D::Object. Uses an internal "weak" property to store the object inside a heap-allocated weak ptr.
-void PushWeakObject(duk_context* ctx, Urho3D::Object* object);
+/// Push a weak-refcounted object that must derive from Object. Uses an internal "weak" property to store the object inside a heap-allocated weak ptr.
+void PushWeakObject(duk_context* ctx, Tundra::Object* object);
+
+/// Setup proxying for the weak-refcounted object at stack top.
+void SetupProxy(duk_context* ctx, const duk_function_list_entry* funcs);
 
 /// Get a string vector from a JS array.
-Urho3D::Vector<Urho3D::String> GetStringVector(duk_context* ctx, duk_idx_t stackIndex);
+Tundra::Vector<Tundra::String> GetStringVector(duk_context* ctx, duk_idx_t stackIndex);
 
 /// Push a string vector to JS array.
-void PushStringVector(duk_context* ctx, const Urho3D::Vector<Urho3D::String>& vector);
+void PushStringVector(duk_context* ctx, const Tundra::Vector<Tundra::String>& vector);
+
+/// Convert and push a variant.
+void PushVariant(duk_context* ctx, const Tundra::Variant& variant);
+
+/// Get a variant from JS stack.
+Tundra::Variant GetVariant(duk_context* ctx, duk_idx_t stackIndex);
+
+/// Convert and push an attribute value.
+void PushAttributeValue(duk_context* ctx, Tundra::IAttribute* attr);
+
+/// Get an attribute value from JS stack and set it into the provided attribute.
+void AssignAttributeValue(duk_context* ctx, duk_idx_t stackIndex, Tundra::IAttribute* destAttr, Tundra::AttributeChange::Type change);
 
 /// Value object template functions
 
@@ -89,6 +112,23 @@ template<class T> void PushValueObjectCopy(duk_context* ctx, const T& source, co
     duk_pop(ctx);
 }
 
+/// Push a value object on the stack. The object must have been heap-allocated and its lifetime will be managed by the JS context from this point on. Finalizer function for the object needs to be specified. Optionally set prototype.
+template<class T> void PushValueObject(duk_context* ctx, T* source, const char* typeName, duk_c_function finalizer, bool setPrototype)
+{
+    duk_push_object(ctx);
+    SetValueObject(ctx, -1, source, typeName);
+    duk_push_c_function(ctx, finalizer, 1);
+    duk_set_finalizer(ctx, -2);
+    // When pushing an object without going through the constructor, have to set prototype manually
+    if (setPrototype)
+    {
+        duk_get_global_string(ctx, typeName);
+        duk_get_prop_string(ctx, -1, "prototype");
+        duk_set_prototype(ctx, -3);
+        duk_pop(ctx);
+    }
+}
+
 /// Push the result of a value object constructor. Finalizer function for the object needs to be specified.
 template<class T> void PushConstructorResult(duk_context* ctx, T* source, const char* typeName, duk_c_function finalizer)
 {
@@ -99,7 +139,7 @@ template<class T> void PushConstructorResult(duk_context* ctx, T* source, const 
 }
 
 /// Push a vector of value objects as an array.
-template<class T> void PushValueObjectVector(duk_context* ctx, const Urho3D::Vector<T>& vector, const char* typeName, duk_c_function finalizer)
+template<class T> void PushValueObjectVector(duk_context* ctx, const Tundra::Vector<T>& vector, const char* typeName, duk_c_function finalizer)
 {
     duk_push_array(ctx);
 
@@ -114,7 +154,7 @@ template<class T> void PushValueObjectVector(duk_context* ctx, const Urho3D::Vec
 template<class T> T* GetWeakObject(duk_context* ctx, duk_idx_t stackIndex)
 {
     T* obj = nullptr;
-    Urho3D::WeakPtr<Urho3D::Object>* ptr = GetWeakPtr(ctx, stackIndex);
+    Tundra::WeakPtr<Tundra::Object>* ptr = GetWeakPtr(ctx, stackIndex);
     if (ptr)
         obj = dynamic_cast<T*>(ptr->Get());
     return obj;
@@ -141,9 +181,9 @@ template<class T> T* GetThisWeakObject(duk_context* ctx)
 }
 
 /// Get a vector of value objects from a Javascript array. Null indices are skipped.
-template<class T> Urho3D::Vector<T> GetValueObjectVector(duk_context* ctx, duk_idx_t stackIndex, const char* typeName)
+template<class T> Tundra::Vector<T> GetValueObjectVector(duk_context* ctx, duk_idx_t stackIndex, const char* typeName)
 {
-    Urho3D::Vector<T> ret;
+    Tundra::Vector<T> ret;
     if (duk_is_object(ctx, stackIndex))
     {
         duk_size_t len = duk_get_length(ctx, stackIndex);
@@ -161,9 +201,9 @@ template<class T> Urho3D::Vector<T> GetValueObjectVector(duk_context* ctx, duk_i
 }
 
 /// Get a vector of refcounted objects from a Javascript array. Null indices are skipped.
-template<class T> Urho3D::Vector<T*> GetWeakObjectVector(duk_context* ctx, duk_idx_t stackIndex)
+template<class T> Tundra::Vector<T*> GetWeakObjectVector(duk_context* ctx, duk_idx_t stackIndex)
 {
-    Urho3D::Vector<T> ret;
+    Tundra::Vector<T> ret;
     if (duk_is_object(ctx, stackIndex))
     {
         duk_size_t len = duk_get_length(ctx, stackIndex);
@@ -181,9 +221,9 @@ template<class T> Urho3D::Vector<T*> GetWeakObjectVector(duk_context* ctx, duk_i
 }
 
 /// Get a shared ptr vector of refcounted objects from a Javascript array. Null indices are skipped.
-template<class T> Urho3D::Vector<Urho3D::SharedPtr<T> > GetWeakObjectSharedPtrVector(duk_context* ctx, duk_idx_t stackIndex)
+template<class T> Tundra::Vector<Tundra::SharedPtr<T> > GetWeakObjectSharedPtrVector(duk_context* ctx, duk_idx_t stackIndex)
 {
-    Urho3D::Vector<Urho3D::SharedPtr<T> > ret;
+    Tundra::Vector<Tundra::SharedPtr<T> > ret;
     if (duk_is_object(ctx, stackIndex))
     {
         duk_size_t len = duk_get_length(ctx, stackIndex);
@@ -192,7 +232,7 @@ template<class T> Urho3D::Vector<Urho3D::SharedPtr<T> > GetWeakObjectSharedPtrVe
             duk_get_prop_index(ctx, stackIndex, i);
             T* obj = GetWeakObject<T>(ctx, -1);
             if (obj)
-                ret.Push(Urho3D::SharedPtr<T>(obj));
+                ret.Push(Tundra::SharedPtr<T>(obj));
             duk_pop(ctx);
         }
     }
@@ -201,9 +241,9 @@ template<class T> Urho3D::Vector<Urho3D::SharedPtr<T> > GetWeakObjectSharedPtrVe
 }
 
 /// Get a weak ptr vector of refcounted objects from a Javascript array. Null indices are skipped.
-template<class T> Urho3D::Vector<Urho3D::WeakPtr<T> > GetWeakObjectWeakPtrVector(duk_context* ctx, duk_idx_t stackIndex)
+template<class T> Tundra::Vector<Tundra::WeakPtr<T> > GetWeakObjectWeakPtrVector(duk_context* ctx, duk_idx_t stackIndex)
 {
-    Urho3D::Vector<Urho3D::WeakPtr<T> > ret;
+    Tundra::Vector<Tundra::WeakPtr<T> > ret;
     if (duk_is_object(ctx, stackIndex))
     {
         duk_size_t len = duk_get_length(ctx, stackIndex);
@@ -212,7 +252,7 @@ template<class T> Urho3D::Vector<Urho3D::WeakPtr<T> > GetWeakObjectWeakPtrVector
             duk_get_prop_index(ctx, stackIndex, i);
             T* obj = GetWeakObject<T>(ctx, -1);
             if (obj)
-                ret.Push(Urho3D::WeakPtr<T>(obj));
+                ret.Push(Tundra::WeakPtr<T>(obj));
             duk_pop(ctx);
         }
     }
@@ -221,7 +261,7 @@ template<class T> Urho3D::Vector<Urho3D::WeakPtr<T> > GetWeakObjectWeakPtrVector
 }
 
 /// Push a vector of weak-refcounted objects as an array. Null indices are included as null objects.
-template<class T> void PushWeakObjectVector(duk_context* ctx, const Urho3D::Vector<T*>& vector)
+template<class T> void PushWeakObjectVector(duk_context* ctx, const Tundra::Vector<T*>& vector)
 {
     duk_push_array(ctx);
 
@@ -233,7 +273,7 @@ template<class T> void PushWeakObjectVector(duk_context* ctx, const Urho3D::Vect
 }
 
 /// Push a vector of weak-refcounted objects as an array. Null indices are included as null objects.
-template<class T> void PushWeakObjectVector(duk_context* ctx, const Urho3D::Vector<Urho3D::SharedPtr<T> >& vector)
+template<class T> void PushWeakObjectVector(duk_context* ctx, const Tundra::Vector<Tundra::SharedPtr<T> >& vector)
 {
     duk_push_array(ctx);
 
@@ -245,7 +285,7 @@ template<class T> void PushWeakObjectVector(duk_context* ctx, const Urho3D::Vect
 }
 
 /// Push a vector of weak-refcounted objects as an array. Null indices are included as null objects.
-template<class T> void PushWeakObjectVector(duk_context* ctx, const Urho3D::Vector<Urho3D::WeakPtr<T> >& vector)
+template<class T> void PushWeakObjectVector(duk_context* ctx, const Tundra::Vector<Tundra::WeakPtr<T> >& vector)
 {
     duk_push_array(ctx);
 
@@ -257,27 +297,61 @@ template<class T> void PushWeakObjectVector(duk_context* ctx, const Urho3D::Vect
 }
 
 /// Push a map of weak-refcounted objects.
-template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const Urho3D::HashMap<T, Urho3D::SharedPtr<U> >& map)
+template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const Tundra::HashMap<T, Tundra::SharedPtr<U> >& map)
 {
-    duk_push_array(ctx);
+    duk_push_object(ctx);
 
-    for (typename Urho3D::HashMap<T, Urho3D::SharedPtr<U> >::ConstIterator i = map.Begin(); i != map.End(); ++i)
+    for (typename Tundra::HashMap<T, Tundra::SharedPtr<U> >::ConstIterator i = map.Begin(); i != map.End(); ++i)
     {
         PushWeakObject(ctx, i->second_.Get());
-        duk_put_prop_string(ctx, -2, Urho3D::String(i->first_).CString());
+        duk_put_prop_string(ctx, -2, Tundra::String(i->first_).CString());
+    }
+}
+
+/// Push a std::map of weak-refcounted objects.
+template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const std::map<T, Tundra::SharedPtr<U> >& map)
+{
+    duk_push_object(ctx);
+
+    for (typename std::map<T, Tundra::SharedPtr<U> >::const_iterator i = map.begin(); i != map.end(); ++i)
+    {
+        PushWeakObject(ctx, i->second.Get());
+        duk_put_prop_string(ctx, -2, Tundra::String(i->first).CString());
+    }
+}
+
+/// Push a std::map of weak-refcounted objects with custom comparator
+template<class T, class U, class V> void PushWeakObjectMap(duk_context* ctx, const std::map<T, Tundra::SharedPtr<U>, V>& map)
+{
+    duk_push_object(ctx);
+
+    for (typename std::map<T, Tundra::SharedPtr<U>, V>::const_iterator i = map.begin(); i != map.end(); ++i)
+    {
+        PushWeakObject(ctx, i->second.Get());
+        duk_put_prop_string(ctx, -2, Tundra::String(i->first).CString());
     }
 }
 
 /// Push a map of weak-refcounted objects.
-template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const Urho3D::HashMap<T, Urho3D::WeakPtr<U> >& map)
+template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const Tundra::HashMap<T, Tundra::WeakPtr<U> >& map)
 {
-    duk_push_array(ctx);
+    duk_push_object(ctx);
 
-    for (typename Urho3D::HashMap<T, Urho3D::WeakPtr<U> >::ConstIterator i = map.Begin(); i != map.End(); ++i)
+    for (typename Tundra::HashMap<T, Tundra::WeakPtr<U> >::ConstIterator i = map.Begin(); i != map.End(); ++i)
     {
         PushWeakObject(ctx, i->second_.Get());
-        duk_put_prop_string(ctx, -2, Urho3D::String(i->first_).CString());
+        duk_put_prop_string(ctx, -2, Tundra::String(i->first_).CString());
     }
 }
+
+/// Base class for signal receivers.
+class SignalReceiver : public Tundra::RefCounted
+{
+public:
+    /// Duktape context pointer.
+    duk_context* ctx_;
+    /// Key (signal pointer) which is used to lookup the receiver on the JS side.
+    void* key_;
+};
 
 }
