@@ -92,6 +92,8 @@ public:
     UIElement* Widget() const;
 
 protected:
+    void OnCloseClicked(StringHash eventType, VariantMap &eventData);
+
     ComponentContainerMap containers_;
     WindowPtr window_;
     ListViewPtr list_;

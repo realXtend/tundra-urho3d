@@ -66,9 +66,10 @@ void IAttributeEditor::Initialize()
     root_->SetLayout(LayoutMode::LM_HORIZONTAL, 2, IntRect(2, 0, 2, 0));
 
     title_ = new Text(framework_->GetContext());
-    title_->SetMinWidth(90);
-    title_->SetMaxWidth(90);
+    title_->SetMinWidth(110);
+    title_->SetMaxWidth(110);
     title_->SetStyle("Text", style);
+    title_->SetFont(title_->GetFont(), 9);
     root_->AddChild(title_);
 }
 
@@ -149,7 +150,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             pos_area->AddChild(t);
 
             LineEdit *e = new LineEdit(framework_->GetContext());
-            e->SetStyle("LineEdit", style);
+            e->SetStyle("LineEditSmall", style);
             pos_area->AddChild(e);
             e->SetCursorPosition(0);
             data_["x_pos_edit"] = e;
@@ -162,7 +163,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             pos_area->AddChild(t);
 
             e = new LineEdit(framework_->GetContext());
-            e->SetStyle("LineEdit", style);
+            e->SetStyle("LineEditSmall", style);
             e->SetCursorPosition(0);
             pos_area->AddChild(e);
             data_["y_pos_edit"] = e;
@@ -175,7 +176,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             pos_area->AddChild(t);
 
             e = new LineEdit(framework_->GetContext());
-            e->SetStyle("LineEdit", style);
+            e->SetStyle("LineEditSmall", style);
             e->SetCursorPosition(0);
             pos_area->AddChild(e);
             data_["z_pos_edit"] = e;
@@ -197,7 +198,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             rot_area->AddChild(t);
 
             LineEdit *e = new LineEdit(framework_->GetContext());
-            e->SetStyle("LineEdit", style);
+            e->SetStyle("LineEditSmall", style);
             rot_area->AddChild(e);
             e->SetCursorPosition(0);
             data_["x_rot_edit"] = e;
@@ -210,7 +211,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             rot_area->AddChild(t);
 
             e = new LineEdit(framework_->GetContext());
-            e->SetStyle("LineEdit", style);
+            e->SetStyle("LineEditSmall", style);
             e->SetCursorPosition(0);
             rot_area->AddChild(e);
             data_["y_rot_edit"] = e;
@@ -223,7 +224,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             rot_area->AddChild(t);
 
             e = new LineEdit(framework_->GetContext());
-            e->SetStyle("LineEdit", style);
+            e->SetStyle("LineEditSmall", style);
             e->SetCursorPosition(0);
             rot_area->AddChild(e);
             data_["z_rot_edit"] = e;
@@ -245,7 +246,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             scl_area->AddChild(t);
 
             LineEdit *e = new LineEdit(framework_->GetContext());
-            e->SetStyle("LineEdit", style);
+            e->SetStyle("LineEditSmall", style);
             scl_area->AddChild(e);
             e->SetCursorPosition(0);
             data_["x_scl_edit"] = e;
@@ -258,7 +259,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             scl_area->AddChild(t);
 
             e = new LineEdit(framework_->GetContext());
-            e->SetStyle("LineEdit", style);
+            e->SetStyle("LineEditSmall", style);
             e->SetCursorPosition(0);
             scl_area->AddChild(e);
             data_["y_scl_edit"] = e;
@@ -271,7 +272,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             scl_area->AddChild(t);
 
             e = new LineEdit(framework_->GetContext());
-            e->SetStyle("LineEdit", style);
+            e->SetStyle("LineEditSmall", style);
             e->SetCursorPosition(0);
             scl_area->AddChild(e);
             data_["z_scl_edit"] = e;
@@ -364,7 +365,7 @@ template<> void AttributeEditor<Vector3>::Initialize()
         element->AddChild(t);
 
         LineEdit *e = new LineEdit(framework_->GetContext());
-        e->SetStyle("LineEdit", style);
+        e->SetStyle("LineEditSmall", style);
         element->AddChild(e);
         e->SetCursorPosition(0);
         data_["x_edit"] = e;
@@ -377,7 +378,7 @@ template<> void AttributeEditor<Vector3>::Initialize()
         element->AddChild(t);
 
         e = new LineEdit(framework_->GetContext());
-        e->SetStyle("LineEdit", style);
+        e->SetStyle("LineEditSmall", style);
         e->SetCursorPosition(0);
         element->AddChild(e);
         data_["y_edit"] = e;
@@ -390,7 +391,7 @@ template<> void AttributeEditor<Vector3>::Initialize()
         element->AddChild(t);
 
         e = new LineEdit(framework_->GetContext());
-        e->SetStyle("LineEdit", style);
+        e->SetStyle("LineEditSmall", style);
         e->SetCursorPosition(0);
         element->AddChild(e);
         data_["z_edit"] = e;
@@ -436,7 +437,7 @@ template<> void AttributeEditor<String>::Initialize()
 
     LineEdit *e = new LineEdit(framework_->GetContext());
     e->SetName("LineEdit");
-    e->SetStyle("LineEdit", style);
+    e->SetStyle("LineEditSmall", style);
     e->SetCursorPosition(0);
     data_["line_edit"] = e;
     root_->AddChild(e);
@@ -445,7 +446,7 @@ template<> void AttributeEditor<String>::Initialize()
 
 template<> void AttributeEditor<String>::Update()
 {
-    LineEdit *e = dynamic_cast<LineEdit*>(root_->GetChild("LineEdit", true));
+    LineEdit *e = dynamic_cast<LineEdit*>(data_["line_edit"].GetPtr());
     e->SetText(Value());
     e->SetCursorPosition(0);
 }

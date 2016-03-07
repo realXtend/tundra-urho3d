@@ -136,8 +136,8 @@ ECEditorWindow::ECEditorWindow(Framework *framework) :
 
     window_ = new Window(framework->GetContext());
     window_->SetLayout(LayoutMode::LM_VERTICAL, 2, IntRect(2, 2, 2, 2));
-    window_->SetSize(IntVector2(300, 500));
-    window_->SetMinSize(IntVector2(300, 500));
+    window_->SetSize(IntVector2(350, 500));
+    window_->SetMinSize(IntVector2(350, 500));
     window_->SetStyle("Window", style);
     window_->SetMovable(true);
     window_->SetResizable(true);
@@ -157,6 +157,8 @@ ECEditorWindow::ECEditorWindow(Framework *framework) :
             button->SetPosition(IntVector2(-3, 0));
             topBar->AddChild(button);
 
+            SubscribeToEvent(E_PRESSED, URHO3D_HANDLER(ECEditorWindow, OnCloseClicked));
+
             Text *windowHeader = new Text(framework->GetContext());
             windowHeader->SetStyle("Text", style);
             windowHeader->SetName("WindowHeader");
@@ -172,15 +174,10 @@ ECEditorWindow::ECEditorWindow(Framework *framework) :
     list_->SetHighlightMode(HighlightMode::HM_ALWAYS);
     list_->SetStyle("ListView", style);
     window_->AddChild(list_);
-
-    {
-        
-    }
 }
 
 ECEditorWindow::~ECEditorWindow()
 {
-    LogWarning("ECEditorWindow");
     Clear();
     if (window_)
         window_->Remove();
@@ -225,9 +222,12 @@ void ECEditorWindow::RemoveEntity(entity_id_t id, bool updateUi)
 
 void ECEditorWindow::Clear()
 {
+    ComponentContainerPtr comp;
     for (unsigned int i = 0; i < containers_.Values().Size(); ++i)
     {
-        containers_.Values()[i].Reset();
+        comp = containers_.Values()[i];
+        list_->RemoveItem(list_->FindItem(comp->Widget()));
+        comp.Reset();
     }
     containers_.Clear();
 }
@@ -256,6 +256,11 @@ void ECEditorWindow::Refresh()
 UIElement *ECEditorWindow::Widget() const
 {
     return window_;
+}
+
+void ECEditorWindow::OnCloseClicked(StringHash /*eventType*/, VariantMap &/*eventData*/)
+{
+    Hide();
 }
 
 }

@@ -154,6 +154,13 @@
         <attribute name="Min Size" value="0 11" />
         <attribute name="Max Size" value="2147483647 11" />
     </element>
+    <element type="LineEditSmall" style="LineEdit">
+        <element type="Text" internal="true">
+            <attribute name="Font Size" value="9" />
+            <attribute name="Color" value="0.9 1 0.9 1" />
+            <attribute name="Selection Color" value="0.3 0.4 0.7 1" />
+        </element>
+    </element>
 
     <!-- Base styles that get inherited and extended -->
 
