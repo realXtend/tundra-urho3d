@@ -218,19 +218,20 @@ namespace BindingsGenerator
                 return "";
         }
 
-        static string GenerateGetFromStack(Symbol classSymbol, int stackIndex, string varName, bool nullCheck = false)
+        static string GenerateGetFromStack(Symbol classSymbol, int stackIndex, string varName)
         {
             string typeName = classSymbol.type;
             if (typeName == null || typeName.Length == 0)
                 typeName = classSymbol.name;
 
-            return GenerateGetFromStack(typeName, stackIndex, varName, nullCheck);
+            return GenerateGetFromStack(typeName, stackIndex, varName);
         }
 
-        static string GenerateGetFromStack(string typeName, int stackIndex, string varName, bool nullCheck = false)
+        static string GenerateGetFromStack(string typeName, int stackIndex, string varName)
         {
-            typeName = SanitateTypeName(typeName);
+            bool isRawPtr = typeName.EndsWith("*");
             bool isPtr = false;
+            typeName = SanitateTypeName(typeName);
 
             if (typeName.EndsWith("Ptr"))
             {
@@ -276,36 +277,28 @@ namespace BindingsGenerator
 
                 if (!IsRefCounted(typeName))
                 {
-                    if (!nullCheck)
-                        return typeName + "* " + varName + " = GetValueObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
+                    if (!isRawPtr)
+                        return typeName + "& " + varName + " = *GetCheckedValueObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
                     else
-                        return typeName + "* " + varName + " = GetCheckedValueObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
+                        return typeName + "* " + varName + " = *GetValueObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
                 }
                 else
                 {
                     if (!isPtr)
-                    {
-                        if (!nullCheck)
-                            return typeName + "* " + varName + " = GetWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
-                        else
-                            return typeName + "* " + varName + " = GetCheckedWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
-                    }
+                        return typeName + "* " + varName + " = GetWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
                     else
-                    {
-                        if (!nullCheck)
-                            return "SharedPtr<" + typeName + "> " + varName + "(GetWeakObject<" + typeName + ">(ctx, " + stackIndex + "));";
-                        else
-                            return "SharedPtr<" + typeName + "> " + varName + "(GetCheckedWeakObject<" + typeName + ">(ctx, " + stackIndex + "));";
-                    }
+                        return "SharedPtr<" + typeName + "> " + varName + "(GetWeakObject<" + typeName + ">(ctx, " + stackIndex + "));";
                 }
             }
             else
                 throw new System.Exception("Unsupported type " + typeName + " for GenerateGetVariable()!");
         }
 
-        static string GenerateGetFromStackDefaultValue(string typeName, int stackIndex, string varName, bool nullCheck, int paramIndex, string defaultValue)
+        static string GenerateGetFromStackDefaultValue(string typeName, int stackIndex, string varName, int paramIndex, string defaultValue)
         {
-            string ret = GenerateGetFromStack(typeName, stackIndex, varName, nullCheck);
+            string ret = GenerateGetFromStack(typeName, stackIndex, varName);
+            // Temp-constructed default parameter + reference is not safe, therefore convert to value
+            ret = ret.Replace("& ", " ");
             int equalsIdx = ret.IndexOf('=');
             ret = ret.Insert(equalsIdx + 2, "numArgs > " + paramIndex + " ? ");
             ret = ret.Substring(0, ret.Length - 1);
@@ -433,7 +426,7 @@ namespace BindingsGenerator
         {
             tw.WriteLine("duk_ret_t " + typeName + "_Finalizer" + DukSignature());
             tw.WriteLine("{");
-            tw.WriteLine(Indent(1) + GenerateGetFromStack(typeName, 0, "obj"));
+            tw.WriteLine(Indent(1) + typeName + "* obj = GetValueObject<" + typeName + ">(ctx, 0, " + ClassIdentifier(typeName) + ");");
             tw.WriteLine(Indent(1) + "if (obj)");
             tw.WriteLine(Indent(1) + "{");
             tw.WriteLine(Indent(2) + "delete obj;");
@@ -637,10 +630,7 @@ namespace BindingsGenerator
                         tw.WriteLine("{");
                         tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
                         tw.WriteLine(Indent(1) + GenerateGetFromStack(child, 0, child.name));
-                        if (Symbol.IsPODType(child.type) || child.type == "String" || child.type == "string" || child.type.Contains("Vector"))
-                            tw.WriteLine(Indent(1) + "thisObj->" + child.name + " = " + child.name + ";");
-                        else
-                            tw.WriteLine(Indent(1) + "if (" + child.name + ") thisObj->" + child.name + " = *" + child.name + ";");
+                        tw.WriteLine(Indent(1) + "thisObj->" + child.name + " = " + child.name + ";");
                         tw.WriteLine(Indent(1) + "return 0;");
                         tw.WriteLine("}");
                         tw.WriteLine("");
@@ -791,14 +781,12 @@ namespace BindingsGenerator
                         for (int i = 0; i < child.parameters.Count; ++i)
                         {
                             if (child.parameters[i].defaultValue == null || child.parameters[i].defaultValue.Length == 0)
-                                tw.WriteLine(Indent(1) + GenerateGetFromStack(child.parameters[i].BasicType(), i, child.parameters[i].name, child.parameters[i].IsAReference()));
+                                tw.WriteLine(Indent(1) + GenerateGetFromStack(child.parameters[i].BasicType(), i, child.parameters[i].name));
                             else
-                                tw.WriteLine(Indent(1) + GenerateGetFromStackDefaultValue(child.parameters[i].BasicType(), i, child.parameters[i].name, child.parameters[i].IsAReference(), i, child.parameters[i].defaultValue));
+                                tw.WriteLine(Indent(1) + GenerateGetFromStackDefaultValue(child.parameters[i].BasicType(), i, child.parameters[i].name, i, child.parameters[i].defaultValue));
                             
                             if (i > 0)
                                 args += ", ";
-                            if (NeedDereference(child.parameters[i]))
-                                args += "*";
                             args += child.parameters[i].name;
                         }
                         tw.WriteLine(Indent(1) + className + "* newObj = new " + className + "(" + args + ");");
@@ -827,14 +815,12 @@ namespace BindingsGenerator
                         for (int i = 0; i < child.parameters.Count; ++i)
                         {
                             if (child.parameters[i].defaultValue == null || child.parameters[i].defaultValue.Length == 0)
-                                tw.WriteLine(Indent(1) + GenerateGetFromStack(child.parameters[i].BasicType(), i, child.parameters[i].name, child.parameters[i].IsAReference()));
+                                tw.WriteLine(Indent(1) + GenerateGetFromStack(child.parameters[i].BasicType(), i, child.parameters[i].name));
                             else
-                                tw.WriteLine(Indent(1) + GenerateGetFromStackDefaultValue(child.parameters[i].BasicType(), i, child.parameters[i].name, child.parameters[i].IsAReference(), i, child.parameters[i].defaultValue));
+                                tw.WriteLine(Indent(1) + GenerateGetFromStackDefaultValue(child.parameters[i].BasicType(), i, child.parameters[i].name, i, child.parameters[i].defaultValue));
 
                             if (i > 0)
                                 args += ", ";
-                            if (NeedDereference(child.parameters[i]))
-                                args += "*";
                             args += child.parameters[i].name;
                         }
                         if (child.type == "void")
@@ -1159,6 +1145,7 @@ namespace BindingsGenerator
             return type.Contains("bool *") || type.EndsWith("float *") || type.EndsWith("float3 *") || type.EndsWith("vec *") || type.Contains("std::") || type.Contains("char*") || type.Contains("char *") || type.Contains("[");
         }
 
+        /*
         static bool NeedDereference(Parameter p)
         {
             if (p.IsAPointer() || p.BasicType().EndsWith("Ptr"))
@@ -1185,6 +1172,7 @@ namespace BindingsGenerator
 
             return true;
         }
+        */
 
         static public string Indent(int num)
         {

@@ -853,8 +853,8 @@ static duk_ret_t AssetAPI_ResourceTypeForAssetRef_String(duk_context* ctx)
 static duk_ret_t AssetAPI_ResourceTypeForAssetRef_AssetReference(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    AssetReference* ref = GetCheckedValueObject<AssetReference>(ctx, 0, AssetReference_ID);
-    String ret = thisObj->ResourceTypeForAssetRef(*ref);
+    AssetReference& ref = *GetCheckedValueObject<AssetReference>(ctx, 0, AssetReference_ID);
+    String ret = thisObj->ResourceTypeForAssetRef(ref);
     duk_push_string(ctx, ret.CString());
     return 1;
 }

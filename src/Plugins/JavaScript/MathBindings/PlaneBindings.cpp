@@ -83,8 +83,8 @@ duk_ret_t Plane_Finalizer(duk_context* ctx)
 static duk_ret_t Plane_Set_normal(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* normal = GetValueObject<float3>(ctx, 0, float3_ID);
-    if (normal) thisObj->normal = *normal;
+    float3& normal = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->normal = normal;
     return 0;
 }
 
@@ -119,55 +119,55 @@ static duk_ret_t Plane_Ctor(duk_context* ctx)
 
 static duk_ret_t Plane_Ctor_float3_float(duk_context* ctx)
 {
-    float3* normal = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& normal = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
     float d = (float)duk_require_number(ctx, 1);
-    Plane* newObj = new Plane(*normal, d);
+    Plane* newObj = new Plane(normal, d);
     PushConstructorResult<Plane>(ctx, newObj, Plane_ID, Plane_Finalizer);
     return 0;
 }
 
 static duk_ret_t Plane_Ctor_float3_float3_float3(duk_context* ctx)
 {
-    float3* v1 = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* v2 = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    float3* v3 = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
-    Plane* newObj = new Plane(*v1, *v2, *v3);
+    float3& v1 = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& v2 = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3& v3 = *GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    Plane* newObj = new Plane(v1, v2, v3);
     PushConstructorResult<Plane>(ctx, newObj, Plane_ID, Plane_Finalizer);
     return 0;
 }
 
 static duk_ret_t Plane_Ctor_float3_float3(duk_context* ctx)
 {
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* normal = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    Plane* newObj = new Plane(*point, *normal);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& normal = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    Plane* newObj = new Plane(point, normal);
     PushConstructorResult<Plane>(ctx, newObj, Plane_ID, Plane_Finalizer);
     return 0;
 }
 
 static duk_ret_t Plane_Ctor_Ray_float3(duk_context* ctx)
 {
-    Ray* line = GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
-    float3* normal = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    Plane* newObj = new Plane(*line, *normal);
+    Ray& line = *GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
+    float3& normal = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    Plane* newObj = new Plane(line, normal);
     PushConstructorResult<Plane>(ctx, newObj, Plane_ID, Plane_Finalizer);
     return 0;
 }
 
 static duk_ret_t Plane_Ctor_Line_float3(duk_context* ctx)
 {
-    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_ID);
-    float3* normal = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    Plane* newObj = new Plane(*line, *normal);
+    Line& line = *GetCheckedValueObject<Line>(ctx, 0, Line_ID);
+    float3& normal = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    Plane* newObj = new Plane(line, normal);
     PushConstructorResult<Plane>(ctx, newObj, Plane_ID, Plane_Finalizer);
     return 0;
 }
 
 static duk_ret_t Plane_Ctor_LineSegment_float3(duk_context* ctx)
 {
-    LineSegment* line = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
-    float3* normal = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    Plane* newObj = new Plane(*line, *normal);
+    LineSegment& line = *GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
+    float3& normal = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    Plane* newObj = new Plane(line, normal);
     PushConstructorResult<Plane>(ctx, newObj, Plane_ID, Plane_Finalizer);
     return 0;
 }
@@ -183,19 +183,19 @@ static duk_ret_t Plane_IsDegenerate(duk_context* ctx)
 static duk_ret_t Plane_Set_float3_float3_float3(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* v1 = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* v2 = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    float3* v3 = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
-    thisObj->Set(*v1, *v2, *v3);
+    float3& v1 = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& v2 = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3& v3 = *GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    thisObj->Set(v1, v2, v3);
     return 0;
 }
 
 static duk_ret_t Plane_Set_float3_float3(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* normal = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    thisObj->Set(*point, *normal);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& normal = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    thisObj->Set(point, normal);
     return 0;
 }
 
@@ -229,8 +229,8 @@ static duk_ret_t Plane_Point_float_float_float3(duk_context* ctx)
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
     float u = (float)duk_require_number(ctx, 0);
     float v = (float)duk_require_number(ctx, 1);
-    float3* referenceOrigin = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
-    float3 ret = thisObj->Point(u, v, *referenceOrigin);
+    float3& referenceOrigin = *GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    float3 ret = thisObj->Point(u, v, referenceOrigin);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
@@ -238,48 +238,48 @@ static duk_ret_t Plane_Point_float_float_float3(duk_context* ctx)
 static duk_ret_t Plane_Translate_float3(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* offset = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    thisObj->Translate(*offset);
+    float3& offset = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->Translate(offset);
     return 0;
 }
 
 static duk_ret_t Plane_Transform_float3x3(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3x3* transform = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
-    thisObj->Transform(*transform);
+    float3x3& transform = *GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
+    thisObj->Transform(transform);
     return 0;
 }
 
 static duk_ret_t Plane_Transform_float3x4(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3x4* transform = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
-    thisObj->Transform(*transform);
+    float3x4& transform = *GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
+    thisObj->Transform(transform);
     return 0;
 }
 
 static duk_ret_t Plane_Transform_float4x4(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float4x4* transform = GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
-    thisObj->Transform(*transform);
+    float4x4& transform = *GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
+    thisObj->Transform(transform);
     return 0;
 }
 
 static duk_ret_t Plane_Transform_Quat(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Quat* transform = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
-    thisObj->Transform(*transform);
+    Quat& transform = *GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
+    thisObj->Transform(transform);
     return 0;
 }
 
 static duk_ret_t Plane_IsInPositiveDirection_float3(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* directionVector = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    bool ret = thisObj->IsInPositiveDirection(*directionVector);
+    float3& directionVector = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    bool ret = thisObj->IsInPositiveDirection(directionVector);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -287,8 +287,8 @@ static duk_ret_t Plane_IsInPositiveDirection_float3(duk_context* ctx)
 static duk_ret_t Plane_IsOnPositiveSide_float3(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    bool ret = thisObj->IsOnPositiveSide(*point);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    bool ret = thisObj->IsOnPositiveSide(point);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -296,8 +296,8 @@ static duk_ret_t Plane_IsOnPositiveSide_float3(duk_context* ctx)
 static duk_ret_t Plane_ExamineSide_Triangle(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
-    int ret = thisObj->ExamineSide(*triangle);
+    Triangle& triangle = *GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
+    int ret = thisObj->ExamineSide(triangle);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -305,9 +305,9 @@ static duk_ret_t Plane_ExamineSide_Triangle(duk_context* ctx)
 static duk_ret_t Plane_AreOnSameSide_float3_float3(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* p1 = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* p2 = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    bool ret = thisObj->AreOnSameSide(*p1, *p2);
+    float3& p1 = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& p2 = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    bool ret = thisObj->AreOnSameSide(p1, p2);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -315,8 +315,8 @@ static duk_ret_t Plane_AreOnSameSide_float3_float3(duk_context* ctx)
 static duk_ret_t Plane_Distance_float3(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float ret = thisObj->Distance(*point);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float ret = thisObj->Distance(point);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -324,8 +324,8 @@ static duk_ret_t Plane_Distance_float3(duk_context* ctx)
 static duk_ret_t Plane_Distance_LineSegment(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
-    float ret = thisObj->Distance(*lineSegment);
+    LineSegment& lineSegment = *GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
+    float ret = thisObj->Distance(lineSegment);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -333,8 +333,8 @@ static duk_ret_t Plane_Distance_LineSegment(duk_context* ctx)
 static duk_ret_t Plane_Distance_Sphere(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
-    float ret = thisObj->Distance(*sphere);
+    Sphere& sphere = *GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
+    float ret = thisObj->Distance(sphere);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -342,8 +342,8 @@ static duk_ret_t Plane_Distance_Sphere(duk_context* ctx)
 static duk_ret_t Plane_Distance_Capsule(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
-    float ret = thisObj->Distance(*capsule);
+    Capsule& capsule = *GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
+    float ret = thisObj->Distance(capsule);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -351,8 +351,8 @@ static duk_ret_t Plane_Distance_Capsule(duk_context* ctx)
 static duk_ret_t Plane_SignedDistance_float3(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float ret = thisObj->SignedDistance(*point);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float ret = thisObj->SignedDistance(point);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -360,8 +360,8 @@ static duk_ret_t Plane_SignedDistance_float3(duk_context* ctx)
 static duk_ret_t Plane_SignedDistance_AABB(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
-    float ret = thisObj->SignedDistance(*aabb);
+    AABB& aabb = *GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
+    float ret = thisObj->SignedDistance(aabb);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -369,8 +369,8 @@ static duk_ret_t Plane_SignedDistance_AABB(duk_context* ctx)
 static duk_ret_t Plane_SignedDistance_OBB(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
-    float ret = thisObj->SignedDistance(*obb);
+    OBB& obb = *GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
+    float ret = thisObj->SignedDistance(obb);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -378,8 +378,8 @@ static duk_ret_t Plane_SignedDistance_OBB(duk_context* ctx)
 static duk_ret_t Plane_SignedDistance_Capsule(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
-    float ret = thisObj->SignedDistance(*capsule);
+    Capsule& capsule = *GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
+    float ret = thisObj->SignedDistance(capsule);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -387,8 +387,8 @@ static duk_ret_t Plane_SignedDistance_Capsule(duk_context* ctx)
 static duk_ret_t Plane_SignedDistance_Frustum(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
-    float ret = thisObj->SignedDistance(*frustum);
+    Frustum& frustum = *GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
+    float ret = thisObj->SignedDistance(frustum);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -396,8 +396,8 @@ static duk_ret_t Plane_SignedDistance_Frustum(duk_context* ctx)
 static duk_ret_t Plane_SignedDistance_Line(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_ID);
-    float ret = thisObj->SignedDistance(*line);
+    Line& line = *GetCheckedValueObject<Line>(ctx, 0, Line_ID);
+    float ret = thisObj->SignedDistance(line);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -405,8 +405,8 @@ static duk_ret_t Plane_SignedDistance_Line(duk_context* ctx)
 static duk_ret_t Plane_SignedDistance_LineSegment(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
-    float ret = thisObj->SignedDistance(*lineSegment);
+    LineSegment& lineSegment = *GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
+    float ret = thisObj->SignedDistance(lineSegment);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -414,8 +414,8 @@ static duk_ret_t Plane_SignedDistance_LineSegment(duk_context* ctx)
 static duk_ret_t Plane_SignedDistance_Ray(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Ray* ray = GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
-    float ret = thisObj->SignedDistance(*ray);
+    Ray& ray = *GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
+    float ret = thisObj->SignedDistance(ray);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -423,8 +423,8 @@ static duk_ret_t Plane_SignedDistance_Ray(duk_context* ctx)
 static duk_ret_t Plane_SignedDistance_Sphere(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
-    float ret = thisObj->SignedDistance(*sphere);
+    Sphere& sphere = *GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
+    float ret = thisObj->SignedDistance(sphere);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -432,8 +432,8 @@ static duk_ret_t Plane_SignedDistance_Sphere(duk_context* ctx)
 static duk_ret_t Plane_SignedDistance_Triangle(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
-    float ret = thisObj->SignedDistance(*triangle);
+    Triangle& triangle = *GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
+    float ret = thisObj->SignedDistance(triangle);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -449,8 +449,8 @@ static duk_ret_t Plane_OrthoProjection(duk_context* ctx)
 static duk_ret_t Plane_Project_float3(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3 ret = thisObj->Project(*point);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->Project(point);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
@@ -458,8 +458,8 @@ static duk_ret_t Plane_Project_float3(duk_context* ctx)
 static duk_ret_t Plane_Project_LineSegment(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
-    LineSegment ret = thisObj->Project(*lineSegment);
+    LineSegment& lineSegment = *GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
+    LineSegment ret = thisObj->Project(lineSegment);
     PushValueObjectCopy<LineSegment>(ctx, ret, LineSegment_ID, LineSegment_Finalizer);
     return 1;
 }
@@ -467,8 +467,8 @@ static duk_ret_t Plane_Project_LineSegment(duk_context* ctx)
 static duk_ret_t Plane_Project_Triangle(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
-    Triangle ret = thisObj->Project(*triangle);
+    Triangle& triangle = *GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
+    Triangle ret = thisObj->Project(triangle);
     PushValueObjectCopy<Triangle>(ctx, ret, Triangle_ID, Triangle_Finalizer);
     return 1;
 }
@@ -476,8 +476,8 @@ static duk_ret_t Plane_Project_Triangle(duk_context* ctx)
 static duk_ret_t Plane_ProjectToNegativeHalf_float3(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3 ret = thisObj->ProjectToNegativeHalf(*point);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ProjectToNegativeHalf(point);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
@@ -485,8 +485,8 @@ static duk_ret_t Plane_ProjectToNegativeHalf_float3(duk_context* ctx)
 static duk_ret_t Plane_ProjectToPositiveHalf_float3(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3 ret = thisObj->ProjectToPositiveHalf(*point);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ProjectToPositiveHalf(point);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
@@ -502,8 +502,8 @@ static duk_ret_t Plane_MirrorMatrix(duk_context* ctx)
 static duk_ret_t Plane_Mirror_float3(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3 ret = thisObj->Mirror(*point);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->Mirror(point);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
@@ -511,10 +511,10 @@ static duk_ret_t Plane_Mirror_float3(duk_context* ctx)
 static duk_ret_t Plane_Refract_float3_float_float(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* vec = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& vec = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
     float negativeSideRefractionIndex = (float)duk_require_number(ctx, 1);
     float positiveSideRefractionIndex = (float)duk_require_number(ctx, 2);
-    float3 ret = thisObj->Refract(*vec, negativeSideRefractionIndex, positiveSideRefractionIndex);
+    float3 ret = thisObj->Refract(vec, negativeSideRefractionIndex, positiveSideRefractionIndex);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
@@ -522,8 +522,8 @@ static duk_ret_t Plane_Refract_float3_float_float(duk_context* ctx)
 static duk_ret_t Plane_ClosestPoint_float3(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3 ret = thisObj->ClosestPoint(*point);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ClosestPoint(point);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
@@ -531,8 +531,8 @@ static duk_ret_t Plane_ClosestPoint_float3(duk_context* ctx)
 static duk_ret_t Plane_ClosestPoint_Ray(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Ray* ray = GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
-    float3 ret = thisObj->ClosestPoint(*ray);
+    Ray& ray = *GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
+    float3 ret = thisObj->ClosestPoint(ray);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
@@ -540,88 +540,96 @@ static duk_ret_t Plane_ClosestPoint_Ray(duk_context* ctx)
 static duk_ret_t Plane_ClosestPoint_LineSegment(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
-    float3 ret = thisObj->ClosestPoint(*lineSegment);
+    LineSegment& lineSegment = *GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
+    float3 ret = thisObj->ClosestPoint(lineSegment);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
 
 static duk_ret_t Plane_Contains_float3_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float epsilon = (float)duk_require_number(ctx, 1);
-    bool ret = thisObj->Contains(*point, epsilon);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float epsilon = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-3f;
+    bool ret = thisObj->Contains(point, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
 
 static duk_ret_t Plane_Contains_Line_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_ID);
-    float epsilon = (float)duk_require_number(ctx, 1);
-    bool ret = thisObj->Contains(*line, epsilon);
+    Line& line = *GetCheckedValueObject<Line>(ctx, 0, Line_ID);
+    float epsilon = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-3f;
+    bool ret = thisObj->Contains(line, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
 
 static duk_ret_t Plane_Contains_Ray_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Ray* ray = GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
-    float epsilon = (float)duk_require_number(ctx, 1);
-    bool ret = thisObj->Contains(*ray, epsilon);
+    Ray& ray = *GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
+    float epsilon = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-3f;
+    bool ret = thisObj->Contains(ray, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
 
 static duk_ret_t Plane_Contains_LineSegment_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
-    float epsilon = (float)duk_require_number(ctx, 1);
-    bool ret = thisObj->Contains(*lineSegment, epsilon);
+    LineSegment& lineSegment = *GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
+    float epsilon = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-3f;
+    bool ret = thisObj->Contains(lineSegment, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
 
 static duk_ret_t Plane_Contains_Triangle_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
-    float epsilon = (float)duk_require_number(ctx, 1);
-    bool ret = thisObj->Contains(*triangle, epsilon);
+    Triangle& triangle = *GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
+    float epsilon = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-3f;
+    bool ret = thisObj->Contains(triangle, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
 
 static duk_ret_t Plane_Contains_Circle_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Circle* circle = GetCheckedValueObject<Circle>(ctx, 0, Circle_ID);
-    float epsilon = (float)duk_require_number(ctx, 1);
-    bool ret = thisObj->Contains(*circle, epsilon);
+    Circle& circle = *GetCheckedValueObject<Circle>(ctx, 0, Circle_ID);
+    float epsilon = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-3f;
+    bool ret = thisObj->Contains(circle, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
 
 static duk_ret_t Plane_SetEquals_Plane_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
-    float epsilon = (float)duk_require_number(ctx, 1);
-    bool ret = thisObj->SetEquals(*plane, epsilon);
+    Plane& plane = *GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
+    float epsilon = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-3f;
+    bool ret = thisObj->SetEquals(plane, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
 
 static duk_ret_t Plane_Equals_Plane_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Plane* other = GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
-    float epsilon = (float)duk_require_number(ctx, 1);
-    bool ret = thisObj->Equals(*other, epsilon);
+    Plane& other = *GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
+    float epsilon = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-3f;
+    bool ret = thisObj->Equals(other, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -629,18 +637,19 @@ static duk_ret_t Plane_Equals_Plane_float(duk_context* ctx)
 static duk_ret_t Plane_BitEquals_Plane(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Plane* other = GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
-    bool ret = thisObj->BitEquals(*other);
+    Plane& other = *GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
+    bool ret = thisObj->BitEquals(other);
     duk_push_boolean(ctx, ret);
     return 1;
 }
 
 static duk_ret_t Plane_IsParallel_Plane_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
-    float epsilon = (float)duk_require_number(ctx, 1);
-    bool ret = thisObj->IsParallel(*plane, epsilon);
+    Plane& plane = *GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
+    float epsilon = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-3f;
+    bool ret = thisObj->IsParallel(plane, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -648,8 +657,8 @@ static duk_ret_t Plane_IsParallel_Plane_float(duk_context* ctx)
 static duk_ret_t Plane_DihedralAngle_Plane(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
-    float ret = thisObj->DihedralAngle(*plane);
+    Plane& plane = *GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
+    float ret = thisObj->DihedralAngle(plane);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -657,8 +666,8 @@ static duk_ret_t Plane_DihedralAngle_Plane(duk_context* ctx)
 static duk_ret_t Plane_Intersects_Sphere(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
-    bool ret = thisObj->Intersects(*sphere);
+    Sphere& sphere = *GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
+    bool ret = thisObj->Intersects(sphere);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -666,8 +675,8 @@ static duk_ret_t Plane_Intersects_Sphere(duk_context* ctx)
 static duk_ret_t Plane_Intersects_AABB(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
-    bool ret = thisObj->Intersects(*aabb);
+    AABB& aabb = *GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
+    bool ret = thisObj->Intersects(aabb);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -675,8 +684,8 @@ static duk_ret_t Plane_Intersects_AABB(duk_context* ctx)
 static duk_ret_t Plane_Intersects_OBB(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
-    bool ret = thisObj->Intersects(*obb);
+    OBB& obb = *GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
+    bool ret = thisObj->Intersects(obb);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -684,8 +693,8 @@ static duk_ret_t Plane_Intersects_OBB(duk_context* ctx)
 static duk_ret_t Plane_Intersects_Triangle(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
-    bool ret = thisObj->Intersects(*triangle);
+    Triangle& triangle = *GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
+    bool ret = thisObj->Intersects(triangle);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -693,8 +702,8 @@ static duk_ret_t Plane_Intersects_Triangle(duk_context* ctx)
 static duk_ret_t Plane_Intersects_Frustum(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
-    bool ret = thisObj->Intersects(*frustum);
+    Frustum& frustum = *GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
+    bool ret = thisObj->Intersects(frustum);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -702,8 +711,8 @@ static duk_ret_t Plane_Intersects_Frustum(duk_context* ctx)
 static duk_ret_t Plane_Intersects_Capsule(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
-    bool ret = thisObj->Intersects(*capsule);
+    Capsule& capsule = *GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
+    bool ret = thisObj->Intersects(capsule);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -711,8 +720,8 @@ static duk_ret_t Plane_Intersects_Capsule(duk_context* ctx)
 static duk_ret_t Plane_Intersects_Circle(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Circle* circle = GetCheckedValueObject<Circle>(ctx, 0, Circle_ID);
-    int ret = thisObj->Intersects(*circle);
+    Circle& circle = *GetCheckedValueObject<Circle>(ctx, 0, Circle_ID);
+    int ret = thisObj->Intersects(circle);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -720,8 +729,8 @@ static duk_ret_t Plane_Intersects_Circle(duk_context* ctx)
 static duk_ret_t Plane_Clip_LineSegment(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    LineSegment* line = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
-    bool ret = thisObj->Clip(*line);
+    LineSegment& line = *GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
+    bool ret = thisObj->Clip(line);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -729,9 +738,9 @@ static duk_ret_t Plane_Clip_LineSegment(duk_context* ctx)
 static duk_ret_t Plane_Clip_float3_float3(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* a = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* b = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    bool ret = thisObj->Clip(*a, *b);
+    float3& a = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& b = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    bool ret = thisObj->Clip(a, b);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -739,9 +748,9 @@ static duk_ret_t Plane_Clip_float3_float3(duk_context* ctx)
 static duk_ret_t Plane_Clip_Line_Ray(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_ID);
-    Ray* outRay = GetCheckedValueObject<Ray>(ctx, 1, Ray_ID);
-    int ret = thisObj->Clip(*line, *outRay);
+    Line& line = *GetCheckedValueObject<Line>(ctx, 0, Line_ID);
+    Ray& outRay = *GetCheckedValueObject<Ray>(ctx, 1, Ray_ID);
+    int ret = thisObj->Clip(line, outRay);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -749,18 +758,19 @@ static duk_ret_t Plane_Clip_Line_Ray(duk_context* ctx)
 static duk_ret_t Plane_Clip_Triangle_Triangle_Triangle(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
-    Triangle* t1 = GetCheckedValueObject<Triangle>(ctx, 1, Triangle_ID);
-    Triangle* t2 = GetCheckedValueObject<Triangle>(ctx, 2, Triangle_ID);
-    int ret = thisObj->Clip(*triangle, *t1, *t2);
+    Triangle& triangle = *GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
+    Triangle& t1 = *GetCheckedValueObject<Triangle>(ctx, 1, Triangle_ID);
+    Triangle& t2 = *GetCheckedValueObject<Triangle>(ctx, 2, Triangle_ID);
+    int ret = thisObj->Clip(triangle, t1, t2);
     duk_push_number(ctx, ret);
     return 1;
 }
 
 static duk_ret_t Plane_PassesThroughOrigin_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float epsilon = (float)duk_require_number(ctx, 0);
+    float epsilon = numArgs > 0 ? (float)duk_require_number(ctx, 0) : 1e-3f;
     bool ret = thisObj->PassesThroughOrigin(epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -769,9 +779,9 @@ static duk_ret_t Plane_PassesThroughOrigin_float(duk_context* ctx)
 static duk_ret_t Plane_GenerateCircle_float3_float(duk_context* ctx)
 {
     Plane* thisObj = GetThisValueObject<Plane>(ctx, Plane_ID);
-    float3* circleCenter = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& circleCenter = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
     float radius = (float)duk_require_number(ctx, 1);
-    Circle ret = thisObj->GenerateCircle(*circleCenter, radius);
+    Circle ret = thisObj->GenerateCircle(circleCenter, radius);
     PushValueObjectCopy<Circle>(ctx, ret, Circle_ID, Circle_Finalizer);
     return 1;
 }
@@ -803,20 +813,20 @@ static duk_ret_t Plane_SerializeToCodeString(duk_context* ctx)
 static duk_ret_t Plane_Ctor_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 0)
-        return Plane_Ctor(ctx);
-    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
-        return Plane_Ctor_float3_float(ctx);
     if (numArgs == 3 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<float3>(ctx, 2, float3_ID))
         return Plane_Ctor_float3_float3_float3(ctx);
-    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
-        return Plane_Ctor_float3_float3(ctx);
-    if (numArgs == 2 && GetValueObject<Ray>(ctx, 0, Ray_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
-        return Plane_Ctor_Ray_float3(ctx);
     if (numArgs == 2 && GetValueObject<Line>(ctx, 0, Line_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
         return Plane_Ctor_Line_float3(ctx);
+    if (numArgs == 2 && GetValueObject<Ray>(ctx, 0, Ray_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
+        return Plane_Ctor_Ray_float3(ctx);
     if (numArgs == 2 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
         return Plane_Ctor_LineSegment_float3(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
+        return Plane_Ctor_float3_float3(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
+        return Plane_Ctor_float3_float(ctx);
+    if (numArgs == 0)
+        return Plane_Ctor(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -833,158 +843,158 @@ static duk_ret_t Plane_Set_Selector(duk_context* ctx)
 static duk_ret_t Plane_Point_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
-        return Plane_Point_float_float(ctx);
     if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && GetValueObject<float3>(ctx, 2, float3_ID))
         return Plane_Point_float_float_float3(ctx);
+    if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
+        return Plane_Point_float_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Plane_Transform_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
-        return Plane_Transform_float3x3(ctx);
-    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_ID))
-        return Plane_Transform_float3x4(ctx);
     if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_ID))
         return Plane_Transform_float4x4(ctx);
     if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_ID))
         return Plane_Transform_Quat(ctx);
+    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
+        return Plane_Transform_float3x3(ctx);
+    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_ID))
+        return Plane_Transform_float3x4(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Plane_Distance_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
-        return Plane_Distance_float3(ctx);
-    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
-        return Plane_Distance_LineSegment(ctx);
     if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
         return Plane_Distance_Sphere(ctx);
     if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
         return Plane_Distance_Capsule(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Plane_Distance_float3(ctx);
+    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
+        return Plane_Distance_LineSegment(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Plane_SignedDistance_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
-        return Plane_SignedDistance_float3(ctx);
-    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
-        return Plane_SignedDistance_AABB(ctx);
-    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
-        return Plane_SignedDistance_OBB(ctx);
-    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
-        return Plane_SignedDistance_Capsule(ctx);
-    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_ID))
-        return Plane_SignedDistance_Frustum(ctx);
-    if (numArgs == 1 && GetValueObject<Line>(ctx, 0, Line_ID))
-        return Plane_SignedDistance_Line(ctx);
     if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
         return Plane_SignedDistance_LineSegment(ctx);
+    if (numArgs == 1 && GetValueObject<Line>(ctx, 0, Line_ID))
+        return Plane_SignedDistance_Line(ctx);
     if (numArgs == 1 && GetValueObject<Ray>(ctx, 0, Ray_ID))
         return Plane_SignedDistance_Ray(ctx);
-    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
-        return Plane_SignedDistance_Sphere(ctx);
     if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
         return Plane_SignedDistance_Triangle(ctx);
+    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
+        return Plane_SignedDistance_Sphere(ctx);
+    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
+        return Plane_SignedDistance_AABB(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Plane_SignedDistance_float3(ctx);
+    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
+        return Plane_SignedDistance_OBB(ctx);
+    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_ID))
+        return Plane_SignedDistance_Frustum(ctx);
+    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
+        return Plane_SignedDistance_Capsule(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Plane_Project_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
-        return Plane_Project_float3(ctx);
-    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
-        return Plane_Project_LineSegment(ctx);
     if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
         return Plane_Project_Triangle(ctx);
+    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
+        return Plane_Project_LineSegment(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Plane_Project_float3(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Plane_ClosestPoint_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
-        return Plane_ClosestPoint_float3(ctx);
-    if (numArgs == 1 && GetValueObject<Ray>(ctx, 0, Ray_ID))
-        return Plane_ClosestPoint_Ray(ctx);
     if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
         return Plane_ClosestPoint_LineSegment(ctx);
+    if (numArgs == 1 && GetValueObject<Ray>(ctx, 0, Ray_ID))
+        return Plane_ClosestPoint_Ray(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Plane_ClosestPoint_float3(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Plane_Contains_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
-        return Plane_Contains_float3_float(ctx);
-    if (numArgs == 2 && GetValueObject<Line>(ctx, 0, Line_ID) && duk_is_number(ctx, 1))
-        return Plane_Contains_Line_float(ctx);
-    if (numArgs == 2 && GetValueObject<Ray>(ctx, 0, Ray_ID) && duk_is_number(ctx, 1))
-        return Plane_Contains_Ray_float(ctx);
-    if (numArgs == 2 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID) && duk_is_number(ctx, 1))
+    if (numArgs >= 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
         return Plane_Contains_LineSegment_float(ctx);
-    if (numArgs == 2 && GetValueObject<Triangle>(ctx, 0, Triangle_ID) && duk_is_number(ctx, 1))
+    if (numArgs >= 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
         return Plane_Contains_Triangle_float(ctx);
-    if (numArgs == 2 && GetValueObject<Circle>(ctx, 0, Circle_ID) && duk_is_number(ctx, 1))
+    if (numArgs >= 1 && GetValueObject<Circle>(ctx, 0, Circle_ID))
         return Plane_Contains_Circle_float(ctx);
+    if (numArgs >= 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Plane_Contains_float3_float(ctx);
+    if (numArgs >= 1 && GetValueObject<Line>(ctx, 0, Line_ID))
+        return Plane_Contains_Line_float(ctx);
+    if (numArgs >= 1 && GetValueObject<Ray>(ctx, 0, Ray_ID))
+        return Plane_Contains_Ray_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Plane_Intersects_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
-        return Plane_Intersects_Sphere(ctx);
-    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
-        return Plane_Intersects_AABB(ctx);
-    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
-        return Plane_Intersects_OBB(ctx);
-    if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
-        return Plane_Intersects_Triangle(ctx);
     if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_ID))
         return Plane_Intersects_Frustum(ctx);
     if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
         return Plane_Intersects_Capsule(ctx);
     if (numArgs == 1 && GetValueObject<Circle>(ctx, 0, Circle_ID))
         return Plane_Intersects_Circle(ctx);
+    if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
+        return Plane_Intersects_Triangle(ctx);
+    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
+        return Plane_Intersects_Sphere(ctx);
+    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
+        return Plane_Intersects_AABB(ctx);
+    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
+        return Plane_Intersects_OBB(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Plane_Clip_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
-        return Plane_Clip_LineSegment(ctx);
-    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
-        return Plane_Clip_float3_float3(ctx);
-    if (numArgs == 2 && GetValueObject<Line>(ctx, 0, Line_ID) && GetValueObject<Ray>(ctx, 1, Ray_ID))
-        return Plane_Clip_Line_Ray(ctx);
     if (numArgs == 3 && GetValueObject<Triangle>(ctx, 0, Triangle_ID) && GetValueObject<Triangle>(ctx, 1, Triangle_ID) && GetValueObject<Triangle>(ctx, 2, Triangle_ID))
         return Plane_Clip_Triangle_Triangle_Triangle(ctx);
+    if (numArgs == 2 && GetValueObject<Line>(ctx, 0, Line_ID) && GetValueObject<Ray>(ctx, 1, Ray_ID))
+        return Plane_Clip_Line_Ray(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
+        return Plane_Clip_float3_float3(ctx);
+    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
+        return Plane_Clip_LineSegment(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Plane_IntersectLinePlane_Static_float3_float_float3_float3_float(duk_context* ctx)
 {
-    float3* planeNormal = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& planeNormal = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
     float planeD = (float)duk_require_number(ctx, 1);
-    float3* linePos = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
-    float3* lineDir = GetCheckedValueObject<float3>(ctx, 3, float3_ID);
+    float3& linePos = *GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    float3& lineDir = *GetCheckedValueObject<float3>(ctx, 3, float3_ID);
     float t = (float)duk_require_number(ctx, 4);
-    bool ret = Plane::IntersectLinePlane(*planeNormal, planeD, *linePos, *lineDir, t);
+    bool ret = Plane::IntersectLinePlane(planeNormal, planeD, linePos, lineDir, t);
     duk_push_boolean(ctx, ret);
     return 1;
 }
 
 static duk_ret_t Plane_FromString_Static_string(duk_context* ctx)
 {
-    string str(duk_require_string(ctx, 0));
+    string str = duk_require_string(ctx, 0);
     Plane ret = Plane::FromString(str);
     PushValueObjectCopy<Plane>(ctx, ret, Plane_ID, Plane_Finalizer);
     return 1;
@@ -1013,14 +1023,14 @@ static const duk_function_list_entry Plane_Functions[] = {
     ,{"Refract", Plane_Refract_float3_float_float, 3}
     ,{"ClosestPoint", Plane_ClosestPoint_Selector, DUK_VARARGS}
     ,{"Contains", Plane_Contains_Selector, DUK_VARARGS}
-    ,{"SetEquals", Plane_SetEquals_Plane_float, 2}
-    ,{"Equals", Plane_Equals_Plane_float, 2}
+    ,{"SetEquals", Plane_SetEquals_Plane_float, DUK_VARARGS}
+    ,{"Equals", Plane_Equals_Plane_float, DUK_VARARGS}
     ,{"BitEquals", Plane_BitEquals_Plane, 1}
-    ,{"IsParallel", Plane_IsParallel_Plane_float, 2}
+    ,{"IsParallel", Plane_IsParallel_Plane_float, DUK_VARARGS}
     ,{"DihedralAngle", Plane_DihedralAngle_Plane, 1}
     ,{"Intersects", Plane_Intersects_Selector, DUK_VARARGS}
     ,{"Clip", Plane_Clip_Selector, DUK_VARARGS}
-    ,{"PassesThroughOrigin", Plane_PassesThroughOrigin_float, 1}
+    ,{"PassesThroughOrigin", Plane_PassesThroughOrigin_float, DUK_VARARGS}
     ,{"GenerateCircle", Plane_GenerateCircle_float3_float, 2}
     ,{"ToString", Plane_ToString, 0}
     ,{"SerializeToString", Plane_SerializeToString, 0}

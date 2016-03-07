@@ -113,8 +113,8 @@ static duk_ret_t float4_Ctor(duk_context* ctx)
 
 static duk_ret_t float4_Ctor_float4(duk_context* ctx)
 {
-    float4* rhs = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4* newObj = new float4(*rhs);
+    float4& rhs = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4* newObj = new float4(rhs);
     PushConstructorResult<float4>(ctx, newObj, float4_ID, float4_Finalizer);
     return 0;
 }
@@ -132,9 +132,9 @@ static duk_ret_t float4_Ctor_float_float_float_float(duk_context* ctx)
 
 static duk_ret_t float4_Ctor_float3_float(duk_context* ctx)
 {
-    float3* xyz = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& xyz = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
     float w = (float)duk_require_number(ctx, 1);
-    float4* newObj = new float4(*xyz, w);
+    float4* newObj = new float4(xyz, w);
     PushConstructorResult<float4>(ctx, newObj, float4_ID, float4_Finalizer);
     return 0;
 }
@@ -143,8 +143,8 @@ static duk_ret_t float4_Ctor_float_float_float2(duk_context* ctx)
 {
     float x = (float)duk_require_number(ctx, 0);
     float y = (float)duk_require_number(ctx, 1);
-    float2* zw = GetCheckedValueObject<float2>(ctx, 2, float2_ID);
-    float4* newObj = new float4(x, y, *zw);
+    float2& zw = *GetCheckedValueObject<float2>(ctx, 2, float2_ID);
+    float4* newObj = new float4(x, y, zw);
     PushConstructorResult<float4>(ctx, newObj, float4_ID, float4_Finalizer);
     return 0;
 }
@@ -152,9 +152,9 @@ static duk_ret_t float4_Ctor_float_float_float2(duk_context* ctx)
 static duk_ret_t float4_Ctor_float_float2_float(duk_context* ctx)
 {
     float x = (float)duk_require_number(ctx, 0);
-    float2* yz = GetCheckedValueObject<float2>(ctx, 1, float2_ID);
+    float2& yz = *GetCheckedValueObject<float2>(ctx, 1, float2_ID);
     float w = (float)duk_require_number(ctx, 2);
-    float4* newObj = new float4(x, *yz, w);
+    float4* newObj = new float4(x, yz, w);
     PushConstructorResult<float4>(ctx, newObj, float4_ID, float4_Finalizer);
     return 0;
 }
@@ -162,27 +162,27 @@ static duk_ret_t float4_Ctor_float_float2_float(duk_context* ctx)
 static duk_ret_t float4_Ctor_float_float3(duk_context* ctx)
 {
     float x = (float)duk_require_number(ctx, 0);
-    float3* yzw = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    float4* newObj = new float4(x, *yzw);
+    float3& yzw = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float4* newObj = new float4(x, yzw);
     PushConstructorResult<float4>(ctx, newObj, float4_ID, float4_Finalizer);
     return 0;
 }
 
 static duk_ret_t float4_Ctor_float2_float2(duk_context* ctx)
 {
-    float2* xy = GetCheckedValueObject<float2>(ctx, 0, float2_ID);
-    float2* zw = GetCheckedValueObject<float2>(ctx, 1, float2_ID);
-    float4* newObj = new float4(*xy, *zw);
+    float2& xy = *GetCheckedValueObject<float2>(ctx, 0, float2_ID);
+    float2& zw = *GetCheckedValueObject<float2>(ctx, 1, float2_ID);
+    float4* newObj = new float4(xy, zw);
     PushConstructorResult<float4>(ctx, newObj, float4_ID, float4_Finalizer);
     return 0;
 }
 
 static duk_ret_t float4_Ctor_float2_float_float(duk_context* ctx)
 {
-    float2* xy = GetCheckedValueObject<float2>(ctx, 0, float2_ID);
+    float2& xy = *GetCheckedValueObject<float2>(ctx, 0, float2_ID);
     float z = (float)duk_require_number(ctx, 1);
     float w = (float)duk_require_number(ctx, 2);
-    float4* newObj = new float4(*xy, z, w);
+    float4* newObj = new float4(xy, z, w);
     PushConstructorResult<float4>(ctx, newObj, float4_ID, float4_Finalizer);
     return 0;
 }
@@ -199,8 +199,8 @@ static duk_ret_t float4_At_int(duk_context* ctx)
 static duk_ret_t float4_Add_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* rhs = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4 ret = thisObj->Add(*rhs);
+    float4& rhs = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4 ret = thisObj->Add(rhs);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -217,8 +217,8 @@ static duk_ret_t float4_Add_float(duk_context* ctx)
 static duk_ret_t float4_Sub_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* rhs = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4 ret = thisObj->Sub(*rhs);
+    float4& rhs = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4 ret = thisObj->Sub(rhs);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -244,8 +244,8 @@ static duk_ret_t float4_SubLeft_float(duk_context* ctx)
 static duk_ret_t float4_Mul_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* v = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4 ret = thisObj->Mul(*v);
+    float4& v = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4 ret = thisObj->Mul(v);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -262,8 +262,8 @@ static duk_ret_t float4_Mul_float(duk_context* ctx)
 static duk_ret_t float4_Div_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* v = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4 ret = thisObj->Div(*v);
+    float4& v = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4 ret = thisObj->Div(v);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -429,8 +429,8 @@ static duk_ret_t float4_SetFromSphericalCoordinates_float_float_float(duk_contex
 static duk_ret_t float4_SetFromSphericalCoordinates_float3(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float3* spherical = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    thisObj->SetFromSphericalCoordinates(*spherical);
+    float3& spherical = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->SetFromSphericalCoordinates(spherical);
     return 0;
 }
 
@@ -575,8 +575,9 @@ static duk_ret_t float4_NormalizeW(duk_context* ctx)
 
 static duk_ret_t float4_IsWZeroOrOne_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float epsilon = (float)duk_require_number(ctx, 0);
+    float epsilon = numArgs > 0 ? (float)duk_require_number(ctx, 0) : 1e-3f;
     bool ret = thisObj->IsWZeroOrOne(epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -584,8 +585,9 @@ static duk_ret_t float4_IsWZeroOrOne_float(duk_context* ctx)
 
 static duk_ret_t float4_IsZero3_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float epsilonSq = (float)duk_require_number(ctx, 0);
+    float epsilonSq = numArgs > 0 ? (float)duk_require_number(ctx, 0) : 1e-6f;
     bool ret = thisObj->IsZero3(epsilonSq);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -593,8 +595,9 @@ static duk_ret_t float4_IsZero3_float(duk_context* ctx)
 
 static duk_ret_t float4_IsZero4_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float epsilonSq = (float)duk_require_number(ctx, 0);
+    float epsilonSq = numArgs > 0 ? (float)duk_require_number(ctx, 0) : 1e-6f;
     bool ret = thisObj->IsZero4(epsilonSq);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -602,8 +605,9 @@ static duk_ret_t float4_IsZero4_float(duk_context* ctx)
 
 static duk_ret_t float4_IsZero_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float epsilonSq = (float)duk_require_number(ctx, 0);
+    float epsilonSq = numArgs > 0 ? (float)duk_require_number(ctx, 0) : 1e-6f;
     bool ret = thisObj->IsZero(epsilonSq);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -611,8 +615,9 @@ static duk_ret_t float4_IsZero_float(duk_context* ctx)
 
 static duk_ret_t float4_IsNormalized3_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float epsilonSq = (float)duk_require_number(ctx, 0);
+    float epsilonSq = numArgs > 0 ? (float)duk_require_number(ctx, 0) : 1e-5f;
     bool ret = thisObj->IsNormalized3(epsilonSq);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -620,8 +625,9 @@ static duk_ret_t float4_IsNormalized3_float(duk_context* ctx)
 
 static duk_ret_t float4_IsNormalized4_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float epsilonSq = (float)duk_require_number(ctx, 0);
+    float epsilonSq = numArgs > 0 ? (float)duk_require_number(ctx, 0) : 1e-5f;
     bool ret = thisObj->IsNormalized4(epsilonSq);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -629,8 +635,9 @@ static duk_ret_t float4_IsNormalized4_float(duk_context* ctx)
 
 static duk_ret_t float4_IsNormalized_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float epsilonSq = (float)duk_require_number(ctx, 0);
+    float epsilonSq = numArgs > 0 ? (float)duk_require_number(ctx, 0) : 1e-5f;
     bool ret = thisObj->IsNormalized(epsilonSq);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -690,20 +697,22 @@ static duk_ret_t float4_IsFinite(duk_context* ctx)
 
 static duk_ret_t float4_IsPerpendicular3_float4_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* other = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float epsilonSq = (float)duk_require_number(ctx, 1);
-    bool ret = thisObj->IsPerpendicular3(*other, epsilonSq);
+    float4& other = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float epsilonSq = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-5f;
+    bool ret = thisObj->IsPerpendicular3(other, epsilonSq);
     duk_push_boolean(ctx, ret);
     return 1;
 }
 
 static duk_ret_t float4_IsPerpendicular_float4_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* other = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float epsilonSq = (float)duk_require_number(ctx, 1);
-    bool ret = thisObj->IsPerpendicular(*other, epsilonSq);
+    float4& other = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float epsilonSq = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-5f;
+    bool ret = thisObj->IsPerpendicular(other, epsilonSq);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -848,8 +857,8 @@ static duk_ret_t float4_Min_float(duk_context* ctx)
 static duk_ret_t float4_Min_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* ceil = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4 ret = thisObj->Min(*ceil);
+    float4& ceil = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4 ret = thisObj->Min(ceil);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -866,8 +875,8 @@ static duk_ret_t float4_Max_float(duk_context* ctx)
 static duk_ret_t float4_Max_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* floor = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4 ret = thisObj->Max(*floor);
+    float4& floor = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4 ret = thisObj->Max(floor);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -885,9 +894,9 @@ static duk_ret_t float4_Clamp_float_float(duk_context* ctx)
 static duk_ret_t float4_Clamp_float4_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* floor = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4* ceil = GetCheckedValueObject<float4>(ctx, 1, float4_ID);
-    float4 ret = thisObj->Clamp(*floor, *ceil);
+    float4& floor = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4& ceil = *GetCheckedValueObject<float4>(ctx, 1, float4_ID);
+    float4 ret = thisObj->Clamp(floor, ceil);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -903,9 +912,9 @@ static duk_ret_t float4_Clamp01(duk_context* ctx)
 static duk_ret_t float4_Lerp_float4_float(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* b = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4& b = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
     float t = (float)duk_require_number(ctx, 1);
-    float4 ret = thisObj->Lerp(*b, t);
+    float4 ret = thisObj->Lerp(b, t);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -913,8 +922,8 @@ static duk_ret_t float4_Lerp_float4_float(duk_context* ctx)
 static duk_ret_t float4_Distance3Sq_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* rhs = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float ret = thisObj->Distance3Sq(*rhs);
+    float4& rhs = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float ret = thisObj->Distance3Sq(rhs);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -922,8 +931,8 @@ static duk_ret_t float4_Distance3Sq_float4(duk_context* ctx)
 static duk_ret_t float4_Distance3_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* rhs = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float ret = thisObj->Distance3(*rhs);
+    float4& rhs = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float ret = thisObj->Distance3(rhs);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -931,8 +940,8 @@ static duk_ret_t float4_Distance3_float4(duk_context* ctx)
 static duk_ret_t float4_Distance4Sq_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* rhs = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float ret = thisObj->Distance4Sq(*rhs);
+    float4& rhs = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float ret = thisObj->Distance4Sq(rhs);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -940,8 +949,8 @@ static duk_ret_t float4_Distance4Sq_float4(duk_context* ctx)
 static duk_ret_t float4_DistanceSq_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* rhs = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float ret = thisObj->DistanceSq(*rhs);
+    float4& rhs = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float ret = thisObj->DistanceSq(rhs);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -949,8 +958,8 @@ static duk_ret_t float4_DistanceSq_float4(duk_context* ctx)
 static duk_ret_t float4_Distance4_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* rhs = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float ret = thisObj->Distance4(*rhs);
+    float4& rhs = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float ret = thisObj->Distance4(rhs);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -958,8 +967,8 @@ static duk_ret_t float4_Distance4_float4(duk_context* ctx)
 static duk_ret_t float4_Distance_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* rhs = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float ret = thisObj->Distance(*rhs);
+    float4& rhs = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float ret = thisObj->Distance(rhs);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -967,8 +976,8 @@ static duk_ret_t float4_Distance_float4(duk_context* ctx)
 static duk_ret_t float4_Dot3_float3(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float3* rhs = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float ret = thisObj->Dot3(*rhs);
+    float3& rhs = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float ret = thisObj->Dot3(rhs);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -976,8 +985,8 @@ static duk_ret_t float4_Dot3_float3(duk_context* ctx)
 static duk_ret_t float4_Dot3_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* rhs = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float ret = thisObj->Dot3(*rhs);
+    float4& rhs = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float ret = thisObj->Dot3(rhs);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -985,8 +994,8 @@ static duk_ret_t float4_Dot3_float4(duk_context* ctx)
 static duk_ret_t float4_Dot4_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* rhs = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float ret = thisObj->Dot4(*rhs);
+    float4& rhs = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float ret = thisObj->Dot4(rhs);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -994,8 +1003,8 @@ static duk_ret_t float4_Dot4_float4(duk_context* ctx)
 static duk_ret_t float4_Dot_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* rhs = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float ret = thisObj->Dot(*rhs);
+    float4& rhs = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float ret = thisObj->Dot(rhs);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -1003,8 +1012,8 @@ static duk_ret_t float4_Dot_float4(duk_context* ctx)
 static duk_ret_t float4_Cross3_float3(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float3* rhs = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float4 ret = thisObj->Cross3(*rhs);
+    float3& rhs = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float4 ret = thisObj->Cross3(rhs);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -1012,8 +1021,8 @@ static duk_ret_t float4_Cross3_float3(duk_context* ctx)
 static duk_ret_t float4_Cross3_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* rhs = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4 ret = thisObj->Cross3(*rhs);
+    float4& rhs = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4 ret = thisObj->Cross3(rhs);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -1021,8 +1030,8 @@ static duk_ret_t float4_Cross3_float4(duk_context* ctx)
 static duk_ret_t float4_Cross_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* rhs = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4 ret = thisObj->Cross(*rhs);
+    float4& rhs = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4 ret = thisObj->Cross(rhs);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -1030,48 +1039,52 @@ static duk_ret_t float4_Cross_float4(duk_context* ctx)
 static duk_ret_t float4_OuterProduct_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* rhs = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4x4 ret = thisObj->OuterProduct(*rhs);
+    float4& rhs = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4x4 ret = thisObj->OuterProduct(rhs);
     PushValueObjectCopy<float4x4>(ctx, ret, float4x4_ID, float4x4_Finalizer);
     return 1;
 }
 
 static duk_ret_t float4_Perpendicular3_float3_float3(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float3* hint = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* hint2 = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    float4 ret = thisObj->Perpendicular3(*hint, *hint2);
+    float3 hint = numArgs > 0 ? *GetCheckedValueObject<float3>(ctx, 0, float3_ID) : float3(0, 1, 0);
+    float3 hint2 = numArgs > 1 ? *GetCheckedValueObject<float3>(ctx, 1, float3_ID) : float3(0, 0, 1);
+    float4 ret = thisObj->Perpendicular3(hint, hint2);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
 
 static duk_ret_t float4_Perpendicular_float4_float4(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* hint = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4* hint2 = GetCheckedValueObject<float4>(ctx, 1, float4_ID);
-    float4 ret = thisObj->Perpendicular(*hint, *hint2);
+    float4 hint = numArgs > 0 ? *GetCheckedValueObject<float4>(ctx, 0, float4_ID) : float4(0, 1, 0, 0);
+    float4 hint2 = numArgs > 1 ? *GetCheckedValueObject<float4>(ctx, 1, float4_ID) : float4(0, 0, 1, 0);
+    float4 ret = thisObj->Perpendicular(hint, hint2);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
 
 static duk_ret_t float4_AnotherPerpendicular3_float3_float3(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float3* hint = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* hint2 = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    float4 ret = thisObj->AnotherPerpendicular3(*hint, *hint2);
+    float3 hint = numArgs > 0 ? *GetCheckedValueObject<float3>(ctx, 0, float3_ID) : float3(0, 1, 0);
+    float3 hint2 = numArgs > 1 ? *GetCheckedValueObject<float3>(ctx, 1, float3_ID) : float3(0, 0, 1);
+    float4 ret = thisObj->AnotherPerpendicular3(hint, hint2);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
 
 static duk_ret_t float4_AnotherPerpendicular_float4_float4(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* hint = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4* hint2 = GetCheckedValueObject<float4>(ctx, 1, float4_ID);
-    float4 ret = thisObj->AnotherPerpendicular(*hint, *hint2);
+    float4 hint = numArgs > 0 ? *GetCheckedValueObject<float4>(ctx, 0, float4_ID) : float4(0, 1, 0, 0);
+    float4 hint2 = numArgs > 1 ? *GetCheckedValueObject<float4>(ctx, 1, float4_ID) : float4(0, 0, 1, 0);
+    float4 ret = thisObj->AnotherPerpendicular(hint, hint2);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -1079,17 +1092,17 @@ static duk_ret_t float4_AnotherPerpendicular_float4_float4(duk_context* ctx)
 static duk_ret_t float4_PerpendicularBasis_float4_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* outB = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4* outC = GetCheckedValueObject<float4>(ctx, 1, float4_ID);
-    thisObj->PerpendicularBasis(*outB, *outC);
+    float4& outB = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4& outC = *GetCheckedValueObject<float4>(ctx, 1, float4_ID);
+    thisObj->PerpendicularBasis(outB, outC);
     return 0;
 }
 
 static duk_ret_t float4_RandomPerpendicular_LCG(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    LCG* rng = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
-    float4 ret = thisObj->RandomPerpendicular(*rng);
+    LCG& rng = *GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float4 ret = thisObj->RandomPerpendicular(rng);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -1097,8 +1110,8 @@ static duk_ret_t float4_RandomPerpendicular_LCG(duk_context* ctx)
 static duk_ret_t float4_Reflect3_float3(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float3* normal = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float4 ret = thisObj->Reflect3(*normal);
+    float3& normal = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float4 ret = thisObj->Reflect3(normal);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -1106,8 +1119,8 @@ static duk_ret_t float4_Reflect3_float3(duk_context* ctx)
 static duk_ret_t float4_Reflect_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* normal = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4 ret = thisObj->Reflect(*normal);
+    float4& normal = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4 ret = thisObj->Reflect(normal);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -1115,10 +1128,10 @@ static duk_ret_t float4_Reflect_float4(duk_context* ctx)
 static duk_ret_t float4_Refract_float4_float_float(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* normal = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4& normal = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
     float negativeSideRefractionIndex = (float)duk_require_number(ctx, 1);
     float positiveSideRefractionIndex = (float)duk_require_number(ctx, 2);
-    float4 ret = thisObj->Refract(*normal, negativeSideRefractionIndex, positiveSideRefractionIndex);
+    float4 ret = thisObj->Refract(normal, negativeSideRefractionIndex, positiveSideRefractionIndex);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -1126,8 +1139,8 @@ static duk_ret_t float4_Refract_float4_float_float(duk_context* ctx)
 static duk_ret_t float4_AngleBetween3_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* other = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float ret = thisObj->AngleBetween3(*other);
+    float4& other = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float ret = thisObj->AngleBetween3(other);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -1135,8 +1148,8 @@ static duk_ret_t float4_AngleBetween3_float4(duk_context* ctx)
 static duk_ret_t float4_AngleBetweenNorm3_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* normalizedVector = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float ret = thisObj->AngleBetweenNorm3(*normalizedVector);
+    float4& normalizedVector = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float ret = thisObj->AngleBetweenNorm3(normalizedVector);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -1144,8 +1157,8 @@ static duk_ret_t float4_AngleBetweenNorm3_float4(duk_context* ctx)
 static duk_ret_t float4_AngleBetween4_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* other = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float ret = thisObj->AngleBetween4(*other);
+    float4& other = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float ret = thisObj->AngleBetween4(other);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -1153,8 +1166,8 @@ static duk_ret_t float4_AngleBetween4_float4(duk_context* ctx)
 static duk_ret_t float4_AngleBetweenNorm4_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* normalizedVector = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float ret = thisObj->AngleBetweenNorm4(*normalizedVector);
+    float4& normalizedVector = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float ret = thisObj->AngleBetweenNorm4(normalizedVector);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -1162,8 +1175,8 @@ static duk_ret_t float4_AngleBetweenNorm4_float4(duk_context* ctx)
 static duk_ret_t float4_ProjectTo3_float3(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float3* target = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float4 ret = thisObj->ProjectTo3(*target);
+    float3& target = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float4 ret = thisObj->ProjectTo3(target);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -1171,8 +1184,8 @@ static duk_ret_t float4_ProjectTo3_float3(duk_context* ctx)
 static duk_ret_t float4_ProjectTo_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* target = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4 ret = thisObj->ProjectTo(*target);
+    float4& target = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4 ret = thisObj->ProjectTo(target);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -1180,8 +1193,8 @@ static duk_ret_t float4_ProjectTo_float4(duk_context* ctx)
 static duk_ret_t float4_ProjectToNorm3_float3(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float3* target = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float4 ret = thisObj->ProjectToNorm3(*target);
+    float3& target = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float4 ret = thisObj->ProjectToNorm3(target);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -1189,30 +1202,32 @@ static duk_ret_t float4_ProjectToNorm3_float3(duk_context* ctx)
 static duk_ret_t float4_ProjectToNorm_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* target = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4 ret = thisObj->ProjectToNorm(*target);
+    float4& target = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4 ret = thisObj->ProjectToNorm(target);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
 
 static duk_ret_t float4_Equals_float4_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* other = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float epsilon = (float)duk_require_number(ctx, 1);
-    bool ret = thisObj->Equals(*other, epsilon);
+    float4& other = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float epsilon = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-3f;
+    bool ret = thisObj->Equals(other, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
 
 static duk_ret_t float4_Equals_float_float_float_float_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
     float x = (float)duk_require_number(ctx, 0);
     float y = (float)duk_require_number(ctx, 1);
     float z = (float)duk_require_number(ctx, 2);
     float w = (float)duk_require_number(ctx, 3);
-    float epsilon = (float)duk_require_number(ctx, 4);
+    float epsilon = numArgs > 4 ? (float)duk_require_number(ctx, 4) : 1e-3f;
     bool ret = thisObj->Equals(x, y, z, w, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -1221,8 +1236,8 @@ static duk_ret_t float4_Equals_float_float_float_float_float(duk_context* ctx)
 static duk_ret_t float4_BitEquals_float4(duk_context* ctx)
 {
     float4* thisObj = GetThisValueObject<float4>(ctx, float4_ID);
-    float4* other = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    bool ret = thisObj->BitEquals(*other);
+    float4& other = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    bool ret = thisObj->BitEquals(other);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -1230,64 +1245,64 @@ static duk_ret_t float4_BitEquals_float4(duk_context* ctx)
 static duk_ret_t float4_Ctor_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 0)
-        return float4_Ctor(ctx);
-    if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
-        return float4_Ctor_float4(ctx);
     if (numArgs == 4 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3))
         return float4_Ctor_float_float_float_float(ctx);
-    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
-        return float4_Ctor_float3_float(ctx);
-    if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && GetValueObject<float2>(ctx, 2, float2_ID))
-        return float4_Ctor_float_float_float2(ctx);
     if (numArgs == 3 && duk_is_number(ctx, 0) && GetValueObject<float2>(ctx, 1, float2_ID) && duk_is_number(ctx, 2))
         return float4_Ctor_float_float2_float(ctx);
+    if (numArgs == 3 && GetValueObject<float2>(ctx, 0, float2_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+        return float4_Ctor_float2_float_float(ctx);
+    if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && GetValueObject<float2>(ctx, 2, float2_ID))
+        return float4_Ctor_float_float_float2(ctx);
     if (numArgs == 2 && duk_is_number(ctx, 0) && GetValueObject<float3>(ctx, 1, float3_ID))
         return float4_Ctor_float_float3(ctx);
     if (numArgs == 2 && GetValueObject<float2>(ctx, 0, float2_ID) && GetValueObject<float2>(ctx, 1, float2_ID))
         return float4_Ctor_float2_float2(ctx);
-    if (numArgs == 3 && GetValueObject<float2>(ctx, 0, float2_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
-        return float4_Ctor_float2_float_float(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
+        return float4_Ctor_float3_float(ctx);
+    if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
+        return float4_Ctor_float4(ctx);
+    if (numArgs == 0)
+        return float4_Ctor(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t float4_Add_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
-        return float4_Add_float4(ctx);
     if (numArgs == 1 && duk_is_number(ctx, 0))
         return float4_Add_float(ctx);
+    if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
+        return float4_Add_float4(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t float4_Sub_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
-        return float4_Sub_float4(ctx);
     if (numArgs == 1 && duk_is_number(ctx, 0))
         return float4_Sub_float(ctx);
+    if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
+        return float4_Sub_float4(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t float4_Mul_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
-        return float4_Mul_float4(ctx);
     if (numArgs == 1 && duk_is_number(ctx, 0))
         return float4_Mul_float(ctx);
+    if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
+        return float4_Mul_float4(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t float4_Div_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
-        return float4_Div_float4(ctx);
     if (numArgs == 1 && duk_is_number(ctx, 0))
         return float4_Div_float(ctx);
+    if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
+        return float4_Div_float4(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -1306,10 +1321,10 @@ static duk_ret_t float4_Swizzled_Selector(duk_context* ctx)
 static duk_ret_t float4_SetFromScalar_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && duk_is_number(ctx, 0))
-        return float4_SetFromScalar_float(ctx);
     if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
         return float4_SetFromScalar_float_float(ctx);
+    if (numArgs == 1 && duk_is_number(ctx, 0))
+        return float4_SetFromScalar_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -1318,70 +1333,70 @@ static duk_ret_t float4_SetFromSphericalCoordinates_Selector(duk_context* ctx)
     int numArgs = duk_get_top(ctx);
     if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
         return float4_SetFromSphericalCoordinates_float_float_float(ctx);
-    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
-        return float4_SetFromSphericalCoordinates_float3(ctx);
     if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
         return float4_SetFromSphericalCoordinates_float_float(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return float4_SetFromSphericalCoordinates_float3(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t float4_Min_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && duk_is_number(ctx, 0))
-        return float4_Min_float(ctx);
     if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
         return float4_Min_float4(ctx);
+    if (numArgs == 1 && duk_is_number(ctx, 0))
+        return float4_Min_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t float4_Max_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && duk_is_number(ctx, 0))
-        return float4_Max_float(ctx);
     if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
         return float4_Max_float4(ctx);
+    if (numArgs == 1 && duk_is_number(ctx, 0))
+        return float4_Max_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t float4_Clamp_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
-        return float4_Clamp_float_float(ctx);
     if (numArgs == 2 && GetValueObject<float4>(ctx, 0, float4_ID) && GetValueObject<float4>(ctx, 1, float4_ID))
         return float4_Clamp_float4_float4(ctx);
+    if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
+        return float4_Clamp_float_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t float4_Dot3_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
-        return float4_Dot3_float3(ctx);
     if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
         return float4_Dot3_float4(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return float4_Dot3_float3(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t float4_Cross3_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
-        return float4_Cross3_float3(ctx);
     if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
         return float4_Cross3_float4(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return float4_Cross3_float3(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t float4_Equals_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && GetValueObject<float4>(ctx, 0, float4_ID) && duk_is_number(ctx, 1))
-        return float4_Equals_float4_float(ctx);
-    if (numArgs == 5 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3) && duk_is_number(ctx, 4))
+    if (numArgs >= 4 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3))
         return float4_Equals_float_float_float_float_float(ctx);
+    if (numArgs >= 1 && GetValueObject<float4>(ctx, 0, float4_ID))
+        return float4_Equals_float4_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -1414,8 +1429,8 @@ static duk_ret_t float4_FromSphericalCoordinates_Static_float_float_float(duk_co
 
 static duk_ret_t float4_FromSphericalCoordinates_Static_float3(duk_context* ctx)
 {
-    float3* spherical = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float4 ret = float4::FromSphericalCoordinates(*spherical);
+    float3& spherical = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float4 ret = float4::FromSphericalCoordinates(spherical);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -1431,77 +1446,82 @@ static duk_ret_t float4_FromSphericalCoordinates_Static_float_float(duk_context*
 
 static duk_ret_t float4_AreOrthogonal_Static_float4_float4_float(duk_context* ctx)
 {
-    float4* a = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4* b = GetCheckedValueObject<float4>(ctx, 1, float4_ID);
-    float epsilon = (float)duk_require_number(ctx, 2);
-     bool ret = float4::AreOrthogonal(*a, *b, epsilon);
+    int numArgs = duk_get_top(ctx);
+    float4& a = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4& b = *GetCheckedValueObject<float4>(ctx, 1, float4_ID);
+    float epsilon = numArgs > 2 ? (float)duk_require_number(ctx, 2) : 1e-3f;
+     bool ret = float4::AreOrthogonal(a, b, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
 
 static duk_ret_t float4_AreOrthogonal_Static_float4_float4_float4_float(duk_context* ctx)
 {
-    float4* a = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4* b = GetCheckedValueObject<float4>(ctx, 1, float4_ID);
-    float4* c = GetCheckedValueObject<float4>(ctx, 2, float4_ID);
-    float epsilon = (float)duk_require_number(ctx, 3);
-     bool ret = float4::AreOrthogonal(*a, *b, *c, epsilon);
+    int numArgs = duk_get_top(ctx);
+    float4& a = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4& b = *GetCheckedValueObject<float4>(ctx, 1, float4_ID);
+    float4& c = *GetCheckedValueObject<float4>(ctx, 2, float4_ID);
+    float epsilon = numArgs > 3 ? (float)duk_require_number(ctx, 3) : 1e-3f;
+     bool ret = float4::AreOrthogonal(a, b, c, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
 
 static duk_ret_t float4_AreCollinear_Static_float4_float4_float4_float(duk_context* ctx)
 {
-    float4* p1 = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4* p2 = GetCheckedValueObject<float4>(ctx, 1, float4_ID);
-    float4* p3 = GetCheckedValueObject<float4>(ctx, 2, float4_ID);
-    float epsilon = (float)duk_require_number(ctx, 3);
-     bool ret = float4::AreCollinear(*p1, *p2, *p3, epsilon);
+    int numArgs = duk_get_top(ctx);
+    float4& p1 = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4& p2 = *GetCheckedValueObject<float4>(ctx, 1, float4_ID);
+    float4& p3 = *GetCheckedValueObject<float4>(ctx, 2, float4_ID);
+    float epsilon = numArgs > 3 ? (float)duk_require_number(ctx, 3) : 1e-7f;
+     bool ret = float4::AreCollinear(p1, p2, p3, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
 
 static duk_ret_t float4_Orthonormalize_Static_float4_float4(duk_context* ctx)
 {
-    float4* a = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4* b = GetCheckedValueObject<float4>(ctx, 1, float4_ID);
-    float4::Orthonormalize(*a, *b);
+    float4& a = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4& b = *GetCheckedValueObject<float4>(ctx, 1, float4_ID);
+    float4::Orthonormalize(a, b);
     return 0;
 }
 
 static duk_ret_t float4_Orthonormalize_Static_float4_float4_float4(duk_context* ctx)
 {
-    float4* a = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4* b = GetCheckedValueObject<float4>(ctx, 1, float4_ID);
-    float4* c = GetCheckedValueObject<float4>(ctx, 2, float4_ID);
-    float4::Orthonormalize(*a, *b, *c);
+    float4& a = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4& b = *GetCheckedValueObject<float4>(ctx, 1, float4_ID);
+    float4& c = *GetCheckedValueObject<float4>(ctx, 2, float4_ID);
+    float4::Orthonormalize(a, b, c);
     return 0;
 }
 
 static duk_ret_t float4_AreOrthonormal_Static_float4_float4_float(duk_context* ctx)
 {
-    float4* a = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4* b = GetCheckedValueObject<float4>(ctx, 1, float4_ID);
-    float epsilon = (float)duk_require_number(ctx, 2);
-     bool ret = float4::AreOrthonormal(*a, *b, epsilon);
+    int numArgs = duk_get_top(ctx);
+    float4& a = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4& b = *GetCheckedValueObject<float4>(ctx, 1, float4_ID);
+    float epsilon = numArgs > 2 ? (float)duk_require_number(ctx, 2) : 1e-3f;
+     bool ret = float4::AreOrthonormal(a, b, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
 
 static duk_ret_t float4_AreOrthonormal_Static_float4_float4_float4_float(duk_context* ctx)
 {
-    float4* a = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4* b = GetCheckedValueObject<float4>(ctx, 1, float4_ID);
-    float4* c = GetCheckedValueObject<float4>(ctx, 2, float4_ID);
-    float epsilon = (float)duk_require_number(ctx, 3);
-     bool ret = float4::AreOrthonormal(*a, *b, *c, epsilon);
+    int numArgs = duk_get_top(ctx);
+    float4& a = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4& b = *GetCheckedValueObject<float4>(ctx, 1, float4_ID);
+    float4& c = *GetCheckedValueObject<float4>(ctx, 2, float4_ID);
+    float epsilon = numArgs > 3 ? (float)duk_require_number(ctx, 3) : 1e-3f;
+     bool ret = float4::AreOrthonormal(a, b, c, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
 
 static duk_ret_t float4_FromString_Static_string(duk_context* ctx)
 {
-    string str(duk_require_string(ctx, 0));
+    string str = duk_require_string(ctx, 0);
     float4 ret = float4::FromString(str);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
@@ -1509,73 +1529,74 @@ static duk_ret_t float4_FromString_Static_string(duk_context* ctx)
 
 static duk_ret_t float4_Lerp_Static_float4_float4_float(duk_context* ctx)
 {
-    float4* a = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4* b = GetCheckedValueObject<float4>(ctx, 1, float4_ID);
+    float4& a = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4& b = *GetCheckedValueObject<float4>(ctx, 1, float4_ID);
     float t = (float)duk_require_number(ctx, 2);
-    float4 ret = float4::Lerp(*a, *b, t);
+    float4 ret = float4::Lerp(a, b, t);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
 
 static duk_ret_t float4_RandomDir_Static_LCG_float(duk_context* ctx)
 {
-    LCG* lcg = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
-    float length = (float)duk_require_number(ctx, 1);
-    float4 ret = float4::RandomDir(*lcg, length);
+    int numArgs = duk_get_top(ctx);
+    LCG& lcg = *GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float length = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1.f;
+    float4 ret = float4::RandomDir(lcg, length);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
 
 static duk_ret_t float4_RandomSphere_Static_LCG_float4_float(duk_context* ctx)
 {
-    LCG* lcg = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
-    float4* center = GetCheckedValueObject<float4>(ctx, 1, float4_ID);
+    LCG& lcg = *GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float4& center = *GetCheckedValueObject<float4>(ctx, 1, float4_ID);
     float radius = (float)duk_require_number(ctx, 2);
-    float4 ret = float4::RandomSphere(*lcg, *center, radius);
+    float4 ret = float4::RandomSphere(lcg, center, radius);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
 
 static duk_ret_t float4_RandomBox_Static_LCG_float_float_float_float_float_float(duk_context* ctx)
 {
-    LCG* lcg = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    LCG& lcg = *GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
     float xmin = (float)duk_require_number(ctx, 1);
     float xmax = (float)duk_require_number(ctx, 2);
     float ymin = (float)duk_require_number(ctx, 3);
     float ymax = (float)duk_require_number(ctx, 4);
     float zmin = (float)duk_require_number(ctx, 5);
     float zmax = (float)duk_require_number(ctx, 6);
-    float4 ret = float4::RandomBox(*lcg, xmin, xmax, ymin, ymax, zmin, zmax);
+    float4 ret = float4::RandomBox(lcg, xmin, xmax, ymin, ymax, zmin, zmax);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
 
 static duk_ret_t float4_RandomBox_Static_LCG_float4_float4(duk_context* ctx)
 {
-    LCG* lcg = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
-    float4* minValues = GetCheckedValueObject<float4>(ctx, 1, float4_ID);
-    float4* maxValues = GetCheckedValueObject<float4>(ctx, 2, float4_ID);
-    float4 ret = float4::RandomBox(*lcg, *minValues, *maxValues);
+    LCG& lcg = *GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float4& minValues = *GetCheckedValueObject<float4>(ctx, 1, float4_ID);
+    float4& maxValues = *GetCheckedValueObject<float4>(ctx, 2, float4_ID);
+    float4 ret = float4::RandomBox(lcg, minValues, maxValues);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
 
 static duk_ret_t float4_RandomBox_Static_LCG_float_float(duk_context* ctx)
 {
-    LCG* lcg = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    LCG& lcg = *GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
     float minElem = (float)duk_require_number(ctx, 1);
     float maxElem = (float)duk_require_number(ctx, 2);
-    float4 ret = float4::RandomBox(*lcg, minElem, maxElem);
+    float4 ret = float4::RandomBox(lcg, minElem, maxElem);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
 
 static duk_ret_t float4_RandomGeneral_Static_LCG_float_float(duk_context* ctx)
 {
-    LCG* lcg = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    LCG& lcg = *GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
     float minElem = (float)duk_require_number(ctx, 1);
     float maxElem = (float)duk_require_number(ctx, 2);
-    float4 ret = float4::RandomGeneral(*lcg, minElem, maxElem);
+    float4 ret = float4::RandomGeneral(lcg, minElem, maxElem);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -1583,10 +1604,10 @@ static duk_ret_t float4_RandomGeneral_Static_LCG_float_float(duk_context* ctx)
 static duk_ret_t float4_FromScalar_Static_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && duk_is_number(ctx, 0))
-        return float4_FromScalar_Static_float(ctx);
     if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
         return float4_FromScalar_Static_float_float(ctx);
+    if (numArgs == 1 && duk_is_number(ctx, 0))
+        return float4_FromScalar_Static_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -1595,40 +1616,40 @@ static duk_ret_t float4_FromSphericalCoordinates_Static_Selector(duk_context* ct
     int numArgs = duk_get_top(ctx);
     if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
         return float4_FromSphericalCoordinates_Static_float_float_float(ctx);
-    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
-        return float4_FromSphericalCoordinates_Static_float3(ctx);
     if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
         return float4_FromSphericalCoordinates_Static_float_float(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return float4_FromSphericalCoordinates_Static_float3(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t float4_AreOrthogonal_Static_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 3 && GetValueObject<float4>(ctx, 0, float4_ID) && GetValueObject<float4>(ctx, 1, float4_ID) && duk_is_number(ctx, 2))
-        return float4_AreOrthogonal_Static_float4_float4_float(ctx);
-    if (numArgs == 4 && GetValueObject<float4>(ctx, 0, float4_ID) && GetValueObject<float4>(ctx, 1, float4_ID) && GetValueObject<float4>(ctx, 2, float4_ID) && duk_is_number(ctx, 3))
+    if (numArgs >= 3 && GetValueObject<float4>(ctx, 0, float4_ID) && GetValueObject<float4>(ctx, 1, float4_ID) && GetValueObject<float4>(ctx, 2, float4_ID))
         return float4_AreOrthogonal_Static_float4_float4_float4_float(ctx);
+    if (numArgs >= 2 && GetValueObject<float4>(ctx, 0, float4_ID) && GetValueObject<float4>(ctx, 1, float4_ID))
+        return float4_AreOrthogonal_Static_float4_float4_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t float4_Orthonormalize_Static_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && GetValueObject<float4>(ctx, 0, float4_ID) && GetValueObject<float4>(ctx, 1, float4_ID))
-        return float4_Orthonormalize_Static_float4_float4(ctx);
     if (numArgs == 3 && GetValueObject<float4>(ctx, 0, float4_ID) && GetValueObject<float4>(ctx, 1, float4_ID) && GetValueObject<float4>(ctx, 2, float4_ID))
         return float4_Orthonormalize_Static_float4_float4_float4(ctx);
+    if (numArgs == 2 && GetValueObject<float4>(ctx, 0, float4_ID) && GetValueObject<float4>(ctx, 1, float4_ID))
+        return float4_Orthonormalize_Static_float4_float4(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t float4_AreOrthonormal_Static_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 3 && GetValueObject<float4>(ctx, 0, float4_ID) && GetValueObject<float4>(ctx, 1, float4_ID) && duk_is_number(ctx, 2))
-        return float4_AreOrthonormal_Static_float4_float4_float(ctx);
-    if (numArgs == 4 && GetValueObject<float4>(ctx, 0, float4_ID) && GetValueObject<float4>(ctx, 1, float4_ID) && GetValueObject<float4>(ctx, 2, float4_ID) && duk_is_number(ctx, 3))
+    if (numArgs >= 3 && GetValueObject<float4>(ctx, 0, float4_ID) && GetValueObject<float4>(ctx, 1, float4_ID) && GetValueObject<float4>(ctx, 2, float4_ID))
         return float4_AreOrthonormal_Static_float4_float4_float4_float(ctx);
+    if (numArgs >= 2 && GetValueObject<float4>(ctx, 0, float4_ID) && GetValueObject<float4>(ctx, 1, float4_ID))
+        return float4_AreOrthonormal_Static_float4_float4_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -1637,10 +1658,10 @@ static duk_ret_t float4_RandomBox_Static_Selector(duk_context* ctx)
     int numArgs = duk_get_top(ctx);
     if (numArgs == 7 && GetValueObject<LCG>(ctx, 0, LCG_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3) && duk_is_number(ctx, 4) && duk_is_number(ctx, 5) && duk_is_number(ctx, 6))
         return float4_RandomBox_Static_LCG_float_float_float_float_float_float(ctx);
-    if (numArgs == 3 && GetValueObject<LCG>(ctx, 0, LCG_ID) && GetValueObject<float4>(ctx, 1, float4_ID) && GetValueObject<float4>(ctx, 2, float4_ID))
-        return float4_RandomBox_Static_LCG_float4_float4(ctx);
     if (numArgs == 3 && GetValueObject<LCG>(ctx, 0, LCG_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
         return float4_RandomBox_Static_LCG_float_float(ctx);
+    if (numArgs == 3 && GetValueObject<LCG>(ctx, 0, LCG_ID) && GetValueObject<float4>(ctx, 1, float4_ID) && GetValueObject<float4>(ctx, 2, float4_ID))
+        return float4_RandomBox_Static_LCG_float4_float4(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -1681,21 +1702,21 @@ static const duk_function_list_entry float4_Functions[] = {
     ,{"Normalized4", float4_Normalized4, 0}
     ,{"Normalized", float4_Normalized, 0}
     ,{"NormalizeW", float4_NormalizeW, 0}
-    ,{"IsWZeroOrOne", float4_IsWZeroOrOne_float, 1}
-    ,{"IsZero3", float4_IsZero3_float, 1}
-    ,{"IsZero4", float4_IsZero4_float, 1}
-    ,{"IsZero", float4_IsZero_float, 1}
-    ,{"IsNormalized3", float4_IsNormalized3_float, 1}
-    ,{"IsNormalized4", float4_IsNormalized4_float, 1}
-    ,{"IsNormalized", float4_IsNormalized_float, 1}
+    ,{"IsWZeroOrOne", float4_IsWZeroOrOne_float, DUK_VARARGS}
+    ,{"IsZero3", float4_IsZero3_float, DUK_VARARGS}
+    ,{"IsZero4", float4_IsZero4_float, DUK_VARARGS}
+    ,{"IsZero", float4_IsZero_float, DUK_VARARGS}
+    ,{"IsNormalized3", float4_IsNormalized3_float, DUK_VARARGS}
+    ,{"IsNormalized4", float4_IsNormalized4_float, DUK_VARARGS}
+    ,{"IsNormalized", float4_IsNormalized_float, DUK_VARARGS}
     ,{"Scale3", float4_Scale3_float, 1}
     ,{"ScaleToLength3", float4_ScaleToLength3_float, 1}
     ,{"ScaleToLength", float4_ScaleToLength_float, 1}
     ,{"ScaledToLength3", float4_ScaledToLength3_float, 1}
     ,{"ScaledToLength", float4_ScaledToLength_float, 1}
     ,{"IsFinite", float4_IsFinite, 0}
-    ,{"IsPerpendicular3", float4_IsPerpendicular3_float4_float, 2}
-    ,{"IsPerpendicular", float4_IsPerpendicular_float4_float, 2}
+    ,{"IsPerpendicular3", float4_IsPerpendicular3_float4_float, DUK_VARARGS}
+    ,{"IsPerpendicular", float4_IsPerpendicular_float4_float, DUK_VARARGS}
     ,{"ToString", float4_ToString, 0}
     ,{"SerializeToString", float4_SerializeToString, 0}
     ,{"SerializeToCodeString", float4_SerializeToCodeString, 0}
@@ -1729,10 +1750,10 @@ static const duk_function_list_entry float4_Functions[] = {
     ,{"Cross3", float4_Cross3_Selector, DUK_VARARGS}
     ,{"Cross", float4_Cross_float4, 1}
     ,{"OuterProduct", float4_OuterProduct_float4, 1}
-    ,{"Perpendicular3", float4_Perpendicular3_float3_float3, 2}
-    ,{"Perpendicular", float4_Perpendicular_float4_float4, 2}
-    ,{"AnotherPerpendicular3", float4_AnotherPerpendicular3_float3_float3, 2}
-    ,{"AnotherPerpendicular", float4_AnotherPerpendicular_float4_float4, 2}
+    ,{"Perpendicular3", float4_Perpendicular3_float3_float3, DUK_VARARGS}
+    ,{"Perpendicular", float4_Perpendicular_float4_float4, DUK_VARARGS}
+    ,{"AnotherPerpendicular3", float4_AnotherPerpendicular3_float3_float3, DUK_VARARGS}
+    ,{"AnotherPerpendicular", float4_AnotherPerpendicular_float4_float4, DUK_VARARGS}
     ,{"PerpendicularBasis", float4_PerpendicularBasis_float4_float4, 2}
     ,{"RandomPerpendicular", float4_RandomPerpendicular_LCG, 1}
     ,{"Reflect3", float4_Reflect3_float3, 1}
@@ -1755,12 +1776,12 @@ static const duk_function_list_entry float4_StaticFunctions[] = {
     {"FromScalar", float4_FromScalar_Static_Selector, DUK_VARARGS}
     ,{"FromSphericalCoordinates", float4_FromSphericalCoordinates_Static_Selector, DUK_VARARGS}
     ,{"AreOrthogonal", float4_AreOrthogonal_Static_Selector, DUK_VARARGS}
-    ,{"AreCollinear", float4_AreCollinear_Static_float4_float4_float4_float, 4}
+    ,{"AreCollinear", float4_AreCollinear_Static_float4_float4_float4_float, DUK_VARARGS}
     ,{"Orthonormalize", float4_Orthonormalize_Static_Selector, DUK_VARARGS}
     ,{"AreOrthonormal", float4_AreOrthonormal_Static_Selector, DUK_VARARGS}
     ,{"FromString", float4_FromString_Static_string, 1}
     ,{"Lerp", float4_Lerp_Static_float4_float4_float, 3}
-    ,{"RandomDir", float4_RandomDir_Static_LCG_float, 2}
+    ,{"RandomDir", float4_RandomDir_Static_LCG_float, DUK_VARARGS}
     ,{"RandomSphere", float4_RandomSphere_Static_LCG_float4_float, 3}
     ,{"RandomBox", float4_RandomBox_Static_Selector, DUK_VARARGS}
     ,{"RandomGeneral", float4_RandomGeneral_Static_LCG_float_float, 3}

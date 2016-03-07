@@ -47,8 +47,8 @@ duk_ret_t Transform_Finalizer(duk_context* ctx)
 static duk_ret_t Transform_Set_pos(duk_context* ctx)
 {
     Transform* thisObj = GetThisValueObject<Transform>(ctx, Transform_ID);
-    float3* pos = GetValueObject<float3>(ctx, 0, float3_ID);
-    if (pos) thisObj->pos = *pos;
+    float3& pos = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->pos = pos;
     return 0;
 }
 
@@ -62,8 +62,8 @@ static duk_ret_t Transform_Get_pos(duk_context* ctx)
 static duk_ret_t Transform_Set_rot(duk_context* ctx)
 {
     Transform* thisObj = GetThisValueObject<Transform>(ctx, Transform_ID);
-    float3* rot = GetValueObject<float3>(ctx, 0, float3_ID);
-    if (rot) thisObj->rot = *rot;
+    float3& rot = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->rot = rot;
     return 0;
 }
 
@@ -77,8 +77,8 @@ static duk_ret_t Transform_Get_rot(duk_context* ctx)
 static duk_ret_t Transform_Set_scale(duk_context* ctx)
 {
     Transform* thisObj = GetThisValueObject<Transform>(ctx, Transform_ID);
-    float3* scale = GetValueObject<float3>(ctx, 0, float3_ID);
-    if (scale) thisObj->scale = *scale;
+    float3& scale = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->scale = scale;
     return 0;
 }
 
@@ -98,34 +98,34 @@ static duk_ret_t Transform_Ctor(duk_context* ctx)
 
 static duk_ret_t Transform_Ctor_float3_float3_float3(duk_context* ctx)
 {
-    float3* pos_ = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* rot_ = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    float3* scale_ = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
-    Transform* newObj = new Transform(*pos_, *rot_, *scale_);
+    float3& pos_ = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& rot_ = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3& scale_ = *GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    Transform* newObj = new Transform(pos_, rot_, scale_);
     PushConstructorResult<Transform>(ctx, newObj, Transform_ID, Transform_Finalizer);
     return 0;
 }
 
 static duk_ret_t Transform_Ctor_float3x3(duk_context* ctx)
 {
-    float3x3* m = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
-    Transform* newObj = new Transform(*m);
+    float3x3& m = *GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
+    Transform* newObj = new Transform(m);
     PushConstructorResult<Transform>(ctx, newObj, Transform_ID, Transform_Finalizer);
     return 0;
 }
 
 static duk_ret_t Transform_Ctor_float3x4(duk_context* ctx)
 {
-    float3x4* m = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
-    Transform* newObj = new Transform(*m);
+    float3x4& m = *GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
+    Transform* newObj = new Transform(m);
     PushConstructorResult<Transform>(ctx, newObj, Transform_ID, Transform_Finalizer);
     return 0;
 }
 
 static duk_ret_t Transform_Ctor_float4x4(duk_context* ctx)
 {
-    float4x4* m = GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
-    Transform* newObj = new Transform(*m);
+    float4x4& m = *GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
+    Transform* newObj = new Transform(m);
     PushConstructorResult<Transform>(ctx, newObj, Transform_ID, Transform_Finalizer);
     return 0;
 }
@@ -133,8 +133,8 @@ static duk_ret_t Transform_Ctor_float4x4(duk_context* ctx)
 static duk_ret_t Transform_SetPos_float3(duk_context* ctx)
 {
     Transform* thisObj = GetThisValueObject<Transform>(ctx, Transform_ID);
-    float3* v = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    thisObj->SetPos(*v);
+    float3& v = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->SetPos(v);
     return 0;
 }
 
@@ -171,8 +171,8 @@ static duk_ret_t Transform_SetScale_float_float_float(duk_context* ctx)
 static duk_ret_t Transform_SetScale_float3(duk_context* ctx)
 {
     Transform* thisObj = GetThisValueObject<Transform>(ctx, Transform_ID);
-    float3* s = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    thisObj->SetScale(*s);
+    float3& s = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->SetScale(s);
     return 0;
 }
 
@@ -195,40 +195,40 @@ static duk_ret_t Transform_ToFloat4x4(duk_context* ctx)
 static duk_ret_t Transform_FromFloat3x4_float3x4(duk_context* ctx)
 {
     Transform* thisObj = GetThisValueObject<Transform>(ctx, Transform_ID);
-    float3x4* m = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
-    thisObj->FromFloat3x4(*m);
+    float3x4& m = *GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
+    thisObj->FromFloat3x4(m);
     return 0;
 }
 
 static duk_ret_t Transform_FromFloat4x4_float4x4(duk_context* ctx)
 {
     Transform* thisObj = GetThisValueObject<Transform>(ctx, Transform_ID);
-    float4x4* m = GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
-    thisObj->FromFloat4x4(*m);
+    float4x4& m = *GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
+    thisObj->FromFloat4x4(m);
     return 0;
 }
 
 static duk_ret_t Transform_SetRotationAndScale_float3x3(duk_context* ctx)
 {
     Transform* thisObj = GetThisValueObject<Transform>(ctx, Transform_ID);
-    float3x3* mat = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
-    thisObj->SetRotationAndScale(*mat);
+    float3x3& mat = *GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
+    thisObj->SetRotationAndScale(mat);
     return 0;
 }
 
 static duk_ret_t Transform_SetOrientation_float3x3(duk_context* ctx)
 {
     Transform* thisObj = GetThisValueObject<Transform>(ctx, Transform_ID);
-    float3x3* mat = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
-    thisObj->SetOrientation(*mat);
+    float3x3& mat = *GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
+    thisObj->SetOrientation(mat);
     return 0;
 }
 
 static duk_ret_t Transform_SetOrientation_Quat(duk_context* ctx)
 {
     Transform* thisObj = GetThisValueObject<Transform>(ctx, Transform_ID);
-    Quat* q = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
-    thisObj->SetOrientation(*q);
+    Quat& q = *GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
+    thisObj->SetOrientation(q);
     return 0;
 }
 
@@ -251,8 +251,8 @@ static duk_ret_t Transform_Orientation(duk_context* ctx)
 static duk_ret_t Transform_Mul_Transform(duk_context* ctx)
 {
     Transform* thisObj = GetThisValueObject<Transform>(ctx, Transform_ID);
-    Transform* rhs = GetCheckedValueObject<Transform>(ctx, 0, Transform_ID);
-    Transform ret = thisObj->Mul(*rhs);
+    Transform& rhs = *GetCheckedValueObject<Transform>(ctx, 0, Transform_ID);
+    Transform ret = thisObj->Mul(rhs);
     PushValueObjectCopy<Transform>(ctx, ret, Transform_ID, Transform_Finalizer);
     return 1;
 }

@@ -107,8 +107,8 @@ static duk_ret_t AssetReferenceList_Size(duk_context* ctx)
 static duk_ret_t AssetReferenceList_Append_AssetReference(duk_context* ctx)
 {
     AssetReferenceList* thisObj = GetThisValueObject<AssetReferenceList>(ctx, AssetReferenceList_ID);
-    AssetReference* ref = GetCheckedValueObject<AssetReference>(ctx, 0, AssetReference_ID);
-    thisObj->Append(*ref);
+    AssetReference& ref = *GetCheckedValueObject<AssetReference>(ctx, 0, AssetReference_ID);
+    thisObj->Append(ref);
     return 0;
 }
 
@@ -124,8 +124,8 @@ static duk_ret_t AssetReferenceList_Set_uint_AssetReference(duk_context* ctx)
 {
     AssetReferenceList* thisObj = GetThisValueObject<AssetReferenceList>(ctx, AssetReferenceList_ID);
     uint i = (uint)duk_require_number(ctx, 0);
-    AssetReference* ref = GetCheckedValueObject<AssetReference>(ctx, 1, AssetReference_ID);
-    thisObj->Set(i, *ref);
+    AssetReference& ref = *GetCheckedValueObject<AssetReference>(ctx, 1, AssetReference_ID);
+    thisObj->Set(i, ref);
     return 0;
 }
 

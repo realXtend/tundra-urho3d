@@ -83,8 +83,8 @@ duk_ret_t Sphere_Finalizer(duk_context* ctx)
 static duk_ret_t Sphere_Set_pos(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    float3* pos = GetValueObject<float3>(ctx, 0, float3_ID);
-    if (pos) thisObj->pos = *pos;
+    float3& pos = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->pos = pos;
     return 0;
 }
 
@@ -119,39 +119,39 @@ static duk_ret_t Sphere_Ctor(duk_context* ctx)
 
 static duk_ret_t Sphere_Ctor_float3_float(duk_context* ctx)
 {
-    float3* center = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& center = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
     float radius = (float)duk_require_number(ctx, 1);
-    Sphere* newObj = new Sphere(*center, radius);
+    Sphere* newObj = new Sphere(center, radius);
     PushConstructorResult<Sphere>(ctx, newObj, Sphere_ID, Sphere_Finalizer);
     return 0;
 }
 
 static duk_ret_t Sphere_Ctor_float3_float3(duk_context* ctx)
 {
-    float3* pointA = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* pointB = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    Sphere* newObj = new Sphere(*pointA, *pointB);
+    float3& pointA = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& pointB = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    Sphere* newObj = new Sphere(pointA, pointB);
     PushConstructorResult<Sphere>(ctx, newObj, Sphere_ID, Sphere_Finalizer);
     return 0;
 }
 
 static duk_ret_t Sphere_Ctor_float3_float3_float3(duk_context* ctx)
 {
-    float3* pointA = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* pointB = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    float3* pointC = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
-    Sphere* newObj = new Sphere(*pointA, *pointB, *pointC);
+    float3& pointA = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& pointB = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3& pointC = *GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    Sphere* newObj = new Sphere(pointA, pointB, pointC);
     PushConstructorResult<Sphere>(ctx, newObj, Sphere_ID, Sphere_Finalizer);
     return 0;
 }
 
 static duk_ret_t Sphere_Ctor_float3_float3_float3_float3(duk_context* ctx)
 {
-    float3* pointA = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* pointB = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    float3* pointC = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
-    float3* pointD = GetCheckedValueObject<float3>(ctx, 3, float3_ID);
-    Sphere* newObj = new Sphere(*pointA, *pointB, *pointC, *pointD);
+    float3& pointA = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& pointB = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3& pointC = *GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    float3& pointD = *GetCheckedValueObject<float3>(ctx, 3, float3_ID);
+    Sphere* newObj = new Sphere(pointA, pointB, pointC, pointD);
     PushConstructorResult<Sphere>(ctx, newObj, Sphere_ID, Sphere_Finalizer);
     return 0;
 }
@@ -159,40 +159,40 @@ static duk_ret_t Sphere_Ctor_float3_float3_float3_float3(duk_context* ctx)
 static duk_ret_t Sphere_Translate_float3(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    float3* offset = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    thisObj->Translate(*offset);
+    float3& offset = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    thisObj->Translate(offset);
     return 0;
 }
 
 static duk_ret_t Sphere_Transform_float3x3(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    float3x3* transform = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
-    thisObj->Transform(*transform);
+    float3x3& transform = *GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
+    thisObj->Transform(transform);
     return 0;
 }
 
 static duk_ret_t Sphere_Transform_float3x4(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    float3x4* transform = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
-    thisObj->Transform(*transform);
+    float3x4& transform = *GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
+    thisObj->Transform(transform);
     return 0;
 }
 
 static duk_ret_t Sphere_Transform_float4x4(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    float4x4* transform = GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
-    thisObj->Transform(*transform);
+    float4x4& transform = *GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
+    thisObj->Transform(transform);
     return 0;
 }
 
 static duk_ret_t Sphere_Transform_Quat(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Quat* transform = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
-    thisObj->Transform(*transform);
+    Quat& transform = *GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
+    thisObj->Transform(transform);
     return 0;
 }
 
@@ -262,8 +262,8 @@ static duk_ret_t Sphere_AnyPointFast(duk_context* ctx)
 static duk_ret_t Sphere_ExtremePoint_float3(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    float3* direction = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3 ret = thisObj->ExtremePoint(*direction);
+    float3& direction = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ExtremePoint(direction);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
@@ -271,9 +271,9 @@ static duk_ret_t Sphere_ExtremePoint_float3(duk_context* ctx)
 static duk_ret_t Sphere_ExtremePoint_float3_float(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    float3* direction = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& direction = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
     float projectionDistance = (float)duk_require_number(ctx, 1);
-    float3 ret = thisObj->ExtremePoint(*direction, projectionDistance);
+    float3 ret = thisObj->ExtremePoint(direction, projectionDistance);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
@@ -281,10 +281,10 @@ static duk_ret_t Sphere_ExtremePoint_float3_float(duk_context* ctx)
 static duk_ret_t Sphere_ProjectToAxis_float3_float_float(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    float3* direction = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& direction = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
     float outMin = (float)duk_require_number(ctx, 1);
     float outMax = (float)duk_require_number(ctx, 2);
-    thisObj->ProjectToAxis(*direction, outMin, outMax);
+    thisObj->ProjectToAxis(direction, outMin, outMax);
     return 0;
 }
 
@@ -314,8 +314,8 @@ static duk_ret_t Sphere_SetDegenerate(duk_context* ctx)
 static duk_ret_t Sphere_Contains_float3(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    bool ret = thisObj->Contains(*point);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    bool ret = thisObj->Contains(point);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -323,9 +323,9 @@ static duk_ret_t Sphere_Contains_float3(duk_context* ctx)
 static duk_ret_t Sphere_Contains_float3_float(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
     float epsilon = (float)duk_require_number(ctx, 1);
-    bool ret = thisObj->Contains(*point, epsilon);
+    bool ret = thisObj->Contains(point, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -333,8 +333,8 @@ static duk_ret_t Sphere_Contains_float3_float(duk_context* ctx)
 static duk_ret_t Sphere_Contains_LineSegment(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
-    bool ret = thisObj->Contains(*lineSegment);
+    LineSegment& lineSegment = *GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
+    bool ret = thisObj->Contains(lineSegment);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -342,8 +342,8 @@ static duk_ret_t Sphere_Contains_LineSegment(duk_context* ctx)
 static duk_ret_t Sphere_Contains_Triangle(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
-    bool ret = thisObj->Contains(*triangle);
+    Triangle& triangle = *GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
+    bool ret = thisObj->Contains(triangle);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -351,8 +351,8 @@ static duk_ret_t Sphere_Contains_Triangle(duk_context* ctx)
 static duk_ret_t Sphere_Contains_AABB(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
-    bool ret = thisObj->Contains(*aabb);
+    AABB& aabb = *GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
+    bool ret = thisObj->Contains(aabb);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -360,8 +360,8 @@ static duk_ret_t Sphere_Contains_AABB(duk_context* ctx)
 static duk_ret_t Sphere_Contains_OBB(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
-    bool ret = thisObj->Contains(*obb);
+    OBB& obb = *GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
+    bool ret = thisObj->Contains(obb);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -369,8 +369,8 @@ static duk_ret_t Sphere_Contains_OBB(duk_context* ctx)
 static duk_ret_t Sphere_Contains_Frustum(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
-    bool ret = thisObj->Contains(*frustum);
+    Frustum& frustum = *GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
+    bool ret = thisObj->Contains(frustum);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -378,8 +378,8 @@ static duk_ret_t Sphere_Contains_Frustum(duk_context* ctx)
 static duk_ret_t Sphere_Contains_Sphere(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
-    bool ret = thisObj->Contains(*sphere);
+    Sphere& sphere = *GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
+    bool ret = thisObj->Contains(sphere);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -387,9 +387,9 @@ static duk_ret_t Sphere_Contains_Sphere(duk_context* ctx)
 static duk_ret_t Sphere_Contains_Sphere_float(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
+    Sphere& sphere = *GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
     float epsilon = (float)duk_require_number(ctx, 1);
-    bool ret = thisObj->Contains(*sphere, epsilon);
+    bool ret = thisObj->Contains(sphere, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -397,8 +397,8 @@ static duk_ret_t Sphere_Contains_Sphere_float(duk_context* ctx)
 static duk_ret_t Sphere_Contains_Capsule(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
-    bool ret = thisObj->Contains(*capsule);
+    Capsule& capsule = *GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
+    bool ret = thisObj->Contains(capsule);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -406,8 +406,8 @@ static duk_ret_t Sphere_Contains_Capsule(duk_context* ctx)
 static duk_ret_t Sphere_Distance_float3(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float ret = thisObj->Distance(*point);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float ret = thisObj->Distance(point);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -415,8 +415,8 @@ static duk_ret_t Sphere_Distance_float3(duk_context* ctx)
 static duk_ret_t Sphere_Distance_Sphere(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
-    float ret = thisObj->Distance(*sphere);
+    Sphere& sphere = *GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
+    float ret = thisObj->Distance(sphere);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -424,8 +424,8 @@ static duk_ret_t Sphere_Distance_Sphere(duk_context* ctx)
 static duk_ret_t Sphere_Distance_Capsule(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
-    float ret = thisObj->Distance(*capsule);
+    Capsule& capsule = *GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
+    float ret = thisObj->Distance(capsule);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -433,8 +433,8 @@ static duk_ret_t Sphere_Distance_Capsule(duk_context* ctx)
 static duk_ret_t Sphere_Distance_AABB(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
-    float ret = thisObj->Distance(*aabb);
+    AABB& aabb = *GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
+    float ret = thisObj->Distance(aabb);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -442,8 +442,8 @@ static duk_ret_t Sphere_Distance_AABB(duk_context* ctx)
 static duk_ret_t Sphere_Distance_OBB(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
-    float ret = thisObj->Distance(*obb);
+    OBB& obb = *GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
+    float ret = thisObj->Distance(obb);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -451,8 +451,8 @@ static duk_ret_t Sphere_Distance_OBB(duk_context* ctx)
 static duk_ret_t Sphere_Distance_Plane(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
-    float ret = thisObj->Distance(*plane);
+    Plane& plane = *GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
+    float ret = thisObj->Distance(plane);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -460,8 +460,8 @@ static duk_ret_t Sphere_Distance_Plane(duk_context* ctx)
 static duk_ret_t Sphere_Distance_Triangle(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
-    float ret = thisObj->Distance(*triangle);
+    Triangle& triangle = *GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
+    float ret = thisObj->Distance(triangle);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -469,8 +469,8 @@ static duk_ret_t Sphere_Distance_Triangle(duk_context* ctx)
 static duk_ret_t Sphere_Distance_Ray(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Ray* ray = GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
-    float ret = thisObj->Distance(*ray);
+    Ray& ray = *GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
+    float ret = thisObj->Distance(ray);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -478,8 +478,8 @@ static duk_ret_t Sphere_Distance_Ray(duk_context* ctx)
 static duk_ret_t Sphere_Distance_Line(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Line* line = GetCheckedValueObject<Line>(ctx, 0, Line_ID);
-    float ret = thisObj->Distance(*line);
+    Line& line = *GetCheckedValueObject<Line>(ctx, 0, Line_ID);
+    float ret = thisObj->Distance(line);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -487,8 +487,8 @@ static duk_ret_t Sphere_Distance_Line(duk_context* ctx)
 static duk_ret_t Sphere_Distance_LineSegment(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
-    float ret = thisObj->Distance(*lineSegment);
+    LineSegment& lineSegment = *GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
+    float ret = thisObj->Distance(lineSegment);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -496,8 +496,8 @@ static duk_ret_t Sphere_Distance_LineSegment(duk_context* ctx)
 static duk_ret_t Sphere_MaxDistance_float3(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float ret = thisObj->MaxDistance(*point);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float ret = thisObj->MaxDistance(point);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -505,8 +505,8 @@ static duk_ret_t Sphere_MaxDistance_float3(duk_context* ctx)
 static duk_ret_t Sphere_ClosestPoint_float3(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3 ret = thisObj->ClosestPoint(*point);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->ClosestPoint(point);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
@@ -514,8 +514,8 @@ static duk_ret_t Sphere_ClosestPoint_float3(duk_context* ctx)
 static duk_ret_t Sphere_Intersects_Plane(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
-    bool ret = thisObj->Intersects(*plane);
+    Plane& plane = *GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
+    bool ret = thisObj->Intersects(plane);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -523,8 +523,8 @@ static duk_ret_t Sphere_Intersects_Plane(duk_context* ctx)
 static duk_ret_t Sphere_Intersects_Capsule(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
-    bool ret = thisObj->Intersects(*capsule);
+    Capsule& capsule = *GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
+    bool ret = thisObj->Intersects(capsule);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -532,8 +532,8 @@ static duk_ret_t Sphere_Intersects_Capsule(duk_context* ctx)
 static duk_ret_t Sphere_Intersects_Frustum(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
-    bool ret = thisObj->Intersects(*frustum);
+    Frustum& frustum = *GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
+    bool ret = thisObj->Intersects(frustum);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -541,8 +541,8 @@ static duk_ret_t Sphere_Intersects_Frustum(duk_context* ctx)
 static duk_ret_t Sphere_Intersects_Sphere(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
-    bool ret = thisObj->Intersects(*sphere);
+    Sphere& sphere = *GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
+    bool ret = thisObj->Intersects(sphere);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -550,100 +550,103 @@ static duk_ret_t Sphere_Intersects_Sphere(duk_context* ctx)
 static duk_ret_t Sphere_Intersect_Plane(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Plane* plane = GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
-    Circle ret = thisObj->Intersect(*plane);
+    Plane& plane = *GetCheckedValueObject<Plane>(ctx, 0, Plane_ID);
+    Circle ret = thisObj->Intersect(plane);
     PushValueObjectCopy<Circle>(ctx, ret, Circle_ID, Circle_Finalizer);
     return 1;
 }
 
 static duk_ret_t Sphere_Enclose_float3_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float epsilon = (float)duk_require_number(ctx, 1);
-    thisObj->Enclose(*point, epsilon);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float epsilon = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-4f;
+    thisObj->Enclose(point, epsilon);
     return 0;
 }
 
 static duk_ret_t Sphere_Enclose_LineSegment(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    LineSegment* lineSegment = GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
-    thisObj->Enclose(*lineSegment);
+    LineSegment& lineSegment = *GetCheckedValueObject<LineSegment>(ctx, 0, LineSegment_ID);
+    thisObj->Enclose(lineSegment);
     return 0;
 }
 
 static duk_ret_t Sphere_Enclose_AABB(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    AABB* aabb = GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
-    thisObj->Enclose(*aabb);
+    AABB& aabb = *GetCheckedValueObject<AABB>(ctx, 0, AABB_ID);
+    thisObj->Enclose(aabb);
     return 0;
 }
 
 static duk_ret_t Sphere_Enclose_OBB(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    OBB* obb = GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
-    thisObj->Enclose(*obb);
+    OBB& obb = *GetCheckedValueObject<OBB>(ctx, 0, OBB_ID);
+    thisObj->Enclose(obb);
     return 0;
 }
 
 static duk_ret_t Sphere_Enclose_Sphere(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
-    thisObj->Enclose(*sphere);
+    Sphere& sphere = *GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
+    thisObj->Enclose(sphere);
     return 0;
 }
 
 static duk_ret_t Sphere_Enclose_Triangle(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Triangle* triangle = GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
-    thisObj->Enclose(*triangle);
+    Triangle& triangle = *GetCheckedValueObject<Triangle>(ctx, 0, Triangle_ID);
+    thisObj->Enclose(triangle);
     return 0;
 }
 
 static duk_ret_t Sphere_Enclose_Frustum(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Frustum* frustum = GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
-    thisObj->Enclose(*frustum);
+    Frustum& frustum = *GetCheckedValueObject<Frustum>(ctx, 0, Frustum_ID);
+    thisObj->Enclose(frustum);
     return 0;
 }
 
 static duk_ret_t Sphere_Enclose_Capsule(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Capsule* capsule = GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
-    thisObj->Enclose(*capsule);
+    Capsule& capsule = *GetCheckedValueObject<Capsule>(ctx, 0, Capsule_ID);
+    thisObj->Enclose(capsule);
     return 0;
 }
 
 static duk_ret_t Sphere_ExtendRadiusToContain_float3_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    float3* point = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float epsilon = (float)duk_require_number(ctx, 1);
-    thisObj->ExtendRadiusToContain(*point, epsilon);
+    float3& point = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float epsilon = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-4f;
+    thisObj->ExtendRadiusToContain(point, epsilon);
     return 0;
 }
 
 static duk_ret_t Sphere_ExtendRadiusToContain_Sphere_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Sphere* sphere = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
-    float epsilon = (float)duk_require_number(ctx, 1);
-    thisObj->ExtendRadiusToContain(*sphere, epsilon);
+    Sphere& sphere = *GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
+    float epsilon = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-4f;
+    thisObj->ExtendRadiusToContain(sphere, epsilon);
     return 0;
 }
 
 static duk_ret_t Sphere_RandomPointInside_LCG(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    LCG* lcg = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
-    float3 ret = thisObj->RandomPointInside(*lcg);
+    LCG& lcg = *GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float3 ret = thisObj->RandomPointInside(lcg);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
@@ -651,8 +654,8 @@ static duk_ret_t Sphere_RandomPointInside_LCG(duk_context* ctx)
 static duk_ret_t Sphere_RandomPointOnSurface_LCG(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    LCG* lcg = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
-    float3 ret = thisObj->RandomPointOnSurface(*lcg);
+    LCG& lcg = *GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float3 ret = thisObj->RandomPointOnSurface(lcg);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
@@ -683,10 +686,11 @@ static duk_ret_t Sphere_SerializeToCodeString(duk_context* ctx)
 
 static duk_ret_t Sphere_Equals_Sphere_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Sphere* rhs = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
-    float epsilon = (float)duk_require_number(ctx, 1);
-    bool ret = thisObj->Equals(*rhs, epsilon);
+    Sphere& rhs = *GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
+    float epsilon = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-3f;
+    bool ret = thisObj->Equals(rhs, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -694,8 +698,8 @@ static duk_ret_t Sphere_Equals_Sphere_float(duk_context* ctx)
 static duk_ret_t Sphere_BitEquals_Sphere(duk_context* ctx)
 {
     Sphere* thisObj = GetThisValueObject<Sphere>(ctx, Sphere_ID);
-    Sphere* other = GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
-    bool ret = thisObj->BitEquals(*other);
+    Sphere& other = *GetCheckedValueObject<Sphere>(ctx, 0, Sphere_ID);
+    bool ret = thisObj->BitEquals(other);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -703,258 +707,258 @@ static duk_ret_t Sphere_BitEquals_Sphere(duk_context* ctx)
 static duk_ret_t Sphere_Ctor_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 0)
-        return Sphere_Ctor(ctx);
-    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
-        return Sphere_Ctor_float3_float(ctx);
-    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
-        return Sphere_Ctor_float3_float3(ctx);
-    if (numArgs == 3 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<float3>(ctx, 2, float3_ID))
-        return Sphere_Ctor_float3_float3_float3(ctx);
     if (numArgs == 4 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<float3>(ctx, 2, float3_ID) && GetValueObject<float3>(ctx, 3, float3_ID))
         return Sphere_Ctor_float3_float3_float3_float3(ctx);
+    if (numArgs == 3 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<float3>(ctx, 2, float3_ID))
+        return Sphere_Ctor_float3_float3_float3(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
+        return Sphere_Ctor_float3_float3(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
+        return Sphere_Ctor_float3_float(ctx);
+    if (numArgs == 0)
+        return Sphere_Ctor(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Sphere_Transform_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
-        return Sphere_Transform_float3x3(ctx);
-    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_ID))
-        return Sphere_Transform_float3x4(ctx);
     if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_ID))
         return Sphere_Transform_float4x4(ctx);
     if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_ID))
         return Sphere_Transform_Quat(ctx);
+    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
+        return Sphere_Transform_float3x3(ctx);
+    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_ID))
+        return Sphere_Transform_float3x4(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Sphere_ExtremePoint_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
-        return Sphere_ExtremePoint_float3(ctx);
     if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
         return Sphere_ExtremePoint_float3_float(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Sphere_ExtremePoint_float3(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Sphere_Contains_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
-        return Sphere_Contains_float3(ctx);
     if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
         return Sphere_Contains_float3_float(ctx);
-    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
-        return Sphere_Contains_LineSegment(ctx);
-    if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
-        return Sphere_Contains_Triangle(ctx);
-    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
-        return Sphere_Contains_AABB(ctx);
-    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
-        return Sphere_Contains_OBB(ctx);
+    if (numArgs == 2 && GetValueObject<Sphere>(ctx, 0, Sphere_ID) && duk_is_number(ctx, 1))
+        return Sphere_Contains_Sphere_float(ctx);
     if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_ID))
         return Sphere_Contains_Frustum(ctx);
     if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
         return Sphere_Contains_Sphere(ctx);
-    if (numArgs == 2 && GetValueObject<Sphere>(ctx, 0, Sphere_ID) && duk_is_number(ctx, 1))
-        return Sphere_Contains_Sphere_float(ctx);
     if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
         return Sphere_Contains_Capsule(ctx);
+    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
+        return Sphere_Contains_OBB(ctx);
+    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
+        return Sphere_Contains_LineSegment(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Sphere_Contains_float3(ctx);
+    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
+        return Sphere_Contains_AABB(ctx);
+    if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
+        return Sphere_Contains_Triangle(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Sphere_Distance_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
-        return Sphere_Distance_float3(ctx);
-    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
-        return Sphere_Distance_Sphere(ctx);
-    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
-        return Sphere_Distance_Capsule(ctx);
-    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
-        return Sphere_Distance_AABB(ctx);
-    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
-        return Sphere_Distance_OBB(ctx);
-    if (numArgs == 1 && GetValueObject<Plane>(ctx, 0, Plane_ID))
-        return Sphere_Distance_Plane(ctx);
     if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
         return Sphere_Distance_Triangle(ctx);
+    if (numArgs == 1 && GetValueObject<Plane>(ctx, 0, Plane_ID))
+        return Sphere_Distance_Plane(ctx);
     if (numArgs == 1 && GetValueObject<Ray>(ctx, 0, Ray_ID))
         return Sphere_Distance_Ray(ctx);
-    if (numArgs == 1 && GetValueObject<Line>(ctx, 0, Line_ID))
-        return Sphere_Distance_Line(ctx);
     if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
         return Sphere_Distance_LineSegment(ctx);
+    if (numArgs == 1 && GetValueObject<Line>(ctx, 0, Line_ID))
+        return Sphere_Distance_Line(ctx);
+    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
+        return Sphere_Distance_Sphere(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Sphere_Distance_float3(ctx);
+    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
+        return Sphere_Distance_Capsule(ctx);
+    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
+        return Sphere_Distance_OBB(ctx);
+    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
+        return Sphere_Distance_AABB(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Sphere_Intersects_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<Plane>(ctx, 0, Plane_ID))
-        return Sphere_Intersects_Plane(ctx);
-    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
-        return Sphere_Intersects_Capsule(ctx);
     if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_ID))
         return Sphere_Intersects_Frustum(ctx);
     if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
         return Sphere_Intersects_Sphere(ctx);
+    if (numArgs == 1 && GetValueObject<Plane>(ctx, 0, Plane_ID))
+        return Sphere_Intersects_Plane(ctx);
+    if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
+        return Sphere_Intersects_Capsule(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Sphere_Enclose_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
-        return Sphere_Enclose_float3_float(ctx);
-    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
-        return Sphere_Enclose_LineSegment(ctx);
-    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
-        return Sphere_Enclose_AABB(ctx);
-    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
-        return Sphere_Enclose_OBB(ctx);
-    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
-        return Sphere_Enclose_Sphere(ctx);
     if (numArgs == 1 && GetValueObject<Triangle>(ctx, 0, Triangle_ID))
         return Sphere_Enclose_Triangle(ctx);
-    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_ID))
-        return Sphere_Enclose_Frustum(ctx);
+    if (numArgs == 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
+        return Sphere_Enclose_Sphere(ctx);
     if (numArgs == 1 && GetValueObject<Capsule>(ctx, 0, Capsule_ID))
         return Sphere_Enclose_Capsule(ctx);
+    if (numArgs == 1 && GetValueObject<Frustum>(ctx, 0, Frustum_ID))
+        return Sphere_Enclose_Frustum(ctx);
+    if (numArgs == 1 && GetValueObject<LineSegment>(ctx, 0, LineSegment_ID))
+        return Sphere_Enclose_LineSegment(ctx);
+    if (numArgs >= 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Sphere_Enclose_float3_float(ctx);
+    if (numArgs == 1 && GetValueObject<OBB>(ctx, 0, OBB_ID))
+        return Sphere_Enclose_OBB(ctx);
+    if (numArgs == 1 && GetValueObject<AABB>(ctx, 0, AABB_ID))
+        return Sphere_Enclose_AABB(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Sphere_ExtendRadiusToContain_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
-        return Sphere_ExtendRadiusToContain_float3_float(ctx);
-    if (numArgs == 2 && GetValueObject<Sphere>(ctx, 0, Sphere_ID) && duk_is_number(ctx, 1))
+    if (numArgs >= 1 && GetValueObject<Sphere>(ctx, 0, Sphere_ID))
         return Sphere_ExtendRadiusToContain_Sphere_float(ctx);
+    if (numArgs >= 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Sphere_ExtendRadiusToContain_float3_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Sphere_OptimalEnclosingSphere_Static_float3_float3(duk_context* ctx)
 {
-    float3* a = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* b = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    Sphere ret = Sphere::OptimalEnclosingSphere(*a, *b);
+    float3& a = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& b = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    Sphere ret = Sphere::OptimalEnclosingSphere(a, b);
     PushValueObjectCopy<Sphere>(ctx, ret, Sphere_ID, Sphere_Finalizer);
     return 1;
 }
 
 static duk_ret_t Sphere_OptimalEnclosingSphere_Static_float3_float3_float3(duk_context* ctx)
 {
-    float3* a = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* b = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    float3* c = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
-    Sphere ret = Sphere::OptimalEnclosingSphere(*a, *b, *c);
+    float3& a = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& b = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3& c = *GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    Sphere ret = Sphere::OptimalEnclosingSphere(a, b, c);
     PushValueObjectCopy<Sphere>(ctx, ret, Sphere_ID, Sphere_Finalizer);
     return 1;
 }
 
 static duk_ret_t Sphere_OptimalEnclosingSphere_Static_float3_float3_float3_float3(duk_context* ctx)
 {
-    float3* a = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* b = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    float3* c = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
-    float3* d = GetCheckedValueObject<float3>(ctx, 3, float3_ID);
-    Sphere ret = Sphere::OptimalEnclosingSphere(*a, *b, *c, *d);
+    float3& a = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& b = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3& c = *GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    float3& d = *GetCheckedValueObject<float3>(ctx, 3, float3_ID);
+    Sphere ret = Sphere::OptimalEnclosingSphere(a, b, c, d);
     PushValueObjectCopy<Sphere>(ctx, ret, Sphere_ID, Sphere_Finalizer);
     return 1;
 }
 
 static duk_ret_t Sphere_OptimalEnclosingSphere_Static_float3_float3_float3_float3_float3_int(duk_context* ctx)
 {
-    float3* a = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* b = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    float3* c = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
-    float3* d = GetCheckedValueObject<float3>(ctx, 3, float3_ID);
-    float3* e = GetCheckedValueObject<float3>(ctx, 4, float3_ID);
+    float3& a = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& b = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3& c = *GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    float3& d = *GetCheckedValueObject<float3>(ctx, 3, float3_ID);
+    float3& e = *GetCheckedValueObject<float3>(ctx, 4, float3_ID);
     int redundantPoint = (int)duk_require_number(ctx, 5);
-    Sphere ret = Sphere::OptimalEnclosingSphere(*a, *b, *c, *d, *e, redundantPoint);
+    Sphere ret = Sphere::OptimalEnclosingSphere(a, b, c, d, e, redundantPoint);
     PushValueObjectCopy<Sphere>(ctx, ret, Sphere_ID, Sphere_Finalizer);
     return 1;
 }
 
 static duk_ret_t Sphere_FitThroughPoints_Static_float3_float3(duk_context* ctx)
 {
-    float3* a = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* b = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    Sphere ret = Sphere::FitThroughPoints(*a, *b);
+    float3& a = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& b = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    Sphere ret = Sphere::FitThroughPoints(a, b);
     PushValueObjectCopy<Sphere>(ctx, ret, Sphere_ID, Sphere_Finalizer);
     return 1;
 }
 
 static duk_ret_t Sphere_FitThroughPoints_Static_float3_float3_float3(duk_context* ctx)
 {
-    float3* a = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* b = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    float3* c = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
-    Sphere ret = Sphere::FitThroughPoints(*a, *b, *c);
+    float3& a = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& b = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3& c = *GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    Sphere ret = Sphere::FitThroughPoints(a, b, c);
     PushValueObjectCopy<Sphere>(ctx, ret, Sphere_ID, Sphere_Finalizer);
     return 1;
 }
 
 static duk_ret_t Sphere_FitThroughPoints_Static_float3_float3_float3_float3(duk_context* ctx)
 {
-    float3* a = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* b = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    float3* c = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
-    float3* d = GetCheckedValueObject<float3>(ctx, 3, float3_ID);
-    Sphere ret = Sphere::FitThroughPoints(*a, *b, *c, *d);
+    float3& a = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& b = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3& c = *GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    float3& d = *GetCheckedValueObject<float3>(ctx, 3, float3_ID);
+    Sphere ret = Sphere::FitThroughPoints(a, b, c, d);
     PushValueObjectCopy<Sphere>(ctx, ret, Sphere_ID, Sphere_Finalizer);
     return 1;
 }
 
 static duk_ret_t Sphere_RandomPointInside_Static_LCG_float3_float(duk_context* ctx)
 {
-    LCG* lcg = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
-    float3* center = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    LCG& lcg = *GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float3& center = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
     float radius = (float)duk_require_number(ctx, 2);
-    float3 ret = Sphere::RandomPointInside(*lcg, *center, radius);
+    float3 ret = Sphere::RandomPointInside(lcg, center, radius);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
 
 static duk_ret_t Sphere_RandomPointOnSurface_Static_LCG_float3_float(duk_context* ctx)
 {
-    LCG* lcg = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
-    float3* center = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    LCG& lcg = *GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float3& center = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
     float radius = (float)duk_require_number(ctx, 2);
-    float3 ret = Sphere::RandomPointOnSurface(*lcg, *center, radius);
+    float3 ret = Sphere::RandomPointOnSurface(lcg, center, radius);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
 
 static duk_ret_t Sphere_RandomUnitaryFloat3_Static_LCG(duk_context* ctx)
 {
-    LCG* lcg = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
-    float3 ret = Sphere::RandomUnitaryFloat3(*lcg);
+    LCG& lcg = *GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    float3 ret = Sphere::RandomUnitaryFloat3(lcg);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
 
 static duk_ret_t Sphere_IntersectLine_Static_float3_float3_float3_float_float_float(duk_context* ctx)
 {
-    float3* linePos = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* lineDir = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    float3* sphereCenter = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    float3& linePos = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& lineDir = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3& sphereCenter = *GetCheckedValueObject<float3>(ctx, 2, float3_ID);
     float sphereRadius = (float)duk_require_number(ctx, 3);
     float t1 = (float)duk_require_number(ctx, 4);
     float t2 = (float)duk_require_number(ctx, 5);
-    int ret = Sphere::IntersectLine(*linePos, *lineDir, *sphereCenter, sphereRadius, t1, t2);
+    int ret = Sphere::IntersectLine(linePos, lineDir, sphereCenter, sphereRadius, t1, t2);
     duk_push_number(ctx, ret);
     return 1;
 }
 
 static duk_ret_t Sphere_FromString_Static_string(duk_context* ctx)
 {
-    string str(duk_require_string(ctx, 0));
+    string str = duk_require_string(ctx, 0);
     Sphere ret = Sphere::FromString(str);
     PushValueObjectCopy<Sphere>(ctx, ret, Sphere_ID, Sphere_Finalizer);
     return 1;
@@ -963,26 +967,26 @@ static duk_ret_t Sphere_FromString_Static_string(duk_context* ctx)
 static duk_ret_t Sphere_OptimalEnclosingSphere_Static_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
-        return Sphere_OptimalEnclosingSphere_Static_float3_float3(ctx);
-    if (numArgs == 3 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<float3>(ctx, 2, float3_ID))
-        return Sphere_OptimalEnclosingSphere_Static_float3_float3_float3(ctx);
-    if (numArgs == 4 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<float3>(ctx, 2, float3_ID) && GetValueObject<float3>(ctx, 3, float3_ID))
-        return Sphere_OptimalEnclosingSphere_Static_float3_float3_float3_float3(ctx);
     if (numArgs == 6 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<float3>(ctx, 2, float3_ID) && GetValueObject<float3>(ctx, 3, float3_ID) && GetValueObject<float3>(ctx, 4, float3_ID) && duk_is_number(ctx, 5))
         return Sphere_OptimalEnclosingSphere_Static_float3_float3_float3_float3_float3_int(ctx);
+    if (numArgs == 4 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<float3>(ctx, 2, float3_ID) && GetValueObject<float3>(ctx, 3, float3_ID))
+        return Sphere_OptimalEnclosingSphere_Static_float3_float3_float3_float3(ctx);
+    if (numArgs == 3 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<float3>(ctx, 2, float3_ID))
+        return Sphere_OptimalEnclosingSphere_Static_float3_float3_float3(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
+        return Sphere_OptimalEnclosingSphere_Static_float3_float3(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Sphere_FitThroughPoints_Static_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
-        return Sphere_FitThroughPoints_Static_float3_float3(ctx);
-    if (numArgs == 3 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<float3>(ctx, 2, float3_ID))
-        return Sphere_FitThroughPoints_Static_float3_float3_float3(ctx);
     if (numArgs == 4 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<float3>(ctx, 2, float3_ID) && GetValueObject<float3>(ctx, 3, float3_ID))
         return Sphere_FitThroughPoints_Static_float3_float3_float3_float3(ctx);
+    if (numArgs == 3 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<float3>(ctx, 2, float3_ID))
+        return Sphere_FitThroughPoints_Static_float3_float3_float3(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
+        return Sphere_FitThroughPoints_Static_float3_float3(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -1015,7 +1019,7 @@ static const duk_function_list_entry Sphere_Functions[] = {
     ,{"ToString", Sphere_ToString, 0}
     ,{"SerializeToString", Sphere_SerializeToString, 0}
     ,{"SerializeToCodeString", Sphere_SerializeToCodeString, 0}
-    ,{"Equals", Sphere_Equals_Sphere_float, 2}
+    ,{"Equals", Sphere_Equals_Sphere_float, DUK_VARARGS}
     ,{"BitEquals", Sphere_BitEquals_Sphere, 1}
     ,{nullptr, nullptr, 0}
 };

@@ -101,10 +101,11 @@ static duk_ret_t LCG_Ctor(duk_context* ctx)
 
 static duk_ret_t LCG_Ctor_u32_u32_u32_u32(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     u32 seed = (u32)duk_require_number(ctx, 0);
-    u32 multiplier = (u32)duk_require_number(ctx, 1);
-    u32 increment = (u32)duk_require_number(ctx, 2);
-    u32 modulus = (u32)duk_require_number(ctx, 3);
+    u32 multiplier = numArgs > 1 ? (u32)duk_require_number(ctx, 1) : 69621;
+    u32 increment = numArgs > 2 ? (u32)duk_require_number(ctx, 2) : 0;
+    u32 modulus = numArgs > 3 ? (u32)duk_require_number(ctx, 3) : 0x7FFFFFFF;
     LCG* newObj = new LCG(seed, multiplier, increment, modulus);
     PushConstructorResult<LCG>(ctx, newObj, LCG_ID, LCG_Finalizer);
     return 0;
@@ -112,11 +113,12 @@ static duk_ret_t LCG_Ctor_u32_u32_u32_u32(duk_context* ctx)
 
 static duk_ret_t LCG_Seed_u32_u32_u32_u32(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     LCG* thisObj = GetThisValueObject<LCG>(ctx, LCG_ID);
     u32 seed = (u32)duk_require_number(ctx, 0);
-    u32 multiplier = (u32)duk_require_number(ctx, 1);
-    u32 increment = (u32)duk_require_number(ctx, 2);
-    u32 modulus = (u32)duk_require_number(ctx, 3);
+    u32 multiplier = numArgs > 1 ? (u32)duk_require_number(ctx, 1) : 69621;
+    u32 increment = numArgs > 2 ? (u32)duk_require_number(ctx, 2) : 0;
+    u32 modulus = numArgs > 3 ? (u32)duk_require_number(ctx, 3) : 0x7FFFFFFF;
     thisObj->Seed(seed, multiplier, increment, modulus);
     return 0;
 }
@@ -202,35 +204,35 @@ static duk_ret_t LCG_FloatIncl_float_float(duk_context* ctx)
 static duk_ret_t LCG_Ctor_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
+    if (numArgs >= 1 && duk_is_number(ctx, 0))
+        return LCG_Ctor_u32_u32_u32_u32(ctx);
     if (numArgs == 0)
         return LCG_Ctor(ctx);
-    if (numArgs == 4 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3))
-        return LCG_Ctor_u32_u32_u32_u32(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t LCG_Int_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 0)
-        return LCG_Int(ctx);
     if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
         return LCG_Int_int_int(ctx);
+    if (numArgs == 0)
+        return LCG_Int(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t LCG_Float_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 0)
-        return LCG_Float(ctx);
     if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
         return LCG_Float_float_float(ctx);
+    if (numArgs == 0)
+        return LCG_Float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static const duk_function_list_entry LCG_Functions[] = {
-    {"Seed", LCG_Seed_u32_u32_u32_u32, 4}
+    {"Seed", LCG_Seed_u32_u32_u32_u32, DUK_VARARGS}
     ,{"Int", LCG_Int_Selector, DUK_VARARGS}
     ,{"MaxInt", LCG_MaxInt, 0}
     ,{"IntFast", LCG_IntFast, 0}

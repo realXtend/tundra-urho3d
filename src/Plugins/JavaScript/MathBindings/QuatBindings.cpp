@@ -119,32 +119,32 @@ static duk_ret_t Quat_Ctor(duk_context* ctx)
 
 static duk_ret_t Quat_Ctor_Quat(duk_context* ctx)
 {
-    Quat* rhs = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
-    Quat* newObj = new Quat(*rhs);
+    Quat& rhs = *GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
+    Quat* newObj = new Quat(rhs);
     PushConstructorResult<Quat>(ctx, newObj, Quat_ID, Quat_Finalizer);
     return 0;
 }
 
 static duk_ret_t Quat_Ctor_float3x3(duk_context* ctx)
 {
-    float3x3* rotationMatrix = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
-    Quat* newObj = new Quat(*rotationMatrix);
+    float3x3& rotationMatrix = *GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
+    Quat* newObj = new Quat(rotationMatrix);
     PushConstructorResult<Quat>(ctx, newObj, Quat_ID, Quat_Finalizer);
     return 0;
 }
 
 static duk_ret_t Quat_Ctor_float3x4(duk_context* ctx)
 {
-    float3x4* rotationMatrix = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
-    Quat* newObj = new Quat(*rotationMatrix);
+    float3x4& rotationMatrix = *GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
+    Quat* newObj = new Quat(rotationMatrix);
     PushConstructorResult<Quat>(ctx, newObj, Quat_ID, Quat_Finalizer);
     return 0;
 }
 
 static duk_ret_t Quat_Ctor_float4x4(duk_context* ctx)
 {
-    float4x4* rotationMatrix = GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
-    Quat* newObj = new Quat(*rotationMatrix);
+    float4x4& rotationMatrix = *GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
+    Quat* newObj = new Quat(rotationMatrix);
     PushConstructorResult<Quat>(ctx, newObj, Quat_ID, Quat_Finalizer);
     return 0;
 }
@@ -162,18 +162,18 @@ static duk_ret_t Quat_Ctor_float_float_float_float(duk_context* ctx)
 
 static duk_ret_t Quat_Ctor_float3_float(duk_context* ctx)
 {
-    float3* rotationAxis = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& rotationAxis = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
     float rotationAngleRadians = (float)duk_require_number(ctx, 1);
-    Quat* newObj = new Quat(*rotationAxis, rotationAngleRadians);
+    Quat* newObj = new Quat(rotationAxis, rotationAngleRadians);
     PushConstructorResult<Quat>(ctx, newObj, Quat_ID, Quat_Finalizer);
     return 0;
 }
 
 static duk_ret_t Quat_Ctor_float4_float(duk_context* ctx)
 {
-    float4* rotationAxis = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4& rotationAxis = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
     float rotationAngleRadians = (float)duk_require_number(ctx, 1);
-    Quat* newObj = new Quat(*rotationAxis, rotationAngleRadians);
+    Quat* newObj = new Quat(rotationAxis, rotationAngleRadians);
     PushConstructorResult<Quat>(ctx, newObj, Quat_ID, Quat_Finalizer);
     return 0;
 }
@@ -221,8 +221,8 @@ static duk_ret_t Quat_Angle(duk_context* ctx)
 static duk_ret_t Quat_Dot_Quat(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    Quat* rhs = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
-    float ret = thisObj->Dot(*rhs);
+    Quat& rhs = *GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
+    float ret = thisObj->Dot(rhs);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -261,8 +261,9 @@ static duk_ret_t Quat_Normalized(duk_context* ctx)
 
 static duk_ret_t Quat_IsNormalized_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    float epsilon = (float)duk_require_number(ctx, 0);
+    float epsilon = numArgs > 0 ? (float)duk_require_number(ctx, 0) : 1e-5f;
     bool ret = thisObj->IsNormalized(epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -270,8 +271,9 @@ static duk_ret_t Quat_IsNormalized_float(duk_context* ctx)
 
 static duk_ret_t Quat_IsInvertible_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    float epsilon = (float)duk_require_number(ctx, 0);
+    float epsilon = numArgs > 0 ? (float)duk_require_number(ctx, 0) : 1e-3f;
     bool ret = thisObj->IsInvertible(epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
@@ -287,10 +289,11 @@ static duk_ret_t Quat_IsFinite(duk_context* ctx)
 
 static duk_ret_t Quat_Equals_Quat_float(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    Quat* rhs = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
-    float epsilon = (float)duk_require_number(ctx, 1);
-    bool ret = thisObj->Equals(*rhs, epsilon);
+    Quat& rhs = *GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
+    float epsilon = numArgs > 1 ? (float)duk_require_number(ctx, 1) : 1e-3f;
+    bool ret = thisObj->Equals(rhs, epsilon);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -298,8 +301,8 @@ static duk_ret_t Quat_Equals_Quat_float(duk_context* ctx)
 static duk_ret_t Quat_BitEquals_Quat(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    Quat* other = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
-    bool ret = thisObj->BitEquals(*other);
+    Quat& other = *GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
+    bool ret = thisObj->BitEquals(other);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -356,8 +359,8 @@ static duk_ret_t Quat_Transform_float_float_float(duk_context* ctx)
 static duk_ret_t Quat_Transform_float3(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    float3* vec = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3 ret = thisObj->Transform(*vec);
+    float3& vec = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->Transform(vec);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
@@ -365,8 +368,8 @@ static duk_ret_t Quat_Transform_float3(duk_context* ctx)
 static duk_ret_t Quat_Transform_float4(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    float4* vec = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4 ret = thisObj->Transform(*vec);
+    float4& vec = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4 ret = thisObj->Transform(vec);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -374,9 +377,9 @@ static duk_ret_t Quat_Transform_float4(duk_context* ctx)
 static duk_ret_t Quat_Lerp_Quat_float(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    Quat* target = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
+    Quat& target = *GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
     float t = (float)duk_require_number(ctx, 1);
-    Quat ret = thisObj->Lerp(*target, t);
+    Quat ret = thisObj->Lerp(target, t);
     PushValueObjectCopy<Quat>(ctx, ret, Quat_ID, Quat_Finalizer);
     return 1;
 }
@@ -384,9 +387,9 @@ static duk_ret_t Quat_Lerp_Quat_float(duk_context* ctx)
 static duk_ret_t Quat_Slerp_Quat_float(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    Quat* target = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
+    Quat& target = *GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
     float t = (float)duk_require_number(ctx, 1);
-    Quat ret = thisObj->Slerp(*target, t);
+    Quat ret = thisObj->Slerp(target, t);
     PushValueObjectCopy<Quat>(ctx, ret, Quat_ID, Quat_Finalizer);
     return 1;
 }
@@ -394,8 +397,8 @@ static duk_ret_t Quat_Slerp_Quat_float(duk_context* ctx)
 static duk_ret_t Quat_AngleBetween_Quat(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    Quat* target = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
-     float ret = thisObj->AngleBetween(*target);
+    Quat& target = *GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
+     float ret = thisObj->AngleBetween(target);
     duk_push_number(ctx, ret);
     return 1;
 }
@@ -403,8 +406,8 @@ static duk_ret_t Quat_AngleBetween_Quat(duk_context* ctx)
 static duk_ret_t Quat_AxisFromTo_Quat(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    Quat* target = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
-    float3 ret = thisObj->AxisFromTo(*target);
+    Quat& target = *GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
+    float3 ret = thisObj->AxisFromTo(target);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
@@ -412,60 +415,60 @@ static duk_ret_t Quat_AxisFromTo_Quat(duk_context* ctx)
 static duk_ret_t Quat_ToAxisAngle_float3_float(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    float3* rotationAxis = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& rotationAxis = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
     float rotationAngleRadians = (float)duk_require_number(ctx, 1);
-    thisObj->ToAxisAngle(*rotationAxis, rotationAngleRadians);
+    thisObj->ToAxisAngle(rotationAxis, rotationAngleRadians);
     return 0;
 }
 
 static duk_ret_t Quat_ToAxisAngle_float4_float(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    float4* rotationAxis = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4& rotationAxis = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
     float rotationAngleRadians = (float)duk_require_number(ctx, 1);
-    thisObj->ToAxisAngle(*rotationAxis, rotationAngleRadians);
+    thisObj->ToAxisAngle(rotationAxis, rotationAngleRadians);
     return 0;
 }
 
 static duk_ret_t Quat_SetFromAxisAngle_float3_float(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    float3* rotationAxis = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& rotationAxis = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
     float rotationAngleRadians = (float)duk_require_number(ctx, 1);
-    thisObj->SetFromAxisAngle(*rotationAxis, rotationAngleRadians);
+    thisObj->SetFromAxisAngle(rotationAxis, rotationAngleRadians);
     return 0;
 }
 
 static duk_ret_t Quat_SetFromAxisAngle_float4_float(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    float4* rotationAxis = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4& rotationAxis = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
     float rotationAngleRadians = (float)duk_require_number(ctx, 1);
-    thisObj->SetFromAxisAngle(*rotationAxis, rotationAngleRadians);
+    thisObj->SetFromAxisAngle(rotationAxis, rotationAngleRadians);
     return 0;
 }
 
 static duk_ret_t Quat_Set_float3x3(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    float3x3* matrix = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
-    thisObj->Set(*matrix);
+    float3x3& matrix = *GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
+    thisObj->Set(matrix);
     return 0;
 }
 
 static duk_ret_t Quat_Set_float3x4(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    float3x4* matrix = GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
-    thisObj->Set(*matrix);
+    float3x4& matrix = *GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
+    thisObj->Set(matrix);
     return 0;
 }
 
 static duk_ret_t Quat_Set_float4x4(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    float4x4* matrix = GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
-    thisObj->Set(*matrix);
+    float4x4& matrix = *GetCheckedValueObject<float4x4>(ctx, 0, float4x4_ID);
+    thisObj->Set(matrix);
     return 0;
 }
 
@@ -603,8 +606,8 @@ static duk_ret_t Quat_ToFloat4x4(duk_context* ctx)
 static duk_ret_t Quat_ToFloat4x4_float3(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    float3* translation = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float4x4 ret = thisObj->ToFloat4x4(*translation);
+    float3& translation = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float4x4 ret = thisObj->ToFloat4x4(translation);
     PushValueObjectCopy<float4x4>(ctx, ret, float4x4_ID, float4x4_Finalizer);
     return 1;
 }
@@ -612,8 +615,8 @@ static duk_ret_t Quat_ToFloat4x4_float3(duk_context* ctx)
 static duk_ret_t Quat_ToFloat4x4_float4(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    float4* translation = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4x4 ret = thisObj->ToFloat4x4(*translation);
+    float4& translation = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4x4 ret = thisObj->ToFloat4x4(translation);
     PushValueObjectCopy<float4x4>(ctx, ret, float4x4_ID, float4x4_Finalizer);
     return 1;
 }
@@ -661,8 +664,8 @@ static duk_ret_t Quat_SerializeToCodeString(duk_context* ctx)
 static duk_ret_t Quat_Mul_Quat(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    Quat* rhs = GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
-    Quat ret = thisObj->Mul(*rhs);
+    Quat& rhs = *GetCheckedValueObject<Quat>(ctx, 0, Quat_ID);
+    Quat ret = thisObj->Mul(rhs);
     PushValueObjectCopy<Quat>(ctx, ret, Quat_ID, Quat_Finalizer);
     return 1;
 }
@@ -670,8 +673,8 @@ static duk_ret_t Quat_Mul_Quat(duk_context* ctx)
 static duk_ret_t Quat_Mul_float3x3(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    float3x3* rhs = GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
-    Quat ret = thisObj->Mul(*rhs);
+    float3x3& rhs = *GetCheckedValueObject<float3x3>(ctx, 0, float3x3_ID);
+    Quat ret = thisObj->Mul(rhs);
     PushValueObjectCopy<Quat>(ctx, ret, Quat_ID, Quat_Finalizer);
     return 1;
 }
@@ -679,8 +682,8 @@ static duk_ret_t Quat_Mul_float3x3(duk_context* ctx)
 static duk_ret_t Quat_Mul_float3(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    float3* vector = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3 ret = thisObj->Mul(*vector);
+    float3& vector = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3 ret = thisObj->Mul(vector);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
@@ -688,8 +691,8 @@ static duk_ret_t Quat_Mul_float3(duk_context* ctx)
 static duk_ret_t Quat_Mul_float4(duk_context* ctx)
 {
     Quat* thisObj = GetThisValueObject<Quat>(ctx, Quat_ID);
-    float4* vector = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4 ret = thisObj->Mul(*vector);
+    float4& vector = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4 ret = thisObj->Mul(vector);
     PushValueObjectCopy<float4>(ctx, ret, float4_ID, float4_Finalizer);
     return 1;
 }
@@ -705,22 +708,22 @@ static duk_ret_t Quat_Neg(duk_context* ctx)
 static duk_ret_t Quat_Ctor_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 0)
-        return Quat_Ctor(ctx);
-    if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_ID))
-        return Quat_Ctor_Quat(ctx);
-    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
-        return Quat_Ctor_float3x3(ctx);
-    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_ID))
-        return Quat_Ctor_float3x4(ctx);
-    if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_ID))
-        return Quat_Ctor_float4x4(ctx);
     if (numArgs == 4 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3))
         return Quat_Ctor_float_float_float_float(ctx);
     if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
         return Quat_Ctor_float3_float(ctx);
     if (numArgs == 2 && GetValueObject<float4>(ctx, 0, float4_ID) && duk_is_number(ctx, 1))
         return Quat_Ctor_float4_float(ctx);
+    if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_ID))
+        return Quat_Ctor_float4x4(ctx);
+    if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_ID))
+        return Quat_Ctor_Quat(ctx);
+    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
+        return Quat_Ctor_float3x3(ctx);
+    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_ID))
+        return Quat_Ctor_float3x4(ctx);
+    if (numArgs == 0)
+        return Quat_Ctor(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -729,100 +732,100 @@ static duk_ret_t Quat_Transform_Selector(duk_context* ctx)
     int numArgs = duk_get_top(ctx);
     if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
         return Quat_Transform_float_float_float(ctx);
-    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
-        return Quat_Transform_float3(ctx);
     if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
         return Quat_Transform_float4(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Quat_Transform_float3(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Quat_ToAxisAngle_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
-        return Quat_ToAxisAngle_float3_float(ctx);
     if (numArgs == 2 && GetValueObject<float4>(ctx, 0, float4_ID) && duk_is_number(ctx, 1))
         return Quat_ToAxisAngle_float4_float(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
+        return Quat_ToAxisAngle_float3_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Quat_SetFromAxisAngle_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
-        return Quat_SetFromAxisAngle_float3_float(ctx);
     if (numArgs == 2 && GetValueObject<float4>(ctx, 0, float4_ID) && duk_is_number(ctx, 1))
         return Quat_SetFromAxisAngle_float4_float(ctx);
+    if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1))
+        return Quat_SetFromAxisAngle_float3_float(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Quat_Set_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
-        return Quat_Set_float3x3(ctx);
-    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_ID))
-        return Quat_Set_float3x4(ctx);
-    if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_ID))
-        return Quat_Set_float4x4(ctx);
     if (numArgs == 4 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3))
         return Quat_Set_float_float_float_float(ctx);
+    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
+        return Quat_Set_float3x3(ctx);
+    if (numArgs == 1 && GetValueObject<float4x4>(ctx, 0, float4x4_ID))
+        return Quat_Set_float4x4(ctx);
+    if (numArgs == 1 && GetValueObject<float3x4>(ctx, 0, float3x4_ID))
+        return Quat_Set_float3x4(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Quat_ToFloat4x4_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 0)
-        return Quat_ToFloat4x4(ctx);
-    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
-        return Quat_ToFloat4x4_float3(ctx);
     if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
         return Quat_ToFloat4x4_float4(ctx);
+    if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
+        return Quat_ToFloat4x4_float3(ctx);
+    if (numArgs == 0)
+        return Quat_ToFloat4x4(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Quat_Mul_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
-    if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_ID))
-        return Quat_Mul_Quat(ctx);
-    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
-        return Quat_Mul_float3x3(ctx);
     if (numArgs == 1 && GetValueObject<float3>(ctx, 0, float3_ID))
         return Quat_Mul_float3(ctx);
     if (numArgs == 1 && GetValueObject<float4>(ctx, 0, float4_ID))
         return Quat_Mul_float4(ctx);
+    if (numArgs == 1 && GetValueObject<Quat>(ctx, 0, Quat_ID))
+        return Quat_Mul_Quat(ctx);
+    if (numArgs == 1 && GetValueObject<float3x3>(ctx, 0, float3x3_ID))
+        return Quat_Mul_float3x3(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t Quat_SlerpVector_Static_float3_float3_float(duk_context* ctx)
 {
-    float3* from = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* to = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3& from = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& to = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
     float t = (float)duk_require_number(ctx, 2);
-    float3 ret = Quat::SlerpVector(*from, *to, t);
+    float3 ret = Quat::SlerpVector(from, to, t);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
 
 static duk_ret_t Quat_SlerpVectorAbs_Static_float3_float3_float(duk_context* ctx)
 {
-    float3* from = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* to = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3& from = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& to = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
     float angleRadians = (float)duk_require_number(ctx, 2);
-    float3 ret = Quat::SlerpVectorAbs(*from, *to, angleRadians);
+    float3 ret = Quat::SlerpVectorAbs(from, to, angleRadians);
     PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
     return 1;
 }
 
 static duk_ret_t Quat_LookAt_Static_float3_float3_float3_float3(duk_context* ctx)
 {
-    float3* localForward = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* targetDirection = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    float3* localUp = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
-    float3* worldUp = GetCheckedValueObject<float3>(ctx, 3, float3_ID);
-    Quat ret = Quat::LookAt(*localForward, *targetDirection, *localUp, *worldUp);
+    float3& localForward = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& targetDirection = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3& localUp = *GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    float3& worldUp = *GetCheckedValueObject<float3>(ctx, 3, float3_ID);
+    Quat ret = Quat::LookAt(localForward, targetDirection, localUp, worldUp);
     PushValueObjectCopy<Quat>(ctx, ret, Quat_ID, Quat_Finalizer);
     return 1;
 }
@@ -853,38 +856,38 @@ static duk_ret_t Quat_RotateZ_Static_float(duk_context* ctx)
 
 static duk_ret_t Quat_RotateAxisAngle_Static_float3_float(duk_context* ctx)
 {
-    float3* axisDirection = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& axisDirection = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
     float angleRadians = (float)duk_require_number(ctx, 1);
-    Quat ret = Quat::RotateAxisAngle(*axisDirection, angleRadians);
+    Quat ret = Quat::RotateAxisAngle(axisDirection, angleRadians);
     PushValueObjectCopy<Quat>(ctx, ret, Quat_ID, Quat_Finalizer);
     return 1;
 }
 
 static duk_ret_t Quat_RotateFromTo_Static_float3_float3(duk_context* ctx)
 {
-    float3* sourceDirection = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* targetDirection = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    Quat ret = Quat::RotateFromTo(*sourceDirection, *targetDirection);
+    float3& sourceDirection = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& targetDirection = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    Quat ret = Quat::RotateFromTo(sourceDirection, targetDirection);
     PushValueObjectCopy<Quat>(ctx, ret, Quat_ID, Quat_Finalizer);
     return 1;
 }
 
 static duk_ret_t Quat_RotateFromTo_Static_float4_float4(duk_context* ctx)
 {
-    float4* sourceDirection = GetCheckedValueObject<float4>(ctx, 0, float4_ID);
-    float4* targetDirection = GetCheckedValueObject<float4>(ctx, 1, float4_ID);
-    Quat ret = Quat::RotateFromTo(*sourceDirection, *targetDirection);
+    float4& sourceDirection = *GetCheckedValueObject<float4>(ctx, 0, float4_ID);
+    float4& targetDirection = *GetCheckedValueObject<float4>(ctx, 1, float4_ID);
+    Quat ret = Quat::RotateFromTo(sourceDirection, targetDirection);
     PushValueObjectCopy<Quat>(ctx, ret, Quat_ID, Quat_Finalizer);
     return 1;
 }
 
 static duk_ret_t Quat_RotateFromTo_Static_float3_float3_float3_float3(duk_context* ctx)
 {
-    float3* sourceDirection = GetCheckedValueObject<float3>(ctx, 0, float3_ID);
-    float3* targetDirection = GetCheckedValueObject<float3>(ctx, 1, float3_ID);
-    float3* sourceDirection2 = GetCheckedValueObject<float3>(ctx, 2, float3_ID);
-    float3* targetDirection2 = GetCheckedValueObject<float3>(ctx, 3, float3_ID);
-    Quat ret = Quat::RotateFromTo(*sourceDirection, *targetDirection, *sourceDirection2, *targetDirection2);
+    float3& sourceDirection = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& targetDirection = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    float3& sourceDirection2 = *GetCheckedValueObject<float3>(ctx, 2, float3_ID);
+    float3& targetDirection2 = *GetCheckedValueObject<float3>(ctx, 3, float3_ID);
+    Quat ret = Quat::RotateFromTo(sourceDirection, targetDirection, sourceDirection2, targetDirection2);
     PushValueObjectCopy<Quat>(ctx, ret, Quat_ID, Quat_Finalizer);
     return 1;
 }
@@ -1011,15 +1014,15 @@ static duk_ret_t Quat_FromEulerZYX_Static_float_float_float(duk_context* ctx)
 
 static duk_ret_t Quat_RandomRotation_Static_LCG(duk_context* ctx)
 {
-    LCG* lcg = GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
-    Quat ret = Quat::RandomRotation(*lcg);
+    LCG& lcg = *GetCheckedValueObject<LCG>(ctx, 0, LCG_ID);
+    Quat ret = Quat::RandomRotation(lcg);
     PushValueObjectCopy<Quat>(ctx, ret, Quat_ID, Quat_Finalizer);
     return 1;
 }
 
 static duk_ret_t Quat_FromString_Static_string(duk_context* ctx)
 {
-    string str(duk_require_string(ctx, 0));
+    string str = duk_require_string(ctx, 0);
     Quat ret = Quat::FromString(str);
     PushValueObjectCopy<Quat>(ctx, ret, Quat_ID, Quat_Finalizer);
     return 1;
@@ -1028,12 +1031,12 @@ static duk_ret_t Quat_FromString_Static_string(duk_context* ctx)
 static duk_ret_t Quat_RotateFromTo_Static_Selector(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
+    if (numArgs == 4 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<float3>(ctx, 2, float3_ID) && GetValueObject<float3>(ctx, 3, float3_ID))
+        return Quat_RotateFromTo_Static_float3_float3_float3_float3(ctx);
     if (numArgs == 2 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID))
         return Quat_RotateFromTo_Static_float3_float3(ctx);
     if (numArgs == 2 && GetValueObject<float4>(ctx, 0, float4_ID) && GetValueObject<float4>(ctx, 1, float4_ID))
         return Quat_RotateFromTo_Static_float4_float4(ctx);
-    if (numArgs == 4 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<float3>(ctx, 2, float3_ID) && GetValueObject<float3>(ctx, 3, float3_ID))
-        return Quat_RotateFromTo_Static_float3_float3_float3_float3(ctx);
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
@@ -1048,10 +1051,10 @@ static const duk_function_list_entry Quat_Functions[] = {
     ,{"Length", Quat_Length, 0}
     ,{"Normalize", Quat_Normalize, 0}
     ,{"Normalized", Quat_Normalized, 0}
-    ,{"IsNormalized", Quat_IsNormalized_float, 1}
-    ,{"IsInvertible", Quat_IsInvertible_float, 1}
+    ,{"IsNormalized", Quat_IsNormalized_float, DUK_VARARGS}
+    ,{"IsInvertible", Quat_IsInvertible_float, DUK_VARARGS}
     ,{"IsFinite", Quat_IsFinite, 0}
-    ,{"Equals", Quat_Equals_Quat_float, 2}
+    ,{"Equals", Quat_Equals_Quat_float, DUK_VARARGS}
     ,{"BitEquals", Quat_BitEquals_Quat, 1}
     ,{"Inverse", Quat_Inverse, 0}
     ,{"Inverted", Quat_Inverted, 0}
