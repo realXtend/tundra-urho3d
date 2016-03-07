@@ -592,7 +592,7 @@ EntityAction *Entity::Action(const String &name)
             return it->second_;
     }
 
-    EntityAction *action = new EntityAction(name);
+    EntityAction *action = new EntityAction(context_, name);
     actions_.Insert(MakePair(name, action));
     return action;
 }

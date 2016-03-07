@@ -10,7 +10,7 @@
 #include "CoreTypes.h"
 #include "Signals.h"
 
-#include <Urho3D/Container/RefCounted.h>
+#include <Urho3D/Core/Object.h>
 
 namespace Tundra
 {
@@ -21,8 +21,10 @@ class Entity;
 /** Components (and other instances) can register to these actions by using Entity::ConnectAction().
     Actions allow more complicated in-world logic to be built in slightly more data-driven fashion.
     Actions cannot be created directly, they're created by Entity::Action(). */
-class TUNDRACORE_API EntityAction : public RefCounted
+class TUNDRACORE_API EntityAction : public Object
 {
+    URHO3D_OBJECT(EntityAction, Object);
+
 public:
     ~EntityAction() {}
 
@@ -54,7 +56,7 @@ private:
 
     /// Constructor.
     /** @param name Name of the action. */
-    explicit EntityAction(const String &name);
+    explicit EntityAction(Urho3D::Context* context, const String &name);
 
     /// Triggers this action i.e. emits the Triggered signal.
     /** @param parameters Action parameters, as applicable. */

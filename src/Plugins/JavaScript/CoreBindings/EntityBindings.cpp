@@ -14,6 +14,7 @@
 #include "Scene/Scene.h"
 #include "Scene/Entity.h"
 #include "Scene/IComponent.h"
+#include "Scene/EntityAction.h"
 #include "Framework/Framework.h"
 
 
@@ -1267,6 +1268,15 @@ static duk_ret_t Entity_Description(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Entity_Action_String(duk_context* ctx)
+{
+    Entity* thisObj = GetThisWeakObject<Entity>(ctx);
+    String name = duk_require_string(ctx, 0);
+    EntityAction * ret = thisObj->Action(name);
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t Entity_RemoveAction_String(duk_context* ctx)
 {
     Entity* thisObj = GetThisWeakObject<Entity>(ctx);
@@ -1622,6 +1632,7 @@ static const duk_function_list_entry Entity_Functions[] = {
     ,{"Name", Entity_Name, 0}
     ,{"SetDescription", Entity_SetDescription_String, 1}
     ,{"Description", Entity_Description, 0}
+    ,{"Action", Entity_Action_String, 1}
     ,{"RemoveAction", Entity_RemoveAction_String, 1}
     ,{"SetTemporary", Entity_SetTemporary_bool_AttributeChange__Type, DUK_VARARGS}
     ,{"IsTemporary", Entity_IsTemporary, 0}

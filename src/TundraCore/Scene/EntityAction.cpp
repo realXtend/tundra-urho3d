@@ -16,8 +16,9 @@ void EntityAction::Trigger(const StringVector &parameters)
     Triggered.Emit(parameters);
 }
 
-EntityAction::EntityAction(const String &name_)
-:name(name_)
+EntityAction::EntityAction(Urho3D::Context* context, const String &name_)
+:Object(context)
+,name(name_)
 {
 }
 
