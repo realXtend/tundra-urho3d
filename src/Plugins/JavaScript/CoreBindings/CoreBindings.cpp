@@ -9,6 +9,7 @@ namespace JSBindings
 void Expose_Entity(duk_context* ctx);
 void Expose_EntityAction(duk_context* ctx);
 void Expose_IComponent(duk_context* ctx);
+void Expose_AttributeChange(duk_context* ctx);
 void Expose_Scene(duk_context* ctx);
 void Expose_Transform(duk_context* ctx);
 void Expose_Framework(duk_context* ctx);
@@ -25,6 +26,7 @@ void ExposeCoreClasses(duk_context* ctx)
     Expose_Entity(ctx);
     Expose_EntityAction(ctx);
     Expose_IComponent(ctx);
+    Expose_AttributeChange(ctx);
     Expose_Scene(ctx);
     Expose_Transform(ctx);
     Expose_Framework(ctx);

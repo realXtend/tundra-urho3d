@@ -576,6 +576,14 @@ static const duk_function_list_entry IAsset_Functions[] = {
 void Expose_IAsset(duk_context* ctx)
 {
     duk_push_object(ctx);
+    duk_push_number(ctx, 0);
+    duk_put_prop_string(ctx, -2, "Original");
+    duk_push_number(ctx, 1);
+    duk_put_prop_string(ctx, -2, "Cached");
+    duk_push_number(ctx, 2);
+    duk_put_prop_string(ctx, -2, "Programmatic");
+    duk_push_number(ctx, 3);
+    duk_put_prop_string(ctx, -2, "Bundle");
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, IAsset_Functions);
     DefineProperty(ctx, "unloaded", IAsset_Get_Unloaded, nullptr);

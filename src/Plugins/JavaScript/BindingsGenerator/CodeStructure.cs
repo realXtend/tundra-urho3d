@@ -119,6 +119,10 @@ namespace BindingsGenerator
         public string path;
         public string filename;
         public string argList;
+        /// <summary>
+        /// Enum initializer value. Null for others
+        /// </summary>
+        public string value;
 
         /// <summary>
         /// If kind == "define", then this symbol is a #define macro, and this string contains the body of the macro.
@@ -448,6 +452,7 @@ namespace BindingsGenerator
         public Dictionary<string, CodeFile> codeFiles = new Dictionary<string, CodeFile>();
         public Dictionary<string, Symbol> symbols = new Dictionary<string, Symbol>();
         public Dictionary<string, Symbol> symbolsByName = new Dictionary<string,Symbol>();
+        public Dictionary<string, Symbol> enumsByName = new Dictionary<string, Symbol>();
         public SortedSet<string> documentationFiles = new SortedSet<string>();
 
         public List<VariableListEntry> todos = new List<VariableListEntry>();
@@ -763,9 +768,9 @@ namespace BindingsGenerator
                     if (member.name.StartsWith("@"))
                         continue; // Doxygen creates items with names starting with '@' at least for unnamed unions, ignore those altogether.
                     symbols[member.id] = member;
-//                    symbolsByName[member.name] = member;
+                    //symbolsByName[member.name] = member;
                     parent.children.Add(member);
-                    
+
                     // Function parameters.
                     foreach(XmlElement param in child.ChildNodes.OfType<XmlElement>())
                         if (param.Name == "param")
@@ -785,9 +790,37 @@ namespace BindingsGenerator
                             member.parameters.Add(p);
                         }
 
+                    // Enum special handling
+                    if (member.kind == "enum")
+                    {
+                        int lastEnumInitializer = -1;
+
+                        foreach (XmlElement value in child.ChildNodes.OfType<XmlElement>())
+                        {
+                            if (value.Name == "enumvalue")
+                            {
+                                Symbol valueSymbol = new Symbol();
+                                valueSymbol.parent = member;
+                                valueSymbol.id = value.GetAttribute("id");
+                                valueSymbol.name = GetXmlElementChildNodeValue(value, "name", true);
+                                valueSymbol.kind = "enumvalue";
+                                valueSymbol.value = GetXmlElementChildNodeValue(value, "initializer", true).Replace("= ", "");
+                                if (valueSymbol.value.Length == 0)
+                                {
+                                    ++lastEnumInitializer;
+                                    valueSymbol.value = lastEnumInitializer.ToString();
+                                }
+                                else
+                                    Int32.TryParse(valueSymbol.value, out lastEnumInitializer);
+                                member.children.Add(valueSymbol);
+                            }
+                        }
+                        enumsByName[member.name] = member;
+                    }
+
                     // If this is a #define macro, get the macro body code.
                     if (member.kind == "define")
-                    {                    
+                    {
                         member.macroBody = GetXmlElementChildNodeValue(child, "initializer");
                         // Create the argList from scratch, because it is not present in the xml in same form than for functions.
                         member.argList = member.ArgStringWithoutTypes();

@@ -153,6 +153,14 @@ static const duk_function_list_entry EntityAction_Functions[] = {
 void Expose_EntityAction(duk_context* ctx)
 {
     duk_push_object(ctx);
+    duk_push_number(ctx, 0);
+    duk_put_prop_string(ctx, -2, "Invalid");
+    duk_push_number(ctx, 1);
+    duk_put_prop_string(ctx, -2, "Local");
+    duk_push_number(ctx, 2);
+    duk_put_prop_string(ctx, -2, "Server");
+    duk_push_number(ctx, 4);
+    duk_put_prop_string(ctx, -2, "Peers");
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, EntityAction_Functions);
     DefineProperty(ctx, "triggered", EntityAction_Get_Triggered, nullptr);

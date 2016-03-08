@@ -81,7 +81,7 @@ namespace BindingsGenerator
 
             foreach (Symbol classSymbol in s.symbolsByName.Values)
             {
-                if ((classSymbol.kind == "class" || classSymbol.kind == "struct") && (exposeTheseClasses.Count == 0 || exposeTheseClasses.Contains(StripNamespace(classSymbol.name))))
+                if ((classSymbol.kind == "class" || classSymbol.kind == "struct" || classSymbol.kind == "namespace") && (exposeTheseClasses.Count == 0 || exposeTheseClasses.Contains(StripNamespace(classSymbol.name))))
                 {
                     string typeName = SanitateTypeName(classSymbol.name);
 
@@ -109,7 +109,7 @@ namespace BindingsGenerator
 
             foreach (Symbol classSymbol in s.symbolsByName.Values)
             {
-                if (classSymbol.kind == "class" || classSymbol.kind == "struct")
+                if (classSymbol.kind == "class" || classSymbol.kind == "struct" || classSymbol.kind == "namespace")
                 {
                     if (classNames.Contains(SanitateTypeName(classSymbol.name)))
                         GenerateClassBindings(classSymbol, outputDirectory);
@@ -190,7 +190,7 @@ namespace BindingsGenerator
             Dictionary<string, List<Overload> > overloads = new Dictionary<string, List<Overload> >();
             Dictionary<string, List<Overload>> staticOverloads = new Dictionary<string, List<Overload>>();
             List<Property> properties = new List<Property>();
-            if (!IsRefCounted(className))
+            if (!IsRefCounted(className) && classSymbol.kind != "namespace")
                 GenerateFinalizer(classSymbol, tw);
             GeneratePropertyAccessors(classSymbol, tw, properties);
             GenerateMemberFunctions(classSymbol, tw, overloads, false);
@@ -941,17 +941,33 @@ namespace BindingsGenerator
 
             if (staticOverloads.Count > 0)
                 tw.WriteLine(Indent(1) + "duk_put_function_list(ctx, -1, " + className + "_StaticFunctions);");
-            tw.WriteLine(Indent(1) + "duk_push_object(ctx);");
-            if (overloads.Count > 0)
-                tw.WriteLine(Indent(1) + "duk_put_function_list(ctx, -1, " + className + "_Functions);");
-            foreach (Property p in properties)
+            foreach (Symbol child in classSymbol.children)
             {
-                if (!p.readOnly)
-                    tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + SanitatePropertyName(p.name) + "\", " + className + "_Get_" + p.name + ", " + className + "_Set_" + p.name + ");");
-                else
-                    tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + SanitatePropertyName(p.name) + "\", " + className + "_Get_" + p.name + ", nullptr);");
+                if (child.kind == "enum")
+                {
+                    foreach (Symbol value in child.children)
+                    {
+                        tw.WriteLine(Indent(1) + "duk_push_number(ctx, " + value.value + ");");
+                        tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"" + value.name + "\");");
+                    }
+                }
             }
-            tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"prototype\");");
+            
+            if (properties.Count > 0 || overloads.Count > 0)
+            {
+                tw.WriteLine(Indent(1) + "duk_push_object(ctx);");
+                if (overloads.Count > 0)
+                    tw.WriteLine(Indent(1) + "duk_put_function_list(ctx, -1, " + className + "_Functions);");
+                foreach (Property p in properties)
+                {
+                    if (!p.readOnly)
+                        tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + SanitatePropertyName(p.name) + "\", " + className + "_Get_" + p.name + ", " + className + "_Set_" + p.name + ");");
+                    else
+                        tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + SanitatePropertyName(p.name) + "\", " + className + "_Get_" + p.name + ", nullptr);");
+                }
+                tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"prototype\");");
+            }
+            
             tw.WriteLine(Indent(1) + "duk_put_global_string(ctx, " + ClassIdentifier(className) + ");");
             tw.WriteLine("}");
             tw.WriteLine("");

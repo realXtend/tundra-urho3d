@@ -1097,6 +1097,24 @@ void Expose_AssetAPI(duk_context* ctx)
 {
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, AssetAPI_StaticFunctions);
+    duk_push_number(ctx, 0);
+    duk_put_prop_string(ctx, -2, "FileQueryLocalFileFound");
+    duk_push_number(ctx, 1);
+    duk_put_prop_string(ctx, -2, "FileQueryLocalFileMissing");
+    duk_push_number(ctx, 2);
+    duk_put_prop_string(ctx, -2, "FileQueryExternalFile");
+    duk_push_number(ctx, 0);
+    duk_put_prop_string(ctx, -2, "AssetRefInvalid");
+    duk_push_number(ctx, 1);
+    duk_put_prop_string(ctx, -2, "AssetRefLocalPath");
+    duk_push_number(ctx, 2);
+    duk_put_prop_string(ctx, -2, "AssetRefRelativePath");
+    duk_push_number(ctx, 3);
+    duk_put_prop_string(ctx, -2, "AssetRefLocalUrl");
+    duk_push_number(ctx, 4);
+    duk_put_prop_string(ctx, -2, "AssetRefExternalUrl");
+    duk_push_number(ctx, 5);
+    duk_put_prop_string(ctx, -2, "AssetRefNamedStorage");
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, AssetAPI_Functions);
     DefineProperty(ctx, "assetCreated", AssetAPI_Get_AssetCreated, nullptr);
