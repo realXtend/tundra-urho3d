@@ -104,6 +104,10 @@ UIElement *ComponentContainer::Widget() const
 
 IAttributeEditor *ComponentContainer::CreateAttributeEditor(Framework *framework, IAttribute *attribute)
 {
+    if (attribute == NULL)
+        return NULL;
+
+    AttributeWeakPtr attributeWeakPtr = AttributeWeakPtr(attribute->Owner(), attribute);
     IAttributeEditor *editor = 0;
     u32 type = attribute->TypeId();
     switch (type)
@@ -117,13 +121,22 @@ IAttributeEditor *ComponentContainer::CreateAttributeEditor(Framework *framework
     case IAttribute::TypeId::BoolId:
         editor = new AttributeEditor<bool>(framework);
         break;
+    case IAttribute::TypeId::RealId:
+        editor = new AttributeEditor<float>(framework);
+        break;
+    case IAttribute::TypeId::IntId:
+        editor = new AttributeEditor<int>(framework);
+        break;
     case IAttribute::TypeId::TransformId:
         editor = new AttributeEditor<Transform>(framework);
         break;
     }
 
     if (editor != NULL)
+    {
         editor->SetTitle(attribute->Name());
+        editor->AddAttribute(attributeWeakPtr);
+    }
 
     return editor;
 }
@@ -182,6 +195,7 @@ ECEditorWindow::~ECEditorWindow()
     if (window_)
         window_->Remove();
     window_.Reset();
+    entity_.Reset();
 }
 
 void ECEditorWindow::Show()
@@ -199,7 +213,7 @@ void ECEditorWindow::AddEntity(EntityPtr entity, bool updateUi)
     if (!entity)
         return;
 
-    entities_[entity->Id()] = EntityWeakPtr(entity);
+    entity_ = EntityWeakPtr(entity);
     if (updateUi)
         Refresh();
 }
@@ -209,15 +223,6 @@ void ECEditorWindow::AddEntity(entity_id_t id, bool updateUi)
     EntityPtr entity = framework_->Scene()->MainCameraScene()->EntityById(id);
     if (entity != NULL)
         AddEntity(entity, updateUi);
-}
-
-void ECEditorWindow::RemoveEntity(entity_id_t id, bool updateUi)
-{
-    if (entities_.Contains(id))
-    {
-        entities_.Erase(id);
-    }
-    Refresh();
 }
 
 void ECEditorWindow::Clear()
@@ -236,8 +241,10 @@ void ECEditorWindow::Refresh()
 {
     Clear();
 
-    Entity *entity = entities_.Values()[0];
-    Entity::ComponentMap components = entity->Components();
+    if (!entity_.Get())
+        return;
+    
+    Entity::ComponentMap components = entity_->Components();
     ComponentContainer *container = 0;
     ComponentPtr comp;
     for (unsigned int i = 0; i < components.Values().Size(); ++i)

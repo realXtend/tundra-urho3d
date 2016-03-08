@@ -86,7 +86,7 @@ public:
 
     void AddEntity(EntityPtr entity, bool updateUi = true);
     void AddEntity(entity_id_t id, bool updateUi = true);
-    void RemoveEntity(entity_id_t id, bool updateUi = true);
+
     void Clear();
     void Refresh();
     UIElement* Widget() const;
@@ -98,7 +98,8 @@ protected:
     WindowPtr window_;
     ListViewPtr list_;
     
-    EntityMap entities_;
+    //EntityMap entities_;
+    EntityWeakPtr entity_;
 
     Framework *framework_;
 };

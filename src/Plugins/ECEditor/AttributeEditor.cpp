@@ -4,6 +4,7 @@
 
 #include "AttributeEditor.h"
 #include "Framework.h"
+#include "IComponent.h"
 
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Engine/Engine.h>
@@ -12,6 +13,7 @@
 #include "LoggingFunctions.h"
 
 #include <Urho3D/UI/UI.h>
+#include <Urho3D/UI/UIEvents.h>
 #include <Urho3D/UI/UIElement.h>
 #include <Urho3D/UI/Text.h>
 #include <Urho3D/UI/Button.h>
@@ -23,7 +25,8 @@ namespace Tundra
 
 IAttributeEditor::IAttributeEditor(Framework *framework) :
     Object(framework->GetContext()),
-    framework_(framework)
+    framework_(framework),
+    ingoreAttributeChange_(false)
 {
 }
 
@@ -52,9 +55,33 @@ UIElementPtr IAttributeEditor::Widget() const
     return root_;
 }
 
-void IAttributeEditor::PreInitialize()
+bool IAttributeEditor::HasAttribute(IAttribute *attribute) const
 {
+    return attributeWeakPtr_.Get() == NULL ? false : attribute == attributeWeakPtr_.Get();
+}
 
+void IAttributeEditor::AddAttribute(AttributeWeakPtr attribute)
+{
+    if (attributeWeakPtr_.Get() != NULL)
+        attributeWeakPtr_.owner.Lock()->AttributeChanged.Disconnect(this, &IAttributeEditor::OnAttributeChanged);
+
+    attributeWeakPtr_ = attribute;
+    attributeWeakPtr_.owner.Lock()->AttributeChanged.Connect(this, &IAttributeEditor::OnAttributeChanged);
+    SetValue();
+}
+
+void IAttributeEditor::RemoveAttribute()
+{
+    if (attributeWeakPtr_.Get() != NULL)
+        attributeWeakPtr_.owner.Lock()->AttributeChanged.Disconnect(this, &IAttributeEditor::OnAttributeChanged);
+
+    attributeWeakPtr_ = AttributeWeakPtr();
+}
+
+void IAttributeEditor::OnAttributeChanged(IAttribute *attribute, AttributeChange::Type changeType)
+{
+    if (HasAttribute(attribute))
+        SetValue();
 }
 
 void IAttributeEditor::Initialize()
@@ -68,12 +95,16 @@ void IAttributeEditor::Initialize()
     title_ = new Text(framework_->GetContext());
     title_->SetMinWidth(110);
     title_->SetMaxWidth(110);
-    title_->SetStyle("Text", style);
-    title_->SetFont(title_->GetFont(), 9);
+    title_->SetStyle("SmallText", style);
     root_->AddChild(title_);
 }
 
 void IAttributeEditor::Update()
+{
+
+}
+
+void IAttributeEditor::SetValue()
 {
 
 }
@@ -100,6 +131,9 @@ template<> void AttributeEditor<bool>::Initialize()
     checkBox->SetStyle("CheckBox", style);
     data_["check_box"] = checkBox;
     root_->AddChild(checkBox);
+
+    SubscribeToEvent(E_TOGGLED, URHO3D_HANDLER(AttributeEditor<bool>, OnUIChanged));
+
     Update();
 }
 
@@ -107,6 +141,150 @@ template<> void AttributeEditor<bool>::Update()
 {
     CheckBox *b = dynamic_cast<CheckBox*>(data_["check_box"].GetPtr());
     b->SetChecked(Value());
+}
+
+template<> void AttributeEditor<bool>::OnUIChanged(StringHash /*eventType*/, VariantMap &eventData)
+{
+    if (attributeWeakPtr_.Get() == NULL)
+        return;
+
+    CheckBox *check = dynamic_cast<CheckBox*>(eventData["Element"].GetPtr());
+    if (check != NULL &&
+        check == data_["check_box"].GetPtr())
+    {
+        ingoreAttributeChange_ = true;
+
+        bool checked = check->IsChecked();
+        Attribute<bool> *attr = dynamic_cast<Attribute<bool> *>(attributeWeakPtr_.Get());
+        if (attr != NULL)
+            attr->Set(checked);
+
+        ingoreAttributeChange_ = false;
+    }
+}
+
+template<> void AttributeEditor<bool>::SetValue()
+{
+    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    {
+        Attribute<bool> *attr = dynamic_cast<Attribute<bool> *>(attributeWeakPtr_.Get());
+        if (attr == NULL)
+            return;
+
+        SetValue(attr->Get());
+    }
+}
+
+//----------------------------FLOAT ATTRIBUTE TYPE----------------------------
+
+template<> void AttributeEditor<float>::SetValue(const float &value)
+{
+    value_ = value;
+    Update();
+}
+
+template<> const float &AttributeEditor<float>::Value() const
+{
+    return value_.GetFloat();
+}
+
+template<> void AttributeEditor<float>::Initialize()
+{
+    IAttributeEditor::Initialize();
+    XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/DefaultStyle.xml");
+
+    LineEdit *e = new LineEdit(framework_->GetContext());
+    e->SetName("LineEdit");
+    e->SetStyle("LineEditSmall", style);
+    e->SetCursorPosition(0);
+    data_["line_edit"] = e;
+    root_->AddChild(e);
+    Update();
+}
+
+template<> void AttributeEditor<float>::Update()
+{
+    LineEdit *e = dynamic_cast<LineEdit*>(data_["line_edit"].GetPtr());
+    e->SetText(String(Value()));
+    e->SetCursorPosition(0);
+}
+
+template<> void AttributeEditor<float>::OnUIChanged(StringHash /*eventType*/, VariantMap &eventData)
+{
+    UIElement *element = dynamic_cast<UIElement*>(eventData["Element"].GetPtr());
+    if (element != NULL)
+    {
+        ingoreAttributeChange_ = true;
+        ingoreAttributeChange_ = false;
+    }
+}
+
+template<> void AttributeEditor<float>::SetValue()
+{
+    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    {
+        Attribute<float> *attr = dynamic_cast<Attribute<float> *>(attributeWeakPtr_.Get());
+        if (attr == NULL)
+            return;
+
+        SetValue(attr->Get());
+    }
+}
+
+//----------------------------INT ATTRIBUTE TYPE----------------------------
+
+template<> void AttributeEditor<int>::SetValue(const int &value)
+{
+    value_ = value;
+    Update();
+}
+
+template<> const int &AttributeEditor<int>::Value() const
+{
+    return value_.GetInt();
+}
+
+template<> void AttributeEditor<int>::Initialize()
+{
+    IAttributeEditor::Initialize();
+    XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/DefaultStyle.xml");
+
+    LineEdit *e = new LineEdit(framework_->GetContext());
+    e->SetName("LineEdit");
+    e->SetStyle("LineEditSmall", style);
+    e->SetCursorPosition(0);
+    data_["line_edit"] = e;
+    root_->AddChild(e);
+    Update();
+}
+
+template<> void AttributeEditor<int>::Update()
+{
+    LineEdit *e = dynamic_cast<LineEdit*>(data_["line_edit"].GetPtr());
+    e->SetText(String(Value()));
+    e->SetCursorPosition(0);
+}
+
+template<> void AttributeEditor<int>::OnUIChanged(StringHash /*eventType*/, VariantMap &eventData)
+{
+    UIElement *element = dynamic_cast<UIElement*>(eventData["Element"].GetPtr());
+    if (element != NULL)
+    {
+        ingoreAttributeChange_ = true;
+        ingoreAttributeChange_ = false;
+    }
+}
+
+template<> void AttributeEditor<int>::SetValue()
+{
+    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    {
+        Attribute<int> *attr = dynamic_cast<Attribute<int> *>(attributeWeakPtr_.Get());
+        if (attr == NULL)
+            return;
+
+        SetValue(attr->Get());
+    }
 }
 
 //----------------------------TRANSFORM ATTRIBUTE TYPE----------------------------
@@ -143,7 +321,7 @@ template<> void AttributeEditor<Transform>::Initialize()
 
         {
             Text *t = new Text(framework_->GetContext());
-            t->SetStyle("Text", style);
+            t->SetStyle("SmallText", style);
             t->SetMaxWidth(12);
             t->SetMinWidth(12);
             t->SetText("x");
@@ -156,7 +334,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             data_["x_pos_edit"] = e;
 
             t = new Text(framework_->GetContext());
-            t->SetStyle("Text", style);
+            t->SetStyle("SmallText", style);
             t->SetMaxWidth(12);
             t->SetMinWidth(12);
             t->SetText("y");
@@ -169,7 +347,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             data_["y_pos_edit"] = e;
 
             t = new Text(framework_->GetContext());
-            t->SetStyle("Text", style);
+            t->SetStyle("SmallText", style);
             t->SetText("z");
             t->SetMaxWidth(12);
             t->SetMinWidth(12);
@@ -191,7 +369,7 @@ template<> void AttributeEditor<Transform>::Initialize()
 
         {
             Text *t = new Text(framework_->GetContext());
-            t->SetStyle("Text", style);
+            t->SetStyle("SmallText", style);
             t->SetMaxWidth(12);
             t->SetMinWidth(12);
             t->SetText("x");
@@ -204,7 +382,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             data_["x_rot_edit"] = e;
 
             t = new Text(framework_->GetContext());
-            t->SetStyle("Text", style);
+            t->SetStyle("SmallText", style);
             t->SetMaxWidth(12);
             t->SetMinWidth(12);
             t->SetText("y");
@@ -217,7 +395,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             data_["y_rot_edit"] = e;
 
             t = new Text(framework_->GetContext());
-            t->SetStyle("Text", style);
+            t->SetStyle("SmallText", style);
             t->SetText("z");
             t->SetMaxWidth(12);
             t->SetMinWidth(12);
@@ -239,7 +417,7 @@ template<> void AttributeEditor<Transform>::Initialize()
 
         {
             Text *t = new Text(framework_->GetContext());
-            t->SetStyle("Text", style);
+            t->SetStyle("SmallText", style);
             t->SetMaxWidth(12);
             t->SetMinWidth(12);
             t->SetText("x");
@@ -252,7 +430,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             data_["x_scl_edit"] = e;
 
             t = new Text(framework_->GetContext());
-            t->SetStyle("Text", style);
+            t->SetStyle("SmallText", style);
             t->SetMaxWidth(12);
             t->SetMinWidth(12);
             t->SetText("y");
@@ -265,7 +443,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             data_["y_scl_edit"] = e;
 
             t = new Text(framework_->GetContext());
-            t->SetStyle("Text", style);
+            t->SetStyle("SmallText", style);
             t->SetText("z");
             t->SetMaxWidth(12);
             t->SetMinWidth(12);
@@ -334,6 +512,28 @@ template<> void AttributeEditor<Transform>::Update()
     }
 }
 
+template<> void AttributeEditor<Transform>::OnUIChanged(StringHash /*eventType*/, VariantMap &eventData)
+{
+    UIElement *element = dynamic_cast<UIElement*>(eventData["Element"].GetPtr());
+    if (element != NULL)
+    {
+        ingoreAttributeChange_ = true;
+        ingoreAttributeChange_ = false;
+    }
+}
+
+template<> void AttributeEditor<Transform>::SetValue()
+{
+    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    {
+        Attribute<Transform> *attr = dynamic_cast<Attribute<Transform> *>(attributeWeakPtr_.Get());
+        if (attr == NULL)
+            return;
+
+        SetValue(attr->Get());
+    }
+}
+
 //----------------------------VECTOR3 ATTRIBUTE TYPE----------------------------
 
 template<> void AttributeEditor<Vector3>::SetValue(const Vector3 &value)
@@ -356,9 +556,8 @@ template<> void AttributeEditor<Vector3>::Initialize()
     
     element->SetLayout(LayoutMode::LM_HORIZONTAL, 2);
     {
-        
         Text *t = new Text(framework_->GetContext());
-        t->SetStyle("Text", style);
+        t->SetStyle("SmallText", style);
         t->SetMaxWidth(12);
         t->SetMinWidth(12);
         t->SetText("x");
@@ -371,7 +570,7 @@ template<> void AttributeEditor<Vector3>::Initialize()
         data_["x_edit"] = e;
 
         t = new Text(framework_->GetContext());
-        t->SetStyle("Text", style);
+        t->SetStyle("SmallText", style);
         t->SetMaxWidth(12);
         t->SetMinWidth(12);
         t->SetText("y");
@@ -384,7 +583,7 @@ template<> void AttributeEditor<Vector3>::Initialize()
         data_["y_edit"] = e;
 
         t = new Text(framework_->GetContext());
-        t->SetStyle("Text", style);
+        t->SetStyle("SmallText", style);
         t->SetText("z");
         t->SetMaxWidth(12);
         t->SetMinWidth(12);
@@ -417,6 +616,28 @@ template<> void AttributeEditor<Vector3>::Update()
     e->SetCursorPosition(0);
 }
 
+template<> void AttributeEditor<Vector3>::OnUIChanged(StringHash /*eventType*/, VariantMap &eventData)
+{
+    UIElement *element = dynamic_cast<UIElement*>(eventData["Element"].GetPtr());
+    if (element != NULL)
+    {
+        ingoreAttributeChange_ = true;
+        ingoreAttributeChange_ = false;
+    }
+}
+
+template<> void AttributeEditor<Vector3>::SetValue()
+{
+    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    {
+        Attribute<Vector3> *attr = dynamic_cast<Attribute<Vector3> *>(attributeWeakPtr_.Get());
+        if (attr == NULL)
+            return;
+
+        SetValue(attr->Get());
+    }
+}
+
 //----------------------------STRING ATTRIBUTE TYPE----------------------------
 
 template<> void AttributeEditor<String>::SetValue(const String &value)
@@ -442,6 +663,8 @@ template<> void AttributeEditor<String>::Initialize()
     data_["line_edit"] = e;
     root_->AddChild(e);
     Update();
+
+    SubscribeToEvent(E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<String>, OnUIChanged));
 }
 
 template<> void AttributeEditor<String>::Update()
@@ -449,6 +672,38 @@ template<> void AttributeEditor<String>::Update()
     LineEdit *e = dynamic_cast<LineEdit*>(data_["line_edit"].GetPtr());
     e->SetText(Value());
     e->SetCursorPosition(0);
+}
+
+template<> void AttributeEditor<String>::OnUIChanged(StringHash /*eventType*/, VariantMap &eventData)
+{
+    if (attributeWeakPtr_.Get() == NULL)
+        return;
+
+    LineEdit *element = dynamic_cast<LineEdit*>(eventData["Element"].GetPtr());
+    if (element != NULL &&
+        element == data_["line_edit"].GetPtr())
+    {
+        ingoreAttributeChange_ = true;
+
+        String value = element->GetText();
+        Attribute<String> *attr = dynamic_cast<Attribute<String> *>(attributeWeakPtr_.Get());
+        if (attr != NULL)
+            attr->Set(value);
+
+        ingoreAttributeChange_ = false;
+    }
+}
+
+template<> void AttributeEditor<String>::SetValue()
+{
+    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    {
+        Attribute<String> *attr = dynamic_cast<Attribute<String> *>(attributeWeakPtr_.Get());
+        if (attr == NULL)
+            return;
+
+        SetValue(attr->Get());
+    }
 }
 
 }
