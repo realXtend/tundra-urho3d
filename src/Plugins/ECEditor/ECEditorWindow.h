@@ -51,36 +51,40 @@ class ECEDITOR_API ComponentContainer : public Object
     URHO3D_OBJECT(ComponentContainer, Object);
 
 public:
-    ComponentContainer(Framework *framework, ComponentPtr component);
+    explicit ComponentContainer(Framework *framework, ComponentPtr component, int index);
     virtual ~ComponentContainer();
 
     void SetTitleText(const String &text);
     String TitleText() const;
 
     UIElement *Widget() const;
+    int Index() const;
 
     static IAttributeEditor *CreateAttributeEditor(Framework *framework, IAttribute *attribute);
 
 protected:
     WindowPtr window_;
     UIElementPtr attributeContainer_;
-    //ListViewPtr list_;
     TextWeakPtr header_;
     ComponentWeakPtr component_;
     AttributeEditorMap attributeEditors_;
+
+    // Defines component position in ECEDitorWindow
+    int index_;
 
     Framework *framework_;
 };
 
 typedef SharedPtr<ComponentContainer> ComponentContainerPtr;
 typedef HashMap<ComponentWeakPtr, ComponentContainerPtr> ComponentContainerMap;
+typedef Vector<ComponentContainerPtr> ComponentContainerVector;
 
 class ECEDITOR_API ECEditorWindow : public Object
 {
     URHO3D_OBJECT(ECEditorWindow, Object);
 
 public:
-    ECEditorWindow(Framework *framework);
+    explicit ECEditorWindow(Framework *framework);
     virtual ~ECEditorWindow();
 
     void Show();
@@ -97,6 +101,8 @@ protected:
     void OnCloseClicked(StringHash eventType, VariantMap &eventData);
 
     ComponentContainerMap containers_;
+    ComponentContainerVector components_;
+
     WindowPtr window_;
     ListViewPtr list_;
     

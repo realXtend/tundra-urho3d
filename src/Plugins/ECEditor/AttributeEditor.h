@@ -11,6 +11,7 @@
 #include "FrameworkFwd.h"
 #include "Signals.h"
 #include "Math/Transform.h"
+#include "Math/Color.h"
 #include "IAttribute.h"
 #include "Signals.h"
 
@@ -25,13 +26,11 @@ namespace Urho3D
     class CheckBox;
 }
 
-using namespace Urho3D;
-
 namespace Tundra
 {
 
-typedef SharedPtr<Text> TextPtr;
-typedef SharedPtr<UIElement> UIElementPtr;
+typedef SharedPtr<Urho3D::Text> TextPtr;
+typedef SharedPtr<Urho3D::UIElement> UIElementPtr;
 typedef Vector<AttributeWeakPtr> AttributeWeakPtrVector;
 
 class ECEDITOR_API IAttributeEditor : public Object
@@ -132,12 +131,19 @@ template<> void AttributeEditor<Transform>::Update();
 template<> void AttributeEditor<Transform>::OnUIChanged(StringHash eventType, VariantMap &eventData);
 template<> void AttributeEditor<Transform>::SetValue();
 
-template<> void AttributeEditor<Vector3>::SetValue(Vector3 value);
-template<> Vector3 AttributeEditor<Vector3>::Value() const;
-template<> void AttributeEditor<Vector3>::Initialize();
-template<> void AttributeEditor<Vector3>::Update();
-template<> void AttributeEditor<Vector3>::OnUIChanged(StringHash eventType, VariantMap &eventData);
-template<> void AttributeEditor<Vector3>::SetValue();
+template<> void AttributeEditor<float3>::SetValue(float3 value);
+template<> float3 AttributeEditor<float3>::Value() const;
+template<> void AttributeEditor<float3>::Initialize();
+template<> void AttributeEditor<float3>::Update();
+template<> void AttributeEditor<float3>::OnUIChanged(StringHash eventType, VariantMap &eventData);
+template<> void AttributeEditor<float3>::SetValue();
+
+template<> void AttributeEditor<Color>::SetValue(Color value);
+template<> Color AttributeEditor<Color>::Value() const;
+template<> void AttributeEditor<Color>::Initialize();
+template<> void AttributeEditor<Color>::Update();
+template<> void AttributeEditor<Color>::OnUIChanged(StringHash eventType, VariantMap &eventData);
+template<> void AttributeEditor<Color>::SetValue();
 
 template<> void AttributeEditor<String>::SetValue(String value);
 template<> String AttributeEditor<String>::Value() const;

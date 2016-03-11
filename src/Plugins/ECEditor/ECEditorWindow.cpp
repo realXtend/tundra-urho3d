@@ -7,6 +7,7 @@
 #include "Scene.h"
 #include "SceneAPI.h"
 #include "AttributeEditor.h"
+#include "Math/Color.h"
 
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Engine/Engine.h>
@@ -27,9 +28,10 @@ using namespace Urho3D;
 namespace Tundra
 {
 
-ComponentContainer::ComponentContainer(Framework *framework, ComponentPtr component) :
+ComponentContainer::ComponentContainer(Framework *framework, ComponentPtr component, int index) :
     Object(framework->GetContext()),
-    framework_(framework)
+    framework_(framework),
+    index_(index)
 {
     XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/DefaultStyle.xml");
 
@@ -103,6 +105,11 @@ UIElement *ComponentContainer::Widget() const
     return window_;
 }
 
+int ComponentContainer::Index() const
+{
+    return index_;
+}
+
 IAttributeEditor *ComponentContainer::CreateAttributeEditor(Framework *framework, IAttribute *attribute)
 {
     if (attribute == NULL)
@@ -117,7 +124,10 @@ IAttributeEditor *ComponentContainer::CreateAttributeEditor(Framework *framework
         editor = new AttributeEditor<String>(framework, attributeWeakPtr);
         break;
     case IAttribute::TypeId::Float3Id:
-        editor = new AttributeEditor<Vector3>(framework, attributeWeakPtr);
+        editor = new AttributeEditor<float3>(framework, attributeWeakPtr);
+        break;
+    case IAttribute::TypeId::ColorId:
+        editor = new AttributeEditor<Tundra::Color>(framework, attributeWeakPtr);
         break;
     case IAttribute::TypeId::BoolId:
         editor = new AttributeEditor<bool>(framework, attributeWeakPtr);
@@ -251,9 +261,18 @@ void ECEditorWindow::Refresh()
         if (comp == NULL)
             continue;
 
-        container = new ComponentContainer(framework_, comp);
+        //int index = GetComponentIndex(comp);
+
+        int index = 6400;
+        if (comp->TypeName() == "Name")
+            index = 0;
+        else if (comp->TypeName() == "Placeable")
+            index = 1;
+
+        container = new ComponentContainer(framework_, comp, index);
         container->SetTitleText(comp->GetTypeName());
-        list_->AddItem(container->Widget());
+
+        list_->InsertItem(index, container->Widget());
         containers_[comp] = container;
     }
 }
