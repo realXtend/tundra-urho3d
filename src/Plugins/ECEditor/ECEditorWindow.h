@@ -35,6 +35,7 @@ class IAttributeEditor;
 typedef SharedPtr<IComponent> ComponentPtr;
 typedef SharedPtr<Entity> EntityPtr;
 typedef SharedPtr<ListView> ListViewPtr;
+typedef SharedPtr<UIElement> UIElementPtr;
 typedef SharedPtr<IAttributeEditor> AttributeEditorPtr;
 
 typedef WeakPtr<IComponent> ComponentWeakPtr;
@@ -62,7 +63,8 @@ public:
 
 protected:
     WindowPtr window_;
-    ListViewPtr list_;
+    UIElementPtr attributeContainer_;
+    //ListViewPtr list_;
     TextWeakPtr header_;
     ComponentWeakPtr component_;
     AttributeEditorMap attributeEditors_;
@@ -98,7 +100,6 @@ protected:
     WindowPtr window_;
     ListViewPtr list_;
     
-    //EntityMap entities_;
     EntityWeakPtr entity_;
 
     Framework *framework_;

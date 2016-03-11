@@ -34,8 +34,7 @@ ComponentContainer::ComponentContainer(Framework *framework, ComponentPtr compon
     XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/DefaultStyle.xml");
 
     window_ = new Window(framework->GetContext());
-    window_->SetLayout(LayoutMode::LM_VERTICAL, 2, IntRect(8, 2, 8, 2));
-    window_->SetMinHeight(150);
+    window_->SetLayout(LayoutMode::LM_VERTICAL, 2, IntRect(8, 8, 8, 8));
     window_->SetStyle("Window", style);
     window_->SetMovable(false);
 
@@ -56,11 +55,13 @@ ComponentContainer::ComponentContainer(Framework *framework, ComponentPtr compon
         }
     }
 
-    list_ = new ListView(framework->GetContext());
-    list_->SetName("HierarchyList");
-    list_->SetHighlightMode(HighlightMode::HM_ALWAYS);
-    list_->SetStyle("ListView", style);
-    window_->AddChild(list_);
+    UIElement *spacer = new UIElement(framework->GetContext());
+    spacer->SetStyle("EditorSeparator", style);
+    window_->AddChild(spacer);
+
+    attributeContainer_ = new UIElement(framework->GetContext());
+    attributeContainer_->SetLayout(LayoutMode::LM_VERTICAL, 2, IntRect(2, 2, 2, 2));
+    window_->AddChild(attributeContainer_);
 
     {
         AttributeVector attributes = component->Attributes();
@@ -70,7 +71,7 @@ ComponentContainer::ComponentContainer(Framework *framework, ComponentPtr compon
             if (editor)
             {
                 attributeEditors_[i] = editor;
-                list_->AddItem(editor->Widget());
+                attributeContainer_->AddChild(editor->Widget());
             }
         }
     }
@@ -113,30 +114,27 @@ IAttributeEditor *ComponentContainer::CreateAttributeEditor(Framework *framework
     switch (type)
     {
     case IAttribute::TypeId::StringId:
-        editor = new AttributeEditor<String>(framework);
+        editor = new AttributeEditor<String>(framework, attributeWeakPtr);
         break;
     case IAttribute::TypeId::Float3Id:
-        editor = new AttributeEditor<Vector3>(framework);
+        editor = new AttributeEditor<Vector3>(framework, attributeWeakPtr);
         break;
     case IAttribute::TypeId::BoolId:
-        editor = new AttributeEditor<bool>(framework);
+        editor = new AttributeEditor<bool>(framework, attributeWeakPtr);
         break;
     case IAttribute::TypeId::RealId:
-        editor = new AttributeEditor<float>(framework);
+        editor = new AttributeEditor<float>(framework, attributeWeakPtr);
         break;
     case IAttribute::TypeId::IntId:
-        editor = new AttributeEditor<int>(framework);
+        editor = new AttributeEditor<int>(framework, attributeWeakPtr);
         break;
     case IAttribute::TypeId::TransformId:
-        editor = new AttributeEditor<Transform>(framework);
+        editor = new AttributeEditor<Transform>(framework, attributeWeakPtr);
         break;
     }
 
     if (editor != NULL)
-    {
         editor->SetTitle(attribute->Name());
-        editor->AddAttribute(attributeWeakPtr);
-    }
 
     return editor;
 }
@@ -231,7 +229,7 @@ void ECEditorWindow::Clear()
     for (unsigned int i = 0; i < containers_.Values().Size(); ++i)
     {
         comp = containers_.Values()[i];
-        list_->RemoveItem(list_->FindItem(comp->Widget()));
+        list_->RemoveItem(comp->Widget());
         comp.Reset();
     }
     containers_.Clear();

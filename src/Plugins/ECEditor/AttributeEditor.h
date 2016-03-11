@@ -39,7 +39,7 @@ class ECEDITOR_API IAttributeEditor : public Object
     URHO3D_OBJECT(IAttributeEditor, Object);
 
 public:
-    explicit IAttributeEditor(Framework *framework);
+    explicit IAttributeEditor(Framework *framework, AttributeWeakPtr attribute);
     virtual ~IAttributeEditor();
 
     virtual const String &Title() const;
@@ -70,7 +70,9 @@ protected:
     Framework *framework_;
     VariantMap data_;
     AttributeWeakPtr attributeWeakPtr_;
+
     bool ingoreAttributeChange_;
+    bool intialized_;
 };
 
 template <typename T>
@@ -79,10 +81,12 @@ class AttributeEditor : public IAttributeEditor
     URHO3D_OBJECT(AttributeEditor, IAttributeEditor);
 
 public:
-    AttributeEditor(Framework *framework) :
-        IAttributeEditor(framework)
+    AttributeEditor(Framework *framework, AttributeWeakPtr attribute) :
+        IAttributeEditor(framework, attribute)
     {
         Initialize();
+        AddAttribute(attribute);
+        Update();
     }
 
     ~AttributeEditor() override
@@ -90,8 +94,8 @@ public:
         
     }
 
-    void SetValue(const T &value);
-    const T &Value() const;
+    void SetValue(T value);
+    T Value() const;
 
 protected:
     void Initialize() override;
@@ -100,43 +104,43 @@ protected:
     void SetValue() override;
 };
 
-template<> void AttributeEditor<bool>::SetValue(const bool &value);
-template<> const bool &AttributeEditor<bool>::Value() const;
+template<> void AttributeEditor<bool>::SetValue(bool value);
+template<> bool AttributeEditor<bool>::Value() const;
 template<> void AttributeEditor<bool>::Initialize();
 template<> void AttributeEditor<bool>::Update();
 template<> void AttributeEditor<bool>::OnUIChanged(StringHash eventType, VariantMap &eventData);
 template<> void AttributeEditor<bool>::SetValue();
 
-template<> void AttributeEditor<float>::SetValue(const float &value);
-template<> const float &AttributeEditor<float>::Value() const;
+template<> void AttributeEditor<float>::SetValue(float value);
+template<> float AttributeEditor<float>::Value() const;
 template<> void AttributeEditor<float>::Initialize();
 template<> void AttributeEditor<float>::Update();
 template<> void AttributeEditor<float>::OnUIChanged(StringHash eventType, VariantMap &eventData);
 template<> void AttributeEditor<float>::SetValue();
 
-template<> void AttributeEditor<int>::SetValue(const int &value);
-template<> const int &AttributeEditor<int>::Value() const;
+template<> void AttributeEditor<int>::SetValue(int value);
+template<> int AttributeEditor<int>::Value() const;
 template<> void AttributeEditor<int>::Initialize();
 template<> void AttributeEditor<int>::Update();
 template<> void AttributeEditor<int>::OnUIChanged(StringHash eventType, VariantMap &eventData);
 template<> void AttributeEditor<int>::SetValue();
 
-template<> void AttributeEditor<Transform>::SetValue(const Transform &value);
-template<> const Transform &AttributeEditor<Transform>::Value() const;
+template<> void AttributeEditor<Transform>::SetValue(Transform value);
+template<> Transform AttributeEditor<Transform>::Value() const;
 template<> void AttributeEditor<Transform>::Initialize();
 template<> void AttributeEditor<Transform>::Update();
 template<> void AttributeEditor<Transform>::OnUIChanged(StringHash eventType, VariantMap &eventData);
 template<> void AttributeEditor<Transform>::SetValue();
 
-template<> void AttributeEditor<Vector3>::SetValue(const Vector3 &value);
-template<> const Vector3 &AttributeEditor<Vector3>::Value() const;
+template<> void AttributeEditor<Vector3>::SetValue(Vector3 value);
+template<> Vector3 AttributeEditor<Vector3>::Value() const;
 template<> void AttributeEditor<Vector3>::Initialize();
 template<> void AttributeEditor<Vector3>::Update();
 template<> void AttributeEditor<Vector3>::OnUIChanged(StringHash eventType, VariantMap &eventData);
 template<> void AttributeEditor<Vector3>::SetValue();
 
-template<> void AttributeEditor<String>::SetValue(const String &value);
-template<> const String &AttributeEditor<String>::Value() const;
+template<> void AttributeEditor<String>::SetValue(String value);
+template<> String AttributeEditor<String>::Value() const;
 template<> void AttributeEditor<String>::Initialize();
 template<> void AttributeEditor<String>::Update();
 template<> void AttributeEditor<String>::OnUIChanged(StringHash eventType, VariantMap &eventData);
