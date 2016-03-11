@@ -22,11 +22,16 @@ using namespace std;
 namespace JSBindings
 {
 
-extern const char* float3_ID;
+static const char* float3_ID = "float3";
 
-duk_ret_t float3_Finalizer(duk_context* ctx);
+static duk_ret_t float3_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float3>(ctx, float3_ID);
+    return 0;
+}
 
-const char* Scene_ID = "Scene";
+
+static const char* Scene_ID = "Scene";
 
 const char* SignalWrapper_Scene_ComponentAdded_ID = "SignalWrapper_Scene_ComponentAdded";
 
@@ -66,14 +71,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Scene_ComponentAdded_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Scene_ComponentAdded_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Scene_ComponentAdded* obj = GetValueObject<SignalWrapper_Scene_ComponentAdded>(ctx, 0, SignalWrapper_Scene_ComponentAdded_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_ComponentAdded_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Scene_ComponentAdded>(ctx, SignalWrapper_Scene_ComponentAdded_ID);
     return 0;
 }
 
@@ -186,14 +186,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Scene_ComponentRemoved_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Scene_ComponentRemoved_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Scene_ComponentRemoved* obj = GetValueObject<SignalWrapper_Scene_ComponentRemoved>(ctx, 0, SignalWrapper_Scene_ComponentRemoved_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_ComponentRemoved_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Scene_ComponentRemoved>(ctx, SignalWrapper_Scene_ComponentRemoved_ID);
     return 0;
 }
 
@@ -304,14 +299,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Scene_EntityCreated_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Scene_EntityCreated_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Scene_EntityCreated* obj = GetValueObject<SignalWrapper_Scene_EntityCreated>(ctx, 0, SignalWrapper_Scene_EntityCreated_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_EntityCreated_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Scene_EntityCreated>(ctx, SignalWrapper_Scene_EntityCreated_ID);
     return 0;
 }
 
@@ -421,14 +411,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Scene_EntityRemoved_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Scene_EntityRemoved_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Scene_EntityRemoved* obj = GetValueObject<SignalWrapper_Scene_EntityRemoved>(ctx, 0, SignalWrapper_Scene_EntityRemoved_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_EntityRemoved_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Scene_EntityRemoved>(ctx, SignalWrapper_Scene_EntityRemoved_ID);
     return 0;
 }
 
@@ -538,14 +523,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Scene_EntityAcked_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Scene_EntityAcked_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Scene_EntityAcked* obj = GetValueObject<SignalWrapper_Scene_EntityAcked>(ctx, 0, SignalWrapper_Scene_EntityAcked_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_EntityAcked_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Scene_EntityAcked>(ctx, SignalWrapper_Scene_EntityAcked_ID);
     return 0;
 }
 
@@ -655,14 +635,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Scene_EntityTemporaryStateToggled_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Scene_EntityTemporaryStateToggled_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Scene_EntityTemporaryStateToggled* obj = GetValueObject<SignalWrapper_Scene_EntityTemporaryStateToggled>(ctx, 0, SignalWrapper_Scene_EntityTemporaryStateToggled_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_EntityTemporaryStateToggled_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Scene_EntityTemporaryStateToggled>(ctx, SignalWrapper_Scene_EntityTemporaryStateToggled_ID);
     return 0;
 }
 
@@ -772,14 +747,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Scene_ComponentAcked_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Scene_ComponentAcked_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Scene_ComponentAcked* obj = GetValueObject<SignalWrapper_Scene_ComponentAcked>(ctx, 0, SignalWrapper_Scene_ComponentAcked_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_ComponentAcked_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Scene_ComponentAcked>(ctx, SignalWrapper_Scene_ComponentAcked_ID);
     return 0;
 }
 
@@ -887,14 +857,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Scene_Removed_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Scene_Removed_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Scene_Removed* obj = GetValueObject<SignalWrapper_Scene_Removed>(ctx, 0, SignalWrapper_Scene_Removed_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_Removed_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Scene_Removed>(ctx, SignalWrapper_Scene_Removed_ID);
     return 0;
 }
 
@@ -1001,14 +966,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Scene_SceneCleared_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Scene_SceneCleared_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Scene_SceneCleared* obj = GetValueObject<SignalWrapper_Scene_SceneCleared>(ctx, 0, SignalWrapper_Scene_SceneCleared_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_SceneCleared_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Scene_SceneCleared>(ctx, SignalWrapper_Scene_SceneCleared_ID);
     return 0;
 }
 
@@ -1119,14 +1079,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Scene_EntityParentChanged_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Scene_EntityParentChanged_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Scene_EntityParentChanged* obj = GetValueObject<SignalWrapper_Scene_EntityParentChanged>(ctx, 0, SignalWrapper_Scene_EntityParentChanged_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Scene_EntityParentChanged_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Scene_EntityParentChanged>(ctx, SignalWrapper_Scene_EntityParentChanged_ID);
     return 0;
 }
 

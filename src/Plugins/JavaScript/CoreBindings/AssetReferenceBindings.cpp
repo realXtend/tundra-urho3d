@@ -21,16 +21,11 @@ namespace JSBindings
 
 
 
-const char* AssetReference_ID = "AssetReference";
+static const char* AssetReference_ID = "AssetReference";
 
-duk_ret_t AssetReference_Finalizer(duk_context* ctx)
+static duk_ret_t AssetReference_Finalizer(duk_context* ctx)
 {
-    AssetReference* obj = GetValueObject<AssetReference>(ctx, 0, AssetReference_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, AssetReference_ID);
-    }
+    FinalizeValueObject<AssetReference>(ctx, AssetReference_ID);
     return 0;
 }
 

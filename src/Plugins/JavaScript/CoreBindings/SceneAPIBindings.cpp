@@ -24,7 +24,7 @@ namespace JSBindings
 
 
 
-const char* SceneAPI_ID = "SceneAPI";
+static const char* SceneAPI_ID = "SceneAPI";
 
 const char* SignalWrapper_SceneAPI_SceneCreated_ID = "SignalWrapper_SceneAPI_SceneCreated";
 
@@ -62,14 +62,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_SceneAPI_SceneCreated_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_SceneAPI_SceneCreated_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_SceneAPI_SceneCreated* obj = GetValueObject<SignalWrapper_SceneAPI_SceneCreated>(ctx, 0, SignalWrapper_SceneAPI_SceneCreated_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_SceneAPI_SceneCreated_ID);
-    }
+    FinalizeValueObject<SignalWrapper_SceneAPI_SceneCreated>(ctx, SignalWrapper_SceneAPI_SceneCreated_ID);
     return 0;
 }
 
@@ -179,14 +174,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_SceneAPI_SceneAboutToBeRemoved* obj = GetValueObject<SignalWrapper_SceneAPI_SceneAboutToBeRemoved>(ctx, 0, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID);
-    }
+    FinalizeValueObject<SignalWrapper_SceneAPI_SceneAboutToBeRemoved>(ctx, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID);
     return 0;
 }
 
@@ -298,14 +288,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered* obj = GetValueObject<SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered>(ctx, 0, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID);
-    }
+    FinalizeValueObject<SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered>(ctx, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID);
     return 0;
 }
 

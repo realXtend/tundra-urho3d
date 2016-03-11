@@ -752,6 +752,113 @@ void Placeable::ToggleVisibility()
     }
 }
 
+void Placeable::SetParent(Entity *parent, bool preserveWorldTransform)
+{
+    float3x4 desiredTransform = (preserveWorldTransform ? LocalToWorld() : transform.Get().ToFloat3x4());
+
+    if (!parent)
+    {
+        EntityReference r;
+        r.Set(0);
+        parentRef.Set(r, AttributeChange::Default);
+    }
+    else
+    {
+        SharedPtr<Placeable> parentPlaceable = parent->Component<Placeable>();
+        if (!parentPlaceable)
+        {
+            LogError("Placeable::SetParent: Parenting entity " + parentEntity->ToString() + " to entity " + parent->ToString() + ", but the target entity does not have an EC_Placeable component!");
+            return;
+        }
+        if (preserveWorldTransform)
+            desiredTransform = parentPlaceable->WorldToLocal() * desiredTransform;
+        parentRef.Set(EntityReference(parent->Id()), AttributeChange::Default);
+    }
+    // Not attaching to a bone, clear any previous bone ref.
+    parentBone.Set("", AttributeChange::Default);
+
+    if (preserveWorldTransform)
+        transform.Set(Transform(desiredTransform), AttributeChange::Default);
+}
+
+void Placeable::SetParent(Entity *parent, const String& boneName, bool preserveWorldTransform)
+{
+    float3x4 desiredTransform = (preserveWorldTransform ? LocalToWorld() : transform.Get().ToFloat3x4());
+
+    if (!parent)
+    {
+        EntityReference r;
+        r.Set(0);
+        parentRef.Set(r, AttributeChange::Default);
+    }
+    else
+    {
+        SharedPtr<Placeable> parentPlaceable = parent->Component<Placeable>();
+        if (!parentPlaceable)
+        {
+            LogError("Placeable::SetParent: Parenting entity " + parentEntity->ToString() + " to entity " + parent->ToString() + ", but the target entity does not have an EC_Placeable component!");
+            return;
+        }
+
+        SharedPtr<Mesh> mesh = parent->Component<Mesh>();
+        if (!mesh)
+        {
+            LogError("Placeable::SetParent: Parenting entity " + parentEntity->ToString() + " to a bone \"" + boneName + "\" of entity " + parent->ToString() + ", but the target entity does not have an EC_Mesh component!");
+            return;
+        }
+
+        Urho3D::Node* parentBone = mesh->BoneNode(boneName);
+        if (!parentBone)
+        {
+            LogError("Placeable::SetParent: Parenting entity " + parentEntity->ToString() + " to a bone \"" + boneName + "\" of entity " + parent->ToString() + " with mesh ref \"" + mesh->meshRef.Get().ref + "\" and skeleton ref \"" + mesh->skeletonRef.Get().ref + "\", but the target entity does not have a bone with that name!");
+            return;
+        }
+        if (preserveWorldTransform)
+            desiredTransform = float4x4(parentBone->GetWorldTransform()).Float3x4Part() * desiredTransform;
+        parentRef.Set(EntityReference(parent->Id()), AttributeChange::Default);
+    }
+    // Not attaching to a bone, clear any previous bone ref.
+    parentBone.Set(boneName, AttributeChange::Default);
+
+    if (preserveWorldTransform)
+        transform.Set(Transform(desiredTransform), AttributeChange::Default);
+}
+
+void DumpChildHierarchy(Placeable *placeable, int indent)
+{
+    EntityVector children = placeable->Children();
+
+    String indentStr = "";
+    for(int i = 0; i < indent; ++i)
+        indentStr = indentStr + " ";
+
+    foreach(EntityPtr child, children)
+    {
+        SharedPtr<Placeable> placeable = child->Component<Placeable>();
+        LogInfo(indentStr + child->ToString() + " at local->parent: " + String(placeable->LocalToParent().ToString().c_str()) + ", world space: " + String(placeable->LocalToWorld().ToString().c_str()));
+        DumpChildHierarchy(placeable.Get(), indent + 2);
+    }
+}
+
+void Placeable::DumpNodeHierarhy()
+{
+    Vector<Placeable*> parents;
+    parents.Push(this);
+    // Print all parents
+    Placeable *p = this;
+    while(p->parentPlaceable_)
+    {
+        parents.Push(p->parentPlaceable_);
+        p = p->parentPlaceable_;
+    }
+
+    for(uint i = parents.Size()-1; i >= 0; --i)
+        LogInfo(parents[i]->ParentEntity()->ToString() + " at local->parent: " + 
+            String(parents[i]->LocalToParent().ToString().c_str()) + ", world space: " + String(parents[i]->LocalToWorld().ToString().c_str()));
+
+    DumpChildHierarchy(this, 2);
+}
+
 void Placeable::OnShowTriggered(const StringVector&)
 {
     Show();

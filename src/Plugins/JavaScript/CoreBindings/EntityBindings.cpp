@@ -26,7 +26,7 @@ namespace JSBindings
 
 
 
-const char* Entity_ID = "Entity";
+static const char* Entity_ID = "Entity";
 
 const char* SignalWrapper_Entity_ComponentAdded_ID = "SignalWrapper_Entity_ComponentAdded";
 
@@ -64,14 +64,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Entity_ComponentAdded_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Entity_ComponentAdded_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Entity_ComponentAdded* obj = GetValueObject<SignalWrapper_Entity_ComponentAdded>(ctx, 0, SignalWrapper_Entity_ComponentAdded_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Entity_ComponentAdded_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Entity_ComponentAdded>(ctx, SignalWrapper_Entity_ComponentAdded_ID);
     return 0;
 }
 
@@ -181,14 +176,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Entity_ComponentRemoved_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Entity_ComponentRemoved_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Entity_ComponentRemoved* obj = GetValueObject<SignalWrapper_Entity_ComponentRemoved>(ctx, 0, SignalWrapper_Entity_ComponentRemoved_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Entity_ComponentRemoved_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Entity_ComponentRemoved>(ctx, SignalWrapper_Entity_ComponentRemoved_ID);
     return 0;
 }
 
@@ -298,14 +288,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Entity_EntityRemoved_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Entity_EntityRemoved_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Entity_EntityRemoved* obj = GetValueObject<SignalWrapper_Entity_EntityRemoved>(ctx, 0, SignalWrapper_Entity_EntityRemoved_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Entity_EntityRemoved_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Entity_EntityRemoved>(ctx, SignalWrapper_Entity_EntityRemoved_ID);
     return 0;
 }
 
@@ -415,14 +400,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Entity_TemporaryStateToggled_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Entity_TemporaryStateToggled_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Entity_TemporaryStateToggled* obj = GetValueObject<SignalWrapper_Entity_TemporaryStateToggled>(ctx, 0, SignalWrapper_Entity_TemporaryStateToggled_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Entity_TemporaryStateToggled_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Entity_TemporaryStateToggled>(ctx, SignalWrapper_Entity_TemporaryStateToggled_ID);
     return 0;
 }
 
@@ -530,14 +510,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Entity_EnterView_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Entity_EnterView_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Entity_EnterView* obj = GetValueObject<SignalWrapper_Entity_EnterView>(ctx, 0, SignalWrapper_Entity_EnterView_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Entity_EnterView_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Entity_EnterView>(ctx, SignalWrapper_Entity_EnterView_ID);
     return 0;
 }
 
@@ -644,14 +619,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Entity_LeaveView_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Entity_LeaveView_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Entity_LeaveView* obj = GetValueObject<SignalWrapper_Entity_LeaveView>(ctx, 0, SignalWrapper_Entity_LeaveView_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Entity_LeaveView_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Entity_LeaveView>(ctx, SignalWrapper_Entity_LeaveView_ID);
     return 0;
 }
 
@@ -762,14 +732,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Entity_ParentChanged_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Entity_ParentChanged_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Entity_ParentChanged* obj = GetValueObject<SignalWrapper_Entity_ParentChanged>(ctx, 0, SignalWrapper_Entity_ParentChanged_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Entity_ParentChanged_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Entity_ParentChanged>(ctx, SignalWrapper_Entity_ParentChanged_ID);
     return 0;
 }
 

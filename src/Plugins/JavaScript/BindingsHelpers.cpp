@@ -19,21 +19,55 @@ using namespace Tundra;
 namespace JSBindings
 {
 
-extern const char* float2_ID;
-extern const char* float3_ID;
-extern const char* float4_ID;
-extern const char* Quat_ID;
-extern const char* Transform_ID;
-extern const char* AssetReference_ID;
-extern const char* AssetReferenceList_ID;
+static const char* float2_ID = "float2";
+static const char* float3_ID = "float3";
+static const char* float4_ID = "float4";
+static const char* Quat_ID = "Quat";
+static const char* Transform_ID = "Transform";
+static const char* AssetReference_ID = "AssetReference";
+static const char* AssetReferenceList_ID = "AssetReferenceList";
 
-duk_ret_t float2_Finalizer(duk_context* ctx);
-duk_ret_t float3_Finalizer(duk_context* ctx);
-duk_ret_t float4_Finalizer(duk_context* ctx);
-duk_ret_t Quat_Finalizer(duk_context* ctx);
-duk_ret_t Transform_Finalizer(duk_context* ctx);
-duk_ret_t AssetReference_Finalizer(duk_context* ctx);
-duk_ret_t AssetReferenceList_Finalizer(duk_context* ctx);
+static duk_ret_t float2_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float2>(ctx, float2_ID);
+    return 0;
+}
+
+static duk_ret_t float3_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float3>(ctx, float3_ID);
+    return 0;
+}
+
+static duk_ret_t float4_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float4>(ctx, float4_ID);
+    return 0;
+}
+
+static duk_ret_t Quat_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<Quat>(ctx, Quat_ID);
+    return 0;
+}
+
+static duk_ret_t Transform_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<Transform>(ctx, Transform_ID);
+    return 0;
+}
+
+static duk_ret_t AssetReference_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<AssetReference>(ctx, AssetReference_ID);
+    return 0;
+}
+
+static duk_ret_t AssetReferenceList_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<AssetReferenceList>(ctx, AssetReferenceList_ID);
+    return 0;
+}
 
 const char* GetValueObjectType(duk_context* ctx, duk_idx_t stackIndex)
 {
@@ -363,37 +397,37 @@ void AssignAttributeValue(duk_context* ctx, duk_idx_t stackIndex, IAttribute* de
         break;
     
     case IAttribute::Float2Id:
-        if (duk_is_object(ctx, stackIndex) && GetValueObjectType(ctx, stackIndex) == float2_ID)
+        if (duk_is_object(ctx, stackIndex) && strcmp(GetValueObjectType(ctx, stackIndex), float2_ID) == 0)
             static_cast<Attribute<float2>*>(destAttr)->Set(*GetValueObject<float2>(ctx, stackIndex, nullptr), change);
         break;
     
     case IAttribute::Float3Id:
-        if (duk_is_object(ctx, stackIndex) && GetValueObjectType(ctx, stackIndex) == float3_ID)
+        if (duk_is_object(ctx, stackIndex) && strcmp(GetValueObjectType(ctx, stackIndex), float3_ID) == 0)
             static_cast<Attribute<float3>*>(destAttr)->Set(*GetValueObject<float3>(ctx, stackIndex, nullptr), change);
         break;
     
     case IAttribute::Float4Id:
-        if (duk_is_object(ctx, stackIndex) && GetValueObjectType(ctx, stackIndex) == float4_ID)
+        if (duk_is_object(ctx, stackIndex) && strcmp(GetValueObjectType(ctx, stackIndex), float4_ID) == 0)
             static_cast<Attribute<float4>*>(destAttr)->Set(*GetValueObject<float4>(ctx, stackIndex, nullptr), change);
         break;
     
     case IAttribute::QuatId:
-        if (duk_is_object(ctx, stackIndex) && GetValueObjectType(ctx, stackIndex) == Quat_ID)
+        if (duk_is_object(ctx, stackIndex) && strcmp(GetValueObjectType(ctx, stackIndex), Quat_ID) == 0)
             static_cast<Attribute<Quat>*>(destAttr)->Set(*GetValueObject<Quat>(ctx, stackIndex, nullptr), change);
         break;
 
     case IAttribute::TransformId:
-        if (duk_is_object(ctx, stackIndex) && GetValueObjectType(ctx, stackIndex) == Transform_ID)
+        if (duk_is_object(ctx, stackIndex) && strcmp(GetValueObjectType(ctx, stackIndex), Transform_ID) == 0)
             static_cast<Attribute<Transform>*>(destAttr)->Set(*GetValueObject<Transform>(ctx, stackIndex, nullptr), change);
         break;
 
     case IAttribute::AssetReferenceId:
-        if (duk_is_object(ctx, stackIndex) && GetValueObjectType(ctx, stackIndex) == AssetReference_ID)
+        if (duk_is_object(ctx, stackIndex) && strcmp(GetValueObjectType(ctx, stackIndex), AssetReference_ID) == 0)
             static_cast<Attribute<AssetReference>*>(destAttr)->Set(*GetValueObject<AssetReference>(ctx, stackIndex, nullptr), change);
         break;
 
     case IAttribute::AssetReferenceListId:
-        if (duk_is_object(ctx, stackIndex) && GetValueObjectType(ctx, stackIndex) == AssetReferenceList_ID)
+        if (duk_is_object(ctx, stackIndex) && strcmp(GetValueObjectType(ctx, stackIndex), AssetReferenceList_ID) == 0)
             static_cast<Attribute<AssetReferenceList>*>(destAttr)->Set(*GetValueObject<AssetReferenceList>(ctx, stackIndex, nullptr), change);
         break;
     }

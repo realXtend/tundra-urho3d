@@ -20,7 +20,7 @@ namespace JSBindings
 
 
 
-const char* AttributeChange_ID = "AttributeChange";
+static const char* AttributeChange_ID = "AttributeChange";
 
 void Expose_AttributeChange(duk_context* ctx)
 {

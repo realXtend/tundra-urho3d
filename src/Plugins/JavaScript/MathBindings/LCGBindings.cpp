@@ -19,16 +19,11 @@ namespace JSBindings
 
 
 
-const char* LCG_ID = "LCG";
+static const char* LCG_ID = "LCG";
 
-duk_ret_t LCG_Finalizer(duk_context* ctx)
+static duk_ret_t LCG_Finalizer(duk_context* ctx)
 {
-    LCG* obj = GetValueObject<LCG>(ctx, 0, LCG_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, LCG_ID);
-    }
+    FinalizeValueObject<LCG>(ctx, LCG_ID);
     return 0;
 }
 

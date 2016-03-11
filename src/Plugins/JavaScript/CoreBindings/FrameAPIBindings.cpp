@@ -22,7 +22,7 @@ namespace JSBindings
 
 
 
-const char* FrameAPI_ID = "FrameAPI";
+static const char* FrameAPI_ID = "FrameAPI";
 
 const char* SignalWrapper_FrameAPI_Updated_ID = "SignalWrapper_FrameAPI_Updated";
 
@@ -58,14 +58,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_FrameAPI_Updated_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_FrameAPI_Updated_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_FrameAPI_Updated* obj = GetValueObject<SignalWrapper_FrameAPI_Updated>(ctx, 0, SignalWrapper_FrameAPI_Updated_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_FrameAPI_Updated_ID);
-    }
+    FinalizeValueObject<SignalWrapper_FrameAPI_Updated>(ctx, SignalWrapper_FrameAPI_Updated_ID);
     return 0;
 }
 
@@ -172,14 +167,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_FrameAPI_PostFrameUpdate_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_FrameAPI_PostFrameUpdate_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_FrameAPI_PostFrameUpdate* obj = GetValueObject<SignalWrapper_FrameAPI_PostFrameUpdate>(ctx, 0, SignalWrapper_FrameAPI_PostFrameUpdate_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_FrameAPI_PostFrameUpdate_ID);
-    }
+    FinalizeValueObject<SignalWrapper_FrameAPI_PostFrameUpdate>(ctx, SignalWrapper_FrameAPI_PostFrameUpdate_ID);
     return 0;
 }
 

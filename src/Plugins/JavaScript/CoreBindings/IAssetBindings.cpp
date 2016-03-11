@@ -21,11 +21,16 @@ using namespace std;
 namespace JSBindings
 {
 
-extern const char* AssetReference_ID;
+static const char* AssetReference_ID = "AssetReference";
 
-duk_ret_t AssetReference_Finalizer(duk_context* ctx);
+static duk_ret_t AssetReference_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<AssetReference>(ctx, AssetReference_ID);
+    return 0;
+}
 
-const char* IAsset_ID = "IAsset";
+
+static const char* IAsset_ID = "IAsset";
 
 const char* SignalWrapper_IAsset_Unloaded_ID = "SignalWrapper_IAsset_Unloaded";
 
@@ -61,14 +66,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_IAsset_Unloaded_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_IAsset_Unloaded_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_IAsset_Unloaded* obj = GetValueObject<SignalWrapper_IAsset_Unloaded>(ctx, 0, SignalWrapper_IAsset_Unloaded_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_IAsset_Unloaded_ID);
-    }
+    FinalizeValueObject<SignalWrapper_IAsset_Unloaded>(ctx, SignalWrapper_IAsset_Unloaded_ID);
     return 0;
 }
 
@@ -175,14 +175,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_IAsset_Loaded_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_IAsset_Loaded_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_IAsset_Loaded* obj = GetValueObject<SignalWrapper_IAsset_Loaded>(ctx, 0, SignalWrapper_IAsset_Loaded_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_IAsset_Loaded_ID);
-    }
+    FinalizeValueObject<SignalWrapper_IAsset_Loaded>(ctx, SignalWrapper_IAsset_Loaded_ID);
     return 0;
 }
 
@@ -289,14 +284,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_IAsset_PropertyStatusChanged_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_IAsset_PropertyStatusChanged_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_IAsset_PropertyStatusChanged* obj = GetValueObject<SignalWrapper_IAsset_PropertyStatusChanged>(ctx, 0, SignalWrapper_IAsset_PropertyStatusChanged_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_IAsset_PropertyStatusChanged_ID);
-    }
+    FinalizeValueObject<SignalWrapper_IAsset_PropertyStatusChanged>(ctx, SignalWrapper_IAsset_PropertyStatusChanged_ID);
     return 0;
 }
 

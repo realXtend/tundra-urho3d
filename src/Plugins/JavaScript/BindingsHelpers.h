@@ -1,57 +1,72 @@
+// For conditions of distribution and use, see copyright notice in LICENSE
+
 #pragma once
 
 #include "duktape.h"
 #include "CoreTypes.h"
+#include "JavaScriptApi.h"
 #include "Scene/IAttribute.h"
 #include <Urho3D/Core/Object.h>
 #include <Urho3D/Core/Variant.h>
 #include <Urho3D/Container/Vector.h>
+#include <cstring>
 #include <map>
 
 namespace JSBindings
 {
 
 /// Return type of a value object at stack index, or null if not valid
-const char* GetValueObjectType(duk_context* ctx, duk_idx_t stackIndex);
+JAVASCRIPT_API const char* GetValueObjectType(duk_context* ctx, duk_idx_t stackIndex);
 
 /// Non-template functions
 /// Set a C++ object to a JS object at stack index, using the "obj" (pointer) and "type" (string) internal properties.
-void SetValueObject(duk_context* ctx, duk_idx_t stackIndex, void* obj, const char* typeName);
+JAVASCRIPT_API void SetValueObject(duk_context* ctx, duk_idx_t stackIndex, void* obj, const char* typeName);
 
 /// Define a property to an object prototype at top of stack.
-void DefineProperty(duk_context* ctx, const char* propertyName, duk_c_function getFunc, duk_c_function setFunc);
+JAVASCRIPT_API void DefineProperty(duk_context* ctx, const char* propertyName, duk_c_function getFunc, duk_c_function setFunc);
 
 /// Get a WeakPtr<Object> from a JS object.
-Tundra::WeakPtr<Tundra::Object>* GetWeakPtr(duk_context* ctx, duk_idx_t stackIndex);
+JAVASCRIPT_API Tundra::WeakPtr<Tundra::Object>* GetWeakPtr(duk_context* ctx, duk_idx_t stackIndex);
 
 /// Common WeakPtr<Object> finalizer.
-duk_ret_t WeakPtr_Finalizer(duk_context* ctx);
+JAVASCRIPT_API duk_ret_t WeakPtr_Finalizer(duk_context* ctx);
 
 /// Push a weak-refcounted object that must derive from Object. Uses an internal "weak" property to store the object inside a heap-allocated weak ptr.
-void PushWeakObject(duk_context* ctx, Tundra::Object* object);
+JAVASCRIPT_API void PushWeakObject(duk_context* ctx, Tundra::Object* object);
 
 /// Setup proxying for the weak-refcounted object at stack top.
-void SetupProxy(duk_context* ctx, const duk_function_list_entry* funcs);
+JAVASCRIPT_API void SetupProxy(duk_context* ctx, const duk_function_list_entry* funcs);
 
 /// Get a string vector from a JS array.
-Tundra::Vector<Tundra::String> GetStringVector(duk_context* ctx, duk_idx_t stackIndex);
+JAVASCRIPT_API Tundra::Vector<Tundra::String> GetStringVector(duk_context* ctx, duk_idx_t stackIndex);
 
 /// Push a string vector to JS array.
-void PushStringVector(duk_context* ctx, const Tundra::Vector<Tundra::String>& vector);
+JAVASCRIPT_API void PushStringVector(duk_context* ctx, const Tundra::Vector<Tundra::String>& vector);
 
 /// Convert and push a variant.
-void PushVariant(duk_context* ctx, const Tundra::Variant& variant);
+JAVASCRIPT_API void PushVariant(duk_context* ctx, const Tundra::Variant& variant);
 
 /// Get a variant from JS stack.
-Tundra::Variant GetVariant(duk_context* ctx, duk_idx_t stackIndex);
+JAVASCRIPT_API Tundra::Variant GetVariant(duk_context* ctx, duk_idx_t stackIndex);
 
 /// Convert and push an attribute value.
-void PushAttributeValue(duk_context* ctx, Tundra::IAttribute* attr);
+JAVASCRIPT_API void PushAttributeValue(duk_context* ctx, Tundra::IAttribute* attr);
 
 /// Get an attribute value from JS stack and set it into the provided attribute.
-void AssignAttributeValue(duk_context* ctx, duk_idx_t stackIndex, Tundra::IAttribute* destAttr, Tundra::AttributeChange::Type change);
+JAVASCRIPT_API void AssignAttributeValue(duk_context* ctx, duk_idx_t stackIndex, Tundra::IAttribute* destAttr, Tundra::AttributeChange::Type change);
 
 /// Value object template functions
+
+/// Finalizer implementation
+template<class T> void FinalizeValueObject(duk_context* ctx, const char* typeName)
+{
+    T* obj = GetValueObject<T>(ctx, 0, typeName);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, typeName);
+    }
+}
 
 /// Get a value object of specified type from JS object at stack index. Uses the "obj" (pointer) and "type" (string) internal properties.
 template<class T> T* GetValueObject(duk_context* ctx, duk_idx_t stackIndex, const char* typeName)
@@ -75,7 +90,7 @@ template<class T> T* GetValueObject(duk_context* ctx, duk_idx_t stackIndex, cons
         objTypeName = (const char*)duk_to_pointer(ctx, -1);
     duk_pop(ctx);
 
-    return (objTypeName == typeName) ? obj : nullptr;
+    return (strcmp(objTypeName, typeName) == 0) ? obj : nullptr;
 }
 
 /// Get an object of type and raise a JS error if null or invalid.
@@ -354,7 +369,7 @@ template<class T, class U> void PushWeakObjectMap(duk_context* ctx, const Tundra
 }
 
 /// Base class for signal receivers.
-class SignalReceiver : public Tundra::RefCounted
+class JAVASCRIPT_API SignalReceiver : public Tundra::RefCounted
 {
 public:
     /// Duktape context pointer.

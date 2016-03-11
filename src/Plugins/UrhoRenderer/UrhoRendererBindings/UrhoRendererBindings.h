@@ -7,6 +7,6 @@
 namespace JSBindings
 {
 
-void ExposeCoreClasses(duk_context* ctx);
+void ExposeUrhoRendererClasses(duk_context* ctx);
 
 }

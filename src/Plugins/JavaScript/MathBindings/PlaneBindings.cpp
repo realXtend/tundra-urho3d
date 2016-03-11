@@ -33,50 +33,59 @@ using namespace std;
 namespace JSBindings
 {
 
-extern const char* float3_ID;
-extern const char* Ray_ID;
-extern const char* Line_ID;
-extern const char* LineSegment_ID;
-extern const char* float3x3_ID;
-extern const char* float3x4_ID;
-extern const char* float4x4_ID;
-extern const char* Quat_ID;
-extern const char* Triangle_ID;
-extern const char* float4_ID;
-extern const char* Sphere_ID;
-extern const char* Capsule_ID;
-extern const char* AABB_ID;
-extern const char* OBB_ID;
-extern const char* Frustum_ID;
-extern const char* Circle_ID;
+static const char* float3_ID = "float3";
+static const char* Ray_ID = "Ray";
+static const char* Line_ID = "Line";
+static const char* LineSegment_ID = "LineSegment";
+static const char* float3x3_ID = "float3x3";
+static const char* float3x4_ID = "float3x4";
+static const char* float4x4_ID = "float4x4";
+static const char* Quat_ID = "Quat";
+static const char* Triangle_ID = "Triangle";
+static const char* float4_ID = "float4";
+static const char* Sphere_ID = "Sphere";
+static const char* Capsule_ID = "Capsule";
+static const char* AABB_ID = "AABB";
+static const char* OBB_ID = "OBB";
+static const char* Frustum_ID = "Frustum";
+static const char* Circle_ID = "Circle";
 
-duk_ret_t float3_Finalizer(duk_context* ctx);
-duk_ret_t Ray_Finalizer(duk_context* ctx);
-duk_ret_t Line_Finalizer(duk_context* ctx);
-duk_ret_t LineSegment_Finalizer(duk_context* ctx);
-duk_ret_t float3x3_Finalizer(duk_context* ctx);
-duk_ret_t float3x4_Finalizer(duk_context* ctx);
-duk_ret_t float4x4_Finalizer(duk_context* ctx);
-duk_ret_t Quat_Finalizer(duk_context* ctx);
-duk_ret_t Triangle_Finalizer(duk_context* ctx);
-duk_ret_t float4_Finalizer(duk_context* ctx);
-duk_ret_t Sphere_Finalizer(duk_context* ctx);
-duk_ret_t Capsule_Finalizer(duk_context* ctx);
-duk_ret_t AABB_Finalizer(duk_context* ctx);
-duk_ret_t OBB_Finalizer(duk_context* ctx);
-duk_ret_t Frustum_Finalizer(duk_context* ctx);
-duk_ret_t Circle_Finalizer(duk_context* ctx);
-
-const char* Plane_ID = "Plane";
-
-duk_ret_t Plane_Finalizer(duk_context* ctx)
+static duk_ret_t float3_Finalizer(duk_context* ctx)
 {
-    Plane* obj = GetValueObject<Plane>(ctx, 0, Plane_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, Plane_ID);
-    }
+    FinalizeValueObject<float3>(ctx, float3_ID);
+    return 0;
+}
+
+static duk_ret_t float3x4_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float3x4>(ctx, float3x4_ID);
+    return 0;
+}
+
+static duk_ret_t LineSegment_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<LineSegment>(ctx, LineSegment_ID);
+    return 0;
+}
+
+static duk_ret_t Triangle_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<Triangle>(ctx, Triangle_ID);
+    return 0;
+}
+
+static duk_ret_t Circle_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<Circle>(ctx, Circle_ID);
+    return 0;
+}
+
+
+static const char* Plane_ID = "Plane";
+
+static duk_ret_t Plane_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<Plane>(ctx, Plane_ID);
     return 0;
 }
 

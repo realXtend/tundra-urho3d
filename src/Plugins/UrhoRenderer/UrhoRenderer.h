@@ -13,6 +13,8 @@
 namespace Tundra
 {
 
+class JavaScriptInstance;
+
 /// A renderer module using Urho3D
 class URHORENDERER_API UrhoRenderer : public IModule, public IRenderer
 {
@@ -68,6 +70,8 @@ private:
     void CreateGraphicsWorld(Scene *scene, AttributeChange::Type);
     /// Removes GraphicsWorld from a Scene.
     void RemoveGraphicsWorld(Scene *scene, AttributeChange::Type);
+    /// Handles script engine creation (register UrhoRenderer classes)
+    void OnScriptInstanceCreated(JavaScriptInstance* instance);
 
     /// Stores the camera that is active in the main window.
     EntityWeakPtr activeMainCamera;

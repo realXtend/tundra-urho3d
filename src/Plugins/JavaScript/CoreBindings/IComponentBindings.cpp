@@ -24,7 +24,7 @@ namespace JSBindings
 
 
 
-const char* IComponent_ID = "IComponent";
+static const char* IComponent_ID = "IComponent";
 
 const char* SignalWrapper_IComponent_ComponentNameChanged_ID = "SignalWrapper_IComponent_ComponentNameChanged";
 
@@ -62,14 +62,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_IComponent_ComponentNameChanged_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_IComponent_ComponentNameChanged_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_IComponent_ComponentNameChanged* obj = GetValueObject<SignalWrapper_IComponent_ComponentNameChanged>(ctx, 0, SignalWrapper_IComponent_ComponentNameChanged_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_IComponent_ComponentNameChanged_ID);
-    }
+    FinalizeValueObject<SignalWrapper_IComponent_ComponentNameChanged>(ctx, SignalWrapper_IComponent_ComponentNameChanged_ID);
     return 0;
 }
 
@@ -175,14 +170,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_IComponent_ParentEntitySet_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_IComponent_ParentEntitySet_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_IComponent_ParentEntitySet* obj = GetValueObject<SignalWrapper_IComponent_ParentEntitySet>(ctx, 0, SignalWrapper_IComponent_ParentEntitySet_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_IComponent_ParentEntitySet_ID);
-    }
+    FinalizeValueObject<SignalWrapper_IComponent_ParentEntitySet>(ctx, SignalWrapper_IComponent_ParentEntitySet_ID);
     return 0;
 }
 
@@ -286,14 +276,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_IComponent_ParentEntityAboutToBeDetached_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_IComponent_ParentEntityAboutToBeDetached_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_IComponent_ParentEntityAboutToBeDetached* obj = GetValueObject<SignalWrapper_IComponent_ParentEntityAboutToBeDetached>(ctx, 0, SignalWrapper_IComponent_ParentEntityAboutToBeDetached_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_IComponent_ParentEntityAboutToBeDetached_ID);
-    }
+    FinalizeValueObject<SignalWrapper_IComponent_ParentEntityAboutToBeDetached>(ctx, SignalWrapper_IComponent_ParentEntityAboutToBeDetached_ID);
     return 0;
 }
 

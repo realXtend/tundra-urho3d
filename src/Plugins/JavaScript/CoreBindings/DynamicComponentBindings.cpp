@@ -24,7 +24,7 @@ namespace JSBindings
 
 
 
-const char* DynamicComponent_ID = "DynamicComponent";
+static const char* DynamicComponent_ID = "DynamicComponent";
 
 const char* SignalWrapper_DynamicComponent_ComponentNameChanged_ID = "SignalWrapper_DynamicComponent_ComponentNameChanged";
 
@@ -62,14 +62,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_DynamicComponent_ComponentNameChanged_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_DynamicComponent_ComponentNameChanged_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_DynamicComponent_ComponentNameChanged* obj = GetValueObject<SignalWrapper_DynamicComponent_ComponentNameChanged>(ctx, 0, SignalWrapper_DynamicComponent_ComponentNameChanged_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_DynamicComponent_ComponentNameChanged_ID);
-    }
+    FinalizeValueObject<SignalWrapper_DynamicComponent_ComponentNameChanged>(ctx, SignalWrapper_DynamicComponent_ComponentNameChanged_ID);
     return 0;
 }
 
@@ -175,14 +170,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_DynamicComponent_ParentEntitySet_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_DynamicComponent_ParentEntitySet_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_DynamicComponent_ParentEntitySet* obj = GetValueObject<SignalWrapper_DynamicComponent_ParentEntitySet>(ctx, 0, SignalWrapper_DynamicComponent_ParentEntitySet_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_DynamicComponent_ParentEntitySet_ID);
-    }
+    FinalizeValueObject<SignalWrapper_DynamicComponent_ParentEntitySet>(ctx, SignalWrapper_DynamicComponent_ParentEntitySet_ID);
     return 0;
 }
 
@@ -286,14 +276,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_DynamicComponent_ParentEntityAboutToBeDetached_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_DynamicComponent_ParentEntityAboutToBeDetached_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_DynamicComponent_ParentEntityAboutToBeDetached* obj = GetValueObject<SignalWrapper_DynamicComponent_ParentEntityAboutToBeDetached>(ctx, 0, SignalWrapper_DynamicComponent_ParentEntityAboutToBeDetached_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_DynamicComponent_ParentEntityAboutToBeDetached_ID);
-    }
+    FinalizeValueObject<SignalWrapper_DynamicComponent_ParentEntityAboutToBeDetached>(ctx, SignalWrapper_DynamicComponent_ParentEntityAboutToBeDetached_ID);
     return 0;
 }
 

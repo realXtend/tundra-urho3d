@@ -21,7 +21,7 @@ namespace JSBindings
 
 
 
-const char* EntityAction_ID = "EntityAction";
+static const char* EntityAction_ID = "EntityAction";
 
 const char* SignalWrapper_EntityAction_Triggered_ID = "SignalWrapper_EntityAction_Triggered";
 
@@ -57,14 +57,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_EntityAction_Triggered_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_EntityAction_Triggered_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_EntityAction_Triggered* obj = GetValueObject<SignalWrapper_EntityAction_Triggered>(ctx, 0, SignalWrapper_EntityAction_Triggered_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_EntityAction_Triggered_ID);
-    }
+    FinalizeValueObject<SignalWrapper_EntityAction_Triggered>(ctx, SignalWrapper_EntityAction_Triggered_ID);
     return 0;
 }
 

@@ -23,30 +23,49 @@ using namespace std;
 namespace JSBindings
 {
 
-extern const char* float3x3_ID;
-extern const char* float3x4_ID;
-extern const char* float4x4_ID;
-extern const char* float3_ID;
-extern const char* float4_ID;
-extern const char* LCG_ID;
+static const char* float3x3_ID = "float3x3";
+static const char* float3x4_ID = "float3x4";
+static const char* float4x4_ID = "float4x4";
+static const char* float3_ID = "float3";
+static const char* float4_ID = "float4";
+static const char* LCG_ID = "LCG";
 
-duk_ret_t float3x3_Finalizer(duk_context* ctx);
-duk_ret_t float3x4_Finalizer(duk_context* ctx);
-duk_ret_t float4x4_Finalizer(duk_context* ctx);
-duk_ret_t float3_Finalizer(duk_context* ctx);
-duk_ret_t float4_Finalizer(duk_context* ctx);
-duk_ret_t LCG_Finalizer(duk_context* ctx);
-
-const char* Quat_ID = "Quat";
-
-duk_ret_t Quat_Finalizer(duk_context* ctx)
+static duk_ret_t float3_Finalizer(duk_context* ctx)
 {
-    Quat* obj = GetValueObject<Quat>(ctx, 0, Quat_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, Quat_ID);
-    }
+    FinalizeValueObject<float3>(ctx, float3_ID);
+    return 0;
+}
+
+static duk_ret_t float4_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float4>(ctx, float4_ID);
+    return 0;
+}
+
+static duk_ret_t float3x3_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float3x3>(ctx, float3x3_ID);
+    return 0;
+}
+
+static duk_ret_t float3x4_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float3x4>(ctx, float3x4_ID);
+    return 0;
+}
+
+static duk_ret_t float4x4_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float4x4>(ctx, float4x4_ID);
+    return 0;
+}
+
+
+static const char* Quat_ID = "Quat";
+
+static duk_ret_t Quat_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<Quat>(ctx, Quat_ID);
     return 0;
 }
 

@@ -21,11 +21,10 @@ using namespace std;
 namespace JSBindings
 {
 
-extern const char* AssetReference_ID;
+static const char* AssetReference_ID = "AssetReference";
 
-duk_ret_t AssetReference_Finalizer(duk_context* ctx);
 
-const char* AssetAPI_ID = "AssetAPI";
+static const char* AssetAPI_ID = "AssetAPI";
 
 const char* SignalWrapper_AssetAPI_AssetCreated_ID = "SignalWrapper_AssetAPI_AssetCreated";
 
@@ -61,14 +60,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_AssetAPI_AssetCreated_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_AssetAPI_AssetCreated_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_AssetAPI_AssetCreated* obj = GetValueObject<SignalWrapper_AssetAPI_AssetCreated>(ctx, 0, SignalWrapper_AssetAPI_AssetCreated_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_AssetAPI_AssetCreated_ID);
-    }
+    FinalizeValueObject<SignalWrapper_AssetAPI_AssetCreated>(ctx, SignalWrapper_AssetAPI_AssetCreated_ID);
     return 0;
 }
 
@@ -175,14 +169,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_AssetAPI_AssetAboutToBeRemoved_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_AssetAPI_AssetAboutToBeRemoved_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_AssetAPI_AssetAboutToBeRemoved* obj = GetValueObject<SignalWrapper_AssetAPI_AssetAboutToBeRemoved>(ctx, 0, SignalWrapper_AssetAPI_AssetAboutToBeRemoved_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_AssetAPI_AssetAboutToBeRemoved_ID);
-    }
+    FinalizeValueObject<SignalWrapper_AssetAPI_AssetAboutToBeRemoved>(ctx, SignalWrapper_AssetAPI_AssetAboutToBeRemoved_ID);
     return 0;
 }
 
@@ -289,14 +278,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved* obj = GetValueObject<SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved>(ctx, 0, SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved_ID);
-    }
+    FinalizeValueObject<SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved>(ctx, SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved_ID);
     return 0;
 }
 
@@ -403,14 +387,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_AssetAPI_AssetDiskSourceChanged_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_AssetAPI_AssetDiskSourceChanged_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_AssetAPI_AssetDiskSourceChanged* obj = GetValueObject<SignalWrapper_AssetAPI_AssetDiskSourceChanged>(ctx, 0, SignalWrapper_AssetAPI_AssetDiskSourceChanged_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_AssetAPI_AssetDiskSourceChanged_ID);
-    }
+    FinalizeValueObject<SignalWrapper_AssetAPI_AssetDiskSourceChanged>(ctx, SignalWrapper_AssetAPI_AssetDiskSourceChanged_ID);
     return 0;
 }
 
@@ -517,14 +496,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_AssetAPI_AssetUploaded_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_AssetAPI_AssetUploaded_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_AssetAPI_AssetUploaded* obj = GetValueObject<SignalWrapper_AssetAPI_AssetUploaded>(ctx, 0, SignalWrapper_AssetAPI_AssetUploaded_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_AssetAPI_AssetUploaded_ID);
-    }
+    FinalizeValueObject<SignalWrapper_AssetAPI_AssetUploaded>(ctx, SignalWrapper_AssetAPI_AssetUploaded_ID);
     return 0;
 }
 
@@ -631,14 +605,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_AssetAPI_AssetDeletedFromStorage_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_AssetAPI_AssetDeletedFromStorage_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_AssetAPI_AssetDeletedFromStorage* obj = GetValueObject<SignalWrapper_AssetAPI_AssetDeletedFromStorage>(ctx, 0, SignalWrapper_AssetAPI_AssetDeletedFromStorage_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_AssetAPI_AssetDeletedFromStorage_ID);
-    }
+    FinalizeValueObject<SignalWrapper_AssetAPI_AssetDeletedFromStorage>(ctx, SignalWrapper_AssetAPI_AssetDeletedFromStorage_ID);
     return 0;
 }
 

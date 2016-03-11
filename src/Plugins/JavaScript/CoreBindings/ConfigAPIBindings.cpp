@@ -22,7 +22,7 @@ namespace JSBindings
 
 
 
-const char* ConfigAPI_ID = "ConfigAPI";
+static const char* ConfigAPI_ID = "ConfigAPI";
 
 static duk_ret_t ConfigAPI_HasKey_String_String_String(duk_context* ctx)
 {

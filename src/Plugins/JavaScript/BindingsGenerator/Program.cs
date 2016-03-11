@@ -36,6 +36,9 @@ namespace BindingsGenerator
     {
         static HashSet<string> classNames = new HashSet<string>();
         static List<string> exposeTheseClasses = new List<string>();
+        static List<string> dependencyOnlyClasses = new List<string>();
+        static HashSet<string> dependencies = new HashSet<string>();
+        static HashSet<string> finalizerDependencies = new HashSet<string>();
         static string fileBasePath = "";
         static Dictionary<string, string> classHeaderFiles = new Dictionary<string, string>();
         static Dictionary<string, bool> isRefCounted = new Dictionary<string, bool>();
@@ -48,7 +51,7 @@ namespace BindingsGenerator
                 Console.WriteLine("First cmdline parameter should be the absolute path to the root where doxygen generated the documentation XML files.");
                 Console.WriteLine("Second cmdline parameter should be the output directory.");
                 Console.WriteLine("Third cmdline parameter (optional) should be the root path of the exposed code. If omitted, include paths may not be accurate.");
-                Console.WriteLine("Further cmdline parameters can optionally list the classes to be exposed. Otherwise all will be exposed. When amount of classes is limited, functions using excluded classes will not be exposed.");
+                Console.WriteLine("Further cmdline parameters can optionally list the classes to be exposed. Otherwise all will be exposed. Prepend _ to class name to only mark it as a dependency or base, but avoid writing bindings for it");
                 return;
             }
 
@@ -74,8 +77,14 @@ namespace BindingsGenerator
             {
                 for (int i = 3; i < args.Length; ++i)
                 {
-                    classNames.Add(args[i]);
-                    exposeTheseClasses.Add(args[i]);
+                    string className = args[i];
+                    if (className.StartsWith("_"))
+                    {
+                        className = className.Substring(1);
+                        dependencyOnlyClasses.Add(className);
+                    }
+                    classNames.Add(className);
+                    exposeTheseClasses.Add(className);
                 }
             }
 
@@ -111,7 +120,8 @@ namespace BindingsGenerator
             {
                 if (classSymbol.kind == "class" || classSymbol.kind == "struct" || classSymbol.kind == "namespace")
                 {
-                    if (classNames.Contains(SanitateTypeName(classSymbol.name)))
+                    string typeName = SanitateTypeName(classSymbol.name);
+                    if (classNames.Contains(typeName) && !dependencyOnlyClasses.Contains(typeName))
                         GenerateClassBindings(classSymbol, outputDirectory);
                 }
             }
@@ -145,12 +155,17 @@ namespace BindingsGenerator
             tw.WriteLine("");
 
             // Find dependency classes and add their includes
-            HashSet<string> dependencies = FindDependencies(classSymbol);
+            dependencies.Clear();
+            finalizerDependencies.Clear();
+            FindDependencies(classSymbol);
             foreach (string s in dependencies)
             {
                 string include = FindIncludeForClass(s);
                 if (include.Length > 0)
                     tw.WriteLine("#include \"" + include + "\"");
+                /// \todo Add more as needed
+                if (s == "Entity" && include.Length == 0)
+                    tw.WriteLine("#include \"Entity.h\"");
             }
             tw.WriteLine("");
 
@@ -168,23 +183,23 @@ namespace BindingsGenerator
             tw.WriteLine("namespace JSBindings");
             tw.WriteLine("{");
             tw.WriteLine("");
-            // Externs for the type identifiers and definitions for dependency classes' destructors
+            // Dependencies' type IDs and finalizers (duplicate to avoid externs, possibly across DLL boundaries)
             foreach (string s in dependencies)
             {
                 if (!IsRefCounted(s))
-                    tw.WriteLine("extern const char* " + ClassIdentifier(s) + ";");
+                    tw.WriteLine("static const char* " + ClassIdentifier(s) + " = \"" + s + "\";");
             }
             tw.WriteLine("");
-            foreach (string s in dependencies)
+            foreach (string s in finalizerDependencies)
             {
                 if (!IsRefCounted(s))
-                    tw.WriteLine("duk_ret_t " + s + "_Finalizer" + DukSignature() + ";");
+                    GenerateFinalizer(s, tw);
             }
             tw.WriteLine("");
 
             // Own type identifier
             // Included also for refcounted classes, since it's needed when registering the prototype
-            tw.WriteLine("const char* " + ClassIdentifier(className) + " = \"" + className + "\";");
+            tw.WriteLine("static const char* " + ClassIdentifier(className) + " = \"" + className + "\";");
             tw.WriteLine("");
 
             Dictionary<string, List<Overload> > overloads = new Dictionary<string, List<Overload> >();
@@ -424,14 +439,9 @@ namespace BindingsGenerator
 
         static void GenerateFinalizer(string typeName, TextWriter tw)
         {
-            tw.WriteLine("duk_ret_t " + typeName + "_Finalizer" + DukSignature());
+            tw.WriteLine("static duk_ret_t " + typeName + "_Finalizer" + DukSignature());
             tw.WriteLine("{");
-            tw.WriteLine(Indent(1) + typeName + "* obj = GetValueObject<" + typeName + ">(ctx, 0, " + ClassIdentifier(typeName) + ");");
-            tw.WriteLine(Indent(1) + "if (obj)");
-            tw.WriteLine(Indent(1) + "{");
-            tw.WriteLine(Indent(2) + "delete obj;");
-            tw.WriteLine(Indent(2) + "SetValueObject(ctx, 0, 0, " + ClassIdentifier(typeName) + ");");
-            tw.WriteLine(Indent(1) + "}");
+            tw.WriteLine(Indent(1) + "FinalizeValueObject<" + typeName + ">(ctx, " + ClassIdentifier(typeName) + ");");
             tw.WriteLine(Indent(1) + "return 0;");
             tw.WriteLine("}");
             tw.WriteLine("");
@@ -639,17 +649,37 @@ namespace BindingsGenerator
 
                     // Get accessor
                     {
-                        tw.WriteLine("static duk_ret_t " + className + "_Get_" + child.name + DukSignature());
-                        tw.WriteLine("{");
-                        tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
+                        string typeName = SanitateTypeName(child.type);
                         if (Symbol.IsPODType(child.type) || IsRefCounted(child.type) || child.type == "String" || child.type == "string" || child.type.Contains("Vector"))
+                        {
+                            if (child.type.Contains("Vector"))
+                            {
+                                typeName = typeName.Substring(0, typeName.Length - 6);
+                                typeName = SanitateTemplateType(typeName);
+                                if (!IsRefCounted(child.type))
+                                {
+                                    // Add finalizer for the value-type property if not already included
+                                    if (!finalizerDependencies.Contains(typeName))
+                                    {
+                                        GenerateFinalizer(typeName, tw);
+                                        finalizerDependencies.Add(typeName);
+                                    }
+                                }
+                            }
+
+                            tw.WriteLine("static duk_ret_t " + className + "_Get_" + child.name + DukSignature());
+                            tw.WriteLine("{");
+                            tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
                             tw.WriteLine(Indent(1) + GeneratePushToStack(child, "thisObj->" + child.name));
+                        }
                         else
                         {
-                            string typeName = SanitateTypeName(child.type);
                             // Non-POD value variable within a larger object: do not create value copy, but point to the data within the object itself,
                             // so that partial access and modification such as transform.pos.x is possible
                             // Note: this is unsafe, should find a better way
+                            tw.WriteLine("static duk_ret_t " + className + "_Get_" + child.name + DukSignature());
+                            tw.WriteLine("{");
+                            tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
                             tw.WriteLine(Indent(1) + "PushValueObject<" + typeName + ">(ctx, &thisObj->" + child.name + ", " + ClassIdentifier(typeName) + ", nullptr, true);");
                         }
                         tw.WriteLine(Indent(1) + "return 1;");
@@ -983,9 +1013,9 @@ namespace BindingsGenerator
 
                 if (child.kind == "function" && !child.name.Contains("operator"))
                 {
-                    AddDependencyIfValid(classSymbol, dependencies, child.type); // Return type
+                    AddDependencyIfValid(classSymbol, child.type, true); // Return type
                     foreach (Parameter p in child.parameters)
-                        AddDependencyIfValid(classSymbol, dependencies, p.BasicType());
+                        AddDependencyIfValid(classSymbol, p.BasicType(), false);
                 }
             }
 
@@ -1012,6 +1042,8 @@ namespace BindingsGenerator
         {
             if (isRefCounted.ContainsKey(className))
                 return isRefCounted[className];
+            else if (className == "Entity" || className == "IComponent" || className == "IAsset")
+                return true;
             else
                 return false;
         }
@@ -1117,7 +1149,7 @@ namespace BindingsGenerator
             return type;
         }
 
-        static void AddDependencyIfValid(Symbol classSymbol, HashSet<string> dependencyNames, string typeName)
+        static void AddDependencyIfValid(Symbol classSymbol, string typeName, bool isReturnValue)
         {
             string t = SanitateTypeName(typeName);
             if (SanitateTypeName(classSymbol.name) == t)
@@ -1129,7 +1161,12 @@ namespace BindingsGenerator
             }
 
             if (!Symbol.IsPODType(t) && classNames.Contains(t))
-                dependencyNames.Add(t);
+            {
+                dependencies.Add(t);
+                // Value objects that are returned need the finalizer function
+                if (!IsRefCounted(t) && isReturnValue)
+                    finalizerDependencies.Add(t);
+            }
         }
 
         static bool IsSupportedType(string typeName)

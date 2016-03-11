@@ -22,6 +22,9 @@
 #include "Entity.h"
 #include "Scene/Scene.h"
 #include "LoggingFunctions.h"
+#include "JavaScript.h"
+#include "JavaScriptInstance.h"
+#include "UrhoRendererBindings/UrhoRendererBindings.h"
 
 #include "TextureAsset.h"
 #include "UrhoMeshAsset.h"
@@ -34,11 +37,14 @@
 
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Core/ProcessUtils.h>
+#include <Urho3D/Core/Profiler.h>
 #include <Urho3D/Graphics/Camera.h>
 #include <Urho3D/Graphics/Graphics.h>
 #include <Urho3D/Graphics/GraphicsEvents.h>
 #include <Urho3D/Graphics/Renderer.h>
 #include <Urho3D/Graphics/Viewport.h>
+
+using namespace JSBindings;
 
 namespace Tundra
 {
@@ -116,6 +122,11 @@ void UrhoRenderer::Initialize()
             rend->SetSpecularLighting(false);
         }
     }
+
+    // Connect to JavaScript module instance creation to be able to expose the renderer classes to each instance
+    JavaScript* javaScript = framework->Module<JavaScript>();
+    if (javaScript)
+        javaScript->ScriptInstanceCreated.Connect(this, &UrhoRenderer::OnScriptInstanceCreated);
 }
 
 void UrhoRenderer::Uninitialize()
@@ -281,6 +292,14 @@ void UrhoRenderer::CreateGraphicsWorld(Scene *scene, AttributeChange::Type)
 void UrhoRenderer::RemoveGraphicsWorld(Scene *scene, AttributeChange::Type)
 {
     scene->RemoveSubsystem(scene->Subsystem<GraphicsWorld>());
+}
+
+void UrhoRenderer::OnScriptInstanceCreated(JavaScriptInstance* instance)
+{
+    URHO3D_PROFILE(ExposeUrhoRendererClasses);
+
+    duk_context* ctx = instance->Context();
+    ExposeUrhoRendererClasses(ctx);
 }
 
 }

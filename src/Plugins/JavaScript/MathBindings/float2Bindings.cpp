@@ -20,24 +20,28 @@ using namespace std;
 namespace JSBindings
 {
 
-extern const char* float4_ID;
-extern const char* float3_ID;
-extern const char* LCG_ID;
+static const char* float4_ID = "float4";
+static const char* float3_ID = "float3";
+static const char* LCG_ID = "LCG";
 
-duk_ret_t float4_Finalizer(duk_context* ctx);
-duk_ret_t float3_Finalizer(duk_context* ctx);
-duk_ret_t LCG_Finalizer(duk_context* ctx);
-
-const char* float2_ID = "float2";
-
-duk_ret_t float2_Finalizer(duk_context* ctx)
+static duk_ret_t float4_Finalizer(duk_context* ctx)
 {
-    float2* obj = GetValueObject<float2>(ctx, 0, float2_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, float2_ID);
-    }
+    FinalizeValueObject<float4>(ctx, float4_ID);
+    return 0;
+}
+
+static duk_ret_t float3_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float3>(ctx, float3_ID);
+    return 0;
+}
+
+
+static const char* float2_ID = "float2";
+
+static duk_ret_t float2_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float2>(ctx, float2_ID);
     return 0;
 }
 

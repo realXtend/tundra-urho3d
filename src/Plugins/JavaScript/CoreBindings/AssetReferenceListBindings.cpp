@@ -20,20 +20,14 @@ using namespace std;
 namespace JSBindings
 {
 
-extern const char* AssetReference_ID;
+static const char* AssetReference_ID = "AssetReference";
 
-duk_ret_t AssetReference_Finalizer(duk_context* ctx);
 
-const char* AssetReferenceList_ID = "AssetReferenceList";
+static const char* AssetReferenceList_ID = "AssetReferenceList";
 
-duk_ret_t AssetReferenceList_Finalizer(duk_context* ctx)
+static duk_ret_t AssetReferenceList_Finalizer(duk_context* ctx)
 {
-    AssetReferenceList* obj = GetValueObject<AssetReferenceList>(ctx, 0, AssetReferenceList_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, AssetReferenceList_ID);
-    }
+    FinalizeValueObject<AssetReferenceList>(ctx, AssetReferenceList_ID);
     return 0;
 }
 
@@ -42,6 +36,12 @@ static duk_ret_t AssetReferenceList_Set_refs(duk_context* ctx)
     AssetReferenceList* thisObj = GetThisValueObject<AssetReferenceList>(ctx, AssetReferenceList_ID);
     AssetReferenceVector refs = GetValueObjectVector<AssetReference>(ctx, 0, AssetReference_ID);
     thisObj->refs = refs;
+    return 0;
+}
+
+static duk_ret_t AssetReference_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<AssetReference>(ctx, AssetReference_ID);
     return 0;
 }
 

@@ -25,7 +25,7 @@ namespace JSBindings
 
 
 
-const char* Framework_ID = "Framework";
+static const char* Framework_ID = "Framework";
 
 const char* SignalWrapper_Framework_ExitRequested_ID = "SignalWrapper_Framework_ExitRequested";
 
@@ -59,14 +59,9 @@ public:
     }
 };
 
-duk_ret_t SignalWrapper_Framework_ExitRequested_Finalizer(duk_context* ctx)
+static duk_ret_t SignalWrapper_Framework_ExitRequested_Finalizer(duk_context* ctx)
 {
-    SignalWrapper_Framework_ExitRequested* obj = GetValueObject<SignalWrapper_Framework_ExitRequested>(ctx, 0, SignalWrapper_Framework_ExitRequested_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, SignalWrapper_Framework_ExitRequested_ID);
-    }
+    FinalizeValueObject<SignalWrapper_Framework_ExitRequested>(ctx, SignalWrapper_Framework_ExitRequested_ID);
     return 0;
 }
 

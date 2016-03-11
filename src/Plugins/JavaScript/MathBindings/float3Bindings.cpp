@@ -30,44 +30,44 @@ using namespace std;
 namespace JSBindings
 {
 
-extern const char* float2_ID;
-extern const char* float4_ID;
-extern const char* Line_ID;
-extern const char* Ray_ID;
-extern const char* LineSegment_ID;
-extern const char* Plane_ID;
-extern const char* Triangle_ID;
-extern const char* AABB_ID;
-extern const char* OBB_ID;
-extern const char* Sphere_ID;
-extern const char* Capsule_ID;
-extern const char* float3x3_ID;
-extern const char* LCG_ID;
+static const char* float2_ID = "float2";
+static const char* float4_ID = "float4";
+static const char* Line_ID = "Line";
+static const char* Ray_ID = "Ray";
+static const char* LineSegment_ID = "LineSegment";
+static const char* Plane_ID = "Plane";
+static const char* Triangle_ID = "Triangle";
+static const char* AABB_ID = "AABB";
+static const char* OBB_ID = "OBB";
+static const char* Sphere_ID = "Sphere";
+static const char* Capsule_ID = "Capsule";
+static const char* float3x3_ID = "float3x3";
+static const char* LCG_ID = "LCG";
 
-duk_ret_t float2_Finalizer(duk_context* ctx);
-duk_ret_t float4_Finalizer(duk_context* ctx);
-duk_ret_t Line_Finalizer(duk_context* ctx);
-duk_ret_t Ray_Finalizer(duk_context* ctx);
-duk_ret_t LineSegment_Finalizer(duk_context* ctx);
-duk_ret_t Plane_Finalizer(duk_context* ctx);
-duk_ret_t Triangle_Finalizer(duk_context* ctx);
-duk_ret_t AABB_Finalizer(duk_context* ctx);
-duk_ret_t OBB_Finalizer(duk_context* ctx);
-duk_ret_t Sphere_Finalizer(duk_context* ctx);
-duk_ret_t Capsule_Finalizer(duk_context* ctx);
-duk_ret_t float3x3_Finalizer(duk_context* ctx);
-duk_ret_t LCG_Finalizer(duk_context* ctx);
-
-const char* float3_ID = "float3";
-
-duk_ret_t float3_Finalizer(duk_context* ctx)
+static duk_ret_t float2_Finalizer(duk_context* ctx)
 {
-    float3* obj = GetValueObject<float3>(ctx, 0, float3_ID);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, float3_ID);
-    }
+    FinalizeValueObject<float2>(ctx, float2_ID);
+    return 0;
+}
+
+static duk_ret_t float4_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float4>(ctx, float4_ID);
+    return 0;
+}
+
+static duk_ret_t float3x3_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float3x3>(ctx, float3x3_ID);
+    return 0;
+}
+
+
+static const char* float3_ID = "float3";
+
+static duk_ret_t float3_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float3>(ctx, float3_ID);
     return 0;
 }
 
