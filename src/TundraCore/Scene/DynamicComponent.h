@@ -71,7 +71,7 @@ public:
         @note Name of the attribute will be assigned to same as the ID. */
     IAttribute *CreateAttribute(const String &typeName, const String &id, AttributeChange::Type change = AttributeChange::Default);
 
-    /// Checks if a given component @c comp is holding exactly same attributes as this component.
+    /// Checks if a given component @c comp is holding exactly same attributes as this component. [noscript]
     /** @param comp Component to be compared with.
         @return Return true if component is holding same attributes as this component else return false. */
     bool ContainSameAttributes(const DynamicComponent &comp) const;
