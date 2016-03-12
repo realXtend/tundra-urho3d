@@ -57,17 +57,6 @@ JAVASCRIPT_API void AssignAttributeValue(duk_context* ctx, duk_idx_t stackIndex,
 
 /// Value object template functions
 
-/// Finalizer implementation
-template<class T> void FinalizeValueObject(duk_context* ctx, const char* typeName)
-{
-    T* obj = GetValueObject<T>(ctx, 0, typeName);
-    if (obj)
-    {
-        delete obj;
-        SetValueObject(ctx, 0, 0, typeName);
-    }
-}
-
 /// Get a value object of specified type from JS object at stack index. Uses the "obj" (pointer) and "type" (string) internal properties.
 template<class T> T* GetValueObject(duk_context* ctx, duk_idx_t stackIndex, const char* typeName)
 {
@@ -159,6 +148,17 @@ template<class T> void PushConstructorResult(duk_context* ctx, T* source, const 
     {
         duk_push_c_function(ctx, finalizer, 1);
         duk_set_finalizer(ctx, -2);
+    }
+}
+
+/// Finalizer implementation
+template<class T> void FinalizeValueObject(duk_context* ctx, const char* typeName)
+{
+    T* obj = GetValueObject<T>(ctx, 0, typeName);
+    if (obj)
+    {
+        delete obj;
+        SetValueObject(ctx, 0, 0, typeName);
     }
 }
 
