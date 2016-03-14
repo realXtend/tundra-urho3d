@@ -109,17 +109,17 @@ public:
     /// Deletes potential dynamic attributes.
     virtual ~IComponent();
 
-    /// Returns the type name of this component.
+    /// Returns the type name of this component. [property]
     /** The type name is the "class" type of the component,
         e.g. "Mesh" or "DynamicComponent". The type name of a component cannot be an empty string.
         The type name of a component never changes at runtime.
         @note Prefer TypeId over TypeName when inspecting the component type (performance). */
     virtual const String &TypeName() const = 0;
 
-    /// Returns the unique type ID of this component.
+    /// Returns the unique type ID of this component. [property]
     virtual u32 TypeId() const = 0;
 
-    /// Returns the name of this component.
+    /// Returns the name of this component. [property]
     /** The name of a component is a custom user-specified name for
         this component instance, and identifies separate instances of the same component in an object. 
         The (TypeName, Name) pairs of all components in an Entity must be unique. The Name string can be empty. */
@@ -228,24 +228,24 @@ public:
         (property / variable names) should be fixed. */
     IAttribute* AttributeByName(const String &name) const;
     
-    /// Returns true if network synchronization of the attributes of this component is enabled.
-    /// A component is always either local or replicated, but not both.
+    /// Returns true if network synchronization of the attributes of this component is enabled. [property]
+    /** A component is always either local or replicated, but not both. */
     bool IsReplicated() const { return replicated; }
 
-    /// Returns true if network synchronization of the attributes of this component is NOT enabled.
-    /// A component is always either local or replicated, but not both.
+    /// Returns true if network synchronization of the attributes of this component is NOT enabled. [property]
+    /** A component is always either local or replicated, but not both. */
     bool IsLocal() const { return !replicated; }
 
-    /// Returns true if this component is pending a replicated ID assignment from the server.
+    /// Returns true if this component is pending a replicated ID assignment from the server. [property]
     bool IsUnacked() const;
 
     /// Sets the default mode for attribute change operations
     void SetUpdateMode(AttributeChange::Type defaultmode);
 
-    /// Gets the default mode for attribute change operations
+    /// Gets the default mode for attribute change operations [property]
     AttributeChange::Type UpdateMode() const { return updateMode; }
 
-    /// Returns component id, which is unique within the parent entity
+    /// Returns component id, which is unique within the parent entity [property]
     component_id_t Id() const { return id; }
 
     /// Returns whether this component supports adding dynamic attributes. False by default.
@@ -302,11 +302,11 @@ public:
     /// Sets whether component is temporary. Temporary components won't be saved when the scene is saved.
     void SetTemporary(bool enable);
 
-    /// Returns whether component is temporary. Temporary components won't be saved when the scene is saved.
+    /// Returns whether component is temporary. Temporary components won't be saved when the scene is saved. [property]
     /** @note if parent entity is temporary, this returns always true regardless of the component's temporary flag. */
     bool IsTemporary() const;
 
-    /// Returns whether the component is in a view-enabled scene, or not.
+    /// Returns whether the component is in a view-enabled scene, or not. [property]
     /** If the information is not available (component is not yet in a scene, will guess "true. */
     bool ViewEnabled() const;
 

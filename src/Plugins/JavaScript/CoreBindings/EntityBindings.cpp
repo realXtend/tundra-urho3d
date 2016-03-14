@@ -1637,6 +1637,17 @@ void Expose_Entity(duk_context* ctx)
     DefineProperty(ctx, "enterView", Entity_Get_EnterView, nullptr);
     DefineProperty(ctx, "leaveView", Entity_Get_LeaveView, nullptr);
     DefineProperty(ctx, "parentChanged", Entity_Get_ParentChanged, nullptr);
+    DefineProperty(ctx, "group", Entity_Group, Entity_SetGroup_String);
+    DefineProperty(ctx, "components", Entity_Components, nullptr);
+    DefineProperty(ctx, "numComponents", Entity_NumComponents, nullptr);
+    DefineProperty(ctx, "name", Entity_Name, Entity_SetName_String);
+    DefineProperty(ctx, "description", Entity_Description, Entity_SetDescription_String);
+    DefineProperty(ctx, "temporary", Entity_IsTemporary, nullptr);
+    DefineProperty(ctx, "local", Entity_IsLocal, nullptr);
+    DefineProperty(ctx, "replicated", Entity_IsReplicated, nullptr);
+    DefineProperty(ctx, "unacked", Entity_IsUnacked, nullptr);
+    DefineProperty(ctx, "id", Entity_Id, nullptr);
+    DefineProperty(ctx, "parent", Entity_Parent, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Entity_ID);
 }

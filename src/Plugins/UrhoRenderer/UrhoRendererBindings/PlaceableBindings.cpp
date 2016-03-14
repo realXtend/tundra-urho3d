@@ -1303,6 +1303,16 @@ void Expose_Placeable(duk_context* ctx)
     DefineProperty(ctx, "componentNameChanged", Placeable_Get_ComponentNameChanged, nullptr);
     DefineProperty(ctx, "parentEntitySet", Placeable_Get_ParentEntitySet, nullptr);
     DefineProperty(ctx, "parentEntityAboutToBeDetached", Placeable_Get_ParentEntityAboutToBeDetached, nullptr);
+    DefineProperty(ctx, "typeName", Placeable_TypeName, nullptr);
+    DefineProperty(ctx, "typeId", Placeable_TypeId, nullptr);
+    DefineProperty(ctx, "name", Placeable_Name, Placeable_SetName_String);
+    DefineProperty(ctx, "replicated", Placeable_IsReplicated, Placeable_SetReplicated_bool);
+    DefineProperty(ctx, "local", Placeable_IsLocal, nullptr);
+    DefineProperty(ctx, "unacked", Placeable_IsUnacked, nullptr);
+    DefineProperty(ctx, "updateMode", Placeable_UpdateMode, Placeable_SetUpdateMode_AttributeChange__Type);
+    DefineProperty(ctx, "id", Placeable_Id, nullptr);
+    DefineProperty(ctx, "temporary", Placeable_IsTemporary, Placeable_SetTemporary_bool);
+    DefineProperty(ctx, "viewEnabled", Placeable_ViewEnabled, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Placeable_ID);
 }

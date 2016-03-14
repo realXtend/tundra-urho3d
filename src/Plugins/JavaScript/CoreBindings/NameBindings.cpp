@@ -604,6 +604,15 @@ void Expose_Name(duk_context* ctx)
     DefineProperty(ctx, "componentNameChanged", Name_Get_ComponentNameChanged, nullptr);
     DefineProperty(ctx, "parentEntitySet", Name_Get_ParentEntitySet, nullptr);
     DefineProperty(ctx, "parentEntityAboutToBeDetached", Name_Get_ParentEntityAboutToBeDetached, nullptr);
+    DefineProperty(ctx, "typeName", Name_TypeName, nullptr);
+    DefineProperty(ctx, "typeId", Name_TypeId, nullptr);
+    DefineProperty(ctx, "replicated", Name_IsReplicated, Name_SetReplicated_bool);
+    DefineProperty(ctx, "local", Name_IsLocal, nullptr);
+    DefineProperty(ctx, "unacked", Name_IsUnacked, nullptr);
+    DefineProperty(ctx, "updateMode", Name_UpdateMode, Name_SetUpdateMode_AttributeChange__Type);
+    DefineProperty(ctx, "id", Name_Id, nullptr);
+    DefineProperty(ctx, "temporary", Name_IsTemporary, Name_SetTemporary_bool);
+    DefineProperty(ctx, "viewEnabled", Name_ViewEnabled, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Name_ID);
 }

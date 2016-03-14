@@ -13,6 +13,7 @@
 #include "Asset/AssetReference.h"
 
 #include <Urho3D/Core/StringUtils.h>
+#include <cstring>
 
 using namespace Tundra;
 
@@ -127,9 +128,9 @@ static duk_ret_t Entity_GetProperty(duk_context* ctx)
      * [2]: receiver (proxy)
      */
     const char* compTypeName = duk_to_string(ctx, 1);
-    // Component properties must be lowercase, to distinguish e.g. between name component, and entity's Name() function
-    // (also speeds up entity function calls)
-    if (compTypeName && compTypeName[0] >= 'a' && compTypeName[0] <= 'z')
+    // Component properties must be lowercase to optimize speed, as this is called for every property access.
+    // Exception: do not look up Name component, as Entity also has its own "name" property
+    if (compTypeName && compTypeName[0] >= 'a' && compTypeName[0] <= 'z' && strcmp(compTypeName, "name"))
     {
         Entity* entity = GetWeakObject<Entity>(ctx, 0);
         if (entity)

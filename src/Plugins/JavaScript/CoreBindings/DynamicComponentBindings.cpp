@@ -644,6 +644,16 @@ void Expose_DynamicComponent(duk_context* ctx)
     DefineProperty(ctx, "componentNameChanged", DynamicComponent_Get_ComponentNameChanged, nullptr);
     DefineProperty(ctx, "parentEntitySet", DynamicComponent_Get_ParentEntitySet, nullptr);
     DefineProperty(ctx, "parentEntityAboutToBeDetached", DynamicComponent_Get_ParentEntityAboutToBeDetached, nullptr);
+    DefineProperty(ctx, "typeName", DynamicComponent_TypeName, nullptr);
+    DefineProperty(ctx, "typeId", DynamicComponent_TypeId, nullptr);
+    DefineProperty(ctx, "name", DynamicComponent_Name, DynamicComponent_SetName_String);
+    DefineProperty(ctx, "replicated", DynamicComponent_IsReplicated, DynamicComponent_SetReplicated_bool);
+    DefineProperty(ctx, "local", DynamicComponent_IsLocal, nullptr);
+    DefineProperty(ctx, "unacked", DynamicComponent_IsUnacked, nullptr);
+    DefineProperty(ctx, "updateMode", DynamicComponent_UpdateMode, DynamicComponent_SetUpdateMode_AttributeChange__Type);
+    DefineProperty(ctx, "id", DynamicComponent_Id, nullptr);
+    DefineProperty(ctx, "temporary", DynamicComponent_IsTemporary, DynamicComponent_SetTemporary_bool);
+    DefineProperty(ctx, "viewEnabled", DynamicComponent_ViewEnabled, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, DynamicComponent_ID);
 }

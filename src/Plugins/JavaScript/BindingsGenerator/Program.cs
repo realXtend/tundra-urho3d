@@ -15,6 +15,7 @@ namespace BindingsGenerator
         public List<Parameter> parameters;
         public bool hasDefaultParameters;
         public int numSignificantParameters;
+        public bool property;
     }
 
     class OverloadComparer : IComparer<Overload>
@@ -787,6 +788,10 @@ namespace BindingsGenerator
                     newOverload.hasDefaultParameters = false;
                     newOverload.numSignificantParameters = child.parameters.Count;
 
+                    foreach (string str in child.Comments())
+                        if (str.Contains("[property]"))
+                            newOverload.property = true;
+
                     for (int i = 0; i < child.parameters.Count; ++i)
                     {
                         if (child.parameters[i].defaultValue != null && child.parameters[i].defaultValue.Length > 0)
@@ -995,6 +1000,61 @@ namespace BindingsGenerator
                     else
                         tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + SanitatePropertyName(p.name) + "\", " + className + "_Get_" + p.name + ", nullptr);");
                 }
+
+                // Check functions which have been annotated as property accessors
+                foreach (KeyValuePair<string, List<Overload> > lo in overloads)
+                {
+                    foreach (Overload o in lo.Value)
+                    {
+                        if (o.property)
+                        {
+                            string propertyName = lo.Key.Substring(className.Length + 1);
+                            if (propertyName.StartsWith("Is"))
+                                propertyName = propertyName.Substring(2);
+                            if (propertyName.StartsWith("Get"))
+                                propertyName = propertyName.Substring(3);
+                            string originalPropertyName = propertyName;
+                            propertyName = SanitatePropertyName(propertyName);
+                            string getterFunctionName = o.functionName;
+                            // Search for the corresponding setter function
+                            string setterFunctionName = "";
+                            string setterName = className + "_" + "Set" + originalPropertyName;
+                            if (overloads.ContainsKey(setterName))
+                            {
+                                foreach (Overload so in overloads[setterName])
+                                {
+                                    if (so.parameters.Count == 1)
+                                    {
+                                        setterFunctionName = so.functionName;
+                                        break;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                setterName = className + "_" + "SetIs" + originalPropertyName;
+                                if (overloads.ContainsKey(setterName))
+                                {
+                                    foreach (Overload so in overloads[setterName])
+                                    {
+                                        if (so.parameters.Count == 1)
+                                        {
+                                            setterFunctionName = so.functionName;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (setterFunctionName.Length > 0)
+                                tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + propertyName + "\", " + getterFunctionName + ", " + setterFunctionName + ");");
+                            else
+                                tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + propertyName + "\", " + getterFunctionName + ", nullptr);");
+                        }
+                    }
+                }
+
+
                 tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"prototype\");");
             }
             

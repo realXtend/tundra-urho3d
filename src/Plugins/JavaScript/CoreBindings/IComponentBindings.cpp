@@ -613,6 +613,16 @@ void Expose_IComponent(duk_context* ctx)
     DefineProperty(ctx, "componentNameChanged", IComponent_Get_ComponentNameChanged, nullptr);
     DefineProperty(ctx, "parentEntitySet", IComponent_Get_ParentEntitySet, nullptr);
     DefineProperty(ctx, "parentEntityAboutToBeDetached", IComponent_Get_ParentEntityAboutToBeDetached, nullptr);
+    DefineProperty(ctx, "typeName", IComponent_TypeName, nullptr);
+    DefineProperty(ctx, "typeId", IComponent_TypeId, nullptr);
+    DefineProperty(ctx, "name", IComponent_Name, IComponent_SetName_String);
+    DefineProperty(ctx, "replicated", IComponent_IsReplicated, IComponent_SetReplicated_bool);
+    DefineProperty(ctx, "local", IComponent_IsLocal, nullptr);
+    DefineProperty(ctx, "unacked", IComponent_IsUnacked, nullptr);
+    DefineProperty(ctx, "updateMode", IComponent_UpdateMode, IComponent_SetUpdateMode_AttributeChange__Type);
+    DefineProperty(ctx, "id", IComponent_Id, nullptr);
+    DefineProperty(ctx, "temporary", IComponent_IsTemporary, IComponent_SetTemporary_bool);
+    DefineProperty(ctx, "viewEnabled", IComponent_ViewEnabled, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, IComponent_ID);
 }

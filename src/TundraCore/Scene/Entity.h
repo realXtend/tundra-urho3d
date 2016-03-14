@@ -63,7 +63,7 @@ public:
     /** @param groupName Name of the group. */
     void SetGroup(const String &groupName);
 
-    /// Returns group name this entity belongs to if Name is available, empty string otherwise.
+    /// Returns group name this entity belongs to if Name is available, empty string otherwise. [property]
     String Group() const;
 
     /// In the following, deserialization functions are now disabled since deserialization can't safely
@@ -100,10 +100,10 @@ public:
         @param name name of the component */
     ComponentPtr CreateComponentWithId(component_id_t compId, u32 typeId, const String &name, AttributeChange::Type change = AttributeChange::Default);
 
-    /// Introspection for the entity, returns all components
+    /// Introspection for the entity, returns all components [property]
     const ComponentMap &Components() const { return components_; }
 
-    /// Returns number of components.
+    /// Returns number of components. [property]
     uint NumComponents() const { return components_.Size(); }
 
     /// Returns actions map for introspection/reflection.
@@ -253,14 +253,14 @@ public:
     /** @param name Name. */
     void SetName(const String &name);
 
-    /// Returns name of this entity if Name is available, empty string otherwise.
+    /// Returns name of this entity if Name is available, empty string otherwise. [property]
     String Name() const;
 
     /// Sets description of the entity to Name component. If the component doesn't exist, it will be created.
     /** @param desc Description. */
     void SetDescription(const String &desc);
 
-    /// Returns description of this entity if Name is available, empty string otherwise.
+    /// Returns description of this entity if Name is available, empty string otherwise. [property]
     String Description() const;
 
     /// Creates and registers new action for this entity, or returns an existing action.
@@ -296,26 +296,26 @@ public:
         @param change Change signaling mode. */
     void SetTemporary(bool enable, AttributeChange::Type change = AttributeChange::Default);
 
-    /// Returns whether entity is temporary. Temporary entities won't be saved when the scene is saved.
+    /// Returns whether entity is temporary. Temporary entities won't be saved when the scene is saved. [property]
     /** By definition, all components of a temporary entity are temporary as well. */
     bool IsTemporary() const { return temporary_; }
 
-    /// Returns if this entity's changes will NOT be sent over the network.
-    /// An Entity is always either local or replicated, but not both.
+    /// Returns if this entity's changes will NOT be sent over the network. [property]
+    /** An Entity is always either local or replicated, but not both. */
     bool IsLocal() const { return id_ >= UniqueIdGenerator::FIRST_LOCAL_ID; }
 
-    /// Returns if this entity's changes will be sent over the network.
-    /// An Entity is always either local or replicated, but not both.
+    /// Returns if this entity's changes will be sent over the network. [property]
+    /** An Entity is always either local or replicated, but not both. */
     bool IsReplicated() const { return id_ < UniqueIdGenerator::FIRST_LOCAL_ID; }
 
-    /// Returns if this entity is pending a proper ID assignment from the server.
+    /// Returns if this entity is pending a proper ID assignment from the server. [property]
     bool IsUnacked() const { return id_ >= UniqueIdGenerator::FIRST_UNACKED_ID && id_ < UniqueIdGenerator::FIRST_LOCAL_ID; }
 
     /// Returns the identifier string for the entity.
     /** Syntax of the string: 'Entity ID <id>' or 'Entity "<name>" (ID: <id>)' if entity has a name. */
     String ToString() const;
 
-    /// Returns the unique id of this entity
+    /// Returns the unique id of this entity. [property]
     entity_id_t Id() const { return id_; }
 
     /// Returns framework
@@ -374,7 +374,7 @@ public:
     EntityPtr CreateLocalChild(const StringVector &components = StringVector(),
         AttributeChange::Type change = AttributeChange::Default, bool componentsReplicated = false, bool temporary = false);
 
-    /// Returns parent entity of this entity, or null if entity is on the root level.
+    /// Returns parent entity of this entity, or null if entity is on the root level. [property]
     EntityPtr Parent() const { return parent_.Lock(); }
 
     /// Returns if parent entity is set.

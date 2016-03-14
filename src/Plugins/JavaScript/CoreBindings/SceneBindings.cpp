@@ -1660,6 +1660,12 @@ void Expose_Scene(duk_context* ctx)
     DefineProperty(ctx, "removed", Scene_Get_Removed, nullptr);
     DefineProperty(ctx, "sceneCleared", Scene_Get_SceneCleared, nullptr);
     DefineProperty(ctx, "entityParentChanged", Scene_Get_EntityParentChanged, nullptr);
+    DefineProperty(ctx, "name", Scene_Name, nullptr);
+    DefineProperty(ctx, "upVector", Scene_UpVector, nullptr);
+    DefineProperty(ctx, "rightVector", Scene_RightVector, nullptr);
+    DefineProperty(ctx, "forwardVector", Scene_ForwardVector, nullptr);
+    DefineProperty(ctx, "viewEnabled", Scene_ViewEnabled, nullptr);
+    DefineProperty(ctx, "authority", Scene_IsAuthority, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Scene_ID);
 }

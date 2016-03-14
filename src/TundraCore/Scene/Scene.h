@@ -39,7 +39,7 @@ public:
     typedef HashMap<entity_id_t, entity_id_t> EntityIdMap; ///< Used to map entity ID changes (oldId, newId).
     typedef HashMap<StringHash, SharedPtr<Object> > SubsystemMap; ///< Maps scene subsystems by type
 
-    /// Returns name of the scene.
+    /// Returns name of the scene. [property]
     const String &Name() const { return name_; }
 
     /// Returns iterator to the beginning of the entities.
@@ -251,22 +251,22 @@ public:
     EntityPtr CreateLocalTemporaryEntity(const StringVector &components = StringVector(),
         AttributeChange::Type change = AttributeChange::Default);
 
-    /// Returns scene up vector. For now it is a compile-time constant
+    /// Returns scene up vector. For now it is a compile-time constant [property]
     /** @sa RightVector,.ForwardVector */
     float3 UpVector() const;
 
-    /// Returns scene right vector. For now it is a compile-time constant
+    /// Returns scene right vector. For now it is a compile-time constant [property]
     /** @sa UpVector, ForwardVector */
     float3 RightVector() const;
 
-    /// Returns scene forward vector. For now it is a compile-time constant
+    /// Returns scene forward vector. For now it is a compile-time constant [property]
     /** @sa UpVector, RightVector */
     float3 ForwardVector() const;
 
-    /// Is scene view enabled (i.e. rendering-related components actually create stuff).
+    /// Is scene view enabled (i.e. rendering-related components actually create stuff). [property]
     bool ViewEnabled() const { return viewEnabled_; }
 
-    /// Is scene authoritative i.e. a server or standalone scene
+    /// Is scene authoritative i.e. a server or standalone scene [property]
     bool IsAuthority() const { return authority_; }
 
     /// Returns entity with the specified id
