@@ -1040,4 +1040,89 @@ template<> void AttributeEditor<EntityReference>::SetValue()
         SetValue(attr->Get());
     }
 }
+
+//----------------------------ASSET REFERENCE ATTRIBUTE TYPE----------------------------
+
+template<> void AttributeEditor<AssetReference>::SetValue(AssetReference value)
+{
+	VariantMap values;
+	values["ref"] = value.ref;
+	values["type"] = value.type;
+	value_ = values;
+	Update();
+}
+
+template<> AssetReference AttributeEditor<AssetReference>::Value() const
+{
+	AssetReference reference;
+	reference.ref = value_.GetString();
+
+	VariantMap values = value_.GetVariantMap();
+	AssetReference asset;
+	asset.ref = values["ref"].GetString();
+	asset.type = values["type"].GetString();
+	return asset;
+}
+
+template<> void AttributeEditor<AssetReference>::Initialize()
+{
+	IAttributeEditor::Initialize();
+	Urho3D::XMLFile *style = context_->GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("Data/UI/DefaultStyle.xml");
+
+	Urho3D::LineEdit *e = new Urho3D::LineEdit(framework_->GetContext());
+	e->SetName("LineEdit");
+	e->SetStyle("LineEditSmall", style);
+	e->SetCursorPosition(0);
+	data_["line_edit"] = e;
+	root_->AddChild(e);
+	Update();
+
+	SubscribeToEvent(Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<AssetReference>, OnUIChanged));
+}
+
+template<> void AttributeEditor<AssetReference>::Update()
+{
+	if (!intialized_)
+		return;
+
+	Urho3D::LineEdit *e = dynamic_cast<Urho3D::LineEdit*>(data_["line_edit"].GetPtr());
+	e->SetText(Value().ref);
+	e->SetCursorPosition(0);
+}
+
+template<> void AttributeEditor<AssetReference>::OnUIChanged(StringHash /*eventType*/, VariantMap &eventData)
+{
+	if (attributeWeakPtr_.Get() == NULL)
+		return;
+
+	Urho3D::LineEdit *element = dynamic_cast<Urho3D::LineEdit*>(eventData["Element"].GetPtr());
+	if (element != NULL &&
+		element == data_["line_edit"].GetPtr())
+	{
+		ingoreAttributeChange_ = true;
+
+		String value = element->GetText();
+		Attribute<AssetReference> *attr = dynamic_cast<Attribute<AssetReference> *>(attributeWeakPtr_.Get());
+		if (attr != NULL)
+		{
+			AssetReference reference;
+			reference.ref = value;
+			attr->Set(reference);
+		}
+
+		ingoreAttributeChange_ = false;
+	}
+}
+
+template<> void AttributeEditor<AssetReference>::SetValue()
+{
+	if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+	{
+		Attribute<AssetReference> *attr = dynamic_cast<Attribute<AssetReference> *>(attributeWeakPtr_.Get());
+		if (attr == NULL)
+			return;
+
+		SetValue(attr->Get());
+	}
+}
 }

@@ -15,6 +15,7 @@
 #include "IAttribute.h"
 #include "Signals.h"
 #include "EntityReference.h"
+#include "AssetReference.h"
 
 #include <Urho3D/Core/Object.h>
 #include <Urho3D/Container/Ptr.h>
@@ -159,5 +160,12 @@ template<> void AttributeEditor<EntityReference>::Initialize();
 template<> void AttributeEditor<EntityReference>::Update();
 template<> void AttributeEditor<EntityReference>::OnUIChanged(StringHash eventType, VariantMap &eventData);
 template<> void AttributeEditor<EntityReference>::SetValue();
+
+template<> void AttributeEditor<AssetReference>::SetValue(AssetReference value);
+template<> AssetReference AttributeEditor<AssetReference>::Value() const;
+template<> void AttributeEditor<AssetReference>::Initialize();
+template<> void AttributeEditor<AssetReference>::Update();
+template<> void AttributeEditor<AssetReference>::OnUIChanged(StringHash eventType, VariantMap &eventData);
+template<> void AttributeEditor<AssetReference>::SetValue();
 
 }
