@@ -168,4 +168,11 @@ template<> void AttributeEditor<AssetReference>::Update();
 template<> void AttributeEditor<AssetReference>::OnUIChanged(StringHash eventType, VariantMap &eventData);
 template<> void AttributeEditor<AssetReference>::SetValue();
 
+template<> void AttributeEditor<AssetReferenceList>::SetValue(AssetReferenceList value);
+template<> AssetReferenceList AttributeEditor<AssetReferenceList>::Value() const;
+template<> void AttributeEditor<AssetReferenceList>::Initialize();
+template<> void AttributeEditor<AssetReferenceList>::Update();
+template<> void AttributeEditor<AssetReferenceList>::OnUIChanged(StringHash eventType, VariantMap &eventData);
+template<> void AttributeEditor<AssetReferenceList>::SetValue();
+
 }

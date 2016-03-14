@@ -147,6 +147,9 @@ IAttributeEditor *ComponentContainer::CreateAttributeEditor(Framework *framework
 	case IAttribute::TypeId::AssetReferenceId:
 		editor = new AttributeEditor<AssetReference>(framework, attributeWeakPtr);
 		break;
+	case IAttribute::TypeId::AssetReferenceListId:
+		editor = new AttributeEditor<AssetReferenceList>(framework, attributeWeakPtr);
+		break;
     }
 
     if (editor != NULL)

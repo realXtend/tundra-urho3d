@@ -1125,4 +1125,116 @@ template<> void AttributeEditor<AssetReference>::SetValue()
 		SetValue(attr->Get());
 	}
 }
+
+//----------------------------ASSET REFERENCE LIST ATTRIBUTE TYPE----------------------------
+
+template<> void AttributeEditor<AssetReferenceList>::SetValue(AssetReferenceList value)
+{
+	VariantMap values;
+	String refs = "";
+	String types = "";
+
+	Tundra::uint count = value.Size();
+	for (Tundra::uint i = 0; i < count; ++i)
+	{
+		refs += value[i].ref;
+		types += value[i].type;
+
+		if (i < count)
+		{
+			refs += ";";
+			types += ";";
+		}	
+	}
+
+	values["size"] = count;
+	values["refs"] = refs;
+	values["types"] = types;
+	value_ = values;
+
+	Update();
+}
+
+template<> AssetReferenceList AttributeEditor<AssetReferenceList>::Value() const
+{
+	AssetReferenceList references;
+
+	VariantMap values = value_.GetVariantMap();
+	Tundra::uint count = values["size"].GetInt();
+	Urho3D::StringVector refs = values["refs"].GetString().Split(';', true);
+	Urho3D::StringVector types = values["types"].GetString().Split(';', true);
+
+	for (Tundra::uint i = 0; i < count; ++i)
+		references.Append(AssetReference(refs[i], types[i]));
+
+	return references;
+}
+
+template<> void AttributeEditor<AssetReferenceList>::Initialize()
+{
+	IAttributeEditor::Initialize();
+	Urho3D::XMLFile *style = context_->GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("Data/UI/DefaultStyle.xml");
+
+	Urho3D::LineEdit *e = new Urho3D::LineEdit(framework_->GetContext());
+	e->SetName("LineEdit");
+	e->SetStyle("LineEditSmall", style);
+	e->SetCursorPosition(0);
+	data_["line_edit"] = e;
+	root_->AddChild(e);
+	Update();
+
+	SubscribeToEvent(Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<AssetReferenceList>, OnUIChanged));
+}
+
+template<> void AttributeEditor<AssetReferenceList>::Update()
+{
+	if (!intialized_)
+		return;
+
+	Urho3D::LineEdit *e = dynamic_cast<Urho3D::LineEdit*>(data_["line_edit"].GetPtr());
+	VariantMap values = value_.GetVariantMap();
+	e->SetText(values["refs"].GetString());
+
+	e->SetCursorPosition(0);
+}
+
+template<> void AttributeEditor<AssetReferenceList>::OnUIChanged(StringHash /*eventType*/, VariantMap &eventData)
+{
+	if (attributeWeakPtr_.Get() == NULL)
+		return;
+
+	Urho3D::LineEdit *element = dynamic_cast<Urho3D::LineEdit*>(eventData["Element"].GetPtr());
+	if (element != NULL &&
+		element == data_["line_edit"].GetPtr())
+	{
+		ingoreAttributeChange_ = true;
+
+		String value = element->GetText();
+		Attribute<AssetReferenceList> *attr = dynamic_cast<Attribute<AssetReferenceList> *>(attributeWeakPtr_.Get());
+		if (attr != NULL)
+		{
+			AssetReferenceList referenses;
+			Urho3D::StringVector refs = value.Split(';', true);
+			for (Tundra::uint i = 0; i < refs.Size(); ++i)
+				referenses.Append(AssetReference(refs[i], attr->Get().type));
+
+			attr->Set(referenses);
+		}
+
+		ingoreAttributeChange_ = false;
+	}
+}
+
+template<> void AttributeEditor<AssetReferenceList>::SetValue()
+{
+	if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+	{
+		Attribute<AssetReferenceList> *attr = dynamic_cast<Attribute<AssetReferenceList> *>(attributeWeakPtr_.Get());
+		if (attr == NULL)
+			return;
+
+		SetValue(attr->Get());
+	}
+}
+
 }
