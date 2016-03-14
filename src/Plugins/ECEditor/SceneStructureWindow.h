@@ -20,6 +20,7 @@ namespace Urho3D
     class UIElement;
     class Window;
     class ListView;
+    class Button;
 }
 
 using namespace Urho3D;
@@ -47,6 +48,7 @@ typedef WeakPtr<SceneContextMenu> SceneContextMenuWeakPtr;
 typedef WeakPtr<TreeView> TreeViewWeakPtr;
 typedef WeakPtr<UIElement> UIElementWeakPtr;
 typedef WeakPtr<Window> UIWindowWeakPtr;
+typedef WeakPtr<Button> ButtonWeakPtr;
 typedef WeakPtr<ListView> ListViewWeakPtr;
 typedef WeakPtr<Object> ObjectWeakPtr;
 typedef SharedPtr<SceneStructureItem> SceneStructureItemPtr;
@@ -81,6 +83,9 @@ public:
 
     void Clear();
     void RefreshView();
+    
+    void Hide();
+    void Show();
 
     SceneStructureItem *FindItem(Object *obj);
 
@@ -107,6 +112,7 @@ protected:
     void OnItemDoubleClicked(StringHash eventType, VariantMap &eventData);
     void OnContextMenuHide(StringHash eventType, VariantMap &eventData);
     void OnSelectionChanged(StringHash eventType, VariantMap &eventData);
+    void OnCloseClicked(StringHash eventType, VariantMap &eventData);
 
     void OnComponentDialogClosed(AddComponentDialog *dialog, bool confirmed);
     void OnEntityDialogClosed(AddEntityDialog *dialog, bool confirmed);
@@ -128,6 +134,7 @@ private:
     AddEntityDialogPtr addEntityDialog_;
 
     UIWindowWeakPtr window_;
+    ButtonWeakPtr closeButton_;
     SceneContextMenuWeakPtr contextMenu_;
     ListViewWeakPtr listView_;
     Vector<ListViewItem> listItems_;

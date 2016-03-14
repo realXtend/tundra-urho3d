@@ -57,6 +57,10 @@ void MenuBar::Create()
 
 void MenuBar::Show()
 {
+    XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/LoginStyle.xml");
+    bar_->SetFixedWidth(GetSubsystem<UI>()->GetRoot()->GetWidth());
+    bar_->SetStyle("MenuBar", style);
+
     if (bar_.NotNull())
         bar_->SetVisible(true);
 }

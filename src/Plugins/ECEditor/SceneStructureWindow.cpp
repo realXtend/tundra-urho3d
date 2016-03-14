@@ -44,6 +44,7 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module
     window_->SetLayout(LayoutMode::LM_VERTICAL, 2, IntRect(2, 2, 2, 2));
     window_->SetSize(IntVector2(300, 500));
     window_->SetMinSize(IntVector2(300, 500));
+    window_->SetPosition(IntVector2(0, 100));
     window_->SetStyle("Window", style);
     window_->SetMovable(true);
     window_->SetResizable(true);
@@ -58,12 +59,14 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module
         window_->AddChild(topBar);
 
         {
-            Button *button = new Button(framework->GetContext());
-            button->SetName("CloseButton");
-            button->SetStyle("CloseButton", style);
-            button->SetAlignment(HA_RIGHT, VA_CENTER);
-            button->SetPosition(IntVector2(-3, 0));
-            topBar->AddChild(button);
+            closeButton_ = new Button(framework->GetContext());
+            closeButton_->SetName("CloseButton");
+            closeButton_->SetStyle("CloseButton", style);
+            closeButton_->SetAlignment(HA_RIGHT, VA_CENTER);
+            closeButton_->SetPosition(IntVector2(-3, 0));
+            topBar->AddChild(closeButton_);
+
+            SubscribeToEvent(E_PRESSED, URHO3D_HANDLER(SceneStructureWindow, OnCloseClicked));
 
             Text *windowHeader = new Text(framework->GetContext());
             windowHeader->SetStyle("Text", style);
@@ -148,11 +151,14 @@ SceneStructureWindow::~SceneStructureWindow()
     addComponentDialog_.Reset();
     addEntityDialog_.Reset();
 
-    if (contextMenu_.NotNull())
+    if (closeButton_.Get())
+        closeButton_->Remove();
+
+    if (contextMenu_.Get())
         contextMenu_->Widget()->Remove();
     contextMenu_.Reset();
 
-    if (window_.NotNull())
+    if (window_.Get())
         window_->Remove();
     window_.Reset();
 }
@@ -286,6 +292,12 @@ void SceneStructureWindow::OnSelectionChanged(StringHash /*eventType*/, VariantM
         return;
 
     PODVector<UIElement *> elements = listView_->GetSelectedItems();
+}
+
+void SceneStructureWindow::OnCloseClicked(StringHash /*eventType*/, VariantMap &eventData)
+{
+    if (eventData["Element"].GetPtr() == closeButton_)
+        Hide();
 }
 
 void SceneStructureWindow::OnComponentDialogClosed(AddComponentDialog *dialog, bool confirmed)
@@ -456,6 +468,18 @@ void SceneStructureWindow::RefreshView()
     }
 
     scene_->EntityCreated.Connect(this, &SceneStructureWindow::OnEntityCreated);
+}
+
+void SceneStructureWindow::Hide()
+{
+    if (window_.Get())
+        window_->SetVisible(false);
+}
+
+void SceneStructureWindow::Show()
+{
+    if (window_.Get())
+        window_->SetVisible(true);
 }
 
 SceneStructureItem *SceneStructureWindow::FindItem(Object *obj)

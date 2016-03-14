@@ -18,6 +18,7 @@ namespace Tundra
 
 class SceneStructureWindow;
 class ECEditorWindow;
+class MenuBarItem;
 typedef SharedPtr<SceneStructureWindow> SceneWindowPtr;
 typedef SharedPtr<ECEditorWindow> EditorWindowPtr;
 
@@ -36,6 +37,7 @@ public:
     void OpenEntityEditor(Entity *entity);
 
 private:
+    void OnSceneEditorOpen(MenuBarItem *item);
     void OnSceneCreated(Scene *scene, AttributeChange::Type type);
 
     SceneWindowPtr sceneEditor_;

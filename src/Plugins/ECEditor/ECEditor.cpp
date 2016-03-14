@@ -6,6 +6,9 @@
 #include "Framework.h"
 #include "SceneStructureWindow.h"
 #include "ECEditorWindow.h"
+#include "UI/UiAPI.h"
+#include "UI/MenuBar.h"
+#include "UI/MenuBarItem.h"
 
 #include "SceneAPI.h"
 #include "Scene.h"
@@ -33,7 +36,15 @@ void ECEditor::Initialize()
     entityEditor_ = new ECEditorWindow(GetFramework());
     entityEditor_->Hide();
     sceneEditor_ = new SceneStructureWindow(GetFramework(), this);
+    sceneEditor_->Hide();
     framework->Scene()->SceneCreated.Connect(this, &ECEditor::OnSceneCreated);
+
+    MenuBar *menu = framework->Ui()->GetMenuBar();
+    if (menu != NULL)
+    {
+        MenuBarItem * item = menu->CreateMenuItem("Edit/Scene Editor");
+        item->OnItemPressed.Connect(this, &ECEditor::OnSceneEditorOpen);
+    }
 }
 
 void ECEditor::OpenSceneEditor()
@@ -54,6 +65,11 @@ void ECEditor::OpenEntityEditor(Entity *entity)
     entityEditor_->Widget()->BringToFront();
     entityEditor_->Widget()->SetPosition(IntVector2(300, 0));
     entityEditor_->Show();
+}
+
+void ECEditor::OnSceneEditorOpen(MenuBarItem *item)
+{
+    sceneEditor_->Show();
 }
 
 void ECEditor::OnSceneCreated(Scene *scene, AttributeChange::Type /*type*/)

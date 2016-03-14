@@ -964,4 +964,80 @@ template<> void AttributeEditor<String>::SetValue()
     }
 }
 
+//----------------------------ENTITY REFERENCE ATTRIBUTE TYPE----------------------------
+
+template<> void AttributeEditor<EntityReference>::SetValue(EntityReference value)
+{
+    value_ = value.ref;
+    Update();
+}
+
+template<> EntityReference AttributeEditor<EntityReference>::Value() const
+{
+    EntityReference reference;
+    reference.ref = value_.GetString();
+    return reference;
+}
+
+template<> void AttributeEditor<EntityReference>::Initialize()
+{
+    IAttributeEditor::Initialize();
+    Urho3D::XMLFile *style = context_->GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("Data/UI/DefaultStyle.xml");
+
+    Urho3D::LineEdit *e = new Urho3D::LineEdit(framework_->GetContext());
+    e->SetName("LineEdit");
+    e->SetStyle("LineEditSmall", style);
+    e->SetCursorPosition(0);
+    data_["line_edit"] = e;
+    root_->AddChild(e);
+    Update();
+
+    SubscribeToEvent(Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<EntityReference>, OnUIChanged));
+}
+
+template<> void AttributeEditor<EntityReference>::Update()
+{
+    if (!intialized_)
+        return;
+
+    Urho3D::LineEdit *e = dynamic_cast<Urho3D::LineEdit*>(data_["line_edit"].GetPtr());
+    e->SetText(Value().ref);
+    e->SetCursorPosition(0);
+}
+
+template<> void AttributeEditor<EntityReference>::OnUIChanged(StringHash /*eventType*/, VariantMap &eventData)
+{
+    if (attributeWeakPtr_.Get() == NULL)
+        return;
+
+    Urho3D::LineEdit *element = dynamic_cast<Urho3D::LineEdit*>(eventData["Element"].GetPtr());
+    if (element != NULL &&
+        element == data_["line_edit"].GetPtr())
+    {
+        ingoreAttributeChange_ = true;
+
+        String value = element->GetText();
+        Attribute<EntityReference> *attr = dynamic_cast<Attribute<EntityReference> *>(attributeWeakPtr_.Get());
+        if (attr != NULL)
+        {
+            EntityReference reference;
+            reference.ref = value;
+            attr->Set(reference);
+        }
+
+        ingoreAttributeChange_ = false;
+    }
+}
+
+template<> void AttributeEditor<EntityReference>::SetValue()
+{
+    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    {
+        Attribute<EntityReference> *attr = dynamic_cast<Attribute<EntityReference> *>(attributeWeakPtr_.Get());
+        if (attr == NULL)
+            return;
+
+        SetValue(attr->Get());
+    }
+}
 }

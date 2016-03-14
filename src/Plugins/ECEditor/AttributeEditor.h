@@ -14,6 +14,7 @@
 #include "Math/Color.h"
 #include "IAttribute.h"
 #include "Signals.h"
+#include "EntityReference.h"
 
 #include <Urho3D/Core/Object.h>
 #include <Urho3D/Container/Ptr.h>
@@ -151,5 +152,12 @@ template<> void AttributeEditor<String>::Initialize();
 template<> void AttributeEditor<String>::Update();
 template<> void AttributeEditor<String>::OnUIChanged(StringHash eventType, VariantMap &eventData);
 template<> void AttributeEditor<String>::SetValue();
+
+template<> void AttributeEditor<EntityReference>::SetValue(EntityReference value);
+template<> EntityReference AttributeEditor<EntityReference>::Value() const;
+template<> void AttributeEditor<EntityReference>::Initialize();
+template<> void AttributeEditor<EntityReference>::Update();
+template<> void AttributeEditor<EntityReference>::OnUIChanged(StringHash eventType, VariantMap &eventData);
+template<> void AttributeEditor<EntityReference>::SetValue();
 
 }

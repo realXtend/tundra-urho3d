@@ -21,6 +21,7 @@
 #include <Urho3D/UI/Menu.h>
 #include <Urho3D/UI/LineEdit.h>
 #include <Urho3D/UI/DropDownList.h>
+#include <Urho3D/Resource/ResourceCache.h>
 
 namespace Tundra
 {
@@ -32,6 +33,7 @@ UiAPI::UiAPI(Framework *framework) :
 {
     if (!framework_->HasCommandLineParameter("--nomenubar") && !framework_->HasCommandLineParameter("--nocentralwidget"))
     {
+        menuBar_ = new MenuBar(framework_);
         // Wait for one frame before intilizing ui elements.
         framework_->Frame()->DelayedExecute(0.0f).Connect(this, &UiAPI::Initialize);
     }
@@ -59,7 +61,8 @@ void UiAPI::RelaseMenuBar()
 
 void UiAPI::Initialize(float /*time*/)
 {
-    CreateMenuBar();
+    menuBar_->Show();
+    //CreateMenuBar();
 }
 
 }
