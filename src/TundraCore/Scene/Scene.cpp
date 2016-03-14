@@ -149,16 +149,21 @@ bool Scene::IsUniqueName(const String& name) const
     return !EntityByName(name);
 }
 
-void Scene::AddSubsystem(Object* system)
+void Scene::AddSubsystem(const String& name, Object* system)
 {
     if (system)
-        subsystems[system->GetType()] = system;
+        subsystems[name] = system;
 }
 
-void Scene::RemoveSubsystem(Object* system)
+void Scene::RemoveSubsystem(const String& name)
 {
-    if (system)
-        subsystems.Erase(system->GetType());
+    subsystems.Erase(name);
+}
+
+SharedPtr<Object> Scene::Subsystem(const String& name) const
+{
+    Scene::SubsystemMap::ConstIterator it = subsystems.Find(name);
+    return it != subsystems.End() ? it->second_ : SharedPtr<Object>();
 }
 
 void Scene::ChangeEntityId(entity_id_t old_id, entity_id_t new_id)

@@ -37,7 +37,7 @@ public:
     typedef EntityMap::Iterator Iterator; ///< entity iterator, see begin() and end()
     typedef EntityMap::ConstIterator ConstIterator; ///< const entity iterator. see begin() and end()
     typedef HashMap<entity_id_t, entity_id_t> EntityIdMap; ///< Used to map entity ID changes (oldId, newId).
-    typedef HashMap<StringHash, SharedPtr<Object> > SubsystemMap; ///< Maps scene subsystems by type
+    typedef HashMap<String, SharedPtr<Object> > SubsystemMap; ///< Maps scene subsystems by type
 
     /// Returns name of the scene. [property]
     const String &Name() const { return name_; }
@@ -67,10 +67,13 @@ public:
     bool operator < (const Scene &other) const { return Name() < other.Name(); }
     
     /// Add a subsystem world (GraphicsWorld, PhysicsWorld)
-    void AddSubsystem(Object* system);
+    void AddSubsystem(const String& propertyName, Object* system);
 
     /// Remove a subsystem world
-    void RemoveSubsystem(Object* system);
+    void RemoveSubsystem(const String& propertyName);
+
+    /// Return a subsystem world by name
+    SharedPtr<Object> Subsystem(const String& propertyName) const;
 
     /// Return a subsystem world 
     template <class T>

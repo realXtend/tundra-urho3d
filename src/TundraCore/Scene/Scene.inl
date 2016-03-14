@@ -6,8 +6,12 @@ namespace Tundra
 template <class T>
 SharedPtr<T> Scene::Subsystem() const
 {
-    SubsystemMap::ConstIterator it = subsystems.Find(T::GetTypeStatic());
-    return Urho3D::DynamicCast<T>(it->second_);
+    for (SubsystemMap::ConstIterator it = subsystems.Begin(); it != subsystems.End(); ++it)
+    {
+        if (it->second_->GetType() == T::GetTypeStatic())
+            return Urho3D::StaticCast<T>(it->second_);
+    }
+    return SharedPtr<T>();
 }
 
 template <typename T>

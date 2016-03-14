@@ -4,6 +4,7 @@
 #include "BindingsHelpers.h"
 #include "Scene/Entity.h"
 #include "Scene/IComponent.h"
+#include "Scene/Scene.h"
 #include "LoggingFunctions.h"
 #include "Math/float2.h"
 #include "Math/float3.h"
@@ -120,6 +121,35 @@ WeakPtr<Object>* GetWeakPtr(duk_context* ctx, duk_idx_t stackIndex)
     return ptr;
 }
 
+static duk_ret_t Scene_GetProperty(duk_context* ctx)
+{
+    /* 'this' binding: handler
+     * [0]: target
+     * [1]: key
+     * [2]: receiver (proxy)
+     */
+    const char* subsystemTypeName = duk_to_string(ctx, 1);
+    // Subsystem properties must be lowercase to optimize speed, as this is called for every property access.
+    if (subsystemTypeName && subsystemTypeName[0] >= 'a' && subsystemTypeName[0] <= 'z')
+    {
+        Scene* scene = GetWeakObject<Scene>(ctx, 0);
+        if (scene)
+        {
+            SharedPtr<Object> ptr = scene->Subsystem(String(subsystemTypeName));
+            if (ptr)
+            {
+                PushWeakObject(ctx, ptr.Get());
+                return 1;
+            }
+        }
+    }
+
+    // Fallthrough to ordinary properties
+    duk_dup(ctx, 1);
+    duk_get_prop(ctx, 0);
+    return 1;
+}
+
 static duk_ret_t Entity_GetProperty(duk_context* ctx)
 {
     /* 'this' binding: handler
@@ -206,6 +236,11 @@ static duk_ret_t Component_SetProperty(duk_context* ctx)
     return 1;
 }
 
+static const duk_function_list_entry SceneProxyFunctions[] = {
+    { "get", Scene_GetProperty, 3 },
+    { NULL, NULL, 0 }
+};
+
 static const duk_function_list_entry EntityProxyFunctions[] = {
     { "get", Entity_GetProperty, 3 },
     { NULL, NULL, 0 }
@@ -237,7 +272,9 @@ void PushWeakObject(duk_context* ctx, Object* object)
     duk_set_prototype(ctx, -3);
     duk_pop(ctx);
 
-    // Proxied property access handling for entity & component
+    // Proxied property access handling for scene, entity & component
+    if (object->GetType() == Scene::GetTypeStatic())
+        SetupProxy(ctx, SceneProxyFunctions);
     if (object->GetType() == Entity::GetTypeStatic())
         SetupProxy(ctx, EntityProxyFunctions);
     else if (dynamic_cast<IComponent*>(object))

@@ -284,14 +284,14 @@ IOgreMaterialProcessor* UrhoRenderer::FindOgreMaterialProcessor(const Ogre::Mate
 
 void UrhoRenderer::CreateGraphicsWorld(Scene *scene, AttributeChange::Type)
 {
-    // Add an OgreWorld to the scene
+    // Add an GraphicsWorld to the scene
     if (scene->ViewEnabled())
-        scene->AddSubsystem(new GraphicsWorld(this, scene));
+        scene->AddSubsystem("graphics", new GraphicsWorld(this, scene));
 }
 
 void UrhoRenderer::RemoveGraphicsWorld(Scene *scene, AttributeChange::Type)
 {
-    scene->RemoveSubsystem(scene->Subsystem<GraphicsWorld>());
+    scene->RemoveSubsystem("graphics");
 }
 
 void UrhoRenderer::OnScriptInstanceCreated(JavaScriptInstance* instance)

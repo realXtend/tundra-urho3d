@@ -177,14 +177,14 @@ void BulletPhysics::CreatePhysicsWorld(Scene *scene, AttributeChange::Type /*cha
     newWorld->SetGravity(scene->UpVector() * -9.81f);
     newWorld->SetPhysicsUpdatePeriod(defaultPhysicsUpdatePeriod_);
     newWorld->SetMaxSubSteps(defaultMaxSubSteps_);
-    scene->AddSubsystem(newWorld);
+    scene->AddSubsystem("physics", newWorld);
     physicsWorlds_.Push(newWorld);
 }
 
 void BulletPhysics::RemovePhysicsWorld(Scene *scene, AttributeChange::Type /*change*/)
 {
     PhysicsWorldPtr worldPtr = scene->Subsystem<PhysicsWorld>();
-    scene->RemoveSubsystem(worldPtr.Get());
+    scene->RemoveSubsystem("physics");
     physicsWorlds_.Remove(worldPtr);
 
     // At this point all Entities have been destroyed. There should be nothing in the cache
