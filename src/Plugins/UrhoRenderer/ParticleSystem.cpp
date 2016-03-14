@@ -193,4 +193,9 @@ void ParticleSystem::DetachParticleSystem()
     }
 }
 
+void ParticleSystem::SoftStopParticleSystem()
+{
+    LogError("ParticleSystem::SoftStopParticleSystem: not implemented");
+}
+
 }

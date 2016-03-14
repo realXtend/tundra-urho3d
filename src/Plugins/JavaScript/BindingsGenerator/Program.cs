@@ -93,6 +93,9 @@ namespace BindingsGenerator
             {
                 if ((classSymbol.kind == "class" || classSymbol.kind == "struct" || classSymbol.kind == "namespace") && (exposeTheseClasses.Count == 0 || exposeTheseClasses.Contains(StripNamespace(classSymbol.name))))
                 {
+                    if (IsBadNamespace(ExtractNamespace(classSymbol.name)))
+                        continue;
+
                     string typeName = SanitateTypeName(classSymbol.name);
 
                     if (!classNames.Contains(typeName))
@@ -109,8 +112,12 @@ namespace BindingsGenerator
                                 string sanitated = str.Substring(fileBasePath.Length).Replace('\\', '/');
                                 if (sanitated.StartsWith("/"))
                                     sanitated = sanitated.Substring(1);
-                                classHeaderFiles[typeName] = sanitated;
-                                break;
+                                int idx = sanitated.IndexOf(typeName);
+                                if (idx == 0 || sanitated[idx - 1] == '/')
+                                {
+                                    classHeaderFiles[typeName] = sanitated;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -121,6 +128,9 @@ namespace BindingsGenerator
             {
                 if (classSymbol.kind == "class" || classSymbol.kind == "struct" || classSymbol.kind == "namespace")
                 {
+                    if (IsBadNamespace(ExtractNamespace(classSymbol.name)))
+                        continue;
+
                     string typeName = SanitateTypeName(classSymbol.name);
                     if (classNames.Contains(typeName) && !dependencyOnlyClasses.Contains(typeName))
                         GenerateClassBindings(classSymbol, outputDirectory);
@@ -1115,6 +1125,11 @@ namespace BindingsGenerator
                 return className.Substring(0, separatorIndex);
             else
                 return "";
+        }
+
+        static bool IsBadNamespace(string namespaceName)
+        {
+            return namespaceName == "Urho3D" || namespaceName == "Ogre" || namespaceName == "Tundra::Ogre";
         }
 
         static string StripNamespace(string className)

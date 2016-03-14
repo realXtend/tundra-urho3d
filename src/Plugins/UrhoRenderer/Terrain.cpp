@@ -387,6 +387,21 @@ float Terrain::GetTerrainMaxHeight() const
     return maxHeight;
 }
 
+void Terrain::Resize(uint newWidth, uint newHeight, uint oldPatchStartX, uint oldPatchStartY)
+{
+    Vector<Patch> newPatches(newWidth * newHeight);
+    for(uint y = 0; y < newHeight && y + oldPatchStartY < yPatches.Get(); ++y)
+        for(uint x = 0; x < newWidth && x + oldPatchStartX < xPatches.Get(); ++x)
+            newPatches[y * newWidth + x] = patches_[(y + oldPatchStartY) * xPatches.Get() + x + oldPatchStartX];
+
+    patches_ = newPatches;
+    xPatches.Set(newWidth, AttributeChange::Disconnected);
+    yPatches.Set(newHeight, AttributeChange::Disconnected);
+    patchWidth_ = newWidth;
+    patchHeight_ = newHeight;
+    DirtyAllTerrainPatches();
+    RegenerateDirtyTerrainPatches();
+}
 
 float Terrain::GetPoint(uint x, uint y) const
 {

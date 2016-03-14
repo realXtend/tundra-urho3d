@@ -75,7 +75,7 @@ public:
     /**  Alternatively float can be used too, e.g. "1.33". If this string is empty, the aspect ratio of the main window viewport is used (default). */
     Attribute<String> aspectRatio;
 
-    /// Returns the actual Urho camera component.
+    /// Returns the actual Urho camera component. [noscript]
     /** @note Use with caution. */
     Urho3D::Camera* UrhoCamera() const { return camera_; }
 
