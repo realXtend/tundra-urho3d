@@ -12,6 +12,7 @@
 #endif
 
 #include "Camera.h"
+#include "IRenderer.h"
 #include "Entity.h"
 
 
@@ -21,8 +22,25 @@ using namespace std;
 namespace JSBindings
 {
 
+static const char* Ray_ID = "Ray";
+static const char* RayQueryResult_ID = "RayQueryResult";
+static const char* Point_ID = "Point";
+static const char* Color_ID = "Color";
 static const char* float3_ID = "float3";
+static const char* Transform_ID = "Transform";
 static const char* float3x4_ID = "float3x4";
+
+static duk_ret_t RayQueryResult_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<RayQueryResult>(ctx, RayQueryResult_ID);
+    return 0;
+}
+
+static duk_ret_t Color_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<Color>(ctx, Color_ID);
+    return 0;
+}
 
 
 static const char* GraphicsWorld_ID = "GraphicsWorld";
@@ -252,6 +270,216 @@ static duk_ret_t GraphicsWorld_SetDefaultSceneFog(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t GraphicsWorld_Raycast_int_int_unsigned(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    int x = (int)duk_require_number(ctx, 0);
+    int y = (int)duk_require_number(ctx, 1);
+    unsigned layerMask = (unsigned)duk_require_number(ctx, 2);
+    RayQueryResult ret = thisObj->Raycast(x, y, layerMask);
+    PushValueObjectCopy<RayQueryResult>(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_Raycast_Point_unsigned(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    Point& point = *GetCheckedValueObject<Point>(ctx, 0, Point_ID);
+    unsigned layerMask = (unsigned)duk_require_number(ctx, 1);
+    RayQueryResult ret = thisObj->Raycast(point, layerMask);
+    PushValueObjectCopy<RayQueryResult>(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_Raycast_int_int(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    int x = (int)duk_require_number(ctx, 0);
+    int y = (int)duk_require_number(ctx, 1);
+    RayQueryResult ret = thisObj->Raycast(x, y);
+    PushValueObjectCopy<RayQueryResult>(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_Raycast_Point(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    Point& point = *GetCheckedValueObject<Point>(ctx, 0, Point_ID);
+    RayQueryResult ret = thisObj->Raycast(point);
+    PushValueObjectCopy<RayQueryResult>(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_Raycast_Ray_unsigned(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    Ray& ray = *GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
+    unsigned layerMask = (unsigned)duk_require_number(ctx, 1);
+    RayQueryResult ret = thisObj->Raycast(ray, layerMask);
+    PushValueObjectCopy<RayQueryResult>(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_Raycast_int_int_unsigned_float(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    int x = (int)duk_require_number(ctx, 0);
+    int y = (int)duk_require_number(ctx, 1);
+    unsigned layerMask = (unsigned)duk_require_number(ctx, 2);
+    float maxDistance = (float)duk_require_number(ctx, 3);
+    RayQueryResult ret = thisObj->Raycast(x, y, layerMask, maxDistance);
+    PushValueObjectCopy<RayQueryResult>(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_Raycast_Point_unsigned_float(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    Point& point = *GetCheckedValueObject<Point>(ctx, 0, Point_ID);
+    unsigned layerMask = (unsigned)duk_require_number(ctx, 1);
+    float maxDistance = (float)duk_require_number(ctx, 2);
+    RayQueryResult ret = thisObj->Raycast(point, layerMask, maxDistance);
+    PushValueObjectCopy<RayQueryResult>(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_Raycast_int_int_float(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    int x = (int)duk_require_number(ctx, 0);
+    int y = (int)duk_require_number(ctx, 1);
+    float maxDistance = (float)duk_require_number(ctx, 2);
+    RayQueryResult ret = thisObj->Raycast(x, y, maxDistance);
+    PushValueObjectCopy<RayQueryResult>(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_Raycast_Point_float(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    Point& point = *GetCheckedValueObject<Point>(ctx, 0, Point_ID);
+    float maxDistance = (float)duk_require_number(ctx, 1);
+    RayQueryResult ret = thisObj->Raycast(point, maxDistance);
+    PushValueObjectCopy<RayQueryResult>(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_Raycast_Ray_unsigned_float(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    Ray& ray = *GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
+    unsigned layerMask = (unsigned)duk_require_number(ctx, 1);
+    float maxDistance = (float)duk_require_number(ctx, 2);
+    RayQueryResult ret = thisObj->Raycast(ray, layerMask, maxDistance);
+    PushValueObjectCopy<RayQueryResult>(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_RaycastAll_int_int_unsigned(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    int x = (int)duk_require_number(ctx, 0);
+    int y = (int)duk_require_number(ctx, 1);
+    unsigned layerMask = (unsigned)duk_require_number(ctx, 2);
+    RayQueryResultVector ret = thisObj->RaycastAll(x, y, layerMask);
+    PushValueObjectVector(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_RaycastAll_Point_unsigned(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    Point& point = *GetCheckedValueObject<Point>(ctx, 0, Point_ID);
+    unsigned layerMask = (unsigned)duk_require_number(ctx, 1);
+    RayQueryResultVector ret = thisObj->RaycastAll(point, layerMask);
+    PushValueObjectVector(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_RaycastAll_int_int(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    int x = (int)duk_require_number(ctx, 0);
+    int y = (int)duk_require_number(ctx, 1);
+    RayQueryResultVector ret = thisObj->RaycastAll(x, y);
+    PushValueObjectVector(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_RaycastAll_Point(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    Point& point = *GetCheckedValueObject<Point>(ctx, 0, Point_ID);
+    RayQueryResultVector ret = thisObj->RaycastAll(point);
+    PushValueObjectVector(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_RaycastAll_Ray_unsigned(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    Ray& ray = *GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
+    unsigned layerMask = (unsigned)duk_require_number(ctx, 1);
+    RayQueryResultVector ret = thisObj->RaycastAll(ray, layerMask);
+    PushValueObjectVector(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_RaycastAll_int_int_unsigned_float(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    int x = (int)duk_require_number(ctx, 0);
+    int y = (int)duk_require_number(ctx, 1);
+    unsigned layerMask = (unsigned)duk_require_number(ctx, 2);
+    float maxDistance = (float)duk_require_number(ctx, 3);
+    RayQueryResultVector ret = thisObj->RaycastAll(x, y, layerMask, maxDistance);
+    PushValueObjectVector(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_RaycastAll_Point_unsigned_float(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    Point& point = *GetCheckedValueObject<Point>(ctx, 0, Point_ID);
+    unsigned layerMask = (unsigned)duk_require_number(ctx, 1);
+    float maxDistance = (float)duk_require_number(ctx, 2);
+    RayQueryResultVector ret = thisObj->RaycastAll(point, layerMask, maxDistance);
+    PushValueObjectVector(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_RaycastAll_int_int_float(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    int x = (int)duk_require_number(ctx, 0);
+    int y = (int)duk_require_number(ctx, 1);
+    float maxDistance = (float)duk_require_number(ctx, 2);
+    RayQueryResultVector ret = thisObj->RaycastAll(x, y, maxDistance);
+    PushValueObjectVector(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_RaycastAll_Point_float(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    Point& point = *GetCheckedValueObject<Point>(ctx, 0, Point_ID);
+    float maxDistance = (float)duk_require_number(ctx, 1);
+    RayQueryResultVector ret = thisObj->RaycastAll(point, maxDistance);
+    PushValueObjectVector(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
+static duk_ret_t GraphicsWorld_RaycastAll_Ray_unsigned_float(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    Ray& ray = *GetCheckedValueObject<Ray>(ctx, 0, Ray_ID);
+    unsigned layerMask = (unsigned)duk_require_number(ctx, 1);
+    float maxDistance = (float)duk_require_number(ctx, 2);
+    RayQueryResultVector ret = thisObj->RaycastAll(ray, layerMask, maxDistance);
+    PushValueObjectVector(ctx, ret, RayQueryResult_ID, RayQueryResult_Finalizer);
+    return 1;
+}
+
 static duk_ret_t GraphicsWorld_IsEntityVisible_Entity(duk_context* ctx)
 {
     GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
@@ -277,6 +505,18 @@ static duk_ret_t GraphicsWorld_IsActive(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t GraphicsWorld_DebugDrawLine_float3_float3_Color_bool(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    float3& start = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float3& end = *GetCheckedValueObject<float3>(ctx, 1, float3_ID);
+    Color& clr = *GetCheckedValueObject<Color>(ctx, 2, Color_ID);
+    bool depthTest = numArgs > 3 ? duk_require_boolean(ctx, 3) : true;
+    thisObj->DebugDrawLine(start, end, clr, depthTest);
+    return 0;
+}
+
 static duk_ret_t GraphicsWorld_DebugDrawLine_float3_float3_float_float_float_bool(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -288,6 +528,47 @@ static duk_ret_t GraphicsWorld_DebugDrawLine_float3_float3_float_float_float_boo
     float b = (float)duk_require_number(ctx, 4);
     bool depthTest = numArgs > 5 ? duk_require_boolean(ctx, 5) : true;
     thisObj->DebugDrawLine(start, end, r, g, b, depthTest);
+    return 0;
+}
+
+static duk_ret_t GraphicsWorld_DebugDrawTransform_Transform_float_float_Color_bool(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    Transform& t = *GetCheckedValueObject<Transform>(ctx, 0, Transform_ID);
+    float axisLength = (float)duk_require_number(ctx, 1);
+    float boxSize = (float)duk_require_number(ctx, 2);
+    Color& clr = *GetCheckedValueObject<Color>(ctx, 3, Color_ID);
+    bool depthTest = numArgs > 4 ? duk_require_boolean(ctx, 4) : true;
+    thisObj->DebugDrawTransform(t, axisLength, boxSize, clr, depthTest);
+    return 0;
+}
+
+static duk_ret_t GraphicsWorld_DebugDrawTransform_Transform_float_float_float_float_float_bool(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    Transform& t = *GetCheckedValueObject<Transform>(ctx, 0, Transform_ID);
+    float axisLength = (float)duk_require_number(ctx, 1);
+    float boxSize = (float)duk_require_number(ctx, 2);
+    float r = (float)duk_require_number(ctx, 3);
+    float g = (float)duk_require_number(ctx, 4);
+    float b = (float)duk_require_number(ctx, 5);
+    bool depthTest = numArgs > 6 ? duk_require_boolean(ctx, 6) : true;
+    thisObj->DebugDrawTransform(t, axisLength, boxSize, r, g, b, depthTest);
+    return 0;
+}
+
+static duk_ret_t GraphicsWorld_DebugDrawFloat3x4_float3x4_float_float_Color_bool(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    float3x4& t = *GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
+    float axisLength = (float)duk_require_number(ctx, 1);
+    float boxSize = (float)duk_require_number(ctx, 2);
+    Color& clr = *GetCheckedValueObject<Color>(ctx, 3, Color_ID);
+    bool depthTest = numArgs > 4 ? duk_require_boolean(ctx, 4) : true;
+    thisObj->DebugDrawFloat3x4(t, axisLength, boxSize, clr, depthTest);
     return 0;
 }
 
@@ -316,6 +597,20 @@ static duk_ret_t GraphicsWorld_DebugDrawAxes_float3x4_bool(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t GraphicsWorld_DebugDrawLight_float3x4_int_float_float_Color_bool(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    float3x4& t = *GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
+    int lightType = (int)duk_require_number(ctx, 1);
+    float range = (float)duk_require_number(ctx, 2);
+    float spotAngle = (float)duk_require_number(ctx, 3);
+    Color& clr = *GetCheckedValueObject<Color>(ctx, 4, Color_ID);
+    bool depthTest = numArgs > 5 ? duk_require_boolean(ctx, 5) : true;
+    thisObj->DebugDrawLight(t, lightType, range, spotAngle, clr, depthTest);
+    return 0;
+}
+
 static duk_ret_t GraphicsWorld_DebugDrawLight_float3x4_int_float_float_float_float_float_bool(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -329,6 +624,18 @@ static duk_ret_t GraphicsWorld_DebugDrawLight_float3x4_int_float_float_float_flo
     float b = (float)duk_require_number(ctx, 6);
     bool depthTest = numArgs > 7 ? duk_require_boolean(ctx, 7) : true;
     thisObj->DebugDrawLight(t, lightType, range, spotAngle, r, g, b, depthTest);
+    return 0;
+}
+
+static duk_ret_t GraphicsWorld_DebugDrawCamera_float3x4_float_Color_bool(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    float3x4& t = *GetCheckedValueObject<float3x4>(ctx, 0, float3x4_ID);
+    float size = (float)duk_require_number(ctx, 1);
+    Color& clr = *GetCheckedValueObject<Color>(ctx, 2, Color_ID);
+    bool depthTest = numArgs > 3 ? duk_require_boolean(ctx, 3) : true;
+    thisObj->DebugDrawCamera(t, size, clr, depthTest);
     return 0;
 }
 
@@ -346,6 +653,19 @@ static duk_ret_t GraphicsWorld_DebugDrawCamera_float3x4_float_float_float_float_
     return 0;
 }
 
+static duk_ret_t GraphicsWorld_DebugDrawSoundSource_float3_float_float_Color_bool(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    float3& soundPos = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float soundInnerRadius = (float)duk_require_number(ctx, 1);
+    float soundOuterRadius = (float)duk_require_number(ctx, 2);
+    Color& clr = *GetCheckedValueObject<Color>(ctx, 3, Color_ID);
+    bool depthTest = numArgs > 4 ? duk_require_boolean(ctx, 4) : true;
+    thisObj->DebugDrawSoundSource(soundPos, soundInnerRadius, soundOuterRadius, clr, depthTest);
+    return 0;
+}
+
 static duk_ret_t GraphicsWorld_DebugDrawSoundSource_float3_float_float_float_float_float_bool(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -358,6 +678,19 @@ static duk_ret_t GraphicsWorld_DebugDrawSoundSource_float3_float_float_float_flo
     float b = (float)duk_require_number(ctx, 5);
     bool depthTest = numArgs > 6 ? duk_require_boolean(ctx, 6) : true;
     thisObj->DebugDrawSoundSource(soundPos, soundInnerRadius, soundOuterRadius, r, g, b, depthTest);
+    return 0;
+}
+
+static duk_ret_t GraphicsWorld_DebugDrawSphere_float3_float_int_Color_bool(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    float3& center = *GetCheckedValueObject<float3>(ctx, 0, float3_ID);
+    float radius = (float)duk_require_number(ctx, 1);
+    int vertices = (int)duk_require_number(ctx, 2);
+    Color& clr = *GetCheckedValueObject<Color>(ctx, 3, Color_ID);
+    bool depthTest = numArgs > 4 ? duk_require_boolean(ctx, 4) : true;
+    thisObj->DebugDrawSphere(center, radius, vertices, clr, depthTest);
     return 0;
 }
 
@@ -392,26 +725,164 @@ static duk_ret_t GraphicsWorld_StopViewTracking_Entity(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t GraphicsWorld_Raycast_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 4 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3))
+        return GraphicsWorld_Raycast_int_int_unsigned_float(ctx);
+    if (numArgs == 3 && GetValueObject<Ray>(ctx, 0, Ray_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+        return GraphicsWorld_Raycast_Ray_unsigned_float(ctx);
+    if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+        return GraphicsWorld_Raycast_int_int_float(ctx);
+    if (numArgs == 3 && GetValueObject<Point>(ctx, 0, Point_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+        return GraphicsWorld_Raycast_Point_unsigned_float(ctx);
+    if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+        return GraphicsWorld_Raycast_int_int_unsigned(ctx);
+    if (numArgs == 2 && GetValueObject<Point>(ctx, 0, Point_ID) && duk_is_number(ctx, 1))
+        return GraphicsWorld_Raycast_Point_float(ctx);
+    if (numArgs == 2 && GetValueObject<Ray>(ctx, 0, Ray_ID) && duk_is_number(ctx, 1))
+        return GraphicsWorld_Raycast_Ray_unsigned(ctx);
+    if (numArgs == 2 && GetValueObject<Point>(ctx, 0, Point_ID) && duk_is_number(ctx, 1))
+        return GraphicsWorld_Raycast_Point_unsigned(ctx);
+    if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
+        return GraphicsWorld_Raycast_int_int(ctx);
+    if (numArgs == 1 && GetValueObject<Point>(ctx, 0, Point_ID))
+        return GraphicsWorld_Raycast_Point(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t GraphicsWorld_RaycastAll_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 4 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3))
+        return GraphicsWorld_RaycastAll_int_int_unsigned_float(ctx);
+    if (numArgs == 3 && GetValueObject<Ray>(ctx, 0, Ray_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+        return GraphicsWorld_RaycastAll_Ray_unsigned_float(ctx);
+    if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+        return GraphicsWorld_RaycastAll_int_int_float(ctx);
+    if (numArgs == 3 && GetValueObject<Point>(ctx, 0, Point_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+        return GraphicsWorld_RaycastAll_Point_unsigned_float(ctx);
+    if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2))
+        return GraphicsWorld_RaycastAll_int_int_unsigned(ctx);
+    if (numArgs == 2 && GetValueObject<Point>(ctx, 0, Point_ID) && duk_is_number(ctx, 1))
+        return GraphicsWorld_RaycastAll_Point_float(ctx);
+    if (numArgs == 2 && GetValueObject<Ray>(ctx, 0, Ray_ID) && duk_is_number(ctx, 1))
+        return GraphicsWorld_RaycastAll_Ray_unsigned(ctx);
+    if (numArgs == 2 && GetValueObject<Point>(ctx, 0, Point_ID) && duk_is_number(ctx, 1))
+        return GraphicsWorld_RaycastAll_Point_unsigned(ctx);
+    if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
+        return GraphicsWorld_RaycastAll_int_int(ctx);
+    if (numArgs == 1 && GetValueObject<Point>(ctx, 0, Point_ID))
+        return GraphicsWorld_RaycastAll_Point(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t GraphicsWorld_DebugDrawLine_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs >= 5 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3) && duk_is_number(ctx, 4))
+        return GraphicsWorld_DebugDrawLine_float3_float3_float_float_float_bool(ctx);
+    if (numArgs >= 3 && GetValueObject<float3>(ctx, 0, float3_ID) && GetValueObject<float3>(ctx, 1, float3_ID) && GetValueObject<Color>(ctx, 2, Color_ID))
+        return GraphicsWorld_DebugDrawLine_float3_float3_Color_bool(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t GraphicsWorld_DebugDrawTransform_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs >= 6 && GetValueObject<Transform>(ctx, 0, Transform_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3) && duk_is_number(ctx, 4) && duk_is_number(ctx, 5))
+        return GraphicsWorld_DebugDrawTransform_Transform_float_float_float_float_float_bool(ctx);
+    if (numArgs >= 4 && GetValueObject<Transform>(ctx, 0, Transform_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && GetValueObject<Color>(ctx, 3, Color_ID))
+        return GraphicsWorld_DebugDrawTransform_Transform_float_float_Color_bool(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t GraphicsWorld_DebugDrawFloat3x4_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs >= 6 && GetValueObject<float3x4>(ctx, 0, float3x4_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3) && duk_is_number(ctx, 4) && duk_is_number(ctx, 5))
+        return GraphicsWorld_DebugDrawFloat3x4_float3x4_float_float_float_float_float_bool(ctx);
+    if (numArgs >= 4 && GetValueObject<float3x4>(ctx, 0, float3x4_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && GetValueObject<Color>(ctx, 3, Color_ID))
+        return GraphicsWorld_DebugDrawFloat3x4_float3x4_float_float_Color_bool(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t GraphicsWorld_DebugDrawLight_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs >= 7 && GetValueObject<float3x4>(ctx, 0, float3x4_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3) && duk_is_number(ctx, 4) && duk_is_number(ctx, 5) && duk_is_number(ctx, 6))
+        return GraphicsWorld_DebugDrawLight_float3x4_int_float_float_float_float_float_bool(ctx);
+    if (numArgs >= 5 && GetValueObject<float3x4>(ctx, 0, float3x4_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3) && GetValueObject<Color>(ctx, 4, Color_ID))
+        return GraphicsWorld_DebugDrawLight_float3x4_int_float_float_Color_bool(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t GraphicsWorld_DebugDrawCamera_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs >= 5 && GetValueObject<float3x4>(ctx, 0, float3x4_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3) && duk_is_number(ctx, 4))
+        return GraphicsWorld_DebugDrawCamera_float3x4_float_float_float_float_bool(ctx);
+    if (numArgs >= 3 && GetValueObject<float3x4>(ctx, 0, float3x4_ID) && duk_is_number(ctx, 1) && GetValueObject<Color>(ctx, 2, Color_ID))
+        return GraphicsWorld_DebugDrawCamera_float3x4_float_Color_bool(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t GraphicsWorld_DebugDrawSoundSource_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs >= 6 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3) && duk_is_number(ctx, 4) && duk_is_number(ctx, 5))
+        return GraphicsWorld_DebugDrawSoundSource_float3_float_float_float_float_float_bool(ctx);
+    if (numArgs >= 4 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && GetValueObject<Color>(ctx, 3, Color_ID))
+        return GraphicsWorld_DebugDrawSoundSource_float3_float_float_Color_bool(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t GraphicsWorld_DebugDrawSphere_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs >= 6 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && duk_is_number(ctx, 3) && duk_is_number(ctx, 4) && duk_is_number(ctx, 5))
+        return GraphicsWorld_DebugDrawSphere_float3_float_int_float_float_float_bool(ctx);
+    if (numArgs >= 4 && GetValueObject<float3>(ctx, 0, float3_ID) && duk_is_number(ctx, 1) && duk_is_number(ctx, 2) && GetValueObject<Color>(ctx, 3, Color_ID))
+        return GraphicsWorld_DebugDrawSphere_float3_float_int_Color_bool(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
+static duk_ret_t GraphicsWorld_DefaultSceneAmbientLightColor_Static(duk_context* ctx)
+{
+    Color ret = GraphicsWorld::DefaultSceneAmbientLightColor();
+    PushValueObjectCopy<Color>(ctx, ret, Color_ID, Color_Finalizer);
+    return 1;
+}
+
 static const duk_function_list_entry GraphicsWorld_Functions[] = {
     {"SetDefaultSceneFog", GraphicsWorld_SetDefaultSceneFog, 0}
+    ,{"Raycast", GraphicsWorld_Raycast_Selector, DUK_VARARGS}
+    ,{"RaycastAll", GraphicsWorld_RaycastAll_Selector, DUK_VARARGS}
     ,{"IsEntityVisible", GraphicsWorld_IsEntityVisible_Entity, 1}
     ,{"VisibleEntities", GraphicsWorld_VisibleEntities, 0}
     ,{"IsActive", GraphicsWorld_IsActive, 0}
-    ,{"DebugDrawLine", GraphicsWorld_DebugDrawLine_float3_float3_float_float_float_bool, DUK_VARARGS}
-    ,{"DebugDrawFloat3x4", GraphicsWorld_DebugDrawFloat3x4_float3x4_float_float_float_float_float_bool, DUK_VARARGS}
+    ,{"DebugDrawLine", GraphicsWorld_DebugDrawLine_Selector, DUK_VARARGS}
+    ,{"DebugDrawTransform", GraphicsWorld_DebugDrawTransform_Selector, DUK_VARARGS}
+    ,{"DebugDrawFloat3x4", GraphicsWorld_DebugDrawFloat3x4_Selector, DUK_VARARGS}
     ,{"DebugDrawAxes", GraphicsWorld_DebugDrawAxes_float3x4_bool, DUK_VARARGS}
-    ,{"DebugDrawLight", GraphicsWorld_DebugDrawLight_float3x4_int_float_float_float_float_float_bool, DUK_VARARGS}
-    ,{"DebugDrawCamera", GraphicsWorld_DebugDrawCamera_float3x4_float_float_float_float_bool, DUK_VARARGS}
-    ,{"DebugDrawSoundSource", GraphicsWorld_DebugDrawSoundSource_float3_float_float_float_float_float_bool, DUK_VARARGS}
-    ,{"DebugDrawSphere", GraphicsWorld_DebugDrawSphere_float3_float_int_float_float_float_bool, DUK_VARARGS}
+    ,{"DebugDrawLight", GraphicsWorld_DebugDrawLight_Selector, DUK_VARARGS}
+    ,{"DebugDrawCamera", GraphicsWorld_DebugDrawCamera_Selector, DUK_VARARGS}
+    ,{"DebugDrawSoundSource", GraphicsWorld_DebugDrawSoundSource_Selector, DUK_VARARGS}
+    ,{"DebugDrawSphere", GraphicsWorld_DebugDrawSphere_Selector, DUK_VARARGS}
     ,{"StartViewTracking", GraphicsWorld_StartViewTracking_Entity, 1}
     ,{"StopViewTracking", GraphicsWorld_StopViewTracking_Entity, 1}
+    ,{nullptr, nullptr, 0}
+};
+
+static const duk_function_list_entry GraphicsWorld_StaticFunctions[] = {
+    {"DefaultSceneAmbientLightColor", GraphicsWorld_DefaultSceneAmbientLightColor_Static, 0}
     ,{nullptr, nullptr, 0}
 };
 
 void Expose_GraphicsWorld(duk_context* ctx)
 {
     duk_push_object(ctx);
+    duk_put_function_list(ctx, -1, GraphicsWorld_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, GraphicsWorld_Functions);
     DefineProperty(ctx, "entityEnterView", GraphicsWorld_Get_EntityEnterView, nullptr);

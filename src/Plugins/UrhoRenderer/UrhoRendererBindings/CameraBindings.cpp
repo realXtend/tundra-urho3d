@@ -20,7 +20,15 @@ using namespace std;
 namespace JSBindings
 {
 
+static const char* Ray_ID = "Ray";
+static const char* Point_ID = "Point";
 static const char* float4x4_ID = "float4x4";
+
+static duk_ret_t Ray_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<Ray>(ctx, Ray_ID);
+    return 0;
+}
 
 static duk_ret_t float4x4_Finalizer(duk_context* ctx)
 {
@@ -403,6 +411,35 @@ static duk_ret_t Camera_VisibleEntities(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Camera_ViewportPointToRay_float_float(duk_context* ctx)
+{
+    Camera* thisObj = GetThisWeakObject<Camera>(ctx);
+    float x = (float)duk_require_number(ctx, 0);
+    float y = (float)duk_require_number(ctx, 1);
+    Ray ret = thisObj->ViewportPointToRay(x, y);
+    PushValueObjectCopy<Ray>(ctx, ret, Ray_ID, Ray_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Camera_ScreenPointToRay_uint_uint(duk_context* ctx)
+{
+    Camera* thisObj = GetThisWeakObject<Camera>(ctx);
+    uint x = (uint)duk_require_number(ctx, 0);
+    uint y = (uint)duk_require_number(ctx, 1);
+    Ray ret = thisObj->ScreenPointToRay(x, y);
+    PushValueObjectCopy<Ray>(ctx, ret, Ray_ID, Ray_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Camera_ScreenPointToRay_Point(duk_context* ctx)
+{
+    Camera* thisObj = GetThisWeakObject<Camera>(ctx);
+    Point& point = *GetCheckedValueObject<Point>(ctx, 0, Point_ID);
+    Ray ret = thisObj->ScreenPointToRay(point);
+    PushValueObjectCopy<Ray>(ctx, ret, Ray_ID, Ray_Finalizer);
+    return 1;
+}
+
 static duk_ret_t Camera_ViewMatrix(duk_context* ctx)
 {
     Camera* thisObj = GetThisWeakObject<Camera>(ctx);
@@ -614,6 +651,16 @@ static duk_ret_t Camera_ShouldBeSerialized_bool_bool(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Camera_ScreenPointToRay_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 2 && duk_is_number(ctx, 0) && duk_is_number(ctx, 1))
+        return Camera_ScreenPointToRay_uint_uint(ctx);
+    if (numArgs == 1 && GetValueObject<Point>(ctx, 0, Point_ID))
+        return Camera_ScreenPointToRay_Point(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
 static duk_ret_t Camera_EnsureTypeNameWithoutPrefix_Static_String(duk_context* ctx)
 {
     String tn = duk_require_string(ctx, 0);
@@ -629,6 +676,8 @@ static const duk_function_list_entry Camera_Functions[] = {
     ,{"SetAspectRatio", Camera_SetAspectRatio_float, 1}
     ,{"IsEntityVisible", Camera_IsEntityVisible_Entity, 1}
     ,{"VisibleEntities", Camera_VisibleEntities, 0}
+    ,{"ViewportPointToRay", Camera_ViewportPointToRay_float_float, 2}
+    ,{"ScreenPointToRay", Camera_ScreenPointToRay_Selector, DUK_VARARGS}
     ,{"ViewMatrix", Camera_ViewMatrix, 0}
     ,{"ProjectionMatrix", Camera_ProjectionMatrix, 0}
     ,{"TypeName", Camera_TypeName, 0}
