@@ -1126,6 +1126,9 @@ namespace BindingsGenerator
 
         static bool IsRefCounted(Symbol classSymbol)
         {
+            if (classSymbol.name.Contains("JavaScriptInstance"))
+                return true;
+
             // We don't have access to Urho includes, but can check for the presence of macros. \todo Better checks or explicit listings of known refcounted classes if needed
             return classSymbol.FindChildByName("URHO3D_OBJECT") != null || classSymbol.FindChildByName("COMPONENT_NAME") != null || classSymbol.FindChildByName("ParentEntity") != null || classSymbol.FindChildByName("DiskSource") != null;
         }
@@ -1134,7 +1137,7 @@ namespace BindingsGenerator
         {
             if (isRefCounted.ContainsKey(className))
                 return isRefCounted[className];
-            else if (className == "Entity" || className == "IComponent" || className == "IAsset")
+            else if (className == "Entity" || className == "IComponent" || className == "IAsset" || className == "JavaScriptInstance")
                 return true;
             else
                 return false;

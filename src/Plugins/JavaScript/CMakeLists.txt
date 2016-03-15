@@ -8,6 +8,7 @@ file(GLOB H_FILES *.h)
 
 AddSourceFolder(CoreBindings)
 AddSourceFolder(MathBindings)
+AddSourceFolder(JavaScriptBindings)
 
 set (SOURCE_FILES ${CPP_FILES} ${C_FILES} ${H_FILES})
 

@@ -12,6 +12,7 @@
 #include "JavaScriptInstance.h"
 #include "MathBindings/MathBindings.h"
 #include "CoreBindings/CoreBindings.h"
+#include "JavaScriptBindings/JavaScriptBindings.h"
 
 #include <Urho3D/Core/Profiler.h>
 
@@ -135,9 +136,13 @@ void JavaScript::PrepareScriptInstance(JavaScriptInstance* instance, Script* scr
         URHO3D_PROFILE(ExposeCoreClasses);
         ExposeCoreClasses(ctx);
     }
+    {
+        URHO3D_PROFILE(ExposeJavaScriptClasses);
+        ExposeJavaScriptClasses(ctx);
+    }
 
-    /// \todo Register engine and other services
     instance->RegisterService("framework", Fw());
+    instance->RegisterService("engine", instance);
 
     if (scriptComp)
     {

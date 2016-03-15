@@ -22,6 +22,8 @@ class Script;
 /// Javascript script instance used with Script component.
 class JAVASCRIPT_API JavaScriptInstance : public IScriptInstance
 {
+    URHO3D_OBJECT(JavaScriptInstance, IScriptInstance);
+
 public:
     /// Creates script engine for this script instance and loads the script but doesn't run it yet.
     /** @param scriptRef Script asset reference.
@@ -41,13 +43,13 @@ public:
     /// Destroys script engine created for this script instance.
     virtual ~JavaScriptInstance();
 
-    /// IScriptInstance override.
+    /// IScriptInstance override. [noscript]
     void Load();
 
-    /// IScriptInstance override.
+    /// IScriptInstance override. [noscript]
     void Unload();
 
-    /// IScriptInstance override.
+    /// IScriptInstance override. [noscript]
     void Run();
 
     /// Evaluate JavaScript in the instance.
@@ -67,7 +69,7 @@ public:
     @param path is relative path from bin/ to file. Example jsmodules/apitest/myscript.js */
     void IncludeFile(const String &file);
 
-    /// Register a service object under a global property. It must derive from Urho3D::Object for type identification.
+    /// Register a service object under a global property. It must derive from Urho3D::Object for type identification. [noscript]
     /** The object is held in a weak pointer on the JS side, so it must be strongly held alive elsewhere. */
     void RegisterService(const String& name, Urho3D::Object* object);
 

@@ -47,6 +47,7 @@ static const String signalSupportCode =
     "}\n";
 
 JavaScriptInstance::JavaScriptInstance(const String &fileName, JavaScript *module, Script* owner) :
+    IScriptInstance(module->GetContext()),
     ctx_(0),
     sourceFile_(fileName),
     module_(module),
@@ -59,6 +60,7 @@ JavaScriptInstance::JavaScriptInstance(const String &fileName, JavaScript *modul
 }
 
 JavaScriptInstance::JavaScriptInstance(ScriptAssetPtr scriptRef, JavaScript *module, Script* owner) :
+    IScriptInstance(module->GetContext()),
     ctx_(0),
     module_(module),
     owner_(owner),
@@ -74,6 +76,7 @@ JavaScriptInstance::JavaScriptInstance(ScriptAssetPtr scriptRef, JavaScript *mod
 }
 
 JavaScriptInstance::JavaScriptInstance(const Vector<ScriptAssetPtr>& scriptRefs, JavaScript *module, Script* owner) :
+    IScriptInstance(module->GetContext()),
     ctx_(0),
     module_(module),
     owner_(owner),

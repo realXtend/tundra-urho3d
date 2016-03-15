@@ -5,17 +5,19 @@
 #include "TundraCoreApi.h"
 #include "CoreTypes.h"
 
-#include <Urho3D/Container/RefCounted.h>
+#include <Urho3D/Core/Object.h>
 
 namespace Tundra
 {
 
 /// Interface for different script instances
-class TUNDRACORE_API IScriptInstance : public RefCounted
+class TUNDRACORE_API IScriptInstance : public Object
 {
+    URHO3D_OBJECT(IScriptInstance, Object);
+
 public:
     /// Default constuctor.
-    IScriptInstance() : trusted_(false) {}
+    IScriptInstance(Urho3D::Context* context) : Object(context), trusted_(false) {}
 
     /// Destructor.
     virtual ~IScriptInstance() {}
