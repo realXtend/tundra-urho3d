@@ -6,4 +6,4 @@ set ORIGINAL_DIR=%CD%
 cd %TUNDRACORE_DIR%
 doxygen ..\Plugins\JavaScript\BindingsGenerator\CoreBindings.doxyfile
 cd %ORIGINAL_DIR%
-bin\release\BindingsGenerator.exe ..\CoreBindings\CoreDocs\xml ..\CoreBindings %TUNDRACORE_DIR% Scene Entity EntityAction IComponent Name DynamicComponent AttributeChange Framework FrameAPI SceneAPI ConfigAPI AssetAPI IAsset AssetReference AssetReferenceList Transform _float3 _float4 _Quat _float3x3 _float3x4 _float4x4
+bin\release\BindingsGenerator.exe ..\CoreBindings\CoreDocs\xml ..\CoreBindings %TUNDRACORE_DIR% Scene Entity EntityAction IComponent Name DynamicComponent AttributeChange Framework FrameAPI SceneAPI ConfigAPI AssetAPI IAsset AssetReference AssetReferenceList RayQueryResult Transform _float3 _float4 _Quat _float3x3 _float3x4 _float4x4

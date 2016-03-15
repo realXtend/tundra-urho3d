@@ -48,6 +48,12 @@ static const char* Capsule_ID = "Capsule";
 static const char* Ray_ID = "Ray";
 static const char* Line_ID = "Line";
 
+static duk_ret_t float3_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float3>(ctx, float3_ID);
+    return 0;
+}
+
 static duk_ret_t OBB_Finalizer(duk_context* ctx)
 {
     FinalizeValueObject<OBB>(ctx, OBB_ID);
@@ -57,12 +63,6 @@ static duk_ret_t OBB_Finalizer(duk_context* ctx)
 static duk_ret_t Sphere_Finalizer(duk_context* ctx)
 {
     FinalizeValueObject<Sphere>(ctx, Sphere_ID);
-    return 0;
-}
-
-static duk_ret_t float3_Finalizer(duk_context* ctx)
-{
-    FinalizeValueObject<float3>(ctx, float3_ID);
     return 0;
 }
 

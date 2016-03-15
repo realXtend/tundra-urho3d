@@ -25,6 +25,12 @@ static const char* float3x4_ID = "float3x4";
 static const char* float4x4_ID = "float4x4";
 static const char* Quat_ID = "Quat";
 
+static duk_ret_t float3_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float3>(ctx, float3_ID);
+    return 0;
+}
+
 static duk_ret_t float3x4_Finalizer(duk_context* ctx)
 {
     FinalizeValueObject<float3x4>(ctx, float3x4_ID);

@@ -66,10 +66,10 @@ public:
     /// Order by scene name
     bool operator < (const Scene &other) const { return Name() < other.Name(); }
     
-    /// Add a subsystem world (GraphicsWorld, PhysicsWorld)
+    /// Add a subsystem world (GraphicsWorld, PhysicsWorld) [noscript]
     void AddSubsystem(const String& propertyName, Object* system);
 
-    /// Remove a subsystem world
+    /// Remove a subsystem world [noscript]
     void RemoveSubsystem(const String& propertyName);
 
     /// Return a subsystem world by name

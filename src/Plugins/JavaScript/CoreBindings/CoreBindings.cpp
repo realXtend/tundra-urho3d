@@ -22,6 +22,7 @@ void Expose_AssetAPI(duk_context* ctx);
 void Expose_IAsset(duk_context* ctx);
 void Expose_AssetReference(duk_context* ctx);
 void Expose_AssetReferenceList(duk_context* ctx);
+void Expose_RayQueryResult(duk_context* ctx);
 
 void ExposeCoreClasses(duk_context* ctx)
 {
@@ -41,6 +42,7 @@ void ExposeCoreClasses(duk_context* ctx)
     Expose_IAsset(ctx);
     Expose_AssetReference(ctx);
     Expose_AssetReferenceList(ctx);
+    Expose_RayQueryResult(ctx);
 }
 
 }

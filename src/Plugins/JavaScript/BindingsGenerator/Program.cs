@@ -237,6 +237,8 @@ namespace BindingsGenerator
             // Hack: these classes are in the same include file
             if (name == "AssetReferenceList")
                 name = "AssetReference";
+            if (name == "RayQueryResult")
+                return "IRenderer.h";
 
             if (classHeaderFiles.ContainsKey(name))
                 return classHeaderFiles[name];
@@ -661,9 +663,9 @@ namespace BindingsGenerator
                     // Get accessor
                     {
                         string typeName = SanitateTypeName(child.type);
-                        if (Symbol.IsPODType(child.type) || IsRefCounted(child.type) || child.type == "String" || child.type == "string" || child.type.Contains("Vector"))
+                        if (Symbol.IsPODType(typeName) || IsRefCounted(typeName) || typeName == "String" || typeName == "string" || typeName.Contains("Vector"))
                         {
-                            if (child.type.Contains("Vector"))
+                            if (typeName.Contains("Vector"))
                             {
                                 typeName = typeName.Substring(0, typeName.Length - 6);
                                 typeName = SanitateTemplateType(typeName);
@@ -932,12 +934,27 @@ namespace BindingsGenerator
             }
         }
 
+        static bool HasFunctions(Dictionary<string, List<Overload> > overloads)
+        {
+            foreach (KeyValuePair<string, List<Overload>> kvp in overloads)
+            {
+                // Constructor does not appear in the function list; check if there's anything else
+                if (kvp.Value[0].functionName.Contains("Ctor"))
+                    continue;
+                else
+                    return true;
+            }
+
+            return false;
+        }
+
         static void GenerateFunctionList(Symbol classSymbol, TextWriter tw, Dictionary<string, List<Overload> > overloads, bool generateStatic)
         {
+            if (!HasFunctions(overloads))
+                return;
+
             string className = StripNamespace(classSymbol.name);
 
-            if (overloads.Count == 0)
-                return;
             if (!generateStatic)
                 tw.WriteLine("static const duk_function_list_entry " + className + "_Functions[] = {");
             else
@@ -965,6 +982,8 @@ namespace BindingsGenerator
 
         static void GenerateExposeFunction(Symbol classSymbol, TextWriter tw, Dictionary<string, List<Overload> > overloads, Dictionary<string, List<Overload> > staticOverloads, List<Property> properties)
         {
+            bool hasFunctions = HasFunctions(overloads);
+            bool hasStaticFunctions = HasFunctions(staticOverloads);
             string className = StripNamespace(classSymbol.name);
 
             tw.WriteLine("void Expose_" + className + DukSignature());
@@ -984,7 +1003,7 @@ namespace BindingsGenerator
             else
                 tw.WriteLine(Indent(1) + "duk_push_object(ctx);");
 
-            if (staticOverloads.Count > 0)
+            if (hasStaticFunctions)
                 tw.WriteLine(Indent(1) + "duk_put_function_list(ctx, -1, " + className + "_StaticFunctions);");
             foreach (Symbol child in classSymbol.children)
             {
@@ -998,10 +1017,10 @@ namespace BindingsGenerator
                 }
             }
             
-            if (properties.Count > 0 || overloads.Count > 0)
+            if (properties.Count > 0 || hasFunctions)
             {
                 tw.WriteLine(Indent(1) + "duk_push_object(ctx);");
-                if (overloads.Count > 0)
+                if (hasFunctions)
                     tw.WriteLine(Indent(1) + "duk_put_function_list(ctx, -1, " + className + "_Functions);");
                 foreach (Property p in properties)
                 {
@@ -1087,6 +1106,9 @@ namespace BindingsGenerator
                     foreach (Parameter p in child.parameters)
                         AddDependencyIfValid(classSymbol, p.BasicType(), false);
                 }
+
+                if (child.kind == "variable" && !child.isStatic && IsScriptable(child) && child.visibilityLevel == VisibilityLevel.Public && IsSupportedType(child.type))
+                    AddDependencyIfValid(classSymbol, child.type, true);
             }
 
             return dependencies;

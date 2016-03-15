@@ -22,6 +22,12 @@ namespace JSBindings
 
 static const char* AssetReference_ID = "AssetReference";
 
+static duk_ret_t AssetReference_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<AssetReference>(ctx, AssetReference_ID);
+    return 0;
+}
+
 
 static const char* AssetReferenceList_ID = "AssetReferenceList";
 
@@ -36,12 +42,6 @@ static duk_ret_t AssetReferenceList_Set_refs(duk_context* ctx)
     AssetReferenceList* thisObj = GetThisValueObject<AssetReferenceList>(ctx, AssetReferenceList_ID);
     AssetReferenceVector refs = GetValueObjectVector<AssetReference>(ctx, 0, AssetReference_ID);
     thisObj->refs = refs;
-    return 0;
-}
-
-static duk_ret_t AssetReference_Finalizer(duk_context* ctx)
-{
-    FinalizeValueObject<AssetReference>(ctx, AssetReference_ID);
     return 0;
 }
 

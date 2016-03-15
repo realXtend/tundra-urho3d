@@ -50,6 +50,12 @@ static const char* Line_ID = "Line";
 static const char* Triangle_ID = "Triangle";
 static const char* Frustum_ID = "Frustum";
 
+static duk_ret_t LineSegment_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<LineSegment>(ctx, LineSegment_ID);
+    return 0;
+}
+
 static duk_ret_t float3_Finalizer(duk_context* ctx)
 {
     FinalizeValueObject<float3>(ctx, float3_ID);
@@ -59,12 +65,6 @@ static duk_ret_t float3_Finalizer(duk_context* ctx)
 static duk_ret_t Circle_Finalizer(duk_context* ctx)
 {
     FinalizeValueObject<Circle>(ctx, Circle_ID);
-    return 0;
-}
-
-static duk_ret_t LineSegment_Finalizer(duk_context* ctx)
-{
-    FinalizeValueObject<LineSegment>(ctx, LineSegment_ID);
     return 0;
 }
 
