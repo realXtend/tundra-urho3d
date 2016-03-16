@@ -32,11 +32,14 @@ MenuBarItem::MenuBarItem(const String &title, Framework *framework, MenuBar *men
 
 MenuBarItem::~MenuBarItem()
 {
-    item_->Remove();
-    item_.Reset();
-
     for (HashMap<String, MenuBarItemPtr>::Iterator iter = subMenus_.Begin(); iter != subMenus_.End(); ++iter)
         iter->second_.Reset();
+
+	if (item_.Get())
+	{
+		item_->Remove();
+		item_.Reset();
+	}
 }
 
 void MenuBarItem::Create(const String &title)

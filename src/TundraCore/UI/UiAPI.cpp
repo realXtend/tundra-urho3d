@@ -8,21 +8,6 @@
 #include "Framework.h"
 #include "FrameAPI.h"
 
-#include <Urho3D/Core/Context.h>
-#include <Urho3D/Engine/Engine.h>
-#include <Urho3D/UI/Font.h>
-#include <Urho3D/Graphics/Graphics.h>
-#include <Urho3D/Core/Profiler.h>
-#include <Urho3D/Graphics/Renderer.h>
-#include <Urho3D/UI/Text.h>
-#include <Urho3D/UI/BorderImage.h>
-#include <Urho3D/UI/UI.h>
-#include <Urho3D/UI/Button.h>
-#include <Urho3D/UI/Menu.h>
-#include <Urho3D/UI/LineEdit.h>
-#include <Urho3D/UI/DropDownList.h>
-#include <Urho3D/Resource/ResourceCache.h>
-
 namespace Tundra
 {
 
@@ -33,8 +18,8 @@ UiAPI::UiAPI(Framework *framework) :
 {
     if (!framework_->HasCommandLineParameter("--nomenubar") && !framework_->HasCommandLineParameter("--nocentralwidget"))
     {
-        menuBar_ = new MenuBar(framework_);
-        // Wait for one frame before intilizing ui elements.
+		CreateMenuBar();
+        // Wait one frame before the rendering window is initialized
         framework_->Frame()->DelayedExecute(0.0f).Connect(this, &UiAPI::Initialize);
     }
 }
@@ -62,7 +47,6 @@ void UiAPI::RelaseMenuBar()
 void UiAPI::Initialize(float /*time*/)
 {
     menuBar_->Show();
-    //CreateMenuBar();
 }
 
 }

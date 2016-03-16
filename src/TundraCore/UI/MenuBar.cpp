@@ -30,12 +30,16 @@ MenuBar::MenuBar(Framework *framework) :
 
 MenuBar::~MenuBar()
 {
-    bar_->Remove();
-    bar_.Reset();
     for (HashMap<String, MenuBarItemPtr>::Iterator iter = rootItems_.Begin(); iter != rootItems_.End(); ++iter)
     {
         iter->second_.Reset();
     }
+
+	if (bar_.Get())
+	{
+		bar_->Remove();
+		bar_.Reset();
+	}
 }
 
 void MenuBar::Create()
