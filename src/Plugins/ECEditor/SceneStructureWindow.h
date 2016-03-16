@@ -89,6 +89,8 @@ public:
 
     SceneStructureItem *FindItem(Object *obj);
 
+	void ToggleItem(SceneStructureItem *item);
+
 protected:
     SceneStructureItem *FindItem(UIElement *element);
     SceneStructureItem *CreateItem(Object *obj, const String &text, SceneStructureItem *parent = 0);

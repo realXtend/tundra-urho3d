@@ -4,6 +4,8 @@
 
 #include "SceneStructureItem.h"
 #include "Framework.h"
+#include "Entity.h"
+#include "IComponent.h"
 
 #include "LoggingFunctions.h"
 
@@ -20,7 +22,7 @@
 namespace Tundra
 {
 
-SceneStructureItem::SceneStructureItem(Context* context, ListView *list) :
+SceneStructureItem::SceneStructureItem(Context* context, ListView *list, Object *object) :
     Object(context)
 {
     list_ = ListViewWeakPtr(list);
@@ -35,18 +37,20 @@ SceneStructureItem::SceneStructureItem(Context* context, ListView *list) :
     toggleButton_->SetVisible(false);
     SubscribeToEvent(toggleButton_, E_RELEASED, URHO3D_HANDLER(SceneStructureItem, OnItemPressed));
 
+	SetData(object);
+
     text_->AddChild(toggleButton_);
 }
 
 SceneStructureItem::~SceneStructureItem()
 {
-    if (toggleButton_.NotNull())
+    if (toggleButton_.Get())
     {
         toggleButton_->Remove();
         toggleButton_.Reset();
     }
 
-    if (text_.NotNull())
+    if (text_.Get())
     {
         text_->Remove();
         text_.Reset();
@@ -58,32 +62,29 @@ void SceneStructureItem::SetIndent(int indent, int indentSpacing)
     toggleButton_->SetPosition(indent * indentSpacing, 0);
 }
 
-void SceneStructureItem::SetType(ItemType type)
-{
-    if (type == type_)
-        return;
-
-    type_ = type;
-    switch (type_)
-    {
-        case ItemType::Entity:
-            toggleButton_->SetVisible(true);
-        break;
-        case ItemType::Component:
-        case ItemType::Attribute:
-            toggleButton_->SetVisible(false);
-        break;
-    }
-}
-
-SceneStructureItem::ItemType SceneStructureItem::Type() const
-{
-    return type_;
-}
-
 void SceneStructureItem::SetData(Object *obj)
 {
     data_ = ObjectWeakPtr(obj);
+
+	if (Entity *entity = dynamic_cast<Tundra::Entity*>(obj))
+	{
+		toggleButton_->SetVisible(true);
+		if (entity->IsTemporary())
+			SetColor(Color(0.9, 0.3, 0.3));
+		else if (entity->IsLocal())
+			SetColor(Color(0.3, 0.3, 0.9));
+	}
+	else
+	{
+		if (IComponent *comp = dynamic_cast<Tundra::IComponent*>(obj))
+		{
+			if (comp->ParentEntity()->IsTemporary())
+				SetColor(Color(0.9, 0.3, 0.3));
+			else if (comp->ParentEntity()->IsLocal())
+				SetColor(Color(0.3, 0.3, 0.9));
+		}
+		toggleButton_->SetVisible(false);
+	}
 }
 
 Object *SceneStructureItem::Data() const
@@ -98,7 +99,7 @@ void SceneStructureItem::SetColor(Color color)
 
 void SceneStructureItem::Refresh()
 {
-    if (list_.NotNull())
+    if (list_.Get())
     {
         bool expanded = list_->IsExpanded(list_->FindItem(text_));
         if (expanded)

@@ -165,7 +165,7 @@ SceneStructureWindow::~SceneStructureWindow()
 
 SceneStructureItem *SceneStructureWindow::CreateItem(Object *obj, const String &text, SceneStructureItem *parent)
 {
-    SceneStructureItem *item = new SceneStructureItem(context_, listView_);
+    SceneStructureItem *item = new SceneStructureItem(context_, listView_, obj);
     if (parent == NULL)
     {
         listView_->InsertItem(listView_->GetNumItems(), item->Widget());
@@ -176,27 +176,6 @@ SceneStructureItem *SceneStructureWindow::CreateItem(Object *obj, const String &
         item->SetIndent(parent->Widget()->GetIndent() + listView_->GetBaseIndent(), listView_->GetIndentSpacing());
     }
     item->SetText(text);
-    if (IComponent *comp = dynamic_cast<IComponent*>(obj))
-    {
-        item->SetType(SceneStructureItem::ItemType::Component);
-        if (comp->ParentEntity() != NULL)
-        {
-            if (comp->ParentEntity()->IsTemporary())
-                item->SetColor(Color(0.9, 0.3, 0.3));
-            else if (comp->ParentEntity()->IsLocal())
-                item->SetColor(Color(0.3, 0.3, 0.9));
-        }
-    }
-    else if (Entity *entity = dynamic_cast<Entity*>(obj))
-    {
-        item->SetType(SceneStructureItem::ItemType::Entity);
-        if (entity->IsTemporary())
-            item->SetColor(Color(0.9, 0.3, 0.3));
-        else if (entity->IsLocal())
-            item->SetColor(Color(0.3, 0.3, 0.9));
-    }
-
-    item->SetData(obj);
     item->OnTogglePressed.Connect(this, &SceneStructureWindow::OnTogglePressed);
 
     ListViewItem info = ListViewItem();
@@ -209,12 +188,7 @@ SceneStructureItem *SceneStructureWindow::CreateItem(Object *obj, const String &
 
 void SceneStructureWindow::OnTogglePressed(SceneStructureItem *item)
 {
-    if (listView_.NotNull())
-    {
-        unsigned index = listView_->FindItem(item->Widget());
-        if (index != M_MAX_UNSIGNED)
-            listView_->ToggleExpand(index);
-    }
+	ToggleItem(item);
 }
 
 void SceneStructureWindow::OnElementClicked(StringHash /*eventType*/, VariantMap &eventData)
@@ -273,11 +247,7 @@ void SceneStructureWindow::OnItemDoubleClicked(StringHash /*eventType*/, Variant
     {
         int button = eventData[Urho3D::MouseButtonDown::P_BUTTON].GetInt();
         if (button == 1) // LEFT BUTTON
-        {
-            unsigned index = listView_->FindItem(item);
-            if (index != M_MAX_UNSIGNED)
-                listView_->ToggleExpand(index);
-        }
+			ToggleItem(FindItem(item));
     }
 }
 
@@ -459,7 +429,7 @@ void SceneStructureWindow::RefreshView()
 
     Vector<EntityPtr> entities = scene_->Entities().Values();
     SceneStructureItem *sceneItem = CreateItem(scene_, "Scene");
-    sceneItem->SetType(SceneStructureItem::ItemType::Entity);
+    //sceneItem->SetType(SceneStructureItem::ItemType::Entity);
 
     for (unsigned i = 0; i < entities.Size(); ++i)
     {
@@ -489,6 +459,17 @@ SceneStructureItem *SceneStructureWindow::FindItem(Object *obj)
             return listItems_[i].item_;
     }
     return NULL;
+}
+
+void SceneStructureWindow::ToggleItem(SceneStructureItem *item)
+{
+	if (listView_.Get())
+	{
+		unsigned index = listView_->FindItem(item->Widget());
+		if (index != M_MAX_UNSIGNED)
+			listView_->ToggleExpand(index);
+		item->Refresh();
+	}
 }
 
 SceneStructureItem *SceneStructureWindow::FindItem(UIElement *element)

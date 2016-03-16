@@ -40,22 +40,13 @@ class ECEDITOR_API SceneStructureItem : public Object
     URHO3D_OBJECT(SceneStructureItem, Object);
 
 public:
-    enum ItemType
-    {
-        Entity = 0,
-        Component,
-        Attribute
-    };
 
-    SceneStructureItem(Context *context, ListView *list);
+    explicit SceneStructureItem(Context *context, ListView *list, Object *object);
     virtual ~SceneStructureItem();
 
     void SetText(const String &text);
     UIElement *Widget() const;
     void SetIndent(int indent, int indentSpacing = 16);
-
-    void SetType(ItemType type);
-    ItemType Type() const;
 
     void SetData(Object *obj);
     Object *Data() const;
@@ -74,7 +65,6 @@ protected:
     ListViewWeakPtr list_;
     TextWeakPtr text_;
     ButtonWeakPtr toggleButton_;
-    ItemType type_;
     ObjectWeakPtr data_;
 };
 
