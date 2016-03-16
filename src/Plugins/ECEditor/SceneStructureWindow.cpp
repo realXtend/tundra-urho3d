@@ -36,7 +36,8 @@ namespace Tundra
 SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module) :
     Object(framework->GetContext()),
     owner_(module),
-    framework_(framework)
+    framework_(framework),
+	scene_(0)
 {
     XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/DefaultStyle.xml");
 
@@ -161,6 +162,8 @@ SceneStructureWindow::~SceneStructureWindow()
     if (window_.Get())
         window_->Remove();
     window_.Reset();
+
+	scene_.Reset();
 }
 
 SceneStructureItem *SceneStructureWindow::CreateItem(Object *obj, const String &text, SceneStructureItem *parent)
@@ -315,7 +318,26 @@ void SceneStructureWindow::OnEntityDialogClosed(AddEntityDialog *dialog, bool co
 
 void SceneStructureWindow::SetShownScene(Scene *newScene)
 {
+	if (scene_)
+	{
+		scene_->ComponentAdded.Disconnect(this, &SceneStructureWindow::OnComponentChanged);
+		scene_->ComponentRemoved.Disconnect(this, &SceneStructureWindow::OnComponentChanged);
+		scene_->EntityCreated.Disconnect(this, &SceneStructureWindow::OnEntityChanged);
+		scene_->EntityRemoved.Disconnect(this, &SceneStructureWindow::OnEntityChanged);
+		scene_->AttributeChanged.Disconnect(this, &SceneStructureWindow::OnAttributeChanged);
+	}
+
     scene_ = newScene;
+
+	if (scene_)
+	{
+		scene_->ComponentAdded.Connect(this, &SceneStructureWindow::OnComponentChanged);
+		scene_->ComponentRemoved.Connect(this, &SceneStructureWindow::OnComponentChanged);
+		scene_->EntityCreated.Connect(this, &SceneStructureWindow::OnEntityChanged);
+		scene_->EntityRemoved.Connect(this, &SceneStructureWindow::OnEntityChanged);
+		scene_->AttributeChanged.Connect(this, &SceneStructureWindow::OnAttributeChanged);
+	}
+
     Clear();
     RefreshView();
 }
@@ -405,6 +427,21 @@ void SceneStructureWindow::EditSelection()
     }
 }
 
+void SceneStructureWindow::OnComponentChanged(Entity *entity, IComponent *component, AttributeChange::Type change)
+{
+	RefreshView();
+}
+
+void SceneStructureWindow::OnEntityChanged(Entity *entity, AttributeChange::Type change)
+{
+	RefreshView();
+}
+
+void SceneStructureWindow::OnAttributeChanged(IComponent *component, IAttribute *attribute, AttributeChange::Type type)
+{
+	RefreshView();
+}
+
 void SceneStructureWindow::Clear()
 {
     Vector<ListViewItem>::Iterator iter = listItems_.Begin();
@@ -429,12 +466,9 @@ void SceneStructureWindow::RefreshView()
 
     Vector<EntityPtr> entities = scene_->Entities().Values();
     SceneStructureItem *sceneItem = CreateItem(scene_, "Scene");
-    //sceneItem->SetType(SceneStructureItem::ItemType::Entity);
 
     for (unsigned i = 0; i < entities.Size(); ++i)
-    {
         AddEntity(entities[i]);
-    }
 
     scene_->EntityCreated.Connect(this, &SceneStructureWindow::OnEntityCreated);
 }
@@ -447,6 +481,7 @@ void SceneStructureWindow::Hide()
 
 void SceneStructureWindow::Show()
 {
+	RefreshView();
     if (window_.Get())
         window_->SetVisible(true);
 }

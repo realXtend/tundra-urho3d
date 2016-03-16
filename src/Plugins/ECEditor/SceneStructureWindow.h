@@ -107,7 +107,12 @@ protected:
 
     void EditSelection();
 
-    // Events
+	// Tundra scene changed
+	void OnComponentChanged(Entity *entity, IComponent *component, AttributeChange::Type change);
+	void OnEntityChanged(Entity *entity, AttributeChange::Type change);
+	void OnAttributeChanged(IComponent *component, IAttribute *attribute, AttributeChange::Type type);
+
+    // Urho3D UI Events
     void OnTogglePressed(SceneStructureItem *item);
     void OnElementClicked(StringHash eventType, VariantMap &eventData);
     void OnItemClicked(StringHash eventType, VariantMap &eventData);
@@ -130,7 +135,7 @@ protected:
     Framework *framework_;
 
 private:
-    Scene *scene_;
+	SceneWeakPtr scene_;
 
     AddComponentDialogPtr addComponentDialog_;
     AddEntityDialogPtr addEntityDialog_;
