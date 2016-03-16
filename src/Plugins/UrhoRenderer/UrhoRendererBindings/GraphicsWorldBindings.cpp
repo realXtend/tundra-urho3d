@@ -12,6 +12,7 @@
 #endif
 
 #include "Camera.h"
+#include "UrhoRenderer.h"
 #include "IRenderer.h"
 #include "Entity.h"
 
@@ -463,6 +464,14 @@ static duk_ret_t GraphicsWorld_IsActive(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t GraphicsWorld_Renderer(duk_context* ctx)
+{
+    GraphicsWorld* thisObj = GetThisWeakObject<GraphicsWorld>(ctx);
+    UrhoRenderer * ret = thisObj->Renderer();
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t GraphicsWorld_DebugDrawLine_float3_float3_Color_bool(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -819,6 +828,7 @@ static const duk_function_list_entry GraphicsWorld_Functions[] = {
     ,{"IsEntityVisible", GraphicsWorld_IsEntityVisible_Entity, 1}
     ,{"VisibleEntities", GraphicsWorld_VisibleEntities, 0}
     ,{"IsActive", GraphicsWorld_IsActive, 0}
+    ,{"Renderer", GraphicsWorld_Renderer, 0}
     ,{"DebugDrawLine", GraphicsWorld_DebugDrawLine_Selector, DUK_VARARGS}
     ,{"DebugDrawTransform", GraphicsWorld_DebugDrawTransform_Selector, DUK_VARARGS}
     ,{"DebugDrawFloat3x4", GraphicsWorld_DebugDrawFloat3x4_Selector, DUK_VARARGS}

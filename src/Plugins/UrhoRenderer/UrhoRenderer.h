@@ -24,14 +24,14 @@ public:
     UrhoRenderer(Framework* owner);
     ~UrhoRenderer();
 
-    /// Returns the Entity which contains the currently active camera that is used to render on the main window.
-    /// The returned Entity is guaranteed to have an Camera component, and it is guaranteed to be attached to a scene.
+    /// Returns the Entity which contains the currently active camera that is used to render on the main window. [property]
+    /** The returned Entity is guaranteed to have an Camera component, and it is guaranteed to be attached to a scene. */
     Entity *MainCamera();
 
-    /// Returns the Camera of the main camera, or 0 if no main camera is active.
+    /// Returns the Camera of the main camera, or 0 if no main camera is active. [property]
     Camera *MainCameraComponent();
 
-    /// Returns the Scene the current active main camera is in, or 0 if no main camera is active.
+    /// Returns the Scene the current active main camera is in, or 0 if no main camera is active. [property]
     Scene *MainCameraScene();
 
     /// Sets the given Entity as the main camera for the main window.
@@ -44,10 +44,10 @@ public:
         If the specified entity is non-zero, it is guaranteed to have an Camera component, and it is attached to some scene. */
     Signal1<Entity*> MainCameraChanged;
 
-    /// Returns window width, or 0 if no render window
+    /// Returns window width, or 0 if no render window [property]
     int WindowWidth() const;
 
-    /// Returns window height, or 0 if no render window
+    /// Returns window height, or 0 if no render window [property]
     int WindowHeight() const;
 
     /// Register an Ogre material processor for material loading/conversion.
