@@ -22,6 +22,8 @@ void Expose_SceneAPI(duk_context* ctx);
 void Expose_ConfigAPI(duk_context* ctx);
 void Expose_AssetAPI(duk_context* ctx);
 void Expose_IAsset(duk_context* ctx);
+void Expose_IAssetTransfer(duk_context* ctx);
+void Expose_IAssetStorage(duk_context* ctx);
 void Expose_AssetReference(duk_context* ctx);
 void Expose_AssetReferenceList(duk_context* ctx);
 void Expose_RayQueryResult(duk_context* ctx);
@@ -44,6 +46,8 @@ void ExposeCoreClasses(duk_context* ctx)
     Expose_ConfigAPI(ctx);
     Expose_AssetAPI(ctx);
     Expose_IAsset(ctx);
+    Expose_IAssetTransfer(ctx);
+    Expose_IAssetStorage(ctx);
     Expose_AssetReference(ctx);
     Expose_AssetReferenceList(ctx);
     Expose_RayQueryResult(ctx);

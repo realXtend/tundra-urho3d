@@ -16,10 +16,12 @@ namespace Tundra
 {
 
 /// Represents a currently ongoing asset download operation.
-class TUNDRACORE_API IAssetTransfer : public RefCounted
+class TUNDRACORE_API IAssetTransfer : public Object
 {
+    URHO3D_OBJECT(IAssetTransfer, Object);
+
 public:
-    IAssetTransfer();
+    IAssetTransfer(Urho3D::Context* context);
     virtual ~IAssetTransfer();
 
     /// Points to the actual asset if it has been loaded in.
@@ -117,7 +119,13 @@ private:
 /// Virtual asset transfer for assets that have already been loaded, but are re-requested
 class VirtualAssetTransfer : public IAssetTransfer
 {
-    
+    URHO3D_OBJECT(VirtualAssetTransfer, IAssetTransfer);
+
+public:
+    VirtualAssetTransfer(Urho3D::Context* context) :
+        IAssetTransfer(context)
+    {
+    }
 };
 
 }

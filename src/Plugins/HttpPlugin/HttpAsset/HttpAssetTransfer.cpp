@@ -15,6 +15,7 @@ namespace Tundra
 {
 
 HttpAssetTransfer::HttpAssetTransfer(HttpAssetProvider *provider, HttpRequestPtr &request, const String &assetRef_, const String &assetType_) :
+    IAssetTransfer(provider->GetContext()),
     provider_(provider),
     request_(request)
 {

@@ -1,7 +1,7 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "StableHeaders.h"
-#include "BindingsHelpers.h"
+#include "JavaScriptInstance.h"
 #include "Scene/Entity.h"
 #include "Scene/IComponent.h"
 #include "Scene/Scene.h"
@@ -531,6 +531,37 @@ void PushAttributeValue(duk_context* ctx, IAttribute* attr)
 
     // Push null if attr was null or type not yet supported
     duk_push_null(ctx);
+}
+
+void CallConnectSignal(duk_context* ctx, void* signal)
+{
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)signal);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_ConnectSignal");
+    duk_remove(ctx, -2); // Global object
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    duk_pop(ctx);
+}
+
+void CallDisconnectSignal(duk_context* ctx, void* signal)
+{
+    int numArgs = duk_get_top(ctx);
+    duk_push_number(ctx, (size_t)signal);
+    duk_insert(ctx, 0);
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
+    duk_remove(ctx, -2); // Global object
+    duk_insert(ctx, 0);
+    duk_pcall(ctx, numArgs + 1);
+    if (duk_get_boolean(ctx, -1)) // Last receiver disconnected
+    {
+        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+        signalReceivers.Erase(signal);
+    }
+    duk_pop(ctx); // Result
 }
 
 }

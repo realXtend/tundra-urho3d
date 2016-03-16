@@ -11,6 +11,8 @@
 #pragma warning(disable: 4800)
 #endif
 
+#include "Asset/IAssetStorage.h"
+#include "Asset/IAssetTransfer.h"
 #include "Framework/Framework.h"
 #include "Asset/AssetReference.h"
 
@@ -79,15 +81,7 @@ static duk_ret_t SignalWrapper_AssetAPI_AssetCreated_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_AssetAPI_AssetCreated::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -95,20 +89,7 @@ static duk_ret_t SignalWrapper_AssetAPI_AssetCreated_Disconnect(duk_context* ctx
 {
     SignalWrapper_AssetAPI_AssetCreated* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_AssetCreated>(ctx, SignalWrapper_AssetAPI_AssetCreated_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -188,15 +169,7 @@ static duk_ret_t SignalWrapper_AssetAPI_AssetAboutToBeRemoved_Connect(duk_contex
         wrapper->signal_->Connect(receiver, &SignalReceiver_AssetAPI_AssetAboutToBeRemoved::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -204,20 +177,7 @@ static duk_ret_t SignalWrapper_AssetAPI_AssetAboutToBeRemoved_Disconnect(duk_con
 {
     SignalWrapper_AssetAPI_AssetAboutToBeRemoved* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_AssetAboutToBeRemoved>(ctx, SignalWrapper_AssetAPI_AssetAboutToBeRemoved_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -297,15 +257,7 @@ static duk_ret_t SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved_Connect(duk_c
         wrapper->signal_->Connect(receiver, &SignalReceiver_AssetAPI_DiskSourceAboutToBeRemoved::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -313,20 +265,7 @@ static duk_ret_t SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved_Disconnect(du
 {
     SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved>(ctx, SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -406,15 +345,7 @@ static duk_ret_t SignalWrapper_AssetAPI_AssetDiskSourceChanged_Connect(duk_conte
         wrapper->signal_->Connect(receiver, &SignalReceiver_AssetAPI_AssetDiskSourceChanged::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -422,20 +353,7 @@ static duk_ret_t SignalWrapper_AssetAPI_AssetDiskSourceChanged_Disconnect(duk_co
 {
     SignalWrapper_AssetAPI_AssetDiskSourceChanged* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_AssetDiskSourceChanged>(ctx, SignalWrapper_AssetAPI_AssetDiskSourceChanged_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -515,15 +433,7 @@ static duk_ret_t SignalWrapper_AssetAPI_AssetUploaded_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_AssetAPI_AssetUploaded::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -531,20 +441,7 @@ static duk_ret_t SignalWrapper_AssetAPI_AssetUploaded_Disconnect(duk_context* ct
 {
     SignalWrapper_AssetAPI_AssetUploaded* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_AssetUploaded>(ctx, SignalWrapper_AssetAPI_AssetUploaded_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -624,15 +521,7 @@ static duk_ret_t SignalWrapper_AssetAPI_AssetDeletedFromStorage_Connect(duk_cont
         wrapper->signal_->Connect(receiver, &SignalReceiver_AssetAPI_AssetDeletedFromStorage::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -640,20 +529,7 @@ static duk_ret_t SignalWrapper_AssetAPI_AssetDeletedFromStorage_Disconnect(duk_c
 {
     SignalWrapper_AssetAPI_AssetDeletedFromStorage* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_AssetDeletedFromStorage>(ctx, SignalWrapper_AssetAPI_AssetDeletedFromStorage_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -680,36 +556,92 @@ static duk_ret_t AssetAPI_Get_AssetDeletedFromStorage(duk_context* ctx)
     return 1;
 }
 
-static duk_ret_t AssetAPI_Update_float(duk_context* ctx)
+const char* SignalWrapper_AssetAPI_AssetStorageAdded_ID = "SignalWrapper_AssetAPI_AssetStorageAdded";
+
+class SignalWrapper_AssetAPI_AssetStorageAdded
 {
-    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    float frametime = (float)duk_require_number(ctx, 0);
-    thisObj->Update(frametime);
+public:
+    SignalWrapper_AssetAPI_AssetStorageAdded(Object* owner, Signal1< AssetStoragePtr >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal1< AssetStoragePtr >* signal_;
+};
+
+class SignalReceiver_AssetAPI_AssetStorageAdded : public SignalReceiver
+{
+public:
+    void OnSignal(AssetStoragePtr param0)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        duk_pop(ctx);
+    }
+};
+
+static duk_ret_t SignalWrapper_AssetAPI_AssetStorageAdded_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<SignalWrapper_AssetAPI_AssetStorageAdded>(ctx, SignalWrapper_AssetAPI_AssetStorageAdded_ID);
     return 0;
 }
 
-static duk_ret_t AssetAPI_AssetLoadCompleted_String(duk_context* ctx)
+static duk_ret_t SignalWrapper_AssetAPI_AssetStorageAdded_Connect(duk_context* ctx)
 {
-    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String assetRef = duk_require_string(ctx, 0);
-    thisObj->AssetLoadCompleted(assetRef);
+    SignalWrapper_AssetAPI_AssetStorageAdded* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_AssetStorageAdded>(ctx, SignalWrapper_AssetAPI_AssetStorageAdded_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_AssetAPI_AssetStorageAdded* receiver = new SignalReceiver_AssetAPI_AssetStorageAdded();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_AssetAPI_AssetStorageAdded::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
-static duk_ret_t AssetAPI_AssetLoadFailed_String(duk_context* ctx)
+static duk_ret_t SignalWrapper_AssetAPI_AssetStorageAdded_Disconnect(duk_context* ctx)
 {
-    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    String assetRef = duk_require_string(ctx, 0);
-    thisObj->AssetLoadFailed(assetRef);
+    SignalWrapper_AssetAPI_AssetStorageAdded* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_AssetStorageAdded>(ctx, SignalWrapper_AssetAPI_AssetStorageAdded_ID);
+    if (!wrapper->owner_) return 0;
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
-static duk_ret_t AssetAPI_NotifyAssetDependenciesChanged_AssetPtr(duk_context* ctx)
+static duk_ret_t SignalWrapper_AssetAPI_AssetStorageAdded_Emit(duk_context* ctx)
+{
+    SignalWrapper_AssetAPI_AssetStorageAdded* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_AssetStorageAdded>(ctx, SignalWrapper_AssetAPI_AssetStorageAdded_ID);
+    if (!wrapper->owner_) return 0;
+    SharedPtr<IAssetStorage> param0(GetWeakObject<IAssetStorage>(ctx, 0));
+    wrapper->signal_->Emit(param0);
+    return 0;
+}
+
+static duk_ret_t AssetAPI_Get_AssetStorageAdded(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
-    SharedPtr<IAsset> asset(GetWeakObject<IAsset>(ctx, 0));
-    thisObj->NotifyAssetDependenciesChanged(asset);
-    return 0;
+    SignalWrapper_AssetAPI_AssetStorageAdded* wrapper = new SignalWrapper_AssetAPI_AssetStorageAdded(thisObj, &thisObj->AssetStorageAdded);
+    PushValueObject(ctx, wrapper, SignalWrapper_AssetAPI_AssetStorageAdded_ID, SignalWrapper_AssetAPI_AssetStorageAdded_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_AssetAPI_AssetStorageAdded_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_AssetAPI_AssetStorageAdded_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_AssetAPI_AssetStorageAdded_Emit, 1);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
 }
 
 static duk_ret_t AssetAPI_IsHeadless(duk_context* ctx)
@@ -745,12 +677,43 @@ static duk_ret_t AssetAPI_AssetsOfType_String(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t AssetAPI_AssetStorages(duk_context* ctx)
+{
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    AssetStorageVector ret = thisObj->AssetStorages();
+    PushWeakObjectVector(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t AssetAPI_OpenAssetCache_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
     String directory = duk_require_string(ctx, 0);
     thisObj->OpenAssetCache(directory);
     return 0;
+}
+
+static duk_ret_t AssetAPI_RequestAsset_String_String_bool(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    String assetRef = duk_require_string(ctx, 0);
+    String assetType = numArgs > 1 ? duk_require_string(ctx, 1) : "";
+    bool forceTransfer = numArgs > 2 ? duk_require_boolean(ctx, 2) : false;
+    AssetTransferPtr ret = thisObj->RequestAsset(assetRef, assetType, forceTransfer);
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t AssetAPI_RequestAsset_AssetReference_bool(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    AssetReference& ref = *GetCheckedValueObject<AssetReference>(ctx, 0, AssetReference_ID);
+    bool forceTransfer = numArgs > 1 ? duk_require_boolean(ctx, 1) : false;
+    AssetTransferPtr ret = thisObj->RequestAsset(ref, forceTransfer);
+    PushWeakObject(ctx, ret);
+    return 1;
 }
 
 static duk_ret_t AssetAPI_CreateNewAsset_String_String(duk_context* ctx)
@@ -801,6 +764,24 @@ static duk_ret_t AssetAPI_FindAsset_String(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t AssetAPI_AssetStorageByName_String(duk_context* ctx)
+{
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    String name = duk_require_string(ctx, 0);
+    AssetStoragePtr ret = thisObj->AssetStorageByName(name);
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t AssetAPI_StorageForAssetRef_String(duk_context* ctx)
+{
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    String ref = duk_require_string(ctx, 0);
+    AssetStoragePtr ret = thisObj->StorageForAssetRef(ref);
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t AssetAPI_RemoveAssetStorage_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
@@ -808,6 +789,32 @@ static duk_ret_t AssetAPI_RemoveAssetStorage_String(duk_context* ctx)
     bool ret = thisObj->RemoveAssetStorage(name);
     duk_push_boolean(ctx, ret);
     return 1;
+}
+
+static duk_ret_t AssetAPI_DeserializeAssetStorageFromString_String_bool(duk_context* ctx)
+{
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    String storage = duk_require_string(ctx, 0);
+    bool fromNetwork = duk_require_boolean(ctx, 1);
+    AssetStoragePtr ret = thisObj->DeserializeAssetStorageFromString(storage, fromNetwork);
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t AssetAPI_DefaultAssetStorage(duk_context* ctx)
+{
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    AssetStoragePtr ret = thisObj->DefaultAssetStorage();
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t AssetAPI_SetDefaultAssetStorage_AssetStoragePtr(duk_context* ctx)
+{
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    SharedPtr<IAssetStorage> storage(GetWeakObject<IAssetStorage>(ctx, 0));
+    thisObj->SetDefaultAssetStorage(storage);
+    return 0;
 }
 
 static duk_ret_t AssetAPI_ResourceTypeForAssetRef_String(duk_context* ctx)
@@ -883,6 +890,15 @@ static duk_ret_t AssetAPI_ForgetAllAssets(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t AssetAPI_PendingTransfer_String(duk_context* ctx)
+{
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    String assetRef = duk_require_string(ctx, 0);
+    AssetTransferPtr ret = thisObj->PendingTransfer(assetRef);
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t AssetAPI_RequestAssetDependencies_AssetPtr(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
@@ -932,6 +948,32 @@ static duk_ret_t AssetAPI_EmitAssetDeletedFromStorage_String(duk_context* ctx)
     String assetRef = duk_require_string(ctx, 0);
     thisObj->EmitAssetDeletedFromStorage(assetRef);
     return 0;
+}
+
+static duk_ret_t AssetAPI_EmitAssetStorageAdded_AssetStoragePtr(duk_context* ctx)
+{
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    SharedPtr<IAssetStorage> newStorage(GetWeakObject<IAssetStorage>(ctx, 0));
+    thisObj->EmitAssetStorageAdded(newStorage);
+    return 0;
+}
+
+static duk_ret_t AssetAPI_CurrentTransfers(duk_context* ctx)
+{
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    AssetTransferMap ret = thisObj->CurrentTransfers();
+    PushWeakObjectMap(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t AssetAPI_RequestAsset_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs >= 1 && GetValueObject<AssetReference>(ctx, 0, AssetReference_ID))
+        return AssetAPI_RequestAsset_AssetReference_bool(ctx);
+    if (numArgs >= 1 && duk_is_string(ctx, 0))
+        return AssetAPI_RequestAsset_String_String_bool(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
 static duk_ret_t AssetAPI_ResourceTypeForAssetRef_Selector(duk_context* ctx)
@@ -1024,33 +1066,39 @@ static duk_ret_t AssetAPI_DesanitateAssetRef_Static_Selector(duk_context* ctx)
 }
 
 static const duk_function_list_entry AssetAPI_Functions[] = {
-    {"Update", AssetAPI_Update_float, 1}
-    ,{"AssetLoadCompleted", AssetAPI_AssetLoadCompleted_String, 1}
-    ,{"AssetLoadFailed", AssetAPI_AssetLoadFailed_String, 1}
-    ,{"NotifyAssetDependenciesChanged", AssetAPI_NotifyAssetDependenciesChanged_AssetPtr, 1}
-    ,{"IsHeadless", AssetAPI_IsHeadless, 0}
+    {"IsHeadless", AssetAPI_IsHeadless, 0}
     ,{"GetFramework", AssetAPI_GetFramework, 0}
     ,{"Assets", AssetAPI_Assets, 0}
     ,{"AssetsOfType", AssetAPI_AssetsOfType_String, 1}
+    ,{"AssetStorages", AssetAPI_AssetStorages, 0}
     ,{"OpenAssetCache", AssetAPI_OpenAssetCache_String, 1}
+    ,{"RequestAsset", AssetAPI_RequestAsset_Selector, DUK_VARARGS}
     ,{"CreateNewAsset", AssetAPI_CreateNewAsset_String_String, 2}
     ,{"CreateAssetFromFile", AssetAPI_CreateAssetFromFile_String_String, 2}
     ,{"GenerateUniqueAssetName", AssetAPI_GenerateUniqueAssetName_String_String, 2}
     ,{"GenerateTemporaryNonexistingAssetFilename", AssetAPI_GenerateTemporaryNonexistingAssetFilename_String, 1}
     ,{"FindAsset", AssetAPI_FindAsset_String, 1}
+    ,{"AssetStorageByName", AssetAPI_AssetStorageByName_String, 1}
+    ,{"StorageForAssetRef", AssetAPI_StorageForAssetRef_String, 1}
     ,{"RemoveAssetStorage", AssetAPI_RemoveAssetStorage_String, 1}
+    ,{"DeserializeAssetStorageFromString", AssetAPI_DeserializeAssetStorageFromString_String_bool, 2}
+    ,{"DefaultAssetStorage", AssetAPI_DefaultAssetStorage, 0}
+    ,{"SetDefaultAssetStorage", AssetAPI_SetDefaultAssetStorage_AssetStoragePtr, 1}
     ,{"ResourceTypeForAssetRef", AssetAPI_ResourceTypeForAssetRef_Selector, DUK_VARARGS}
     ,{"ResolveAssetRef", AssetAPI_ResolveAssetRef_String_String, 2}
     ,{"ForgetAsset", AssetAPI_ForgetAsset_Selector, DUK_VARARGS}
     ,{"ForgetBundle", AssetAPI_ForgetBundle_String_bool, 2}
     ,{"DeleteAssetFromStorage", AssetAPI_DeleteAssetFromStorage_String, 1}
     ,{"ForgetAllAssets", AssetAPI_ForgetAllAssets, 0}
+    ,{"PendingTransfer", AssetAPI_PendingTransfer_String, 1}
     ,{"RequestAssetDependencies", AssetAPI_RequestAssetDependencies_AssetPtr, 1}
     ,{"NumPendingDependencies", AssetAPI_NumPendingDependencies_AssetPtr, 1}
     ,{"HasPendingDependencies", AssetAPI_HasPendingDependencies_AssetPtr, 1}
     ,{"HandleAssetDiscovery", AssetAPI_HandleAssetDiscovery_String_String, 2}
     ,{"HandleAssetDeleted", AssetAPI_HandleAssetDeleted_String, 1}
     ,{"EmitAssetDeletedFromStorage", AssetAPI_EmitAssetDeletedFromStorage_String, 1}
+    ,{"EmitAssetStorageAdded", AssetAPI_EmitAssetStorageAdded_AssetStoragePtr, 1}
+    ,{"CurrentTransfers", AssetAPI_CurrentTransfers, 0}
     ,{nullptr, nullptr, 0}
 };
 
@@ -1086,12 +1134,13 @@ void Expose_AssetAPI(duk_context* ctx)
     duk_put_prop_string(ctx, -2, "AssetRefNamedStorage");
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, AssetAPI_Functions);
-    DefineProperty(ctx, "assetCreated", AssetAPI_Get_AssetCreated, nullptr);
-    DefineProperty(ctx, "assetAboutToBeRemoved", AssetAPI_Get_AssetAboutToBeRemoved, nullptr);
-    DefineProperty(ctx, "diskSourceAboutToBeRemoved", AssetAPI_Get_DiskSourceAboutToBeRemoved, nullptr);
-    DefineProperty(ctx, "assetDiskSourceChanged", AssetAPI_Get_AssetDiskSourceChanged, nullptr);
-    DefineProperty(ctx, "assetUploaded", AssetAPI_Get_AssetUploaded, nullptr);
-    DefineProperty(ctx, "assetDeletedFromStorage", AssetAPI_Get_AssetDeletedFromStorage, nullptr);
+    DefineProperty(ctx, "AssetCreated", AssetAPI_Get_AssetCreated, nullptr);
+    DefineProperty(ctx, "AssetAboutToBeRemoved", AssetAPI_Get_AssetAboutToBeRemoved, nullptr);
+    DefineProperty(ctx, "DiskSourceAboutToBeRemoved", AssetAPI_Get_DiskSourceAboutToBeRemoved, nullptr);
+    DefineProperty(ctx, "AssetDiskSourceChanged", AssetAPI_Get_AssetDiskSourceChanged, nullptr);
+    DefineProperty(ctx, "AssetUploaded", AssetAPI_Get_AssetUploaded, nullptr);
+    DefineProperty(ctx, "AssetDeletedFromStorage", AssetAPI_Get_AssetDeletedFromStorage, nullptr);
+    DefineProperty(ctx, "AssetStorageAdded", AssetAPI_Get_AssetStorageAdded, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, AssetAPI_ID);
 }

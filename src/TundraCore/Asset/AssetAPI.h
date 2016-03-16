@@ -101,35 +101,37 @@ public:
     /// Returns all the currently ongoing or waiting asset transfers.
     Vector<AssetTransferPtr> PendingTransfers() const;
 
-    /// Performs internal tick-based updates of the whole asset system.
+    /// Performs internal tick-based updates of the whole asset system. [noscript]
     /** This function is intended to be called only by the core, do not call it yourself. */
     void Update(float frametime);
 
-    /// Called by each AssetProvider to notify the Asset API that an asset transfer has completed.
+    /// Called by each AssetProvider to notify the Asset API that an asset transfer has completed. [noscript]
     /** Do not call this function from client code. */
     void AssetTransferCompleted(IAssetTransfer *transfer);
 
-    /// Called by each AssetProvider to notify the Asset API that the asset transfer finished in a failure.
+    /// Called by each AssetProvider to notify the Asset API that the asset transfer finished in a failure. [noscript]
     /** The Asset API will erase this transfer and also fail any transfers of assets which depended on this transfer. */
     void AssetTransferFailed(IAssetTransfer *transfer, String reason);
     
-    /// Called by each AssetProvider to notify of aborted transfers.
+    /// Called by each AssetProvider to notify of aborted transfers. [noscript]
     /** The Asset API will erase this transfer and also fail any transfers of assets which depended on this transfer. */
     void AssetTransferAborted(IAssetTransfer *transfer);
 
-    /// Called by each IAsset when it has completed loading successfully.
+    /// Called by each IAsset when it has completed loading successfully. [noscript]
     /** Typically inside IAsset::DeserializeFromData or later on if it is loading asynchronously. */
     void AssetLoadCompleted(const String assetRef);
 
-    /// Called by each IAsset when it has failed to load.
+    /// Called by each IAsset when it has failed to load. [noscript]
     /** Typically inside IAsset::DeserializeFromData or later on if it is loading asynchronously. */
     void AssetLoadFailed(const String assetRef);
 
-    /// Called by each AssetProvider to notify the Asset API that an asset upload transfer has completed. Do not call this function from client code.
+    /// Called by each AssetProvider to notify the Asset API that an asset upload transfer has completed. Do not call this function from client code. [noscript]
     void AssetUploadTransferCompleted(IAssetUploadTransfer *transfer);
 
+    /// Notify that load of asset dependencies is complete. [noscript]
     void AssetDependenciesCompleted(AssetTransferPtr transfer);
 
+    /// Notify that asset's dependencies have changed. [noscript]
     void NotifyAssetDependenciesChanged(AssetPtr asset);
 
     bool IsHeadless() const { return isHeadless; }

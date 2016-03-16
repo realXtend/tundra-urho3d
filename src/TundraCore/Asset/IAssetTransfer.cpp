@@ -10,7 +10,8 @@
 namespace Tundra
 {
 
-IAssetTransfer::IAssetTransfer() : 
+IAssetTransfer::IAssetTransfer(Urho3D::Context* context) : 
+    Object(context),
     cachingAllowed(true),
     diskSourceType(IAsset::Original)
 {

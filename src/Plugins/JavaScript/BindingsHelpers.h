@@ -55,6 +55,12 @@ JAVASCRIPT_API void PushAttributeValue(duk_context* ctx, Tundra::IAttribute* att
 /// Get an attribute value from JS stack and set it into the provided attribute.
 JAVASCRIPT_API void AssignAttributeValue(duk_context* ctx, duk_idx_t stackIndex, Tundra::IAttribute* destAttr, Tundra::AttributeChange::Type change);
 
+/// Call signal connect on the JS side (this object and receiver in JS stack)
+JAVASCRIPT_API void CallConnectSignal(duk_context* ctx, void* signal);
+
+/// Call signal disconnect on the JS side (this object and receiver in JS stack). The C++ side receiver is erased if this was the last connection.
+JAVASCRIPT_API void CallDisconnectSignal(duk_context* ctx, void* signal);
+
 /// Value object template functions
 
 /// Get a value object of specified type from JS object at stack index. Uses the "obj" (pointer) and "type" (string) internal properties.

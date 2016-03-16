@@ -74,15 +74,7 @@ static duk_ret_t SignalWrapper_JavaScriptInstance_ScriptEvaluated_Connect(duk_co
         wrapper->signal_->Connect(receiver, &SignalReceiver_JavaScriptInstance_ScriptEvaluated::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -90,20 +82,7 @@ static duk_ret_t SignalWrapper_JavaScriptInstance_ScriptEvaluated_Disconnect(duk
 {
     SignalWrapper_JavaScriptInstance_ScriptEvaluated* wrapper = GetThisValueObject<SignalWrapper_JavaScriptInstance_ScriptEvaluated>(ctx, SignalWrapper_JavaScriptInstance_ScriptEvaluated_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -180,15 +159,7 @@ static duk_ret_t SignalWrapper_JavaScriptInstance_ScriptUnloading_Connect(duk_co
         wrapper->signal_->Connect(receiver, &SignalReceiver_JavaScriptInstance_ScriptUnloading::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -196,20 +167,7 @@ static duk_ret_t SignalWrapper_JavaScriptInstance_ScriptUnloading_Disconnect(duk
 {
     SignalWrapper_JavaScriptInstance_ScriptUnloading* wrapper = GetThisValueObject<SignalWrapper_JavaScriptInstance_ScriptUnloading>(ctx, SignalWrapper_JavaScriptInstance_ScriptUnloading_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -282,8 +240,8 @@ void Expose_JavaScriptInstance(duk_context* ctx)
     duk_push_object(ctx);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, JavaScriptInstance_Functions);
-    DefineProperty(ctx, "scriptEvaluated", JavaScriptInstance_Get_ScriptEvaluated, nullptr);
-    DefineProperty(ctx, "scriptUnloading", JavaScriptInstance_Get_ScriptUnloading, nullptr);
+    DefineProperty(ctx, "ScriptEvaluated", JavaScriptInstance_Get_ScriptEvaluated, nullptr);
+    DefineProperty(ctx, "ScriptUnloading", JavaScriptInstance_Get_ScriptUnloading, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, JavaScriptInstance_ID);
 }

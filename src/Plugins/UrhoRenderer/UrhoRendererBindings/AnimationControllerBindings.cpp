@@ -77,15 +77,7 @@ static duk_ret_t SignalWrapper_AnimationController_AnimationFinished_Connect(duk
         wrapper->signal_->Connect(receiver, &SignalReceiver_AnimationController_AnimationFinished::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -93,20 +85,7 @@ static duk_ret_t SignalWrapper_AnimationController_AnimationFinished_Disconnect(
 {
     SignalWrapper_AnimationController_AnimationFinished* wrapper = GetThisValueObject<SignalWrapper_AnimationController_AnimationFinished>(ctx, SignalWrapper_AnimationController_AnimationFinished_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -186,15 +165,7 @@ static duk_ret_t SignalWrapper_AnimationController_AnimationCycled_Connect(duk_c
         wrapper->signal_->Connect(receiver, &SignalReceiver_AnimationController_AnimationCycled::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -202,20 +173,7 @@ static duk_ret_t SignalWrapper_AnimationController_AnimationCycled_Disconnect(du
 {
     SignalWrapper_AnimationController_AnimationCycled* wrapper = GetThisValueObject<SignalWrapper_AnimationController_AnimationCycled>(ctx, SignalWrapper_AnimationController_AnimationCycled_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -297,15 +255,7 @@ static duk_ret_t SignalWrapper_AnimationController_ComponentNameChanged_Connect(
         wrapper->signal_->Connect(receiver, &SignalReceiver_AnimationController_ComponentNameChanged::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -313,20 +263,7 @@ static duk_ret_t SignalWrapper_AnimationController_ComponentNameChanged_Disconne
 {
     SignalWrapper_AnimationController_ComponentNameChanged* wrapper = GetThisValueObject<SignalWrapper_AnimationController_ComponentNameChanged>(ctx, SignalWrapper_AnimationController_ComponentNameChanged_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -405,15 +342,7 @@ static duk_ret_t SignalWrapper_AnimationController_ParentEntitySet_Connect(duk_c
         wrapper->signal_->Connect(receiver, &SignalReceiver_AnimationController_ParentEntitySet::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -421,20 +350,7 @@ static duk_ret_t SignalWrapper_AnimationController_ParentEntitySet_Disconnect(du
 {
     SignalWrapper_AnimationController_ParentEntitySet* wrapper = GetThisValueObject<SignalWrapper_AnimationController_ParentEntitySet>(ctx, SignalWrapper_AnimationController_ParentEntitySet_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -511,15 +427,7 @@ static duk_ret_t SignalWrapper_AnimationController_ParentEntityAboutToBeDetached
         wrapper->signal_->Connect(receiver, &SignalReceiver_AnimationController_ParentEntityAboutToBeDetached::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -527,20 +435,7 @@ static duk_ret_t SignalWrapper_AnimationController_ParentEntityAboutToBeDetached
 {
     SignalWrapper_AnimationController_ParentEntityAboutToBeDetached* wrapper = GetThisValueObject<SignalWrapper_AnimationController_ParentEntityAboutToBeDetached>(ctx, SignalWrapper_AnimationController_ParentEntityAboutToBeDetached_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -1125,11 +1020,11 @@ void Expose_AnimationController(duk_context* ctx)
     duk_put_prop_string(ctx, -2, "FreePhase");
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, AnimationController_Functions);
-    DefineProperty(ctx, "animationFinished", AnimationController_Get_AnimationFinished, nullptr);
-    DefineProperty(ctx, "animationCycled", AnimationController_Get_AnimationCycled, nullptr);
-    DefineProperty(ctx, "componentNameChanged", AnimationController_Get_ComponentNameChanged, nullptr);
-    DefineProperty(ctx, "parentEntitySet", AnimationController_Get_ParentEntitySet, nullptr);
-    DefineProperty(ctx, "parentEntityAboutToBeDetached", AnimationController_Get_ParentEntityAboutToBeDetached, nullptr);
+    DefineProperty(ctx, "AnimationFinished", AnimationController_Get_AnimationFinished, nullptr);
+    DefineProperty(ctx, "AnimationCycled", AnimationController_Get_AnimationCycled, nullptr);
+    DefineProperty(ctx, "ComponentNameChanged", AnimationController_Get_ComponentNameChanged, nullptr);
+    DefineProperty(ctx, "ParentEntitySet", AnimationController_Get_ParentEntitySet, nullptr);
+    DefineProperty(ctx, "ParentEntityAboutToBeDetached", AnimationController_Get_ParentEntityAboutToBeDetached, nullptr);
     DefineProperty(ctx, "typeName", AnimationController_TypeName, nullptr);
     DefineProperty(ctx, "typeId", AnimationController_TypeId, nullptr);
     DefineProperty(ctx, "name", AnimationController_Name, AnimationController_SetName_String);

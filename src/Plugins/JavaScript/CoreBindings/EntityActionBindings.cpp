@@ -76,15 +76,7 @@ static duk_ret_t SignalWrapper_EntityAction_Triggered_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_EntityAction_Triggered::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -92,20 +84,7 @@ static duk_ret_t SignalWrapper_EntityAction_Triggered_Disconnect(duk_context* ct
 {
     SignalWrapper_EntityAction_Triggered* wrapper = GetThisValueObject<SignalWrapper_EntityAction_Triggered>(ctx, SignalWrapper_EntityAction_Triggered_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -158,7 +137,7 @@ void Expose_EntityAction(duk_context* ctx)
     duk_put_prop_string(ctx, -2, "Peers");
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, EntityAction_Functions);
-    DefineProperty(ctx, "triggered", EntityAction_Get_Triggered, nullptr);
+    DefineProperty(ctx, "Triggered", EntityAction_Get_Triggered, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, EntityAction_ID);
 }

@@ -13,6 +13,8 @@ namespace Tundra
 /// HTTP asset transfer
 class TUNDRA_HTTP_API HttpAssetTransfer : public IAssetTransfer
 {
+    URHO3D_OBJECT(HttpAssetTransfer, IAssetTransfer);
+
 public:
     HttpAssetTransfer(HttpAssetProvider *provider, HttpRequestPtr &request, const String &assetRef_, const String &assetType_);
     ~HttpAssetTransfer();

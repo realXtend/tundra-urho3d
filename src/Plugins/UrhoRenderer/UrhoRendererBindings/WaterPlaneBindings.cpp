@@ -86,15 +86,7 @@ static duk_ret_t SignalWrapper_WaterPlane_ComponentNameChanged_Connect(duk_conte
         wrapper->signal_->Connect(receiver, &SignalReceiver_WaterPlane_ComponentNameChanged::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -102,20 +94,7 @@ static duk_ret_t SignalWrapper_WaterPlane_ComponentNameChanged_Disconnect(duk_co
 {
     SignalWrapper_WaterPlane_ComponentNameChanged* wrapper = GetThisValueObject<SignalWrapper_WaterPlane_ComponentNameChanged>(ctx, SignalWrapper_WaterPlane_ComponentNameChanged_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -194,15 +173,7 @@ static duk_ret_t SignalWrapper_WaterPlane_ParentEntitySet_Connect(duk_context* c
         wrapper->signal_->Connect(receiver, &SignalReceiver_WaterPlane_ParentEntitySet::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -210,20 +181,7 @@ static duk_ret_t SignalWrapper_WaterPlane_ParentEntitySet_Disconnect(duk_context
 {
     SignalWrapper_WaterPlane_ParentEntitySet* wrapper = GetThisValueObject<SignalWrapper_WaterPlane_ParentEntitySet>(ctx, SignalWrapper_WaterPlane_ParentEntitySet_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -300,15 +258,7 @@ static duk_ret_t SignalWrapper_WaterPlane_ParentEntityAboutToBeDetached_Connect(
         wrapper->signal_->Connect(receiver, &SignalReceiver_WaterPlane_ParentEntityAboutToBeDetached::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -316,20 +266,7 @@ static duk_ret_t SignalWrapper_WaterPlane_ParentEntityAboutToBeDetached_Disconne
 {
     SignalWrapper_WaterPlane_ParentEntityAboutToBeDetached* wrapper = GetThisValueObject<SignalWrapper_WaterPlane_ParentEntityAboutToBeDetached>(ctx, SignalWrapper_WaterPlane_ParentEntityAboutToBeDetached_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -646,9 +583,9 @@ void Expose_WaterPlane(duk_context* ctx)
     duk_put_function_list(ctx, -1, WaterPlane_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, WaterPlane_Functions);
-    DefineProperty(ctx, "componentNameChanged", WaterPlane_Get_ComponentNameChanged, nullptr);
-    DefineProperty(ctx, "parentEntitySet", WaterPlane_Get_ParentEntitySet, nullptr);
-    DefineProperty(ctx, "parentEntityAboutToBeDetached", WaterPlane_Get_ParentEntityAboutToBeDetached, nullptr);
+    DefineProperty(ctx, "ComponentNameChanged", WaterPlane_Get_ComponentNameChanged, nullptr);
+    DefineProperty(ctx, "ParentEntitySet", WaterPlane_Get_ParentEntitySet, nullptr);
+    DefineProperty(ctx, "ParentEntityAboutToBeDetached", WaterPlane_Get_ParentEntityAboutToBeDetached, nullptr);
     DefineProperty(ctx, "typeName", WaterPlane_TypeName, nullptr);
     DefineProperty(ctx, "typeId", WaterPlane_TypeId, nullptr);
     DefineProperty(ctx, "name", WaterPlane_Name, WaterPlane_SetName_String);

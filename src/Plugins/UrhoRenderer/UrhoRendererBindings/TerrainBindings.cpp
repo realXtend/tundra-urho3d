@@ -82,15 +82,7 @@ static duk_ret_t SignalWrapper_Terrain_TerrainRegenerated_Connect(duk_context* c
         wrapper->signal_->Connect(receiver, &SignalReceiver_Terrain_TerrainRegenerated::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -98,20 +90,7 @@ static duk_ret_t SignalWrapper_Terrain_TerrainRegenerated_Disconnect(duk_context
 {
     SignalWrapper_Terrain_TerrainRegenerated* wrapper = GetThisValueObject<SignalWrapper_Terrain_TerrainRegenerated>(ctx, SignalWrapper_Terrain_TerrainRegenerated_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -192,15 +171,7 @@ static duk_ret_t SignalWrapper_Terrain_ComponentNameChanged_Connect(duk_context*
         wrapper->signal_->Connect(receiver, &SignalReceiver_Terrain_ComponentNameChanged::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -208,20 +179,7 @@ static duk_ret_t SignalWrapper_Terrain_ComponentNameChanged_Disconnect(duk_conte
 {
     SignalWrapper_Terrain_ComponentNameChanged* wrapper = GetThisValueObject<SignalWrapper_Terrain_ComponentNameChanged>(ctx, SignalWrapper_Terrain_ComponentNameChanged_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -300,15 +258,7 @@ static duk_ret_t SignalWrapper_Terrain_ParentEntitySet_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_Terrain_ParentEntitySet::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -316,20 +266,7 @@ static duk_ret_t SignalWrapper_Terrain_ParentEntitySet_Disconnect(duk_context* c
 {
     SignalWrapper_Terrain_ParentEntitySet* wrapper = GetThisValueObject<SignalWrapper_Terrain_ParentEntitySet>(ctx, SignalWrapper_Terrain_ParentEntitySet_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -406,15 +343,7 @@ static duk_ret_t SignalWrapper_Terrain_ParentEntityAboutToBeDetached_Connect(duk
         wrapper->signal_->Connect(receiver, &SignalReceiver_Terrain_ParentEntityAboutToBeDetached::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -422,20 +351,7 @@ static duk_ret_t SignalWrapper_Terrain_ParentEntityAboutToBeDetached_Disconnect(
 {
     SignalWrapper_Terrain_ParentEntityAboutToBeDetached* wrapper = GetThisValueObject<SignalWrapper_Terrain_ParentEntityAboutToBeDetached>(ctx, SignalWrapper_Terrain_ParentEntityAboutToBeDetached_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -869,10 +785,10 @@ void Expose_Terrain(duk_context* ctx)
     duk_put_function_list(ctx, -1, Terrain_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Terrain_Functions);
-    DefineProperty(ctx, "terrainRegenerated", Terrain_Get_TerrainRegenerated, nullptr);
-    DefineProperty(ctx, "componentNameChanged", Terrain_Get_ComponentNameChanged, nullptr);
-    DefineProperty(ctx, "parentEntitySet", Terrain_Get_ParentEntitySet, nullptr);
-    DefineProperty(ctx, "parentEntityAboutToBeDetached", Terrain_Get_ParentEntityAboutToBeDetached, nullptr);
+    DefineProperty(ctx, "TerrainRegenerated", Terrain_Get_TerrainRegenerated, nullptr);
+    DefineProperty(ctx, "ComponentNameChanged", Terrain_Get_ComponentNameChanged, nullptr);
+    DefineProperty(ctx, "ParentEntitySet", Terrain_Get_ParentEntitySet, nullptr);
+    DefineProperty(ctx, "ParentEntityAboutToBeDetached", Terrain_Get_ParentEntityAboutToBeDetached, nullptr);
     DefineProperty(ctx, "typeName", Terrain_TypeName, nullptr);
     DefineProperty(ctx, "typeId", Terrain_TypeId, nullptr);
     DefineProperty(ctx, "name", Terrain_Name, Terrain_SetName_String);

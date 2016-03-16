@@ -564,15 +564,7 @@ namespace BindingsGenerator
                     tw.WriteLine(Indent(2) + "wrapper->signal_->Connect(receiver, &" + receiverClassName + "::OnSignal);");
                     tw.WriteLine(Indent(2) + "signalReceivers[wrapper->signal_] = receiver;");
                     tw.WriteLine(Indent(1) + "}");
-                    tw.WriteLine(Indent(1) + "int numArgs = duk_get_top(ctx);");
-                    tw.WriteLine(Indent(1) + "duk_push_number(ctx, (size_t)wrapper->signal_);");
-                    tw.WriteLine(Indent(1) + "duk_insert(ctx, 0);");
-                    tw.WriteLine(Indent(1) + "duk_push_global_object(ctx);");
-                    tw.WriteLine(Indent(1) + "duk_get_prop_string(ctx, -1, \"_ConnectSignal\");");
-                    tw.WriteLine(Indent(1) + "duk_remove(ctx, -2);"); // Global object
-                    tw.WriteLine(Indent(1) + "duk_insert(ctx, 0);");
-                    tw.WriteLine(Indent(1) + "duk_pcall(ctx, numArgs + 1);");
-                    tw.WriteLine(Indent(1) + "duk_pop(ctx);"); // Result
+                    tw.WriteLine(Indent(1) + "CallConnectSignal(ctx, wrapper->signal_);");
                     tw.WriteLine(Indent(1) + "return 0;");
                     tw.WriteLine("}");
                     tw.WriteLine("");
@@ -582,20 +574,7 @@ namespace BindingsGenerator
                     tw.WriteLine("{");
                     tw.WriteLine(Indent(1) + wrapperClassName + "* wrapper = GetThisValueObject<" + wrapperClassName + ">(ctx, " + ClassIdentifier(wrapperClassName) + ");");
                     tw.WriteLine(Indent(1) + "if (!wrapper->owner_) return 0;"); // Check signal owner expiration
-                    tw.WriteLine(Indent(1) + "int numArgs = duk_get_top(ctx);");
-                    tw.WriteLine(Indent(1) + "duk_push_number(ctx, (size_t)wrapper->signal_);");
-                    tw.WriteLine(Indent(1) + "duk_insert(ctx, 0);");
-                    tw.WriteLine(Indent(1) + "duk_push_global_object(ctx);");
-                    tw.WriteLine(Indent(1) + "duk_get_prop_string(ctx, -1, \"_DisconnectSignal\");");
-                    tw.WriteLine(Indent(1) + "duk_remove(ctx, -2);"); // Global object
-                    tw.WriteLine(Indent(1) + "duk_insert(ctx, 0);");
-                    tw.WriteLine(Indent(1) + "duk_pcall(ctx, numArgs + 1);");
-                    tw.WriteLine(Indent(1) + "if (duk_get_boolean(ctx, -1))"); // Last receiver disconnected
-                    tw.WriteLine(Indent(1) + "{");
-                    tw.WriteLine(Indent(2) + "HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();");
-                    tw.WriteLine(Indent(2) + "signalReceivers.Erase(wrapper->signal_);");
-                    tw.WriteLine(Indent(1) + "}");
-                    tw.WriteLine(Indent(1) + "duk_pop(ctx);"); // Result
+                    tw.WriteLine(Indent(1) + "CallDisconnectSignal(ctx, wrapper->signal_);");
                     tw.WriteLine(Indent(1) + "return 0;");
                     tw.WriteLine("}");
                     tw.WriteLine("");
@@ -643,13 +622,13 @@ namespace BindingsGenerator
                 else if (child.kind == "variable" && !child.isStatic && IsScriptable(child) && child.visibilityLevel == VisibilityLevel.Public && IsSupportedType(child.type))
                 {
                     Property newProperty;
-                    newProperty.name = child.name;
+                    newProperty.name = SanitatePropertyName(child.name);
                     newProperty.readOnly = true;
 
                     // Set accessor
                     if (!child.IsConst())
                     {
-                        tw.WriteLine("static duk_ret_t " + className + "_Set_" + child.name + DukSignature());
+                        tw.WriteLine("static duk_ret_t " + className + "_Set_" + newProperty.name + DukSignature());
                         tw.WriteLine("{");
                         tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
                         tw.WriteLine(Indent(1) + GenerateGetFromStack(child, 0, child.name));
@@ -663,6 +642,12 @@ namespace BindingsGenerator
                     // Get accessor
                     {
                         string typeName = SanitateTypeName(child.type);
+                        if (typeName.EndsWith("Ptr"))
+                        {
+                            typeName = typeName.Substring(0, typeName.Length - 3);
+                            typeName = SanitateTemplateType(typeName);
+                        }
+
                         if (Symbol.IsPODType(typeName) || IsRefCounted(typeName) || typeName == "String" || typeName == "string" || typeName.Contains("Vector"))
                         {
                             if (typeName.Contains("Vector"))
@@ -680,7 +665,7 @@ namespace BindingsGenerator
                                 }
                             }
 
-                            tw.WriteLine("static duk_ret_t " + className + "_Get_" + child.name + DukSignature());
+                            tw.WriteLine("static duk_ret_t " + className + "_Get_" + newProperty.name + DukSignature());
                             tw.WriteLine("{");
                             tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
                             tw.WriteLine(Indent(1) + GeneratePushToStack(child, "thisObj->" + child.name));
@@ -690,7 +675,7 @@ namespace BindingsGenerator
                             // Non-POD value variable within a larger object: do not create value copy, but point to the data within the object itself,
                             // so that partial access and modification such as transform.pos.x is possible
                             // Note: this is unsafe, should find a better way
-                            tw.WriteLine("static duk_ret_t " + className + "_Get_" + child.name + DukSignature());
+                            tw.WriteLine("static duk_ret_t " + className + "_Get_" + newProperty.name + DukSignature());
                             tw.WriteLine("{");
                             tw.WriteLine(Indent(1) + GenerateGetThis(classSymbol));
                             tw.WriteLine(Indent(1) + "PushValueObject<" + typeName + ">(ctx, &thisObj->" + child.name + ", " + ClassIdentifier(typeName) + ", nullptr, true);");
@@ -1025,9 +1010,9 @@ namespace BindingsGenerator
                 foreach (Property p in properties)
                 {
                     if (!p.readOnly)
-                        tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + SanitatePropertyName(p.name) + "\", " + className + "_Get_" + p.name + ", " + className + "_Set_" + p.name + ");");
+                        tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + p.name + "\", " + className + "_Get_" + p.name + ", " + className + "_Set_" + p.name + ");");
                     else
-                        tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + SanitatePropertyName(p.name) + "\", " + className + "_Get_" + p.name + ", nullptr);");
+                        tw.WriteLine(Indent(1) + "DefineProperty(ctx, \"" + p.name + "\", " + className + "_Get_" + p.name + ", nullptr);");
                 }
 
                 // Check functions which have been annotated as property accessors
@@ -1126,7 +1111,7 @@ namespace BindingsGenerator
 
         static bool IsRefCounted(Symbol classSymbol)
         {
-            if (classSymbol.name.Contains("JavaScriptInstance"))
+            if (classSymbol.name.Contains("JavaScriptInstance") || classSymbol.name.Contains("AssetTransfer") || classSymbol.name.Contains("AssetStorage"))
                 return true;
 
             // We don't have access to Urho includes, but can check for the presence of macros. \todo Better checks or explicit listings of known refcounted classes if needed
@@ -1137,7 +1122,7 @@ namespace BindingsGenerator
         {
             if (isRefCounted.ContainsKey(className))
                 return isRefCounted[className];
-            else if (className == "Entity" || className == "IComponent" || className == "IAsset" || className == "JavaScriptInstance")
+            else if (className == "Entity" || className == "IComponent" || className == "IAsset" || className == "IAssetTransfer" || className == "IAssetStorage" || className == "JavaScriptInstance")
                 return true;
             else
                 return false;
@@ -1223,6 +1208,10 @@ namespace BindingsGenerator
                 typeName = "IComponent";
             if (typeName == "Asset")
                 typeName = "IAsset";
+            if (typeName == "AssetTransfer")
+                typeName = "IAssetTransfer";
+            if (typeName == "AssetStorage")
+                typeName = "IAssetStorage";
             return typeName;
         }
 

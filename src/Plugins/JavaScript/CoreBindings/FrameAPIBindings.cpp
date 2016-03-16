@@ -77,15 +77,7 @@ static duk_ret_t SignalWrapper_FrameAPI_Updated_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_FrameAPI_Updated::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -93,20 +85,7 @@ static duk_ret_t SignalWrapper_FrameAPI_Updated_Disconnect(duk_context* ctx)
 {
     SignalWrapper_FrameAPI_Updated* wrapper = GetThisValueObject<SignalWrapper_FrameAPI_Updated>(ctx, SignalWrapper_FrameAPI_Updated_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -186,15 +165,7 @@ static duk_ret_t SignalWrapper_FrameAPI_PostFrameUpdate_Connect(duk_context* ctx
         wrapper->signal_->Connect(receiver, &SignalReceiver_FrameAPI_PostFrameUpdate::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -202,20 +173,7 @@ static duk_ret_t SignalWrapper_FrameAPI_PostFrameUpdate_Disconnect(duk_context* 
 {
     SignalWrapper_FrameAPI_PostFrameUpdate* wrapper = GetThisValueObject<SignalWrapper_FrameAPI_PostFrameUpdate>(ctx, SignalWrapper_FrameAPI_PostFrameUpdate_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -246,8 +204,8 @@ void Expose_FrameAPI(duk_context* ctx)
 {
     duk_push_object(ctx);
     duk_push_object(ctx);
-    DefineProperty(ctx, "updated", FrameAPI_Get_Updated, nullptr);
-    DefineProperty(ctx, "postFrameUpdate", FrameAPI_Get_PostFrameUpdate, nullptr);
+    DefineProperty(ctx, "Updated", FrameAPI_Get_Updated, nullptr);
+    DefineProperty(ctx, "PostFrameUpdate", FrameAPI_Get_PostFrameUpdate, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, FrameAPI_ID);
 }

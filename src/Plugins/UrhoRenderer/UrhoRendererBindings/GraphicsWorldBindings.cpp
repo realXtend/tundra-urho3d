@@ -98,15 +98,7 @@ static duk_ret_t SignalWrapper_GraphicsWorld_EntityEnterView_Connect(duk_context
         wrapper->signal_->Connect(receiver, &SignalReceiver_GraphicsWorld_EntityEnterView::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -114,20 +106,7 @@ static duk_ret_t SignalWrapper_GraphicsWorld_EntityEnterView_Disconnect(duk_cont
 {
     SignalWrapper_GraphicsWorld_EntityEnterView* wrapper = GetThisValueObject<SignalWrapper_GraphicsWorld_EntityEnterView>(ctx, SignalWrapper_GraphicsWorld_EntityEnterView_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -207,15 +186,7 @@ static duk_ret_t SignalWrapper_GraphicsWorld_EntityLeaveView_Connect(duk_context
         wrapper->signal_->Connect(receiver, &SignalReceiver_GraphicsWorld_EntityLeaveView::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -223,20 +194,7 @@ static duk_ret_t SignalWrapper_GraphicsWorld_EntityLeaveView_Disconnect(duk_cont
 {
     SignalWrapper_GraphicsWorld_EntityLeaveView* wrapper = GetThisValueObject<SignalWrapper_GraphicsWorld_EntityLeaveView>(ctx, SignalWrapper_GraphicsWorld_EntityLeaveView_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -885,8 +843,8 @@ void Expose_GraphicsWorld(duk_context* ctx)
     duk_put_function_list(ctx, -1, GraphicsWorld_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, GraphicsWorld_Functions);
-    DefineProperty(ctx, "entityEnterView", GraphicsWorld_Get_EntityEnterView, nullptr);
-    DefineProperty(ctx, "entityLeaveView", GraphicsWorld_Get_EntityLeaveView, nullptr);
+    DefineProperty(ctx, "EntityEnterView", GraphicsWorld_Get_EntityEnterView, nullptr);
+    DefineProperty(ctx, "EntityLeaveView", GraphicsWorld_Get_EntityLeaveView, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, GraphicsWorld_ID);
 }

@@ -79,15 +79,7 @@ static duk_ret_t SignalWrapper_Sky_ComponentNameChanged_Connect(duk_context* ctx
         wrapper->signal_->Connect(receiver, &SignalReceiver_Sky_ComponentNameChanged::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -95,20 +87,7 @@ static duk_ret_t SignalWrapper_Sky_ComponentNameChanged_Disconnect(duk_context* 
 {
     SignalWrapper_Sky_ComponentNameChanged* wrapper = GetThisValueObject<SignalWrapper_Sky_ComponentNameChanged>(ctx, SignalWrapper_Sky_ComponentNameChanged_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -187,15 +166,7 @@ static duk_ret_t SignalWrapper_Sky_ParentEntitySet_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_Sky_ParentEntitySet::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -203,20 +174,7 @@ static duk_ret_t SignalWrapper_Sky_ParentEntitySet_Disconnect(duk_context* ctx)
 {
     SignalWrapper_Sky_ParentEntitySet* wrapper = GetThisValueObject<SignalWrapper_Sky_ParentEntitySet>(ctx, SignalWrapper_Sky_ParentEntitySet_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -293,15 +251,7 @@ static duk_ret_t SignalWrapper_Sky_ParentEntityAboutToBeDetached_Connect(duk_con
         wrapper->signal_->Connect(receiver, &SignalReceiver_Sky_ParentEntityAboutToBeDetached::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -309,20 +259,7 @@ static duk_ret_t SignalWrapper_Sky_ParentEntityAboutToBeDetached_Disconnect(duk_
 {
     SignalWrapper_Sky_ParentEntityAboutToBeDetached* wrapper = GetThisValueObject<SignalWrapper_Sky_ParentEntityAboutToBeDetached>(ctx, SignalWrapper_Sky_ParentEntityAboutToBeDetached_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -598,9 +535,9 @@ void Expose_Sky(duk_context* ctx)
     duk_put_function_list(ctx, -1, Sky_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Sky_Functions);
-    DefineProperty(ctx, "componentNameChanged", Sky_Get_ComponentNameChanged, nullptr);
-    DefineProperty(ctx, "parentEntitySet", Sky_Get_ParentEntitySet, nullptr);
-    DefineProperty(ctx, "parentEntityAboutToBeDetached", Sky_Get_ParentEntityAboutToBeDetached, nullptr);
+    DefineProperty(ctx, "ComponentNameChanged", Sky_Get_ComponentNameChanged, nullptr);
+    DefineProperty(ctx, "ParentEntitySet", Sky_Get_ParentEntitySet, nullptr);
+    DefineProperty(ctx, "ParentEntityAboutToBeDetached", Sky_Get_ParentEntityAboutToBeDetached, nullptr);
     DefineProperty(ctx, "typeName", Sky_TypeName, nullptr);
     DefineProperty(ctx, "typeId", Sky_TypeId, nullptr);
     DefineProperty(ctx, "name", Sky_Name, Sky_SetName_String);

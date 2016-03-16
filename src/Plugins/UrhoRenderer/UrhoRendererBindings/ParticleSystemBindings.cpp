@@ -79,15 +79,7 @@ static duk_ret_t SignalWrapper_ParticleSystem_ComponentNameChanged_Connect(duk_c
         wrapper->signal_->Connect(receiver, &SignalReceiver_ParticleSystem_ComponentNameChanged::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -95,20 +87,7 @@ static duk_ret_t SignalWrapper_ParticleSystem_ComponentNameChanged_Disconnect(du
 {
     SignalWrapper_ParticleSystem_ComponentNameChanged* wrapper = GetThisValueObject<SignalWrapper_ParticleSystem_ComponentNameChanged>(ctx, SignalWrapper_ParticleSystem_ComponentNameChanged_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -187,15 +166,7 @@ static duk_ret_t SignalWrapper_ParticleSystem_ParentEntitySet_Connect(duk_contex
         wrapper->signal_->Connect(receiver, &SignalReceiver_ParticleSystem_ParentEntitySet::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -203,20 +174,7 @@ static duk_ret_t SignalWrapper_ParticleSystem_ParentEntitySet_Disconnect(duk_con
 {
     SignalWrapper_ParticleSystem_ParentEntitySet* wrapper = GetThisValueObject<SignalWrapper_ParticleSystem_ParentEntitySet>(ctx, SignalWrapper_ParticleSystem_ParentEntitySet_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -293,15 +251,7 @@ static duk_ret_t SignalWrapper_ParticleSystem_ParentEntityAboutToBeDetached_Conn
         wrapper->signal_->Connect(receiver, &SignalReceiver_ParticleSystem_ParentEntityAboutToBeDetached::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -309,20 +259,7 @@ static duk_ret_t SignalWrapper_ParticleSystem_ParentEntityAboutToBeDetached_Disc
 {
     SignalWrapper_ParticleSystem_ParentEntityAboutToBeDetached* wrapper = GetThisValueObject<SignalWrapper_ParticleSystem_ParentEntityAboutToBeDetached>(ctx, SignalWrapper_ParticleSystem_ParentEntityAboutToBeDetached_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -614,9 +551,9 @@ void Expose_ParticleSystem(duk_context* ctx)
     duk_put_function_list(ctx, -1, ParticleSystem_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, ParticleSystem_Functions);
-    DefineProperty(ctx, "componentNameChanged", ParticleSystem_Get_ComponentNameChanged, nullptr);
-    DefineProperty(ctx, "parentEntitySet", ParticleSystem_Get_ParentEntitySet, nullptr);
-    DefineProperty(ctx, "parentEntityAboutToBeDetached", ParticleSystem_Get_ParentEntityAboutToBeDetached, nullptr);
+    DefineProperty(ctx, "ComponentNameChanged", ParticleSystem_Get_ComponentNameChanged, nullptr);
+    DefineProperty(ctx, "ParentEntitySet", ParticleSystem_Get_ParentEntitySet, nullptr);
+    DefineProperty(ctx, "ParentEntityAboutToBeDetached", ParticleSystem_Get_ParentEntityAboutToBeDetached, nullptr);
     DefineProperty(ctx, "typeName", ParticleSystem_TypeName, nullptr);
     DefineProperty(ctx, "typeId", ParticleSystem_TypeId, nullptr);
     DefineProperty(ctx, "name", ParticleSystem_Name, ParticleSystem_SetName_String);

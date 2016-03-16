@@ -90,15 +90,7 @@ static duk_ret_t SignalWrapper_Scene_ComponentAdded_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_Scene_ComponentAdded::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -106,20 +98,7 @@ static duk_ret_t SignalWrapper_Scene_ComponentAdded_Disconnect(duk_context* ctx)
 {
     SignalWrapper_Scene_ComponentAdded* wrapper = GetThisValueObject<SignalWrapper_Scene_ComponentAdded>(ctx, SignalWrapper_Scene_ComponentAdded_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -205,15 +184,7 @@ static duk_ret_t SignalWrapper_Scene_ComponentRemoved_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_Scene_ComponentRemoved::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -221,20 +192,7 @@ static duk_ret_t SignalWrapper_Scene_ComponentRemoved_Disconnect(duk_context* ct
 {
     SignalWrapper_Scene_ComponentRemoved* wrapper = GetThisValueObject<SignalWrapper_Scene_ComponentRemoved>(ctx, SignalWrapper_Scene_ComponentRemoved_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -318,15 +276,7 @@ static duk_ret_t SignalWrapper_Scene_EntityCreated_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_Scene_EntityCreated::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -334,20 +284,7 @@ static duk_ret_t SignalWrapper_Scene_EntityCreated_Disconnect(duk_context* ctx)
 {
     SignalWrapper_Scene_EntityCreated* wrapper = GetThisValueObject<SignalWrapper_Scene_EntityCreated>(ctx, SignalWrapper_Scene_EntityCreated_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -430,15 +367,7 @@ static duk_ret_t SignalWrapper_Scene_EntityRemoved_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_Scene_EntityRemoved::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -446,20 +375,7 @@ static duk_ret_t SignalWrapper_Scene_EntityRemoved_Disconnect(duk_context* ctx)
 {
     SignalWrapper_Scene_EntityRemoved* wrapper = GetThisValueObject<SignalWrapper_Scene_EntityRemoved>(ctx, SignalWrapper_Scene_EntityRemoved_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -542,15 +458,7 @@ static duk_ret_t SignalWrapper_Scene_EntityAcked_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_Scene_EntityAcked::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -558,20 +466,7 @@ static duk_ret_t SignalWrapper_Scene_EntityAcked_Disconnect(duk_context* ctx)
 {
     SignalWrapper_Scene_EntityAcked* wrapper = GetThisValueObject<SignalWrapper_Scene_EntityAcked>(ctx, SignalWrapper_Scene_EntityAcked_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -654,15 +549,7 @@ static duk_ret_t SignalWrapper_Scene_EntityTemporaryStateToggled_Connect(duk_con
         wrapper->signal_->Connect(receiver, &SignalReceiver_Scene_EntityTemporaryStateToggled::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -670,20 +557,7 @@ static duk_ret_t SignalWrapper_Scene_EntityTemporaryStateToggled_Disconnect(duk_
 {
     SignalWrapper_Scene_EntityTemporaryStateToggled* wrapper = GetThisValueObject<SignalWrapper_Scene_EntityTemporaryStateToggled>(ctx, SignalWrapper_Scene_EntityTemporaryStateToggled_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -766,15 +640,7 @@ static duk_ret_t SignalWrapper_Scene_ComponentAcked_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_Scene_ComponentAcked::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -782,20 +648,7 @@ static duk_ret_t SignalWrapper_Scene_ComponentAcked_Disconnect(duk_context* ctx)
 {
     SignalWrapper_Scene_ComponentAcked* wrapper = GetThisValueObject<SignalWrapper_Scene_ComponentAcked>(ctx, SignalWrapper_Scene_ComponentAcked_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -876,15 +729,7 @@ static duk_ret_t SignalWrapper_Scene_Removed_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_Scene_Removed::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -892,20 +737,7 @@ static duk_ret_t SignalWrapper_Scene_Removed_Disconnect(duk_context* ctx)
 {
     SignalWrapper_Scene_Removed* wrapper = GetThisValueObject<SignalWrapper_Scene_Removed>(ctx, SignalWrapper_Scene_Removed_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -985,15 +817,7 @@ static duk_ret_t SignalWrapper_Scene_SceneCleared_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_Scene_SceneCleared::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -1001,20 +825,7 @@ static duk_ret_t SignalWrapper_Scene_SceneCleared_Disconnect(duk_context* ctx)
 {
     SignalWrapper_Scene_SceneCleared* wrapper = GetThisValueObject<SignalWrapper_Scene_SceneCleared>(ctx, SignalWrapper_Scene_SceneCleared_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -1098,15 +909,7 @@ static duk_ret_t SignalWrapper_Scene_EntityParentChanged_Connect(duk_context* ct
         wrapper->signal_->Connect(receiver, &SignalReceiver_Scene_EntityParentChanged::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -1114,20 +917,7 @@ static duk_ret_t SignalWrapper_Scene_EntityParentChanged_Disconnect(duk_context*
 {
     SignalWrapper_Scene_EntityParentChanged* wrapper = GetThisValueObject<SignalWrapper_Scene_EntityParentChanged>(ctx, SignalWrapper_Scene_EntityParentChanged_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -1650,16 +1440,16 @@ void Expose_Scene(duk_context* ctx)
     duk_push_object(ctx);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Scene_Functions);
-    DefineProperty(ctx, "componentAdded", Scene_Get_ComponentAdded, nullptr);
-    DefineProperty(ctx, "componentRemoved", Scene_Get_ComponentRemoved, nullptr);
-    DefineProperty(ctx, "entityCreated", Scene_Get_EntityCreated, nullptr);
-    DefineProperty(ctx, "entityRemoved", Scene_Get_EntityRemoved, nullptr);
-    DefineProperty(ctx, "entityAcked", Scene_Get_EntityAcked, nullptr);
-    DefineProperty(ctx, "entityTemporaryStateToggled", Scene_Get_EntityTemporaryStateToggled, nullptr);
-    DefineProperty(ctx, "componentAcked", Scene_Get_ComponentAcked, nullptr);
-    DefineProperty(ctx, "removed", Scene_Get_Removed, nullptr);
-    DefineProperty(ctx, "sceneCleared", Scene_Get_SceneCleared, nullptr);
-    DefineProperty(ctx, "entityParentChanged", Scene_Get_EntityParentChanged, nullptr);
+    DefineProperty(ctx, "ComponentAdded", Scene_Get_ComponentAdded, nullptr);
+    DefineProperty(ctx, "ComponentRemoved", Scene_Get_ComponentRemoved, nullptr);
+    DefineProperty(ctx, "EntityCreated", Scene_Get_EntityCreated, nullptr);
+    DefineProperty(ctx, "EntityRemoved", Scene_Get_EntityRemoved, nullptr);
+    DefineProperty(ctx, "EntityAcked", Scene_Get_EntityAcked, nullptr);
+    DefineProperty(ctx, "EntityTemporaryStateToggled", Scene_Get_EntityTemporaryStateToggled, nullptr);
+    DefineProperty(ctx, "ComponentAcked", Scene_Get_ComponentAcked, nullptr);
+    DefineProperty(ctx, "Removed", Scene_Get_Removed, nullptr);
+    DefineProperty(ctx, "SceneCleared", Scene_Get_SceneCleared, nullptr);
+    DefineProperty(ctx, "EntityParentChanged", Scene_Get_EntityParentChanged, nullptr);
     DefineProperty(ctx, "name", Scene_Name, nullptr);
     DefineProperty(ctx, "upVector", Scene_UpVector, nullptr);
     DefineProperty(ctx, "rightVector", Scene_RightVector, nullptr);

@@ -85,15 +85,7 @@ static duk_ret_t SignalWrapper_IAsset_Unloaded_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_IAsset_Unloaded::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -101,20 +93,7 @@ static duk_ret_t SignalWrapper_IAsset_Unloaded_Disconnect(duk_context* ctx)
 {
     SignalWrapper_IAsset_Unloaded* wrapper = GetThisValueObject<SignalWrapper_IAsset_Unloaded>(ctx, SignalWrapper_IAsset_Unloaded_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -194,15 +173,7 @@ static duk_ret_t SignalWrapper_IAsset_Loaded_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_IAsset_Loaded::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -210,20 +181,7 @@ static duk_ret_t SignalWrapper_IAsset_Loaded_Disconnect(duk_context* ctx)
 {
     SignalWrapper_IAsset_Loaded* wrapper = GetThisValueObject<SignalWrapper_IAsset_Loaded>(ctx, SignalWrapper_IAsset_Loaded_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -303,15 +261,7 @@ static duk_ret_t SignalWrapper_IAsset_PropertyStatusChanged_Connect(duk_context*
         wrapper->signal_->Connect(receiver, &SignalReceiver_IAsset_PropertyStatusChanged::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -319,20 +269,7 @@ static duk_ret_t SignalWrapper_IAsset_PropertyStatusChanged_Disconnect(duk_conte
 {
     SignalWrapper_IAsset_PropertyStatusChanged* wrapper = GetThisValueObject<SignalWrapper_IAsset_PropertyStatusChanged>(ctx, SignalWrapper_IAsset_PropertyStatusChanged_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -490,6 +427,14 @@ static duk_ret_t IAsset_SaveCachedCopyToFile_String(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t IAsset_AssetStorage(duk_context* ctx)
+{
+    IAsset* thisObj = GetThisWeakObject<IAsset>(ctx);
+    AssetStoragePtr ret = thisObj->AssetStorage();
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t IAsset_GetAssetAPI(duk_context* ctx)
 {
     IAsset* thisObj = GetThisWeakObject<IAsset>(ctx);
@@ -537,6 +482,14 @@ static duk_ret_t IAsset_FindReferencesRecursive(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t IAsset_SetAssetStorage_AssetStoragePtr(duk_context* ctx)
+{
+    IAsset* thisObj = GetThisWeakObject<IAsset>(ctx);
+    SharedPtr<IAssetStorage> storage(GetWeakObject<IAssetStorage>(ctx, 0));
+    thisObj->SetAssetStorage(storage);
+    return 0;
+}
+
 static const duk_function_list_entry IAsset_Functions[] = {
     {"Type", IAsset_Type, 0}
     ,{"Name", IAsset_Name, 0}
@@ -554,12 +507,14 @@ static const duk_function_list_entry IAsset_Functions[] = {
     ,{"Clone", IAsset_Clone_String, 1}
     ,{"SaveToFile", IAsset_SaveToFile_String_String, DUK_VARARGS}
     ,{"SaveCachedCopyToFile", IAsset_SaveCachedCopyToFile_String, 1}
+    ,{"AssetStorage", IAsset_AssetStorage, 0}
     ,{"GetAssetAPI", IAsset_GetAssetAPI, 0}
     ,{"ToString", IAsset_ToString, 0}
     ,{"LoadCompleted", IAsset_LoadCompleted, 0}
     ,{"DependencyLoaded", IAsset_DependencyLoaded_AssetPtr, 1}
     ,{"FindReferences", IAsset_FindReferences, 0}
     ,{"FindReferencesRecursive", IAsset_FindReferencesRecursive, 0}
+    ,{"SetAssetStorage", IAsset_SetAssetStorage_AssetStoragePtr, 1}
     ,{nullptr, nullptr, 0}
 };
 
@@ -576,9 +531,9 @@ void Expose_IAsset(duk_context* ctx)
     duk_put_prop_string(ctx, -2, "Bundle");
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, IAsset_Functions);
-    DefineProperty(ctx, "unloaded", IAsset_Get_Unloaded, nullptr);
-    DefineProperty(ctx, "loaded", IAsset_Get_Loaded, nullptr);
-    DefineProperty(ctx, "propertyStatusChanged", IAsset_Get_PropertyStatusChanged, nullptr);
+    DefineProperty(ctx, "Unloaded", IAsset_Get_Unloaded, nullptr);
+    DefineProperty(ctx, "Loaded", IAsset_Get_Loaded, nullptr);
+    DefineProperty(ctx, "PropertyStatusChanged", IAsset_Get_PropertyStatusChanged, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, IAsset_ID);
 }

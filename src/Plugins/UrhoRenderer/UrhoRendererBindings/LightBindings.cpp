@@ -79,15 +79,7 @@ static duk_ret_t SignalWrapper_Light_ComponentNameChanged_Connect(duk_context* c
         wrapper->signal_->Connect(receiver, &SignalReceiver_Light_ComponentNameChanged::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -95,20 +87,7 @@ static duk_ret_t SignalWrapper_Light_ComponentNameChanged_Disconnect(duk_context
 {
     SignalWrapper_Light_ComponentNameChanged* wrapper = GetThisValueObject<SignalWrapper_Light_ComponentNameChanged>(ctx, SignalWrapper_Light_ComponentNameChanged_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -187,15 +166,7 @@ static duk_ret_t SignalWrapper_Light_ParentEntitySet_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_Light_ParentEntitySet::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -203,20 +174,7 @@ static duk_ret_t SignalWrapper_Light_ParentEntitySet_Disconnect(duk_context* ctx
 {
     SignalWrapper_Light_ParentEntitySet* wrapper = GetThisValueObject<SignalWrapper_Light_ParentEntitySet>(ctx, SignalWrapper_Light_ParentEntitySet_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -293,15 +251,7 @@ static duk_ret_t SignalWrapper_Light_ParentEntityAboutToBeDetached_Connect(duk_c
         wrapper->signal_->Connect(receiver, &SignalReceiver_Light_ParentEntityAboutToBeDetached::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -309,20 +259,7 @@ static duk_ret_t SignalWrapper_Light_ParentEntityAboutToBeDetached_Disconnect(du
 {
     SignalWrapper_Light_ParentEntityAboutToBeDetached* wrapper = GetThisValueObject<SignalWrapper_Light_ParentEntityAboutToBeDetached>(ctx, SignalWrapper_Light_ParentEntityAboutToBeDetached_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -596,9 +533,9 @@ void Expose_Light(duk_context* ctx)
     duk_put_prop_string(ctx, -2, "DirectionalLight");
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Light_Functions);
-    DefineProperty(ctx, "componentNameChanged", Light_Get_ComponentNameChanged, nullptr);
-    DefineProperty(ctx, "parentEntitySet", Light_Get_ParentEntitySet, nullptr);
-    DefineProperty(ctx, "parentEntityAboutToBeDetached", Light_Get_ParentEntityAboutToBeDetached, nullptr);
+    DefineProperty(ctx, "ComponentNameChanged", Light_Get_ComponentNameChanged, nullptr);
+    DefineProperty(ctx, "ParentEntitySet", Light_Get_ParentEntitySet, nullptr);
+    DefineProperty(ctx, "ParentEntityAboutToBeDetached", Light_Get_ParentEntityAboutToBeDetached, nullptr);
     DefineProperty(ctx, "typeName", Light_TypeName, nullptr);
     DefineProperty(ctx, "typeId", Light_TypeId, nullptr);
     DefineProperty(ctx, "name", Light_Name, Light_SetName_String);

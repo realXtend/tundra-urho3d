@@ -82,7 +82,7 @@ AssetTransferPtr LocalAssetProvider::CreateTransfer(String assetRef, String asse
         }
     }
 
-    AssetTransferPtr transfer(new IAssetTransfer);
+    AssetTransferPtr transfer(new IAssetTransfer(context_));
     transfer->source.ref = assetRef.Trimmed();
     transfer->assetType = assetType;
     transfer->diskSourceType = IAsset::Original; // The disk source represents the original authoritative source for the asset.

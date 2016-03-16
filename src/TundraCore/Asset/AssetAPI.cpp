@@ -836,7 +836,7 @@ AssetTransferPtr AssetAPI::RequestAsset(String assetRef, String assetType, bool 
                 AssetTransferPtr subTransfer = assetBundleMonitor->SubAssetTransfer(fullAssetRef);
                 if (!subTransfer.Get())
                 {
-                    subTransfer = new VirtualAssetTransfer();
+                    subTransfer = new VirtualAssetTransfer(context_);
                     subTransfer->source.ref = fullAssetRef;
                     subTransfer->assetType = ResourceTypeForAssetRef(subTransfer->source.ref);
                     subTransfer->provider = transfer->provider;
@@ -893,7 +893,7 @@ AssetTransferPtr AssetAPI::RequestAsset(String assetRef, String assetType, bool 
     {
         // The asset was already downloaded. Generate a 'virtual asset transfer' 
         // and return it to the client. Fill in the valid existing asset ptr to the transfer.
-        AssetTransferPtr transfer(new VirtualAssetTransfer());
+        AssetTransferPtr transfer(new VirtualAssetTransfer(context_));
         transfer->asset = existingAsset;
         transfer->source.ref = assetRef;
         transfer->assetType = assetType;
@@ -929,7 +929,7 @@ AssetTransferPtr AssetAPI::RequestAsset(String assetRef, String assetType, bool 
                     return subTransfer;
             }
             // Create a loader for this sub asset.
-            AssetTransferPtr transfer(new VirtualAssetTransfer());
+            AssetTransferPtr transfer(new VirtualAssetTransfer(context_));
             transfer->asset = existingAsset;
             transfer->source.ref = fullAssetRef;
             readySubTransfers.Push(SubAssetLoader(assetRef, transfer));
@@ -951,7 +951,7 @@ AssetTransferPtr AssetAPI::RequestAsset(String assetRef, String assetType, bool 
         PendingDownloadRequest pendingRequest;
         pendingRequest.assetRef = assetRef;
         pendingRequest.assetType = assetType;
-        pendingRequest.transfer = new IAssetTransfer();
+        pendingRequest.transfer = new IAssetTransfer(context_);
 
         pendingDownloadRequests[assetRef] = pendingRequest;
 
@@ -1021,7 +1021,7 @@ AssetTransferPtr AssetAPI::RequestAsset(String assetRef, String assetType, bool 
         {
             // In this case we return a virtual transfer for the sub asset.
             // This transfer will be loaded once the bundle can provide the content.
-            subTransfer = new VirtualAssetTransfer();
+            subTransfer = new VirtualAssetTransfer(context_);
             subTransfer->source.ref = fullAssetRef;
             subTransfer->assetType = ResourceTypeForAssetRef(subTransfer->source.ref);
             subTransfer->provider = transfer->provider;

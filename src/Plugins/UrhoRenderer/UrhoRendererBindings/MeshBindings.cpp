@@ -82,15 +82,7 @@ static duk_ret_t SignalWrapper_Mesh_MeshAboutToBeDestroyed_Connect(duk_context* 
         wrapper->signal_->Connect(receiver, &SignalReceiver_Mesh_MeshAboutToBeDestroyed::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -98,20 +90,7 @@ static duk_ret_t SignalWrapper_Mesh_MeshAboutToBeDestroyed_Disconnect(duk_contex
 {
     SignalWrapper_Mesh_MeshAboutToBeDestroyed* wrapper = GetThisValueObject<SignalWrapper_Mesh_MeshAboutToBeDestroyed>(ctx, SignalWrapper_Mesh_MeshAboutToBeDestroyed_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -188,15 +167,7 @@ static duk_ret_t SignalWrapper_Mesh_MeshChanged_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_Mesh_MeshChanged::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -204,20 +175,7 @@ static duk_ret_t SignalWrapper_Mesh_MeshChanged_Disconnect(duk_context* ctx)
 {
     SignalWrapper_Mesh_MeshChanged* wrapper = GetThisValueObject<SignalWrapper_Mesh_MeshChanged>(ctx, SignalWrapper_Mesh_MeshChanged_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -298,15 +256,7 @@ static duk_ret_t SignalWrapper_Mesh_MaterialChanged_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_Mesh_MaterialChanged::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -314,20 +264,7 @@ static duk_ret_t SignalWrapper_Mesh_MaterialChanged_Disconnect(duk_context* ctx)
 {
     SignalWrapper_Mesh_MaterialChanged* wrapper = GetThisValueObject<SignalWrapper_Mesh_MaterialChanged>(ctx, SignalWrapper_Mesh_MaterialChanged_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -406,15 +343,7 @@ static duk_ret_t SignalWrapper_Mesh_SkeletonChanged_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_Mesh_SkeletonChanged::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -422,20 +351,7 @@ static duk_ret_t SignalWrapper_Mesh_SkeletonChanged_Disconnect(duk_context* ctx)
 {
     SignalWrapper_Mesh_SkeletonChanged* wrapper = GetThisValueObject<SignalWrapper_Mesh_SkeletonChanged>(ctx, SignalWrapper_Mesh_SkeletonChanged_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -516,15 +432,7 @@ static duk_ret_t SignalWrapper_Mesh_ComponentNameChanged_Connect(duk_context* ct
         wrapper->signal_->Connect(receiver, &SignalReceiver_Mesh_ComponentNameChanged::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -532,20 +440,7 @@ static duk_ret_t SignalWrapper_Mesh_ComponentNameChanged_Disconnect(duk_context*
 {
     SignalWrapper_Mesh_ComponentNameChanged* wrapper = GetThisValueObject<SignalWrapper_Mesh_ComponentNameChanged>(ctx, SignalWrapper_Mesh_ComponentNameChanged_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -624,15 +519,7 @@ static duk_ret_t SignalWrapper_Mesh_ParentEntitySet_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_Mesh_ParentEntitySet::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -640,20 +527,7 @@ static duk_ret_t SignalWrapper_Mesh_ParentEntitySet_Disconnect(duk_context* ctx)
 {
     SignalWrapper_Mesh_ParentEntitySet* wrapper = GetThisValueObject<SignalWrapper_Mesh_ParentEntitySet>(ctx, SignalWrapper_Mesh_ParentEntitySet_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -730,15 +604,7 @@ static duk_ret_t SignalWrapper_Mesh_ParentEntityAboutToBeDetached_Connect(duk_co
         wrapper->signal_->Connect(receiver, &SignalReceiver_Mesh_ParentEntityAboutToBeDetached::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -746,20 +612,7 @@ static duk_ret_t SignalWrapper_Mesh_ParentEntityAboutToBeDetached_Disconnect(duk
 {
     SignalWrapper_Mesh_ParentEntityAboutToBeDetached* wrapper = GetThisValueObject<SignalWrapper_Mesh_ParentEntityAboutToBeDetached>(ctx, SignalWrapper_Mesh_ParentEntityAboutToBeDetached_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -1100,13 +953,13 @@ void Expose_Mesh(duk_context* ctx)
     duk_put_function_list(ctx, -1, Mesh_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Mesh_Functions);
-    DefineProperty(ctx, "meshAboutToBeDestroyed", Mesh_Get_MeshAboutToBeDestroyed, nullptr);
-    DefineProperty(ctx, "meshChanged", Mesh_Get_MeshChanged, nullptr);
-    DefineProperty(ctx, "materialChanged", Mesh_Get_MaterialChanged, nullptr);
-    DefineProperty(ctx, "skeletonChanged", Mesh_Get_SkeletonChanged, nullptr);
-    DefineProperty(ctx, "componentNameChanged", Mesh_Get_ComponentNameChanged, nullptr);
-    DefineProperty(ctx, "parentEntitySet", Mesh_Get_ParentEntitySet, nullptr);
-    DefineProperty(ctx, "parentEntityAboutToBeDetached", Mesh_Get_ParentEntityAboutToBeDetached, nullptr);
+    DefineProperty(ctx, "MeshAboutToBeDestroyed", Mesh_Get_MeshAboutToBeDestroyed, nullptr);
+    DefineProperty(ctx, "MeshChanged", Mesh_Get_MeshChanged, nullptr);
+    DefineProperty(ctx, "MaterialChanged", Mesh_Get_MaterialChanged, nullptr);
+    DefineProperty(ctx, "SkeletonChanged", Mesh_Get_SkeletonChanged, nullptr);
+    DefineProperty(ctx, "ComponentNameChanged", Mesh_Get_ComponentNameChanged, nullptr);
+    DefineProperty(ctx, "ParentEntitySet", Mesh_Get_ParentEntitySet, nullptr);
+    DefineProperty(ctx, "ParentEntityAboutToBeDetached", Mesh_Get_ParentEntityAboutToBeDetached, nullptr);
     DefineProperty(ctx, "typeName", Mesh_TypeName, nullptr);
     DefineProperty(ctx, "typeId", Mesh_TypeId, nullptr);
     DefineProperty(ctx, "name", Mesh_Name, Mesh_SetName_String);

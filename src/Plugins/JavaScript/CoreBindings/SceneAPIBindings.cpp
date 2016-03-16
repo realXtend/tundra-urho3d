@@ -81,15 +81,7 @@ static duk_ret_t SignalWrapper_SceneAPI_SceneCreated_Connect(duk_context* ctx)
         wrapper->signal_->Connect(receiver, &SignalReceiver_SceneAPI_SceneCreated::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -97,20 +89,7 @@ static duk_ret_t SignalWrapper_SceneAPI_SceneCreated_Disconnect(duk_context* ctx
 {
     SignalWrapper_SceneAPI_SceneCreated* wrapper = GetThisValueObject<SignalWrapper_SceneAPI_SceneCreated>(ctx, SignalWrapper_SceneAPI_SceneCreated_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -193,15 +172,7 @@ static duk_ret_t SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Connect(duk_contex
         wrapper->signal_->Connect(receiver, &SignalReceiver_SceneAPI_SceneAboutToBeRemoved::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -209,20 +180,7 @@ static duk_ret_t SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Disconnect(duk_con
 {
     SignalWrapper_SceneAPI_SceneAboutToBeRemoved* wrapper = GetThisValueObject<SignalWrapper_SceneAPI_SceneAboutToBeRemoved>(ctx, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -307,15 +265,7 @@ static duk_ret_t SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Conne
         wrapper->signal_->Connect(receiver, &SignalReceiver_SceneAPI_PlaceholderComponentTypeRegistered::OnSignal);
         signalReceivers[wrapper->signal_] = receiver;
     }
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_ConnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    duk_pop(ctx);
+    CallConnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -323,20 +273,7 @@ static duk_ret_t SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Disco
 {
     SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered* wrapper = GetThisValueObject<SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered>(ctx, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID);
     if (!wrapper->owner_) return 0;
-    int numArgs = duk_get_top(ctx);
-    duk_push_number(ctx, (size_t)wrapper->signal_);
-    duk_insert(ctx, 0);
-    duk_push_global_object(ctx);
-    duk_get_prop_string(ctx, -1, "_DisconnectSignal");
-    duk_remove(ctx, -2);
-    duk_insert(ctx, 0);
-    duk_pcall(ctx, numArgs + 1);
-    if (duk_get_boolean(ctx, -1))
-    {
-        HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
-        signalReceivers.Erase(wrapper->signal_);
-    }
-    duk_pop(ctx);
+    CallDisconnectSignal(ctx, wrapper->signal_);
     return 0;
 }
 
@@ -554,9 +491,9 @@ void Expose_SceneAPI(duk_context* ctx)
     duk_put_function_list(ctx, -1, SceneAPI_StaticFunctions);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, SceneAPI_Functions);
-    DefineProperty(ctx, "sceneCreated", SceneAPI_Get_SceneCreated, nullptr);
-    DefineProperty(ctx, "sceneAboutToBeRemoved", SceneAPI_Get_SceneAboutToBeRemoved, nullptr);
-    DefineProperty(ctx, "placeholderComponentTypeRegistered", SceneAPI_Get_PlaceholderComponentTypeRegistered, nullptr);
+    DefineProperty(ctx, "SceneCreated", SceneAPI_Get_SceneCreated, nullptr);
+    DefineProperty(ctx, "SceneAboutToBeRemoved", SceneAPI_Get_SceneAboutToBeRemoved, nullptr);
+    DefineProperty(ctx, "PlaceholderComponentTypeRegistered", SceneAPI_Get_PlaceholderComponentTypeRegistered, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, SceneAPI_ID);
 }
