@@ -62,8 +62,6 @@ void ECEditor::OpenSceneEditor(Scene *scene)
 void ECEditor::OpenEntityEditor(Entity *entity)
 {
     entityEditor_->AddEntity(entity->Id(), true);
-    entityEditor_->Widget()->BringToFront();
-    entityEditor_->Widget()->SetPosition(IntVector2(300, 0));
     entityEditor_->Show();
 }
 

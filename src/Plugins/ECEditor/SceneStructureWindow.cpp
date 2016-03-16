@@ -66,7 +66,7 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module
             closeButton_->SetPosition(IntVector2(-3, 0));
             topBar->AddChild(closeButton_);
 
-            SubscribeToEvent(E_PRESSED, URHO3D_HANDLER(SceneStructureWindow, OnCloseClicked));
+            SubscribeToEvent(closeButton_.Get(), E_PRESSED, URHO3D_HANDLER(SceneStructureWindow, OnCloseClicked));
 
             Text *windowHeader = new Text(framework->GetContext());
             windowHeader->SetStyle("Text", style);
@@ -99,7 +99,7 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module
         window_->AddChild(bottomBar);
 
         {
-            Button *button = new Button(framework->GetContext());
+            /*Button *button = new Button(framework->GetContext());
             button->SetName("UndoButton");
             Text *text = new Text(framework->GetContext());
             text->SetText("Undo");
@@ -125,7 +125,7 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module
             button->SetMinWidth(50);
             button->SetMaxWidth(50);
             text->SetAlignment(HA_CENTER, VA_CENTER);
-            bottomBar->AddChild(button);
+            bottomBar->AddChild(button);*/
         }
     }
 
@@ -294,10 +294,9 @@ void SceneStructureWindow::OnSelectionChanged(StringHash /*eventType*/, VariantM
     PODVector<UIElement *> elements = listView_->GetSelectedItems();
 }
 
-void SceneStructureWindow::OnCloseClicked(StringHash /*eventType*/, VariantMap &eventData)
+void SceneStructureWindow::OnCloseClicked(StringHash /*eventType*/, VariantMap &/*eventData*/)
 {
-    if (eventData["Element"].GetPtr() == closeButton_)
-        Hide();
+    Hide();
 }
 
 void SceneStructureWindow::OnComponentDialogClosed(AddComponentDialog *dialog, bool confirmed)

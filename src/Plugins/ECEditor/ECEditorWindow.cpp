@@ -168,6 +168,7 @@ ECEditorWindow::ECEditorWindow(Framework *framework) :
     window_->SetLayout(LayoutMode::LM_VERTICAL, 2, IntRect(2, 2, 2, 2));
     window_->SetSize(IntVector2(350, 500));
     window_->SetMinSize(IntVector2(350, 500));
+	window_->SetPosition(IntVector2(300, 100));
     window_->SetStyle("Window", style);
     window_->SetMovable(true);
     window_->SetResizable(true);
@@ -180,14 +181,14 @@ ECEditorWindow::ECEditorWindow(Framework *framework) :
         window_->AddChild(topBar);
 
         {
-            Button *button = new Button(framework->GetContext());
-            button->SetName("CloseButton");
-            button->SetStyle("CloseButton", style);
-            button->SetAlignment(HA_RIGHT, VA_CENTER);
-            button->SetPosition(IntVector2(-3, 0));
-            topBar->AddChild(button);
+			closeButton_ = new Button(framework->GetContext());
+			closeButton_->SetName("CloseButton");
+			closeButton_->SetStyle("CloseButton", style);
+			closeButton_->SetAlignment(HA_RIGHT, VA_CENTER);
+			closeButton_->SetPosition(IntVector2(-3, 0));
+            topBar->AddChild(closeButton_);
 
-            SubscribeToEvent(E_PRESSED, URHO3D_HANDLER(ECEditorWindow, OnCloseClicked));
+            SubscribeToEvent(closeButton_.Get(), E_PRESSED, URHO3D_HANDLER(ECEditorWindow, OnCloseClicked));
 
             Text *windowHeader = new Text(framework->GetContext());
             windowHeader->SetStyle("Text", style);
@@ -218,6 +219,8 @@ ECEditorWindow::~ECEditorWindow()
 void ECEditorWindow::Show()
 {
     window_->SetVisible(true);
+	list_->SetFocus(true);
+	window_->BringToFront();
 }
 
 void ECEditorWindow::Hide()
@@ -293,7 +296,7 @@ UIElement *ECEditorWindow::Widget() const
 
 void ECEditorWindow::OnCloseClicked(StringHash /*eventType*/, VariantMap &/*eventData*/)
 {
-    Hide();
+	Hide();
 }
 
 }

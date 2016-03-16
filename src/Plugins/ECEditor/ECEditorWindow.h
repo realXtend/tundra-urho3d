@@ -20,6 +20,7 @@ namespace Urho3D
     class UIElement;
     class ListView;
     class Text;
+	class Button;
 }
 
 using namespace Urho3D;
@@ -41,6 +42,7 @@ typedef SharedPtr<IAttributeEditor> AttributeEditorPtr;
 typedef WeakPtr<IComponent> ComponentWeakPtr;
 typedef WeakPtr<Entity> EntityWeakPtr;
 typedef WeakPtr<Text> TextWeakPtr;
+typedef WeakPtr<Button> ButtonWeakPtr;
 typedef HashMap<entity_id_t, EntityWeakPtr> EntityMap;
 typedef HashMap<int, AttributeEditorPtr> AttributeEditorMap;
 
@@ -105,6 +107,7 @@ protected:
 
     WindowPtr window_;
     ListViewPtr list_;
+	ButtonWeakPtr closeButton_;
     
     EntityWeakPtr entity_;
 
