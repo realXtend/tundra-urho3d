@@ -69,6 +69,16 @@ namespace BindingsGenerator
             return t;
         }
 
+        public string BasicTypeRetainReference()
+        {
+            string t = type.Trim();
+            if (t.StartsWith("const"))
+                t = t.Substring(5).Trim();
+            if (t.EndsWith("const"))
+                t = t.Substring(0, t.Length - 5).Trim();
+            return t;
+        }
+
         /// <summary>
         /// Returns the basic type as a sanitated identifier.
         /// If type "const float3 &" -> BasicType() returns "float3".

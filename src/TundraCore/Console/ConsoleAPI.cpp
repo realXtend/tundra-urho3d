@@ -137,7 +137,7 @@ void ConsoleAPI::OnUpdate(float frametime)
     }
 }
 
-void SetConsoleVisible(bool /*visible*/)
+void ConsoleAPI::SetConsoleVisible(bool /*visible*/)
 {
     /// @todo GUI console
 }

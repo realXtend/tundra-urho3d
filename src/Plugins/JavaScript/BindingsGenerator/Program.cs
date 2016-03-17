@@ -258,6 +258,7 @@ namespace BindingsGenerator
         static string GenerateGetFromStack(string typeName, int stackIndex, string varName)
         {
             bool isRawPtr = typeName.EndsWith("*");
+            bool isReference = typeName.EndsWith("&");
             bool isPtr = false;
             typeName = SanitateTypeName(typeName);
 
@@ -266,6 +267,7 @@ namespace BindingsGenerator
                 typeName = typeName.Substring(0, typeName.Length - 3);
                 typeName = SanitateTemplateType(typeName);
                 isPtr = true;
+                isReference = false;
             }
 
             if (Symbol.IsNumberType(typeName))
@@ -312,10 +314,15 @@ namespace BindingsGenerator
                 }
                 else
                 {
-                    if (!isPtr)
-                        return typeName + "* " + varName + " = GetWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
+                    if (!isReference)
+                    {
+                        if (!isPtr)
+                            return typeName + "* " + varName + " = GetWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
+                        else
+                            return "SharedPtr<" + typeName + "> " + varName + "(GetWeakObject<" + typeName + ">(ctx, " + stackIndex + "));";
+                    }
                     else
-                        return "SharedPtr<" + typeName + "> " + varName + "(GetWeakObject<" + typeName + ">(ctx, " + stackIndex + "));";
+                        return typeName + "& " + varName + " = *GetCheckedWeakObject<" + typeName + ">(ctx, " + stackIndex + ");";
                 }
             }
             else
@@ -813,9 +820,9 @@ namespace BindingsGenerator
                         for (int i = 0; i < child.parameters.Count; ++i)
                         {
                             if (child.parameters[i].defaultValue == null || child.parameters[i].defaultValue.Length == 0)
-                                tw.WriteLine(Indent(1) + GenerateGetFromStack(child.parameters[i].BasicType(), i, child.parameters[i].name));
+                                tw.WriteLine(Indent(1) + GenerateGetFromStack(child.parameters[i].BasicTypeRetainReference(), i, child.parameters[i].name));
                             else
-                                tw.WriteLine(Indent(1) + GenerateGetFromStackDefaultValue(child.parameters[i].BasicType(), i, child.parameters[i].name, i, child.parameters[i].defaultValue));
+                                tw.WriteLine(Indent(1) + GenerateGetFromStackDefaultValue(child.parameters[i].BasicTypeRetainReference(), i, child.parameters[i].name, i, child.parameters[i].defaultValue));
                             
                             if (i > 0)
                                 args += ", ";
@@ -847,9 +854,9 @@ namespace BindingsGenerator
                         for (int i = 0; i < child.parameters.Count; ++i)
                         {
                             if (child.parameters[i].defaultValue == null || child.parameters[i].defaultValue.Length == 0)
-                                tw.WriteLine(Indent(1) + GenerateGetFromStack(child.parameters[i].BasicType(), i, child.parameters[i].name));
+                                tw.WriteLine(Indent(1) + GenerateGetFromStack(child.parameters[i].BasicTypeRetainReference(), i, child.parameters[i].name));
                             else
-                                tw.WriteLine(Indent(1) + GenerateGetFromStackDefaultValue(child.parameters[i].BasicType(), i, child.parameters[i].name, i, child.parameters[i].defaultValue));
+                                tw.WriteLine(Indent(1) + GenerateGetFromStackDefaultValue(child.parameters[i].BasicTypeRetainReference(), i, child.parameters[i].name, i, child.parameters[i].defaultValue));
 
                             if (i > 0)
                                 args += ", ";
@@ -1171,7 +1178,10 @@ namespace BindingsGenerator
             if (t.StartsWith("Vector<"))
                 t = t.Substring(7).Replace(">", "") + "Vector";
 
-            return StripNamespace(t);
+            t = StripNamespace(t);
+            if (t == "Key" || t == "KeySequence")
+                t = "int";
+            return t;
         }
 
         static string SanitateTypeNameNoPtrNoConst(string type)
@@ -1212,6 +1222,8 @@ namespace BindingsGenerator
                 typeName = "IAssetTransfer";
             if (typeName == "AssetStorage")
                 typeName = "IAssetStorage";
+            if (typeName == "AssetBundle")
+                typeName = "IAssetBundle";
             return typeName;
         }
 

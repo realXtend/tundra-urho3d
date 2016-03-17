@@ -86,8 +86,8 @@ public:
     /// This is optional. KeyEventSignals are freed properly when the context is destroyed.
     void UnregisterKeyEvent(KeySequence keySequence);
 
-    /// Returns the user-defined name of this InputContext. The name cannot be used as an unique identifier, it is only
-    /// present for human-readable purposes.
+    /// Returns the user-defined name of this InputContext. [property]
+    /** The name cannot be used as an unique identifier, it is only present for human-readable purposes. */
     String Name() const { return name; }
 
     /// Sets the name of this InputContext. The name cannot be used as an unique identifier, it is only
@@ -144,7 +144,7 @@ public:
     ///\todo Bypasses context and queries mouse state directly from Urho3D. Use events instead.
     bool IsMouseButtonReleased(int mouseButton) const;
 
-    /// Returns number of active touches
+    /// Returns number of active touches [property]
     ///\todo Bypasses context and queries touch state directly from Urho3D. Use events instead.
     unsigned GetNumTouches() const;
 
@@ -152,9 +152,9 @@ public:
     ///\todo Bypasses context and queries touch state directly from Urho3D. Use events instead.
     Urho3D::TouchState* GetTouch(unsigned index) const;
 
-    /// Returns the priority value this context has with respect to the other input contexts.
-    /// Higher = more urgent. Used to determine the order in which input is received by the input contexts.
-    /// The priority is assigned when the context is created and may not be changed afterwards.
+    /// Returns the priority value this context has with respect to the other input contexts. [property]
+    /** Higher = more urgent. Used to determine the order in which input is received by the input contexts.
+        The priority is assigned when the context is created and may not be changed afterwards. */
     int Priority() const { return priority; }
 
 private:

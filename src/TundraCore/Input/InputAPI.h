@@ -14,11 +14,10 @@
 #include <Urho3D/Core/Object.h>
 #include <Urho3D/Container/List.h>
 
-
-class Framework;
-
 namespace Tundra
 {
+
+class Framework;
 
 /// Provides keyboard and mouse input events.
 /** The Input API works with the notion of 'input contexts', which are objects that modules acquire
@@ -89,7 +88,7 @@ public:
 
     Framework *Fw() const { return framework; }
 
-    /// Creates a new input context with the given name.
+    /// Creates a new input context with the given name. [noscript]
     /** The name is not an ID, i.e. it does not have to be unique with 
         existing contexts (although it is encouraged). When you no longer need the context, free all refcounts to it.
         Remember to hold on to a SharedPtr of the input context as long as you are using the context. */
@@ -110,7 +109,7 @@ public:
                        and switches into relative mouse movement input mode. */
     void SetMouseCursorVisible(bool visible);
 
-    /// @return True if we are in absolute movement mode, and false if we are in relative mouse movement mode.
+    /// @return True if we are in absolute movement mode, and false if we are in relative mouse movement mode. [property]
     bool IsMouseCursorVisible() const;
 
     /// Returns true if the given key is physically held down.
@@ -146,13 +145,13 @@ public:
     /** @param mouseButton Urho3D code */
     bool IsMouseButtonReleased(int mouseButton) const;
 
-    /// Get mouse movement this frame
+    /// Get mouse movement this frame [property]
     int GetMouseMoveX() const;
 
-    /// Get mouse movement this frame
+    /// Get mouse movement this frame [property]
     int GetMouseMoveY() const;
 
-    /// Returns number of active touches
+    /// Returns number of active touches [property]
     unsigned GetNumTouches() const;
 
     /// Return active touch by index.
@@ -161,7 +160,7 @@ public:
     ///\todo Actually ask if touch input hardware is available. Now is set to True once the first gesture
     /// comes to our event filter. Find a way to inspect hardware in the constructor, best would be to find out touch device via qt if at all possible 
 
-    /// Return if input is handling gestures from a touch input device.
+    /// Return if input is handling gestures from a touch input device. [property]
     /** If true InputContext is emitting the gesture specific signals. Do not trust this at the moment,
         see todo comment. Just connect to the gesture signals and wait if they are being emitted. */
     bool IsGesturesEnabled() const { return gesturesEnabled; }
@@ -171,7 +170,7 @@ public:
         @param mouseButton Urho3D code */
     Point MousePressedPos(int mouseButton) const;
 
-    /// Returns the current mouse position in the main window coordinate space.
+    /// Returns the current mouse position in the main window coordinate space. [property]
     Point MousePos() const;
 
     /// Returns the highest-priority input context that gets all events first to handle (even before going to Qt widgets).
@@ -209,7 +208,7 @@ public:
     /// Prints the list of input contexts, for debugging purposes.
     void DumpInputContexts();
 
-    /// Returns the number of currently active touch points, if touch input is active.
+    /// Returns the number of currently active touch points, if touch input is active. [property]
     int NumTouchPoints() const { return numTouchPoints; }
 
     /// Handle events received from Urho

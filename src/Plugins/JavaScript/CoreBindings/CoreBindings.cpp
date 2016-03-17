@@ -16,17 +16,23 @@ void Expose_Scene(duk_context* ctx);
 void Expose_Color(duk_context* ctx);
 void Expose_Point(duk_context* ctx);
 void Expose_Transform(duk_context* ctx);
+void Expose_AssetReference(duk_context* ctx);
+void Expose_AssetReferenceList(duk_context* ctx);
+void Expose_RayQueryResult(duk_context* ctx);
 void Expose_Framework(duk_context* ctx);
 void Expose_FrameAPI(duk_context* ctx);
 void Expose_SceneAPI(duk_context* ctx);
 void Expose_ConfigAPI(duk_context* ctx);
+void Expose_ConsoleAPI(duk_context* ctx);
 void Expose_AssetAPI(duk_context* ctx);
 void Expose_IAsset(duk_context* ctx);
 void Expose_IAssetTransfer(duk_context* ctx);
 void Expose_IAssetStorage(duk_context* ctx);
-void Expose_AssetReference(duk_context* ctx);
-void Expose_AssetReferenceList(duk_context* ctx);
-void Expose_RayQueryResult(duk_context* ctx);
+void Expose_IAssetBundle(duk_context* ctx);
+void Expose_InputAPI(duk_context* ctx);
+void Expose_InputContext(duk_context* ctx);
+void Expose_KeyEvent(duk_context* ctx);
+void Expose_MouseEvent(duk_context* ctx);
 
 void ExposeCoreClasses(duk_context* ctx)
 {
@@ -40,6 +46,9 @@ void ExposeCoreClasses(duk_context* ctx)
     Expose_Color(ctx);
     Expose_Point(ctx);
     Expose_Transform(ctx);
+    Expose_AssetReference(ctx);
+    Expose_AssetReferenceList(ctx);
+    Expose_RayQueryResult(ctx);
     Expose_Framework(ctx);
     Expose_FrameAPI(ctx);
     Expose_SceneAPI(ctx);
@@ -48,9 +57,11 @@ void ExposeCoreClasses(duk_context* ctx)
     Expose_IAsset(ctx);
     Expose_IAssetTransfer(ctx);
     Expose_IAssetStorage(ctx);
-    Expose_AssetReference(ctx);
-    Expose_AssetReferenceList(ctx);
-    Expose_RayQueryResult(ctx);
+    Expose_IAssetBundle(ctx);
+    Expose_InputAPI(ctx);
+    Expose_InputContext(ctx);
+    Expose_KeyEvent(ctx);
+    Expose_MouseEvent(ctx);
 }
 
 }

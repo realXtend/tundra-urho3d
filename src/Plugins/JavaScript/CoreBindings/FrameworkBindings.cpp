@@ -14,7 +14,9 @@
 #include "Framework/ConfigAPI.h"
 #include "Framework/FrameAPI.h"
 #include "Scene/SceneAPI.h"
+#include "Console/ConsoleAPI.h"
 #include "Asset/AssetAPI.h"
+#include "Input/InputAPI.h"
 
 
 using namespace Tundra;
@@ -200,10 +202,26 @@ static duk_ret_t Framework_Scene(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Framework_Console(duk_context* ctx)
+{
+    Framework* thisObj = GetThisWeakObject<Framework>(ctx);
+    ConsoleAPI * ret = thisObj->Console();
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t Framework_Asset(duk_context* ctx)
 {
     Framework* thisObj = GetThisWeakObject<Framework>(ctx);
     AssetAPI * ret = thisObj->Asset();
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t Framework_Input(duk_context* ctx)
+{
+    Framework* thisObj = GetThisWeakObject<Framework>(ctx);
+    InputAPI * ret = thisObj->Input();
     PushWeakObject(ctx, ret);
     return 1;
 }
@@ -248,7 +266,9 @@ static const duk_function_list_entry Framework_Functions[] = {
     ,{"Config", Framework_Config, 0}
     ,{"Frame", Framework_Frame, 0}
     ,{"Scene", Framework_Scene, 0}
+    ,{"Console", Framework_Console, 0}
     ,{"Asset", Framework_Asset, 0}
+    ,{"Input", Framework_Input, 0}
     ,{nullptr, nullptr, 0}
 };
 

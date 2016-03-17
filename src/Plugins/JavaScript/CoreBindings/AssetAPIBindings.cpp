@@ -12,6 +12,7 @@
 #endif
 
 #include "Asset/IAssetStorage.h"
+#include "Asset/IAssetBundle.h"
 #include "Asset/IAssetTransfer.h"
 #include "Framework/Framework.h"
 #include "Asset/AssetReference.h"
@@ -204,6 +205,94 @@ static duk_ret_t AssetAPI_Get_AssetAboutToBeRemoved(duk_context* ctx)
     return 1;
 }
 
+const char* SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved_ID = "SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved";
+
+class SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved
+{
+public:
+    SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved(Object* owner, Signal1< AssetBundlePtr >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal1< AssetBundlePtr >* signal_;
+};
+
+class SignalReceiver_AssetAPI_AssetBundleAboutToBeRemoved : public SignalReceiver
+{
+public:
+    void OnSignal(AssetBundlePtr param0)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        duk_pop(ctx);
+    }
+};
+
+static duk_ret_t SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved>(ctx, SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved_ID);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved_Connect(duk_context* ctx)
+{
+    SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved>(ctx, SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_AssetAPI_AssetBundleAboutToBeRemoved* receiver = new SignalReceiver_AssetAPI_AssetBundleAboutToBeRemoved();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_AssetAPI_AssetBundleAboutToBeRemoved::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    CallConnectSignal(ctx, wrapper->signal_);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved>(ctx, SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved_ID);
+    if (!wrapper->owner_) return 0;
+    CallDisconnectSignal(ctx, wrapper->signal_);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved_Emit(duk_context* ctx)
+{
+    SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved>(ctx, SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved_ID);
+    if (!wrapper->owner_) return 0;
+    SharedPtr<IAssetBundle> param0(GetWeakObject<IAssetBundle>(ctx, 0));
+    wrapper->signal_->Emit(param0);
+    return 0;
+}
+
+static duk_ret_t AssetAPI_Get_AssetBundleAboutToBeRemoved(duk_context* ctx)
+{
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved* wrapper = new SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved(thisObj, &thisObj->AssetBundleAboutToBeRemoved);
+    PushValueObject(ctx, wrapper, SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved_ID, SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_AssetAPI_AssetBundleAboutToBeRemoved_Emit, 1);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
 const char* SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved_ID = "SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved";
 
 class SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved
@@ -288,6 +377,94 @@ static duk_ret_t AssetAPI_Get_DiskSourceAboutToBeRemoved(duk_context* ctx)
     duk_push_c_function(ctx, SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
     duk_push_c_function(ctx, SignalWrapper_AssetAPI_DiskSourceAboutToBeRemoved_Emit, 1);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
+const char* SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved_ID = "SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved";
+
+class SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved
+{
+public:
+    SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved(Object* owner, Signal1< AssetBundlePtr >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal1< AssetBundlePtr >* signal_;
+};
+
+class SignalReceiver_AssetAPI_BundleDiskSourceAboutToBeRemoved : public SignalReceiver
+{
+public:
+    void OnSignal(AssetBundlePtr param0)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        duk_pop(ctx);
+    }
+};
+
+static duk_ret_t SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved>(ctx, SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved_ID);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved_Connect(duk_context* ctx)
+{
+    SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved>(ctx, SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_AssetAPI_BundleDiskSourceAboutToBeRemoved* receiver = new SignalReceiver_AssetAPI_BundleDiskSourceAboutToBeRemoved();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_AssetAPI_BundleDiskSourceAboutToBeRemoved::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    CallConnectSignal(ctx, wrapper->signal_);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved>(ctx, SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved_ID);
+    if (!wrapper->owner_) return 0;
+    CallDisconnectSignal(ctx, wrapper->signal_);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved_Emit(duk_context* ctx)
+{
+    SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved* wrapper = GetThisValueObject<SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved>(ctx, SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved_ID);
+    if (!wrapper->owner_) return 0;
+    SharedPtr<IAssetBundle> param0(GetWeakObject<IAssetBundle>(ctx, 0));
+    wrapper->signal_->Emit(param0);
+    return 0;
+}
+
+static duk_ret_t AssetAPI_Get_BundleDiskSourceAboutToBeRemoved(duk_context* ctx)
+{
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved* wrapper = new SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved(thisObj, &thisObj->BundleDiskSourceAboutToBeRemoved);
+    PushValueObject(ctx, wrapper, SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved_ID, SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_AssetAPI_BundleDiskSourceAboutToBeRemoved_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
 }
@@ -668,6 +845,14 @@ static duk_ret_t AssetAPI_Assets(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t AssetAPI_AssetBundles(duk_context* ctx)
+{
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    AssetBundleMap ret = thisObj->AssetBundles();
+    PushWeakObjectMap(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t AssetAPI_AssetsOfType_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
@@ -726,6 +911,16 @@ static duk_ret_t AssetAPI_CreateNewAsset_String_String(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t AssetAPI_CreateNewAssetBundle_String_String(duk_context* ctx)
+{
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    String type = duk_require_string(ctx, 0);
+    String name = duk_require_string(ctx, 1);
+    AssetBundlePtr ret = thisObj->CreateNewAssetBundle(type, name);
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t AssetAPI_CreateAssetFromFile_String_String(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
@@ -760,6 +955,15 @@ static duk_ret_t AssetAPI_FindAsset_String(duk_context* ctx)
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
     String assetRef = duk_require_string(ctx, 0);
     AssetPtr ret = thisObj->FindAsset(assetRef);
+    PushWeakObject(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t AssetAPI_FindBundle_String(duk_context* ctx)
+{
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    String bundleRef = duk_require_string(ctx, 0);
+    AssetBundlePtr ret = thisObj->FindBundle(bundleRef);
     PushWeakObject(ctx, ret);
     return 1;
 }
@@ -861,6 +1065,16 @@ static duk_ret_t AssetAPI_ForgetAsset_String_bool(duk_context* ctx)
     String assetRef = duk_require_string(ctx, 0);
     bool removeDiskSource = duk_require_boolean(ctx, 1);
     bool ret = thisObj->ForgetAsset(assetRef, removeDiskSource);
+    duk_push_boolean(ctx, ret);
+    return 1;
+}
+
+static duk_ret_t AssetAPI_ForgetBundle_AssetBundlePtr_bool(duk_context* ctx)
+{
+    AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
+    SharedPtr<IAssetBundle> bundle(GetWeakObject<IAssetBundle>(ctx, 0));
+    bool removeDiskSource = duk_require_boolean(ctx, 1);
+    bool ret = thisObj->ForgetBundle(bundle, removeDiskSource);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -996,6 +1210,16 @@ static duk_ret_t AssetAPI_ForgetAsset_Selector(duk_context* ctx)
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
+static duk_ret_t AssetAPI_ForgetBundle_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 2 && duk_is_string(ctx, 0) && duk_is_boolean(ctx, 1))
+        return AssetAPI_ForgetBundle_String_bool(ctx);
+    if (numArgs == 2 && duk_is_boolean(ctx, 1))
+        return AssetAPI_ForgetBundle_AssetBundlePtr_bool(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
 static duk_ret_t AssetAPI_SanitateAssetRef_Static_String(duk_context* ctx)
 {
     String ref = duk_require_string(ctx, 0);
@@ -1069,15 +1293,18 @@ static const duk_function_list_entry AssetAPI_Functions[] = {
     {"IsHeadless", AssetAPI_IsHeadless, 0}
     ,{"GetFramework", AssetAPI_GetFramework, 0}
     ,{"Assets", AssetAPI_Assets, 0}
+    ,{"AssetBundles", AssetAPI_AssetBundles, 0}
     ,{"AssetsOfType", AssetAPI_AssetsOfType_String, 1}
     ,{"AssetStorages", AssetAPI_AssetStorages, 0}
     ,{"OpenAssetCache", AssetAPI_OpenAssetCache_String, 1}
     ,{"RequestAsset", AssetAPI_RequestAsset_Selector, DUK_VARARGS}
     ,{"CreateNewAsset", AssetAPI_CreateNewAsset_String_String, 2}
+    ,{"CreateNewAssetBundle", AssetAPI_CreateNewAssetBundle_String_String, 2}
     ,{"CreateAssetFromFile", AssetAPI_CreateAssetFromFile_String_String, 2}
     ,{"GenerateUniqueAssetName", AssetAPI_GenerateUniqueAssetName_String_String, 2}
     ,{"GenerateTemporaryNonexistingAssetFilename", AssetAPI_GenerateTemporaryNonexistingAssetFilename_String, 1}
     ,{"FindAsset", AssetAPI_FindAsset_String, 1}
+    ,{"FindBundle", AssetAPI_FindBundle_String, 1}
     ,{"AssetStorageByName", AssetAPI_AssetStorageByName_String, 1}
     ,{"StorageForAssetRef", AssetAPI_StorageForAssetRef_String, 1}
     ,{"RemoveAssetStorage", AssetAPI_RemoveAssetStorage_String, 1}
@@ -1087,7 +1314,7 @@ static const duk_function_list_entry AssetAPI_Functions[] = {
     ,{"ResourceTypeForAssetRef", AssetAPI_ResourceTypeForAssetRef_Selector, DUK_VARARGS}
     ,{"ResolveAssetRef", AssetAPI_ResolveAssetRef_String_String, 2}
     ,{"ForgetAsset", AssetAPI_ForgetAsset_Selector, DUK_VARARGS}
-    ,{"ForgetBundle", AssetAPI_ForgetBundle_String_bool, 2}
+    ,{"ForgetBundle", AssetAPI_ForgetBundle_Selector, DUK_VARARGS}
     ,{"DeleteAssetFromStorage", AssetAPI_DeleteAssetFromStorage_String, 1}
     ,{"ForgetAllAssets", AssetAPI_ForgetAllAssets, 0}
     ,{"PendingTransfer", AssetAPI_PendingTransfer_String, 1}
@@ -1136,7 +1363,9 @@ void Expose_AssetAPI(duk_context* ctx)
     duk_put_function_list(ctx, -1, AssetAPI_Functions);
     DefineProperty(ctx, "AssetCreated", AssetAPI_Get_AssetCreated, nullptr);
     DefineProperty(ctx, "AssetAboutToBeRemoved", AssetAPI_Get_AssetAboutToBeRemoved, nullptr);
+    DefineProperty(ctx, "AssetBundleAboutToBeRemoved", AssetAPI_Get_AssetBundleAboutToBeRemoved, nullptr);
     DefineProperty(ctx, "DiskSourceAboutToBeRemoved", AssetAPI_Get_DiskSourceAboutToBeRemoved, nullptr);
+    DefineProperty(ctx, "BundleDiskSourceAboutToBeRemoved", AssetAPI_Get_BundleDiskSourceAboutToBeRemoved, nullptr);
     DefineProperty(ctx, "AssetDiskSourceChanged", AssetAPI_Get_AssetDiskSourceChanged, nullptr);
     DefineProperty(ctx, "AssetUploaded", AssetAPI_Get_AssetUploaded, nullptr);
     DefineProperty(ctx, "AssetDeletedFromStorage", AssetAPI_Get_AssetDeletedFromStorage, nullptr);
