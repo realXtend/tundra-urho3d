@@ -182,6 +182,60 @@
             <attribute name="Selection Color" value="0.3 0.4 0.7 1" />
         </element>
     </element>
+    <element type="DialogWindow" style="Window" auto="false">
+        <attribute name="Is Movable" value="true" />
+        <attribute name="Modal Shade Color" value="0.3 0.4 0.7 0.4" />
+        <attribute name="Modal Frame Color" value="0.3 0.4 0.7" />
+        <attribute name="Modal Frame Size" value="2 2" />
+    </element>
+    
+    <!-- File Selector style -->
+    <element type="FileSelector" style="DialogWindow" auto="false">
+        <attribute name="Size" value="400 300" />
+        <attribute name="Is Resizable" value="true" />
+        <attribute name="Resize Border" value="6 6 6 6" />
+        <attribute name="Layout Mode" value="vertical" />
+        <attribute name="Layout Spacing" value="4" />
+        <attribute name="Layout Border" value="6 6 6 6" />
+    </element>
+    <element type="FileSelectorButton" style="Button" auto="false">
+        <attribute name="Min Size" value="80 17" />
+        <attribute name="Max Size" value="80 17" />
+    </element>
+    <element type="FileSelectorButtonText" style="Text" auto="false" />
+    <element type="FileSelectorListView" style="ListView" auto="false">
+        <attribute name="Highlight Mode" value="Always" />
+    </element>
+    <element type="FileSelectorLineEdit" style="LineEdit" auto="false">
+        <attribute name="Min Size" value="0 17" />
+        <attribute name="Max Size" value="2147483647 17" />
+    </element>
+    <element type="FileSelectorFilterList" style="DropDownList" auto="false">
+        <attribute name="Min Size" value="64 17" />
+        <attribute name="Max Size" value="64 17" />
+        <attribute name="Resize Popup" value="true" />
+    </element>
+    <element type="FileSelectorFilterText" style="Text" auto="false">
+        <attribute name="Is Enabled" value="true" />
+        <attribute name="Selection Color" value="0.2 0.225 0.35 1" />
+        <attribute name="Hover Color" value="0.3 0.4 0.7 1" />
+    </element>
+    <element type="FileSelectorLayout" auto="false">
+        <attribute name="Min Size" value="0 17" />
+        <attribute name="Max Size" value="2147483647 17" />
+        <attribute name="Layout Spacing" value="4" />
+    </element>
+    <element type="FileSelectorListText" style="Text" auto="false">
+        <attribute name="Hover Color" value="0.3 0.4 0.7 1" />
+        <attribute name="Selection Color" value="0.2 0.225 0.35 1" />
+    </element>
+    <element type="FileSelectorTitleText" style="Text" auto="false" />
+    <element type="EditorDivider" style="BorderImage" auto="false">
+        <attribute name="Image Rect" value="144 32 160 43" />
+        <attribute name="Border" value="4 4 4 4" />
+        <attribute name="Min Size" value="0 11" />
+        <attribute name="Max Size" value="2147483647 11" />
+    </element>
 
     <!-- Base styles that get inherited and extended -->
 

@@ -40,7 +40,7 @@ class ECEDITOR_API SceneContextMenu : public Object
     URHO3D_OBJECT(SceneContextMenu, Object);
 
 public:
-    SceneContextMenu(Context* context);
+    explicit SceneContextMenu(Context* context);
     virtual ~SceneContextMenu();
     
     Menu *GetItem(const String &id);
@@ -59,7 +59,6 @@ protected:
     String GetItemId(Menu *menu);
 
     void OnItemPressed(StringHash eventType, VariantMap& eventData);
-    void OnWindowDefocused(StringHash eventType, VariantMap& eventData);
 
     WindowWeakPtr window_;
     SceneContextItemMap contextItemMap_;

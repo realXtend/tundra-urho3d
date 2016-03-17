@@ -32,13 +32,14 @@ SceneContextMenu::SceneContextMenu(Context* context) :
     window_->SetLayout(LM_VERTICAL, 4, IntRect(6, 6, 6, 6));
     window_->SetMovable(false);
     window_->SetEnabled(true);
-    SubscribeToEvent(window_, E_DEFOCUSED, URHO3D_HANDLER(SceneContextMenu, OnWindowDefocused));
     Close();
 }
 
 SceneContextMenu::~SceneContextMenu()
 {
-    if (window_.NotNull())
+	Clear();
+
+    if (window_.Get())
         window_->Remove();
     window_.Reset();
 }
@@ -82,14 +83,13 @@ Menu *SceneContextMenu::CreateItem(const String &id, const String &text)
 
 void SceneContextMenu::Clear()
 {
-    SceneContextItemMap::Iterator iter = contextItemMap_.Begin();
-    while (iter != contextItemMap_.End())
-    {
-        iter->second_->Remove();
-        iter->second_.Reset();
-        iter++;
-    }
-    contextItemMap_.Clear();
+	Urho3D::Vector<Tundra::MenuWeakPtr> menus = contextItemMap_.Values();
+	for (uint i = 0; i < menus.Size(); ++i)
+	{
+		if (menus[i].Get())
+			menus[i]->Remove();
+	}
+	contextItemMap_.Clear();
 }
 
 UIElement *SceneContextMenu::Widget()
@@ -140,11 +140,6 @@ void SceneContextMenu::OnItemPressed(StringHash /*eventType*/, VariantMap& event
     if (id != "")
         OnActionSelected.Emit(this, id);
     Close();
-}
-
-void SceneContextMenu::OnWindowDefocused(StringHash /*eventType*/, VariantMap& /*eventData*/)
-{
-    LogWarning("Defocused!");
 }
 
 }

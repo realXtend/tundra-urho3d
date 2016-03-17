@@ -44,7 +44,7 @@ typedef WeakPtr<IModule> ModuleWeakPtr;
 typedef WeakPtr<Entity> EntityWeakPtr;
 typedef WeakPtr<IComponent> ComponentWeakPtr;
 
-typedef WeakPtr<SceneContextMenu> SceneContextMenuWeakPtr;
+typedef SharedPtr<SceneContextMenu> SceneContextMenuPtr;
 typedef WeakPtr<TreeView> TreeViewWeakPtr;
 typedef WeakPtr<UIElement> UIElementWeakPtr;
 typedef WeakPtr<Window> UIWindowWeakPtr;
@@ -86,6 +86,8 @@ public:
     
     void Hide();
     void Show();
+
+	void Update();
 
     SceneStructureItem *FindItem(Object *obj);
 
@@ -139,10 +141,10 @@ private:
 
     AddComponentDialogPtr addComponentDialog_;
     AddEntityDialogPtr addEntityDialog_;
+	SceneContextMenuPtr contextMenu_;
 
     UIWindowWeakPtr window_;
     ButtonWeakPtr closeButton_;
-    SceneContextMenuWeakPtr contextMenu_;
     ListViewWeakPtr listView_;
     Vector<ListViewItem> listItems_;
 
@@ -150,6 +152,12 @@ private:
     Vector<ComponentWeakPtr> selectedComponents_;
 
     ModuleWeakPtr owner_;
+
+	/*
+	If Scene entity, component or attribute has changed in some way mark the editor as dirty and
+	update the editor in next frame.
+	*/
+	bool dirty_;
 };
 
 }
