@@ -9,9 +9,12 @@
 #include "AttributeChangeType.h"
 #include "IRenderer.h"
 #include "Signals.h"
+#include "Entity.h"
 
 namespace Tundra
 {
+
+class JavaScriptInstance;
 
 /// Transforms generic mouse and keyboard input events on scene entities to input-related entity actions and signals.
 /** Performs a raycast to the mouse position each frame and executes entity actions depending current input.
@@ -37,9 +40,9 @@ public:
     SceneInteract(Framework* owner);
     ~SceneInteract();
 
-    /// Frame-based module update
+    /// Frame-based module update [noscript]
     void Update(float frametime) override;
-   /// Returns the latest raycast result to last known mouse cursor position in the currently active scene.
+   /// Returns the latest raycast result to last known mouse cursor position in the currently active scene. [property]
     /** @return Raycast result. */
     RayQueryResult* CurrentMouseRaycastResult() const;
 
@@ -91,6 +94,9 @@ private:
     /** This function will only perform the raycast once per Tundra mainloop frame. */
     RayQueryResult* ExecuteRaycast();
     
+    /// Handles script engine creation (register SceneInteract class)
+    void OnScriptInstanceCreated(JavaScriptInstance* instance);
+
     void Initialize() override;
     void Uninitialize() override;
 

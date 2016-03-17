@@ -295,6 +295,9 @@ namespace BindingsGenerator
                 {
                     string templateType = typeName.Substring(0, typeName.Length - 6);
                     templateType = SanitateTemplateType(templateType);
+                    // Hack
+                    if (typeName == "float3Vector")
+                        typeName = "Vector<float3>";
 
                     if (templateType == "String" || templateType == "string")
                         return typeName + " " + varName + " = GetStringVector(ctx, " + stackIndex + ");";
@@ -312,7 +315,7 @@ namespace BindingsGenerator
                     if (!isRawPtr)
                         return typeName + "& " + varName + " = *GetCheckedValueObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
                     else
-                        return typeName + "* " + varName + " = *GetValueObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
+                        return typeName + "* " + varName + " = GetValueObject<" + typeName + ">(ctx, " + stackIndex + ", " + ClassIdentifier(typeName) + ");";
                 }
                 else
                 {
@@ -354,6 +357,8 @@ namespace BindingsGenerator
 
         static string GeneratePushToStack(string typeName, string source)
         {
+            bool isPtr = typeName.EndsWith("*");
+
             typeName = SanitateTypeName(typeName);
             if (typeName.EndsWith("Ptr"))
             {
@@ -397,7 +402,12 @@ namespace BindingsGenerator
             else
             {
                 if (!IsRefCounted(typeName))
-                    return "PushValueObjectCopy<" + typeName + ">(ctx, " + source + ", " + ClassIdentifier(typeName) + ", " + typeName + "_Finalizer);";
+                {
+                    if (!isPtr)
+                        return "PushValueObjectCopy<" + typeName + ">(ctx, " + source + ", " + ClassIdentifier(typeName) + ", " + typeName + "_Finalizer);";
+                    else
+                        return "PushValueObjectCopy<" + typeName + ">(ctx, *" + source + ", " + ClassIdentifier(typeName) + ", " + typeName + "_Finalizer);";
+                }
                 else
                     return "PushWeakObject(ctx, " + source + ");";
             }

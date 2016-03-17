@@ -13,12 +13,24 @@
 #include "InputAPI.h"
 #include "InputContext.h"
 
+#include "JavaScript.h"
+#include "JavaScriptInstance.h"
+
 #include <Math/float3.h>
 #include <Math/MathFunc.h>
 
 #include <Urho3D/Core/Profiler.h>
 #include <Urho3D/Core/StringUtils.h>
 #include <Urho3D/UI/UI.h>
+
+namespace JSBindings
+{
+
+void Expose_SceneInteract(duk_context* ctx);
+
+}
+
+using namespace JSBindings;
 
 namespace Tundra
 {
@@ -40,6 +52,11 @@ void SceneInteract::Initialize()
 {
     inputContext = framework->Input()->RegisterInputContext("SceneInteract", 100);
     inputContext->MouseEventReceived.Connect(this, &SceneInteract::HandleMouseEvent);
+
+    // Connect to JavaScript module instance creation to be able to expose SceneInteract to each instance
+    JavaScript* javaScript = framework->Module<JavaScript>();
+    if (javaScript)
+        javaScript->ScriptInstanceCreated.Connect(this, &SceneInteract::OnScriptInstanceCreated);
 }
 
 void SceneInteract::Uninitialize()
@@ -231,6 +248,16 @@ void SceneInteract::HandleMouseEvent(MouseEvent* e)
             EntityClickReleased.Emit(hitEntity, (int)e->button, raycastResult);
         }
     }
+}
+
+void SceneInteract::OnScriptInstanceCreated(JavaScriptInstance* instance)
+{
+    URHO3D_PROFILE(ExposeSceneInteract);
+
+    duk_context* ctx = instance->Context();
+    Expose_SceneInteract(ctx);
+
+    instance->RegisterService("sceneinteract", this);
 }
 
 }

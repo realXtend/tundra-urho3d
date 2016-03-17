@@ -1,0 +1,14 @@
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+GENERATE_XML           = YES
+GENERATE_LATEX         = NO
+GENERATE_HTML          = NO
+OUTPUT_DIRECTORY       = ./SceneInteractBindings/SceneInteractDocs
+INLINE_INHERITED_MEMB  = YES
+INPUT                  = . \
+                         ../../TundraCore/Scene \
+                         ../../TundraCore/Math
+FILE_PATTERNS          = *.cpp \
+                         *.h
+RECURSIVE              = YES
+PREDEFINED             =
