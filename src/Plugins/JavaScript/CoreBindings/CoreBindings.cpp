@@ -53,6 +53,7 @@ void ExposeCoreClasses(duk_context* ctx)
     Expose_FrameAPI(ctx);
     Expose_SceneAPI(ctx);
     Expose_ConfigAPI(ctx);
+    Expose_ConsoleAPI(ctx);
     Expose_AssetAPI(ctx);
     Expose_IAsset(ctx);
     Expose_IAssetTransfer(ctx);
