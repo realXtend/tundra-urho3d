@@ -19,6 +19,7 @@ namespace Tundra
 {
 
 class IMeshAsset;
+class JavaScriptInstance;
 
 /// Provides physics rendering by utilizing Bullet.
 class BULLETPHYSICS_API BulletPhysics : public IModule
@@ -78,6 +79,8 @@ private:
     void CreatePhysicsWorld(Scene *scene, AttributeChange::Type change);
     /// Removes PhysicsWorld of a Scene.
     void RemovePhysicsWorld(Scene *scene, AttributeChange::Type change);
+    /// Handles script engine creation (register BulletPhysics classes)
+    void OnScriptInstanceCreated(JavaScriptInstance* instance);
 
     /// All PhysicsWorlds created.
     Vector<PhysicsWorldPtr> physicsWorlds_;

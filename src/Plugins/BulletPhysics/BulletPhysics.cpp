@@ -24,6 +24,10 @@
 #include "LoggingFunctions.h"
 #include "IMeshAsset.h"
 
+#include "JavaScript.h"
+#include "JavaScriptInstance.h"
+#include "BulletPhysicsBindings/BulletPhysicsBindings.h"
+
 #include <Urho3D/Core/StringUtils.h>
 #include <Urho3D/Core/Profiler.h>
 
@@ -36,6 +40,8 @@
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
+
+using namespace JSBindings;
 
 namespace Tundra
 {
@@ -93,6 +99,11 @@ void BulletPhysics::Initialize()
         if (steps > 0)
             SetDefaultMaxSubSteps(steps);
     }
+    
+    // Connect to JavaScript module instance creation to be able to expose the physics classes to each instance
+    JavaScript* javaScript = framework->Module<JavaScript>();
+    if (javaScript)
+        javaScript->ScriptInstanceCreated.Connect(this, &BulletPhysics::OnScriptInstanceCreated);
 }
 
 void BulletPhysics::Uninitialize()
@@ -271,6 +282,14 @@ shared_ptr<ConvexHullSet> BulletPhysics::GetConvexHullSetFromMeshAsset(IMeshAsse
     convexHullSets_[mesh->Name()] = ptr;
     
     return ptr;
+}
+
+void BulletPhysics::OnScriptInstanceCreated(JavaScriptInstance* instance)
+{
+    URHO3D_PROFILE(ExposeBulletPhysicsClasses);
+
+    duk_context* ctx = instance->Context();
+    ExposeBulletPhysicsClasses(ctx);
 }
 
 }

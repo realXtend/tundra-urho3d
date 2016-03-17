@@ -586,11 +586,11 @@ void PhysicsWorld::ProcessPostTick(float substeptime)
     }
 }
 
-PhysicsRaycastResult* PhysicsWorld::Raycast(const float3& origin, const float3& direction, float maxdistance, int collisiongroup, int collisionmask)
+PhysicsRaycastResult PhysicsWorld::Raycast(const float3& origin, const float3& direction, float maxdistance, int collisiongroup, int collisionmask)
 {
     URHO3D_PROFILE(PhysicsWorld_Raycast);
     
-    static PhysicsRaycastResult result;
+    PhysicsRaycastResult result;
     
     float3 normalizedDir = direction.Normalized();
     
@@ -616,7 +616,7 @@ PhysicsRaycastResult* PhysicsWorld::Raycast(const float3& origin, const float3& 
         }
     }
     
-    return &result;
+    return result;
 }
 
 EntityVector PhysicsWorld::ObbCollisionQuery(const OBB &obb, int collisionGroup, int collisionMask)

@@ -43,10 +43,10 @@ public:
     PhysicsWorld(Scene* scene, bool isClient);
     virtual ~PhysicsWorld();
     
-    /// Step the physics world. May trigger several internal simulation substeps, according to the deltatime given.
+    /// Step the physics world. May trigger several internal simulation substeps, according to the deltatime given. [noscript]
     void Simulate(float frametime);
     
-    /// Process collision from an internal sub-step (Bullet post-tick callback)
+    /// Process collision from an internal sub-step (Bullet post-tick callback) [noscript]
     void ProcessPostTick(float subStepTime);
     
     /// Returns the set of collisions that occurred during the previous frame.
@@ -57,39 +57,39 @@ public:
     /** @param updatePeriod Update period */
     void SetPhysicsUpdatePeriod(float updatePeriod);
 
-    /// Return internal physics timestep
+    /// Return internal physics timestep [property]
     float PhysicsUpdatePeriod() const { return physicsUpdatePeriod_; }
 
     /// Set maximum physics substeps to perform on a single frame. Once this maximum is reached, time will appear to slow down if framerate is too low.
     /** @param steps Maximum physics substeps */
     void SetMaxSubSteps(int steps);
 
-    /// Return amount of maximum physics substeps on a single frame.
+    /// Return amount of maximum physics substeps on a single frame. [property]
     int MaxSubSteps() const { return maxSubSteps_; }
 
     /// Set gravity that affects all moving objects of the physics world
     /** @param gravity Gravity vector */
     void SetGravity(const float3& gravity);
 
-    /// Return gravity
+    /// Return gravity [property]
     float3 Gravity() const;
 
     /// Enable/disable debug geometry
     void SetDebugGeometryEnabled(bool enable);
     
-    /// Get debug geometry enabled status
+    /// Get debug geometry enabled status [property]
     bool IsDebugGeometryEnabled() const;
     
     /// Enable/disable physics simulation
     void SetRunning(bool enable) { runPhysics_ = enable; }
     
-    /// Return whether simulation is on
+    /// Return whether simulation is on [property]
     bool IsRunning() const { return runPhysics_; }
 
     /// Return the Bullet world object
     btDiscreteDynamicsWorld* BulletWorld() const;
 
-    /// Return whether the physics world is for a client scene. Client scenes only simulate local entities' motion on their own.
+    /// Return whether the physics world is for a client scene. Client scenes only simulate local entities' motion on their own. [property]
     bool IsClient() const { return isClient_; }
 
     /// Raycast to the world. Returns only a single (the closest) result.
@@ -99,7 +99,7 @@ public:
         @param collisionGroup Collision layer. Default has all bits set.
         @param collisionMask Collision mask. Default has all bits set.
         @return result PhysicsRaycastResult structure */
-    PhysicsRaycastResult* Raycast(const float3& origin, const float3& direction, float maxDistance, int collisionGroup = -1, int collisionMask = -1);
+    PhysicsRaycastResult Raycast(const float3& origin, const float3& direction, float maxDistance, int collisionGroup = -1, int collisionMask = -1);
 
     /// Performs collision query for OBB.
     /** @param obb Oriented bounding box to test

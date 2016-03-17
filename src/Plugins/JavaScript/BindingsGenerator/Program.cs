@@ -237,6 +237,8 @@ namespace BindingsGenerator
             // Hack: these classes are in the same include file
             if (name == "AssetReferenceList")
                 name = "AssetReference";
+            if (name == "PhysicsRaycastResult")
+                return "PhysicsWorld.h";
             if (name == "RayQueryResult")
                 return "IRenderer.h";
 
