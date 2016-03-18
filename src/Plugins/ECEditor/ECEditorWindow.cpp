@@ -141,15 +141,15 @@ IAttributeEditor *ComponentContainer::CreateAttributeEditor(Framework *framework
     case IAttribute::TypeId::TransformId:
         editor = new AttributeEditor<Transform>(framework, attributeWeakPtr);
         break;
-	case IAttribute::TypeId::EntityReferenceId:
-		editor = new AttributeEditor<EntityReference>(framework, attributeWeakPtr);
-		break;
-	case IAttribute::TypeId::AssetReferenceId:
-		editor = new AttributeEditor<AssetReference>(framework, attributeWeakPtr);
-		break;
-	case IAttribute::TypeId::AssetReferenceListId:
-		editor = new AttributeEditor<AssetReferenceList>(framework, attributeWeakPtr);
-		break;
+    case IAttribute::TypeId::EntityReferenceId:
+        editor = new AttributeEditor<EntityReference>(framework, attributeWeakPtr);
+        break;
+    case IAttribute::TypeId::AssetReferenceId:
+        editor = new AttributeEditor<AssetReference>(framework, attributeWeakPtr);
+        break;
+    case IAttribute::TypeId::AssetReferenceListId:
+        editor = new AttributeEditor<AssetReferenceList>(framework, attributeWeakPtr);
+        break;
     }
 
     if (editor != NULL)
@@ -168,7 +168,7 @@ ECEditorWindow::ECEditorWindow(Framework *framework) :
     window_->SetLayout(LayoutMode::LM_VERTICAL, 2, IntRect(2, 2, 2, 2));
     window_->SetSize(IntVector2(350, 500));
     window_->SetMinSize(IntVector2(350, 500));
-	window_->SetPosition(IntVector2(300, 100));
+    window_->SetPosition(IntVector2(300, 100));
     window_->SetStyle("Window", style);
     window_->SetMovable(true);
     window_->SetResizable(true);
@@ -181,11 +181,11 @@ ECEditorWindow::ECEditorWindow(Framework *framework) :
         window_->AddChild(topBar);
 
         {
-			closeButton_ = new Button(framework->GetContext());
-			closeButton_->SetName("CloseButton");
-			closeButton_->SetStyle("CloseButton", style);
-			closeButton_->SetAlignment(HA_RIGHT, VA_CENTER);
-			closeButton_->SetPosition(IntVector2(-3, 0));
+            closeButton_ = new Button(framework->GetContext());
+            closeButton_->SetName("CloseButton");
+            closeButton_->SetStyle("CloseButton", style);
+            closeButton_->SetAlignment(HA_RIGHT, VA_CENTER);
+            closeButton_->SetPosition(IntVector2(-3, 0));
             topBar->AddChild(closeButton_);
 
             SubscribeToEvent(closeButton_.Get(), E_PRESSED, URHO3D_HANDLER(ECEditorWindow, OnCloseClicked));
@@ -219,8 +219,8 @@ ECEditorWindow::~ECEditorWindow()
 void ECEditorWindow::Show()
 {
     window_->SetVisible(true);
-	list_->SetFocus(true);
-	window_->BringToFront();
+    list_->SetFocus(true);
+    window_->BringToFront();
 }
 
 void ECEditorWindow::Hide()
@@ -263,7 +263,7 @@ void ECEditorWindow::Refresh()
 
     if (!entity_.Get())
         return;
-    
+
     Entity::ComponentMap components = entity_->Components();
     ComponentContainer *container = 0;
     ComponentPtr comp;
@@ -296,7 +296,7 @@ UIElement *ECEditorWindow::Widget() const
 
 void ECEditorWindow::OnCloseClicked(StringHash /*eventType*/, VariantMap &/*eventData*/)
 {
-	Hide();
+    Hide();
 }
 
 }

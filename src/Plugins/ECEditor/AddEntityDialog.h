@@ -16,13 +16,13 @@
 
 namespace Urho3D
 {
-    class Context;
-    class DropDownList;
-    class LineEdit;
-    class Window;
-    class CheckBox;
-    class UIElement;
-    class Text;
+class Context;
+class DropDownList;
+class LineEdit;
+class Window;
+class CheckBox;
+class UIElement;
+class Text;
 }
 
 using namespace Urho3D;
@@ -59,7 +59,7 @@ protected:
     void OnCheckboxChanged(StringHash eventType, VariantMap &eventData);
 
     Framework *framework_;
-    
+
     LineEditPtr nameLineEdit_;
     WindowPtr window_;
     CheckBoxPtr localCheckBox_;

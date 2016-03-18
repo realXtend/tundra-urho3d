@@ -17,10 +17,10 @@
 
 namespace Urho3D
 {
-    class UIElement;
-    class Window;
-    class ListView;
-    class Button;
+class UIElement;
+class Window;
+class ListView;
+class Button;
 }
 
 using namespace Urho3D;
@@ -83,15 +83,15 @@ public:
 
     void Clear();
     void RefreshView();
-    
+
     void Hide();
     void Show();
 
-	void Update();
+    void Update();
 
     SceneStructureItem *FindItem(Object *obj);
 
-	void ToggleItem(SceneStructureItem *item);
+    void ToggleItem(SceneStructureItem *item);
 
 protected:
     SceneStructureItem *FindItem(UIElement *element);
@@ -109,10 +109,10 @@ protected:
 
     void EditSelection();
 
-	// Tundra scene changed
-	void OnComponentChanged(Entity *entity, IComponent *component, AttributeChange::Type change);
-	void OnEntityChanged(Entity *entity, AttributeChange::Type change);
-	void OnAttributeChanged(IComponent *component, IAttribute *attribute, AttributeChange::Type type);
+    // Tundra scene changed
+    void OnComponentChanged(Entity *entity, IComponent *component, AttributeChange::Type change);
+    void OnEntityChanged(Entity *entity, AttributeChange::Type change);
+    void OnAttributeChanged(IComponent *component, IAttribute *attribute, AttributeChange::Type type);
 
     // Urho3D UI Events
     void OnTogglePressed(SceneStructureItem *item);
@@ -137,11 +137,11 @@ protected:
     Framework *framework_;
 
 private:
-	SceneWeakPtr scene_;
+    SceneWeakPtr scene_;
 
     AddComponentDialogPtr addComponentDialog_;
     AddEntityDialogPtr addEntityDialog_;
-	SceneContextMenuPtr contextMenu_;
+    SceneContextMenuPtr contextMenu_;
 
     UIWindowWeakPtr window_;
     ButtonWeakPtr closeButton_;
@@ -153,11 +153,11 @@ private:
 
     ModuleWeakPtr owner_;
 
-	/*
-	If Scene entity, component or attribute has changed in some way mark the editor as dirty and
-	update the editor in next frame.
-	*/
-	bool dirty_;
+    /*
+    If Scene entity, component or attribute has changed in some way mark the editor as dirty and
+    update the editor in next frame.
+    */
+    bool dirty_;
 };
 
 }

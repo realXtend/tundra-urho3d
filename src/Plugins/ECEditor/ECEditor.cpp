@@ -45,20 +45,20 @@ void ECEditor::Initialize()
     MenuBar *menu = framework->Ui()->GetMenuBar();
     if (menu != NULL)
     {
-		MenuBarItem *newScene = menu->CreateMenuItem("File/New");
-		MenuBarItem *fileOpen = menu->CreateMenuItem("File/Open");
-		MenuBarItem *fileSave = menu->CreateMenuItem("File/Save");
-		MenuBarItem *exit = menu->CreateMenuItem("File/Exit");
+        /*MenuBarItem *newScene = menu->CreateMenuItem("File/New");
+        MenuBarItem *fileOpen = menu->CreateMenuItem("File/Open");
+        MenuBarItem *fileSave = menu->CreateMenuItem("File/Save");
+        MenuBarItem *exit = menu->CreateMenuItem("File/Exit");*/
 
         MenuBarItem *sceneEditor = menu->CreateMenuItem("Edit/Scene Editor");
-		sceneEditor->OnItemPressed.Connect(this, &ECEditor::OnSceneEditorOpen);
+        sceneEditor->OnItemPressed.Connect(this, &ECEditor::OnSceneEditorOpen);
     }
 }
 
 void ECEditor::Update(float UNUSED_PARAM(frametime))
 {
-	if (sceneEditor_.Get())
-		sceneEditor_->Update();
+    if (sceneEditor_.Get())
+        sceneEditor_->Update();
 }
 
 void ECEditor::OpenSceneEditor()

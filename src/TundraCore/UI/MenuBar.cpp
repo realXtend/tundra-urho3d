@@ -35,11 +35,11 @@ MenuBar::~MenuBar()
         iter->second_.Reset();
     }
 
-	if (bar_.Get())
-	{
-		bar_->Remove();
-		bar_.Reset();
-	}
+    if (bar_.Get())
+    {
+        bar_->Remove();
+        bar_.Reset();
+    }
 }
 
 void MenuBar::Create()

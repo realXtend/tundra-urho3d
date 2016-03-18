@@ -37,9 +37,10 @@ namespace Tundra
 
 SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module) :
     Object(framework->GetContext()),
-    owner_(module),
-    framework_(framework),
-	scene_(0)
+    owner_(module), framework_(framework),
+    scene_(0), window_(0),
+    closeButton_(0), listView_(0),
+    contextMenu_(0), addComponentDialog_(0)
 {
     XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/DefaultStyle.xml");
 
@@ -53,12 +54,12 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module
     window_->SetResizable(true);
     GetSubsystem<UI>()->GetRoot()->AddChild(window_);
 
-	/*FileSelector *file = new FileSelector(framework->GetContext());
-	file->SetDefaultStyle(style);
-	file->SetTitle("Save scene as ...");
-	file->SetButtonTexts("Ok", "Cancel");
-	file->SetDirectoryMode(false);*/
-	//file->SetButtonTexts("ok", "cancel");
+    /*FileSelector *file = new FileSelector(framework->GetContext());
+    file->SetDefaultStyle(style);
+    file->SetTitle("Save scene as ...");
+    file->SetButtonTexts("Ok", "Cancel");
+    file->SetDirectoryMode(false);*/
+    //file->SetButtonTexts("ok", "cancel");
 
     SubscribeToEvent(window_, E_POSITIONED, URHO3D_HANDLER(SceneStructureWindow, OnContextMenuHide));
 
@@ -101,7 +102,7 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module
     SubscribeToEvent(listView_, E_SELECTIONCHANGED, URHO3D_HANDLER(SceneStructureWindow, OnSelectionChanged));
     SubscribeToEvent(E_UIMOUSECLICK, URHO3D_HANDLER(SceneStructureWindow, OnElementClicked));
 
-    {
+    /*{
         UIElement *bottomBar = new UIElement(framework->GetContext());
         bottomBar->SetMinHeight(30);
         bottomBar->SetMaxHeight(30);
@@ -109,7 +110,7 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module
         window_->AddChild(bottomBar);
 
         {
-            /*Button *button = new Button(framework->GetContext());
+            Button *button = new Button(framework->GetContext());
             button->SetName("UndoButton");
             Text *text = new Text(framework->GetContext());
             text->SetText("Undo");
@@ -135,9 +136,9 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module
             button->SetMinWidth(50);
             button->SetMaxWidth(50);
             text->SetAlignment(HA_CENTER, VA_CENTER);
-            bottomBar->AddChild(button);*/
+            bottomBar->AddChild(button);
         }
-    }
+    }*/
 
     contextMenu_ = new SceneContextMenu(framework->GetContext());
     contextMenu_->Widget()->SetPosition(IntVector2(100, 100));
@@ -158,7 +159,7 @@ SceneStructureWindow::~SceneStructureWindow()
     Clear();
     addComponentDialog_.Reset();
     addEntityDialog_.Reset();
-	contextMenu_.Reset();
+    contextMenu_.Reset();
 
     if (closeButton_.Get())
         closeButton_->Remove();
@@ -167,7 +168,7 @@ SceneStructureWindow::~SceneStructureWindow()
         window_->Remove();
     window_.Reset();
 
-	scene_.Reset();
+    scene_.Reset();
 }
 
 SceneStructureItem *SceneStructureWindow::CreateItem(Object *obj, const String &text, SceneStructureItem *parent)
@@ -254,7 +255,7 @@ void SceneStructureWindow::OnItemDoubleClicked(StringHash /*eventType*/, Variant
     {
         int button = eventData[Urho3D::MouseButtonDown::P_BUTTON].GetInt();
         if (button == 1) // LEFT BUTTON
-			ToggleItem(FindItem(item));
+            ToggleItem(FindItem(item));
     }
 }
 
@@ -298,7 +299,7 @@ void SceneStructureWindow::OnComponentDialogClosed(AddComponentDialog *dialog, b
             comp->SetTemporary(temporary);
         }
     }
-	dirty_ = true;
+    dirty_ = true;
 }
 
 void SceneStructureWindow::OnEntityDialogClosed(AddEntityDialog *dialog, bool confirmed)
@@ -322,28 +323,28 @@ void SceneStructureWindow::OnEntityDialogClosed(AddEntityDialog *dialog, bool co
 
 void SceneStructureWindow::SetShownScene(Scene *newScene)
 {
-	if (scene_)
-	{
-		scene_->ComponentAdded.Disconnect(this, &SceneStructureWindow::OnComponentChanged);
-		scene_->ComponentRemoved.Disconnect(this, &SceneStructureWindow::OnComponentChanged);
-		scene_->EntityCreated.Disconnect(this, &SceneStructureWindow::OnEntityChanged);
-		scene_->EntityRemoved.Disconnect(this, &SceneStructureWindow::OnEntityChanged);
-		scene_->AttributeChanged.Disconnect(this, &SceneStructureWindow::OnAttributeChanged);
-	}
+    if (scene_)
+    {
+        scene_->ComponentAdded.Disconnect(this, &SceneStructureWindow::OnComponentChanged);
+        scene_->ComponentRemoved.Disconnect(this, &SceneStructureWindow::OnComponentChanged);
+        scene_->EntityCreated.Disconnect(this, &SceneStructureWindow::OnEntityChanged);
+        scene_->EntityRemoved.Disconnect(this, &SceneStructureWindow::OnEntityChanged);
+        scene_->AttributeChanged.Disconnect(this, &SceneStructureWindow::OnAttributeChanged);
+    }
 
     scene_ = newScene;
 
-	if (scene_)
-	{
-		scene_->ComponentAdded.Connect(this, &SceneStructureWindow::OnComponentChanged);
-		scene_->ComponentRemoved.Connect(this, &SceneStructureWindow::OnComponentChanged);
-		scene_->EntityCreated.Connect(this, &SceneStructureWindow::OnEntityChanged);
-		scene_->EntityRemoved.Connect(this, &SceneStructureWindow::OnEntityChanged);
-		scene_->AttributeChanged.Connect(this, &SceneStructureWindow::OnAttributeChanged);
-	}
+    if (scene_)
+    {
+        scene_->ComponentAdded.Connect(this, &SceneStructureWindow::OnComponentChanged);
+        scene_->ComponentRemoved.Connect(this, &SceneStructureWindow::OnComponentChanged);
+        scene_->EntityCreated.Connect(this, &SceneStructureWindow::OnEntityChanged);
+        scene_->EntityRemoved.Connect(this, &SceneStructureWindow::OnEntityChanged);
+        scene_->AttributeChanged.Connect(this, &SceneStructureWindow::OnAttributeChanged);
+    }
 
     Clear();
-	dirty_ = true;
+    dirty_ = true;
 }
 
 void SceneStructureWindow::OnEntityCreated(Entity* entity, AttributeChange::Type /*change*/)
@@ -433,17 +434,17 @@ void SceneStructureWindow::EditSelection()
 
 void SceneStructureWindow::OnComponentChanged(Entity *entity, IComponent *component, AttributeChange::Type change)
 {
-	dirty_ = true;
+    dirty_ = true;
 }
 
 void SceneStructureWindow::OnEntityChanged(Entity *entity, AttributeChange::Type change)
 {
-	dirty_ = true;
+    dirty_ = true;
 }
 
 void SceneStructureWindow::OnAttributeChanged(IComponent *component, IAttribute *attribute, AttributeChange::Type type)
 {
-	dirty_ = true;
+    dirty_ = true;
 }
 
 void SceneStructureWindow::Clear()
@@ -463,7 +464,7 @@ void SceneStructureWindow::Clear()
 
 void SceneStructureWindow::RefreshView()
 {
-	dirty_ = false;
+    dirty_ = false;
 
     // TODO optimize the refresh code.
     Clear();
@@ -493,8 +494,8 @@ void SceneStructureWindow::Show()
 
 void SceneStructureWindow::Update()
 {
-	if (dirty_ && window_.Get() && window_->IsVisible())
-		RefreshView();
+    if (dirty_ && window_.Get() && window_->IsVisible())
+        RefreshView();
 }
 
 SceneStructureItem *SceneStructureWindow::FindItem(Object *obj)
@@ -509,13 +510,13 @@ SceneStructureItem *SceneStructureWindow::FindItem(Object *obj)
 
 void SceneStructureWindow::ToggleItem(SceneStructureItem *item)
 {
-	if (listView_.Get())
-	{
-		unsigned index = listView_->FindItem(item->Widget());
-		if (index != M_MAX_UNSIGNED)
-			listView_->ToggleExpand(index);
-		item->Refresh();
-	}
+    if (listView_.Get())
+    {
+        unsigned index = listView_->FindItem(item->Widget());
+        if (index != M_MAX_UNSIGNED)
+            listView_->ToggleExpand(index);
+        item->Refresh();
+    }
 }
 
 SceneStructureItem *SceneStructureWindow::FindItem(UIElement *element)
@@ -564,7 +565,7 @@ void SceneStructureWindow::OnActionSelected(SceneContextMenu *contextMenu, Strin
         addComponentDialog_->Widget()->SetPosition(pos);
     }
     
-	dirty_ = true;
+    dirty_ = true;
 }
 
 bool SceneStructureWindow::ComponentSelected(IComponent *component) const

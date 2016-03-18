@@ -35,11 +35,11 @@ MenuBarItem::~MenuBarItem()
     for (HashMap<String, MenuBarItemPtr>::Iterator iter = subMenus_.Begin(); iter != subMenus_.End(); ++iter)
         iter->second_.Reset();
 
-	if (item_.Get())
-	{
-		item_->Remove();
-		item_.Reset();
-	}
+    if (item_.Get())
+    {
+        item_->Remove();
+        item_.Reset();
+    }
 }
 
 void MenuBarItem::Create(const String &title)
@@ -108,7 +108,7 @@ void MenuBarItem::UpdatePopup()
     int width = element->GetWidth() - (element->GetLayoutBorder().left_ + element->GetLayoutBorder().right_);
     for (HashMap<String, MenuBarItemPtr>::Iterator iter = subMenus_.Begin(); iter != subMenus_.End(); ++iter)
         iter->second_->GetMenu()->SetFixedWidth(width);
-    
+
     if (parentItem_.NotNull())
         item_->SetPopupOffset(IntVector2(parentItem_->GetMenu()->GetPopup()->GetWidth() - 2, -4));
 }

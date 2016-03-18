@@ -31,7 +31,7 @@ public:
     ~ECEditor();
 
     void Initialize() override;
-	void Update(float UNUSED_PARAM(frametime)) override;
+    void Update(float UNUSED_PARAM(frametime)) override;
 
     void OpenSceneEditor();
     void OpenSceneEditor(Scene *scene);

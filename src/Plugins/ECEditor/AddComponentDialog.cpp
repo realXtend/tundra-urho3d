@@ -26,7 +26,9 @@ namespace Tundra
 
 AddComponentDialog::AddComponentDialog(Framework *framework) :
     Object(framework->GetContext()),
-    framework_(framework)
+    framework_(framework),
+    window_(0), dropDownList_(0),
+    localCheckBox_(0), localText_(0)
 {
     XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/DefaultStyle.xml");
 

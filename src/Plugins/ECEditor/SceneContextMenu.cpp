@@ -37,7 +37,7 @@ SceneContextMenu::SceneContextMenu(Context* context) :
 
 SceneContextMenu::~SceneContextMenu()
 {
-	Clear();
+    Clear();
 
     if (window_.Get())
         window_->Remove();
@@ -83,13 +83,13 @@ Menu *SceneContextMenu::CreateItem(const String &id, const String &text)
 
 void SceneContextMenu::Clear()
 {
-	Urho3D::Vector<Tundra::MenuWeakPtr> menus = contextItemMap_.Values();
-	for (uint i = 0; i < menus.Size(); ++i)
-	{
-		if (menus[i].Get())
-			menus[i]->Remove();
-	}
-	contextItemMap_.Clear();
+    Urho3D::Vector<Tundra::MenuWeakPtr> menus = contextItemMap_.Values();
+    for (uint i = 0; i < menus.Size(); ++i)
+    {
+        if (menus[i].Get())
+            menus[i]->Remove();
+    }
+    contextItemMap_.Clear();
 }
 
 UIElement *SceneContextMenu::Widget()

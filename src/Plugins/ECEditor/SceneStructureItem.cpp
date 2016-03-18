@@ -37,7 +37,7 @@ SceneStructureItem::SceneStructureItem(Context* context, ListView *list, Object 
     toggleButton_->SetVisible(false);
     SubscribeToEvent(toggleButton_, E_RELEASED, URHO3D_HANDLER(SceneStructureItem, OnItemPressed));
 
-	SetData(object);
+    SetData(object);
 
     text_->AddChild(toggleButton_);
 }
@@ -66,25 +66,25 @@ void SceneStructureItem::SetData(Object *obj)
 {
     data_ = ObjectWeakPtr(obj);
 
-	if (Entity *entity = dynamic_cast<Tundra::Entity*>(obj))
-	{
-		toggleButton_->SetVisible(true);
-		if (entity->IsTemporary())
-			SetColor(Color(0.9, 0.3, 0.3));
-		else if (entity->IsLocal())
-			SetColor(Color(0.3, 0.3, 0.9));
-	}
-	else
-	{
-		if (IComponent *comp = dynamic_cast<Tundra::IComponent*>(obj))
-		{
-			if (comp->ParentEntity()->IsTemporary())
-				SetColor(Color(0.9, 0.3, 0.3));
-			else if (comp->ParentEntity()->IsLocal())
-				SetColor(Color(0.3, 0.3, 0.9));
-		}
-		toggleButton_->SetVisible(false);
-	}
+    if (Entity *entity = dynamic_cast<Tundra::Entity*>(obj))
+    {
+        toggleButton_->SetVisible(true);
+        if (entity->IsTemporary())
+            SetColor(Color(0.9, 0.3, 0.3));
+        else if (entity->IsLocal())
+            SetColor(Color(0.3, 0.3, 0.9));
+    }
+    else
+    {
+        if (IComponent *comp = dynamic_cast<Tundra::IComponent*>(obj))
+        {
+            if (comp->ParentEntity()->IsTemporary())
+                SetColor(Color(0.9, 0.3, 0.3));
+            else if (comp->ParentEntity()->IsLocal())
+                SetColor(Color(0.3, 0.3, 0.9));
+        }
+        toggleButton_->SetVisible(false);
+    }
 }
 
 Object *SceneStructureItem::Data() const
