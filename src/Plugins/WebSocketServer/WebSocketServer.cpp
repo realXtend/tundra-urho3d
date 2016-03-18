@@ -147,7 +147,7 @@ void Server::Update(float frametime)
         {
             if (!UserConnection(event->connection))
             {
-                WebSocket::UserConnectionPtr userConnection(new WebSocket::UserConnection(event->connection));
+                WebSocket::UserConnectionPtr userConnection(new WebSocket::UserConnection(context_, event->connection));
                 connections_.Push(userConnection);
 
                 // The connection does not yet have an ID assigned. Tundra server will assign on login

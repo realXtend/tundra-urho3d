@@ -35,16 +35,16 @@ public:
     /// Register to entity/component change signals from a specific scene and start syncing them
     void RegisterToScene(ScenePtr scene);
     
-    /// Accumulate time & send pending sync messages if enough time passed from last update
+    /// Accumulate time & send pending sync messages if enough time passed from last update [noscript]
     void Update(float frametime);
     
-    /// Create new replication state for user and dirty it (server operation only)
+    /// Create new replication state for user and dirty it (server operation only) [noscript]
     void NewUserConnected(const UserConnectionPtr &user);
 
     /// Set update period (seconds)
     void SetUpdatePeriod(float period);
 
-    /// Get update period
+    /// Get update period [property]
     float GetUpdatePeriod() const { return updatePeriod_; }
 
     /// Returns SceneSyncState for a client connection.
@@ -60,18 +60,18 @@ public:
         @remark Interest management */
     void SetInterestManagementEnabled(bool enabled);
 
-    /// Is interest management enabled.
+    /// Is interest management enabled. [property]
     bool IsInterestManagementEnabled() const { return Prioritizer() != 0; }
 
     /// Sets the client's observer entity. @remark Interest management
     /** @note The entity needs to have Placeable component present in order to be usable. */
     void SetObserver(const EntityPtr &entity) { observer_ = entity; }
-    /// Returns the observer entity, if any. @remark Interest management
+    /// Returns the observer entity, if any. @remark Interest management [property]
     EntityPtr Observer() const { return observer_.Lock(); }
 
     /// Sets priority update period, cannot be faster that sync update period. @remark Interest management
     void SetPriorityUpdatePeriod(float period);
-    /// Returns priority update period. @remark Interest management
+    /// Returns priority update period. @remark Interest management [property]
     float PriorityUpdatePeriod() const { return priorityUpdatePeriod_; }
 
     /// Sets the prioritizer.

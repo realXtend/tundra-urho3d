@@ -272,7 +272,7 @@ namespace BindingsGenerator
             {
                 if (typeName == "double")
                     return typeName + " " + varName + " = duk_require_number(ctx, " + stackIndex + ");";
-                else if (typeName == "AttributeChange::Type")
+                else if (typeName == "AttributeChange::Type" || typeName == "ClientLoginState")
                     return typeName + " " + varName + " = (" + typeName + ")(int)duk_require_number(ctx, " + stackIndex + ");"; 
                 else
                     return typeName + " " + varName + " = (" + typeName + ")duk_require_number(ctx, " + stackIndex + ");"; 
@@ -294,6 +294,22 @@ namespace BindingsGenerator
                     // Hack
                     if (typeName == "float3Vector")
                         typeName = "Vector<float3>";
+
+                    if (templateType == "String" || templateType == "string")
+                        return typeName + " " + varName + " = GetStringVector(ctx, " + stackIndex + ");";
+                    else
+                    {
+                        if (!IsRefCounted(templateType))
+                            return typeName + " " + varName + " = GetValueObjectVector<" + templateType + ">(ctx, " + stackIndex + ", " + ClassIdentifier(templateType) + ");";
+                        else
+                            return typeName + " " + varName + " = GetWeakObjectVector<" + templateType + ">(ctx, " + stackIndex + ");";
+                    }
+                }
+
+                if (typeName.EndsWith("List"))
+                {
+                    string templateType = typeName.Substring(0, typeName.Length - 4);
+                    templateType = SanitateTemplateType(templateType);
 
                     if (templateType == "String" || templateType == "string")
                         return typeName + " " + varName + " = GetStringVector(ctx, " + stackIndex + ");";
@@ -384,6 +400,22 @@ namespace BindingsGenerator
                     /// \todo This needs the id & finalizer, mark dependencies
                     if (!IsRefCounted(templateType))
                         return "PushValueObjectVector(ctx, " + source + ", " +  ClassIdentifier(templateType) + ", " + templateType + "_Finalizer);";
+                    else
+                        return "PushWeakObjectVector(ctx, " + source + ");";
+                }
+            }
+            else if (typeName.EndsWith("List"))
+            {
+                string templateType = typeName.Substring(0, typeName.Length - 4);
+                templateType = SanitateTemplateType(templateType);
+
+                if (templateType == "String" || templateType == "string")
+                    return "PushStringVector(ctx, " + source + ");";
+                else
+                {
+                    /// \todo This needs the id & finalizer, mark dependencies
+                    if (!IsRefCounted(templateType))
+                        return "PushValueObjectVector(ctx, " + source + ", " + ClassIdentifier(templateType) + ", " + templateType + "_Finalizer);";
                     else
                         return "PushWeakObjectVector(ctx, " + source + ");";
                 }
@@ -779,7 +811,7 @@ namespace BindingsGenerator
                     // Differentiate function name by parameters
                     string functionName = baseFunctionName;
                     for (int i = 0; i < child.parameters.Count; ++i)
-                        functionName += "_" + SanitateTypeName(child.parameters[i].BasicType()).Replace(':', '_');
+                        functionName += "_" + SanitateTypeName(child.parameters[i].BasicType()).Replace(':', '_').Replace(' ', '_');
      
                     // Skip if same overload (typically a const variation) already included
                     bool hasSame = false;
@@ -1254,6 +1286,7 @@ namespace BindingsGenerator
             type = type.Replace("EntityMap", "Scene::EntityMap");
             type = type.Replace("ComponentVector", "Entity::ComponentVector");
             type = type.Replace("ComponentMap", "Entity::ComponentMap");
+            type = type.Replace("ClientLoginState", "Client::ClientLoginState");
             if (type == "vec")
                 type = "float3";
             return type;
@@ -1285,6 +1318,14 @@ namespace BindingsGenerator
             if (t.EndsWith("Vector"))
             {
                 string templateType = t.Substring(0, t.Length - 6);
+                if (templateType == "String")
+                    return true;
+                templateType = SanitateTemplateType(templateType);
+                return classNames.Contains(templateType) || dependencyNames.Contains(templateType);
+            }
+            else if (t.EndsWith("List"))
+            {
+                string templateType = t.Substring(0, t.Length - 4);
                 if (templateType == "String")
                     return true;
                 templateType = SanitateTemplateType(templateType);

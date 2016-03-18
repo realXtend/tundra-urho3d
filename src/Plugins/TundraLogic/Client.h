@@ -27,7 +27,7 @@ public:
     explicit Client(TundraLogic* owner);
     ~Client();
 
-    /// Perform any per-frame processing
+    /// Perform any per-frame processing [noscript]
     void Update(float frametime);
 
     enum ClientLoginState
@@ -38,17 +38,17 @@ public:
         LoggedIn
     };
 
-    /// Returns connection/login state
+    /// Returns connection/login state [property]
     ClientLoginState LoginState() const { return loginstate_; }
 
-    /// Returns client connection ID (from loginreply message), or zero if not connected.
+    /// Returns client connection ID (from loginreply message), or zero if not connected. [property]
     u32 ConnectionId() const { return client_id_; }
 
     /// Returns the underlying kNet MessageConnection object that represents this connection.
     /** This function may return null in the case the connection is not active. */
     kNet::MessageConnection* MessageConnection();
 
-    /// Returns the "virtual" user connection object representing the server. This object will exist always, but its MessageConnection is null when not connected.
+    /// Returns the "virtual" user connection object representing the server. This object will exist always, but its MessageConnection is null when not connected. [property]
     KNetUserConnectionPtr ServerUserConnection() const;
 
     /// Connect and login. Username and password will be encoded to XML key-value data
@@ -66,7 +66,7 @@ public:
     /** @param fail Pass in true if the logout was due to connection/login failure. False, if the connection was aborted deliberately by the client. */
     void DoLogout(bool fail = false);
 
-    /// See if connected & authenticated
+    /// See if connected & authenticated [property]
     bool IsConnected() const;
 
      /// Sets the given login property with the given value.

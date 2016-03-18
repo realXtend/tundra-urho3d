@@ -18,7 +18,7 @@ namespace WebSocket
     class WEBSOCKETSERVER_API UserConnection : public Tundra::UserConnection
     {
     public:
-        UserConnection(ConnectionPtr connection_);
+        UserConnection(Urho3D::Context* context, ConnectionPtr connection_);
         ~UserConnection();
 
         virtual Tundra::String ConnectionType() const { return "websocket"; }

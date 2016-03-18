@@ -256,7 +256,7 @@ void KristalliProtocol::NewConnectionEstablished(kNet::MessageConnection *source
 
     source->RegisterInboundMessageHandler(this);
     
-    UserConnectionPtr connection = UserConnectionPtr(new KNetUserConnection());
+    UserConnectionPtr connection = UserConnectionPtr(new KNetUserConnection(context_));
     connection->userID = AllocateNewConnectionID();
     Urho3D::StaticCast<KNetUserConnection>(connection)->connection = source;
     connections.Push(connection);

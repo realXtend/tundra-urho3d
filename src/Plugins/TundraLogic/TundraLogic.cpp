@@ -15,15 +15,19 @@
 #include "Scene/Scene.h"
 #include "UserConnectedResponseData.h"
 #include "LoggingFunctions.h"
-
 #include "AssetAPI.h"
 #include "IAsset.h"
-
 #include "LocalAssetProvider.h"
 #include "LocalAssetStorage.h"
+#include "JavaScript.h"
+#include "JavaScriptInstance.h"
+#include "TundraLogicBindings/TundraLogicBindings.h"
 
+#include <Urho3D/Core/Profiler.h>
 #include <Urho3D/Core/Timer.h>
 #include <Urho3D/Core/StringUtils.h>
+
+using namespace JSBindings;
 
 namespace Tundra
 {
@@ -69,6 +73,11 @@ void TundraLogic::Initialize()
     client_->Connected.Connect(this, &TundraLogic::ClientConnectedToServer);
     client_->Disconnected.Connect(this, &TundraLogic::ClientDisconnectedFromServer);
     server_->UserConnected.Connect(this, &TundraLogic::ServerNewUserConnected);
+
+    // Connect to JavaScript module instance creation to be able to expose TundraLogic classes to each instance
+    JavaScript* javaScript = framework->Module<JavaScript>();
+    if (javaScript)
+        javaScript->ScriptInstanceCreated.Connect(this, &TundraLogic::OnScriptInstanceCreated);
 }
 
 void TundraLogic::HandleLogin(const StringVector &params) const
@@ -369,6 +378,19 @@ void TundraLogic::DetermineStorageTrustStatus(AssetStoragePtr storage)
         storage->SetTrustState(IAssetStorage::StorageAskTrust);
     }
 }
+
+void TundraLogic::OnScriptInstanceCreated(JavaScriptInstance* instance)
+{
+    URHO3D_PROFILE(ExposeTundraLogicClasses);
+
+    duk_context* ctx = instance->Context();
+    ExposeTundraLogicClasses(ctx);
+    
+    instance->RegisterService("client", client_);
+    instance->RegisterService("server", server_);
+    instance->RegisterService("syncmanager", syncManager_);
+}
+
 
 extern "C"
 {

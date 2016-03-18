@@ -11,6 +11,8 @@
 namespace Tundra
 {
 
+class JavaScriptInstance;
+
 typedef SharedPtr<Tundra::Client> ClientPtr;
 typedef SharedPtr<Tundra::Server> ServerPtr;
 
@@ -72,6 +74,10 @@ private:
 
     /// Handle new connection to server. Populate local asset storages if connected from the same machine to the login response data.
     void ServerNewUserConnected(u32 connectionID, UserConnection *connection, UserConnectedResponseData *responseData);
+    
+    /// Handle script engine creation (register TundraLogic classes)
+    void OnScriptInstanceCreated(JavaScriptInstance* instance);
+    
     /// The sync manager
     SharedPtr<Tundra::SyncManager> syncManager_;
     /// The client

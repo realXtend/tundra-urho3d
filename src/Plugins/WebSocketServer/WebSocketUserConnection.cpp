@@ -16,9 +16,10 @@
 namespace WebSocket
 {
 
-UserConnection::UserConnection(ConnectionPtr connection_)
+UserConnection::UserConnection(Urho3D::Context* context, ConnectionPtr connection_) :
+    Tundra::UserConnection(context),
+    webSocketConnection(ConnectionWeakPtr(connection_))
 {
-    webSocketConnection = ConnectionWeakPtr(connection_);
 }
 
 UserConnection::~UserConnection()

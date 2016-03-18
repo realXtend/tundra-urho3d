@@ -11,7 +11,8 @@
 namespace Tundra
 {
 
-UserConnection::UserConnection() : 
+UserConnection::UserConnection(Urho3D::Context* context) : 
+    Object(context),
     userID(0),
     protocolVersion(ProtocolOriginal)
 {}
@@ -72,6 +73,11 @@ void UserConnection::DenyConnection(const String &reason)
 {
     properties["authenticated"] = false;
     properties["reason"] = reason;
+}
+
+KNetUserConnection::KNetUserConnection(Urho3D::Context* context) :
+    UserConnection(context)
+{
 }
 
 void KNetUserConnection::Send(kNet::message_id_t id, const char* data, size_t numBytes, bool reliable, bool inOrder, unsigned long priority, unsigned long contentID)

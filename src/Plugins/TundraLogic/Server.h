@@ -17,20 +17,20 @@ namespace Tundra
 /// \todo Implement
 class TUNDRALOGIC_API Server : public Object
 {
-    URHO3D_OBJECT(Server, Object)
+    URHO3D_OBJECT(Server, Object);
     
 public:
     explicit Server(TundraLogic* owner);
     ~Server();
 
-    /// Perform any per-frame processing
+    /// Perform any per-frame processing [noscript]
     void Update(float frametime);
 
     /// Get matching userconnection from a messageconnection, or null if unknown
     /// @todo Rename to UserConnection(ForMessageConnection) or similar.
     UserConnectionPtr GetUserConnection(kNet::MessageConnection* source) const;
 
-    /// Get all connected users
+    /// Get all connected users [property]
     UserConnectionList& UserConnections() const;
 
     /// Set current action sender. Called by SyncManager
@@ -41,19 +41,19 @@ public:
         @todo Rename to (KNet)NetworkServer or similar. */
     kNet::NetworkServer *GetServer() const;
 
-    /// Returns server's port.
+    /// Returns server's port. [property]
     /** @return Server port number, or -1 if server is not running. */
     int Port() const;
 
-    /// Returns server's protocol.
+    /// Returns server's protocol. [property]
     /** @return 'udp', tcp', or an empty string if server is not running. */
     String Protocol() const;
 
-    /// Add a user from external networking subsystem such as WebSocket. Return true if the user was successfully authenticated according to the login properties.
+    /// Add a user from external networking subsystem such as WebSocket. Return true if the user was successfully authenticated according to the login properties. [noscript]
     bool AddExternalUser(UserConnectionPtr user);
-    /// Remove a user from external networking subsystem
+    /// Remove a user from external networking subsystem [noscript]
     void RemoveExternalUser(UserConnectionPtr user);
-    /// Emit network message received on behalf of an external networking subsystem. Packet id should be left zero if not supported.
+    /// Emit network message received on behalf of an external networking subsystem. Packet id should be left zero if not supported. [noscript]
     void EmitNetworkMessageReceived(UserConnection *connection, kNet::packet_id_t, kNet::message_id_t id, const char* data, size_t numBytes);
 
     // slots:
@@ -66,19 +66,19 @@ public:
     /// Stop server & delete server scene
     void Stop();
 
-    /// Returns whether server is running
+    /// Returns whether server is running [property]
     bool IsRunning() const;
 
-    /// Returns whether server is about to start.
+    /// Returns whether server is about to start. [property]
     bool IsAboutToStart() const;
 
-    /// Returns all authenticated users.
+    /// Returns all authenticated users. [property]
     UserConnectionList AuthenticatedUsers() const;
 
     /// Returns connection corresponding to a connection ID.
     UserConnectionPtr UserConnectionById(u32 connectionID) const;
 
-    /// Returns current sender of an action.
+    /// Returns current sender of an action. [property]
     /** Valid (non-null) only while an action packet is being handled. Null if it was invoked by server */
     UserConnectionPtr ActionSender() const;
 
