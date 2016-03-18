@@ -22,10 +22,17 @@ namespace JSBindings
 {
 
 static const char* float3_ID = "float3";
+static const char* float2_ID = "float2";
 
 static duk_ret_t float3_Finalizer(duk_context* ctx)
 {
     FinalizeValueObject<float3>(ctx, float3_ID);
+    return 0;
+}
+
+static duk_ret_t float2_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float2>(ctx, float2_ID);
     return 0;
 }
 
@@ -128,6 +135,36 @@ static duk_ret_t RayQueryResult_Get_triangleIndex(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t RayQueryResult_Set_uv(duk_context* ctx)
+{
+    RayQueryResult* thisObj = GetThisValueObject<RayQueryResult>(ctx, RayQueryResult_ID);
+    float2& uv = *GetCheckedValueObject<float2>(ctx, 0, float2_ID);
+    thisObj->uv = uv;
+    return 0;
+}
+
+static duk_ret_t RayQueryResult_Get_uv(duk_context* ctx)
+{
+    RayQueryResult* thisObj = GetThisValueObject<RayQueryResult>(ctx, RayQueryResult_ID);
+    PushValueObject<float2>(ctx, &thisObj->uv, float2_ID, nullptr, true);
+    return 1;
+}
+
+static duk_ret_t RayQueryResult_Set_barycentricUV(duk_context* ctx)
+{
+    RayQueryResult* thisObj = GetThisValueObject<RayQueryResult>(ctx, RayQueryResult_ID);
+    float2& barycentricUV = *GetCheckedValueObject<float2>(ctx, 0, float2_ID);
+    thisObj->barycentricUV = barycentricUV;
+    return 0;
+}
+
+static duk_ret_t RayQueryResult_Get_barycentricUV(duk_context* ctx)
+{
+    RayQueryResult* thisObj = GetThisValueObject<RayQueryResult>(ctx, RayQueryResult_ID);
+    PushValueObject<float2>(ctx, &thisObj->barycentricUV, float2_ID, nullptr, true);
+    return 1;
+}
+
 static duk_ret_t RayQueryResult_Set_t(duk_context* ctx)
 {
     RayQueryResult* thisObj = GetThisValueObject<RayQueryResult>(ctx, RayQueryResult_ID);
@@ -160,6 +197,8 @@ void Expose_RayQueryResult(duk_context* ctx)
     DefineProperty(ctx, "normal", RayQueryResult_Get_normal, RayQueryResult_Set_normal);
     DefineProperty(ctx, "submeshIndex", RayQueryResult_Get_submeshIndex, RayQueryResult_Set_submeshIndex);
     DefineProperty(ctx, "triangleIndex", RayQueryResult_Get_triangleIndex, RayQueryResult_Set_triangleIndex);
+    DefineProperty(ctx, "uv", RayQueryResult_Get_uv, RayQueryResult_Set_uv);
+    DefineProperty(ctx, "barycentricUV", RayQueryResult_Get_barycentricUV, RayQueryResult_Set_barycentricUV);
     DefineProperty(ctx, "t", RayQueryResult_Get_t, RayQueryResult_Set_t);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, RayQueryResult_ID);

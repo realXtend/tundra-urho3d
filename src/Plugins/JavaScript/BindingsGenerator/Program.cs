@@ -37,13 +37,15 @@ namespace BindingsGenerator
     {
         static HashSet<string> classNames = new HashSet<string>();
         static List<string> exposeTheseClasses = new List<string>();
-        static List<string> dependencyOnlyClasses = new List<string>();
         static HashSet<string> dependencies = new HashSet<string>();
         static HashSet<string> finalizerDependencies = new HashSet<string>();
         static string fileBasePath = "";
         static Dictionary<string, string> classHeaderFiles = new Dictionary<string, string>();
         static Dictionary<string, bool> isRefCounted = new Dictionary<string, bool>();
         static string[] headerFiles = null;
+        
+        // Dependency classes that are always supported in bindings
+        static string[] dependencyNames = {"float2", "float3", "float4", "Quat", "float3x3", "float3x4", "float4x4", "Ray", "Color", "Point",  "RayQueryResult", "Transform", "Entity", "AttributeChange", "IComponent", "IAsset", "IAssetStorage", "IAssetTransfer"};
 
         static void Main(string[] args)
         {
@@ -52,7 +54,7 @@ namespace BindingsGenerator
                 Console.WriteLine("First cmdline parameter should be the absolute path to the root where doxygen generated the documentation XML files.");
                 Console.WriteLine("Second cmdline parameter should be the output directory.");
                 Console.WriteLine("Third cmdline parameter (optional) should be the root path of the exposed code. If omitted, include paths may not be accurate.");
-                Console.WriteLine("Further cmdline parameters can optionally list the classes to be exposed. Otherwise all will be exposed. Prepend _ to class name to only mark it as a dependency or base, but avoid writing bindings for it");
+                Console.WriteLine("Further cmdline parameters can optionally list the classes to be exposed. Otherwise all will be exposed.");
                 return;
             }
 
@@ -79,11 +81,6 @@ namespace BindingsGenerator
                 for (int i = 3; i < args.Length; ++i)
                 {
                     string className = args[i];
-                    if (className.StartsWith("_"))
-                    {
-                        className = className.Substring(1);
-                        dependencyOnlyClasses.Add(className);
-                    }
                     classNames.Add(className);
                     exposeTheseClasses.Add(className);
                 }
@@ -132,7 +129,7 @@ namespace BindingsGenerator
                         continue;
 
                     string typeName = SanitateTypeName(classSymbol.name);
-                    if (classNames.Contains(typeName) && !dependencyOnlyClasses.Contains(typeName))
+                    if (classNames.Contains(typeName))
                         GenerateClassBindings(classSymbol, outputDirectory);
                 }
             }
@@ -751,10 +748,11 @@ namespace BindingsGenerator
                             break;
                         }
                         // If it's a pointer, it must be one of the exposed classes which is refcounted
+                        // This is to avoid e.g. math functions that write to a user-specified array of objects that can't be safely exposed in script
                         if (t.Contains('*'))
                         {
                             string st = SanitateTypeName(t);
-                            if (!IsRefCounted(st) || !classNames.Contains(st))
+                            if (!IsRefCounted(st) || (!classNames.Contains(st) && !dependencyNames.Contains(st)))
                             {
                                 Console.WriteLine("Unsupported pointer parameter " + st + " in function " + child.name + " of " + className);
                                 badParameters = true;
@@ -1273,7 +1271,7 @@ namespace BindingsGenerator
                 t = SanitateTemplateType(templateType);
             }
 
-            if (!Symbol.IsPODType(t) && classNames.Contains(t))
+            if (!Symbol.IsPODType(t) && (classNames.Contains(t) || dependencyNames.Contains(t)))
             {
                 dependencies.Add(t);
                 // Value objects that are returned need the finalizer function
@@ -1291,16 +1289,16 @@ namespace BindingsGenerator
                 if (templateType == "String")
                     return true;
                 templateType = SanitateTemplateType(templateType);
-                return classNames.Contains(templateType);
+                return classNames.Contains(templateType) || dependencyNames.Contains(templateType);
             }
             else if (t.EndsWith("Map") || t.EndsWith("Ptr"))
             {
                 string templateType = t.Substring(0, t.Length - 3);
                 templateType = SanitateTemplateType(templateType);
-                return classNames.Contains(templateType);
+                return classNames.Contains(templateType) || dependencyNames.Contains(templateType);
             }
 
-            return t == "void" || Symbol.IsPODType(t) || classNames.Contains(t) || t == "string" || t == "String" || t == "Variant";
+            return t == "void" || Symbol.IsPODType(t) || classNames.Contains(t) || dependencyNames.Contains(t) || t == "string" || t == "String" || t == "Variant";
         }
 
         static bool IsBadType(string type)
