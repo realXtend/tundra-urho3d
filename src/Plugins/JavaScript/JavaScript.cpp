@@ -5,7 +5,11 @@
 #include "Framework.h"
 #include "LoggingFunctions.h"
 #include "AssetAPI.h"
+#include "FrameAPI.h"
+#include "ConfigAPI.h"
 #include "SceneAPI.h"
+#include "Console/ConsoleAPI.h"
+#include "Input/InputAPI.h"
 #include "GenericAssetFactory.h"
 #include "Script.h"
 #include "ScriptAsset.h"
@@ -142,6 +146,12 @@ void JavaScript::PrepareScriptInstance(JavaScriptInstance* instance, Script* scr
     }
 
     instance->RegisterService("framework", Fw());
+    instance->RegisterService("frame", Fw()->Frame());
+    instance->RegisterService("input", Fw()->Input());
+    instance->RegisterService("console", Fw()->Console());
+    instance->RegisterService("asset", Fw()->Asset());
+    instance->RegisterService("config", Fw()->Config());
+
     instance->RegisterService("engine", instance);
 
     if (scriptComp)

@@ -23,15 +23,9 @@ namespace JSBindings
 
 static const char* BulletPhysics_ID = "BulletPhysics";
 
-static duk_ret_t BulletPhysics_Finalizer(duk_context* ctx)
-{
-    FinalizeValueObject<BulletPhysics>(ctx, BulletPhysics_ID);
-    return 0;
-}
-
 static duk_ret_t BulletPhysics_ForgetUnusedCacheShapes(duk_context* ctx)
 {
-    BulletPhysics* thisObj = GetThisValueObject<BulletPhysics>(ctx, BulletPhysics_ID);
+    BulletPhysics* thisObj = GetThisWeakObject<BulletPhysics>(ctx);
     int ret = thisObj->ForgetUnusedCacheShapes();
     duk_push_number(ctx, ret);
     return 1;
@@ -39,7 +33,7 @@ static duk_ret_t BulletPhysics_ForgetUnusedCacheShapes(duk_context* ctx)
 
 static duk_ret_t BulletPhysics_SetDefaultPhysicsUpdatePeriod_float(duk_context* ctx)
 {
-    BulletPhysics* thisObj = GetThisValueObject<BulletPhysics>(ctx, BulletPhysics_ID);
+    BulletPhysics* thisObj = GetThisWeakObject<BulletPhysics>(ctx);
     float updatePeriod = (float)duk_require_number(ctx, 0);
     thisObj->SetDefaultPhysicsUpdatePeriod(updatePeriod);
     return 0;
@@ -47,7 +41,7 @@ static duk_ret_t BulletPhysics_SetDefaultPhysicsUpdatePeriod_float(duk_context* 
 
 static duk_ret_t BulletPhysics_DefaultPhysicsUpdatePeriod(duk_context* ctx)
 {
-    BulletPhysics* thisObj = GetThisValueObject<BulletPhysics>(ctx, BulletPhysics_ID);
+    BulletPhysics* thisObj = GetThisWeakObject<BulletPhysics>(ctx);
     float ret = thisObj->DefaultPhysicsUpdatePeriod();
     duk_push_number(ctx, ret);
     return 1;
@@ -55,7 +49,7 @@ static duk_ret_t BulletPhysics_DefaultPhysicsUpdatePeriod(duk_context* ctx)
 
 static duk_ret_t BulletPhysics_SetDefaultMaxSubSteps_int(duk_context* ctx)
 {
-    BulletPhysics* thisObj = GetThisValueObject<BulletPhysics>(ctx, BulletPhysics_ID);
+    BulletPhysics* thisObj = GetThisWeakObject<BulletPhysics>(ctx);
     int steps = (int)duk_require_number(ctx, 0);
     thisObj->SetDefaultMaxSubSteps(steps);
     return 0;
@@ -63,7 +57,7 @@ static duk_ret_t BulletPhysics_SetDefaultMaxSubSteps_int(duk_context* ctx)
 
 static duk_ret_t BulletPhysics_DefaultMaxSubSteps(duk_context* ctx)
 {
-    BulletPhysics* thisObj = GetThisValueObject<BulletPhysics>(ctx, BulletPhysics_ID);
+    BulletPhysics* thisObj = GetThisWeakObject<BulletPhysics>(ctx);
     int ret = thisObj->DefaultMaxSubSteps();
     duk_push_number(ctx, ret);
     return 1;
@@ -71,35 +65,35 @@ static duk_ret_t BulletPhysics_DefaultMaxSubSteps(duk_context* ctx)
 
 static duk_ret_t BulletPhysics_ToggleDebugGeometry(duk_context* ctx)
 {
-    BulletPhysics* thisObj = GetThisValueObject<BulletPhysics>(ctx, BulletPhysics_ID);
+    BulletPhysics* thisObj = GetThisWeakObject<BulletPhysics>(ctx);
     thisObj->ToggleDebugGeometry();
     return 0;
 }
 
 static duk_ret_t BulletPhysics_StopPhysics(duk_context* ctx)
 {
-    BulletPhysics* thisObj = GetThisValueObject<BulletPhysics>(ctx, BulletPhysics_ID);
+    BulletPhysics* thisObj = GetThisWeakObject<BulletPhysics>(ctx);
     thisObj->StopPhysics();
     return 0;
 }
 
 static duk_ret_t BulletPhysics_StartPhysics(duk_context* ctx)
 {
-    BulletPhysics* thisObj = GetThisValueObject<BulletPhysics>(ctx, BulletPhysics_ID);
+    BulletPhysics* thisObj = GetThisWeakObject<BulletPhysics>(ctx);
     thisObj->StartPhysics();
     return 0;
 }
 
 static duk_ret_t BulletPhysics_AutoCollisionMesh(duk_context* ctx)
 {
-    BulletPhysics* thisObj = GetThisValueObject<BulletPhysics>(ctx, BulletPhysics_ID);
+    BulletPhysics* thisObj = GetThisWeakObject<BulletPhysics>(ctx);
     thisObj->AutoCollisionMesh();
     return 0;
 }
 
 static duk_ret_t BulletPhysics_SetRunPhysics_bool(duk_context* ctx)
 {
-    BulletPhysics* thisObj = GetThisValueObject<BulletPhysics>(ctx, BulletPhysics_ID);
+    BulletPhysics* thisObj = GetThisWeakObject<BulletPhysics>(ctx);
     bool enable = duk_require_boolean(ctx, 0);
     thisObj->SetRunPhysics(enable);
     return 0;

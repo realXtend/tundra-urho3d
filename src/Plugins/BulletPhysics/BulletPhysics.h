@@ -24,6 +24,8 @@ class JavaScriptInstance;
 /// Provides physics rendering by utilizing Bullet.
 class BULLETPHYSICS_API BulletPhysics : public IModule
 {
+    URHO3D_OBJECT(BulletPhysics, IModule);
+
 public:
     BulletPhysics(Framework* owner);
     virtual ~BulletPhysics();
