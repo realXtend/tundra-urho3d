@@ -28,10 +28,8 @@ public:
     BulletPhysics(Framework* owner);
     virtual ~BulletPhysics();
 
-    void Load();
-    void Initialize();
+    /// Update the module. [noscript]
     void Update(float frametime);
-    void Uninitialize();
 
     /// Forget cache bullet shapes.
     /** Code that loads into the cache with calling GetTriangleMeshFromMesh and GetConvexHullSetFromMesh is
@@ -50,13 +48,13 @@ public:
     /// Set default physics update rate for new physics worlds
     void SetDefaultPhysicsUpdatePeriod(float updatePeriod);
 
-    /// Return default physics update rate for new physics worlds
+    /// Return default physics update rate for new physics worlds [property]
     float DefaultPhysicsUpdatePeriod() const { return defaultPhysicsUpdatePeriod_; }
 
     /// Set default physics max substeps for new physics worlds
     void SetDefaultMaxSubSteps(int steps);
 
-    /// Return default physics max substeps for new physics worlds
+    /// Return default physics max substeps for new physics worlds [property]
     int DefaultMaxSubSteps() const { return defaultMaxSubSteps_; }
 
     /// Toggles physics debug geometry
@@ -73,8 +71,12 @@ public:
 
     /// Enable/disable physics simulation from all physics worlds
     void SetRunPhysics(bool enable);
-    
+
 private:
+    void Load() override;
+    void Initialize() override;
+    void Uninitialize() override;
+
     /// Creates PhysicsWorld for a Scene.
     void CreatePhysicsWorld(Scene *scene, AttributeChange::Type change);
     /// Removes PhysicsWorld of a Scene.

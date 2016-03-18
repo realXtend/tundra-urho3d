@@ -290,6 +290,8 @@ void BulletPhysics::OnScriptInstanceCreated(JavaScriptInstance* instance)
 
     duk_context* ctx = instance->Context();
     ExposeBulletPhysicsClasses(ctx);
+    
+    instance->RegisterService("physics", this);
 }
 
 }

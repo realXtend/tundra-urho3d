@@ -26,7 +26,6 @@ namespace BindingsGenerator
         }
     }
 
-
     struct Property
     {
         public string name;
