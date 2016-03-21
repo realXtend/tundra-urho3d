@@ -110,6 +110,11 @@ void JavaScriptInstance::DeleteEngine()
         program_ = "";
         ScriptUnloading.Emit();
 
+        // As a convention, we call a function 'OnScriptDestroyed' for each JS script
+        // so that they can clean up their data before the script is removed from the object,
+        // or when the system is unloading.
+        Execute("OnScriptDestroyed", false);
+
         instanceMap.Erase(ctx_);
         duk_destroy_heap(ctx_);
         ctx_ = 0;
@@ -287,7 +292,7 @@ bool JavaScriptInstance::Evaluate(const String& script)
     return success;
 }
 
-bool JavaScriptInstance::Execute(const String& functionName)
+bool JavaScriptInstance::Execute(const String& functionName, bool logError)
 {
     if (!ctx_)
     {
@@ -298,7 +303,7 @@ bool JavaScriptInstance::Execute(const String& functionName)
     duk_push_global_object(ctx_);
     duk_get_prop_string(ctx_, -1, functionName.CString());
     bool success = duk_pcall(ctx_, 0) == 0;
-    if (!success)
+    if (!success && logError)
         LogError("[JavaScript] Execute: " + String(duk_safe_to_string(ctx_, -1)));
 
     duk_pop(ctx_); // Pop result/error

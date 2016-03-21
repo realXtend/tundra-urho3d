@@ -56,7 +56,7 @@ public:
     bool Evaluate(const String& script);
 
     /// Call a global function. \todo Parameter passing & return value
-    bool Execute(const String& functionName);
+    bool Execute(const String& functionName, bool logError = true);
 
     /// Return the Duktape context.
     duk_context* Context() const { return ctx_; }

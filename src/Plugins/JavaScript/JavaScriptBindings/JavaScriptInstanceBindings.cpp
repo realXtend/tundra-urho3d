@@ -202,11 +202,13 @@ static duk_ret_t JavaScriptInstance_Evaluate_String(duk_context* ctx)
     return 1;
 }
 
-static duk_ret_t JavaScriptInstance_Execute_String(duk_context* ctx)
+static duk_ret_t JavaScriptInstance_Execute_String_bool(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     JavaScriptInstance* thisObj = GetThisWeakObject<JavaScriptInstance>(ctx);
     String functionName = duk_require_string(ctx, 0);
-    bool ret = thisObj->Execute(functionName);
+    bool logError = numArgs > 1 ? duk_require_boolean(ctx, 1) : true;
+    bool ret = thisObj->Execute(functionName, logError);
     duk_push_boolean(ctx, ret);
     return 1;
 }
@@ -229,7 +231,7 @@ static duk_ret_t JavaScriptInstance_IsEvaluated(duk_context* ctx)
 
 static const duk_function_list_entry JavaScriptInstance_Functions[] = {
     {"Evaluate", JavaScriptInstance_Evaluate_String, 1}
-    ,{"Execute", JavaScriptInstance_Execute_String, 1}
+    ,{"Execute", JavaScriptInstance_Execute_String_bool, DUK_VARARGS}
     ,{"IncludeFile", JavaScriptInstance_IncludeFile_String, 1}
     ,{"IsEvaluated", JavaScriptInstance_IsEvaluated, 0}
     ,{nullptr, nullptr, 0}
