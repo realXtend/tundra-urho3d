@@ -655,8 +655,12 @@ namespace BindingsGenerator
                     tw.WriteLine(Indent(1) + "PushValueObject(ctx, wrapper, " + ClassIdentifier(wrapperClassName) + ", " + wrapperClassName + "_Finalizer, false);");
                     tw.WriteLine(Indent(1) + "duk_push_c_function(ctx, " + wrapperClassName + "_Connect" + ", DUK_VARARGS);");
                     tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"Connect\");");
+                    tw.WriteLine(Indent(1) + "duk_push_c_function(ctx, " + wrapperClassName + "_Connect" + ", DUK_VARARGS);");
+                    tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"connect\");");
                     tw.WriteLine(Indent(1) + "duk_push_c_function(ctx, " + wrapperClassName + "_Disconnect" + ", DUK_VARARGS);");
                     tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"Disconnect\");");
+                    tw.WriteLine(Indent(1) + "duk_push_c_function(ctx, " + wrapperClassName + "_Disconnect" + ", DUK_VARARGS);");
+                    tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"disconnect\");");
                     tw.WriteLine(Indent(1) + "duk_push_c_function(ctx, " + wrapperClassName + "_Emit" + ", " + parameters.Count + ");");
                     tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"Emit\");");
                     tw.WriteLine(Indent(1) + "return 1;");

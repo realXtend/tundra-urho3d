@@ -107,8 +107,12 @@ static duk_ret_t Framework_Get_ExitRequested(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_Framework_ExitRequested_ID, SignalWrapper_Framework_ExitRequested_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_Framework_ExitRequested_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Framework_ExitRequested_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_Framework_ExitRequested_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Framework_ExitRequested_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_Framework_ExitRequested_Emit, 0);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;

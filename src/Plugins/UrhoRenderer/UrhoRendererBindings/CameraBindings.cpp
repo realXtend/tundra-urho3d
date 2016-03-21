@@ -123,8 +123,12 @@ static duk_ret_t Camera_Get_ComponentNameChanged(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_Camera_ComponentNameChanged_ID, SignalWrapper_Camera_ComponentNameChanged_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_Camera_ComponentNameChanged_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Camera_ComponentNameChanged_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_Camera_ComponentNameChanged_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Camera_ComponentNameChanged_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_Camera_ComponentNameChanged_Emit, 2);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -208,8 +212,12 @@ static duk_ret_t Camera_Get_ParentEntitySet(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_Camera_ParentEntitySet_ID, SignalWrapper_Camera_ParentEntitySet_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_Camera_ParentEntitySet_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Camera_ParentEntitySet_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_Camera_ParentEntitySet_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Camera_ParentEntitySet_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_Camera_ParentEntitySet_Emit, 0);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -293,8 +301,12 @@ static duk_ret_t Camera_Get_ParentEntityAboutToBeDetached(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_Camera_ParentEntityAboutToBeDetached_ID, SignalWrapper_Camera_ParentEntityAboutToBeDetached_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_Camera_ParentEntityAboutToBeDetached_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Camera_ParentEntityAboutToBeDetached_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_Camera_ParentEntityAboutToBeDetached_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Camera_ParentEntityAboutToBeDetached_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_Camera_ParentEntityAboutToBeDetached_Emit, 0);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;

@@ -106,8 +106,12 @@ static duk_ret_t UrhoRenderer_Get_MainCameraChanged(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_UrhoRenderer_MainCameraChanged_ID, SignalWrapper_UrhoRenderer_MainCameraChanged_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_UrhoRenderer_MainCameraChanged_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_UrhoRenderer_MainCameraChanged_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_UrhoRenderer_MainCameraChanged_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_UrhoRenderer_MainCameraChanged_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_UrhoRenderer_MainCameraChanged_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;

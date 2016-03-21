@@ -113,8 +113,12 @@ static duk_ret_t IAsset_Get_Unloaded(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_IAsset_Unloaded_ID, SignalWrapper_IAsset_Unloaded_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_IAsset_Unloaded_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_IAsset_Unloaded_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_IAsset_Unloaded_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_IAsset_Unloaded_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_IAsset_Unloaded_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -201,8 +205,12 @@ static duk_ret_t IAsset_Get_Loaded(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_IAsset_Loaded_ID, SignalWrapper_IAsset_Loaded_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_IAsset_Loaded_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_IAsset_Loaded_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_IAsset_Loaded_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_IAsset_Loaded_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_IAsset_Loaded_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -289,8 +297,12 @@ static duk_ret_t IAsset_Get_PropertyStatusChanged(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_IAsset_PropertyStatusChanged_ID, SignalWrapper_IAsset_PropertyStatusChanged_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_IAsset_PropertyStatusChanged_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_IAsset_PropertyStatusChanged_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_IAsset_PropertyStatusChanged_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_IAsset_PropertyStatusChanged_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_IAsset_PropertyStatusChanged_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;

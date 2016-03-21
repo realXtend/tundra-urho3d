@@ -101,8 +101,12 @@ static duk_ret_t Client_Get_AboutToConnect(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_Client_AboutToConnect_ID, SignalWrapper_Client_AboutToConnect_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_Client_AboutToConnect_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Client_AboutToConnect_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_Client_AboutToConnect_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Client_AboutToConnect_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_Client_AboutToConnect_Emit, 0);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -186,8 +190,12 @@ static duk_ret_t Client_Get_Disconnected(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_Client_Disconnected_ID, SignalWrapper_Client_Disconnected_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_Client_Disconnected_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Client_Disconnected_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_Client_Disconnected_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Client_Disconnected_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_Client_Disconnected_Emit, 0);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -274,8 +282,12 @@ static duk_ret_t Client_Get_LoginFailed(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_Client_LoginFailed_ID, SignalWrapper_Client_LoginFailed_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_Client_LoginFailed_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Client_LoginFailed_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_Client_LoginFailed_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Client_LoginFailed_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_Client_LoginFailed_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;

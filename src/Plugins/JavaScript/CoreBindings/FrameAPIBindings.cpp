@@ -105,8 +105,12 @@ static duk_ret_t FrameAPI_Get_Updated(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_FrameAPI_Updated_ID, SignalWrapper_FrameAPI_Updated_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_FrameAPI_Updated_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_FrameAPI_Updated_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_FrameAPI_Updated_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_FrameAPI_Updated_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_FrameAPI_Updated_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -193,8 +197,12 @@ static duk_ret_t FrameAPI_Get_PostFrameUpdate(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_FrameAPI_PostFrameUpdate_ID, SignalWrapper_FrameAPI_PostFrameUpdate_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_FrameAPI_PostFrameUpdate_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_FrameAPI_PostFrameUpdate_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_FrameAPI_PostFrameUpdate_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_FrameAPI_PostFrameUpdate_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_FrameAPI_PostFrameUpdate_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;

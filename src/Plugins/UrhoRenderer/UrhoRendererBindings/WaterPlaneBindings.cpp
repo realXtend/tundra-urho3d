@@ -115,8 +115,12 @@ static duk_ret_t WaterPlane_Get_ComponentNameChanged(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_WaterPlane_ComponentNameChanged_ID, SignalWrapper_WaterPlane_ComponentNameChanged_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_WaterPlane_ComponentNameChanged_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_WaterPlane_ComponentNameChanged_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_WaterPlane_ComponentNameChanged_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_WaterPlane_ComponentNameChanged_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_WaterPlane_ComponentNameChanged_Emit, 2);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -200,8 +204,12 @@ static duk_ret_t WaterPlane_Get_ParentEntitySet(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_WaterPlane_ParentEntitySet_ID, SignalWrapper_WaterPlane_ParentEntitySet_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_WaterPlane_ParentEntitySet_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_WaterPlane_ParentEntitySet_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_WaterPlane_ParentEntitySet_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_WaterPlane_ParentEntitySet_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_WaterPlane_ParentEntitySet_Emit, 0);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -285,8 +293,12 @@ static duk_ret_t WaterPlane_Get_ParentEntityAboutToBeDetached(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_WaterPlane_ParentEntityAboutToBeDetached_ID, SignalWrapper_WaterPlane_ParentEntityAboutToBeDetached_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_WaterPlane_ParentEntityAboutToBeDetached_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_WaterPlane_ParentEntityAboutToBeDetached_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_WaterPlane_ParentEntityAboutToBeDetached_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_WaterPlane_ParentEntityAboutToBeDetached_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_WaterPlane_ParentEntityAboutToBeDetached_Emit, 0);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;

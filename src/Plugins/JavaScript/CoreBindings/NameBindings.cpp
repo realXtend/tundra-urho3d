@@ -110,8 +110,12 @@ static duk_ret_t Name_Get_ComponentNameChanged(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_Name_ComponentNameChanged_ID, SignalWrapper_Name_ComponentNameChanged_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_Name_ComponentNameChanged_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Name_ComponentNameChanged_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_Name_ComponentNameChanged_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Name_ComponentNameChanged_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_Name_ComponentNameChanged_Emit, 2);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -195,8 +199,12 @@ static duk_ret_t Name_Get_ParentEntitySet(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_Name_ParentEntitySet_ID, SignalWrapper_Name_ParentEntitySet_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_Name_ParentEntitySet_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Name_ParentEntitySet_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_Name_ParentEntitySet_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Name_ParentEntitySet_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_Name_ParentEntitySet_Emit, 0);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -280,8 +288,12 @@ static duk_ret_t Name_Get_ParentEntityAboutToBeDetached(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_Name_ParentEntityAboutToBeDetached_ID, SignalWrapper_Name_ParentEntityAboutToBeDetached_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_Name_ParentEntityAboutToBeDetached_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Name_ParentEntityAboutToBeDetached_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_Name_ParentEntityAboutToBeDetached_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Name_ParentEntityAboutToBeDetached_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_Name_ParentEntityAboutToBeDetached_Emit, 0);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;

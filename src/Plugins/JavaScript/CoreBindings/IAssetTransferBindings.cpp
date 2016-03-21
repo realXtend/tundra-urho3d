@@ -172,8 +172,12 @@ static duk_ret_t IAssetTransfer_Get_Downloaded(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_IAssetTransfer_Downloaded_ID, SignalWrapper_IAssetTransfer_Downloaded_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_IAssetTransfer_Downloaded_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_IAssetTransfer_Downloaded_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_IAssetTransfer_Downloaded_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_IAssetTransfer_Downloaded_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_IAssetTransfer_Downloaded_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -260,8 +264,12 @@ static duk_ret_t IAssetTransfer_Get_Succeeded(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_IAssetTransfer_Succeeded_ID, SignalWrapper_IAssetTransfer_Succeeded_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_IAssetTransfer_Succeeded_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_IAssetTransfer_Succeeded_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_IAssetTransfer_Succeeded_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_IAssetTransfer_Succeeded_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_IAssetTransfer_Succeeded_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -351,8 +359,12 @@ static duk_ret_t IAssetTransfer_Get_Failed(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_IAssetTransfer_Failed_ID, SignalWrapper_IAssetTransfer_Failed_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_IAssetTransfer_Failed_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_IAssetTransfer_Failed_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_IAssetTransfer_Failed_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_IAssetTransfer_Failed_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_IAssetTransfer_Failed_Emit, 2);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;

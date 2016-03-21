@@ -144,8 +144,12 @@ static duk_ret_t UserConnection_Get_ActionTriggered(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_UserConnection_ActionTriggered_ID, SignalWrapper_UserConnection_ActionTriggered_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_UserConnection_ActionTriggered_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_UserConnection_ActionTriggered_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_UserConnection_ActionTriggered_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_UserConnection_ActionTriggered_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_UserConnection_ActionTriggered_Emit, 4);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;

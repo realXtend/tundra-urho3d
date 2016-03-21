@@ -127,8 +127,12 @@ static duk_ret_t GraphicsWorld_Get_EntityEnterView(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_GraphicsWorld_EntityEnterView_ID, SignalWrapper_GraphicsWorld_EntityEnterView_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_GraphicsWorld_EntityEnterView_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_GraphicsWorld_EntityEnterView_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_GraphicsWorld_EntityEnterView_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_GraphicsWorld_EntityEnterView_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_GraphicsWorld_EntityEnterView_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -215,8 +219,12 @@ static duk_ret_t GraphicsWorld_Get_EntityLeaveView(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_GraphicsWorld_EntityLeaveView_ID, SignalWrapper_GraphicsWorld_EntityLeaveView_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_GraphicsWorld_EntityLeaveView_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_GraphicsWorld_EntityLeaveView_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_GraphicsWorld_EntityLeaveView_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_GraphicsWorld_EntityLeaveView_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_GraphicsWorld_EntityLeaveView_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;

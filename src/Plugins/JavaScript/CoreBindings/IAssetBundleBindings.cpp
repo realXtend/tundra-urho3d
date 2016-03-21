@@ -105,8 +105,12 @@ static duk_ret_t IAssetBundle_Get_Loaded(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_IAssetBundle_Loaded_ID, SignalWrapper_IAssetBundle_Loaded_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_IAssetBundle_Loaded_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_IAssetBundle_Loaded_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_IAssetBundle_Loaded_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_IAssetBundle_Loaded_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_IAssetBundle_Loaded_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -193,8 +197,12 @@ static duk_ret_t IAssetBundle_Get_Unloaded(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_IAssetBundle_Unloaded_ID, SignalWrapper_IAssetBundle_Unloaded_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_IAssetBundle_Unloaded_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_IAssetBundle_Unloaded_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_IAssetBundle_Unloaded_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_IAssetBundle_Unloaded_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_IAssetBundle_Unloaded_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -281,8 +289,12 @@ static duk_ret_t IAssetBundle_Get_Failed(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_IAssetBundle_Failed_ID, SignalWrapper_IAssetBundle_Failed_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_IAssetBundle_Failed_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_IAssetBundle_Failed_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_IAssetBundle_Failed_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_IAssetBundle_Failed_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_IAssetBundle_Failed_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;

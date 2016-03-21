@@ -110,8 +110,12 @@ static duk_ret_t SceneAPI_Get_SceneCreated(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_SceneAPI_SceneCreated_ID, SignalWrapper_SceneAPI_SceneCreated_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneCreated_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneCreated_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneCreated_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneCreated_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneCreated_Emit, 2);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -201,8 +205,12 @@ static duk_ret_t SceneAPI_Get_SceneAboutToBeRemoved(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_ID, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_SceneAPI_SceneAboutToBeRemoved_Emit, 2);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
@@ -295,8 +303,12 @@ static duk_ret_t SceneAPI_Get_PlaceholderComponentTypeRegistered(duk_context* ct
     PushValueObject(ctx, wrapper, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_ID, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_SceneAPI_PlaceholderComponentTypeRegistered_Emit, 3);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;

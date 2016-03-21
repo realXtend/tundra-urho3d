@@ -104,8 +104,12 @@ static duk_ret_t EntityAction_Get_Triggered(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_EntityAction_Triggered_ID, SignalWrapper_EntityAction_Triggered_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_EntityAction_Triggered_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_EntityAction_Triggered_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_EntityAction_Triggered_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_EntityAction_Triggered_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
     duk_push_c_function(ctx, SignalWrapper_EntityAction_Triggered_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
