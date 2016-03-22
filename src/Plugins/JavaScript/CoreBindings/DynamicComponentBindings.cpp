@@ -307,6 +307,17 @@ static duk_ret_t DynamicComponent_SupportsDynamicAttributes(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t DynamicComponent_CreateAttribute_String_String_AttributeChange__Type(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    DynamicComponent* thisObj = GetThisWeakObject<DynamicComponent>(ctx);
+    String typeName = duk_require_string(ctx, 0);
+    String id = duk_require_string(ctx, 1);
+    AttributeChange::Type change = numArgs > 2 ? (AttributeChange::Type)(int)duk_require_number(ctx, 2) : AttributeChange::Default;
+    thisObj->CreateAttribute(typeName, id, change);
+    return 0;
+}
+
 static duk_ret_t DynamicComponent_RemoveAttribute_String_AttributeChange__Type(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -548,6 +559,7 @@ static duk_ret_t DynamicComponent_EnsureTypeNameWithoutPrefix_Static_String(duk_
 
 static const duk_function_list_entry DynamicComponent_Functions[] = {
     {"SupportsDynamicAttributes", DynamicComponent_SupportsDynamicAttributes, 0}
+    ,{"CreateAttribute", DynamicComponent_CreateAttribute_String_String_AttributeChange__Type, DUK_VARARGS}
     ,{"RemoveAttribute", DynamicComponent_RemoveAttribute_String_AttributeChange__Type, DUK_VARARGS}
     ,{"ContainsAttribute", DynamicComponent_ContainsAttribute_String, 1}
     ,{"RemoveAllAttributes", DynamicComponent_RemoveAllAttributes_AttributeChange__Type, DUK_VARARGS}

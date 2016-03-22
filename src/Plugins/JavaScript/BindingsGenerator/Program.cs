@@ -761,6 +761,10 @@ namespace BindingsGenerator
                     if (className == "Plane" && child.name == "Distance" && child.parameters.Count == 1 && child.parameters[0].BasicType().Contains("float4"))
                         continue;
 
+                    // DynamicComponent CreateAttribute return value hack: cannot return IAttribute as it's not a refcountable object, instead just convert to void return type
+                    if (className == "DynamicComponent" && child.name == "CreateAttribute")
+                        child.type = "void";
+
                     bool isClassCtor = !child.isStatic && (child.name == className);
                     if (!isClassCtor && !IsSupportedType(child.type))
                     {

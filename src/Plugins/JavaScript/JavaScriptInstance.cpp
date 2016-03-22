@@ -108,7 +108,7 @@ void JavaScriptInstance::DeleteEngine()
     if (ctx_)
     {
         program_ = "";
-        ScriptUnloading.Emit();
+        ScriptUnloading.Emit(this);
 
         // As a convention, we call a function 'OnScriptDestroyed' for each JS script
         // so that they can clean up their data before the script is removed from the object,
@@ -272,7 +272,7 @@ void JavaScriptInstance::Run()
     }
 
     evaluated_ = true;
-    ScriptEvaluated.Emit();
+    ScriptEvaluated.Emit(this);
 }
 
 bool JavaScriptInstance::Evaluate(const String& script)

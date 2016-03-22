@@ -11,6 +11,7 @@ void Expose_EntityAction(duk_context* ctx);
 void Expose_IComponent(duk_context* ctx);
 void Expose_Name(duk_context* ctx);
 void Expose_DynamicComponent(duk_context* ctx);
+void Expose_Script(duk_context* ctx);
 void Expose_AttributeChange(duk_context* ctx);
 void Expose_Scene(duk_context* ctx);
 void Expose_Color(duk_context* ctx);
@@ -41,6 +42,7 @@ void ExposeCoreClasses(duk_context* ctx)
     Expose_IComponent(ctx);
     Expose_Name(ctx);
     Expose_DynamicComponent(ctx);
+    Expose_Script(ctx);
     Expose_AttributeChange(ctx);
     Expose_Scene(ctx);
     Expose_Color(ctx);

@@ -124,10 +124,10 @@ public:
     Signal2<Script*, const Vector<ScriptAssetPtr>&> ScriptAssetsChanged;
 
     /// Emitted when the script application name has changed
-    Signal1<const String&> ApplicationNameChanged;
+    Signal2<Script*, const String&> ApplicationNameChanged;
 
     /// Emitted when the script class name has changed
-    Signal1<const String&> ClassNameChanged;
+    Signal2<Script*, const String&> ClassNameChanged;
 
 private:
     /// Handles logic regarding attribute changes of this EC.

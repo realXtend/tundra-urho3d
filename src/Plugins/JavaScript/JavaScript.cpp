@@ -62,6 +62,7 @@ void JavaScript::OnComponentAdded(Entity* entity, IComponent* comp, AttributeCha
         Script* script = static_cast<Script*>(comp);
         script->ScriptAssetsChanged.Connect(this, &JavaScript::OnScriptAssetsChanged);
         /// \todo Handle application / class mechanic
+        script->ClassNameChanged.Connect(this, &JavaScript::OnScriptClassNameChanged);
 
         // Set the script component's isClient & isServer flags to determine run mode
         /// \hack Can not depend on TundraLogicModule so that other modules can depend on us, so rather check the server commandline flag
@@ -84,6 +85,8 @@ void JavaScript::OnComponentRemoved(Entity* /*entity*/, IComponent* comp, Attrib
     {
         Script* script = static_cast<Script*>(comp);
         script->ScriptAssetsChanged.Disconnect(this, &JavaScript::OnScriptAssetsChanged);
+        script->ClassNameChanged.Disconnect(this, &JavaScript::OnScriptClassNameChanged);
+        RemoveScriptObject(script);
     }
 }
 
@@ -108,13 +111,11 @@ void JavaScript::OnScriptAssetsChanged(Script* scriptComp, const Vector<ScriptAs
 
         // If this component is a script application, connect to the evaluate / unload signals so that we can create or delete script objects as needed
         /// \todo Implement, skipped for now
-        /*
-        if (!sender->applicationName.Get().trimmed().isEmpty())
+        if (!scriptComp->applicationName.Get().Trimmed().Empty())
         {
             jsInstance->ScriptEvaluated.Connect(this, &JavaScript::OnScriptEvaluated);
             jsInstance->ScriptUnloading.Connect(this, &JavaScript::OnScriptUnloading);
         }
-        */
 
         bool isApplication = !scriptComp->applicationName.Get().Trimmed().Empty();
         if (scriptComp->runOnLoad.Get() && scriptComp->ShouldRun())
@@ -159,6 +160,117 @@ void JavaScript::PrepareScriptInstance(JavaScriptInstance* instance, Script* scr
         instance->RegisterService("me", scriptComp->ParentEntity());
         instance->RegisterService("scene", scriptComp->ParentScene());
     }
+}
+
+void JavaScript::OnScriptClassNameChanged(Script* scriptComp, const String& /*newClassName*/)
+{
+    // Check runmode for the object
+    if (!scriptComp->ShouldRun())
+        return;
+    
+    // It is possible that we do not find the script application yet. In that case, the object will be created once the app loads.
+    String appName, className;
+    ParseAppAndClassName(scriptComp, appName, className);
+    Script* app = FindScriptApplication(scriptComp, appName);
+    if (app)
+        CreateScriptObject(app, scriptComp, className);
+    else
+        // If we did not find the class yet, delete the existing object in any case
+        RemoveScriptObject(scriptComp);
+}
+
+void JavaScript::OnScriptEvaluated(JavaScriptInstance* instance)
+{
+    Script* app = dynamic_cast<Script*>(instance->Owner().Get());
+    if (app)
+        CreateScriptObjects(app);
+}
+
+void JavaScript::OnScriptUnloading(JavaScriptInstance* instance)
+{
+    RemoveScriptObjects(instance);
+}
+
+Script* JavaScript::FindScriptApplication(Script* instance, const String& appName)
+{
+    if (!instance || appName.Empty())
+        return 0;
+    Entity* entity = instance->ParentEntity();
+    if (!entity)
+        return 0;
+    Scene* scene = entity->ParentScene();
+    if (!scene)
+        return 0;
+    // Get all script components that possibly refer to this application
+    Vector<SharedPtr<Script> > scripts = scene->Components<Script>();
+    for (unsigned i = 0; i < scripts.Size(); ++i)
+    {
+        const String& name = scripts[i]->applicationName.Get();
+        if (!name.Empty() && name.Trimmed().Compare(appName, false) == 0)
+            return scripts[i].Get();
+    }
+
+    return 0;
+}
+
+void JavaScript::ParseAppAndClassName(Script* instance, String& appName, String& className)
+{
+    if (!instance)
+    {
+        appName.Clear();
+        className.Clear();
+    }
+    else
+    {
+        StringList strings = instance->className.Get().Split('.');
+        if (strings.Size() == 2)
+        {
+            appName = strings[0].Trimmed();
+            className = strings[1].Trimmed();
+        }
+        else
+        {
+            appName.Clear();
+            className.Clear();
+        }
+    }
+}
+
+void JavaScript::CreateScriptObject(Script* app, Script* instance, const String& className)
+{
+    // Delete any existing object instance, possibly in another script application
+    RemoveScriptObject(instance);
+    
+    // Make sure the runmode allows object creation
+    if (!instance->ShouldRun())
+        return;
+    
+    // Todo: implement rest
+}
+
+void JavaScript::RemoveScriptObject(Script* instance)
+{
+    Script* app = instance->ScriptApplication();
+    if (!app)
+        return;
+    
+    // Todo: implement rest
+}
+
+void JavaScript::CreateScriptObjects(Script* app)
+{
+    // If application has an empty name, we can not create script objects out of it. Skip the expensive
+    // entity/scriptcomponent scan in that case.
+    const String& thisAppName = app->applicationName.Get().Trimmed();
+    if (thisAppName.Empty())
+        return;
+
+    // Todo: implement rest
+}
+
+void JavaScript::RemoveScriptObjects(JavaScriptInstance* jsInstance)
+{
+    // Todo: implement rest
 }
 
 }

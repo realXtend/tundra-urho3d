@@ -163,11 +163,11 @@ void Script::HandleAttributeChanged(IAttribute* attribute, AttributeChange::Type
     }
     else if (attribute == &applicationName)
     {
-        ApplicationNameChanged.Emit(applicationName.Get());
+        ApplicationNameChanged.Emit(this, applicationName.Get());
     }
     else if (attribute == &className)
     {
-        ClassNameChanged.Emit(className.Get());
+        ClassNameChanged.Emit(this, className.Get());
     }
     else if (attribute == &runMode)
     {

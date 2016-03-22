@@ -80,10 +80,10 @@ public:
     virtual HashMap<String, uint> DumpEngineInformation();
 
     /// The scripts have been run.
-    Signal0<void> ScriptEvaluated;
+    Signal1<JavaScriptInstance*> ScriptEvaluated;
 
     /// The script engine is about to unload.
-    Signal0<void> ScriptUnloading;
+    Signal1<JavaScriptInstance*> ScriptUnloading;
 
     /// Lookup instance by context.
     static JavaScriptInstance* InstanceFromContext(duk_context* ctx);

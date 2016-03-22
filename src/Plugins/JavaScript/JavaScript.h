@@ -38,6 +38,16 @@ private:
     void OnComponentAdded(Entity* entity, IComponent* comp, AttributeChange::Type change);
     void OnComponentRemoved(Entity* entity, IComponent* comp, AttributeChange::Type change);
     void OnScriptAssetsChanged(Script* scriptComp, const Vector<ScriptAssetPtr>& newScripts);
+    void OnScriptClassNameChanged(Script* scriptComp, const String& newClassName);
+    void OnScriptEvaluated(JavaScriptInstance* instance);
+    void OnScriptUnloading(JavaScriptInstance* instance);
+
+    Script* FindScriptApplication(Script* instance, const String& appName);
+    void ParseAppAndClassName(Script* instance, String& appName, String& className);
+    void CreateScriptObject(Script* app, Script* instance, const String& className);
+    void RemoveScriptObject(Script* instance);
+    void CreateScriptObjects(Script* app);
+    void RemoveScriptObjects(JavaScriptInstance* jsInstance);
 };
 
 }

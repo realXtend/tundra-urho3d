@@ -28,20 +28,20 @@ const char* SignalWrapper_JavaScriptInstance_ScriptEvaluated_ID = "SignalWrapper
 class SignalWrapper_JavaScriptInstance_ScriptEvaluated
 {
 public:
-    SignalWrapper_JavaScriptInstance_ScriptEvaluated(Object* owner, Signal0< void >* signal) :
+    SignalWrapper_JavaScriptInstance_ScriptEvaluated(Object* owner, Signal1< JavaScriptInstance * >* signal) :
         owner_(owner),
         signal_(signal)
     {
     }
 
     WeakPtr<Object> owner_;
-    Signal0< void >* signal_;
+    Signal1< JavaScriptInstance * >* signal_;
 };
 
 class SignalReceiver_JavaScriptInstance_ScriptEvaluated : public SignalReceiver
 {
 public:
-    void OnSignal()
+    void OnSignal(JavaScriptInstance * param0)
     {
         duk_context* ctx = ctx_;
         duk_push_global_object(ctx);
@@ -49,6 +49,8 @@ public:
         duk_remove(ctx, -2);
         duk_push_number(ctx, (size_t)key_);
         duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
         bool success = duk_pcall(ctx, 2) == 0;
         if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
         duk_pop(ctx);
@@ -90,7 +92,8 @@ static duk_ret_t SignalWrapper_JavaScriptInstance_ScriptEvaluated_Emit(duk_conte
 {
     SignalWrapper_JavaScriptInstance_ScriptEvaluated* wrapper = GetThisValueObject<SignalWrapper_JavaScriptInstance_ScriptEvaluated>(ctx, SignalWrapper_JavaScriptInstance_ScriptEvaluated_ID);
     if (!wrapper->owner_) return 0;
-    wrapper->signal_->Emit();
+    JavaScriptInstance* param0 = GetWeakObject<JavaScriptInstance>(ctx, 0);
+    wrapper->signal_->Emit(param0);
     return 0;
 }
 
@@ -101,9 +104,13 @@ static duk_ret_t JavaScriptInstance_Get_ScriptEvaluated(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_JavaScriptInstance_ScriptEvaluated_ID, SignalWrapper_JavaScriptInstance_ScriptEvaluated_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_JavaScriptInstance_ScriptEvaluated_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_JavaScriptInstance_ScriptEvaluated_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_JavaScriptInstance_ScriptEvaluated_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
-    duk_push_c_function(ctx, SignalWrapper_JavaScriptInstance_ScriptEvaluated_Emit, 0);
+    duk_push_c_function(ctx, SignalWrapper_JavaScriptInstance_ScriptEvaluated_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
+    duk_push_c_function(ctx, SignalWrapper_JavaScriptInstance_ScriptEvaluated_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
 }
@@ -113,20 +120,20 @@ const char* SignalWrapper_JavaScriptInstance_ScriptUnloading_ID = "SignalWrapper
 class SignalWrapper_JavaScriptInstance_ScriptUnloading
 {
 public:
-    SignalWrapper_JavaScriptInstance_ScriptUnloading(Object* owner, Signal0< void >* signal) :
+    SignalWrapper_JavaScriptInstance_ScriptUnloading(Object* owner, Signal1< JavaScriptInstance * >* signal) :
         owner_(owner),
         signal_(signal)
     {
     }
 
     WeakPtr<Object> owner_;
-    Signal0< void >* signal_;
+    Signal1< JavaScriptInstance * >* signal_;
 };
 
 class SignalReceiver_JavaScriptInstance_ScriptUnloading : public SignalReceiver
 {
 public:
-    void OnSignal()
+    void OnSignal(JavaScriptInstance * param0)
     {
         duk_context* ctx = ctx_;
         duk_push_global_object(ctx);
@@ -134,6 +141,8 @@ public:
         duk_remove(ctx, -2);
         duk_push_number(ctx, (size_t)key_);
         duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
         bool success = duk_pcall(ctx, 2) == 0;
         if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
         duk_pop(ctx);
@@ -175,7 +184,8 @@ static duk_ret_t SignalWrapper_JavaScriptInstance_ScriptUnloading_Emit(duk_conte
 {
     SignalWrapper_JavaScriptInstance_ScriptUnloading* wrapper = GetThisValueObject<SignalWrapper_JavaScriptInstance_ScriptUnloading>(ctx, SignalWrapper_JavaScriptInstance_ScriptUnloading_ID);
     if (!wrapper->owner_) return 0;
-    wrapper->signal_->Emit();
+    JavaScriptInstance* param0 = GetWeakObject<JavaScriptInstance>(ctx, 0);
+    wrapper->signal_->Emit(param0);
     return 0;
 }
 
@@ -186,9 +196,13 @@ static duk_ret_t JavaScriptInstance_Get_ScriptUnloading(duk_context* ctx)
     PushValueObject(ctx, wrapper, SignalWrapper_JavaScriptInstance_ScriptUnloading_ID, SignalWrapper_JavaScriptInstance_ScriptUnloading_Finalizer, false);
     duk_push_c_function(ctx, SignalWrapper_JavaScriptInstance_ScriptUnloading_Connect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_JavaScriptInstance_ScriptUnloading_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
     duk_push_c_function(ctx, SignalWrapper_JavaScriptInstance_ScriptUnloading_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "Disconnect");
-    duk_push_c_function(ctx, SignalWrapper_JavaScriptInstance_ScriptUnloading_Emit, 0);
+    duk_push_c_function(ctx, SignalWrapper_JavaScriptInstance_ScriptUnloading_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
+    duk_push_c_function(ctx, SignalWrapper_JavaScriptInstance_ScriptUnloading_Emit, 1);
     duk_put_prop_string(ctx, -2, "Emit");
     return 1;
 }
