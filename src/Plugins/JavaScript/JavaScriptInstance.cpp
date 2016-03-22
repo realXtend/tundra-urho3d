@@ -44,6 +44,26 @@ static const String signalSupportCode =
     "if (!_connections.hasOwnProperty(key)) return\n"
     "var connections = _connections[key]\n"
     "for (var i = 0; i < connections.length; ++i) { connections[i].func.apply(connections[i].obj, params); }\n"
+    "}\n"
+    "_scriptObjects = {};\n"
+    "function _StoreScriptObject(key, obj) {\n"
+     "_scriptObjects[key] = obj;\n"
+    "}\n"
+    "function _RemoveScriptObject(key) {\n"
+    "if (_scriptObjects.hasOwnProperty(key)) {\n"
+    "var obj = _scriptObjects[key];\n"
+    "if (obj && obj.OnScriptObjectDestroyed && typeof obj.OnScriptObjectDestroyed == 'function') obj.OnScriptObjectDestroyed()\n"
+    "delete _scriptObjects[key];\n"
+    "}\n"
+    "}\n"
+    "function _RemoveScriptObjects() {\n"
+    "for (key in _scriptObjects) {\n"
+    "if (_scriptObjects.hasOwnProperty(key)) {\n"
+    "var obj = _scriptObjects[key];\n"
+    "if (obj && obj.OnScriptObjectDestroyed && typeof obj.OnScriptObjectDestroyed == 'function') obj.OnScriptObjectDestroyed()\n"
+    "}\n"
+    "}\n"
+    "_scriptObjects = {};\n"
     "}\n";
 
 JavaScriptInstance::JavaScriptInstance(const String &fileName, JavaScript *module, Script* owner) :
@@ -302,12 +322,12 @@ bool JavaScriptInstance::Execute(const String& functionName, bool logError)
 
     duk_push_global_object(ctx_);
     duk_get_prop_string(ctx_, -1, functionName.CString());
+    duk_remove(ctx_, -2); // Remove global object
+
     bool success = duk_pcall(ctx_, 0) == 0;
     if (!success && logError)
         LogError("[JavaScript] Execute: " + String(duk_safe_to_string(ctx_, -1)));
-
     duk_pop(ctx_); // Pop result/error
-    duk_pop(ctx_); // Pop global object
     return success;
 }
 

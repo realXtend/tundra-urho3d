@@ -245,7 +245,47 @@ void JavaScript::CreateScriptObject(Script* app, Script* instance, const String&
     if (!instance->ShouldRun())
         return;
     
-    // Todo: implement rest
+    JavaScriptInstance* jsInstance = dynamic_cast<JavaScriptInstance*>(app->ScriptInstance());
+    if (!jsInstance || !jsInstance->IsEvaluated())
+        return;
+    
+    const String& appAndClassName = instance->className.Get();
+
+    duk_context* ctx = jsInstance->Context();
+    duk_push_global_object(ctx);
+    duk_get_prop_string(ctx, -1, className.CString());
+    duk_remove(ctx, -2);
+    if (duk_is_function(ctx, -1))
+    {
+        // Push containing entity and the instance script component as parameters
+        PushWeakObject(ctx, instance->ParentEntity());
+        PushWeakObject(ctx, instance);
+        bool success = duk_pnew(ctx, 2) == 0;
+        if (success && duk_is_object(ctx, -1))
+        {
+            duk_push_global_object(ctx);
+            duk_get_prop_string(ctx, -1, "_StoreScriptObject");
+            duk_remove(ctx, -2);
+            // Use pointer of the object instance script component as the key
+            duk_push_number(ctx, (size_t)instance);
+            duk_dup(ctx, -3);
+            duk_remove(ctx, -4);
+            success = duk_pcall(ctx, 2) == 0;
+            if (!success)
+                LogError("[JavaScript] CreateScriptObject: failed to store script object for " + appAndClassName + ": " + String(duk_safe_to_string(ctx, -1)));
+            duk_pop(ctx);
+        }
+        else
+        {
+            LogError("[JavaScript] CreateScriptObject: failed to run constructor for " + appAndClassName + ": " + String(duk_safe_to_string(ctx, -1)));
+            duk_pop(ctx);
+        }
+    }
+    else
+    {
+        LogError("[JavaScript] CreateScriptObject: constructor not found for " + appAndClassName);
+        duk_pop(ctx);
+    }
 }
 
 void JavaScript::RemoveScriptObject(Script* instance)
@@ -254,7 +294,19 @@ void JavaScript::RemoveScriptObject(Script* instance)
     if (!app)
         return;
     
-    // Todo: implement rest
+    JavaScriptInstance* jsInstance = dynamic_cast<JavaScriptInstance*>(app->ScriptInstance());
+    if (jsInstance)
+    {
+        duk_context* ctx = jsInstance->Context();
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_RemoveScriptObject");
+        duk_remove(ctx, -2);
+        // Use pointer of the object instance script component as the key
+        duk_push_number(ctx, (size_t)instance);
+        bool success = duk_pcall(ctx, 1) == 0;
+        if (!success) LogError("[JavaScript] RemoveScriptObject: " + String(duk_safe_to_string(ctx, -1)));
+        duk_pop(ctx);
+    }
 }
 
 void JavaScript::CreateScriptObjects(Script* app)
@@ -265,12 +317,35 @@ void JavaScript::CreateScriptObjects(Script* app)
     if (thisAppName.Empty())
         return;
 
-    // Todo: implement rest
+    JavaScriptInstance* jsInstance = dynamic_cast<JavaScriptInstance*>(app->ScriptInstance());
+    if (!jsInstance || !jsInstance->IsEvaluated())
+    {
+        LogError("CreateScriptObjects: the application Script component does not have a script engine that has already evaluated its code");
+        return;
+    }
+    
+    Entity* appEntity = app->ParentEntity();
+    if (!appEntity)
+        return;
+    Scene* scene = appEntity->ParentScene();
+    if (!scene)
+        return;
+    String appName, className;
+    // Get all script components that possibly refer to this application
+    Vector<SharedPtr<Script> > scripts = scene->Components<Script>();
+    for(unsigned i = 0; i < scripts.Size(); ++i)
+        if (scripts[i]->ShouldRun())
+        {
+            ParseAppAndClassName(scripts[i].Get(), appName, className);
+            if (appName == thisAppName)
+                CreateScriptObject(app, scripts[i].Get(), className);
+        }
 }
 
 void JavaScript::RemoveScriptObjects(JavaScriptInstance* jsInstance)
 {
-    // Todo: implement rest
+    if (jsInstance)
+        jsInstance->Execute("_RemoveScriptObjects");
 }
 
 }
