@@ -23,7 +23,9 @@ namespace Tundra
 {
 
 SceneStructureItem::SceneStructureItem(Context* context, ListView *list, Object *object) :
-    Object(context)
+    Object(context), list_(0),
+    style_(0), text_(0),
+    toggleButton_(0)
 {
     list_ = ListViewWeakPtr(list);
     style_ = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/DefaultStyle.xml");

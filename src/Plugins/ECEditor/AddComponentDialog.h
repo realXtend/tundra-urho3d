@@ -1,8 +1,8 @@
 /**
     For conditions of distribution and use, see copyright notice in LICENSE
 
-    @file   ECEditor.h
-    @brief  ECEditor core API. */
+    @file   AddComponentDialog.h
+    @brief  AddComponentDialog. */
 
 #pragma once
 

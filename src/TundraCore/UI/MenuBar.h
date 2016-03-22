@@ -43,6 +43,9 @@ public:
     /// Hide menu bar ui element
     void Hide();
 
+    /// Hide all menu popups.
+    void Close();
+
     /// Search for MenuBarItem by it's title
     /** Supports both search by title and hierarchical search
     e.g. Find("File") or Find("File/Save Scene")
@@ -69,7 +72,7 @@ protected:
 private:
 
     HashMap<String, MenuBarItemPtr> rootItems_;
-    SharedPtr<UIElement> bar_;
+    SharedPtr<Menu> bar_;
 };
 
 }

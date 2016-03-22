@@ -54,13 +54,6 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module
     window_->SetResizable(true);
     GetSubsystem<UI>()->GetRoot()->AddChild(window_);
 
-    /*FileSelector *file = new FileSelector(framework->GetContext());
-    file->SetDefaultStyle(style);
-    file->SetTitle("Save scene as ...");
-    file->SetButtonTexts("Ok", "Cancel");
-    file->SetDirectoryMode(false);*/
-    //file->SetButtonTexts("ok", "cancel");
-
     SubscribeToEvent(window_, E_POSITIONED, URHO3D_HANDLER(SceneStructureWindow, OnContextMenuHide));
 
     {
@@ -484,6 +477,7 @@ void SceneStructureWindow::Hide()
 {
     if (window_.Get())
         window_->SetVisible(false);
+    HideContextMenu();
 }
 
 void SceneStructureWindow::Show()

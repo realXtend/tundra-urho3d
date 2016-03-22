@@ -2,7 +2,7 @@
     For conditions of distribution and use, see copyright notice in LICENSE
 
     @file   SceneStructureWindow.h
-    @brief  SceneStructureWindow core API. */
+    @brief  SceneStructureWindow. */
 
 #pragma once
 

@@ -65,14 +65,23 @@ void MenuBar::Show()
     bar_->SetFixedWidth(GetSubsystem<UI>()->GetRoot()->GetWidth());
     bar_->SetStyle("MenuBar", style);
 
-    if (bar_.NotNull())
+    if (bar_.Get())
         bar_->SetVisible(true);
 }
 
 void MenuBar::Hide()
 {
-    if (bar_.NotNull())
+    if (bar_.Get())
         bar_->SetVisible(false);
+}
+
+void MenuBar::Close()
+{
+    if (bar_.Get())
+    {
+        bar_->ShowPopup(false);
+        GetSubsystem<UI>()->SetFocusElement(0);
+    }
 }
 
 MenuBarItem* MenuBar::Find(const String &title)

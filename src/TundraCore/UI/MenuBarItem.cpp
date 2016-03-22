@@ -25,7 +25,8 @@ MenuBarItem::MenuBarItem(const String &title, Framework *framework, MenuBar *men
     Object(framework->GetContext()),
     framework_(framework),
     menuBar_(menuBar),
-    parentItem_(parentItem)
+    parentItem_(parentItem),
+    item_(0)
 {
     Create(title);
 }
@@ -115,6 +116,9 @@ void MenuBarItem::UpdatePopup()
 
 void MenuBarItem::OnMenuPressed(StringHash /*eventType*/, VariantMap& /*eventData*/)
 {
+    if (subMenus_.Size() == 0)
+        menuBar_->Close();
+
     OnItemPressed.Emit(this);
 }
 

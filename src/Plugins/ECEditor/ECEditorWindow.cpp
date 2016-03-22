@@ -30,8 +30,9 @@ namespace Tundra
 
 ComponentContainer::ComponentContainer(Framework *framework, ComponentPtr component, int index) :
     Object(framework->GetContext()),
-    framework_(framework),
-    index_(index)
+    framework_(framework), index_(index),
+    window_(0), header_(0),
+    attributeContainer_(0)
 {
     XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/DefaultStyle.xml");
 

@@ -1,8 +1,8 @@
 /**
     For conditions of distribution and use, see copyright notice in LICENSE
 
-    @file   ECEditor.h
-    @brief  ECEditor core API. */
+    @file   ECEditorWindow.h
+    @brief  ECEditorWindow. */
 
 #pragma once
 
@@ -20,7 +20,7 @@ namespace Urho3D
     class UIElement;
     class ListView;
     class Text;
-	class Button;
+    class Button;
 }
 
 using namespace Urho3D;

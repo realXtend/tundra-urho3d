@@ -19,8 +19,13 @@ namespace Tundra
 class SceneStructureWindow;
 class ECEditorWindow;
 class MenuBarItem;
+class OpenSceneDialog;
+class FileDialog;
+
 typedef SharedPtr<SceneStructureWindow> SceneWindowPtr;
 typedef SharedPtr<ECEditorWindow> EditorWindowPtr;
+typedef WeakPtr<MenuBarItem> MenuBarItemWeakPtr;
+typedef SharedPtr<FileDialog> FileDialogPtr;
 
 class ECEDITOR_API ECEditor : public IModule
 {
@@ -38,11 +43,25 @@ public:
     void OpenEntityEditor(Entity *entity);
 
 private:
-    void OnSceneEditorOpen(MenuBarItem *item);
+    void OpenSceneDialogWindow();
+    void NewSceneDialogWindow();
+
+    void OnFileDialogClosed(FileDialog *dialog, bool confirmed, const String &directory, const String &file);
+
+    void CreateNewScene(const String &directory, const String &file);
+    void OpenScene(const String &directory, const String &file);
+
+    void OnBarMenuSelected(MenuBarItem *item);
     void OnSceneCreated(Scene *scene, AttributeChange::Type type);
 
     SceneWindowPtr sceneEditor_;
     EditorWindowPtr entityEditor_;
+    FileDialogPtr openSceneDialog_;
+    FileDialogPtr newSceneDialog_;
+
+    MenuBarItemWeakPtr sceneEditorItem_;
+    MenuBarItemWeakPtr openSceneItem_;
+    MenuBarItemWeakPtr newSceneItem_;
 };
 
 }
