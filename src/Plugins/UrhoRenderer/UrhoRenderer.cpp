@@ -300,6 +300,7 @@ void UrhoRenderer::OnScriptInstanceCreated(JavaScriptInstance* instance)
 
     duk_context* ctx = instance->Context();
     ExposeUrhoRendererClasses(ctx);
+    instance->RegisterService("renderer", this);
 }
 
 }
