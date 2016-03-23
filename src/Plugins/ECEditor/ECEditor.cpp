@@ -242,7 +242,7 @@ void ECEditor::OnBarMenuSelected(MenuBarItem *item)
     else if (openSceneItem_ == item)
         OpenFileDialogWindow("OpenScene");
     else if (newSceneItem_ == item)
-        OpenFileDialogWindow("CreateScene");
+        OpenFileDialogWindow("NewScene");
     else if (saveSceneItem_ == item)
         OpenFileDialogWindow("SaveScene");;
 }
