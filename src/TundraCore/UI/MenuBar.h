@@ -46,6 +46,9 @@ public:
     /// Hide all menu popups.
     void Close();
 
+    /// Return array of children attached to MenuBar.
+    Vector<MenuBarItemPtr> Children() const;
+
     /// Search for MenuBarItem by it's title
     /** Supports both search by title and hierarchical search
     e.g. Find("File") or Find("File/Save Scene")

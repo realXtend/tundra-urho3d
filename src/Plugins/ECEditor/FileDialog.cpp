@@ -25,7 +25,21 @@ FileDialog::FileDialog(Framework *framework) :
     framework_(framework),
     fileSelector_(0)
 {
-    
+    Urho3D::XMLFile *style = context_->GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("Data/UI/DefaultStyle.xml");
+
+    fileSelector_ = new Urho3D::FileSelector(framework_->GetContext());
+    fileSelector_->SetDefaultStyle(style);
+    fileSelector_->SetButtonTexts("Ok", "Cancel");
+    fileSelector_->SetFilters(filters_, 0);
+
+    // Center dialog
+    Urho3D::UIElement *root = GetSubsystem<Urho3D::UI>()->GetRoot();
+    Urho3D::IntVector2 size = fileSelector_->GetWindow()->GetSize();
+    fileSelector_->GetWindow()->SetPosition(Urho3D::IntVector2(root->GetWidth() * 0.5 - size.x_ * 0.5, root->GetHeight() * 0.5 - size.y_ * 0.5));
+
+    SubscribeToEvent(fileSelector_->GetCloseButton(), Urho3D::E_RELEASED, URHO3D_HANDLER(FileDialog, OnButtonPressed));
+    SubscribeToEvent(fileSelector_->GetCancelButton(), Urho3D::E_RELEASED, URHO3D_HANDLER(FileDialog, OnButtonPressed));
+    SubscribeToEvent(fileSelector_->GetOKButton(), Urho3D::E_RELEASED, URHO3D_HANDLER(FileDialog, OnButtonPressed));
 }
 
 FileDialog::~FileDialog()
@@ -41,34 +55,27 @@ Urho3D::FileSelector *FileDialog::FileSelector() const
 void FileDialog::SetFilters(const StringVector &filters)
 {
     filters_ = filters;
+    if (fileSelector_.Get())
+        fileSelector_->SetFilters(filters_, 0);
 }
 
-void FileDialog::Open()
+void FileDialog::SetTitle(const String &title)
 {
-    if (!fileSelector_.Get())
-    {
-        Initialize();
-        
-        // Center dialog
-        Urho3D::UIElement *root = GetSubsystem<Urho3D::UI>()->GetRoot();
-        Urho3D::IntVector2 size = fileSelector_->GetWindow()->GetSize();
-        fileSelector_->GetWindow()->SetPosition(Urho3D::IntVector2(root->GetWidth() * 0.5 - size.x_ * 0.5, root->GetHeight() * 0.5 - size.y_ * 0.5));
-    }
+    if (fileSelector_.Get())
+        fileSelector_->SetTitle(title);
 }
 
-void FileDialog::Initialize()
+const String &FileDialog::Title() const
 {
-    Urho3D::XMLFile *style = context_->GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("Data/UI/DefaultStyle.xml");
+    if (fileSelector_.Get())
+        fileSelector_->GetTitle();
+    return "";
+}
 
-    fileSelector_ = new Urho3D::FileSelector(framework_->GetContext());
-    fileSelector_->SetDefaultStyle(style);
-    fileSelector_->SetTitle("Open Scene");
-    fileSelector_->SetButtonTexts("Ok", "Cancel");
-    fileSelector_->SetFilters(filters_, 0);
-
-    SubscribeToEvent(fileSelector_->GetCloseButton(), Urho3D::E_RELEASED, URHO3D_HANDLER(FileDialog, OnButtonPressed));
-    SubscribeToEvent(fileSelector_->GetCancelButton(), Urho3D::E_RELEASED, URHO3D_HANDLER(FileDialog, OnButtonPressed));
-    SubscribeToEvent(fileSelector_->GetOKButton(), Urho3D::E_RELEASED, URHO3D_HANDLER(FileDialog, OnButtonPressed));
+FileDialogPtr FileDialog::Open(Framework *framework)
+{
+    FileDialogPtr dialog = FileDialogPtr(new FileDialog(framework));
+    return dialog;
 }
 
 void FileDialog::Release()

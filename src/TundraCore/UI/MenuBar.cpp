@@ -84,6 +84,11 @@ void MenuBar::Close()
     }
 }
 
+Vector<MenuBarItemPtr> MenuBar::Children() const
+{
+    return rootItems_.Values();
+}
+
 MenuBarItem* MenuBar::Find(const String &title)
 {
     MenuBarItem *item = NULL;

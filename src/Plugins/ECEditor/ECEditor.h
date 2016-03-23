@@ -43,24 +43,26 @@ public:
     void OpenEntityEditor(Entity *entity);
 
 private:
-    void OpenSceneDialogWindow();
-    void NewSceneDialogWindow();
+    void OpenFileDialogWindow(const String &title);
 
-    void OnFileDialogClosed(FileDialog *dialog, bool confirmed, const String &directory, const String &file);
+    void OnOpenSceneDialogClosed(FileDialog *dialog, bool confirmed, const String &directory, const String &file);
+    void OnNewSceneDialogClosed(FileDialog *dialog, bool confirmed, const String &directory, const String &file);
+    void OnSaveSceneDialogClosed(FileDialog *dialog, bool confirmed, const String &directory, const String &file);
 
     void CreateNewScene(const String &directory, const String &file);
     void OpenScene(const String &directory, const String &file);
+    void SaveSceneAs(const String &directory, const String &file);
 
     void OnBarMenuSelected(MenuBarItem *item);
     void OnSceneCreated(Scene *scene, AttributeChange::Type type);
 
     SceneWindowPtr sceneEditor_;
     EditorWindowPtr entityEditor_;
-    FileDialogPtr openSceneDialog_;
-    FileDialogPtr newSceneDialog_;
+    FileDialogPtr fileBrowser_;
 
     MenuBarItemWeakPtr sceneEditorItem_;
     MenuBarItemWeakPtr openSceneItem_;
+    MenuBarItemWeakPtr saveSceneItem_;
     MenuBarItemWeakPtr newSceneItem_;
 };
 

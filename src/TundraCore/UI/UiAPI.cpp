@@ -18,7 +18,7 @@ UiAPI::UiAPI(Framework *framework) :
 {
     if (!framework_->HasCommandLineParameter("--nomenubar") && !framework_->HasCommandLineParameter("--nocentralwidget"))
     {
-		CreateMenuBar();
+        CreateMenuBar();
         // Wait one frame before the rendering window is initialized
         framework_->Frame()->DelayedExecute(0.0f).Connect(this, &UiAPI::Initialize);
     }
@@ -46,7 +46,12 @@ void UiAPI::RelaseMenuBar()
 
 void UiAPI::Initialize(float /*time*/)
 {
+    if (!menuBar_.Get())
+        return;
+
     menuBar_->Show();
+    if (menuBar_->Children().Size() == 0)
+        menuBar_->Hide();
 }
 
 }

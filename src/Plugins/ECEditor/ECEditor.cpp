@@ -28,8 +28,8 @@ ECEditor::ECEditor(Framework* owner) :
     IModule("LoginScreen", owner),
     entityEditor_(0), sceneEditor_(0),
     sceneEditorItem_(0), openSceneItem_(0),
-    newSceneItem_(0), openSceneDialog_(0),
-    newSceneDialog_(0)
+    newSceneItem_(0), fileBrowser_(0),
+    saveSceneItem_(0)
 {
     
 }
@@ -48,17 +48,6 @@ void ECEditor::Initialize()
     sceneEditor_ = new SceneStructureWindow(GetFramework(), this);
     sceneEditor_->Hide();
 
-    StringVector filters;
-    filters.Push("*.txml");
-
-    openSceneDialog_ = new FileDialog(GetFramework());
-    openSceneDialog_->SetFilters(filters);
-    openSceneDialog_->OnDialogClosed.Connect(this, &ECEditor::OnFileDialogClosed);
-
-    newSceneDialog_ = new FileDialog(GetFramework());
-    newSceneDialog_->SetFilters(filters);
-    newSceneDialog_->OnDialogClosed.Connect(this, &ECEditor::OnFileDialogClosed);
-
     framework->Scene()->SceneCreated.Connect(this, &ECEditor::OnSceneCreated);
 
     MenuBar *menu = framework->Ui()->GetMenuBar();
@@ -69,6 +58,9 @@ void ECEditor::Initialize()
 
         openSceneItem_ = menu->CreateMenuItem("File/Open Scene...");
         openSceneItem_->OnItemPressed.Connect(this, &ECEditor::OnBarMenuSelected);
+
+        saveSceneItem_ = menu->CreateMenuItem("File/Save Scene...");
+        saveSceneItem_->OnItemPressed.Connect(this, &ECEditor::OnBarMenuSelected);
 
         sceneEditorItem_ = menu->CreateMenuItem("Edit/Scene Editor");
         sceneEditorItem_->OnItemPressed.Connect(this, &ECEditor::OnBarMenuSelected);
@@ -103,27 +95,60 @@ void ECEditor::OpenEntityEditor(Entity *entity)
     }
 }
 
-void ECEditor::OpenSceneDialogWindow()
+void ECEditor::OpenFileDialogWindow(const String &action)
 {
-    if (openSceneDialog_.Get())
-        openSceneDialog_->Open();
+    if (fileBrowser_.Get())
+    {
+        fileBrowser_.Reset();
+    }
+
+    StringVector filters;
+    filters.Push("*.txml");
+
+    fileBrowser_ = FileDialog::Open(framework);
+    fileBrowser_->SetFilters(filters);
+
+    if (action == "OpenScene")
+    {
+        fileBrowser_->SetTitle("Open Scene...");
+        fileBrowser_->OnDialogClosed.Connect(this, &ECEditor::OnOpenSceneDialogClosed);
+    }
+    else if (action == "NewScene")
+    {
+        fileBrowser_->SetTitle("Create new Scene...");
+        fileBrowser_->OnDialogClosed.Connect(this, &ECEditor::OnNewSceneDialogClosed);
+    }
+    else if (action == "SaveScene")
+    {
+        fileBrowser_->SetTitle("Save Scene as...");
+        fileBrowser_->OnDialogClosed.Connect(this, &ECEditor::OnSaveSceneDialogClosed);
+    }
 }
 
-void ECEditor::NewSceneDialogWindow()
-{
-    if (newSceneDialog_.Get())
-        newSceneDialog_->Open();
-}
-
-void ECEditor::OnFileDialogClosed(FileDialog *dialog, bool confirmed, const String &directory, const String &file)
+void ECEditor::OnOpenSceneDialogClosed(FileDialog *dialog, bool confirmed, const String &directory, const String &file)
 {
     if (!confirmed)
         return;
 
-    if (openSceneDialog_.Get() == dialog)
-        OpenScene(directory, file);
-    else if (newSceneDialog_.Get() == dialog)
-        CreateNewScene(directory, file);
+    LogWarning("Testi " + directory + file);
+
+    OpenScene(directory, file);
+}
+
+void ECEditor::OnNewSceneDialogClosed(FileDialog *dialog, bool confirmed, const String &directory, const String &file)
+{
+    if (!confirmed)
+        return;
+
+    CreateNewScene(directory, file);
+}
+
+void ECEditor::OnSaveSceneDialogClosed(FileDialog *dialog, bool confirmed, const String &directory, const String &file)
+{
+    if (!confirmed)
+        return;
+
+    SaveSceneAs(directory, file);
 }
 
 void ECEditor::CreateNewScene(const String &directory, const String &file)
@@ -191,14 +216,35 @@ void ECEditor::OpenScene(const String &directory, const String &file)
     scene->LoadSceneXML(fullFilePath, true, false, AttributeChange::Default);
 }
 
+void ECEditor::SaveSceneAs(const String &directory, const String &file)
+{
+    ScenePtr scene = ScenePtr(framework->Scene()->MainCameraScene());
+    if (!scene.Get())
+    {
+        SceneMap scenes = framework->Scene()->Scenes();
+        if (scenes.Size())
+            return;
+
+        // Check if any scene exists if main camera scene is null.
+        scene = scenes.Values()[0];
+        if (!scene.Get())
+            return;
+    }
+
+    String fullFilePath = directory + file;
+    scene->SaveSceneXML(fullFilePath, false, true);
+}
+
 void ECEditor::OnBarMenuSelected(MenuBarItem *item)
 {
     if (sceneEditorItem_ == item)
         sceneEditor_->Show();
     else if (openSceneItem_ == item)
-        OpenSceneDialogWindow();
+        OpenFileDialogWindow("OpenScene");
     else if (newSceneItem_ == item)
-        NewSceneDialogWindow();
+        OpenFileDialogWindow("CreateScene");
+    else if (saveSceneItem_ == item)
+        OpenFileDialogWindow("SaveScene");;
 }
 
 void ECEditor::OnSceneCreated(Scene *scene, AttributeChange::Type /*type*/)

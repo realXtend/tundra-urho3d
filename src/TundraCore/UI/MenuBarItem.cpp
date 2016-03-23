@@ -159,6 +159,11 @@ MenuBarItem* MenuBarItem::Child(const String &title)
     return NULL;
 }
 
+Vector<MenuBarItemPtr> MenuBarItem::Children() const
+{
+    return subMenus_.Values();
+}
+
 MenuBarItem* MenuBarItem::Parent()
 {
     return parentItem_;

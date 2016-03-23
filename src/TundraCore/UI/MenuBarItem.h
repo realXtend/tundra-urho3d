@@ -55,6 +55,9 @@ public:
     /// Get child menu item
     MenuBarItem* Child(const String &title);
 
+    /// Get children attached in this MenuBarItem
+    Vector<MenuBarItemPtr> Children() const;
+
     /// Get parent MenuBarItem or NULL if no parent.
     MenuBarItem* Parent();
 
