@@ -82,6 +82,7 @@ AddProject(Plugins Plugins/SceneInteract)
 AddProject(Plugins Plugins/AvatarApplication)
 if (NOT ANDROID)
     AddProject(Plugins Plugins/WebSocketServer)
+    AddProject(Plugins Plugins/ECEditor)
 endif()
 AddProject(Plugins Plugins/LoginScreen)
 
