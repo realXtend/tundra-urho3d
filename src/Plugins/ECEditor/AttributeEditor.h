@@ -90,7 +90,7 @@ public:
         Update();
     }
 
-    ~AttributeEditor() override
+    ~AttributeEditor()
     {
         
     }
