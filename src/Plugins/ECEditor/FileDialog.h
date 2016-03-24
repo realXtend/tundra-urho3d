@@ -44,7 +44,7 @@ public:
     void SetTitle(const String &title);
 
     /// Get dialog title text
-    const String &Title() const;
+    String Title() const;
 
     /// Initialize instance of file dialog window and display it on screen.
     static FileDialogPtr Open(Framework *framework);

@@ -65,7 +65,7 @@ void FileDialog::SetTitle(const String &title)
         fileSelector_->SetTitle(title);
 }
 
-const String &FileDialog::Title() const
+String FileDialog::Title() const
 {
     if (fileSelector_.Get())
         fileSelector_->GetTitle();

@@ -130,7 +130,7 @@ IAttributeEditor *ComponentContainer::CreateAttributeEditor(Framework *framework
     case IAttribute::ColorId:
         editor = new AttributeEditor<Tundra::Color>(framework, attributeWeakPtr);
         break;
-    case IAttribute::TypeId::BoolId:
+    case IAttribute::BoolId:
         editor = new AttributeEditor<bool>(framework, attributeWeakPtr);
         break;
     case IAttribute::RealId:
