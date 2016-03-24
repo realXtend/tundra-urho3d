@@ -115,40 +115,40 @@ IAttributeEditor *ComponentContainer::CreateAttributeEditor(Framework *framework
 {
     if (attribute == NULL)
         return NULL;
-
+    
     AttributeWeakPtr attributeWeakPtr = AttributeWeakPtr(attribute->Owner(), attribute);
     IAttributeEditor *editor = 0;
     u32 type = attribute->TypeId();
     switch (type)
     {
-    case IAttribute::TypeId::StringId:
+    case IAttribute::StringId:
         editor = new AttributeEditor<String>(framework, attributeWeakPtr);
         break;
-    case IAttribute::TypeId::Float3Id:
+    case IAttribute::Float3Id:
         editor = new AttributeEditor<float3>(framework, attributeWeakPtr);
         break;
-    case IAttribute::TypeId::ColorId:
+    case IAttribute::ColorId:
         editor = new AttributeEditor<Tundra::Color>(framework, attributeWeakPtr);
         break;
     case IAttribute::TypeId::BoolId:
         editor = new AttributeEditor<bool>(framework, attributeWeakPtr);
         break;
-    case IAttribute::TypeId::RealId:
+    case IAttribute::RealId:
         editor = new AttributeEditor<float>(framework, attributeWeakPtr);
         break;
-    case IAttribute::TypeId::IntId:
+    case IAttribute::IntId:
         editor = new AttributeEditor<int>(framework, attributeWeakPtr);
         break;
-    case IAttribute::TypeId::TransformId:
+    case IAttribute::TransformId:
         editor = new AttributeEditor<Transform>(framework, attributeWeakPtr);
         break;
-    case IAttribute::TypeId::EntityReferenceId:
+    case IAttribute::EntityReferenceId:
         editor = new AttributeEditor<EntityReference>(framework, attributeWeakPtr);
         break;
-    case IAttribute::TypeId::AssetReferenceId:
+    case IAttribute::AssetReferenceId:
         editor = new AttributeEditor<AssetReference>(framework, attributeWeakPtr);
         break;
-    case IAttribute::TypeId::AssetReferenceListId:
+    case IAttribute::AssetReferenceListId:
         editor = new AttributeEditor<AssetReferenceList>(framework, attributeWeakPtr);
         break;
     }
@@ -203,7 +203,7 @@ ECEditorWindow::ECEditorWindow(Framework *framework) :
 
     list_ = new ListView(framework->GetContext());
     list_->SetName("HierarchyList");
-    list_->SetHighlightMode(HighlightMode::HM_ALWAYS);
+    list_->SetHighlightMode(HM_ALWAYS);
     list_->SetStyle("ListView", style);
     window_->AddChild(list_);
 }

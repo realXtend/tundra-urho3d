@@ -102,7 +102,7 @@ void IAttributeEditor::Initialize()
 
     root_ = new Urho3D::UIElement(framework_->GetContext());
     root_->SetHeight(22);
-    root_->SetLayout(Urho3D::LayoutMode::LM_HORIZONTAL, 2, Urho3D::IntRect(2, 0, 2, 0));
+    root_->SetLayout(Urho3D::LM_HORIZONTAL, 2, Urho3D::IntRect(2, 0, 2, 0));
 
     title_ = new Urho3D::Text(framework_->GetContext());
     title_->SetMinWidth(120);
@@ -359,13 +359,13 @@ template<> void AttributeEditor<Transform>::Initialize()
     Urho3D::XMLFile *style = context_->GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("Data/UI/DefaultStyle.xml");
 
     Urho3D::UIElement *v_element = new Urho3D::UIElement(framework_->GetContext());
-    v_element->SetLayout(Urho3D::LayoutMode::LM_VERTICAL, 2);
+    v_element->SetLayout(Urho3D::LM_VERTICAL, 2);
     root_->AddChild(v_element);
 
     // POSITION
     {
         Urho3D::UIElement *pos_area = new Urho3D::UIElement(framework_->GetContext());
-        pos_area->SetLayout(Urho3D::LayoutMode::LM_HORIZONTAL, 2);
+        pos_area->SetLayout(Urho3D::LM_HORIZONTAL, 2);
         v_element->AddChild(pos_area);
 
         {
@@ -416,7 +416,7 @@ template<> void AttributeEditor<Transform>::Initialize()
     // ROTATION
     {
         Urho3D::UIElement *rot_area = new Urho3D::UIElement(framework_->GetContext());
-        rot_area->SetLayout(Urho3D::LayoutMode::LM_HORIZONTAL, 2);
+        rot_area->SetLayout(Urho3D::LM_HORIZONTAL, 2);
         v_element->AddChild(rot_area);
 
         {
@@ -467,7 +467,7 @@ template<> void AttributeEditor<Transform>::Initialize()
     // SCALE
     {
         Urho3D::UIElement *scl_area = new Urho3D::UIElement(framework_->GetContext());
-        scl_area->SetLayout(Urho3D::LayoutMode::LM_HORIZONTAL, 2);
+        scl_area->SetLayout(Urho3D::LM_HORIZONTAL, 2);
         v_element->AddChild(scl_area);
 
         {
@@ -661,7 +661,7 @@ template<> void AttributeEditor<float3>::Initialize()
 
     Urho3D::UIElement *element = new Urho3D::UIElement(framework_->GetContext());
 
-    element->SetLayout(Urho3D::LayoutMode::LM_HORIZONTAL, 2);
+    element->SetLayout(Urho3D::LM_HORIZONTAL, 2);
     {
         Urho3D::Text *t = new Urho3D::Text(framework_->GetContext());
         t->SetStyle("SmallText", style);
@@ -791,7 +791,7 @@ template<> void AttributeEditor<Color>::Initialize()
 
     Urho3D::UIElement *element = new Urho3D::UIElement(framework_->GetContext());
 
-    element->SetLayout(Urho3D::LayoutMode::LM_HORIZONTAL, 2);
+    element->SetLayout(Urho3D::LM_HORIZONTAL, 2);
     {
         Urho3D::Text *t = new Urho3D::Text(framework_->GetContext());
         t->SetStyle("SmallText", style);
