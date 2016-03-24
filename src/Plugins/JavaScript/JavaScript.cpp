@@ -390,14 +390,14 @@ void JavaScript::LoadStartupScripts()
     StringVector startupScripts = StartupScripts();
     StringVector startupAutoScripts;
 
-    String path = framework->InstallationDirectory() + "JSModules/Startup";
+    String path = framework->InstallationDirectory() + "jsmodules/startup";
     Urho3D::FileSystem* fileSystem = GetSubsystem<Urho3D::FileSystem>();
     fileSystem->ScanDir(startupAutoScripts, path, "*.js", Urho3D::SCAN_FILES, true);
 
-    // 1. Run any existing StartupScripts that reside in /JSModules/Startup first
+    // 1. Run any existing StartupScripts that reside in /jsmodules/startup first
     if (!startupAutoScripts.Empty())
     {
-        LogInfo(Name() + ": Loading startup scripts from /JSModules/Startup");
+        LogInfo(Name() + ": Loading startup scripts from /jsmodules/startup");
         foreach (const String &script, startupAutoScripts)
         {
             String fullPath = path + "/" + script;
@@ -413,8 +413,8 @@ void JavaScript::LoadStartupScripts()
     // 2. Load the rest of the references from the config files
     foreach (const String &script, startupScripts)
     {
-        // Allow relative paths from '/<install_dir>/JSModules' to start also
-        String jsPluginsDir = framework->InstallationDirectory() + "JSModules";
+        // Allow relative paths from '/<install_dir>/jsmodules' to start also
+        String jsPluginsDir = framework->InstallationDirectory() + "jsmodules";
 
         // Only allow relative paths, maybe allow absolute paths as well, maybe even URLs at some point?
         if (Urho3D::IsAbsolutePath(script))
