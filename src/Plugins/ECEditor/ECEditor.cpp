@@ -130,8 +130,6 @@ void ECEditor::OnOpenSceneDialogClosed(FileDialog *dialog, bool confirmed, const
     if (!confirmed)
         return;
 
-    LogWarning("Testi " + directory + file);
-
     OpenScene(directory, file);
 }
 

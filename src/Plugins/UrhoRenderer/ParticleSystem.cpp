@@ -125,6 +125,13 @@ void ParticleSystem::OnParticleAssetLoaded(AssetPtr asset)
     foreach (SharedPtr<Urho3D::ParticleEffect> effect, particleAsset->particleEffects_)
     {
         ///\todo Particles are now facing away from camera (or culled wrong side), so need to force fix culling.
+        ///\todo Proper fix for this situation
+        if (!effect->GetMaterial())
+        {
+            LogWarning("Material of particle effect was null, skipping");
+            continue;
+        }
+
         effect->GetMaterial()->SetCullMode(Urho3D::CULL_NONE);
 
         StringHash alphaPass = StringHash("alpha");
