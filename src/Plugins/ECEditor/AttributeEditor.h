@@ -43,7 +43,7 @@ public:
     explicit IAttributeEditor(Framework *framework, AttributeWeakPtr attribute);
     virtual ~IAttributeEditor();
 
-    virtual const String &Title() const;
+    virtual String Title() const;
     virtual void SetTitle(const String &text);
 
     UIElementPtr Widget() const;

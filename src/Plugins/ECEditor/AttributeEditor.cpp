@@ -39,7 +39,7 @@ IAttributeEditor::~IAttributeEditor()
     root_.Reset();
 }
 
-const String &IAttributeEditor::Title() const
+String IAttributeEditor::Title() const
 {
     if (title_)
         title_->GetText();
@@ -75,8 +75,8 @@ void IAttributeEditor::AddAttribute(AttributeWeakPtr attribute)
 
     // Ignore Placable transform and Rigidbody float3 attribute changes so user can change values while the physics are running.
     u32 type = attributeWeakPtr_.attribute->TypeId();
-    if ((type == IAttribute::TypeId::TransformId && attributeWeakPtr_.owner->TypeId() == 20) ||
-        (type == IAttribute::TypeId::Float3Id && attributeWeakPtr_.owner->TypeId() == 23))
+    if ((type == IAttribute::TransformId && attributeWeakPtr_.owner->TypeId() == 20) ||
+        (type == IAttribute::Float3Id && attributeWeakPtr_.owner->TypeId() == 23))
         return;
 
     attributeWeakPtr_.owner.Lock()->AttributeChanged.Connect(this, &IAttributeEditor::OnAttributeChanged);
@@ -90,7 +90,7 @@ void IAttributeEditor::RemoveAttribute()
     attributeWeakPtr_ = AttributeWeakPtr();
 }
 
-void IAttributeEditor::OnAttributeChanged(IAttribute *attribute, AttributeChange::Type changeType)
+void IAttributeEditor::OnAttributeChanged(IAttribute *attribute, AttributeChange::Type /*changeType*/)
 {
     if (HasAttribute(attribute))
         SetValue();
