@@ -228,11 +228,12 @@ float3 Placeable::Scale() const
 
 float3x4 Placeable::LocalToWorld() const
 {
-    // The Urho3D scene node world transform is always up to date with the transform attribute
-    if (sceneNode_)
+    // If we are parented to a bone, we can't (yet) compute the local-to-world matrix ourselves,
+    // so query Urho for the world matrix.
+    if (!parentBone.Get().Empty() && sceneNode_)
         return sceneNode_->GetWorldTransform();
-    
-    // Otherwise, if scene node is not available, use theoretical derived transform from Tundra scene structure
+
+    // Otherwise calculate from Tundra scene structure
     Placeable *parentPlaceable = ParentPlaceableComponent();
     assert(parentPlaceable != this);
     float3x4 localToWorld = parentPlaceable ? (parentPlaceable->LocalToWorld() * LocalToParent()) : LocalToParent();
