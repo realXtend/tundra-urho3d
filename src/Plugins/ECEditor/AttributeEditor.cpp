@@ -26,7 +26,8 @@ namespace Tundra
 IAttributeEditor::IAttributeEditor(Framework *framework, AttributeWeakPtr attribute) :
     Object(framework->GetContext()),
     framework_(framework),
-    ingoreAttributeChange_(false),
+    ignoreAttributeChange_(false),
+    ignoreEditorChange_(false),
     intialized_(false)
 {
 }
@@ -68,7 +69,9 @@ void IAttributeEditor::AddAttribute(AttributeWeakPtr attribute)
 
     attributeWeakPtr_ = attribute;
 
+    ignoreEditorChange_ = true;
     SetValue();
+    ignoreEditorChange_ = false;
 
     // Ignore Placable transform and Rigidbody float3 attribute changes so user can change values while the physics are running.
     u32 type = attributeWeakPtr_.attribute->TypeId();
@@ -160,23 +163,24 @@ template<> void AttributeEditor<bool>::OnUIChanged(StringHash /*eventType*/, Var
         return;
 
     Urho3D::CheckBox *check = dynamic_cast<Urho3D::CheckBox*>(eventData["Element"].GetPtr());
-    if (check != NULL &&
+    if (!ignoreEditorChange_ &&
+        check != NULL &&
         check == data_["check_box"].GetPtr())
     {
-        ingoreAttributeChange_ = true;
+        ignoreAttributeChange_ = true;
 
         bool checked = check->IsChecked();
         Attribute<bool> *attr = dynamic_cast<Attribute<bool> *>(attributeWeakPtr_.Get());
         if (attr != NULL)
             attr->Set(checked);
 
-        ingoreAttributeChange_ = false;
+        ignoreAttributeChange_ = false;
     }
 }
 
 template<> void AttributeEditor<bool>::SetValue()
 {
-    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    if (!ignoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
     {
         Attribute<bool> *attr = dynamic_cast<Attribute<bool> *>(attributeWeakPtr_.Get());
         if (attr == NULL)
@@ -232,23 +236,24 @@ template<> void AttributeEditor<float>::OnUIChanged(StringHash /*eventType*/, Va
         return;
 
     Urho3D::LineEdit *element = dynamic_cast<Urho3D::LineEdit*>(eventData["Element"].GetPtr());
-    if (element != NULL &&
+    if (!ignoreEditorChange_ &&
+        element != NULL &&
         element == data_["line_edit"].GetPtr())
     {
-        ingoreAttributeChange_ = true;
+        ignoreAttributeChange_ = true;
 
         String value = element->GetText();
         Attribute<float> *attr = dynamic_cast<Attribute<float> *>(attributeWeakPtr_.Get());
         if (attr != NULL)
             attr->Set(ToFloat(value));
 
-        ingoreAttributeChange_ = false;
+        ignoreAttributeChange_ = false;
     }
 }
 
 template<> void AttributeEditor<float>::SetValue()
 {
-    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    if (!ignoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
     {
         Attribute<float> *attr = dynamic_cast<Attribute<float> *>(attributeWeakPtr_.Get());
         if (attr == NULL)
@@ -304,23 +309,24 @@ template<> void AttributeEditor<int>::OnUIChanged(StringHash /*eventType*/, Vari
         return;
 
     Urho3D::LineEdit *element = dynamic_cast<Urho3D::LineEdit*>(eventData["Element"].GetPtr());
-    if (element != NULL &&
+    if (!ignoreEditorChange_ &&
+        element != NULL &&
         element == data_["line_edit"].GetPtr())
     {
-        ingoreAttributeChange_ = true;
+        ignoreAttributeChange_ = true;
 
         String value = element->GetText();
         Attribute<int> *attr = dynamic_cast<Attribute<int> *>(attributeWeakPtr_.Get());
         if (attr != NULL)
             attr->Set(ToInt(value));
 
-        ingoreAttributeChange_ = false;
+        ignoreAttributeChange_ = false;
     }
 }
 
 template<> void AttributeEditor<int>::SetValue()
 {
-    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    if (!ignoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
     {
         Attribute<int> *attr = dynamic_cast<Attribute<int> *>(attributeWeakPtr_.Get());
         if (attr == NULL)
@@ -574,10 +580,11 @@ template<> void AttributeEditor<Transform>::OnUIChanged(StringHash /*eventType*/
         return;
 
     Urho3D::LineEdit *element = dynamic_cast<Urho3D::LineEdit*>(eventData["Element"].GetPtr());
-    if (element == NULL)
+    if (ignoreEditorChange_ ||
+        element == NULL)
         return;
 
-    ingoreAttributeChange_ = true;
+    ignoreAttributeChange_ = true;
 
     if (element == data_["x_pos_edit"].GetPtr() || element == data_["y_pos_edit"].GetPtr() || element == data_["z_pos_edit"].GetPtr())
     {
@@ -619,12 +626,12 @@ template<> void AttributeEditor<Transform>::OnUIChanged(StringHash /*eventType*/
         }
     }
 
-    ingoreAttributeChange_ = false;
+    ignoreAttributeChange_ = false;
 }
 
 template<> void AttributeEditor<Transform>::SetValue()
 {
-    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    if (!ignoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
     {
         Attribute<Transform> *attr = dynamic_cast<Attribute<Transform> *>(attributeWeakPtr_.Get());
         if (attr == NULL)
@@ -729,10 +736,11 @@ template<> void AttributeEditor<float3>::OnUIChanged(StringHash /*eventType*/, V
         return;
 
     Urho3D::LineEdit *element = dynamic_cast<Urho3D::LineEdit*>(eventData["Element"].GetPtr());
-    if (element == NULL)
+    if (ignoreEditorChange_ ||
+        element == NULL)
         return;
 
-    ingoreAttributeChange_ = true;
+    ignoreAttributeChange_ = true;
 
     if (element == data_["x_edit"].GetPtr() || element == data_["y_edit"].GetPtr() || element == data_["z_edit"].GetPtr())
     {
@@ -748,12 +756,12 @@ template<> void AttributeEditor<float3>::OnUIChanged(StringHash /*eventType*/, V
         }
     }
 
-    ingoreAttributeChange_ = false;
+    ignoreAttributeChange_ = false;
 }
 
 template<> void AttributeEditor<float3>::SetValue()
 {
-    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    if (!ignoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
     {
         Attribute<float3> *attr = dynamic_cast<Attribute<float3> *>(attributeWeakPtr_.Get());
         if (attr == NULL)
@@ -877,10 +885,10 @@ template<> void AttributeEditor<Color>::OnUIChanged(StringHash /*eventType*/, Va
         return;
 
     Urho3D::LineEdit *element = dynamic_cast<Urho3D::LineEdit*>(eventData["Element"].GetPtr());
-    if (element == NULL)
+    if (ignoreEditorChange_ || element == NULL)
         return;
 
-    ingoreAttributeChange_ = true;
+    ignoreAttributeChange_ = true;
 
     if (element == data_["r_edit"].GetPtr() || element == data_["g_edit"].GetPtr() ||
         element == data_["b_edit"].GetPtr() || element == data_["a_edit"].GetPtr())
@@ -898,12 +906,12 @@ template<> void AttributeEditor<Color>::OnUIChanged(StringHash /*eventType*/, Va
         }
     }
 
-    ingoreAttributeChange_ = false;
+    ignoreAttributeChange_ = false;
 }
 
 template<> void AttributeEditor<Color>::SetValue()
 {
-    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    if (!ignoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
     {
         Attribute<Color> *attr = dynamic_cast<Attribute<Color> *>(attributeWeakPtr_.Get());
         if (attr == NULL)
@@ -958,23 +966,24 @@ template<> void AttributeEditor<String>::OnUIChanged(StringHash /*eventType*/, V
         return;
 
     Urho3D::LineEdit *element = dynamic_cast<Urho3D::LineEdit*>(eventData["Element"].GetPtr());
-    if (element != NULL &&
+    if (!ignoreEditorChange_ &&
+        element != NULL &&
         element == data_["line_edit"].GetPtr())
     {
-        ingoreAttributeChange_ = true;
+        ignoreAttributeChange_ = true;
 
         String value = element->GetText();
         Attribute<String> *attr = dynamic_cast<Attribute<String> *>(attributeWeakPtr_.Get());
         if (attr != NULL)
             attr->Set(value);
 
-        ingoreAttributeChange_ = false;
+        ignoreAttributeChange_ = false;
     }
 }
 
 template<> void AttributeEditor<String>::SetValue()
 {
-    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    if (!ignoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
     {
         Attribute<String> *attr = dynamic_cast<Attribute<String> *>(attributeWeakPtr_.Get());
         if (attr == NULL)
@@ -1031,10 +1040,11 @@ template<> void AttributeEditor<EntityReference>::OnUIChanged(StringHash /*event
         return;
 
     Urho3D::LineEdit *element = dynamic_cast<Urho3D::LineEdit*>(eventData["Element"].GetPtr());
-    if (element != NULL &&
+    if (!ignoreEditorChange_ &&
+        element != NULL &&
         element == data_["line_edit"].GetPtr())
     {
-        ingoreAttributeChange_ = true;
+        ignoreAttributeChange_ = true;
 
         String value = element->GetText();
         Attribute<EntityReference> *attr = dynamic_cast<Attribute<EntityReference> *>(attributeWeakPtr_.Get());
@@ -1045,13 +1055,13 @@ template<> void AttributeEditor<EntityReference>::OnUIChanged(StringHash /*event
             attr->Set(reference);
         }
 
-        ingoreAttributeChange_ = false;
+        ignoreAttributeChange_ = false;
     }
 }
 
 template<> void AttributeEditor<EntityReference>::SetValue()
 {
-    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    if (!ignoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
     {
         Attribute<EntityReference> *attr = dynamic_cast<Attribute<EntityReference> *>(attributeWeakPtr_.Get());
         if (attr == NULL)
@@ -1116,10 +1126,11 @@ template<> void AttributeEditor<AssetReference>::OnUIChanged(StringHash /*eventT
         return;
 
     Urho3D::LineEdit *element = dynamic_cast<Urho3D::LineEdit*>(eventData["Element"].GetPtr());
-    if (element != NULL &&
+    if (!ignoreEditorChange_ &&
+        element != NULL &&
         element == data_["line_edit"].GetPtr())
     {
-        ingoreAttributeChange_ = true;
+        ignoreAttributeChange_ = true;
 
         String value = element->GetText();
         Attribute<AssetReference> *attr = dynamic_cast<Attribute<AssetReference> *>(attributeWeakPtr_.Get());
@@ -1130,13 +1141,13 @@ template<> void AttributeEditor<AssetReference>::OnUIChanged(StringHash /*eventT
             attr->Set(reference);
         }
 
-        ingoreAttributeChange_ = false;
+        ignoreAttributeChange_ = false;
     }
 }
 
 template<> void AttributeEditor<AssetReference>::SetValue()
 {
-    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    if (!ignoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
     {
         Attribute<AssetReference> *attr = dynamic_cast<Attribute<AssetReference> *>(attributeWeakPtr_.Get());
         if (attr == NULL)
@@ -1224,10 +1235,11 @@ template<> void AttributeEditor<AssetReferenceList>::OnUIChanged(StringHash /*ev
         return;
 
     Urho3D::LineEdit *element = dynamic_cast<Urho3D::LineEdit*>(eventData["Element"].GetPtr());
-    if (element != NULL &&
+    if (!ignoreEditorChange_ &&
+        element != NULL &&
         element == data_["line_edit"].GetPtr())
     {
-        ingoreAttributeChange_ = true;
+        ignoreAttributeChange_ = true;
 
         String value = element->GetText();
         Attribute<AssetReferenceList> *attr = dynamic_cast<Attribute<AssetReferenceList> *>(attributeWeakPtr_.Get());
@@ -1241,13 +1253,13 @@ template<> void AttributeEditor<AssetReferenceList>::OnUIChanged(StringHash /*ev
             attr->Set(referenses);
         }
 
-        ingoreAttributeChange_ = false;
+        ignoreAttributeChange_ = false;
     }
 }
 
 template<> void AttributeEditor<AssetReferenceList>::SetValue()
 {
-    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    if (!ignoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
     {
         Attribute<AssetReferenceList> *attr = dynamic_cast<Attribute<AssetReferenceList> *>(attributeWeakPtr_.Get());
         if (attr == NULL)

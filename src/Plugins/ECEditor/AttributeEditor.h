@@ -72,7 +72,11 @@ protected:
     VariantMap data_;
     AttributeWeakPtr attributeWeakPtr_;
 
-    bool ingoreAttributeChange_;
+    /// When Attribute changes dont update the UI.
+    bool ignoreAttributeChange_;
+
+    /// If false dont update attribute value when UI changes
+    bool ignoreEditorChange_;
     bool intialized_;
 };
 
