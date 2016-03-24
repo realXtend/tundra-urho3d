@@ -38,8 +38,13 @@ public:
     void Initialize() override;
     void Update(float UNUSED_PARAM(frametime)) override;
 
+    /// Open scene editor and use default camera scene.
     void OpenSceneEditor();
+
+    /// Open scene editor
     void OpenSceneEditor(Scene *scene);
+
+    /// Open entity editor for given entity.
     void OpenEntityEditor(Entity *entity);
 
 private:

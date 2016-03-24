@@ -53,7 +53,7 @@ public:
     void RemoveAttribute();
 
 protected:
-    /// Listens if attribute value have changed outside from the editor and update changes into UI.
+    /// Listens if attribute value have changed outside from the editor and apply changes to UI.
     virtual void OnAttributeChanged(IAttribute *attribute, AttributeChange::Type changeType);
 
     /// Initialize attribute editor UI elements and register to UI events.

@@ -67,8 +67,16 @@ void IAttributeEditor::AddAttribute(AttributeWeakPtr attribute)
         attributeWeakPtr_.owner.Lock()->AttributeChanged.Disconnect(this, &IAttributeEditor::OnAttributeChanged);
 
     attributeWeakPtr_ = attribute;
-    attributeWeakPtr_.owner.Lock()->AttributeChanged.Connect(this, &IAttributeEditor::OnAttributeChanged);
+
     SetValue();
+
+    // Ignore Placable transform and Rigidbody float3 attribute changes so user can change values while the physics are running.
+    u32 type = attributeWeakPtr_.attribute->TypeId();
+    if ((type == IAttribute::TypeId::TransformId && attributeWeakPtr_.owner->TypeId() == 20) ||
+        (type == IAttribute::TypeId::Float3Id && attributeWeakPtr_.owner->TypeId() == 23))
+        return;
+
+    attributeWeakPtr_.owner.Lock()->AttributeChanged.Connect(this, &IAttributeEditor::OnAttributeChanged);
 }
 
 void IAttributeEditor::RemoveAttribute()
@@ -135,8 +143,8 @@ template<> void AttributeEditor<bool>::Initialize()
     data_["check_box"] = checkBox;
     root_->AddChild(checkBox);
 
-    SubscribeToEvent(Urho3D::E_TOGGLED, URHO3D_HANDLER(AttributeEditor<bool>, OnUIChanged));
-    
+    SubscribeToEvent(checkBox, Urho3D::E_TOGGLED, URHO3D_HANDLER(AttributeEditor<bool>, OnUIChanged));
+
     Update();
 }
 
@@ -203,7 +211,7 @@ template<> void AttributeEditor<float>::Initialize()
     data_["line_edit"] = e;
     root_->AddChild(e);
 
-    SubscribeToEvent(Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<float>, OnUIChanged));
+    SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<float>, OnUIChanged));
 
     Update();
 }
@@ -275,7 +283,7 @@ template<> void AttributeEditor<int>::Initialize()
     data_["line_edit"] = e;
     root_->AddChild(e);
 
-    SubscribeToEvent(Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<int>, OnUIChanged));
+    SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<int>, OnUIChanged));
 
     Update();
 }
@@ -367,6 +375,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             pos_area->AddChild(e);
             e->SetCursorPosition(0);
             data_["x_pos_edit"] = e;
+            SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<Transform>, OnUIChanged));
 
             t = new Urho3D::Text(framework_->GetContext());
             t->SetStyle("SmallText", style);
@@ -380,6 +389,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             e->SetCursorPosition(0);
             pos_area->AddChild(e);
             data_["y_pos_edit"] = e;
+            SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<Transform>, OnUIChanged));
 
             t = new Urho3D::Text(framework_->GetContext());
             t->SetStyle("SmallText", style);
@@ -393,6 +403,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             e->SetCursorPosition(0);
             pos_area->AddChild(e);
             data_["z_pos_edit"] = e;
+            SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<Transform>, OnUIChanged));
         }
     }
 
@@ -415,6 +426,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             rot_area->AddChild(e);
             e->SetCursorPosition(0);
             data_["x_rot_edit"] = e;
+            SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<Transform>, OnUIChanged));
 
             t = new Urho3D::Text(framework_->GetContext());
             t->SetStyle("SmallText", style);
@@ -428,6 +440,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             e->SetCursorPosition(0);
             rot_area->AddChild(e);
             data_["y_rot_edit"] = e;
+            SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<Transform>, OnUIChanged));
 
             t = new Urho3D::Text(framework_->GetContext());
             t->SetStyle("SmallText", style);
@@ -441,6 +454,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             e->SetCursorPosition(0);
             rot_area->AddChild(e);
             data_["z_rot_edit"] = e;
+            SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<Transform>, OnUIChanged));
         }
     }
 
@@ -463,6 +477,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             scl_area->AddChild(e);
             e->SetCursorPosition(0);
             data_["x_scl_edit"] = e;
+            SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<Transform>, OnUIChanged));
 
             t = new Urho3D::Text(framework_->GetContext());
             t->SetStyle("SmallText", style);
@@ -476,6 +491,7 @@ template<> void AttributeEditor<Transform>::Initialize()
             e->SetCursorPosition(0);
             scl_area->AddChild(e);
             data_["y_scl_edit"] = e;
+            SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<Transform>, OnUIChanged));
 
             t = new Urho3D::Text(framework_->GetContext());
             t->SetStyle("SmallText", style);
@@ -489,10 +505,10 @@ template<> void AttributeEditor<Transform>::Initialize()
             e->SetCursorPosition(0);
             scl_area->AddChild(e);
             data_["z_scl_edit"] = e;
+            SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<Transform>, OnUIChanged));
         }
     }
 
-    SubscribeToEvent(Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<Transform>, OnUIChanged));
     Update();
 }
 
@@ -563,7 +579,7 @@ template<> void AttributeEditor<Transform>::OnUIChanged(StringHash /*eventType*/
 
     ingoreAttributeChange_ = true;
 
-    if (element == data_["x_pos_edit"].GetPtr() || element == data_["y_pos_edit"].GetPtr() ||  element == data_["z_pos_edit"].GetPtr())
+    if (element == data_["x_pos_edit"].GetPtr() || element == data_["y_pos_edit"].GetPtr() || element == data_["z_pos_edit"].GetPtr())
     {
         String value = element->GetText();
         Attribute<Transform> *attr = dynamic_cast<Attribute<Transform> *>(attributeWeakPtr_.Get());
@@ -637,7 +653,7 @@ template<> void AttributeEditor<float3>::Initialize()
     Urho3D::XMLFile *style = context_->GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("Data/UI/DefaultStyle.xml");
 
     Urho3D::UIElement *element = new Urho3D::UIElement(framework_->GetContext());
-    
+
     element->SetLayout(Urho3D::LayoutMode::LM_HORIZONTAL, 2);
     {
         Urho3D::Text *t = new Urho3D::Text(framework_->GetContext());
@@ -652,6 +668,7 @@ template<> void AttributeEditor<float3>::Initialize()
         element->AddChild(e);
         e->SetCursorPosition(0);
         data_["x_edit"] = e;
+        SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<float3>, OnUIChanged));
 
         t = new Urho3D::Text(framework_->GetContext());
         t->SetStyle("SmallText", style);
@@ -665,6 +682,7 @@ template<> void AttributeEditor<float3>::Initialize()
         e->SetCursorPosition(0);
         element->AddChild(e);
         data_["y_edit"] = e;
+        SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<float3>, OnUIChanged));
 
         t = new Urho3D::Text(framework_->GetContext());
         t->SetStyle("SmallText", style);
@@ -678,10 +696,9 @@ template<> void AttributeEditor<float3>::Initialize()
         e->SetCursorPosition(0);
         element->AddChild(e);
         data_["z_edit"] = e;
+        SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<float3>, OnUIChanged));
     }
     root_->AddChild(element);
-
-    SubscribeToEvent(Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<float3>, OnUIChanged));
 
     Update();
 }
@@ -780,6 +797,7 @@ template<> void AttributeEditor<Color>::Initialize()
         element->AddChild(e);
         e->SetCursorPosition(0);
         data_["r_edit"] = e;
+        SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<Color>, OnUIChanged));
 
         t = new Urho3D::Text(framework_->GetContext());
         t->SetStyle("SmallText", style);
@@ -793,6 +811,7 @@ template<> void AttributeEditor<Color>::Initialize()
         e->SetCursorPosition(0);
         element->AddChild(e);
         data_["g_edit"] = e;
+        SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<Color>, OnUIChanged));
 
         t = new Urho3D::Text(framework_->GetContext());
         t->SetStyle("SmallText", style);
@@ -806,6 +825,7 @@ template<> void AttributeEditor<Color>::Initialize()
         e->SetCursorPosition(0);
         element->AddChild(e);
         data_["b_edit"] = e;
+        SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<Color>, OnUIChanged));
 
         t = new Urho3D::Text(framework_->GetContext());
         t->SetStyle("SmallText", style);
@@ -819,10 +839,10 @@ template<> void AttributeEditor<Color>::Initialize()
         e->SetCursorPosition(0);
         element->AddChild(e);
         data_["a_edit"] = e;
+        SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<Color>, OnUIChanged));
     }
     root_->AddChild(element);
 
-    SubscribeToEvent(Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<Color>, OnUIChanged));
 
     Update();
 }
@@ -919,7 +939,7 @@ template<> void AttributeEditor<String>::Initialize()
     root_->AddChild(e);
     Update();
 
-    SubscribeToEvent(Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<String>, OnUIChanged));
+    SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<String>, OnUIChanged));
 }
 
 template<> void AttributeEditor<String>::Update()
@@ -992,7 +1012,7 @@ template<> void AttributeEditor<EntityReference>::Initialize()
     root_->AddChild(e);
     Update();
 
-    SubscribeToEvent(Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<EntityReference>, OnUIChanged));
+    SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<EntityReference>, OnUIChanged));
 }
 
 template<> void AttributeEditor<EntityReference>::Update()
@@ -1045,196 +1065,196 @@ template<> void AttributeEditor<EntityReference>::SetValue()
 
 template<> void AttributeEditor<AssetReference>::SetValue(AssetReference value)
 {
-	VariantMap values;
-	values["ref"] = value.ref;
-	values["type"] = value.type;
-	value_ = values;
-	Update();
+    VariantMap values;
+    values["ref"] = value.ref;
+    values["type"] = value.type;
+    value_ = values;
+    Update();
 }
 
 template<> AssetReference AttributeEditor<AssetReference>::Value() const
 {
-	AssetReference reference;
-	reference.ref = value_.GetString();
+    AssetReference reference;
+    reference.ref = value_.GetString();
 
-	VariantMap values = value_.GetVariantMap();
-	AssetReference asset;
-	asset.ref = values["ref"].GetString();
-	asset.type = values["type"].GetString();
-	return asset;
+    VariantMap values = value_.GetVariantMap();
+    AssetReference asset;
+    asset.ref = values["ref"].GetString();
+    asset.type = values["type"].GetString();
+    return asset;
 }
 
 template<> void AttributeEditor<AssetReference>::Initialize()
 {
-	IAttributeEditor::Initialize();
-	Urho3D::XMLFile *style = context_->GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("Data/UI/DefaultStyle.xml");
+    IAttributeEditor::Initialize();
+    Urho3D::XMLFile *style = context_->GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("Data/UI/DefaultStyle.xml");
 
-	Urho3D::LineEdit *e = new Urho3D::LineEdit(framework_->GetContext());
-	e->SetName("LineEdit");
-	e->SetStyle("LineEditSmall", style);
-	e->SetCursorPosition(0);
-	data_["line_edit"] = e;
-	root_->AddChild(e);
-	Update();
+    Urho3D::LineEdit *e = new Urho3D::LineEdit(framework_->GetContext());
+    e->SetName("LineEdit");
+    e->SetStyle("LineEditSmall", style);
+    e->SetCursorPosition(0);
+    data_["line_edit"] = e;
+    root_->AddChild(e);
+    Update();
 
-	SubscribeToEvent(Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<AssetReference>, OnUIChanged));
+    SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<AssetReference>, OnUIChanged));
 }
 
 template<> void AttributeEditor<AssetReference>::Update()
 {
-	if (!intialized_)
-		return;
+    if (!intialized_)
+        return;
 
-	Urho3D::LineEdit *e = dynamic_cast<Urho3D::LineEdit*>(data_["line_edit"].GetPtr());
-	e->SetText(Value().ref);
-	e->SetCursorPosition(0);
+    Urho3D::LineEdit *e = dynamic_cast<Urho3D::LineEdit*>(data_["line_edit"].GetPtr());
+    e->SetText(Value().ref);
+    e->SetCursorPosition(0);
 }
 
 template<> void AttributeEditor<AssetReference>::OnUIChanged(StringHash /*eventType*/, VariantMap &eventData)
 {
-	if (attributeWeakPtr_.Get() == NULL)
-		return;
+    if (attributeWeakPtr_.Get() == NULL)
+        return;
 
-	Urho3D::LineEdit *element = dynamic_cast<Urho3D::LineEdit*>(eventData["Element"].GetPtr());
-	if (element != NULL &&
-		element == data_["line_edit"].GetPtr())
-	{
-		ingoreAttributeChange_ = true;
+    Urho3D::LineEdit *element = dynamic_cast<Urho3D::LineEdit*>(eventData["Element"].GetPtr());
+    if (element != NULL &&
+        element == data_["line_edit"].GetPtr())
+    {
+        ingoreAttributeChange_ = true;
 
-		String value = element->GetText();
-		Attribute<AssetReference> *attr = dynamic_cast<Attribute<AssetReference> *>(attributeWeakPtr_.Get());
-		if (attr != NULL)
-		{
-			AssetReference reference;
-			reference.ref = value;
-			attr->Set(reference);
-		}
+        String value = element->GetText();
+        Attribute<AssetReference> *attr = dynamic_cast<Attribute<AssetReference> *>(attributeWeakPtr_.Get());
+        if (attr != NULL)
+        {
+            AssetReference reference;
+            reference.ref = value;
+            attr->Set(reference);
+        }
 
-		ingoreAttributeChange_ = false;
-	}
+        ingoreAttributeChange_ = false;
+    }
 }
 
 template<> void AttributeEditor<AssetReference>::SetValue()
 {
-	if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
-	{
-		Attribute<AssetReference> *attr = dynamic_cast<Attribute<AssetReference> *>(attributeWeakPtr_.Get());
-		if (attr == NULL)
-			return;
+    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    {
+        Attribute<AssetReference> *attr = dynamic_cast<Attribute<AssetReference> *>(attributeWeakPtr_.Get());
+        if (attr == NULL)
+            return;
 
-		SetValue(attr->Get());
-	}
+        SetValue(attr->Get());
+    }
 }
 
 //----------------------------ASSET REFERENCE LIST ATTRIBUTE TYPE----------------------------
 
 template<> void AttributeEditor<AssetReferenceList>::SetValue(AssetReferenceList value)
 {
-	VariantMap values;
-	String refs = "";
-	String types = "";
+    VariantMap values;
+    String refs = "";
+    String types = "";
 
-	Tundra::uint count = value.Size();
-	for (Tundra::uint i = 0; i < count; ++i)
-	{
-		refs += value[i].ref;
-		types += value[i].type;
+    Tundra::uint count = value.Size();
+    for (Tundra::uint i = 0; i < count; ++i)
+    {
+        refs += value[i].ref;
+        types += value[i].type;
 
-		if (i < count)
-		{
-			refs += ";";
-			types += ";";
-		}	
-	}
+        if (i < count)
+        {
+            refs += ";";
+            types += ";";
+        }
+    }
 
-	values["size"] = count;
-	values["refs"] = refs;
-	values["types"] = types;
-	value_ = values;
+    values["size"] = count;
+    values["refs"] = refs;
+    values["types"] = types;
+    value_ = values;
 
-	Update();
+    Update();
 }
 
 template<> AssetReferenceList AttributeEditor<AssetReferenceList>::Value() const
 {
-	AssetReferenceList references;
+    AssetReferenceList references;
 
-	VariantMap values = value_.GetVariantMap();
-	Tundra::uint count = values["size"].GetInt();
-	Urho3D::StringVector refs = values["refs"].GetString().Split(';', true);
-	Urho3D::StringVector types = values["types"].GetString().Split(';', true);
+    VariantMap values = value_.GetVariantMap();
+    Tundra::uint count = values["size"].GetInt();
+    Urho3D::StringVector refs = values["refs"].GetString().Split(';', true);
+    Urho3D::StringVector types = values["types"].GetString().Split(';', true);
 
-	for (Tundra::uint i = 0; i < count; ++i)
-		references.Append(AssetReference(refs[i], types[i]));
+    for (Tundra::uint i = 0; i < count; ++i)
+        references.Append(AssetReference(refs[i], types[i]));
 
-	return references;
+    return references;
 }
 
 template<> void AttributeEditor<AssetReferenceList>::Initialize()
 {
-	IAttributeEditor::Initialize();
-	Urho3D::XMLFile *style = context_->GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("Data/UI/DefaultStyle.xml");
+    IAttributeEditor::Initialize();
+    Urho3D::XMLFile *style = context_->GetSubsystem<Urho3D::ResourceCache>()->GetResource<Urho3D::XMLFile>("Data/UI/DefaultStyle.xml");
 
-	Urho3D::LineEdit *e = new Urho3D::LineEdit(framework_->GetContext());
-	e->SetName("LineEdit");
-	e->SetStyle("LineEditSmall", style);
-	e->SetCursorPosition(0);
-	data_["line_edit"] = e;
-	root_->AddChild(e);
-	Update();
+    Urho3D::LineEdit *e = new Urho3D::LineEdit(framework_->GetContext());
+    e->SetName("LineEdit");
+    e->SetStyle("LineEditSmall", style);
+    e->SetCursorPosition(0);
+    data_["line_edit"] = e;
+    root_->AddChild(e);
+    Update();
 
-	SubscribeToEvent(Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<AssetReferenceList>, OnUIChanged));
+    SubscribeToEvent(e, Urho3D::E_TEXTFINISHED, URHO3D_HANDLER(AttributeEditor<AssetReferenceList>, OnUIChanged));
 }
 
 template<> void AttributeEditor<AssetReferenceList>::Update()
 {
-	if (!intialized_)
-		return;
+    if (!intialized_)
+        return;
 
-	Urho3D::LineEdit *e = dynamic_cast<Urho3D::LineEdit*>(data_["line_edit"].GetPtr());
-	VariantMap values = value_.GetVariantMap();
-	e->SetText(values["refs"].GetString());
+    Urho3D::LineEdit *e = dynamic_cast<Urho3D::LineEdit*>(data_["line_edit"].GetPtr());
+    VariantMap values = value_.GetVariantMap();
+    e->SetText(values["refs"].GetString());
 
-	e->SetCursorPosition(0);
+    e->SetCursorPosition(0);
 }
 
 template<> void AttributeEditor<AssetReferenceList>::OnUIChanged(StringHash /*eventType*/, VariantMap &eventData)
 {
-	if (attributeWeakPtr_.Get() == NULL)
-		return;
+    if (attributeWeakPtr_.Get() == NULL)
+        return;
 
-	Urho3D::LineEdit *element = dynamic_cast<Urho3D::LineEdit*>(eventData["Element"].GetPtr());
-	if (element != NULL &&
-		element == data_["line_edit"].GetPtr())
-	{
-		ingoreAttributeChange_ = true;
+    Urho3D::LineEdit *element = dynamic_cast<Urho3D::LineEdit*>(eventData["Element"].GetPtr());
+    if (element != NULL &&
+        element == data_["line_edit"].GetPtr())
+    {
+        ingoreAttributeChange_ = true;
 
-		String value = element->GetText();
-		Attribute<AssetReferenceList> *attr = dynamic_cast<Attribute<AssetReferenceList> *>(attributeWeakPtr_.Get());
-		if (attr != NULL)
-		{
-			AssetReferenceList referenses;
-			Urho3D::StringVector refs = value.Split(';', true);
-			for (Tundra::uint i = 0; i < refs.Size(); ++i)
-				referenses.Append(AssetReference(refs[i], attr->Get().type));
+        String value = element->GetText();
+        Attribute<AssetReferenceList> *attr = dynamic_cast<Attribute<AssetReferenceList> *>(attributeWeakPtr_.Get());
+        if (attr != NULL)
+        {
+            AssetReferenceList referenses;
+            Urho3D::StringVector refs = value.Split(';', true);
+            for (Tundra::uint i = 0; i < refs.Size(); ++i)
+                referenses.Append(AssetReference(refs[i], attr->Get().type));
 
-			attr->Set(referenses);
-		}
+            attr->Set(referenses);
+        }
 
-		ingoreAttributeChange_ = false;
-	}
+        ingoreAttributeChange_ = false;
+    }
 }
 
 template<> void AttributeEditor<AssetReferenceList>::SetValue()
 {
-	if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
-	{
-		Attribute<AssetReferenceList> *attr = dynamic_cast<Attribute<AssetReferenceList> *>(attributeWeakPtr_.Get());
-		if (attr == NULL)
-			return;
+    if (!ingoreAttributeChange_ && attributeWeakPtr_.Get() != NULL)
+    {
+        Attribute<AssetReferenceList> *attr = dynamic_cast<Attribute<AssetReferenceList> *>(attributeWeakPtr_.Get());
+        if (attr == NULL)
+            return;
 
-		SetValue(attr->Get());
-	}
+        SetValue(attr->Get());
+    }
 }
 
 }

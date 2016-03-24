@@ -437,7 +437,8 @@ void SceneStructureWindow::OnEntityChanged(Entity *entity, AttributeChange::Type
 
 void SceneStructureWindow::OnAttributeChanged(IComponent *component, IAttribute *attribute, AttributeChange::Type type)
 {
-    dirty_ = true;
+    if (component != 0 && component->TypeId() == 26)
+        dirty_ = true;
 }
 
 void SceneStructureWindow::Clear()
