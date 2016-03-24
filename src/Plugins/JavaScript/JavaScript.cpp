@@ -56,6 +56,17 @@ void JavaScript::Initialize()
         this, &JavaScript::LoadStartupScripts);
         
     framework->Scene()->SceneCreated.Connect(this, &JavaScript::OnSceneCreated);
+
+    // Initialize startup scripts
+    LoadStartupScripts();
+
+    StringVector runScripts = framework->CommandLineParameters("--run");
+    foreach(const String &script, runScripts)
+    {
+        SharedPtr<JavaScriptInstance> jsInstance(new JavaScriptInstance(script, this));
+        startupScripts_.Push(jsInstance);
+        jsInstance->Run();
+    }
 }
 
 void JavaScript::Uninitialize()
@@ -74,7 +85,6 @@ void JavaScript::OnComponentAdded(Entity* entity, IComponent* comp, AttributeCha
     {
         Script* script = static_cast<Script*>(comp);
         script->ScriptAssetsChanged.Connect(this, &JavaScript::OnScriptAssetsChanged);
-        /// \todo Handle application / class mechanic
         script->ClassNameChanged.Connect(this, &JavaScript::OnScriptClassNameChanged);
 
         // Set the script component's isClient & isServer flags to determine run mode
@@ -123,7 +133,6 @@ void JavaScript::OnScriptAssetsChanged(Script* scriptComp, const Vector<ScriptAs
         scriptComp->SetScriptInstance(jsInstance);
 
         // If this component is a script application, connect to the evaluate / unload signals so that we can create or delete script objects as needed
-        /// \todo Implement, skipped for now
         if (!scriptComp->applicationName.Get().Trimmed().Empty())
         {
             jsInstance->ScriptEvaluated.Connect(this, &JavaScript::OnScriptEvaluated);
@@ -378,18 +387,17 @@ void JavaScript::LoadStartupScripts()
 {
     UnloadStartupScripts();
 
-    StringVector loadedScripts;
     StringVector startupScripts = StartupScripts();
     StringVector startupAutoScripts;
 
-    String path = framework->InstallationDirectory() + "jsmodules/startup";
+    String path = framework->InstallationDirectory() + "JSModules/Startup";
     Urho3D::FileSystem* fileSystem = GetSubsystem<Urho3D::FileSystem>();
     fileSystem->ScanDir(startupAutoScripts, path, "*.js", Urho3D::SCAN_FILES, true);
 
-    // 1. Run any existing StartupScripts that reside in /jsmodules/startup first
+    // 1. Run any existing StartupScripts that reside in /JSModules/Startup first
     if (!startupAutoScripts.Empty())
     {
-        LogInfo(Name() + ": Loading startup scripts from /jsmodules/startup");
+        LogInfo(Name() + ": Loading startup scripts from /JSModules/Startup");
         foreach (const String &script, startupAutoScripts)
         {
             String fullPath = path + "/" + script;
@@ -397,13 +405,38 @@ void JavaScript::LoadStartupScripts()
             SharedPtr<JavaScriptInstance> jsInstance(new JavaScriptInstance(fullPath, this));
             startupScripts_.Push(jsInstance);
             jsInstance->Run();
-            loadedScripts.Push(fullPath);
+            startupScripts.Remove(fullPath);
+            startupScripts.Remove(script);
         }
     }
 
     // 2. Load the rest of the references from the config files
     foreach (const String &script, startupScripts)
     {
+        // Allow relative paths from '/<install_dir>/JSModules' to start also
+        String jsPluginsDir = framework->InstallationDirectory() + "JSModules";
+
+        // Only allow relative paths, maybe allow absolute paths as well, maybe even URLs at some point?
+        if (Urho3D::IsAbsolutePath(script))
+            continue;
+
+        String pathToFile;
+        if (fileSystem->FileExists(jsPluginsDir + "/" + script))
+            pathToFile = jsPluginsDir + "/" + script;
+        // Absolute path (above already ignored?)
+        else if (fileSystem->FileExists(script))
+            pathToFile = script;
+        else
+        {
+            // Try relative to the startup config.
+            LogWarning(Name() + "** Could not find startup file for: " + script);
+            continue;
+        }
+
+        LogInfo(Name() + ": ** " + script);
+        SharedPtr<JavaScriptInstance> jsInstance(new JavaScriptInstance(pathToFile, this));
+        startupScripts_.Push(jsInstance);
+        jsInstance->Run();
     }
 }
 
