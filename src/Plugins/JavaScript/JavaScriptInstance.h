@@ -25,6 +25,9 @@ class JAVASCRIPT_API JavaScriptInstance : public IScriptInstance
     URHO3D_OBJECT(JavaScriptInstance, IScriptInstance);
 
 public:
+    /// Creates empty script engine without script refs.
+    JavaScriptInstance(JavaScript *module, Script* owner = nullptr);
+
     /// Creates script engine for this script instance and loads the script but doesn't run it yet.
     /** @param scriptRef Script asset reference.
     @param module Javascript module. */
@@ -91,14 +94,15 @@ public:
     /// Return the instance's signal receiver map.
     HashMap<void*, SharedPtr<JSBindings::SignalReceiver> >& SignalReceivers() { return signalReceivers_; }
 
+    /// Read a script file and return it as string. [noscript]
+    String LoadScript(const String &fileName);
+
 private:
     /// Creates new script context/engine.
     void CreateEngine();
 
     /// Deletes script context/engine.
     void DeleteEngine();
-
-    String LoadScript(const String &fileName);
 
     // The script content for a JavascriptInstance is loaded either using the Asset API or 
     // using an absolute path name from the local file system.

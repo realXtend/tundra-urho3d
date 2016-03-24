@@ -19,6 +19,7 @@
 #include "JavaScriptBindings/JavaScriptBindings.h"
 
 #include <Urho3D/Core/Profiler.h>
+#include <Urho3D/IO/FileSystem.h>
 
 using namespace JSBindings;
 
@@ -42,6 +43,18 @@ void JavaScript::Load()
 
 void JavaScript::Initialize()
 {
+    framework->Console()->RegisterCommand(
+        "jsExec", "Execute given code in the embedded Javascript interpreter. Usage: jsExec(mycodestring)")->ExecutedWith.Connect(
+        this, &JavaScript::RunStringCommand);
+
+    framework->Console()->RegisterCommand(
+        "jsLoad", "Execute a javascript file. jsLoad(myJsFile.js)")->ExecutedWith.Connect(
+        this, &JavaScript::RunScriptCommand);
+
+    framework->Console()->RegisterCommand(
+        "jsReloadScripts", "Reloads and re-executes startup scripts.",
+        this, &JavaScript::LoadStartupScripts);
+        
     framework->Scene()->SceneCreated.Connect(this, &JavaScript::OnSceneCreated);
 }
 
@@ -146,12 +159,12 @@ void JavaScript::PrepareScriptInstance(JavaScriptInstance* instance, Script* scr
         ExposeJavaScriptClasses(ctx);
     }
 
-    instance->RegisterService("framework", Fw());
-    instance->RegisterService("frame", Fw()->Frame());
-    instance->RegisterService("input", Fw()->Input());
-    instance->RegisterService("console", Fw()->Console());
-    instance->RegisterService("asset", Fw()->Asset());
-    instance->RegisterService("config", Fw()->Config());
+    instance->RegisterService("framework", framework);
+    instance->RegisterService("frame", framework->Frame());
+    instance->RegisterService("input", framework->Input());
+    instance->RegisterService("console", framework->Console());
+    instance->RegisterService("asset", framework->Asset());
+    instance->RegisterService("config", framework->Config());
 
     instance->RegisterService("engine", instance);
 
@@ -346,6 +359,81 @@ void JavaScript::RemoveScriptObjects(JavaScriptInstance* jsInstance)
 {
     if (jsInstance)
         jsInstance->Execute("_RemoveScriptObjects");
+}
+
+StringList JavaScript::StartupScripts()
+{
+    StringList scripts;
+    if (framework->HasCommandLineParameter("--jsplugin"))
+        scripts.Push(framework->CommandLineParameters("--jsplugin"));
+    return scripts;
+}
+
+void JavaScript::UnloadStartupScripts()
+{
+    startupScripts_.Clear();
+}
+
+void JavaScript::LoadStartupScripts()
+{
+    UnloadStartupScripts();
+
+    StringVector loadedScripts;
+    StringVector startupScripts = StartupScripts();
+    StringVector startupAutoScripts;
+
+    String path = framework->InstallationDirectory() + "jsmodules/startup";
+    Urho3D::FileSystem* fileSystem = GetSubsystem<Urho3D::FileSystem>();
+    fileSystem->ScanDir(startupAutoScripts, path, "*.js", Urho3D::SCAN_FILES, true);
+
+    // 1. Run any existing StartupScripts that reside in /jsmodules/startup first
+    if (!startupAutoScripts.Empty())
+    {
+        LogInfo(Name() + ": Loading startup scripts from /jsmodules/startup");
+        foreach (const String &script, startupAutoScripts)
+        {
+            String fullPath = path + "/" + script;
+            LogInfo(Name() + ": ** " + script);
+            SharedPtr<JavaScriptInstance> jsInstance(new JavaScriptInstance(fullPath, this));
+            startupScripts_.Push(jsInstance);
+            jsInstance->Run();
+            loadedScripts.Push(fullPath);
+        }
+    }
+
+    // 2. Load the rest of the references from the config files
+    foreach (const String &script, startupScripts)
+    {
+    }
+}
+
+void JavaScript::RunString(const String& codeString)
+{
+    if (!defaultInstance_)
+        defaultInstance_ = new JavaScriptInstance(this);
+    defaultInstance_->Evaluate(codeString);
+}
+
+void JavaScript::RunScript(const String& scriptFile)
+{
+    if (!defaultInstance_)
+        defaultInstance_ = new JavaScriptInstance(this);
+    String script = defaultInstance_->LoadScript(scriptFile);
+    if (script.Length() > 0)
+        defaultInstance_->Evaluate(script);
+}
+
+void JavaScript::RunStringCommand(const StringVector& params)
+{
+    String result; 
+    result.Join(params, " ");
+    RunString(result);
+}
+
+void JavaScript::RunScriptCommand(const StringVector& params)
+{
+    if (params.Size())
+        RunScript(params[0]);
 }
 
 }

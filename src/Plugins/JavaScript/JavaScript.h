@@ -29,6 +29,12 @@ public:
     /// Prepare a script engine by registering the API and service objects.
     void PrepareScriptInstance(JavaScriptInstance* instance, Script* scriptComp);
 
+    /// Executes JS file.
+    void RunScript(const String& scriptFilename);
+
+    /// Executes and arbitrary JS code string.
+    void RunString(const String& codeString);
+
 private:
     void Load() override;
     void Initialize() override;
@@ -48,6 +54,28 @@ private:
     void RemoveScriptObject(Script* instance);
     void CreateScriptObjects(Script* app);
     void RemoveScriptObjects(JavaScriptInstance* jsInstance);
+
+    /// Executes "run script file" console command
+    void RunScriptCommand(const StringVector& scriptFilename);
+
+    /// Executes "run script line" console command
+    void RunStringCommand(const StringVector& codeString);
+
+    /// Startup js scripts specified on the command line via --jsplugin
+    /** @return List of script paths relative to bin/jsplugins */
+    StringList StartupScripts();
+
+    /// (Re)loads and executes startup scripts.
+    void LoadStartupScripts();
+
+    /// Stops and deletes startup scripts.
+    void UnloadStartupScripts();
+
+    /// Default JS instance for console & commandline script execution. Created on first use.
+    SharedPtr<JavaScriptInstance> defaultInstance_;
+
+    /// Engines for executing startup (possibly persistent) scripts.
+    Vector<SharedPtr<JavaScriptInstance> > startupScripts_;
 };
 
 }

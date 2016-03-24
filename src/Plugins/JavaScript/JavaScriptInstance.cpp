@@ -66,6 +66,17 @@ static const String signalSupportCode =
     "_scriptObjects = {};\n"
     "}\n";
 
+JavaScriptInstance::JavaScriptInstance(JavaScript *module, Script* owner) :
+    IScriptInstance(module->GetContext()),
+    ctx_(0),
+    module_(module),
+    owner_(owner),
+    evaluated_(false)
+{
+    assert(module);
+    CreateEngine();
+}
+
 JavaScriptInstance::JavaScriptInstance(const String &fileName, JavaScript *module, Script* owner) :
     IScriptInstance(module->GetContext()),
     ctx_(0),
