@@ -39,8 +39,8 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module
     Object(framework->GetContext()),
     owner_(module), framework_(framework),
     scene_(0), window_(0),
-    closeButton_(0), listView_(0),
-    contextMenu_(0), addComponentDialog_(0)
+    listView_(0), contextMenu_(0),
+    addComponentDialog_(0)
 {
     XMLFile *style = context_->GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Data/UI/DefaultStyle.xml");
 
@@ -63,14 +63,14 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module
         window_->AddChild(topBar);
 
         {
-            closeButton_ = new Button(framework->GetContext());
-            closeButton_->SetName("CloseButton");
-            closeButton_->SetStyle("CloseButton", style);
-            closeButton_->SetAlignment(HA_RIGHT, VA_CENTER);
-            closeButton_->SetPosition(IntVector2(-3, 0));
-            topBar->AddChild(closeButton_);
+            Button *closeButton = new Button(framework->GetContext());
+            closeButton->SetName("CloseButton");
+            closeButton->SetStyle("CloseButton", style);
+            closeButton->SetAlignment(HA_RIGHT, VA_CENTER);
+            closeButton->SetPosition(IntVector2(-3, 0));
+            topBar->AddChild(closeButton);
 
-            SubscribeToEvent(closeButton_.Get(), E_PRESSED, URHO3D_HANDLER(SceneStructureWindow, OnCloseClicked));
+            SubscribeToEvent(closeButton, E_PRESSED, URHO3D_HANDLER(SceneStructureWindow, OnCloseClicked));
 
             Text *windowHeader = new Text(framework->GetContext());
             windowHeader->SetStyle("Text", style);
@@ -95,44 +95,6 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module
     SubscribeToEvent(listView_, E_SELECTIONCHANGED, URHO3D_HANDLER(SceneStructureWindow, OnSelectionChanged));
     SubscribeToEvent(E_UIMOUSECLICK, URHO3D_HANDLER(SceneStructureWindow, OnElementClicked));
 
-    /*{
-        UIElement *bottomBar = new UIElement(framework->GetContext());
-        bottomBar->SetMinHeight(30);
-        bottomBar->SetMaxHeight(30);
-        bottomBar->SetLayout(LayoutMode::LM_HORIZONTAL, 12, IntRect(12, 2, 12, 2));
-        window_->AddChild(bottomBar);
-
-        {
-            Button *button = new Button(framework->GetContext());
-            button->SetName("UndoButton");
-            Text *text = new Text(framework->GetContext());
-            text->SetText("Undo");
-            text->SetAlignment(HA_CENTER, VA_CENTER);
-            text->SetInternal(true);
-            
-            button->AddChild(text);
-            button->SetStyle("Button", style);
-            button->SetMinWidth(50);
-            button->SetMaxWidth(50);
-            button->SetVerticalAlignment(VA_CENTER);
-            bottomBar->AddChild(button);
-
-            button = new Button(framework->GetContext());
-            button->SetName("RedoButton");
-            button->SetVerticalAlignment(VA_CENTER);
-            text = new Text(framework->GetContext());
-            text->SetText("Redo");
-            text->SetInternal(true);
-
-            button->AddChild(text);
-            button->SetStyle("Button", style);
-            button->SetMinWidth(50);
-            button->SetMaxWidth(50);
-            text->SetAlignment(HA_CENTER, VA_CENTER);
-            bottomBar->AddChild(button);
-        }
-    }*/
-
     contextMenu_ = new SceneContextMenu(framework->GetContext());
     contextMenu_->Widget()->SetPosition(IntVector2(100, 100));
     contextMenu_->OnActionSelected.Connect(this, &SceneStructureWindow::OnActionSelected);
@@ -153,9 +115,6 @@ SceneStructureWindow::~SceneStructureWindow()
     addComponentDialog_.Reset();
     addEntityDialog_.Reset();
     contextMenu_.Reset();
-
-    if (closeButton_.Get())
-        closeButton_->Remove();
 
     if (window_.Get())
         window_->Remove();
@@ -402,6 +361,8 @@ void SceneStructureWindow::ShowContextMenu(Object *obj, int x, int y)
         m = contextMenu_->CreateItem("addEntity", "New Entity...");
         m = contextMenu_->CreateItem("addComponent", "New Component");
         m = contextMenu_->CreateItem("editEntity", "Edit");
+        m = contextMenu_->CreateItem("copyEntity", "Copy");
+        m = contextMenu_->CreateItem("pasteEntity", "Paste");
     }
     else
     {
@@ -427,12 +388,12 @@ void SceneStructureWindow::EditSelection()
 
 void SceneStructureWindow::OnComponentChanged(Entity *entity, IComponent *component, AttributeChange::Type change)
 {
-    dirty_ = true;
+    //dirty_ = true;
 }
 
 void SceneStructureWindow::OnEntityChanged(Entity *entity, AttributeChange::Type change)
 {
-    dirty_ = true;
+    //dirty_ = true;
 }
 
 void SceneStructureWindow::OnAttributeChanged(IComponent *component, IAttribute *attribute, AttributeChange::Type type)
@@ -451,6 +412,9 @@ void SceneStructureWindow::Clear()
         iter++;
     }
     listItems_.Clear();
+
+    selectedComponents_.Clear();
+    selectedEntities_.Clear();
 
     if (scene_ != NULL)
         scene_->EntityCreated.Disconnect(this, &SceneStructureWindow::OnEntityCreated);
@@ -500,7 +464,7 @@ SceneStructureItem *SceneStructureWindow::FindItem(Object *obj)
         if (listItems_[i].object_ == obj)
             return listItems_[i].item_;
     }
-    return NULL;
+    return 0;
 }
 
 void SceneStructureWindow::ToggleItem(SceneStructureItem *item)
@@ -513,6 +477,47 @@ void SceneStructureWindow::ToggleItem(SceneStructureItem *item)
         item->Refresh();
     }
 }
+
+void SceneStructureWindow::Copy(Entity *entity)
+{
+    if (entity)
+    {
+        Urho3D::XMLFile entityXml(context_);
+        Urho3D::XMLElement base = entityXml.CreateRoot("scene");
+        Urho3D::XMLElement entityElement = base.CreateChild("entity");
+        entityElement.SetAttribute("id", String(entity->Id()));
+
+        const Entity::ComponentMap &components = entity->Components();
+        for (Entity::ComponentMap::ConstIterator i = components.Begin(); i != components.End(); ++i)
+            i->second_->SerializeTo(entityXml, entityElement);
+
+        GetSubsystem<Urho3D::UI>()->SetClipboardText(entityXml.ToString());
+    }
+}
+
+void SceneStructureWindow::Copy(IComponent *component)
+{
+    if (component)
+    {
+        
+    }
+}
+
+void SceneStructureWindow::PasteEntity()
+{
+    String clipboard = GetSubsystem<Urho3D::UI>()->GetClipboardText();
+    if (!scene_ || clipboard.Empty())
+        return;
+
+    Urho3D::XMLFile xmlData(context_);
+    if (!xmlData.FromString(clipboard))
+    {
+        /// @todo print error message.
+        return;
+    }
+    scene_->CreateContentFromXml(xmlData, false, Tundra::AttributeChange::Default);
+}
+
 
 SceneStructureItem *SceneStructureWindow::FindItem(UIElement *element)
 {
@@ -551,6 +556,15 @@ void SceneStructureWindow::OnActionSelected(SceneContextMenu *contextMenu, Strin
     else if (id == "editEntity")
     {
         EditSelection();
+    }
+    else if (id == "copyEntity")
+    {
+        for (uint i = 0; i < selectedEntities_.Size(); i++)
+            Copy(selectedEntities_[i]);
+    }
+    else if (id == "pasteEntity")
+    {
+        PasteEntity();
     }
     else if (id == "addComponent")
     {

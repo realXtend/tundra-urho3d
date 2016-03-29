@@ -11,13 +11,13 @@
 #include "UI/UiAPI.h"
 #include "UI/MenuBar.h"
 #include "UI/MenuBarItem.h"
-#include "Sky.h"
 
 #include "SceneAPI.h"
 #include "Scene.h"
 
 #include "LoggingFunctions.h"
 
+#include <Urho3D/UI/UI.h>
 #include <Urho3D/Engine/Engine.h>
 #include <Urho3D/UI/UIElement.h>
 #include <Urho3D/UI/FileSelector.h>
@@ -65,6 +65,9 @@ void ECEditor::Initialize()
         sceneEditorItem_ = menu->CreateMenuItem("Edit/Scene Editor");
         sceneEditorItem_->OnItemPressed.Connect(this, &ECEditor::OnBarMenuSelected);
     }
+
+    // Enable system clipboard so we can copy & paste entities in editor.
+    GetSubsystem<UI>()->SetUseSystemClipboard(true);
 }
 
 void ECEditor::Update(float UNUSED_PARAM(frametime))

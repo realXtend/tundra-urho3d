@@ -20,7 +20,6 @@ namespace Urho3D
 class UIElement;
 class Window;
 class ListView;
-class Button;
 }
 
 using namespace Urho3D;
@@ -48,7 +47,6 @@ typedef SharedPtr<SceneContextMenu> SceneContextMenuPtr;
 typedef WeakPtr<TreeView> TreeViewWeakPtr;
 typedef WeakPtr<UIElement> UIElementWeakPtr;
 typedef WeakPtr<Window> UIWindowWeakPtr;
-typedef WeakPtr<Button> ButtonWeakPtr;
 typedef WeakPtr<ListView> ListViewWeakPtr;
 typedef WeakPtr<Object> ObjectWeakPtr;
 typedef SharedPtr<SceneStructureItem> SceneStructureItemPtr;
@@ -61,6 +59,7 @@ class ECEDITOR_API SceneStructureWindow : public Object
     URHO3D_OBJECT(SceneStructureWindow, Object);
 
 public:
+    /// Data object holding ui ListItem pointer and entity or component pointer.
     struct ListViewItem
     {
         SceneStructureItemPtr item_;
@@ -70,9 +69,9 @@ public:
     explicit SceneStructureWindow(Framework *framework, IModule *owner);
     virtual ~SceneStructureWindow();
 
-    /// Sets new scene to be shown in the tree view.
-    /** Populates tree view with entities.
-    If scene is set to null, the tree view is cleared and previous signal connections are disconnected.
+    /// Sets new scene to be shown in the list.
+    /** Populates list view with entities.
+    If scene is set to null, the view is cleared.
     @param newScene Scene. */
     void SetShownScene(Scene *newScene);
 
@@ -81,19 +80,39 @@ public:
         return scene_;
     }
 
+    /// Clear all ui and data objects from the editor but keep shown scene.
     void Clear();
+
+    /// Refresh the UI elemnts
+    /** @TODO optimize refresh code, current version will recreate all ui elements
+    */
     void RefreshView();
 
+    /// Hide editor window
     void Hide();
+
+    /// Show editor window
     void Show();
 
+    /// Check if editor window needs refreshing.
     void Update();
 
+    /// Search for SceneStrucutreItem for given Entity or Component ptr.
+    /** @param obj Entity or Component ptr.
+        @return Return scene structure item if found otherwise return null.
+    */
     SceneStructureItem *FindItem(Object *obj);
 
+    /// Expand or Reduce SceneStructureItem in ListView.
+    /** @param item toggle item target
+    */
     void ToggleItem(SceneStructureItem *item);
 
 protected:
+    void Copy(Entity *entity);
+    void Copy(IComponent *component);
+    void PasteEntity();
+
     SceneStructureItem *FindItem(UIElement *element);
     SceneStructureItem *CreateItem(Object *obj, const String &text, SceneStructureItem *parent = 0);
 
@@ -122,10 +141,8 @@ protected:
     void OnContextMenuHide(StringHash eventType, VariantMap &eventData);
     void OnSelectionChanged(StringHash eventType, VariantMap &eventData);
     void OnCloseClicked(StringHash eventType, VariantMap &eventData);
-
     void OnComponentDialogClosed(AddComponentDialog *dialog, bool confirmed);
     void OnEntityDialogClosed(AddEntityDialog *dialog, bool confirmed);
-
     void OnActionSelected(SceneContextMenu *contextMenu, String id);
 
     bool ComponentSelected(IComponent *component) const;
@@ -137,25 +154,29 @@ protected:
     Framework *framework_;
 
 private:
+    /// Selcted scene that this window is editing.
     SceneWeakPtr scene_;
-
+    /// Compoent selection dialog window
     AddComponentDialogPtr addComponentDialog_;
+    /// Entity selection dialog window
     AddEntityDialogPtr addEntityDialog_;
+    /// Right click context menu
     SceneContextMenuPtr contextMenu_;
-
+    /// Scene strucutre window root object
     UIWindowWeakPtr window_;
-    ButtonWeakPtr closeButton_;
+    /// Scene strucuture list element
     ListViewWeakPtr listView_;
+    /// List item data object
     Vector<ListViewItem> listItems_;
-
+    /// Array of selected entities
     Vector<EntityWeakPtr> selectedEntities_;
+    /// Array of selected components
     Vector<ComponentWeakPtr> selectedComponents_;
-
+    /// ECEditor module
     ModuleWeakPtr owner_;
-
     /*
-    If Scene entity, component or attribute has changed in some way mark the editor as dirty and
-    update the editor in next frame.
+    If Scene entity, component or attribute has changed in some way,
+    mark the editor as dirty and update the editor window in next frame.
     */
     bool dirty_;
 };
