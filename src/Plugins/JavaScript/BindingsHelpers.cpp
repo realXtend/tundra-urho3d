@@ -254,6 +254,12 @@ static const duk_function_list_entry ComponentProxyFunctions[] = {
 
 void PushWeakObject(duk_context* ctx, Object* object)
 {
+    if (!object)
+    {
+        duk_push_null(ctx);
+        return;
+    }
+
     duk_push_object(ctx);
     WeakPtr<Object>* ptr = new WeakPtr<Object>(object);
     duk_push_pointer(ctx, ptr);
