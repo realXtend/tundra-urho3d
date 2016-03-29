@@ -118,6 +118,14 @@ static duk_ret_t Framework_Get_ExitRequested(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Framework_Platform(duk_context* ctx)
+{
+    Framework* thisObj = GetThisWeakObject<Framework>(ctx);
+    String ret = thisObj->Platform();
+    duk_push_string(ctx, ret.CString());
+    return 1;
+}
+
 static duk_ret_t Framework_ParseWildCardFilename_String(duk_context* ctx)
 {
     Framework* thisObj = GetThisWeakObject<Framework>(ctx);
@@ -259,7 +267,8 @@ static duk_ret_t Framework_Instance_Static(duk_context* ctx)
 }
 
 static const duk_function_list_entry Framework_Functions[] = {
-    {"ParseWildCardFilename", Framework_ParseWildCardFilename_String, 1}
+    {"Platform", Framework_Platform, 0}
+    ,{"ParseWildCardFilename", Framework_ParseWildCardFilename_String, 1}
     ,{"HasCommandLineParameter", Framework_HasCommandLineParameter_String, 1}
     ,{"CommandLineParameters", Framework_CommandLineParameters_String, 1}
     ,{"ConfigFiles", Framework_ConfigFiles, 0}
@@ -291,6 +300,7 @@ void Expose_Framework(duk_context* ctx)
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Framework_Functions);
     DefineProperty(ctx, "ExitRequested", Framework_Get_ExitRequested, nullptr);
+    DefineProperty(ctx, "platform", Framework_Platform, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Framework_ID);
 }

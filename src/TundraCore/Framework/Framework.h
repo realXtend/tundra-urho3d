@@ -87,6 +87,9 @@ public:
     /// Returns name of the application, "Tundra-urho3d" by default.
     static const String& ApplicationName();
 
+    /// Return current execution platform. E.g. "Windows", "Linux", "Mac OS X", "Android", "iOS" or "Raspberry Pi". [property]
+    String Platform() const;
+
 #ifdef ANDROID
     /// Returns Android package name.
     static const String& PackageName();

@@ -497,6 +497,11 @@ String Framework::UserDocumentsDirectory() const
     return GetSubsystem<FileSystem>()->GetUserDocumentsDir();
 }
 
+String Framework::Platform() const
+{
+    return Urho3D::GetPlatform();
+}
+
 String Framework::ParseWildCardFilename(const String& input) const
 {
     // Parse all the special symbols from the log filename.
