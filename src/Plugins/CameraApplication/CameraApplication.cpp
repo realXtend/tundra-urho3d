@@ -131,7 +131,7 @@ void CameraApplication::CreateCamera()
 
 void CameraApplication::CheckCameraSpawnPos(Entity* entity, AttributeChange::Type /*change*/)
 {
-    if (!entity)
+    if (!entity || entity->Name() != "FreeLookCameraSpawnPos")
         return;
 
     Entity* cameraEntity = framework->Renderer()->MainCamera();
