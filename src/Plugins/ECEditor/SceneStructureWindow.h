@@ -111,7 +111,7 @@ public:
 protected:
     void Copy(Entity *entity);
     void Copy(IComponent *component);
-    void PasteEntity();
+    void Paste();
 
     SceneStructureItem *FindItem(UIElement *element);
     SceneStructureItem *CreateItem(Object *obj, const String &text, SceneStructureItem *parent = 0);
@@ -146,7 +146,7 @@ protected:
     void OnActionSelected(SceneContextMenu *contextMenu, String id);
 
     bool ComponentSelected(IComponent *component) const;
-    bool EntitySelected(Entity *component) const;
+    bool EntitySelected(Entity *entity) const;
     void ClearSelection();
     void SelectEntity(Entity *entity);
     void SelectComponent(IComponent *component);

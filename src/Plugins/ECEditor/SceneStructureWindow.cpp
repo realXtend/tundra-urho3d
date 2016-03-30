@@ -85,7 +85,7 @@ SceneStructureWindow::SceneStructureWindow(Framework *framework, IModule *module
     listView_ = new ListView(framework->GetContext());
     listView_->SetName("SceneHierarchyList");
     listView_->SetStyle("HierarchyListView", style);
-    listView_->SetMultiselect(true);
+    //listView_->SetMultiselect(true);
     listView_->SetEnabled(true);
     listView_->SetFocusMode(FocusMode::FM_FOCUSABLE_DEFOCUSABLE);
     window_->AddChild(listView_);
@@ -271,6 +271,8 @@ void SceneStructureWindow::OnEntityDialogClosed(AddEntityDialog *dialog, bool co
         entity = scene->CreateLocalEntity();
     entity->SetTemporary(temporary);
     entity->SetName(name);
+
+    dirty_ = true;
 }
 
 void SceneStructureWindow::SetShownScene(Scene *newScene)
@@ -353,7 +355,9 @@ void SceneStructureWindow::ShowContextMenu(Object *obj, int x, int y)
     if (dynamic_cast<IComponent*>(obj) != NULL)
     {
         Menu *m = contextMenu_->CreateItem("removeComponent", "Remove");
-        m = contextMenu_->CreateItem("editComponent", "Edit");
+        m = contextMenu_->CreateItem("copyComponent", "Copy");
+        m = contextMenu_->CreateItem("pasteComponent", "Paste");
+        //m = contextMenu_->CreateItem("editComponent", "Edit");
     }
     else if (dynamic_cast<Entity*>(obj) != NULL)
     {
@@ -499,11 +503,21 @@ void SceneStructureWindow::Copy(IComponent *component)
 {
     if (component)
     {
-        
+        Urho3D::XMLFile entityXml(context_);
+        Urho3D::XMLElement base = entityXml.CreateRoot("entity");
+        base.SetAttribute("id", String(component->ParentEntity()->Id()));
+
+        const Entity::ComponentMap &components = component->ParentEntity()->Components();
+        for (Entity::ComponentMap::ConstIterator i = components.Begin(); i != components.End(); ++i)
+        {
+            if (i->second_ == component)
+                i->second_->SerializeTo(entityXml, base);
+        }
+        GetSubsystem<Urho3D::UI>()->SetClipboardText(entityXml.ToString());
     }
 }
 
-void SceneStructureWindow::PasteEntity()
+void SceneStructureWindow::Paste()
 {
     String clipboard = GetSubsystem<Urho3D::UI>()->GetClipboardText();
     if (!scene_ || clipboard.Empty())
@@ -515,9 +529,68 @@ void SceneStructureWindow::PasteEntity()
         /// @todo print error message.
         return;
     }
-    scene_->CreateContentFromXml(xmlData, false, Tundra::AttributeChange::Default);
-}
 
+    Urho3D::XMLElement root = xmlData.GetRoot();
+    if (root.GetName() == "scene")
+    {
+        scene_->CreateContentFromXml(xmlData, false, Tundra::AttributeChange::Default);
+    }
+    else if (root.GetName() == "entity")
+    {
+        if (selectedEntities_.Size() == 0 &&
+            selectedComponents_.Size() == 0)
+            return;
+
+        String id = root.GetAttribute("id");
+        if (id.Empty())
+        {
+            /// @todo print error message.
+            return;
+        }
+
+        Entity *originalEntity = scene_->EntityById(ToInt(id));
+        if (!originalEntity)
+        {
+            /// @todo print error message.
+            return;
+        }
+
+        Urho3D::XMLElement componentElement = root.GetChild("component");
+        if (!componentElement)
+        {
+            /// @todo print error message.
+            return;
+        }
+        String typeName = componentElement.GetAttribute("type");
+
+        Entity *entity;
+        if (selectedEntities_.Size() > 0)
+            entity = selectedEntities_[0];
+        else
+            entity = selectedComponents_[0]->ParentEntity();
+
+        const Entity::ComponentMap &components = originalEntity->Components();
+        for (Entity::ComponentMap::ConstIterator i = components.Begin(); i != components.End(); ++i)
+        {
+            if (i->second_->GetTypeName() != typeName)
+                continue;
+
+            ComponentPtr component = entity->GetOrCreateComponent(i->second_->TypeId(), i->second_->Name(), AttributeChange::Default);
+            const AttributeVector &attributes = i->second_->Attributes();
+            for (size_t j = 0; j < attributes.Size(); j++)
+            {
+                if (attributes[j])
+                {
+                    IAttribute *attribute = component->AttributeByName(attributes[j]->Name());
+                    if (attribute)
+                        attribute->FromString(attributes[j]->ToString(), AttributeChange::Default);
+                }
+            }
+        }
+    }
+
+    dirty_ = true;
+}
 
 SceneStructureItem *SceneStructureWindow::FindItem(UIElement *element)
 {
@@ -542,16 +615,19 @@ void SceneStructureWindow::OnActionSelected(SceneContextMenu *contextMenu, Strin
     {
         for (unsigned int i = 0; i < selectedComponents_.Size(); i++)
             selectedComponents_[i]->ParentEntity()->RemoveComponent(selectedComponents_[i]->TypeName());
+        dirty_ = true;
     }
     if (id == "removeComponent")
     {
         for (unsigned int i = 0; i < selectedComponents_.Size(); i++)
             selectedComponents_[i]->ParentEntity()->RemoveComponent(selectedComponents_[i]->TypeName());
+        dirty_ = true;
     }
     else if (id == "removeEntity")
     {
         for (unsigned int i = 0; i < selectedEntities_.Size(); i++)
             selectedEntities_[i]->ParentScene()->RemoveEntity(selectedEntities_[i]->Id());
+        dirty_ = true;
     }
     else if (id == "editEntity")
     {
@@ -564,7 +640,7 @@ void SceneStructureWindow::OnActionSelected(SceneContextMenu *contextMenu, Strin
     }
     else if (id == "pasteEntity")
     {
-        PasteEntity();
+        Paste();
     }
     else if (id == "addComponent")
     {
@@ -573,8 +649,15 @@ void SceneStructureWindow::OnActionSelected(SceneContextMenu *contextMenu, Strin
         pos.x_ += 100;
         addComponentDialog_->Widget()->SetPosition(pos);
     }
-    
-    dirty_ = true;
+    else if (id == "copyComponent")
+    {
+        for (uint i = 0; i < selectedComponents_.Size(); i++)
+            Copy(selectedComponents_[i]);
+    }
+    else if (id == "pasteComponent")
+    {
+        Paste();
+    }
 }
 
 bool SceneStructureWindow::ComponentSelected(IComponent *component) const
