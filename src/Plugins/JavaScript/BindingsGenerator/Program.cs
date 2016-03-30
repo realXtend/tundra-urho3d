@@ -270,9 +270,10 @@ namespace BindingsGenerator
 
             if (Symbol.IsNumberType(typeName))
             {
+                typeName = SanitateTypeForFunction(typeName);
                 if (typeName == "double")
                     return typeName + " " + varName + " = duk_require_number(ctx, " + stackIndex + ");";
-                else if (typeName == "AttributeChange::Type" || typeName == "ClientLoginState")
+                else if (typeName == "AttributeChange::Type" || typeName == "ClientLoginState" || typeName == "MouseEvent::MouseButton")
                     return typeName + " " + varName + " = (" + typeName + ")(int)duk_require_number(ctx, " + stackIndex + ");"; 
                 else
                     return typeName + " " + varName + " = (" + typeName + ")duk_require_number(ctx, " + stackIndex + ");"; 
@@ -588,7 +589,7 @@ namespace BindingsGenerator
                         tw.WriteLine(Indent(2) + "duk_put_prop_index(ctx, -2, " + i + ");");
                     }
                     tw.WriteLine(Indent(2) + "bool success = duk_pcall(ctx, 2) == 0;");
-                    tw.WriteLine(Indent(2) + "if (!success) LogError(\"[JavaScript] OnSignal: \" + String(duk_safe_to_string(ctx, -1)));");
+                    tw.WriteLine(Indent(2) + "if (!success) LogError(\"[JavaScript] OnSignal: \" + GetErrorString(ctx));");
                     tw.WriteLine(Indent(2) + "duk_pop(ctx);"); // Result
                     tw.WriteLine(Indent(1) + "}");
                     tw.WriteLine("};");
@@ -1230,6 +1231,7 @@ namespace BindingsGenerator
             t = StripNamespace(t);
             if (t == "Key" || t == "KeySequence")
                 t = "int";
+
             return t;
         }
 
@@ -1295,6 +1297,7 @@ namespace BindingsGenerator
             type = type.Replace("ComponentVector", "Entity::ComponentVector");
             type = type.Replace("ComponentMap", "Entity::ComponentMap");
             type = type.Replace("ClientLoginState", "Client::ClientLoginState");
+            type = type.Replace("MouseButton", "MouseEvent::MouseButton");
             if (type == "vec")
                 type = "float3";
             return type;

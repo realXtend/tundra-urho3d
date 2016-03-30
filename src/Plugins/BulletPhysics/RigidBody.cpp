@@ -67,7 +67,7 @@ struct RigidBody::Impl : public btMotionState
     void setWorldTransform(const btTransform &worldTrans)
     {
         /// \todo For a large scene, applying the changed transforms of rigid bodies is slow (slower than the physics simulation itself,
-        /// or handling collisions) due to the large number of Qt signals being fired.
+        /// or handling collisions) due to the large number of signals being fired.
     
         // Cannot modify server-authoritative physics object, rather get the transform changes through placeable attributes
         const bool hasAuthority = rigidBody->HasAuthority();

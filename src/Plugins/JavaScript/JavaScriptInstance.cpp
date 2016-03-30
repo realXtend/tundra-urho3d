@@ -126,7 +126,7 @@ void JavaScriptInstance::CreateEngine()
 {
     ctx_ = duk_create_heap_default();
     instanceMap[ctx_] = this;
-    Evaluate(signalSupportCode);
+    Evaluate(signalSupportCode, "JSInstanceInternal");
 
     Script *ec = dynamic_cast<Script*>(owner_.Get());
     module_->PrepareScriptInstance(this, ec);
@@ -298,7 +298,7 @@ void JavaScriptInstance::Run()
         String scriptSourceFilename = (useAssets ? scriptRefs_[i]->Name() : sourceFile_);
         const String &scriptContent = (useAssets ? scriptRefs_[i]->scriptContent : program_);
 
-        if (!Evaluate(scriptContent))
+        if (!Evaluate(scriptContent, scriptSourceFilename))
             break;
     }
 
@@ -306,18 +306,19 @@ void JavaScriptInstance::Run()
     ScriptEvaluated.Emit(this);
 }
 
-bool JavaScriptInstance::Evaluate(const String& script)
+bool JavaScriptInstance::Evaluate(const String& script, const String& fileName)
 {
     if (!ctx_)
     {
-        LogError("JavascriptInstance::Run: Cannot evaluate, script engine not created.");
+        LogError("[Javascript] Cannot evaluate, script engine not created.");
         return false;
     }
 
     duk_push_string(ctx_, script.CString());
-    bool success = duk_peval(ctx_) == 0;
+    duk_push_string(ctx_, fileName.CString());
+    bool success = duk_eval_raw(ctx_, NULL, 0, DUK_COMPILE_EVAL | DUK_COMPILE_SAFE) == 0;
     if (!success)
-        LogError("[JavaScript] Evaluate: " + String(duk_safe_to_string(ctx_, -1)));
+        LogError("[JavaScript] Evaluate: " + GetErrorString(ctx_));
 
     duk_pop(ctx_); // Pop result/error
     return success;
@@ -327,7 +328,7 @@ bool JavaScriptInstance::Execute(const String& functionName, bool logError)
 {
     if (!ctx_)
     {
-        LogError("JavascriptInstance::Run: Cannot execute function " + functionName + ", script engine not created.");
+        LogError("[JavaScript] Cannot execute function " + functionName + ", script engine not created.");
         return false;
     }
 
@@ -337,7 +338,7 @@ bool JavaScriptInstance::Execute(const String& functionName, bool logError)
 
     bool success = duk_pcall(ctx_, 0) == 0;
     if (!success && logError)
-        LogError("[JavaScript] Execute: " + String(duk_safe_to_string(ctx_, -1)));
+        LogError("[JavaScript] Execute: " + GetErrorString(ctx_));
     duk_pop(ctx_); // Pop result/error
     return success;
 }
@@ -347,7 +348,7 @@ void JavaScriptInstance::IncludeFile(const String &path)
     for(uint i = 0; i < includedFiles_.Size(); ++i)
         if (includedFiles_[i].ToLower() == path.ToLower())
         {
-            LogDebug("JavaScript::IncludeFile: Not including already included file " + path);
+            LogDebug("[JavaScript] IncludeFile: Not including already included file " + path);
             return;
         }
 
@@ -358,7 +359,7 @@ void JavaScriptInstance::IncludeFile(const String &path)
     context->setThisObject(context->parentContext()->thisObject());
     */
 
-    Evaluate(script);
+    Evaluate(script, path);
     includedFiles_.Push(path);
 }
 
@@ -366,7 +367,7 @@ void JavaScriptInstance::RegisterService(const String& name, Urho3D::Object* obj
 {
     if (!ctx_)
     {
-        LogError("JavascriptInstance::RegisterService: Cannot register object, script engine not created.");
+        LogError("[JavaScript] RegisterService: Cannot register object, script engine not created.");
     }
 
     duk_push_global_object(ctx_);

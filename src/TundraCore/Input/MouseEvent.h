@@ -47,12 +47,12 @@ public:
         /// @note Must be the last one in the enum so that we don't break scripts or other instances that could be using number instead of the symbol.
     };
 
-    /// PressOrigin tells whether a mouse press originated on top of a Qt widget or on top of the 3D scene area.
+    /// PressOrigin tells whether a mouse press originated on top of a UI element or on top of the 3D scene area.
     enum PressOrigin
     {
         PressOriginNone = 0, ///< No press of the given type has been registered.
         PressOriginScene,
-        PressOriginQtWidget
+        PressOriginUiElement
     };
 
     EventType eventType;
@@ -60,7 +60,7 @@ public:
     /// The button that this event corresponds to.
     MouseButton button;
 
-    /// If eventType==MousePress, this field tells whether the click originates on the 3D scene or on a Qt widget.
+    /// If eventType==MousePress, this field tells whether the click originates on the 3D scene or on a UI element.
     PressOrigin origin;
 
     // The mouse coordinates in the client coordinate area.
@@ -83,7 +83,6 @@ public:
     unsigned long otherButtons;
 
     /// A bitfield of the keyboard modifiers (Ctrl, Shift, ...) associated with this key event.
-    /// Use Qt::KeyboardModifier, http://qt-project.org/doc/qt-4.8/qt.html#KeyboardModifier-enum to access these.
     /// @sa HasShiftModifier, HasCtrlModifier, HasAltModifier
     unsigned long modifiers;
 
@@ -114,9 +113,7 @@ public:
     PressPositions mousePressPositions;
 
     /// This field is used as an accept/suppression flag. When you are handling this event, settings this to true signals that
-    /// your module handled this event, and it should not be passed on to Qt for further processing. Of course you can
-    /// leave this as false even after you handle this event, in case you don't care whether Qt gets this event as well or not.
-    /// By default, this field is set to false when the event is fired to the event queue.
+    /// your module handled this event, and it should not be passed on to further processing.
     bool handled;
 
     /// Wall clock time when the event occurred.

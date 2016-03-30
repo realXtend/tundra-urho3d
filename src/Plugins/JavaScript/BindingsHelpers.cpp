@@ -260,6 +260,23 @@ void PushWeakObject(duk_context* ctx, Object* object)
         return;
     }
 
+    duk_push_heap_stash(ctx);
+
+    // Check if the wrapper for the object already exists in stash
+    // This is required so that comparisons of object references (e.g. against the me property) work properly
+    if (duk_has_prop_index(ctx, -1, (size_t)object))
+    {
+        duk_get_prop_index(ctx, -1, (size_t)object);
+        WeakPtr<Object>* oldPtr = GetWeakPtr(ctx, -1);
+        if (oldPtr && oldPtr->Get() == object)
+        {
+            duk_remove(ctx, -2); // Remove stash
+            return;
+        }
+        else
+            duk_pop(ctx); // Valid existing wrapper not found
+    }
+
     duk_push_object(ctx);
     WeakPtr<Object>* ptr = new WeakPtr<Object>(object);
     duk_push_pointer(ctx, ptr);
@@ -285,6 +302,11 @@ void PushWeakObject(duk_context* ctx, Object* object)
         SetupProxy(ctx, EntityProxyFunctions);
     else if (dynamic_cast<IComponent*>(object))
         SetupProxy(ctx, ComponentProxyFunctions);
+
+    // Store to stash
+    duk_dup(ctx, -1);
+    duk_put_prop_index(ctx, -3, (size_t)object);
+    duk_remove(ctx, -2); // Remove stash
 }
 
 void SetupProxy(duk_context* ctx, const duk_function_list_entry* funcs)
@@ -473,6 +495,15 @@ void AssignAttributeValue(duk_context* ctx, duk_idx_t stackIndex, IAttribute* de
     case IAttribute::AssetReferenceListId:
         if (duk_is_object(ctx, stackIndex) && strcmp(GetValueObjectType(ctx, stackIndex), AssetReferenceList_ID) == 0)
             static_cast<Attribute<AssetReferenceList>*>(destAttr)->Set(*GetValueObject<AssetReferenceList>(ctx, stackIndex, nullptr), change);
+        // Also allow assigning a single AssetReference to an AssetReferenceList
+        else if (duk_is_object(ctx, stackIndex) && strcmp(GetValueObjectType(ctx, stackIndex), AssetReference_ID) == 0)
+        {
+            const AssetReference& ref = *GetValueObject<AssetReference>(ctx, stackIndex, nullptr);
+            AssetReferenceList list;
+            list.type = ref.type;
+            list.Append(ref);
+            static_cast<Attribute<AssetReferenceList>*>(destAttr)->Set(list);
+        }
         break;
     }
 }
@@ -568,6 +599,23 @@ void CallDisconnectSignal(duk_context* ctx, void* signal)
         signalReceivers.Erase(signal);
     }
     duk_pop(ctx); // Result
+}
+
+static int GetStackRaw(duk_context *ctx)
+{
+    if (!duk_is_object(ctx, -1) || !duk_has_prop_string(ctx, -1, "stack") || !duk_is_error(ctx, -1))
+        return 1;
+
+    duk_get_prop_string(ctx, -1, "stack");
+    duk_remove(ctx, -2);
+    return 1;
+}
+
+Tundra::String GetErrorString(duk_context* ctx)
+{
+    duk_safe_call(ctx, GetStackRaw, 1, 1);
+    const char* str = duk_safe_to_string(ctx, -1);
+    return String(str);
 }
 
 }

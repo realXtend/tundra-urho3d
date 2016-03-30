@@ -52,7 +52,7 @@ public:
         PushWeakObject(ctx, param0);
         duk_put_prop_index(ctx, -2, 0);
         bool success = duk_pcall(ctx, 2) == 0;
-        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
         duk_pop(ctx);
     }
 };
@@ -144,7 +144,7 @@ public:
         PushWeakObject(ctx, param0);
         duk_put_prop_index(ctx, -2, 0);
         bool success = duk_pcall(ctx, 2) == 0;
-        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
         duk_pop(ctx);
     }
 };
@@ -207,15 +207,6 @@ static duk_ret_t JavaScriptInstance_Get_ScriptUnloading(duk_context* ctx)
     return 1;
 }
 
-static duk_ret_t JavaScriptInstance_Evaluate_String(duk_context* ctx)
-{
-    JavaScriptInstance* thisObj = GetThisWeakObject<JavaScriptInstance>(ctx);
-    String script = duk_require_string(ctx, 0);
-    bool ret = thisObj->Evaluate(script);
-    duk_push_boolean(ctx, ret);
-    return 1;
-}
-
 static duk_ret_t JavaScriptInstance_Execute_String_bool(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -244,8 +235,7 @@ static duk_ret_t JavaScriptInstance_IsEvaluated(duk_context* ctx)
 }
 
 static const duk_function_list_entry JavaScriptInstance_Functions[] = {
-    {"Evaluate", JavaScriptInstance_Evaluate_String, 1}
-    ,{"Execute", JavaScriptInstance_Execute_String_bool, DUK_VARARGS}
+    {"Execute", JavaScriptInstance_Execute_String_bool, DUK_VARARGS}
     ,{"IncludeFile", JavaScriptInstance_IncludeFile_String, 1}
     ,{"IsEvaluated", JavaScriptInstance_IsEvaluated, 0}
     ,{nullptr, nullptr, 0}

@@ -26,10 +26,10 @@ class Framework;
 
     Input events are processed in the following order:
         1) Very first, when a new input event is received, it is posted to the top level input context.
-           See TopLevelInputContext(). This is already before any Qt widgets get the
+           See TopLevelInputContext(). This is already before any UI elements get the
            chance to process the event.
-        2) If the event is a mouse event that occurs on top of a Qt widget, or the event is a key event
-           and a Qt widget has keyboard focus, the event is passed to Qt, and suppressed from going
+        2) If the event is a mouse event that occurs on top of a UI element, or the event is a key event
+           and a UI element has keyboard focus, the event is passed to UI and suppressed from going
            further.
         3) The event is posted to all the registered input contexts in their order of priority. See 
            RegisterInputContext().
@@ -113,9 +113,9 @@ public:
     bool IsMouseCursorVisible() const;
 
     /// Returns true if the given key is physically held down.
-    /** This is done to the best knowledge of the input API, which may be wrong depending on whether Qt has managed
-        to successfully deliver the information). This ignores all the grabs and contexts, e.g. you will get true 
-        even if a text edit has focus in a Qt widget.
+    /** This is done to the best knowledge of the input API, which may be wrong depending on whether Urho's input subsystem has managed
+        to successfully receive the information). This ignores all the grabs and contexts, e.g. you will get true 
+        even if a text edit has focus in a UI element.
         @param keyCode Urho3D keycode */
     bool IsKeyDown(Key keyCode) const;
 
@@ -173,7 +173,7 @@ public:
     /// Returns the current mouse position in the main window coordinate space. [property]
     Point MousePos() const;
 
-    /// Returns the highest-priority input context that gets all events first to handle (even before going to Qt widgets).
+    /// Returns the highest-priority input context that gets all events first to handle (even before going to UI elements).
     /** You may register your own keyboard and mouse handlers in this context and block events from going to the main window
         (by setting the .handled member of the event to true), but be very careful when doing so. */
     InputContext *TopLevelInputContext() { return &topLevelInputContext; }
@@ -239,7 +239,7 @@ private:
     MouseEvent::PressPositions mousePressPositions;
 
     // The last known mouse coordinates in window client coordinate space. These are not necessarily the coordinates from previous frame,
-    // but from the previous Qt mouse input event.
+    // but from the previous mouse input event.
     int lastMouseX;
     int lastMouseY;
 
@@ -267,7 +267,7 @@ private:
     InputContextList registeredInputContexts;
 
     /// This input context is processed immediately as the first thing in the system. I.e. before even checking whether the
-    /// input event should be passed to Qt.
+    /// input event should be passed to the UI subsystem
     InputContext topLevelInputContext;
 
     /// Stores all the keyboard mappings we have gathered.
@@ -282,12 +282,12 @@ private:
     /// Lists the keycodes of buttons that are taken to have been pressed down during this Update() cycle.
     Vector<Key> releasedKeys;
 
-    /// An internal queue where all new Qt keypress events are stored before they are advertised for callers of IsKeyPressed().
+    /// An internal queue where all new keypress events are stored before they are advertised for callers of IsKeyPressed().
     /// This queue is used to avoid key presses being missed between Update() cycles, i.e. so that the module Updates
     /// may get called in any order.
     Vector<Key> newKeysPressedQueue;
 
-    /// An internal queue where all new Qt keyrelease events are stored before they are advertised for callers of IsKeyReleased().
+    /// An internal queue where all new keyrelease events are stored before they are advertised for callers of IsKeyReleased().
     /// This queue is used to avoid key releases being missed between Update() cycles, i.e. so that the module Updates
     /// may get called in any order.
     Vector<Key> newKeysReleasedQueue;

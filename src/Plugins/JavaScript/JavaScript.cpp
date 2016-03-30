@@ -17,6 +17,8 @@
 #include "MathBindings/MathBindings.h"
 #include "CoreBindings/CoreBindings.h"
 #include "JavaScriptBindings/JavaScriptBindings.h"
+#include "Asset/LocalAssetProvider.h"
+#include "Asset/LocalAssetStorage.h"
 
 #include <Urho3D/Core/Profiler.h>
 #include <Urho3D/IO/FileSystem.h>
@@ -56,6 +58,12 @@ void JavaScript::Initialize()
         this, &JavaScript::LoadStartupScripts);
         
     framework->Scene()->SceneCreated.Connect(this, &JavaScript::OnSceneCreated);
+
+    // Add the local asset storage for jsmodules dir
+    String jsAssetDir = framework->InstallationDirectory() + "jsmodules";
+    LocalAssetStoragePtr storage = framework->Asset()->AssetProvider<LocalAssetProvider>()->AddStorageDirectory(jsAssetDir, "Javascript", true, false);
+    storage->SetReplicated(false); // If we are a server, don't pass this storage to the client.
+
 
     // Initialize startup scripts
     LoadStartupScripts();
@@ -126,7 +134,7 @@ void JavaScript::OnScriptAssetsChanged(Script* scriptComp, const Vector<ScriptAs
     // First clean up any previous running script from, if any exists.
     scriptComp->SetScriptInstance(0);
 
-    if (newScripts[0]->Name().EndsWith(".js")) // We're positively using QtScript.
+    if (newScripts[0]->Name().EndsWith(".js")) // We're positively using JavaScript.
     {
         JavaScriptInstance *jsInstance = new JavaScriptInstance(newScripts, this, scriptComp);
 
@@ -444,7 +452,7 @@ void JavaScript::RunString(const String& codeString)
 {
     if (!defaultInstance_)
         defaultInstance_ = new JavaScriptInstance(this);
-    defaultInstance_->Evaluate(codeString);
+    defaultInstance_->Evaluate(codeString, "ImmediateString");
 }
 
 void JavaScript::RunScript(const String& scriptFile)
@@ -453,7 +461,7 @@ void JavaScript::RunScript(const String& scriptFile)
         defaultInstance_ = new JavaScriptInstance(this);
     String script = defaultInstance_->LoadScript(scriptFile);
     if (script.Length() > 0)
-        defaultInstance_->Evaluate(script);
+        defaultInstance_->Evaluate(script, scriptFile);
 }
 
 void JavaScript::RunStringCommand(const StringVector& params)

@@ -55,8 +55,8 @@ public:
     /// IScriptInstance override. [noscript]
     void Run();
 
-    /// Evaluate JavaScript in the instance.
-    bool Evaluate(const String& script);
+    /// Evaluate JavaScript in the instance. [noscript]
+    bool Evaluate(const String& script, const String& fileName);
 
     /// Call a global function. \todo Parameter passing & return value
     bool Execute(const String& functionName, bool logError = true);

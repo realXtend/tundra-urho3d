@@ -32,6 +32,21 @@ static duk_ret_t Point_Finalizer(duk_context* ctx)
 
 static const char* MouseEvent_ID = "MouseEvent";
 
+static duk_ret_t MouseEvent_Set_button(duk_context* ctx)
+{
+    MouseEvent* thisObj = GetThisWeakObject<MouseEvent>(ctx);
+    MouseEvent::MouseButton button = (MouseEvent::MouseButton)(int)duk_require_number(ctx, 0);
+    thisObj->button = button;
+    return 0;
+}
+
+static duk_ret_t MouseEvent_Get_button(duk_context* ctx)
+{
+    MouseEvent* thisObj = GetThisWeakObject<MouseEvent>(ctx);
+    duk_push_number(ctx, thisObj->button);
+    return 1;
+}
+
 static duk_ret_t MouseEvent_Set_x(duk_context* ctx)
 {
     MouseEvent* thisObj = GetThisWeakObject<MouseEvent>(ctx);
@@ -246,6 +261,14 @@ static duk_ret_t MouseEvent_GlobalY(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t MouseEvent_Button(duk_context* ctx)
+{
+    MouseEvent* thisObj = GetThisWeakObject<MouseEvent>(ctx);
+    MouseEvent::MouseButton ret = thisObj->Button();
+    duk_push_number(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t MouseEvent_Timestamp(duk_context* ctx)
 {
     MouseEvent* thisObj = GetThisWeakObject<MouseEvent>(ctx);
@@ -276,6 +299,15 @@ static duk_ret_t MouseEvent_MousePressedPos_int(duk_context* ctx)
     int mouseButton = (int)duk_require_number(ctx, 0);
     Point ret = thisObj->MousePressedPos(mouseButton);
     PushValueObjectCopy<Point>(ctx, ret, Point_ID, Point_Finalizer);
+    return 1;
+}
+
+static duk_ret_t MouseEvent_IsButtonDown_MouseButton(duk_context* ctx)
+{
+    MouseEvent* thisObj = GetThisWeakObject<MouseEvent>(ctx);
+    MouseEvent::MouseButton button_ = (MouseEvent::MouseButton)(int)duk_require_number(ctx, 0);
+    bool ret = thisObj->IsButtonDown(button_);
+    duk_push_boolean(ctx, ret);
     return 1;
 }
 
@@ -344,10 +376,12 @@ static const duk_function_list_entry MouseEvent_Functions[] = {
     ,{"RelativeZ", MouseEvent_RelativeZ, 0}
     ,{"GlobalX", MouseEvent_GlobalX, 0}
     ,{"GlobalY", MouseEvent_GlobalY, 0}
+    ,{"Button", MouseEvent_Button, 0}
     ,{"Timestamp", MouseEvent_Timestamp, 0}
     ,{"Suppress", MouseEvent_Suppress, 0}
     ,{"HadKeyDown", MouseEvent_HadKeyDown_int, 1}
     ,{"MousePressedPos", MouseEvent_MousePressedPos_int, 1}
+    ,{"IsButtonDown", MouseEvent_IsButtonDown_MouseButton, 1}
     ,{"IsLeftButtonDown", MouseEvent_IsLeftButtonDown, 0}
     ,{"IsMiddleButtonDown", MouseEvent_IsMiddleButtonDown, 0}
     ,{"IsRightButtonDown", MouseEvent_IsRightButtonDown, 0}
@@ -392,9 +426,10 @@ void Expose_MouseEvent(duk_context* ctx)
     duk_push_number(ctx, 1);
     duk_put_prop_string(ctx, -2, "PressOriginScene");
     duk_push_number(ctx, 2);
-    duk_put_prop_string(ctx, -2, "PressOriginQtWidget");
+    duk_put_prop_string(ctx, -2, "PressOriginUiElement");
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, MouseEvent_Functions);
+    DefineProperty(ctx, "button", MouseEvent_Get_button, MouseEvent_Set_button);
     DefineProperty(ctx, "x", MouseEvent_Get_x, MouseEvent_Set_x);
     DefineProperty(ctx, "y", MouseEvent_Get_y, MouseEvent_Set_y);
     DefineProperty(ctx, "z", MouseEvent_Get_z, MouseEvent_Set_z);

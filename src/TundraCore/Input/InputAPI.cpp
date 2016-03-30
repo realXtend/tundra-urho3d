@@ -332,13 +332,10 @@ void InputAPI::TriggerKeyEvent(KeyEvent &key)
     assert(key.eventType != KeyEvent::KeyEventInvalid);
     assert(key.handled == false);
 
-    // First, we pass the key to the global top level input context, which operates above Qt widget input.
+    // First, we pass the key to the global top level input context, which operates above UI element input.
     topLevelInputContext.TriggerKeyEvent(key);
     if (key.handled) // Convert a Pressed event to a Released event if it was suppressed, so that lower contexts properly let go of the key.
         key.eventType = KeyEvent::KeyReleased;
-
-    // If the mouse cursor is hidden, we treat each InputContext as if it had TakesKeyboardEventsOverQt true.
-    // This is because when the mouse cursor is hidden, no key input should go to the main 2D UI window.
 
     // Pass the event to all input contexts in the priority order.
     for(auto iter = registeredInputContexts.Begin(); iter != registeredInputContexts.End(); ++iter)
@@ -350,7 +347,7 @@ void InputAPI::TriggerKeyEvent(KeyEvent &key)
             key.eventType = KeyEvent::KeyReleased;
     }
 
-    // If the mouse cursor is hidden, all key events should go to the 'scene' - In that case, suppress all key events from going to the main 2D Qt window.
+    // If the mouse cursor is hidden, all key events should go to the 'scene' - In that case, suppress all key events from going to the main window.
     if (!IsMouseCursorVisible())
         key.Suppress();
 }
@@ -367,13 +364,10 @@ void InputAPI::TriggerMouseEvent(MouseEvent &mouse)
     // the client can do proper drag tracking.
     mouse.mousePressPositions = mousePressPositions;
 
-    // First, we pass the event to the global top level input context, which operates above Qt widget input.
+    // First, we pass the event to the global top level input context, which operates above UI element input.
     topLevelInputContext.TriggerMouseEvent(mouse);
     if (mouse.handled)
         return;
-
-    // If the mouse cursor is hidden, we treat each InputContext as if it had TakesMouseEventsOverQt true.
-    // This is because when the mouse cursor is hidden, no mouse input should go to the main 2D UI window.
 
     // Pass the event to all input contexts in the priority order.
     for(auto iter = registeredInputContexts.Begin(); iter != registeredInputContexts.End(); ++iter)
@@ -385,7 +379,7 @@ void InputAPI::TriggerMouseEvent(MouseEvent &mouse)
             context->TriggerMouseEvent(mouse);
     }
 
-    // If the mouse cursor is hidden, all mouse events should go to the 'scene' - In that case, suppress all mouse events from going to the main 2D Qt window.
+    // If the mouse cursor is hidden, all mouse events should go to the 'scene' - In that case, suppress all mouse events from going to the main window.
     if (!IsMouseCursorVisible())
         mouse.Suppress();
 }
@@ -481,7 +475,7 @@ void InputAPI::EventFilter(StringHash eventType, VariantMap& eventData)
 
         TriggerKeyEvent(keyEvent);
 
-        return; // If we got true here, need to suppress this event from going to Qt.
+        return; // If we got true here, need to suppress this event.
     }
 
     else if (eventType == Urho3D::E_KEYUP)
@@ -508,7 +502,7 @@ void InputAPI::EventFilter(StringHash eventType, VariantMap& eventData)
         heldKeys.Erase(existingKey);
         currentModifiers = eventData[Urho3D::KeyDown::P_QUALIFIERS].GetInt(); // local tracking for mouse events
 
-        // Queue up the release event for the polling API, independent of whether any Qt widget has keyboard focus.
+        // Queue up the release event for the polling API, independent of whether any UI element has keyboard focus.
         if (keyEvent.keyPressCount == 1) /// \todo The polling API does not get key repeats at all. Should it?
             newKeysReleasedQueue.Push(eventData[Urho3D::KeyDown::P_KEY].GetInt());
 
@@ -520,7 +514,7 @@ void InputAPI::EventFilter(StringHash eventType, VariantMap& eventData)
     else if (eventType == Urho3D::E_MOUSEBUTTONDOWN || eventType == Urho3D::E_MOUSEBUTTONUP)
     {
         // We always update the global polled input states, independent of whether any the mouse cursor is
-        // on top of any Qt widget.
+        // on top of any UI element
         if (eventType == Urho3D::E_MOUSEBUTTONDOWN)
         {
             heldMouseButtons |= eventData[Urho3D::MouseButtonDown::P_BUTTON].GetInt();  //(MouseEvent::MouseButton)e->button();

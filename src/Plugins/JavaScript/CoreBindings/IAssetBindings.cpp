@@ -61,7 +61,7 @@ public:
         PushWeakObject(ctx, param0);
         duk_put_prop_index(ctx, -2, 0);
         bool success = duk_pcall(ctx, 2) == 0;
-        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
         duk_pop(ctx);
     }
 };
@@ -153,7 +153,7 @@ public:
         PushWeakObject(ctx, param0);
         duk_put_prop_index(ctx, -2, 0);
         bool success = duk_pcall(ctx, 2) == 0;
-        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
         duk_pop(ctx);
     }
 };
@@ -245,7 +245,7 @@ public:
         PushWeakObject(ctx, param0);
         duk_put_prop_index(ctx, -2, 0);
         bool success = duk_pcall(ctx, 2) == 0;
-        if (!success) LogError("[JavaScript] OnSignal: " + String(duk_safe_to_string(ctx, -1)));
+        if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
         duk_pop(ctx);
     }
 };

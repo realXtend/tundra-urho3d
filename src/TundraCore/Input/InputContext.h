@@ -65,8 +65,7 @@ public:
     Signal1<MouseEvent*> MouseDoubleClicked;
 
     // The following signals are emitted on the appropriate events. It is guaranteed that each press event
-    // will follow a corresponding release event (although if it gets lost from Qt, it might get delayed
-    // until we actually notice it).
+    // will follow a corresponding release event
     Signal1<MouseEvent*> MouseLeftPressed;
     Signal1<MouseEvent*> MouseMiddlePressed;
     Signal1<MouseEvent*> MouseRightPressed;
@@ -185,7 +184,7 @@ private:
 
     /// Stores a buffered version of all the key pressed. This is to avoid losing any press or
     /// release events in the case of different module Update() orders, or when accessing the
-    /// context from Qt event handlers outside Update() cycle.
+    /// context from event handlers outside Update() cycle.
     HeldKeysMap heldKeysBuffered;
 
     /// Tests both newKeyEvents and heldKeysBuffered and looks if this context is aware of the

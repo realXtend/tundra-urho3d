@@ -26,19 +26,15 @@ public:
     VariantMap urhoEvent;
 
     /// The key code associated with this key event.
-    /// See Qt::Key from http://qt-project.org/doc/qt-4.8/qt.html#Key-enum
     /// @note This member stores the pressed key without keyboard modifiers attached.
-    /// @note Due to QtScript incompatibility, all unicode values are presented as Qt::Key_unknown. Use KeyEvent::text to retrieve the unicode value for this key
     Key keyCode;
 
     /// How many times this key event has been pressed during the time the key has been held down. If 1, this means a new 
     /// keypress. If >1, this means that this event is being raised on a key repeat event, and this field increments by
     /// one for each time the repeat signal is received.
-    /// @note It seems that Qt sends repeats OK for character keys, but it never repeats modifier keys.
     int keyPressCount;
 
     /// A bitfield of the keyboard modifiers (Ctrl, Shift, ...) associated with this key event.
-    /// Use Qt::KeyboardModifier, http://qt-project.org/doc/qt-4.8/qt.html#KeyboardModifier-enum to access these.
     /// Also see \see KeyEvent::HasShiftModifier.
     unsigned long modifiers;
 
@@ -61,15 +57,12 @@ public:
     /// @note Only valid/used for KeyPressed events.
     KeySequence sequence;
 
-    /// Contains Qt's keycodes for all other keys that are being pressed when this key was pressed.
-    /// See Qt::Key, http://qt-project.org/doc/qt-4.8/qt.html#Key-enum
+    /// Contains keycodes for all other keys that are being pressed when this key was pressed.
     /// This member is only valid when eventType==KeyPressed.
     Vector<Key> otherHeldKeys;
 
     /// This field is used as an accept/suppression flag. When you are handling this event, settings this to true signals that
-    /// your module handled this keyevent, and it should not be passed on to Qt for further processing. Of course you can
-    /// leave this as false even after you handle this event, in case you don't care whether Qt gets this event as well or not.
-    /// By default, this field is set to false when the event is fired to the event queue.
+    /// your module handled this keyevent, and it should not be passed on to further processing.
     bool handled;
 
     /// Wall clock time when the event occurred.
