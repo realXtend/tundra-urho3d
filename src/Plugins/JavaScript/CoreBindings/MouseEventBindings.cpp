@@ -32,6 +32,21 @@ static duk_ret_t Point_Finalizer(duk_context* ctx)
 
 static const char* MouseEvent_ID = "MouseEvent";
 
+static duk_ret_t MouseEvent_Set_eventType(duk_context* ctx)
+{
+    MouseEvent* thisObj = GetThisWeakObject<MouseEvent>(ctx);
+    MouseEvent::EventType eventType = (MouseEvent::EventType)(int)duk_require_number(ctx, 0);
+    thisObj->eventType = eventType;
+    return 0;
+}
+
+static duk_ret_t MouseEvent_Get_eventType(duk_context* ctx)
+{
+    MouseEvent* thisObj = GetThisWeakObject<MouseEvent>(ctx);
+    duk_push_number(ctx, thisObj->eventType);
+    return 1;
+}
+
 static duk_ret_t MouseEvent_Set_button(duk_context* ctx)
 {
     MouseEvent* thisObj = GetThisWeakObject<MouseEvent>(ctx);
@@ -261,6 +276,14 @@ static duk_ret_t MouseEvent_GlobalY(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t MouseEvent_Type(duk_context* ctx)
+{
+    MouseEvent* thisObj = GetThisWeakObject<MouseEvent>(ctx);
+    MouseEvent::EventType ret = thisObj->Type();
+    duk_push_number(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t MouseEvent_Button(duk_context* ctx)
 {
     MouseEvent* thisObj = GetThisWeakObject<MouseEvent>(ctx);
@@ -376,6 +399,7 @@ static const duk_function_list_entry MouseEvent_Functions[] = {
     ,{"RelativeZ", MouseEvent_RelativeZ, 0}
     ,{"GlobalX", MouseEvent_GlobalX, 0}
     ,{"GlobalY", MouseEvent_GlobalY, 0}
+    ,{"Type", MouseEvent_Type, 0}
     ,{"Button", MouseEvent_Button, 0}
     ,{"Timestamp", MouseEvent_Timestamp, 0}
     ,{"Suppress", MouseEvent_Suppress, 0}
@@ -429,6 +453,7 @@ void Expose_MouseEvent(duk_context* ctx)
     duk_put_prop_string(ctx, -2, "PressOriginUiElement");
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, MouseEvent_Functions);
+    DefineProperty(ctx, "eventType", MouseEvent_Get_eventType, MouseEvent_Set_eventType);
     DefineProperty(ctx, "button", MouseEvent_Get_button, MouseEvent_Set_button);
     DefineProperty(ctx, "x", MouseEvent_Get_x, MouseEvent_Set_x);
     DefineProperty(ctx, "y", MouseEvent_Get_y, MouseEvent_Set_y);

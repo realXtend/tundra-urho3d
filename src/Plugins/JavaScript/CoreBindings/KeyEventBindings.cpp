@@ -53,6 +53,21 @@ static duk_ret_t KeyEvent_Get_keyPressCount(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t KeyEvent_Set_eventType(duk_context* ctx)
+{
+    KeyEvent* thisObj = GetThisWeakObject<KeyEvent>(ctx);
+    KeyEvent::EventType eventType = (KeyEvent::EventType)(int)duk_require_number(ctx, 0);
+    thisObj->eventType = eventType;
+    return 0;
+}
+
+static duk_ret_t KeyEvent_Get_eventType(duk_context* ctx)
+{
+    KeyEvent* thisObj = GetThisWeakObject<KeyEvent>(ctx);
+    duk_push_number(ctx, thisObj->eventType);
+    return 1;
+}
+
 static duk_ret_t KeyEvent_Set_text(duk_context* ctx)
 {
     KeyEvent* thisObj = GetThisWeakObject<KeyEvent>(ctx);
@@ -145,6 +160,14 @@ static duk_ret_t KeyEvent_KeyCode(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t KeyEvent_Type(duk_context* ctx)
+{
+    KeyEvent* thisObj = GetThisWeakObject<KeyEvent>(ctx);
+    KeyEvent::EventType ret = thisObj->Type();
+    duk_push_number(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t KeyEvent_Timestamp(duk_context* ctx)
 {
     KeyEvent* thisObj = GetThisWeakObject<KeyEvent>(ctx);
@@ -222,6 +245,7 @@ static const duk_function_list_entry KeyEvent_Functions[] = {
     ,{"Text", KeyEvent_Text, 0}
     ,{"KeyPressCount", KeyEvent_KeyPressCount, 0}
     ,{"KeyCode", KeyEvent_KeyCode, 0}
+    ,{"Type", KeyEvent_Type, 0}
     ,{"Timestamp", KeyEvent_Timestamp, 0}
     ,{"Suppress", KeyEvent_Suppress, 0}
     ,{"IsRepeat", KeyEvent_IsRepeat, 0}
@@ -249,6 +273,7 @@ void Expose_KeyEvent(duk_context* ctx)
     duk_put_function_list(ctx, -1, KeyEvent_Functions);
     DefineProperty(ctx, "keyCode", KeyEvent_Get_keyCode, KeyEvent_Set_keyCode);
     DefineProperty(ctx, "keyPressCount", KeyEvent_Get_keyPressCount, KeyEvent_Set_keyPressCount);
+    DefineProperty(ctx, "eventType", KeyEvent_Get_eventType, KeyEvent_Set_eventType);
     DefineProperty(ctx, "text", KeyEvent_Get_text, KeyEvent_Set_text);
     DefineProperty(ctx, "sequence", KeyEvent_Get_sequence, KeyEvent_Set_sequence);
     DefineProperty(ctx, "handled", KeyEvent_Get_handled, KeyEvent_Set_handled);

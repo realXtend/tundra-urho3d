@@ -42,6 +42,7 @@ namespace BindingsGenerator
         static Dictionary<string, string> classHeaderFiles = new Dictionary<string, string>();
         static Dictionary<string, bool> isRefCounted = new Dictionary<string, bool>();
         static string[] headerFiles = null;
+        static string currentClassName = "";
         
         // Dependency classes that are always supported in bindings
         static string[] dependencyNames = {"float2", "float3", "float4", "Quat", "float3x3", "float3x4", "float4x4", "Ray", "Color", "Point",  "RayQueryResult", "Transform", "Entity", "AttributeChange", "IComponent", "IAsset", "IAssetStorage", "IAssetTransfer"};
@@ -140,6 +141,7 @@ namespace BindingsGenerator
             string namespaceName = ExtractNamespace(classSymbol.name);
 
             Console.WriteLine("Generating bindings for " + className);
+            currentClassName = className;
 
             TextWriter tw = new StreamWriter(outputDirectory + "/" + className + "Bindings.cpp");
             tw.WriteLine("// For conditions of distribution and use, see copyright notice in LICENSE");
@@ -273,7 +275,7 @@ namespace BindingsGenerator
                 typeName = SanitateTypeForFunction(typeName);
                 if (typeName == "double")
                     return typeName + " " + varName + " = duk_require_number(ctx, " + stackIndex + ");";
-                else if (typeName == "AttributeChange::Type" || typeName == "ClientLoginState" || typeName == "MouseEvent::MouseButton")
+                else if (typeName == "ClientLoginState" || typeName.Contains("::"))
                     return typeName + " " + varName + " = (" + typeName + ")(int)duk_require_number(ctx, " + stackIndex + ");"; 
                 else
                     return typeName + " " + varName + " = (" + typeName + ")duk_require_number(ctx, " + stackIndex + ");"; 
@@ -1298,6 +1300,10 @@ namespace BindingsGenerator
             type = type.Replace("ComponentMap", "Entity::ComponentMap");
             type = type.Replace("ClientLoginState", "Client::ClientLoginState");
             type = type.Replace("MouseButton", "MouseEvent::MouseButton");
+            if (type == "EventType" && currentClassName == "KeyEvent")
+                type = "KeyEvent::EventType";
+            if (type == "EventType" && currentClassName == "MouseEvent")
+                type = "MouseEvent::EventType";
             if (type == "vec")
                 type = "float3";
             return type;
