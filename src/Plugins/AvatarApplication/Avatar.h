@@ -6,6 +6,7 @@
 #include "AssetReference.h"
 #include "AvatarApi.h"
 #include "AssetFwd.h"
+#include "AvatarDescAsset.h"
 
 namespace Tundra
 {

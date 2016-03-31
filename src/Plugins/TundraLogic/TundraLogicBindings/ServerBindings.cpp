@@ -471,7 +471,7 @@ static duk_ret_t Server_UserConnectionById_u32(duk_context* ctx)
     Server* thisObj = GetThisWeakObject<Server>(ctx);
     u32 connectionID = (u32)duk_require_number(ctx, 0);
     UserConnectionPtr ret = thisObj->UserConnectionById(connectionID);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -479,7 +479,7 @@ static duk_ret_t Server_ActionSender(duk_context* ctx)
 {
     Server* thisObj = GetThisWeakObject<Server>(ctx);
     UserConnectionPtr ret = thisObj->ActionSender();
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 

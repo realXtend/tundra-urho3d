@@ -1110,7 +1110,7 @@ static duk_ret_t Scene_CreateEntity_entity_id_t_StringVector_AttributeChange__Ty
     bool componentsReplicated = numArgs > 4 ? duk_require_boolean(ctx, 4) : true;
     bool temporary = numArgs > 5 ? duk_require_boolean(ctx, 5) : false;
     EntityPtr ret = thisObj->CreateEntity(id, components, change, replicated, componentsReplicated, temporary);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -1123,7 +1123,7 @@ static duk_ret_t Scene_CreateLocalEntity_StringVector_AttributeChange__Type_bool
     bool componentsReplicated = numArgs > 2 ? duk_require_boolean(ctx, 2) : false;
     bool temporary = numArgs > 3 ? duk_require_boolean(ctx, 3) : false;
     EntityPtr ret = thisObj->CreateLocalEntity(components, change, componentsReplicated, temporary);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -1135,7 +1135,7 @@ static duk_ret_t Scene_CreateTemporaryEntity_StringVector_AttributeChange__Type_
     AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
     bool componentsReplicated = numArgs > 2 ? duk_require_boolean(ctx, 2) : true;
     EntityPtr ret = thisObj->CreateTemporaryEntity(components, change, componentsReplicated);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -1146,7 +1146,7 @@ static duk_ret_t Scene_CreateLocalTemporaryEntity_StringVector_AttributeChange__
     StringVector components = numArgs > 0 ? GetStringVector(ctx, 0) : StringVector();
     AttributeChange::Type change = numArgs > 1 ? (AttributeChange::Type)(int)duk_require_number(ctx, 1) : AttributeChange::Default;
     EntityPtr ret = thisObj->CreateLocalTemporaryEntity(components, change);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -1195,7 +1195,7 @@ static duk_ret_t Scene_EntityById_entity_id_t(duk_context* ctx)
     Scene* thisObj = GetThisWeakObject<Scene>(ctx);
     entity_id_t id = (entity_id_t)duk_require_number(ctx, 0);
     EntityPtr ret = thisObj->EntityById(id);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -1204,7 +1204,7 @@ static duk_ret_t Scene_EntityByName_String(duk_context* ctx)
     Scene* thisObj = GetThisWeakObject<Scene>(ctx);
     String name = duk_require_string(ctx, 0);
     EntityPtr ret = thisObj->EntityByName(name);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 

@@ -55,7 +55,7 @@ public:
         duk_remove(ctx, -2);
         duk_push_number(ctx, (size_t)key_);
         duk_push_array(ctx);
-        PushWeakObject(ctx, param0);
+        PushWeakObject(ctx, param0.Get());
         duk_put_prop_index(ctx, -2, 0);
         bool success = duk_pcall(ctx, 2) == 0;
         if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
@@ -147,7 +147,7 @@ public:
         duk_remove(ctx, -2);
         duk_push_number(ctx, (size_t)key_);
         duk_push_array(ctx);
-        PushWeakObject(ctx, param0);
+        PushWeakObject(ctx, param0.Get());
         duk_put_prop_index(ctx, -2, 0);
         bool success = duk_pcall(ctx, 2) == 0;
         if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
@@ -239,7 +239,7 @@ public:
         duk_remove(ctx, -2);
         duk_push_number(ctx, (size_t)key_);
         duk_push_array(ctx);
-        PushWeakObject(ctx, param0);
+        PushWeakObject(ctx, param0.Get());
         duk_put_prop_index(ctx, -2, 0);
         bool success = duk_pcall(ctx, 2) == 0;
         if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
@@ -331,7 +331,7 @@ public:
         duk_remove(ctx, -2);
         duk_push_number(ctx, (size_t)key_);
         duk_push_array(ctx);
-        PushWeakObject(ctx, param0);
+        PushWeakObject(ctx, param0.Get());
         duk_put_prop_index(ctx, -2, 0);
         bool success = duk_pcall(ctx, 2) == 0;
         if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
@@ -423,7 +423,7 @@ public:
         duk_remove(ctx, -2);
         duk_push_number(ctx, (size_t)key_);
         duk_push_array(ctx);
-        PushWeakObject(ctx, param0);
+        PushWeakObject(ctx, param0.Get());
         duk_put_prop_index(ctx, -2, 0);
         bool success = duk_pcall(ctx, 2) == 0;
         if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
@@ -515,7 +515,7 @@ public:
         duk_remove(ctx, -2);
         duk_push_number(ctx, (size_t)key_);
         duk_push_array(ctx);
-        PushWeakObject(ctx, param0);
+        PushWeakObject(ctx, param0.Get());
         duk_put_prop_index(ctx, -2, 0);
         bool success = duk_pcall(ctx, 2) == 0;
         if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
@@ -791,7 +791,7 @@ public:
         duk_remove(ctx, -2);
         duk_push_number(ctx, (size_t)key_);
         duk_push_array(ctx);
-        PushWeakObject(ctx, param0);
+        PushWeakObject(ctx, param0.Get());
         duk_put_prop_index(ctx, -2, 0);
         bool success = duk_pcall(ctx, 2) == 0;
         if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
@@ -922,7 +922,7 @@ static duk_ret_t AssetAPI_RequestAsset_String_String_bool(duk_context* ctx)
     String assetType = numArgs > 1 ? duk_require_string(ctx, 1) : "";
     bool forceTransfer = numArgs > 2 ? duk_require_boolean(ctx, 2) : false;
     AssetTransferPtr ret = thisObj->RequestAsset(assetRef, assetType, forceTransfer);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -933,7 +933,7 @@ static duk_ret_t AssetAPI_RequestAsset_AssetReference_bool(duk_context* ctx)
     AssetReference& ref = *GetCheckedValueObject<AssetReference>(ctx, 0, AssetReference_ID);
     bool forceTransfer = numArgs > 1 ? duk_require_boolean(ctx, 1) : false;
     AssetTransferPtr ret = thisObj->RequestAsset(ref, forceTransfer);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -943,7 +943,7 @@ static duk_ret_t AssetAPI_CreateNewAsset_String_String(duk_context* ctx)
     String type = duk_require_string(ctx, 0);
     String name = duk_require_string(ctx, 1);
     AssetPtr ret = thisObj->CreateNewAsset(type, name);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -953,7 +953,7 @@ static duk_ret_t AssetAPI_CreateNewAssetBundle_String_String(duk_context* ctx)
     String type = duk_require_string(ctx, 0);
     String name = duk_require_string(ctx, 1);
     AssetBundlePtr ret = thisObj->CreateNewAssetBundle(type, name);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -963,7 +963,7 @@ static duk_ret_t AssetAPI_CreateAssetFromFile_String_String(duk_context* ctx)
     String assetType = duk_require_string(ctx, 0);
     String assetFile = duk_require_string(ctx, 1);
     AssetPtr ret = thisObj->CreateAssetFromFile(assetType, assetFile);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -991,7 +991,7 @@ static duk_ret_t AssetAPI_FindAsset_String(duk_context* ctx)
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
     String assetRef = duk_require_string(ctx, 0);
     AssetPtr ret = thisObj->FindAsset(assetRef);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -1000,7 +1000,7 @@ static duk_ret_t AssetAPI_FindBundle_String(duk_context* ctx)
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
     String bundleRef = duk_require_string(ctx, 0);
     AssetBundlePtr ret = thisObj->FindBundle(bundleRef);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -1009,7 +1009,7 @@ static duk_ret_t AssetAPI_AssetStorageByName_String(duk_context* ctx)
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
     String name = duk_require_string(ctx, 0);
     AssetStoragePtr ret = thisObj->AssetStorageByName(name);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -1018,7 +1018,7 @@ static duk_ret_t AssetAPI_StorageForAssetRef_String(duk_context* ctx)
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
     String ref = duk_require_string(ctx, 0);
     AssetStoragePtr ret = thisObj->StorageForAssetRef(ref);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -1037,7 +1037,7 @@ static duk_ret_t AssetAPI_DeserializeAssetStorageFromString_String_bool(duk_cont
     String storage = duk_require_string(ctx, 0);
     bool fromNetwork = duk_require_boolean(ctx, 1);
     AssetStoragePtr ret = thisObj->DeserializeAssetStorageFromString(storage, fromNetwork);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -1045,7 +1045,7 @@ static duk_ret_t AssetAPI_DefaultAssetStorage(duk_context* ctx)
 {
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
     AssetStoragePtr ret = thisObj->DefaultAssetStorage();
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -1145,7 +1145,7 @@ static duk_ret_t AssetAPI_PendingTransfer_String(duk_context* ctx)
     AssetAPI* thisObj = GetThisWeakObject<AssetAPI>(ctx);
     String assetRef = duk_require_string(ctx, 0);
     AssetTransferPtr ret = thisObj->PendingTransfer(assetRef);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 

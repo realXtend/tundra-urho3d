@@ -373,12 +373,14 @@ namespace BindingsGenerator
         static string GeneratePushToStack(string typeName, string source)
         {
             bool isPtr = typeName.EndsWith("*");
+            bool isSharedPtr = false;
 
             typeName = SanitateTypeName(typeName);
             if (typeName.EndsWith("Ptr"))
             {
                 typeName = typeName.Substring(0, typeName.Length - 3);
                 typeName = SanitateTemplateType(typeName);
+                isSharedPtr = true;
             }
 
             if (Symbol.IsNumberType(typeName))
@@ -440,7 +442,12 @@ namespace BindingsGenerator
                         return "PushValueObjectCopy<" + typeName + ">(ctx, *" + source + ", " + ClassIdentifier(typeName) + ", " + typeName + "_Finalizer);";
                 }
                 else
-                    return "PushWeakObject(ctx, " + source + ");";
+                {
+                    if (!isSharedPtr)
+                        return "PushWeakObject(ctx, " + source + ");";
+                    else
+                        return "PushWeakObject(ctx, " + source + ".Get());";
+                }
             }
         }
 
@@ -502,6 +509,9 @@ namespace BindingsGenerator
 
         static void GenerateFinalizer(string typeName, TextWriter tw)
         {
+            if (typeName == "String" || typeName == "string")
+                return;
+
             tw.WriteLine("static duk_ret_t " + typeName + "_Finalizer" + DukSignature());
             tw.WriteLine("{");
             tw.WriteLine(Indent(1) + "FinalizeValueObject<" + typeName + ">(ctx, " + ClassIdentifier(typeName) + ");");

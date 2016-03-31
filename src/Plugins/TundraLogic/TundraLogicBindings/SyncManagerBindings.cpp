@@ -69,7 +69,7 @@ static duk_ret_t SyncManager_Observer(duk_context* ctx)
 {
     SyncManager* thisObj = GetThisWeakObject<SyncManager>(ctx);
     EntityPtr ret = thisObj->Observer();
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
