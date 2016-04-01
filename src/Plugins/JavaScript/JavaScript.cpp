@@ -64,7 +64,13 @@ void JavaScript::Initialize()
     LocalAssetStoragePtr storage = framework->Asset()->AssetProvider<LocalAssetProvider>()->AddStorageDirectory(jsAssetDir, "Javascript", true, false);
     storage->SetReplicated(false); // If we are a server, don't pass this storage to the client.
 
+    // Set startup scripts and --run commands to be run on the first frame.
+    // This is to ensure that all loaded modules have hooked themselves up to JS instance creation before creating JS instances
+    framework->Frame()->DelayedExecute(0.0f).Connect(this, &JavaScript::OnFirstFrame);
+}
 
+void JavaScript::OnFirstFrame(float /*dt*/)
+{
     // Initialize startup scripts
     LoadStartupScripts();
 

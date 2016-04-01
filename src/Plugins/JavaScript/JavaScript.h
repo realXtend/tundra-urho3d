@@ -40,6 +40,7 @@ private:
     void Initialize() override;
     void Uninitialize() override;
 
+    void OnFirstFrame(float dt);
     void OnSceneCreated(Scene *scene, AttributeChange::Type);
     void OnComponentAdded(Entity* entity, IComponent* comp, AttributeChange::Type change);
     void OnComponentRemoved(Entity* entity, IComponent* comp, AttributeChange::Type change);

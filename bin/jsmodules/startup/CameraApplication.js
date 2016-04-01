@@ -6,14 +6,15 @@ if (!framework.IsHeadless())
     framework.Scene().SceneCreated.Connect(OnSceneCreated);
 }
 
-var _scene = null;
+var scene = null;
 var cameraEntityId = 0;
 var createdCameraEntityId = 0;
 
-function OnSceneCreated(scene)
+function OnSceneCreated(scene_)
 {
-    if (scene != null)
+    if (scene_ != null)
     {
+        scene = scene_;
         scene.SceneCleared.Connect(OnSceneCleared);
         scene.EntityCreated.Connect(OnEntityCreated)
         CreateCamera(scene);
@@ -46,9 +47,9 @@ function OnEntityCreated(entity, change)
         }
     }
     // If a camera spawnpos entity is loaded, copy the transform
-    if (entity.name == "FreeLookCameraSpawnPos" && _scene)
+    if (entity.name == "FreeLookCameraSpawnPos")
     {
-        var cameraEntity = _scene.EntityById(cameraEntityId);
+        var cameraEntity = scene.EntityById(cameraEntityId);
         if (cameraEntity)
             cameraEntity.placeable.transform = entity.placeable.transform;
     }
@@ -56,8 +57,6 @@ function OnEntityCreated(entity, change)
 
 function CreateCamera(scene)
 {
-    _scene = scene;
-
     if (scene.EntityByName("FreeLookCamera") != null)
         return;
 

@@ -3784,7 +3784,7 @@
  </entity>
  <entity id="-2147483647" sync="0">
   <component type="EC_Script" sync="1">
-   <attribute value="local://freelookcamera.js" name="Script ref"/>
+   <attribute value="local://FreeLookCamera.js" name="Script ref"/>
    <attribute value="true" name="Run on load"/>
    <attribute value="0" name="Run mode"/>
    <attribute value="" name="Script application name"/>
