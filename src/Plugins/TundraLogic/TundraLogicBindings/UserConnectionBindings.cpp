@@ -155,6 +155,87 @@ static duk_ret_t UserConnection_Get_ActionTriggered(duk_context* ctx)
     return 1;
 }
 
+const char* SignalWrapper_UserConnection_NetworkMessageReceived_ID = "SignalWrapper_UserConnection_NetworkMessageReceived";
+
+class SignalWrapper_UserConnection_NetworkMessageReceived
+{
+public:
+    SignalWrapper_UserConnection_NetworkMessageReceived(Object* owner, Signal5< UserConnection *, kNet::packet_id_t , kNet::message_id_t , const char *, size_t >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal5< UserConnection *, kNet::packet_id_t , kNet::message_id_t , const char *, size_t >* signal_;
+};
+
+class SignalReceiver_UserConnection_NetworkMessageReceived : public SignalReceiver
+{
+public:
+    void OnSignal(UserConnection * param0, kNet::packet_id_t param1, kNet::message_id_t param2, const char * param3, size_t param4)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
+        duk_pop(ctx);
+    }
+};
+
+static duk_ret_t SignalWrapper_UserConnection_NetworkMessageReceived_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<SignalWrapper_UserConnection_NetworkMessageReceived>(ctx, SignalWrapper_UserConnection_NetworkMessageReceived_ID);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_UserConnection_NetworkMessageReceived_Connect(duk_context* ctx)
+{
+    SignalWrapper_UserConnection_NetworkMessageReceived* wrapper = GetThisValueObject<SignalWrapper_UserConnection_NetworkMessageReceived>(ctx, SignalWrapper_UserConnection_NetworkMessageReceived_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_UserConnection_NetworkMessageReceived* receiver = new SignalReceiver_UserConnection_NetworkMessageReceived();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_UserConnection_NetworkMessageReceived::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    CallConnectSignal(ctx, wrapper->signal_);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_UserConnection_NetworkMessageReceived_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_UserConnection_NetworkMessageReceived* wrapper = GetThisValueObject<SignalWrapper_UserConnection_NetworkMessageReceived>(ctx, SignalWrapper_UserConnection_NetworkMessageReceived_ID);
+    if (!wrapper->owner_) return 0;
+    CallDisconnectSignal(ctx, wrapper->signal_);
+    return 0;
+}
+
+static duk_ret_t UserConnection_Get_NetworkMessageReceived(duk_context* ctx)
+{
+    UserConnection* thisObj = GetThisWeakObject<UserConnection>(ctx);
+    SignalWrapper_UserConnection_NetworkMessageReceived* wrapper = new SignalWrapper_UserConnection_NetworkMessageReceived(thisObj, &thisObj->NetworkMessageReceived);
+    PushValueObject(ctx, wrapper, SignalWrapper_UserConnection_NetworkMessageReceived_ID, SignalWrapper_UserConnection_NetworkMessageReceived_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_UserConnection_NetworkMessageReceived_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_UserConnection_NetworkMessageReceived_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
+    duk_push_c_function(ctx, SignalWrapper_UserConnection_NetworkMessageReceived_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_UserConnection_NetworkMessageReceived_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
+    return 1;
+}
+
 static duk_ret_t UserConnection_ConnectionId(duk_context* ctx)
 {
     UserConnection* thisObj = GetThisWeakObject<UserConnection>(ctx);
@@ -283,6 +364,7 @@ void Expose_UserConnection(duk_context* ctx)
     DefineProperty(ctx, "userID", UserConnection_Get_userID, UserConnection_Set_userID);
     DefineProperty(ctx, "loginData", UserConnection_Get_loginData, UserConnection_Set_loginData);
     DefineProperty(ctx, "ActionTriggered", UserConnection_Get_ActionTriggered, nullptr);
+    DefineProperty(ctx, "NetworkMessageReceived", UserConnection_Get_NetworkMessageReceived, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, UserConnection_ID);
 }

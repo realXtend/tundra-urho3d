@@ -26,6 +26,87 @@ namespace JSBindings
 
 static const char* Script_ID = "Script";
 
+const char* SignalWrapper_Script_ScriptAssetsChanged_ID = "SignalWrapper_Script_ScriptAssetsChanged";
+
+class SignalWrapper_Script_ScriptAssetsChanged
+{
+public:
+    SignalWrapper_Script_ScriptAssetsChanged(Object* owner, Signal2< Script *, const Vector< ScriptAssetPtr > & >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal2< Script *, const Vector< ScriptAssetPtr > & >* signal_;
+};
+
+class SignalReceiver_Script_ScriptAssetsChanged : public SignalReceiver
+{
+public:
+    void OnSignal(Script * param0, const Vector< ScriptAssetPtr > & param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
+        duk_pop(ctx);
+    }
+};
+
+static duk_ret_t SignalWrapper_Script_ScriptAssetsChanged_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<SignalWrapper_Script_ScriptAssetsChanged>(ctx, SignalWrapper_Script_ScriptAssetsChanged_ID);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Script_ScriptAssetsChanged_Connect(duk_context* ctx)
+{
+    SignalWrapper_Script_ScriptAssetsChanged* wrapper = GetThisValueObject<SignalWrapper_Script_ScriptAssetsChanged>(ctx, SignalWrapper_Script_ScriptAssetsChanged_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_Script_ScriptAssetsChanged* receiver = new SignalReceiver_Script_ScriptAssetsChanged();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_Script_ScriptAssetsChanged::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    CallConnectSignal(ctx, wrapper->signal_);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Script_ScriptAssetsChanged_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_Script_ScriptAssetsChanged* wrapper = GetThisValueObject<SignalWrapper_Script_ScriptAssetsChanged>(ctx, SignalWrapper_Script_ScriptAssetsChanged_ID);
+    if (!wrapper->owner_) return 0;
+    CallDisconnectSignal(ctx, wrapper->signal_);
+    return 0;
+}
+
+static duk_ret_t Script_Get_ScriptAssetsChanged(duk_context* ctx)
+{
+    Script* thisObj = GetThisWeakObject<Script>(ctx);
+    SignalWrapper_Script_ScriptAssetsChanged* wrapper = new SignalWrapper_Script_ScriptAssetsChanged(thisObj, &thisObj->ScriptAssetsChanged);
+    PushValueObject(ctx, wrapper, SignalWrapper_Script_ScriptAssetsChanged_ID, SignalWrapper_Script_ScriptAssetsChanged_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Script_ScriptAssetsChanged_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Script_ScriptAssetsChanged_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
+    duk_push_c_function(ctx, SignalWrapper_Script_ScriptAssetsChanged_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Script_ScriptAssetsChanged_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
+    return 1;
+}
+
 const char* SignalWrapper_Script_ApplicationNameChanged_ID = "SignalWrapper_Script_ApplicationNameChanged";
 
 class SignalWrapper_Script_ApplicationNameChanged
@@ -812,6 +893,7 @@ void Expose_Script(duk_context* ctx)
     duk_put_prop_string(ctx, -2, "RunOnServer");
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Script_Functions);
+    DefineProperty(ctx, "ScriptAssetsChanged", Script_Get_ScriptAssetsChanged, nullptr);
     DefineProperty(ctx, "ApplicationNameChanged", Script_Get_ApplicationNameChanged, nullptr);
     DefineProperty(ctx, "ClassNameChanged", Script_Get_ClassNameChanged, nullptr);
     DefineProperty(ctx, "ComponentNameChanged", Script_Get_ComponentNameChanged, nullptr);
