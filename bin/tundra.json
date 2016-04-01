@@ -8,7 +8,6 @@
 			"TundraLogic",
 			"HttpPlugin",
 			"WebSocketServer",
-			"CameraApplication",
 			"SceneInteract",
 			"AvatarApplication"
 		]
