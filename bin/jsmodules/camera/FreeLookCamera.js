@@ -69,6 +69,11 @@ if (!framework.IsHeadless())
         }
     }
     */
+    
+    // Set start position if possible
+    var startPos = scene.EntityByName("FreeLookCameraSpawnPos");
+    if (startPos)
+        me.placeable.transform = startPos.placeable.transform;
 }
 
 function IsCameraActive()
