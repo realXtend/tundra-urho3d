@@ -17,30 +17,23 @@ function OnScriptDestroyed()
 
 if (server.IsRunning())
 {
-    print("Connect signals");
     server.UserAboutToConnect.Connect(ServerHandleUserAboutToConnect);
     server.UserConnected.Connect(ServerHandleUserConnected);
     server.UserDisconnected.Connect(ServerHandleUserDisconnected);
 
     // If there are connected users when this script was added, add av for all of them
-    print("Get users");
     var users = server.AuthenticatedUsers();
     if (users.length > 0)
         print("[Avatar Application] Application started. Creating avatars for logged in clients.");
 
-    print("Create avatars for users");
     for(var i=0; i < users.length; i++)
         ServerHandleUserConnected(users[i].id, users[i]);
-        
-    print("AvatarApplication SERVER side started");
 }
 else // client
 {
     inputContext = input.RegisterInputContextRaw("AvatarApplication", 102);
     inputContext.KeyPressed.connect(function(e) { if (e.HasCtrlModifier() && e.keyCode == 9) me.Exec(1, "ToggleCamera") } );
     me.Action("ToggleCamera").Triggered.connect(ClientHandleToggleCamera);
-
-    print("AvatarApplication CLIENT side started");
 }
 
 function ClientHandleToggleCamera() {
@@ -90,7 +83,7 @@ function ClientHandleToggleCamera() {
 
 function ServerHandleUserAboutToConnect(connectionID, user) {
     // Uncomment to test access control
-    //if (user.GetProperty("password") != "xxx")
+    //if (user.Property("password") != "xxx")
     //    user.DenyConnection();
 }
 
@@ -107,7 +100,7 @@ function ServerHandleUserConnected(connectionID, user) {
     avatarEntity.SetName(avatarEntityName);
     
     if (user != null)
-        avatarEntity.SetDescription(user.GetProperty("username"));
+        avatarEntity.SetDescription(user.Property("username"));
 
     var script = avatarEntity.script;
     script.className = "AvatarApp.SimpleAvatar";
@@ -127,7 +120,7 @@ function ServerHandleUserConnected(connectionID, user) {
     placeable.transform = transform;
 
     if (user != null)
-        print("[Avatar Application] Created avatar for " + user.GetProperty("username"));
+        print("[Avatar Application] Created avatar for " + user.Property("username"));
 }
 
 function ServerHandleUserDisconnected(connectionID, user) {
@@ -137,7 +130,7 @@ function ServerHandleUserDisconnected(connectionID, user) {
         scene.RemoveEntity(avatarEntity.id);
 
         if (user != null) {
-            print("[Avatar Application] User " + user.GetProperty("username") + " disconnected, destroyed avatar entity.");
+            print("[Avatar Application] User " + user.Property("username") + " disconnected, destroyed avatar entity.");
         }
     }
 }

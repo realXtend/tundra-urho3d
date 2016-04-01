@@ -1,14 +1,6 @@
 // !ref: default_avatar.avatar
-// !ref: crosshair.js
 
-var isAndroid = (application.platform == "android");
-
-if (!server.IsRunning() && !framework.IsHeadless() && !isAndroid)
-{
-    engine.ImportExtension("qt.core");
-    engine.ImportExtension("qt.gui");
-    engine.IncludeFile("crosshair.js");
-}
+var isAndroid = (framework.platform == "android");
 
 // A simple walking avatar with physics & 1st/3rd person camera
 function SimpleAvatar(entity, comp)
@@ -105,7 +97,7 @@ SimpleAvatar.prototype.ServerInitialize = function() {
     // appearance ref right after this in the client actually does not take effect at all.
     if (clientPtr != null)
     {
-        var avatarurlProp = clientPtr.GetProperty("avatarurl");
+        var avatarurlProp = clientPtr.Property("avatarurl");
         if (avatarurlProp && avatarurlProp.length > 0)
         {
             debug.Log("Avatar from login parameters enabled: " + avatarurlProp);
@@ -449,7 +441,7 @@ SimpleAvatar.prototype.ClientUpdate = function(frametime) {
         if (fingersDownNow != this.fingersDown) {
             this.fingersDown = fingersDownNow;
             if (fingersDownNow >= 2)
-		this.me.Exec(2, "Move", "forward");
+                this.me.Exec(2, "Move", "forward");
             else
                 this.me.Exec(2, "Stop", "forward");
         }
@@ -778,8 +770,8 @@ SimpleAvatar.prototype.ClientHandleMouseMove = function(mouseevent) {
     if ((firstPerson) && (input.IsMouseCursorVisible()))
     {
         input.SetMouseCursorVisible(false);
-        if (!this.crosshair.isUsingLabel)
-            QApplication.setOverrideCursor(crosshair.cursor);
+        //if (!this.crosshair.isUsingLabel)
+        //    QApplication.setOverrideCursor(crosshair.cursor);
     }
         
     // Do not rotate if not allowed
