@@ -308,12 +308,12 @@ void JavaScript::CreateScriptObject(Script* app, Script* instance, const String&
             duk_remove(ctx, -4);
             success = duk_pcall(ctx, 2) == 0;
             if (!success)
-                LogError("[JavaScript] CreateScriptObject: failed to store script object for " + appAndClassName + ": " + String(duk_safe_to_string(ctx, -1)));
+                LogError("[JavaScript] CreateScriptObject: failed to store script object for " + appAndClassName + ": " + GetErrorString(ctx));
             duk_pop(ctx);
         }
         else
         {
-            LogError("[JavaScript] CreateScriptObject: failed to run constructor for " + appAndClassName + ": " + String(duk_safe_to_string(ctx, -1)));
+            LogError("[JavaScript] CreateScriptObject: failed to run constructor for " + appAndClassName + ": " + GetErrorString(ctx));
             duk_pop(ctx);
         }
     }
@@ -340,7 +340,7 @@ void JavaScript::RemoveScriptObject(Script* instance)
         // Use pointer of the object instance script component as the key
         duk_push_number(ctx, (size_t)instance);
         bool success = duk_pcall(ctx, 1) == 0;
-        if (!success) LogError("[JavaScript] RemoveScriptObject: " + String(duk_safe_to_string(ctx, -1)));
+        if (!success) LogError("[JavaScript] RemoveScriptObject: " + GetErrorString(ctx));
         duk_pop(ctx);
     }
 }

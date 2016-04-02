@@ -70,6 +70,9 @@ void ScriptAsset::ParseReferences()
         {
             String name = line.Substring(pos + 5);
             String type;
+            if (name.EndsWith("\r"))
+                name.Resize(name.Length() - 1);
+
             pos = name.Find(',');
             if (pos != String::NPOS)
             {
