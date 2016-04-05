@@ -135,7 +135,8 @@ protected:
     void HideContextMenu();
     void ShowContextMenu(Object *obj, int x, int y);
 
-    void EditSelection();
+    void EditEntity(Entity *entity);
+    void EditComponent(IComponent *component);
 
     // Tundra scene changed
     void OnComponentRemoved(Entity *entity, IComponent *component, AttributeChange::Type change);

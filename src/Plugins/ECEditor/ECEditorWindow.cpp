@@ -229,21 +229,36 @@ void ECEditorWindow::Hide()
     window_->SetVisible(false);
 }
 
-void ECEditorWindow::AddEntity(EntityPtr entity, bool updateUi)
+void ECEditorWindow::SetEntity(EntityPtr entity)
 {
     if (!entity)
         return;
 
     entity_ = EntityWeakPtr(entity);
-    if (updateUi)
-        Refresh();
+    Refresh();
 }
 
-void ECEditorWindow::AddEntity(entity_id_t id, bool updateUi)
+void ECEditorWindow::SetEntity(entity_id_t id)
 {
     EntityPtr entity = framework_->Scene()->MainCameraScene()->EntityById(id);
     if (entity != NULL)
-        AddEntity(entity, updateUi);
+        SetEntity(entity);
+}
+
+void ECEditorWindow::ScrollToComponent(IComponent *component)
+{
+    IntVector2 position;
+    ComponentContainerMap::ConstIterator iter = containers_.Begin();
+    while (iter != containers_.End())
+    {
+        if (iter->first_ == component)
+        {
+            IntVector2 position = iter->second_->Widget()->GetPosition();
+            list_->SetViewPosition(position);
+            break;
+        }
+        iter++;
+    }
 }
 
 void ECEditorWindow::Clear()

@@ -93,7 +93,17 @@ void ECEditor::OpenEntityEditor(Entity *entity)
 {
     if (entityEditor_.Get())
     {
-        entityEditor_->AddEntity(entity->Id(), true);
+        entityEditor_->SetEntity(entity->Id());
+        entityEditor_->Show();
+    }
+}
+
+void ECEditor::OpenEntityEditor(Entity *entity, IComponent *component)
+{
+    if (entityEditor_.Get())
+    {
+        entityEditor_->SetEntity(entity->Id());
+        entityEditor_->ScrollToComponent(component);
         entityEditor_->Show();
     }
 }

@@ -385,7 +385,7 @@ void SceneStructureWindow::ShowContextMenu(Object *obj, int x, int y)
         Menu *m = contextMenu_->CreateItem("removeComponent", "Remove");
         m = contextMenu_->CreateItem("copyComponent", "Copy");
         m = contextMenu_->CreateItem("pasteComponent", "Paste");
-        //m = contextMenu_->CreateItem("editComponent", "Edit");
+        m = contextMenu_->CreateItem("editComponent", "Edit");
     }
     else if (dynamic_cast<Entity*>(obj) != NULL)
     {
@@ -406,16 +406,24 @@ void SceneStructureWindow::ShowContextMenu(Object *obj, int x, int y)
     contextMenu_->Open();
 }
 
-void SceneStructureWindow::EditSelection()
+void SceneStructureWindow::EditEntity(Entity *entity)
 {
-    if (selectedEntities_.Size() == 0)
+    if (!entity)
         return;
 
     ECEditor *editor = dynamic_cast<ECEditor*>(owner_.Get());
     if (editor)
-    {
-        editor->OpenEntityEditor(selectedEntities_[0]);
-    }
+        editor->OpenEntityEditor(entity);
+}
+
+void SceneStructureWindow::EditComponent(IComponent *component)
+{
+    if (!component)
+        return;
+
+    ECEditor *editor = dynamic_cast<ECEditor*>(owner_.Get());
+    if (editor)
+        editor->OpenEntityEditor(component->ParentEntity(), component);
 }
 
 void SceneStructureWindow::OnComponentRemoved(Entity *entity, IComponent *component, AttributeChange::Type change)
@@ -687,7 +695,8 @@ void SceneStructureWindow::OnActionSelected(SceneContextMenu *contextMenu, Strin
     }
     else if (id == "editEntity")
     {
-        EditSelection();
+        if (selectedEntities_.Size() > 0)
+            EditEntity(selectedEntities_[0]);
     }
     else if (id == "copyEntity")
     {
@@ -704,6 +713,11 @@ void SceneStructureWindow::OnActionSelected(SceneContextMenu *contextMenu, Strin
         IntVector2 pos = window_->GetPosition();
         pos.x_ += 100;
         addComponentDialog_->Widget()->SetPosition(pos);
+    }
+    else if (id == "editComponent")
+    {
+        if (selectedComponents_.Size() > 0)
+            EditComponent(selectedComponents_[0]);
     }
     if (id == "removeComponent")
     {

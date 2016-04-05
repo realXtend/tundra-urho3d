@@ -47,6 +47,9 @@ public:
     /// Open entity editor for given entity.
     void OpenEntityEditor(Entity *entity);
 
+    /// Open entity editor for given entity and scroll to given compoent.
+    void OpenEntityEditor(Entity *entity, IComponent *component);
+
 private:
     void OpenFileDialogWindow(const String &title);
 

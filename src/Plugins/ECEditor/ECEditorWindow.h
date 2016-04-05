@@ -92,9 +92,19 @@ public:
     void Show();
     void Hide();
 
-    void AddEntity(EntityPtr entity, bool updateUi = true);
-    void AddEntity(entity_id_t id, bool updateUi = true);
+    /// Set entity to editor.
+    /** @param entity to display on editor.
+    */
+    void SetEntity(EntityPtr entity);
 
+    /// Set entity to editor.
+    /** @param id get entity by id.
+    */
+    void SetEntity(entity_id_t id);
+
+    void ScrollToComponent(IComponent *component);
+
+    /// Clear ui
     void Clear();
     void Refresh();
     UIElement* Widget() const;
@@ -103,11 +113,10 @@ protected:
     void OnCloseClicked(StringHash eventType, VariantMap &eventData);
 
     ComponentContainerMap containers_;
-    ComponentContainerVector components_;
 
     WindowPtr window_;
     ListViewPtr list_;
-	ButtonWeakPtr closeButton_;
+    ButtonWeakPtr closeButton_;
     
     EntityWeakPtr entity_;
 
