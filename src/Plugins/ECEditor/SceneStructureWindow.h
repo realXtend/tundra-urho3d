@@ -64,6 +64,11 @@ public:
     {
         SceneStructureItemPtr item_;
         ObjectWeakPtr object_;
+
+        bool operator!=(const ListViewItem& rhs)
+        {
+            return item_ != rhs.item_ || object_ != rhs.object_;
+        }
     };
 
     explicit SceneStructureWindow(Framework *framework, IModule *owner);
@@ -114,13 +119,17 @@ protected:
     void Paste();
 
     SceneStructureItem *FindItem(UIElement *element);
+    void RemoveItem(SceneStructureItem *item);
+
     SceneStructureItem *CreateItem(Object *obj, const String &text, SceneStructureItem *parent = 0);
 
     void OnEntityCreated(Entity* entity, AttributeChange::Type change);
     void OnComponentCreated(IComponent* component, AttributeChange::Type change);
 
     void AddEntity(Entity *entity);
+    void RemoveEntity(Entity *entity);
     void AddComponent(IComponent *component);
+    void RemoveComponent(IComponent *component);
     void AddScene(Scene *scene);
 
     void HideContextMenu();
@@ -129,8 +138,10 @@ protected:
     void EditSelection();
 
     // Tundra scene changed
-    void OnComponentChanged(Entity *entity, IComponent *component, AttributeChange::Type change);
-    void OnEntityChanged(Entity *entity, AttributeChange::Type change);
+    void OnComponentRemoved(Entity *entity, IComponent *component, AttributeChange::Type change);
+    void OnComponentAdded(Entity *entity, IComponent *component, AttributeChange::Type change);
+    void OnEntityRemoved(Entity *entity, AttributeChange::Type change);
+    void OnEntityAdded(Entity *entity, AttributeChange::Type change);
     void OnAttributeChanged(IComponent *component, IAttribute *attribute, AttributeChange::Type type);
 
     // Urho3D UI Events
