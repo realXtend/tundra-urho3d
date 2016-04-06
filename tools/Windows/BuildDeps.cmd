@@ -363,10 +363,9 @@ IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 IF NOT EXIST "%DEPS%\curl\". (
     cecho {0D}Cloning Curl into "%DEPS%\curl".{# #}{\n}
     cd "%DEPS%"
-    git clone https://github.com/bagder/curl.git curl
+    git clone --branch curl-7_38_0 https://github.com/bagder/curl.git curl
     IF NOT EXIST "%DEPS%\curl\.git" GOTO :ERROR
     cd curl
-    git checkout curl-7_38_0
     IF NOT %ERRORLEVEL%==0 GOTO :ERROR
     IF %TUNDRA_ANDROID%==1 (
         patch --strip=1 < %TOOLS%\Patches\android-curl-0001-hack-find-openssl.patch

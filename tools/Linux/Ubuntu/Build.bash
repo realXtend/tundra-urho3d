@@ -291,7 +291,7 @@ if [ $skip_deps = false ] ; then
     start_target curl
 
     if ! is_cloned ; then
-        git clone https://github.com/bagder/curl.git curl
+        git clone --branch curl-7_38_0 https://github.com/bagder/curl.git curl
         cd curl
         git checkout curl-7_38_0
     fi
