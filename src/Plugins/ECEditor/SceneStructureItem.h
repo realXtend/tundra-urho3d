@@ -35,6 +35,9 @@ typedef WeakPtr<Text> TextWeakPtr;
 typedef WeakPtr<Object> ObjectWeakPtr;
 typedef WeakPtr<ListView> ListViewWeakPtr;
 
+/** Single SceneStructureWindow list ui item that dont hold parent child hierachy information, instead Urho's UIElements are used to keep track
+    of this. Scene, Entity and Component can be attached to each item. This is need to track if the item is temparary or local.
+*/
 class ECEDITOR_API SceneStructureItem : public Object
 {
     URHO3D_OBJECT(SceneStructureItem, Object);
@@ -44,17 +47,28 @@ public:
     explicit SceneStructureItem(Context *context, ListView *list, Object *object);
     virtual ~SceneStructureItem();
 
+    /// Set header text
     void SetText(const String &text);
+
+    /// Get SceneStructureItem root item
     UIElement *Widget() const;
+
+    /// Set list item indent
     void SetIndent(int indent, int indentSpacing = 16);
 
+    /// Set meta data
     void SetData(Object *obj);
+
+    /// Get meta data
     Object *Data() const;
 
+    /// Set header text color
     void SetColor(Color color);
 
+    /// Refresh ui arrow
     void Refresh();
 
+    /// Triggered when toggle arrow button is being pressed
     Signal1<SceneStructureItem* ARG(SceneStructureItem)> OnTogglePressed;
 
 protected:

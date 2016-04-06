@@ -62,7 +62,7 @@ bool IAttributeEditor::HasAttribute(IAttribute *attribute) const
     return attributeWeakPtr_.Get() == NULL ? false : attribute == attributeWeakPtr_.Get();
 }
 
-void IAttributeEditor::AddAttribute(AttributeWeakPtr attribute)
+void IAttributeEditor::SetAttribute(AttributeWeakPtr attribute)
 {
     if (attributeWeakPtr_.Get() != NULL)
         attributeWeakPtr_.owner.Lock()->AttributeChanged.Disconnect(this, &IAttributeEditor::OnAttributeChanged);

@@ -35,6 +35,7 @@ typedef SharedPtr<Urho3D::Text> TextPtr;
 typedef SharedPtr<Urho3D::UIElement> UIElementPtr;
 typedef Vector<AttributeWeakPtr> AttributeWeakPtrVector;
 
+/// Interaface class for AttributeEditor creates base ui elements for each attribute type.
 class ECEDITOR_API IAttributeEditor : public Object
 {
     URHO3D_OBJECT(IAttributeEditor, Object);
@@ -43,13 +44,22 @@ public:
     explicit IAttributeEditor(Framework *framework, AttributeWeakPtr attribute);
     virtual ~IAttributeEditor();
 
+    /// Get attribute editor name
     virtual String Title() const;
+
+    /// Set attribute editor name
     virtual void SetTitle(const String &text);
 
+    /// Get root ui element
     UIElementPtr Widget() const;
 
+    /// Check if given attribute is edited by this editor
     bool HasAttribute(IAttribute *attribute) const;
-    void AddAttribute(AttributeWeakPtr attribute);
+
+    /// Set edited attribute to editor.
+    void SetAttribute(AttributeWeakPtr attribute);
+
+    /// Remove edited attribute from editor.
     void RemoveAttribute();
 
 protected:
@@ -90,7 +100,7 @@ public:
         IAttributeEditor(framework, attribute)
     {
         Initialize();
-        AddAttribute(attribute);
+        SetAttribute(attribute);
         Update();
     }
 
@@ -99,7 +109,10 @@ public:
         
     }
 
+    /// Set attribute value
     void SetValue(T value);
+
+    /// Get attribute value
     T Value() const;
 
 protected:

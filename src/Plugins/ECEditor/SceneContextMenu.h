@@ -43,16 +43,28 @@ public:
     explicit SceneContextMenu(Context* context);
     virtual ~SceneContextMenu();
     
+    /// Get Menu item by given id
     Menu *GetItem(const String &id);
+
+    /// Create new context menu item by given id and header text.
     Menu *CreateItem(const String &id, const String &text);
+
+    /// Clear context menu ui
     void Clear();
 
+    /// Get Context Menu ui root object.
     UIElement *Widget();
 
+    /// Is context menu visible
     bool IsVisible() const;
+
+    /// Set context menu visible
     void Open();
+
+    /// Hide context menu
     void Close();
 
+    /// Triggered when conext menu item is selected by user
     Signal2<SceneContextMenu*, String> OnActionSelected;
 
 protected:

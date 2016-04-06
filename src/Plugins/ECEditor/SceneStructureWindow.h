@@ -54,6 +54,9 @@ typedef SharedPtr<ECEditorCommandStack> CommandStackPtr;
 typedef SharedPtr<AddComponentDialog> AddComponentDialogPtr;
 typedef SharedPtr<AddEntityDialog> AddEntityDialogPtr;
 
+/// SceneStructureWindow will display each entity in given scene. Only single scene can be displayed.
+/** SceneContextMenu have options to add, remove, edit and copy&paste entities and components.
+*/
 class ECEDITOR_API SceneStructureWindow : public Object
 {
     URHO3D_OBJECT(SceneStructureWindow, Object);
@@ -80,6 +83,7 @@ public:
     @param newScene Scene. */
     void SetShownScene(Scene *newScene);
 
+    /// Get displayed scene
     Scene *ShownScene() const
     {
         return scene_;
@@ -114,28 +118,64 @@ public:
     void ToggleItem(SceneStructureItem *item);
 
 protected:
+    /// Copy entity data to clipboard
+    /** @param component target entity
+    */
     void Copy(Entity *entity);
+    
+    /// Copy component data to clipboard
+    /** @param component target component
+    */
     void Copy(IComponent *component);
-    void Paste();
 
+    /// Read xml data from clipboard and paste changes to selected entity
+    void Paste();
+    
+    /// Find SceneStructureItem for given UI element.
+    /** @param element ui element
+        @return Return scene structure item if found otherwise return null.
+    */
     SceneStructureItem *FindItem(UIElement *element);
+
+    /// Remove SceneStructureItem from editor
+    /** @param item target item
+    */
     void RemoveItem(SceneStructureItem *item);
 
+    /// Create SceneStructureItem for the editor.
+    /** @param obj target object that usually is component or entity
+        @param text List item header text
+        @param parent parent object this item is attached to.
+        @return Created SceneStructureItem
+    */
     SceneStructureItem *CreateItem(Object *obj, const String &text, SceneStructureItem *parent = 0);
 
-    void OnEntityCreated(Entity* entity, AttributeChange::Type change);
-    void OnComponentCreated(IComponent* component, AttributeChange::Type change);
-
+    /// Create new SceneStructureItem for given entity.
     void AddEntity(Entity *entity);
-    void RemoveEntity(Entity *entity);
-    void AddComponent(IComponent *component);
-    void RemoveComponent(IComponent *component);
-    void AddScene(Scene *scene);
 
+    /// If found remove SceneStructureItem.
+    void RemoveEntity(Entity *entity);
+
+    /// Create new SceneStructureItem for given component.
+    void AddComponent(IComponent *component);
+
+    /// If found remove SceneStructureItem.
+    void RemoveComponent(IComponent *component);
+
+    /// Hide context menu
     void HideContextMenu();
+
+    /// Show context menu in given screen position
+    /** @param obj target object defines what actions are displayed on context menu
+        @param x point in screen space
+        @param y point in screen space
+    */
     void ShowContextMenu(Object *obj, int x, int y);
 
+    /// Send request to edit a given entity
     void EditEntity(Entity *entity);
+
+    /// Send a reqeust to edit given compoent
     void EditComponent(IComponent *component);
 
     // Tundra scene changed

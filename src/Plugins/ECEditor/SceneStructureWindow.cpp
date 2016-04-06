@@ -229,7 +229,7 @@ void SceneStructureWindow::OnCloseClicked(StringHash /*eventType*/, VariantMap &
     Hide();
 }
 
-void SceneStructureWindow::OnComponentDialogClosed(AddComponentDialog *dialog, bool confirmed)
+void SceneStructureWindow::OnComponentDialogClosed(AddComponentDialog* /*dialog*/, bool confirmed)
 {
     if (confirmed == false || selectedEntities_.Size() == 0 || addComponentDialog_.Null())
         return;
@@ -254,7 +254,7 @@ void SceneStructureWindow::OnComponentDialogClosed(AddComponentDialog *dialog, b
     //dirty_ = true;
 }
 
-void SceneStructureWindow::OnEntityDialogClosed(AddEntityDialog *dialog, bool confirmed)
+void SceneStructureWindow::OnEntityDialogClosed(AddEntityDialog* /*dialog*/, bool confirmed)
 {
     if (confirmed == false || addEntityDialog_.Null())
         return;
@@ -301,16 +301,6 @@ void SceneStructureWindow::SetShownScene(Scene *newScene)
     dirty_ = true;
 }
 
-void SceneStructureWindow::OnEntityCreated(Entity* entity, AttributeChange::Type /*change*/)
-{
-    AddEntity(entity);
-}
-
-void SceneStructureWindow::OnComponentCreated(IComponent* component, AttributeChange::Type /*change*/)
-{
-    AddComponent(component);
-}
-
 void SceneStructureWindow::AddEntity(Entity *entity)
 {
     SceneStructureItem *entityItem = FindItem(entity);
@@ -329,9 +319,6 @@ void SceneStructureWindow::AddEntity(Entity *entity)
         AddComponent(iter->second_);
         iter.GotoNext();
     }
-
-    entity->ComponentAdded.Disconnect(this, &SceneStructureWindow::OnComponentCreated);
-    entity->ComponentAdded.Connect(this, &SceneStructureWindow::OnComponentCreated);
 }
 
 void SceneStructureWindow::RemoveEntity(Entity *entity)
@@ -363,11 +350,6 @@ void SceneStructureWindow::RemoveComponent(IComponent *component)
     }
 }
 
-void SceneStructureWindow::AddScene(Scene *scene)
-{
-    scene_ = scene;
-}
-
 void SceneStructureWindow::HideContextMenu()
 {
     if (contextMenu_.NotNull())
@@ -382,23 +364,25 @@ void SceneStructureWindow::ShowContextMenu(Object *obj, int x, int y)
     contextMenu_->Clear();
     if (dynamic_cast<IComponent*>(obj) != NULL)
     {
-        Menu *m = contextMenu_->CreateItem("removeComponent", "Remove");
-        m = contextMenu_->CreateItem("copyComponent", "Copy");
-        m = contextMenu_->CreateItem("pasteComponent", "Paste");
-        m = contextMenu_->CreateItem("editComponent", "Edit");
+        contextMenu_->CreateItem("editComponent", "Edit");
+        contextMenu_->CreateItem("copyComponent", "Copy");
+        contextMenu_->CreateItem("pasteComponent", "Paste");
+        
+        contextMenu_->CreateItem("removeComponent", "Remove");
     }
     else if (dynamic_cast<Entity*>(obj) != NULL)
     {
-        Menu *m = contextMenu_->CreateItem("removeEntity", "Remove");
-        m = contextMenu_->CreateItem("addEntity", "New Entity...");
-        m = contextMenu_->CreateItem("addComponent", "New Component");
-        m = contextMenu_->CreateItem("editEntity", "Edit");
-        m = contextMenu_->CreateItem("copyEntity", "Copy");
-        m = contextMenu_->CreateItem("pasteEntity", "Paste");
+        contextMenu_->CreateItem("editEntity", "Edit");
+        contextMenu_->CreateItem("copyEntity", "Copy");
+        contextMenu_->CreateItem("pasteEntity", "Paste");
+        
+        contextMenu_->CreateItem("addEntity", "New Entity...");
+        contextMenu_->CreateItem("addComponent", "New Component");
+        contextMenu_->CreateItem("removeEntity", "Remove");
     }
     else
     {
-        Menu *m = contextMenu_->CreateItem("addEntity", "New Entity...");
+        contextMenu_->CreateItem("addEntity", "New Entity...");
     }
 
     contextMenu_->Widget()->SetPosition(x, y);
@@ -426,7 +410,7 @@ void SceneStructureWindow::EditComponent(IComponent *component)
         editor->OpenEntityEditor(component->ParentEntity(), component);
 }
 
-void SceneStructureWindow::OnComponentRemoved(Entity *entity, IComponent *component, AttributeChange::Type change)
+void SceneStructureWindow::OnComponentRemoved(Entity* /*entity*/, IComponent *component, AttributeChange::Type /*change*/)
 {
     SceneStructureItem *comp = FindItem(component);
     // If found remove component from list.
@@ -436,7 +420,7 @@ void SceneStructureWindow::OnComponentRemoved(Entity *entity, IComponent *compon
     }
 }
 
-void SceneStructureWindow::OnComponentAdded(Entity *entity, IComponent *component, AttributeChange::Type change)
+void SceneStructureWindow::OnComponentAdded(Entity *entity, IComponent *component, AttributeChange::Type /*change*/)
 {
     SceneStructureItem *comp = FindItem(component);
     // Component already added
@@ -448,17 +432,17 @@ void SceneStructureWindow::OnComponentAdded(Entity *entity, IComponent *componen
         CreateItem(component, component->TypeName(), entityItem);
 }
 
-void SceneStructureWindow::OnEntityRemoved(Entity *entity, AttributeChange::Type change)
+void SceneStructureWindow::OnEntityRemoved(Entity *entity, AttributeChange::Type /*hange*/)
 {
     RemoveEntity(entity);
 }
 
-void SceneStructureWindow::OnEntityAdded(Entity *entity, AttributeChange::Type change)
+void SceneStructureWindow::OnEntityAdded(Entity *entity, AttributeChange::Type /*change*/)
 {
     AddEntity(entity);
 }
 
-void SceneStructureWindow::OnAttributeChanged(IComponent *component, IAttribute *attribute, AttributeChange::Type type)
+void SceneStructureWindow::OnAttributeChanged(IComponent *component, IAttribute* /*attribute*/, AttributeChange::Type /*type*/)
 {
     if (component != 0 && component->TypeId() == 26)
         dirty_ = true;
@@ -477,9 +461,6 @@ void SceneStructureWindow::Clear()
 
     selectedComponents_.Clear();
     selectedEntities_.Clear();
-
-    if (scene_ != NULL)
-        scene_->EntityCreated.Disconnect(this, &SceneStructureWindow::OnEntityCreated);
 }
 
 void SceneStructureWindow::RefreshView()
@@ -493,13 +474,10 @@ void SceneStructureWindow::RefreshView()
         return;
 
     Vector<EntityPtr> entities = scene_->Entities().Values();
-    SceneStructureItem *sceneItem = CreateItem(scene_, "Scene");
+    CreateItem(scene_, "Scene");
 
     for (unsigned i = 0; i < entities.Size(); ++i)
         AddEntity(entities[i]);
-
-    scene_->EntityCreated.Disconnect(this, &SceneStructureWindow::OnEntityCreated);
-    scene_->EntityCreated.Connect(this, &SceneStructureWindow::OnEntityCreated);
 }
 
 void SceneStructureWindow::Hide()
@@ -679,7 +657,7 @@ void SceneStructureWindow::RemoveItem(SceneStructureItem *item)
         listItems_.Remove(listItems_[index]);
 }
 
-void SceneStructureWindow::OnActionSelected(SceneContextMenu *contextMenu, String id)
+void SceneStructureWindow::OnActionSelected(SceneContextMenu* /*contextMenu*/, String id)
 {
     if (id == "addEntity")
     {

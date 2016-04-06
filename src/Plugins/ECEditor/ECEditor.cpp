@@ -138,7 +138,7 @@ void ECEditor::OpenFileDialogWindow(const String &action)
     }
 }
 
-void ECEditor::OnOpenSceneDialogClosed(FileDialog *dialog, bool confirmed, const String &directory, const String &file)
+void ECEditor::OnOpenSceneDialogClosed(FileDialog* /*dialog*/, bool confirmed, const String &directory, const String &file)
 {
     if (!confirmed)
         return;
@@ -146,7 +146,7 @@ void ECEditor::OnOpenSceneDialogClosed(FileDialog *dialog, bool confirmed, const
     OpenScene(directory, file);
 }
 
-void ECEditor::OnNewSceneDialogClosed(FileDialog *dialog, bool confirmed, const String &directory, const String &file)
+void ECEditor::OnNewSceneDialogClosed(FileDialog* /*dialog*/, bool confirmed, const String &directory, const String &file)
 {
     if (!confirmed)
         return;
@@ -154,7 +154,7 @@ void ECEditor::OnNewSceneDialogClosed(FileDialog *dialog, bool confirmed, const 
     CreateNewScene(directory, file);
 }
 
-void ECEditor::OnSaveSceneDialogClosed(FileDialog *dialog, bool confirmed, const String &directory, const String &file)
+void ECEditor::OnSaveSceneDialogClosed(FileDialog* /*dialog*/, bool confirmed, const String &directory, const String &file)
 {
     if (!confirmed)
         return;

@@ -48,6 +48,7 @@ typedef HashMap<int, AttributeEditorPtr> AttributeEditorMap;
 
 typedef SharedPtr<Window> WindowPtr;
 
+/// Component editor ui element that displays signle component and it's attributes
 class ECEDITOR_API ComponentContainer : public Object
 {
     URHO3D_OBJECT(ComponentContainer, Object);
@@ -62,6 +63,7 @@ public:
     UIElement *Widget() const;
     int Index() const;
 
+    /// Factory method to create AttributeEditor for given attribute type.
     static IAttributeEditor *CreateAttributeEditor(Framework *framework, IAttribute *attribute);
 
 protected:
@@ -81,6 +83,7 @@ typedef SharedPtr<ComponentContainer> ComponentContainerPtr;
 typedef HashMap<ComponentWeakPtr, ComponentContainerPtr> ComponentContainerMap;
 typedef Vector<ComponentContainerPtr> ComponentContainerVector;
 
+/// Entity-component editor window.
 class ECEDITOR_API ECEditorWindow : public Object
 {
     URHO3D_OBJECT(ECEditorWindow, Object);
@@ -102,9 +105,10 @@ public:
     */
     void SetEntity(entity_id_t id);
 
+    /// Scroll list view to given component
     void ScrollToComponent(IComponent *component);
 
-    /// Clear ui
+    /// Clear UI
     void Clear();
     void Refresh();
     UIElement* Widget() const;
