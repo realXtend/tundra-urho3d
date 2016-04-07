@@ -717,6 +717,25 @@ static duk_ret_t RigidBody_SetReplicated_bool(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t RigidBody_SetAttribute_String_Variant_AttributeChange__Type(duk_context* ctx)
+{
+    RigidBody* thisObj = GetThisWeakObject<RigidBody>(ctx);
+    String id = duk_require_string(ctx, 0);
+    Variant value = GetVariant(ctx, 1);
+    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
+    thisObj->SetAttribute(id, value, change);
+    return 0;
+}
+
+static duk_ret_t RigidBody_GetAttribute_String(duk_context* ctx)
+{
+    RigidBody* thisObj = GetThisWeakObject<RigidBody>(ctx);
+    String id = duk_require_string(ctx, 0);
+    Variant ret = thisObj->GetAttribute(id);
+    PushVariant(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t RigidBody_IsReplicated(duk_context* ctx)
 {
     RigidBody* thisObj = GetThisWeakObject<RigidBody>(ctx);
@@ -898,6 +917,8 @@ static const duk_function_list_entry RigidBody_Functions[] = {
     ,{"SetName", RigidBody_SetName_String, 1}
     ,{"SetParentEntity", RigidBody_SetParentEntity_Entity, 1}
     ,{"SetReplicated", RigidBody_SetReplicated_bool, 1}
+    ,{"SetAttribute", RigidBody_SetAttribute_String_Variant_AttributeChange__Type, 3}
+    ,{"GetAttribute", RigidBody_GetAttribute_String, 1}
     ,{"IsReplicated", RigidBody_IsReplicated, 0}
     ,{"IsLocal", RigidBody_IsLocal, 0}
     ,{"IsUnacked", RigidBody_IsUnacked, 0}

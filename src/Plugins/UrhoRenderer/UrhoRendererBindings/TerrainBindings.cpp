@@ -590,6 +590,25 @@ static duk_ret_t Terrain_SetReplicated_bool(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Terrain_SetAttribute_String_Variant_AttributeChange__Type(duk_context* ctx)
+{
+    Terrain* thisObj = GetThisWeakObject<Terrain>(ctx);
+    String id = duk_require_string(ctx, 0);
+    Variant value = GetVariant(ctx, 1);
+    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
+    thisObj->SetAttribute(id, value, change);
+    return 0;
+}
+
+static duk_ret_t Terrain_GetAttribute_String(duk_context* ctx)
+{
+    Terrain* thisObj = GetThisWeakObject<Terrain>(ctx);
+    String id = duk_require_string(ctx, 0);
+    Variant ret = thisObj->GetAttribute(id);
+    PushVariant(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t Terrain_IsReplicated(duk_context* ctx)
 {
     Terrain* thisObj = GetThisWeakObject<Terrain>(ctx);
@@ -769,6 +788,8 @@ static const duk_function_list_entry Terrain_Functions[] = {
     ,{"SetName", Terrain_SetName_String, 1}
     ,{"SetParentEntity", Terrain_SetParentEntity_Entity, 1}
     ,{"SetReplicated", Terrain_SetReplicated_bool, 1}
+    ,{"SetAttribute", Terrain_SetAttribute_String_Variant_AttributeChange__Type, 3}
+    ,{"GetAttribute", Terrain_GetAttribute_String, 1}
     ,{"IsReplicated", Terrain_IsReplicated, 0}
     ,{"IsLocal", Terrain_IsLocal, 0}
     ,{"IsUnacked", Terrain_IsUnacked, 0}

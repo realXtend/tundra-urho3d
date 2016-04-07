@@ -583,6 +583,25 @@ static duk_ret_t VolumeTrigger_SetReplicated_bool(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t VolumeTrigger_SetAttribute_String_Variant_AttributeChange__Type(duk_context* ctx)
+{
+    VolumeTrigger* thisObj = GetThisWeakObject<VolumeTrigger>(ctx);
+    String id = duk_require_string(ctx, 0);
+    Variant value = GetVariant(ctx, 1);
+    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
+    thisObj->SetAttribute(id, value, change);
+    return 0;
+}
+
+static duk_ret_t VolumeTrigger_GetAttribute_String(duk_context* ctx)
+{
+    VolumeTrigger* thisObj = GetThisWeakObject<VolumeTrigger>(ctx);
+    String id = duk_require_string(ctx, 0);
+    Variant ret = thisObj->GetAttribute(id);
+    PushVariant(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t VolumeTrigger_IsReplicated(duk_context* ctx)
 {
     VolumeTrigger* thisObj = GetThisWeakObject<VolumeTrigger>(ctx);
@@ -751,6 +770,8 @@ static const duk_function_list_entry VolumeTrigger_Functions[] = {
     ,{"SetName", VolumeTrigger_SetName_String, 1}
     ,{"SetParentEntity", VolumeTrigger_SetParentEntity_Entity, 1}
     ,{"SetReplicated", VolumeTrigger_SetReplicated_bool, 1}
+    ,{"SetAttribute", VolumeTrigger_SetAttribute_String_Variant_AttributeChange__Type, 3}
+    ,{"GetAttribute", VolumeTrigger_GetAttribute_String, 1}
     ,{"IsReplicated", VolumeTrigger_IsReplicated, 0}
     ,{"IsLocal", VolumeTrigger_IsLocal, 0}
     ,{"IsUnacked", VolumeTrigger_IsUnacked, 0}

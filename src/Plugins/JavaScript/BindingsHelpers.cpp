@@ -165,9 +165,7 @@ static duk_ret_t Entity_GetProperty(duk_context* ctx)
         Entity* entity = GetWeakObject<Entity>(ctx, 0);
         if (entity)
         {
-            // Now convert to uppercase so that the type comparison will work
             String compTypeStr(compTypeName);
-            compTypeStr[0] = (char)Urho3D::ToUpper(compTypeStr[0]);
             IComponent* comp = entity->Component(compTypeStr);
             if (comp)
             {

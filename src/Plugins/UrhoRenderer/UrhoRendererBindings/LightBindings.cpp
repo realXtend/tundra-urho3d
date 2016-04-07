@@ -345,6 +345,25 @@ static duk_ret_t Light_SetReplicated_bool(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Light_SetAttribute_String_Variant_AttributeChange__Type(duk_context* ctx)
+{
+    Light* thisObj = GetThisWeakObject<Light>(ctx);
+    String id = duk_require_string(ctx, 0);
+    Variant value = GetVariant(ctx, 1);
+    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
+    thisObj->SetAttribute(id, value, change);
+    return 0;
+}
+
+static duk_ret_t Light_GetAttribute_String(duk_context* ctx)
+{
+    Light* thisObj = GetThisWeakObject<Light>(ctx);
+    String id = duk_require_string(ctx, 0);
+    Variant ret = thisObj->GetAttribute(id);
+    PushVariant(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t Light_IsReplicated(duk_context* ctx)
 {
     Light* thisObj = GetThisWeakObject<Light>(ctx);
@@ -507,6 +526,8 @@ static const duk_function_list_entry Light_Functions[] = {
     ,{"SetName", Light_SetName_String, 1}
     ,{"SetParentEntity", Light_SetParentEntity_Entity, 1}
     ,{"SetReplicated", Light_SetReplicated_bool, 1}
+    ,{"SetAttribute", Light_SetAttribute_String_Variant_AttributeChange__Type, 3}
+    ,{"GetAttribute", Light_GetAttribute_String, 1}
     ,{"IsReplicated", Light_IsReplicated, 0}
     ,{"IsLocal", Light_IsLocal, 0}
     ,{"IsUnacked", Light_IsUnacked, 0}

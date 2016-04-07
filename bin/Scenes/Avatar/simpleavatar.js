@@ -56,14 +56,11 @@ function SimpleAvatar(entity, comp)
 }
 
 SimpleAvatar.prototype.OnScriptObjectDestroyed = function() {
-    if (framework.IsExiting())
-        return;
-
     // Must remember to manually disconnect subsystem signals, otherwise they'll continue to get signalled
     if (this.isServer)
     {
-        frame.Updated.disconnect(this, this.ServerUpdate);
-        scene.physics.Updated.disconnect(this, this.ServerUpdatePhysics);
+        frame.Updated.Disconnect(this, this.ServerUpdate);
+        scene.physics.Updated.Disconnect(this, this.ServerUpdatePhysics);
     }
     else
     {
@@ -75,25 +72,25 @@ SimpleAvatar.prototype.OnScriptObjectDestroyed = function() {
             scene.RemoveEntity(avatar.id);
 */
 
-        frame.Updated.disconnect(this, this.ClientUpdate);
+        frame.Updated.Disconnect(this, this.ClientUpdate);
     }
 }
 
 SimpleAvatar.prototype.ServerInitialize = function() {
     // Create the avatar component & set the avatar appearance. The avatar component will create the mesh & animationcontroller, once the avatar asset has loaded
     var avatar = this.me.GetOrCreateComponent("Avatar");
-    
+
     // Try to dig login param avatar. This seemed like the easiest way to do it.
     // Parse the connection id from the entity name and get a connection for him,
     // check if a custom av url was passed when this client logged in.
     var entName = this.me.name;
     var indexNum = entName.substring(6); // 'Avatar' == 6, we want the number after that
-    var clientPtr = server.GetUserConnection(parseInt(indexNum, 10));
+    var clientPtr = server.UserConnectionById(parseInt(indexNum, 10));
     
     // Default avatar ref
     var avatarurl = "default_avatar.avatar";
-    
-    // This is done here (server side) because it seems changing the avatar 
+
+    // This is done here (server side) because it seems changing the avatar
     // appearance ref right after this in the client actually does not take effect at all.
     if (clientPtr != null)
     {
@@ -104,7 +101,7 @@ SimpleAvatar.prototype.ServerInitialize = function() {
             avatarurl = avatarurlProp;
         }
     }
-    
+
     var r = avatar.appearanceRef;
     r.ref = avatarurl;
     avatar.appearanceRef = r;
@@ -139,18 +136,18 @@ SimpleAvatar.prototype.ServerInitialize = function() {
     // proxtrigger.active = false;
 
     // Hook to physics update
-    scene.physics.Updated.connect(this, this.ServerUpdatePhysics);
+    scene.physics.Updated.Connect(this, this.ServerUpdatePhysics);
 
     // Hook to tick update for animation update
-    frame.Updated.connect(this, this.ServerUpdate);
+    frame.Updated.Connect(this, this.ServerUpdate);
 
     // Connect actions. These come from the client side inputmapper
-    this.me.Action("Move").Triggered.connect(this, this.ServerHandleMove);
-    this.me.Action("Stop").Triggered.connect(this, this.ServerHandleStop);
-    this.me.Action("ToggleFly").Triggered.connect(this, this.ServerHandleToggleFly);
-    this.me.Action("SetRotation").Triggered.connect(this, this.ServerHandleSetRotation);
+    this.me.Action("Move").Triggered.Connect(this, this.ServerHandleMove);
+    this.me.Action("Stop").Triggered.Connect(this, this.ServerHandleStop);
+    this.me.Action("ToggleFly").Triggered.Connect(this, this.ServerHandleToggleFly);
+    this.me.Action("SetRotation").Triggered.Connect(this, this.ServerHandleSetRotation);
 
-    rigidbody.PhysicsCollision.connect(this, this.ServerHandleCollision);
+    rigidbody.PhysicsCollision.Connect(this, this.ServerHandleCollision);
 }
 
 SimpleAvatar.prototype.ServerUpdate = function(frametime) {
@@ -366,13 +363,13 @@ SimpleAvatar.prototype.ClientInitialize = function() {
         var soundlistener = this.me.GetOrCreateComponent("SoundListener", 2, false);
         soundlistener.active = true;
 
-        this.me.Action("MouseScroll").Triggered.connect(this, this.ClientHandleMouseScroll);
+        this.me.Action("MouseScroll").Triggered.Connect(this, this.ClientHandleMouseScroll);
         // Use mouselook action on Android for simple panning, as Qt touch events can not be yet accessed
         if (isAndroid)
-            this.me.Action("MouseLookX").Triggered.connect(this, this.ClientHandleMouseLookX);
-        this.me.Action("Zoom").Triggered.connect(this, this.ClientHandleKeyboardZoom);
-        this.me.Action("Rotate").Triggered.connect(this, this.ClientHandleRotate);
-        this.me.Action("StopRotate").Triggered.connect(this, this.ClientHandleStopRotate);
+            this.me.Action("MouseLookX").Triggered.Connect(this, this.ClientHandleMouseLookX);
+        this.me.Action("Zoom").Triggered.Connect(this, this.ClientHandleKeyboardZoom);
+        this.me.Action("Rotate").Triggered.Connect(this, this.ClientHandleRotate);
+        this.me.Action("StopRotate").Triggered.Connect(this, this.ClientHandleStopRotate);
     }
     else
     {
@@ -409,7 +406,7 @@ SimpleAvatar.prototype.ClientInitialize = function() {
     }
 
     // Hook to tick update to update visual effects (both own and others' avatars)
-    frame.Updated.connect(this, this.ClientUpdate);
+    frame.Updated.Connect(this, this.ClientUpdate);
 }
 
 SimpleAvatar.prototype.IsCameraActive = function() {
@@ -488,9 +485,9 @@ SimpleAvatar.prototype.ClientCreateInputMapper = function() {
     var inputContext = inputmapper.GetInputContext();
     if (!isAndroid)
     {
-        inputContext.GestureStarted.connect(this, this.GestureStarted);
-        inputContext.GestureUpdated.connect(this, this.GestureUpdated);
-        inputContext.MouseMove.connect(this, this.ClientHandleMouseMove);
+        inputContext.GestureStarted.Connect(this, this.GestureStarted);
+        inputContext.GestureUpdated.Connect(this, this.GestureUpdated);
+        inputContext.MouseMove.Connect(this, this.ClientHandleMouseMove);
     }
 
     // Local mapper for mouse scroll and rotate
