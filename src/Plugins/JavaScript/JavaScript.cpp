@@ -322,6 +322,9 @@ void JavaScript::CreateScriptObject(Script* app, Script* instance, const String&
         LogError("[JavaScript] CreateScriptObject: constructor not found for " + appAndClassName);
         duk_pop(ctx);
     }
+
+    // Remember that the component has a script object created from this application
+    instance->SetScriptApplication(app);
 }
 
 void JavaScript::RemoveScriptObject(Script* instance)
@@ -343,6 +346,9 @@ void JavaScript::RemoveScriptObject(Script* instance)
         if (!success) LogError("[JavaScript] RemoveScriptObject: " + GetErrorString(ctx));
         duk_pop(ctx);
     }
+
+    // Forget the application
+    instance->SetScriptApplication(0);
 }
 
 void JavaScript::CreateScriptObjects(Script* app)
