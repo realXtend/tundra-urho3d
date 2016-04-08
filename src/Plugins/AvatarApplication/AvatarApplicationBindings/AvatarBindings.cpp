@@ -378,10 +378,11 @@ static duk_ret_t Avatar_SetReplicated_bool(duk_context* ctx)
 
 static duk_ret_t Avatar_SetAttribute_String_Variant_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     Avatar* thisObj = GetThisWeakObject<Avatar>(ctx);
     String id = duk_require_string(ctx, 0);
     Variant value = GetVariant(ctx, 1);
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
+    AttributeChange::Type change = numArgs > 2 ? (AttributeChange::Type)(int)duk_require_number(ctx, 2) : AttributeChange::Default;
     thisObj->SetAttribute(id, value, change);
     return 0;
 }
@@ -561,7 +562,7 @@ static const duk_function_list_entry Avatar_Functions[] = {
     ,{"SetName", Avatar_SetName_String, 1}
     ,{"SetParentEntity", Avatar_SetParentEntity_Entity, 1}
     ,{"SetReplicated", Avatar_SetReplicated_bool, 1}
-    ,{"SetAttribute", Avatar_SetAttribute_String_Variant_AttributeChange__Type, 3}
+    ,{"SetAttribute", Avatar_SetAttribute_String_Variant_AttributeChange__Type, DUK_VARARGS}
     ,{"GetAttribute", Avatar_GetAttribute_String, 1}
     ,{"IsReplicated", Avatar_IsReplicated, 0}
     ,{"IsLocal", Avatar_IsLocal, 0}

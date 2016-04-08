@@ -398,10 +398,11 @@ static duk_ret_t WaterPlane_SetReplicated_bool(duk_context* ctx)
 
 static duk_ret_t WaterPlane_SetAttribute_String_Variant_AttributeChange__Type(duk_context* ctx)
 {
+    int numArgs = duk_get_top(ctx);
     WaterPlane* thisObj = GetThisWeakObject<WaterPlane>(ctx);
     String id = duk_require_string(ctx, 0);
     Variant value = GetVariant(ctx, 1);
-    AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 2);
+    AttributeChange::Type change = numArgs > 2 ? (AttributeChange::Type)(int)duk_require_number(ctx, 2) : AttributeChange::Default;
     thisObj->SetAttribute(id, value, change);
     return 0;
 }
@@ -582,7 +583,7 @@ static const duk_function_list_entry WaterPlane_Functions[] = {
     ,{"SetName", WaterPlane_SetName_String, 1}
     ,{"SetParentEntity", WaterPlane_SetParentEntity_Entity, 1}
     ,{"SetReplicated", WaterPlane_SetReplicated_bool, 1}
-    ,{"SetAttribute", WaterPlane_SetAttribute_String_Variant_AttributeChange__Type, 3}
+    ,{"SetAttribute", WaterPlane_SetAttribute_String_Variant_AttributeChange__Type, DUK_VARARGS}
     ,{"GetAttribute", WaterPlane_GetAttribute_String, 1}
     ,{"IsReplicated", WaterPlane_IsReplicated, 0}
     ,{"IsLocal", WaterPlane_IsLocal, 0}

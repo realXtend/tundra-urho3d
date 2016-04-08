@@ -182,7 +182,7 @@ public:
     void SetReplicated(bool enable);
 
     /// Set an attribute through a Variant. Can be used by scripts.
-    void SetAttribute(const String& id, const Variant& value, AttributeChange::Type change);
+    void SetAttribute(const String& id, const Variant& value, AttributeChange::Type change = AttributeChange::Default);
 
     /// Return an attribute value as a Variant. Can be used by scripts.
     Variant GetAttribute(const String& id) const;
