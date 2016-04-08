@@ -357,7 +357,9 @@ bool AnimationController::SetAnimationNumLoops(const String& name, uint repeats)
 StringVector AnimationController::AvailableAnimations()
 {
     StringVector availableList;
-    
+    if (mesh_)
+        availableList = mesh_->AnimationNames();
+
     return availableList;
 }
 
