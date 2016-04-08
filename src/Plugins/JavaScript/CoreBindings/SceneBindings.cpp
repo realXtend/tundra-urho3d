@@ -979,6 +979,8 @@ public:
         duk_put_prop_index(ctx, -2, 1);
         PushStringVector(ctx, param2);
         duk_put_prop_index(ctx, -2, 2);
+        duk_push_number(ctx, param3);
+        duk_put_prop_index(ctx, -2, 3);
         bool success = duk_pcall(ctx, 2) == 0;
         if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
         duk_pop(ctx);
@@ -1016,6 +1018,18 @@ static duk_ret_t SignalWrapper_Scene_ActionTriggered_Disconnect(duk_context* ctx
     return 0;
 }
 
+static duk_ret_t SignalWrapper_Scene_ActionTriggered_Emit(duk_context* ctx)
+{
+    SignalWrapper_Scene_ActionTriggered* wrapper = GetThisValueObject<SignalWrapper_Scene_ActionTriggered>(ctx, SignalWrapper_Scene_ActionTriggered_ID);
+    if (!wrapper->owner_) return 0;
+    Entity* param0 = GetWeakObject<Entity>(ctx, 0);
+    String param1 = duk_require_string(ctx, 1);
+    StringVector param2 = GetStringVector(ctx, 2);
+    EntityAction::ExecTypeField param3 = (EntityAction::ExecTypeField)(int)duk_require_number(ctx, 3);
+    wrapper->signal_->Emit(param0, param1, param2, param3);
+    return 0;
+}
+
 static duk_ret_t Scene_Get_ActionTriggered(duk_context* ctx)
 {
     Scene* thisObj = GetThisWeakObject<Scene>(ctx);
@@ -1029,6 +1043,8 @@ static duk_ret_t Scene_Get_ActionTriggered(duk_context* ctx)
     duk_put_prop_string(ctx, -2, "Disconnect");
     duk_push_c_function(ctx, SignalWrapper_Scene_ActionTriggered_Disconnect, DUK_VARARGS);
     duk_put_prop_string(ctx, -2, "disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Scene_ActionTriggered_Emit, 4);
+    duk_put_prop_string(ctx, -2, "Emit");
     return 1;
 }
 
@@ -1396,6 +1412,17 @@ static duk_ret_t Scene_EmitEntityRemoved_Entity_AttributeChange__Type(duk_contex
     Entity* entity = GetWeakObject<Entity>(ctx, 0);
     AttributeChange::Type change = (AttributeChange::Type)(int)duk_require_number(ctx, 1);
     thisObj->EmitEntityRemoved(entity, change);
+    return 0;
+}
+
+static duk_ret_t Scene_EmitActionTriggered_Entity_String_StringVector_ExecTypeField(duk_context* ctx)
+{
+    Scene* thisObj = GetThisWeakObject<Scene>(ctx);
+    Entity* entity = GetWeakObject<Entity>(ctx, 0);
+    String action = duk_require_string(ctx, 1);
+    StringVector params = GetStringVector(ctx, 2);
+    EntityAction::ExecTypeField type = (EntityAction::ExecTypeField)(int)duk_require_number(ctx, 3);
+    thisObj->EmitActionTriggered(entity, action, params, type);
     return 0;
 }
 
@@ -1769,6 +1796,7 @@ static const duk_function_list_entry Scene_Functions[] = {
     ,{"EmitComponentAdded", Scene_EmitComponentAdded_Entity_IComponent_AttributeChange__Type, 3}
     ,{"EmitComponentRemoved", Scene_EmitComponentRemoved_Entity_IComponent_AttributeChange__Type, 3}
     ,{"EmitEntityRemoved", Scene_EmitEntityRemoved_Entity_AttributeChange__Type, 2}
+    ,{"EmitActionTriggered", Scene_EmitActionTriggered_Entity_String_StringVector_ExecTypeField, 4}
     ,{"EmitEntityAcked", Scene_EmitEntityAcked_Entity_entity_id_t, 2}
     ,{"EmitComponentAcked", Scene_EmitComponentAcked_IComponent_component_id_t, 2}
     ,{"EntitiesWithComponent", Scene_EntitiesWithComponent_Selector, DUK_VARARGS}

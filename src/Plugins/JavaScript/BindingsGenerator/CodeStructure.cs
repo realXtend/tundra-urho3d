@@ -436,12 +436,12 @@ namespace BindingsGenerator
 
         public static bool IsPODType(string type)
         {
-            return type == "bool" || type == "int" || type == "unsigned" || type == "unsigned short" || type == "u32" || type == "u16" || type == "uint" || type == "double" || type == "float" || type == "AttributeChange::Type" || type == "ClientLoginState" || type == "MouseButton" || type == "EventType" || type == "MouseEvent::MouseButton" || type == "TrustState" || type == "ChangeType" || type == "entity_id_t" || type == "component_id_t"; ///\todo Add more basic types here.
+            return type == "bool" || type == "int" || type == "unsigned" || type == "unsigned short" || type == "u32" || type == "u16" || type == "uint" || type == "double" || type == "float" || type == "AttributeChange::Type" || type == "ClientLoginState" || type == "MouseButton" || type == "EventType" || type == "MouseEvent::MouseButton" || type == "EntityAction::ExecTypeField" || type == "ExecTypeField" || type == "TrustState" || type == "ChangeType" || type == "entity_id_t" || type == "component_id_t"; ///\todo Add more basic types here.
         }
 
         public static bool IsNumberType(string type)
         {
-            return type == "int" || type == "unsigned" || type == "unsigned short" || type == "u32" || type == "u16" || type == "uint" || type == "double" || type == "float" || type == "AttributeChange::Type" || type == "ClientLoginState" || type == "MouseButton" || type == "EventType" || type == "MouseEvent::MouseButton" || type == "TrustState" || type == "ChangeType" || type == "entity_id_t" || type == "component_id_t";
+            return type == "int" || type == "unsigned" || type == "unsigned short" || type == "u32" || type == "u16" || type == "uint" || type == "double" || type == "float" || type == "AttributeChange::Type" || type == "ClientLoginState" || type == "MouseButton" || type == "EventType" || type == "MouseEvent::MouseButton" || type == "EntityAction::ExecTypeField" || type == "ExecTypeField" || type == "TrustState" || type == "ChangeType" || type == "entity_id_t" || type == "component_id_t";
         }
     };
 

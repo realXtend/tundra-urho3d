@@ -1131,6 +1131,29 @@ static duk_ret_t Entity_RemoveAction_String(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Entity_Exec_ExecTypeField_String_String_String_String(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    Entity* thisObj = GetThisWeakObject<Entity>(ctx);
+    EntityAction::ExecTypeField type = (EntityAction::ExecTypeField)(int)duk_require_number(ctx, 0);
+    String action = duk_require_string(ctx, 1);
+    String p1 = numArgs > 2 ? duk_require_string(ctx, 2) : "";
+    String p2 = numArgs > 3 ? duk_require_string(ctx, 3) : "";
+    String p3 = numArgs > 4 ? duk_require_string(ctx, 4) : "";
+    thisObj->Exec(type, action, p1, p2, p3);
+    return 0;
+}
+
+static duk_ret_t Entity_Exec_ExecTypeField_String_StringVector(duk_context* ctx)
+{
+    Entity* thisObj = GetThisWeakObject<Entity>(ctx);
+    EntityAction::ExecTypeField type = (EntityAction::ExecTypeField)(int)duk_require_number(ctx, 0);
+    String action = duk_require_string(ctx, 1);
+    StringVector params = GetStringVector(ctx, 2);
+    thisObj->Exec(type, action, params);
+    return 0;
+}
+
 static duk_ret_t Entity_SetTemporary_bool_AttributeChange__Type(duk_context* ctx)
 {
     int numArgs = duk_get_top(ctx);
@@ -1451,6 +1474,16 @@ static duk_ret_t Entity_ComponentsOfType_Selector(duk_context* ctx)
     duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
 }
 
+static duk_ret_t Entity_Exec_Selector(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    if (numArgs == 3 && duk_is_number(ctx, 0) && duk_is_string(ctx, 1) && duk_is_object(ctx, 2))
+        return Entity_Exec_ExecTypeField_String_StringVector(ctx);
+    if (numArgs >= 2 && duk_is_number(ctx, 0) && duk_is_string(ctx, 1))
+        return Entity_Exec_ExecTypeField_String_String_String_String(ctx);
+    duk_error(ctx, DUK_ERR_ERROR, "Could not select function overload");
+}
+
 static const duk_function_list_entry Entity_Functions[] = {
     {"SetGroup", Entity_SetGroup_String, 1}
     ,{"Group", Entity_Group, 0}
@@ -1480,6 +1513,7 @@ static const duk_function_list_entry Entity_Functions[] = {
     ,{"Description", Entity_Description, 0}
     ,{"Action", Entity_Action_String, 1}
     ,{"RemoveAction", Entity_RemoveAction_String, 1}
+    ,{"Exec", Entity_Exec_Selector, DUK_VARARGS}
     ,{"SetTemporary", Entity_SetTemporary_bool_AttributeChange__Type, DUK_VARARGS}
     ,{"IsTemporary", Entity_IsTemporary, 0}
     ,{"IsLocal", Entity_IsLocal, 0}

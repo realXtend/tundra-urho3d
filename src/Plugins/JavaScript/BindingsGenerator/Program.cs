@@ -1363,6 +1363,8 @@ namespace BindingsGenerator
                 type = "MouseEvent::EventType";
             if (type == "vec")
                 type = "float3";
+            if (type == "ExecTypeField")
+                type = "EntityAction::ExecTypeField";
             return type;
         }
 
