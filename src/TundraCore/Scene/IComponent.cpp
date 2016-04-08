@@ -12,6 +12,8 @@
 #include "SceneAPI.h"
 #include "Framework.h"
 #include "LoggingFunctions.h"
+#include "AssetReference.h"
+#include "EntityReference.h"
 
 #include <Urho3D/Resource/XMLFile.h>
 
@@ -22,7 +24,6 @@
 #include <Math/float3.h>
 #include <Math/float4.h>
 #include <Math/Quat.h>
-#include "AssetReference.h"
 
 namespace Tundra
 {
@@ -157,6 +158,9 @@ void IComponent::SetAttribute(const String& id, const Variant& value, AttributeC
     case IAttribute::AssetReferenceId:
         static_cast<Attribute<AssetReference>*>(attr)->Set(AssetReference(value.GetString()), change);
         break;
+    case IAttribute::EntityReferenceId:
+        static_cast<Attribute<EntityReference>*>(attr)->Set(EntityReference(value.GetString()), change);
+        break;
     }
 }
 
@@ -188,6 +192,8 @@ Variant IComponent::GetAttribute(const String& id) const
         return Variant(static_cast<Attribute<Quat>*>(attr)->Get());
     case IAttribute::AssetReferenceId:
         return Variant(static_cast<Attribute<AssetReference>*>(attr)->Get().ref);
+    case IAttribute::EntityReferenceId:
+        return Variant(static_cast<Attribute<EntityReference>*>(attr)->Get().ref);
     }
 
     return Variant();
