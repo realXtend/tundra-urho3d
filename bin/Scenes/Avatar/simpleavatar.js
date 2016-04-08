@@ -662,7 +662,6 @@ SimpleAvatar.prototype.LockMouseMove = function(x,y) {
 }
 
 SimpleAvatar.prototype.CommonFindAnimations = function() {
-    print("Findanimations");
     var animcontrol = this.me.animationcontroller;
     if (animcontrol == null)
     {
@@ -670,7 +669,6 @@ SimpleAvatar.prototype.CommonFindAnimations = function() {
     }
     var availableAnimations = animcontrol.AvailableAnimations();
     if (availableAnimations.length > 0) {
-        print(availableAnimations.length + " anims");
         // Detect animation names
         for(var i=0; i<this.animList.length; i++) {
             var animName = this.animList[i];
