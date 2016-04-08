@@ -21,10 +21,24 @@ namespace JSBindings
 {
 
 static const char* float3x4_ID = "float3x4";
+static const char* float3_ID = "float3";
+static const char* Quat_ID = "Quat";
 
 static duk_ret_t float3x4_Finalizer(duk_context* ctx)
 {
     FinalizeValueObject<float3x4>(ctx, float3x4_ID);
+    return 0;
+}
+
+static duk_ret_t float3_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<float3>(ctx, float3_ID);
+    return 0;
+}
+
+static duk_ret_t Quat_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<Quat>(ctx, Quat_ID);
     return 0;
 }
 
@@ -708,6 +722,60 @@ static duk_ret_t Mesh_HasMesh(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t Mesh_BonePosition_String(duk_context* ctx)
+{
+    Mesh* thisObj = GetThisWeakObject<Mesh>(ctx);
+    String boneName = duk_require_string(ctx, 0);
+    float3 ret = thisObj->BonePosition(boneName);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Mesh_BoneDerivedPosition_String(duk_context* ctx)
+{
+    Mesh* thisObj = GetThisWeakObject<Mesh>(ctx);
+    String boneName = duk_require_string(ctx, 0);
+    float3 ret = thisObj->BoneDerivedPosition(boneName);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Mesh_BoneWorldPosition_String(duk_context* ctx)
+{
+    Mesh* thisObj = GetThisWeakObject<Mesh>(ctx);
+    String boneName = duk_require_string(ctx, 0);
+    float3 ret = thisObj->BoneWorldPosition(boneName);
+    PushValueObjectCopy<float3>(ctx, ret, float3_ID, float3_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Mesh_BoneOrientation_String(duk_context* ctx)
+{
+    Mesh* thisObj = GetThisWeakObject<Mesh>(ctx);
+    String boneName = duk_require_string(ctx, 0);
+    Quat ret = thisObj->BoneOrientation(boneName);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_ID, Quat_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Mesh_BoneDerivedOrientation_String(duk_context* ctx)
+{
+    Mesh* thisObj = GetThisWeakObject<Mesh>(ctx);
+    String boneName = duk_require_string(ctx, 0);
+    Quat ret = thisObj->BoneDerivedOrientation(boneName);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_ID, Quat_Finalizer);
+    return 1;
+}
+
+static duk_ret_t Mesh_BoneWorldOrientation_String(duk_context* ctx)
+{
+    Mesh* thisObj = GetThisWeakObject<Mesh>(ctx);
+    String boneName = duk_require_string(ctx, 0);
+    Quat ret = thisObj->BoneWorldOrientation(boneName);
+    PushValueObjectCopy<Quat>(ctx, ret, Quat_ID, Quat_Finalizer);
+    return 1;
+}
+
 static duk_ret_t Mesh_AnimationNames(duk_context* ctx)
 {
     Mesh* thisObj = GetThisWeakObject<Mesh>(ctx);
@@ -960,6 +1028,12 @@ static const duk_function_list_entry Mesh_Functions[] = {
     ,{"MorphNames", Mesh_MorphNames, 0}
     ,{"LocalToWorld", Mesh_LocalToWorld, 0}
     ,{"HasMesh", Mesh_HasMesh, 0}
+    ,{"BonePosition", Mesh_BonePosition_String, 1}
+    ,{"BoneDerivedPosition", Mesh_BoneDerivedPosition_String, 1}
+    ,{"BoneWorldPosition", Mesh_BoneWorldPosition_String, 1}
+    ,{"BoneOrientation", Mesh_BoneOrientation_String, 1}
+    ,{"BoneDerivedOrientation", Mesh_BoneDerivedOrientation_String, 1}
+    ,{"BoneWorldOrientation", Mesh_BoneWorldOrientation_String, 1}
     ,{"AnimationNames", Mesh_AnimationNames, 0}
     ,{"ForceMeshLoad", Mesh_ForceMeshLoad, 0}
     ,{"MeshName", Mesh_MeshName, 0}

@@ -140,6 +140,42 @@ Urho3D::Node* Mesh::BoneNode(const String& name) const
     return bone ? bone->node_.Get() : nullptr;
 }
 
+float3 Mesh::BonePosition(const String& name) const
+{
+    Urho3D::Node* bone = BoneNode(name);
+    return bone ? bone->GetPosition() : float3::zero;
+}
+
+float3 Mesh::BoneDerivedPosition(const String& name) const
+{
+    Urho3D::Node* bone = BoneNode(name);
+    return bone ? (mesh_->GetNode()->GetWorldTransform().Inverse() * bone->GetWorldPosition()) : float3::zero;
+}
+
+float3 Mesh::BoneWorldPosition(const String& name) const
+{
+    Urho3D::Node* bone = BoneNode(name);
+    return bone ? bone->GetWorldPosition() : float3::zero;
+}
+
+Quat Mesh::BoneOrientation(const String& name) const
+{
+    Urho3D::Node* bone = BoneNode(name);
+    return bone ? bone->GetRotation() : Quat::identity;
+}
+
+Quat Mesh::BoneDerivedOrientation(const String& name) const
+{
+    Urho3D::Node* bone = BoneNode(name);
+    return bone ? (mesh_->GetNode()->GetWorldRotation().Inverse() * bone->GetWorldRotation()) : Quat::identity;
+}
+
+Quat Mesh::BoneWorldOrientation(const String& name) const
+{
+    Urho3D::Node* bone = BoneNode(name);
+    return bone ? bone->GetWorldRotation() : Quat::identity;
+}
+
 void Mesh::DeserializeFrom(Urho3D::XMLElement& element, AttributeChange::Type change)
 {
     if (!BeginDeserialization(element))

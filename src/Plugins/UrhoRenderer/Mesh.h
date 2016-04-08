@@ -118,6 +118,19 @@ public:
     /// Returns a bone scene node by name. If mesh is not skeletal, always returns null.
     Urho3D::Node* BoneNode(const String& boneName) const;
 
+    /// Return bone's local position
+    float3 BonePosition(const String& boneName) const;
+    /// Return bone's root-derived position. Note: these are not world coordinates, but relative to the mesh root
+    float3 BoneDerivedPosition(const String& boneName) const;
+    /// Return bone's world position.
+    float3 BoneWorldPosition(const String& boneName) const;
+    /// Return bone's local orientation
+    Quat BoneOrientation(const String& boneName) const;
+    /// Return bone's root-derived orientation
+    Quat BoneDerivedOrientation(const String& boneName) const;
+    /// Return bone's world orientation
+    Quat BoneWorldOrientation(const String& boneName) const;
+
     /// Returns adjustment scene node (used for scaling/offset/orientation modifications)
     Urho3D::Node* AdjustmentSceneNode() const { return adjustmentNode_; }
 
