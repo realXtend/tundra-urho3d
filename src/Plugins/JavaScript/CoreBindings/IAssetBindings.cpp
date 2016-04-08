@@ -150,7 +150,7 @@ public:
         duk_remove(ctx, -2);
         duk_push_number(ctx, (size_t)key_);
         duk_push_array(ctx);
-        PushWeakObject(ctx, param0);
+        PushWeakObject(ctx, param0.Get());
         duk_put_prop_index(ctx, -2, 0);
         bool success = duk_pcall(ctx, 2) == 0;
         if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
@@ -415,7 +415,7 @@ static duk_ret_t IAsset_Clone_String(duk_context* ctx)
     IAsset* thisObj = GetThisWeakObject<IAsset>(ctx);
     String newAssetName = duk_require_string(ctx, 0);
     AssetPtr ret = thisObj->Clone(newAssetName);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -443,7 +443,7 @@ static duk_ret_t IAsset_AssetStorage(duk_context* ctx)
 {
     IAsset* thisObj = GetThisWeakObject<IAsset>(ctx);
     AssetStoragePtr ret = thisObj->AssetStorage();
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 

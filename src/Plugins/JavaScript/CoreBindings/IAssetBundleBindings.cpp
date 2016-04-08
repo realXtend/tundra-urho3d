@@ -361,7 +361,7 @@ static duk_ret_t IAssetBundle_AssetStorage(duk_context* ctx)
 {
     IAssetBundle* thisObj = GetThisWeakObject<IAssetBundle>(ctx);
     AssetStoragePtr ret = thisObj->AssetStorage();
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 

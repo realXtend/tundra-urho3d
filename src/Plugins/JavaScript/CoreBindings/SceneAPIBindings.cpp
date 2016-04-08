@@ -327,7 +327,7 @@ static duk_ret_t SceneAPI_SceneByName_String(duk_context* ctx)
     SceneAPI* thisObj = GetThisWeakObject<SceneAPI>(ctx);
     String name = duk_require_string(ctx, 0);
     ScenePtr ret = thisObj->SceneByName(name);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -348,7 +348,7 @@ static duk_ret_t SceneAPI_CreateScene_String_bool_bool_AttributeChange__Type(duk
     bool authority = duk_require_boolean(ctx, 2);
     AttributeChange::Type change = numArgs > 3 ? (AttributeChange::Type)(int)duk_require_number(ctx, 3) : AttributeChange::Default;
     ScenePtr ret = thisObj->CreateScene(name, viewEnabled, authority, change);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -398,7 +398,7 @@ static duk_ret_t SceneAPI_CreateComponentByName_Scene_String_String(duk_context*
     String componentTypeName = duk_require_string(ctx, 1);
     String newComponentName = numArgs > 2 ? duk_require_string(ctx, 2) : "";
     ComponentPtr ret = thisObj->CreateComponentByName(scene, componentTypeName, newComponentName);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -410,7 +410,7 @@ static duk_ret_t SceneAPI_CreateComponentById_Scene_u32_String(duk_context* ctx)
     u32 componentTypeid = (u32)duk_require_number(ctx, 1);
     String newComponentName = numArgs > 2 ? duk_require_string(ctx, 2) : "";
     ComponentPtr ret = thisObj->CreateComponentById(scene, componentTypeid, newComponentName);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 

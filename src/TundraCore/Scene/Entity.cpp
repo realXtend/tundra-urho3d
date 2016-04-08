@@ -335,7 +335,7 @@ ComponentPtr Entity::Component(const String &typeName) const
 {
     const String cTypeName = IComponent::EnsureTypeNameWithoutPrefix(typeName);
     for (ComponentMap::ConstIterator i = components_.Begin(); i != components_.End(); ++i)
-        if (i->second_->TypeName() == cTypeName)
+        if (i->second_->TypeName().Compare(cTypeName, false) == 0)
             return i->second_;
 
     return ComponentPtr();

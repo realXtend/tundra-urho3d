@@ -4,7 +4,9 @@
 
 #include "AvatarDescHelpers.h"
 #include "IAsset.h"
+#include "IAssetStorage.h"
 #include "Signals.h"
+
 
 #include <Urho3D/Resource/XMLFile.h>
 

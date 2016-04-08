@@ -23,11 +23,120 @@ namespace JSBindings
 
 static const char* IAssetStorage_ID = "IAssetStorage";
 
+const char* SignalWrapper_IAssetStorage_AssetChanged_ID = "SignalWrapper_IAssetStorage_AssetChanged";
+
+class SignalWrapper_IAssetStorage_AssetChanged
+{
+public:
+    SignalWrapper_IAssetStorage_AssetChanged(Object* owner, Signal4< IAssetStorage *, String, String, IAssetStorage::ChangeType >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal4< IAssetStorage *, String, String, IAssetStorage::ChangeType >* signal_;
+};
+
+class SignalReceiver_IAssetStorage_AssetChanged : public SignalReceiver
+{
+public:
+    void OnSignal(IAssetStorage * param0, String param1, String param2, IAssetStorage::ChangeType param3)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        duk_push_string(ctx, param1.CString());
+        duk_put_prop_index(ctx, -2, 1);
+        duk_push_string(ctx, param2.CString());
+        duk_put_prop_index(ctx, -2, 2);
+        duk_push_number(ctx, param3);
+        duk_put_prop_index(ctx, -2, 3);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
+        duk_pop(ctx);
+    }
+};
+
+static duk_ret_t SignalWrapper_IAssetStorage_AssetChanged_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<SignalWrapper_IAssetStorage_AssetChanged>(ctx, SignalWrapper_IAssetStorage_AssetChanged_ID);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_IAssetStorage_AssetChanged_Connect(duk_context* ctx)
+{
+    SignalWrapper_IAssetStorage_AssetChanged* wrapper = GetThisValueObject<SignalWrapper_IAssetStorage_AssetChanged>(ctx, SignalWrapper_IAssetStorage_AssetChanged_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_IAssetStorage_AssetChanged* receiver = new SignalReceiver_IAssetStorage_AssetChanged();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_IAssetStorage_AssetChanged::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    CallConnectSignal(ctx, wrapper->signal_);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_IAssetStorage_AssetChanged_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_IAssetStorage_AssetChanged* wrapper = GetThisValueObject<SignalWrapper_IAssetStorage_AssetChanged>(ctx, SignalWrapper_IAssetStorage_AssetChanged_ID);
+    if (!wrapper->owner_) return 0;
+    CallDisconnectSignal(ctx, wrapper->signal_);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_IAssetStorage_AssetChanged_Emit(duk_context* ctx)
+{
+    SignalWrapper_IAssetStorage_AssetChanged* wrapper = GetThisValueObject<SignalWrapper_IAssetStorage_AssetChanged>(ctx, SignalWrapper_IAssetStorage_AssetChanged_ID);
+    if (!wrapper->owner_) return 0;
+    IAssetStorage* param0 = GetWeakObject<IAssetStorage>(ctx, 0);
+    String param1 = duk_require_string(ctx, 1);
+    String param2 = duk_require_string(ctx, 2);
+    IAssetStorage::ChangeType param3 = (IAssetStorage::ChangeType)(int)duk_require_number(ctx, 3);
+    wrapper->signal_->Emit(param0, param1, param2, param3);
+    return 0;
+}
+
+static duk_ret_t IAssetStorage_Get_AssetChanged(duk_context* ctx)
+{
+    IAssetStorage* thisObj = GetThisWeakObject<IAssetStorage>(ctx);
+    SignalWrapper_IAssetStorage_AssetChanged* wrapper = new SignalWrapper_IAssetStorage_AssetChanged(thisObj, &thisObj->AssetChanged);
+    PushValueObject(ctx, wrapper, SignalWrapper_IAssetStorage_AssetChanged_ID, SignalWrapper_IAssetStorage_AssetChanged_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_IAssetStorage_AssetChanged_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_IAssetStorage_AssetChanged_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
+    duk_push_c_function(ctx, SignalWrapper_IAssetStorage_AssetChanged_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_IAssetStorage_AssetChanged_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
+    duk_push_c_function(ctx, SignalWrapper_IAssetStorage_AssetChanged_Emit, 4);
+    duk_put_prop_string(ctx, -2, "Emit");
+    return 1;
+}
+
 static duk_ret_t IAssetStorage_SetReplicated_bool(duk_context* ctx)
 {
     IAssetStorage* thisObj = GetThisWeakObject<IAssetStorage>(ctx);
     bool isReplicated_ = duk_require_boolean(ctx, 0);
     thisObj->SetReplicated(isReplicated_);
+    return 0;
+}
+
+static duk_ret_t IAssetStorage_SetTrustState_TrustState(duk_context* ctx)
+{
+    IAssetStorage* thisObj = GetThisWeakObject<IAssetStorage>(ctx);
+    IAssetStorage::TrustState trustState_ = (IAssetStorage::TrustState)(int)duk_require_number(ctx, 0);
+    thisObj->SetTrustState(trustState_);
     return 0;
 }
 
@@ -94,6 +203,14 @@ static duk_ret_t IAssetStorage_Trusted(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t IAssetStorage_GetTrustState(duk_context* ctx)
+{
+    IAssetStorage* thisObj = GetThisWeakObject<IAssetStorage>(ctx);
+    IAssetStorage::TrustState ret = thisObj->GetTrustState();
+    duk_push_number(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t IAssetStorage_GetFullAssetURL_String(duk_context* ctx)
 {
     IAssetStorage* thisObj = GetThisWeakObject<IAssetStorage>(ctx);
@@ -145,8 +262,25 @@ static duk_ret_t IAssetStorage_SerializeToString_bool(duk_context* ctx)
     return 1;
 }
 
+static duk_ret_t IAssetStorage_TrustStateToString_Static_TrustState(duk_context* ctx)
+{
+    IAssetStorage::TrustState s = (IAssetStorage::TrustState)(int)duk_require_number(ctx, 0);
+    String ret = IAssetStorage::TrustStateToString(s);
+    duk_push_string(ctx, ret.CString());
+    return 1;
+}
+
+static duk_ret_t IAssetStorage_TrustStateFromString_Static_String(duk_context* ctx)
+{
+    String s = duk_require_string(ctx, 0);
+    IAssetStorage::TrustState ret = IAssetStorage::TrustStateFromString(s);
+    duk_push_number(ctx, ret);
+    return 1;
+}
+
 static const duk_function_list_entry IAssetStorage_Functions[] = {
     {"SetReplicated", IAssetStorage_SetReplicated_bool, 1}
+    ,{"SetTrustState", IAssetStorage_SetTrustState_TrustState, 1}
     ,{"GetAllAssetRefs", IAssetStorage_GetAllAssetRefs, 0}
     ,{"RefreshAssetRefs", IAssetStorage_RefreshAssetRefs, 0}
     ,{"Writable", IAssetStorage_Writable, 0}
@@ -155,6 +289,7 @@ static const duk_function_list_entry IAssetStorage_Functions[] = {
     ,{"AutoDiscoverable", IAssetStorage_AutoDiscoverable, 0}
     ,{"IsReplicated", IAssetStorage_IsReplicated, 0}
     ,{"Trusted", IAssetStorage_Trusted, 0}
+    ,{"GetTrustState", IAssetStorage_GetTrustState, 0}
     ,{"GetFullAssetURL", IAssetStorage_GetFullAssetURL_String, 1}
     ,{"Type", IAssetStorage_Type, 0}
     ,{"Name", IAssetStorage_Name, 0}
@@ -164,9 +299,16 @@ static const duk_function_list_entry IAssetStorage_Functions[] = {
     ,{nullptr, nullptr, 0}
 };
 
+static const duk_function_list_entry IAssetStorage_StaticFunctions[] = {
+    {"TrustStateToString", IAssetStorage_TrustStateToString_Static_TrustState, 1}
+    ,{"TrustStateFromString", IAssetStorage_TrustStateFromString_Static_String, 1}
+    ,{nullptr, nullptr, 0}
+};
+
 void Expose_IAssetStorage(duk_context* ctx)
 {
     duk_push_object(ctx);
+    duk_put_function_list(ctx, -1, IAssetStorage_StaticFunctions);
     duk_push_number(ctx, 0);
     duk_put_prop_string(ctx, -2, "AssetCreate");
     duk_push_number(ctx, 1);
@@ -181,6 +323,7 @@ void Expose_IAssetStorage(duk_context* ctx)
     duk_put_prop_string(ctx, -2, "StorageAskTrust");
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, IAssetStorage_Functions);
+    DefineProperty(ctx, "AssetChanged", IAssetStorage_Get_AssetChanged, nullptr);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, IAssetStorage_ID);
 }

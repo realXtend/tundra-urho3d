@@ -11,8 +11,9 @@
 namespace Tundra
 {
 
-/// Avatar component, description asset and hardcoded C++ avatar control functionality.
-/** Once proper script support is in place, the application part can be removed. */
+class JavaScriptInstance;
+
+/// Avatar component and avatar description asset functionality. */
 class AvatarApplication : public IModule
 {
     URHO3D_OBJECT(AvatarApplication, IModule);
@@ -21,38 +22,13 @@ public:
     AvatarApplication(Framework* owner);
     ~AvatarApplication();
 
-    /// Frame-based module update
-    void Update(float frametime) override;
-
 private:
-    /// React to scene creation
-    void OnSceneCreated(Scene *scene, AttributeChange::Type change);
-    /// React to entity creation
-    void OnEntityCreated(Entity* entity, AttributeChange::Type change);
-    /// Handle rotate delta from CameraApplication
-    void OnRotateChanged(float3 rotDelta);
-    /// Handle move vector change from CameraApplication
-    void OnMoveChanged(float3 moveVector);
-    /// Handle zoom change from CameraApplication
-    void OnZoomChanged(int delta);
-    /// Update avatar camera's position to match own avatar
-    void UpdateCameraPosition(float frametime);
-    /// Update animations of all avatars in the scene
-    void UpdateAvatarAnimations();
-
-    SceneWeakPtr lastScene_;
-    EntityWeakPtr ownAvatarEntity_;
-    EntityWeakPtr avatarCameraEntity_;
-
-    float yaw, pitch;
-    float cameraDistance;
-    float newCameraDistance;
-    bool firstPerson;
-    float3 lastSentMove;
-
     void Load() override;
     void Initialize() override;
     void Uninitialize() override;
+
+    /// Handles script engine creation (register AvatarApplication classes)
+    void OnScriptInstanceCreated(JavaScriptInstance* instance);
 };
 
 }

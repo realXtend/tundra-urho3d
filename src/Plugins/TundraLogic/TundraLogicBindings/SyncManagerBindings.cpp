@@ -25,6 +25,87 @@ namespace JSBindings
 
 static const char* SyncManager_ID = "SyncManager";
 
+const char* SignalWrapper_SyncManager_SceneStateCreated_ID = "SignalWrapper_SyncManager_SceneStateCreated";
+
+class SignalWrapper_SyncManager_SceneStateCreated
+{
+public:
+    SignalWrapper_SyncManager_SceneStateCreated(Object* owner, Signal2< UserConnection *, SceneSyncState *>* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal2< UserConnection *, SceneSyncState *>* signal_;
+};
+
+class SignalReceiver_SyncManager_SceneStateCreated : public SignalReceiver
+{
+public:
+    void OnSignal(UserConnection * param0, SceneSyncState * param1)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
+        duk_pop(ctx);
+    }
+};
+
+static duk_ret_t SignalWrapper_SyncManager_SceneStateCreated_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<SignalWrapper_SyncManager_SceneStateCreated>(ctx, SignalWrapper_SyncManager_SceneStateCreated_ID);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_SyncManager_SceneStateCreated_Connect(duk_context* ctx)
+{
+    SignalWrapper_SyncManager_SceneStateCreated* wrapper = GetThisValueObject<SignalWrapper_SyncManager_SceneStateCreated>(ctx, SignalWrapper_SyncManager_SceneStateCreated_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_SyncManager_SceneStateCreated* receiver = new SignalReceiver_SyncManager_SceneStateCreated();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_SyncManager_SceneStateCreated::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    CallConnectSignal(ctx, wrapper->signal_);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_SyncManager_SceneStateCreated_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_SyncManager_SceneStateCreated* wrapper = GetThisValueObject<SignalWrapper_SyncManager_SceneStateCreated>(ctx, SignalWrapper_SyncManager_SceneStateCreated_ID);
+    if (!wrapper->owner_) return 0;
+    CallDisconnectSignal(ctx, wrapper->signal_);
+    return 0;
+}
+
+static duk_ret_t SyncManager_Get_SceneStateCreated(duk_context* ctx)
+{
+    SyncManager* thisObj = GetThisWeakObject<SyncManager>(ctx);
+    SignalWrapper_SyncManager_SceneStateCreated* wrapper = new SignalWrapper_SyncManager_SceneStateCreated(thisObj, &thisObj->SceneStateCreated);
+    PushValueObject(ctx, wrapper, SignalWrapper_SyncManager_SceneStateCreated_ID, SignalWrapper_SyncManager_SceneStateCreated_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_SyncManager_SceneStateCreated_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_SyncManager_SceneStateCreated_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
+    duk_push_c_function(ctx, SignalWrapper_SyncManager_SceneStateCreated_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_SyncManager_SceneStateCreated_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
+    return 1;
+}
+
 static duk_ret_t SyncManager_SetUpdatePeriod_float(duk_context* ctx)
 {
     SyncManager* thisObj = GetThisWeakObject<SyncManager>(ctx);
@@ -69,7 +150,7 @@ static duk_ret_t SyncManager_Observer(duk_context* ctx)
 {
     SyncManager* thisObj = GetThisWeakObject<SyncManager>(ctx);
     EntityPtr ret = thisObj->Observer();
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -106,6 +187,7 @@ void Expose_SyncManager(duk_context* ctx)
     duk_push_object(ctx);
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, SyncManager_Functions);
+    DefineProperty(ctx, "SceneStateCreated", SyncManager_Get_SceneStateCreated, nullptr);
     DefineProperty(ctx, "updatePeriod", SyncManager_GetUpdatePeriod, SyncManager_SetUpdatePeriod_float);
     DefineProperty(ctx, "interestManagementEnabled", SyncManager_IsInterestManagementEnabled, SyncManager_SetInterestManagementEnabled_bool);
     DefineProperty(ctx, "observer", SyncManager_Observer, SyncManager_SetObserver_EntityPtr);

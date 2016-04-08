@@ -1077,6 +1077,20 @@ void Expose_float2(duk_context* ctx)
     DefineProperty(ctx, "y", float2_Get_y, float2_Set_y);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, float2_ID);
+    duk_get_global_string(ctx, float2_ID);
+    PushValueObjectCopy<float2>(ctx, float2::zero, float2_ID, float2_Finalizer);
+    duk_put_prop_string(ctx, -2, "zero");
+    PushValueObjectCopy<float2>(ctx, float2::one, float2_ID, float2_Finalizer);
+    duk_put_prop_string(ctx, -2, "one");
+    PushValueObjectCopy<float2>(ctx, float2::unitX, float2_ID, float2_Finalizer);
+    duk_put_prop_string(ctx, -2, "unitX");
+    PushValueObjectCopy<float2>(ctx, float2::unitY, float2_ID, float2_Finalizer);
+    duk_put_prop_string(ctx, -2, "unitY");
+    PushValueObjectCopy<float2>(ctx, float2::nan, float2_ID, float2_Finalizer);
+    duk_put_prop_string(ctx, -2, "nan");
+    PushValueObjectCopy<float2>(ctx, float2::inf, float2_ID, float2_Finalizer);
+    duk_put_prop_string(ctx, -2, "inf");
+    duk_pop(ctx);
 }
 
 }

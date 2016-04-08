@@ -12,12 +12,18 @@
 #include "SceneAPI.h"
 #include "Framework.h"
 #include "LoggingFunctions.h"
+#include "AssetReference.h"
+#include "EntityReference.h"
 
 #include <Urho3D/Resource/XMLFile.h>
 
 #include <kNet/DataSerializer.h>
 #include <kNet/DataDeserializer.h>
 #include <Urho3D/Core/StringUtils.h>
+#include <Math/float2.h>
+#include <Math/float3.h>
+#include <Math/float4.h>
+#include <Math/Quat.h>
 
 namespace Tundra
 {
@@ -113,6 +119,84 @@ void IComponent::SetReplicated(bool enable)
     }
     
     replicated = enable;
+}
+
+void IComponent::SetAttribute(const String& id, const Variant& value, AttributeChange::Type change)
+{
+    IAttribute* attr = AttributeById(id);
+    if (!attr)
+        attr = AttributeByName(id);
+    if (!attr)
+        return;
+
+    switch (attr->TypeId())
+    {
+    case IAttribute::BoolId:
+        static_cast<Attribute<bool>*>(attr)->Set(value.GetBool(), change);
+        break;
+    case IAttribute::IntId:
+        static_cast<Attribute<int>*>(attr)->Set(value.GetInt(), change);
+        break;
+    case IAttribute::StringId:
+        static_cast<Attribute<String>*>(attr)->Set(value.GetString(), change);
+        break;
+    case IAttribute::RealId:
+        static_cast<Attribute<float>*>(attr)->Set(value.GetFloat(), change);
+        break;
+    case IAttribute::Float2Id:
+        static_cast<Attribute<float2>*>(attr)->Set(value.GetVector2(), change);
+        break;
+    case IAttribute::Float3Id:
+        static_cast<Attribute<float3>*>(attr)->Set(value.GetVector3(), change);
+        break;
+    case IAttribute::Float4Id:
+        static_cast<Attribute<float4>*>(attr)->Set(value.GetVector4(), change);
+        break;
+    case IAttribute::QuatId:
+        static_cast<Attribute<Quat>*>(attr)->Set(value.GetQuaternion(), change);
+        break;
+    case IAttribute::AssetReferenceId:
+        static_cast<Attribute<AssetReference>*>(attr)->Set(AssetReference(value.GetString()), change);
+        break;
+    case IAttribute::EntityReferenceId:
+        static_cast<Attribute<EntityReference>*>(attr)->Set(EntityReference(value.GetString()), change);
+        break;
+    }
+}
+
+Variant IComponent::GetAttribute(const String& id) const
+{
+    IAttribute* attr = AttributeById(id);
+    if (!attr)
+        attr = AttributeByName(id);
+    if (!attr)
+        return Variant();
+
+    switch (attr->TypeId())
+    {
+    case IAttribute::BoolId:
+        return Variant(static_cast<Attribute<bool>*>(attr)->Get());
+    case IAttribute::IntId:
+        return Variant(static_cast<Attribute<int>*>(attr)->Get());
+    case IAttribute::StringId:
+        return Variant(static_cast<Attribute<String>*>(attr)->Get());
+    case IAttribute::RealId:
+        return Variant(static_cast<Attribute<float>*>(attr)->Get());
+    case IAttribute::Float2Id:
+        return Variant(static_cast<Attribute<float2>*>(attr)->Get());
+    case IAttribute::Float3Id:
+        return Variant(static_cast<Attribute<float3>*>(attr)->Get());
+    case IAttribute::Float4Id:
+        return Variant(static_cast<Attribute<float4>*>(attr)->Get());
+    case IAttribute::QuatId:
+        return Variant(static_cast<Attribute<Quat>*>(attr)->Get());
+    case IAttribute::AssetReferenceId:
+        return Variant(static_cast<Attribute<AssetReference>*>(attr)->Get().ref);
+    case IAttribute::EntityReferenceId:
+        return Variant(static_cast<Attribute<EntityReference>*>(attr)->Get().ref);
+    }
+
+    return Variant();
 }
 
 AttributeVector IComponent::NonEmptyAttributes() const

@@ -181,6 +181,12 @@ public:
     /** True by default. Can only be changed before the component is added to an entity, because the replication determines the ID range to use. */
     void SetReplicated(bool enable);
 
+    /// Set an attribute through a Variant. Can be used by scripts.
+    void SetAttribute(const String& id, const Variant& value, AttributeChange::Type change = AttributeChange::Default);
+
+    /// Return an attribute value as a Variant. Can be used by scripts.
+    Variant GetAttribute(const String& id) const;
+
     /// Finds and returns an attribute of type 'Attribute<T>' and given name
     /** @param T The Attribute type to look for.
         @param name The name of the attribute.

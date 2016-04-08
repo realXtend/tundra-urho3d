@@ -119,6 +119,170 @@ static duk_ret_t Server_Get_UserAboutToConnect(duk_context* ctx)
     return 1;
 }
 
+const char* SignalWrapper_Server_UserConnected_ID = "SignalWrapper_Server_UserConnected";
+
+class SignalWrapper_Server_UserConnected
+{
+public:
+    SignalWrapper_Server_UserConnected(Object* owner, Signal3< u32, UserConnection *, UserConnectedResponseData * >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal3< u32, UserConnection *, UserConnectedResponseData * >* signal_;
+};
+
+class SignalReceiver_Server_UserConnected : public SignalReceiver
+{
+public:
+    void OnSignal(u32 param0, UserConnection * param1, UserConnectedResponseData * param2)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        duk_push_number(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        PushWeakObject(ctx, param1);
+        duk_put_prop_index(ctx, -2, 1);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
+        duk_pop(ctx);
+    }
+};
+
+static duk_ret_t SignalWrapper_Server_UserConnected_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<SignalWrapper_Server_UserConnected>(ctx, SignalWrapper_Server_UserConnected_ID);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Server_UserConnected_Connect(duk_context* ctx)
+{
+    SignalWrapper_Server_UserConnected* wrapper = GetThisValueObject<SignalWrapper_Server_UserConnected>(ctx, SignalWrapper_Server_UserConnected_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_Server_UserConnected* receiver = new SignalReceiver_Server_UserConnected();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_Server_UserConnected::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    CallConnectSignal(ctx, wrapper->signal_);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Server_UserConnected_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_Server_UserConnected* wrapper = GetThisValueObject<SignalWrapper_Server_UserConnected>(ctx, SignalWrapper_Server_UserConnected_ID);
+    if (!wrapper->owner_) return 0;
+    CallDisconnectSignal(ctx, wrapper->signal_);
+    return 0;
+}
+
+static duk_ret_t Server_Get_UserConnected(duk_context* ctx)
+{
+    Server* thisObj = GetThisWeakObject<Server>(ctx);
+    SignalWrapper_Server_UserConnected* wrapper = new SignalWrapper_Server_UserConnected(thisObj, &thisObj->UserConnected);
+    PushValueObject(ctx, wrapper, SignalWrapper_Server_UserConnected_ID, SignalWrapper_Server_UserConnected_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Server_UserConnected_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Server_UserConnected_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
+    duk_push_c_function(ctx, SignalWrapper_Server_UserConnected_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Server_UserConnected_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
+    return 1;
+}
+
+const char* SignalWrapper_Server_MessageReceived_ID = "SignalWrapper_Server_MessageReceived";
+
+class SignalWrapper_Server_MessageReceived
+{
+public:
+    SignalWrapper_Server_MessageReceived(Object* owner, Signal5< UserConnection *, kNet::packet_id_t, kNet::message_id_t, const char *, size_t >* signal) :
+        owner_(owner),
+        signal_(signal)
+    {
+    }
+
+    WeakPtr<Object> owner_;
+    Signal5< UserConnection *, kNet::packet_id_t, kNet::message_id_t, const char *, size_t >* signal_;
+};
+
+class SignalReceiver_Server_MessageReceived : public SignalReceiver
+{
+public:
+    void OnSignal(UserConnection * param0, kNet::packet_id_t param1, kNet::message_id_t param2, const char * param3, size_t param4)
+    {
+        duk_context* ctx = ctx_;
+        duk_push_global_object(ctx);
+        duk_get_prop_string(ctx, -1, "_OnSignal");
+        duk_remove(ctx, -2);
+        duk_push_number(ctx, (size_t)key_);
+        duk_push_array(ctx);
+        PushWeakObject(ctx, param0);
+        duk_put_prop_index(ctx, -2, 0);
+        bool success = duk_pcall(ctx, 2) == 0;
+        if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
+        duk_pop(ctx);
+    }
+};
+
+static duk_ret_t SignalWrapper_Server_MessageReceived_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<SignalWrapper_Server_MessageReceived>(ctx, SignalWrapper_Server_MessageReceived_ID);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Server_MessageReceived_Connect(duk_context* ctx)
+{
+    SignalWrapper_Server_MessageReceived* wrapper = GetThisValueObject<SignalWrapper_Server_MessageReceived>(ctx, SignalWrapper_Server_MessageReceived_ID);
+    if (!wrapper->owner_) return 0;
+    HashMap<void*, SharedPtr<SignalReceiver> >& signalReceivers = JavaScriptInstance::InstanceFromContext(ctx)->SignalReceivers();
+    if (signalReceivers.Find(wrapper->signal_) == signalReceivers.End())
+    {
+        SignalReceiver_Server_MessageReceived* receiver = new SignalReceiver_Server_MessageReceived();
+        receiver->ctx_ = ctx;
+        receiver->key_ = wrapper->signal_;
+        wrapper->signal_->Connect(receiver, &SignalReceiver_Server_MessageReceived::OnSignal);
+        signalReceivers[wrapper->signal_] = receiver;
+    }
+    CallConnectSignal(ctx, wrapper->signal_);
+    return 0;
+}
+
+static duk_ret_t SignalWrapper_Server_MessageReceived_Disconnect(duk_context* ctx)
+{
+    SignalWrapper_Server_MessageReceived* wrapper = GetThisValueObject<SignalWrapper_Server_MessageReceived>(ctx, SignalWrapper_Server_MessageReceived_ID);
+    if (!wrapper->owner_) return 0;
+    CallDisconnectSignal(ctx, wrapper->signal_);
+    return 0;
+}
+
+static duk_ret_t Server_Get_MessageReceived(duk_context* ctx)
+{
+    Server* thisObj = GetThisWeakObject<Server>(ctx);
+    SignalWrapper_Server_MessageReceived* wrapper = new SignalWrapper_Server_MessageReceived(thisObj, &thisObj->MessageReceived);
+    PushValueObject(ctx, wrapper, SignalWrapper_Server_MessageReceived_ID, SignalWrapper_Server_MessageReceived_Finalizer, false);
+    duk_push_c_function(ctx, SignalWrapper_Server_MessageReceived_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Connect");
+    duk_push_c_function(ctx, SignalWrapper_Server_MessageReceived_Connect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "connect");
+    duk_push_c_function(ctx, SignalWrapper_Server_MessageReceived_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "Disconnect");
+    duk_push_c_function(ctx, SignalWrapper_Server_MessageReceived_Disconnect, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "disconnect");
+    return 1;
+}
+
 const char* SignalWrapper_Server_UserDisconnected_ID = "SignalWrapper_Server_UserDisconnected";
 
 class SignalWrapper_Server_UserDisconnected
@@ -471,7 +635,7 @@ static duk_ret_t Server_UserConnectionById_u32(duk_context* ctx)
     Server* thisObj = GetThisWeakObject<Server>(ctx);
     u32 connectionID = (u32)duk_require_number(ctx, 0);
     UserConnectionPtr ret = thisObj->UserConnectionById(connectionID);
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -479,7 +643,7 @@ static duk_ret_t Server_ActionSender(duk_context* ctx)
 {
     Server* thisObj = GetThisWeakObject<Server>(ctx);
     UserConnectionPtr ret = thisObj->ActionSender();
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 
@@ -504,6 +668,8 @@ void Expose_Server(duk_context* ctx)
     duk_push_object(ctx);
     duk_put_function_list(ctx, -1, Server_Functions);
     DefineProperty(ctx, "UserAboutToConnect", Server_Get_UserAboutToConnect, nullptr);
+    DefineProperty(ctx, "UserConnected", Server_Get_UserConnected, nullptr);
+    DefineProperty(ctx, "MessageReceived", Server_Get_MessageReceived, nullptr);
     DefineProperty(ctx, "UserDisconnected", Server_Get_UserDisconnected, nullptr);
     DefineProperty(ctx, "ServerStarted", Server_Get_ServerStarted, nullptr);
     DefineProperty(ctx, "ServerStopped", Server_Get_ServerStopped, nullptr);

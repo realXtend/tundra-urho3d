@@ -12,6 +12,7 @@
 #include "Math/Quat.h"
 #include "Math/Transform.h"
 #include "Asset/AssetReference.h"
+#include "Scene/EntityReference.h"
 
 #include <Urho3D/Core/StringUtils.h>
 #include <cstring>
@@ -28,6 +29,7 @@ static const char* Quat_ID = "Quat";
 static const char* Transform_ID = "Transform";
 static const char* AssetReference_ID = "AssetReference";
 static const char* AssetReferenceList_ID = "AssetReferenceList";
+static const char* EntityReference_ID = "EntityReference";
 
 static duk_ret_t float2_Finalizer(duk_context* ctx)
 {
@@ -68,6 +70,12 @@ static duk_ret_t AssetReference_Finalizer(duk_context* ctx)
 static duk_ret_t AssetReferenceList_Finalizer(duk_context* ctx)
 {
     FinalizeValueObject<AssetReferenceList>(ctx, AssetReferenceList_ID);
+    return 0;
+}
+
+static duk_ret_t EntityReference_Finalizer(duk_context* ctx)
+{
+    FinalizeValueObject<EntityReference>(ctx, EntityReference_ID);
     return 0;
 }
 
@@ -165,9 +173,7 @@ static duk_ret_t Entity_GetProperty(duk_context* ctx)
         Entity* entity = GetWeakObject<Entity>(ctx, 0);
         if (entity)
         {
-            // Now convert to uppercase so that the type comparison will work
             String compTypeStr(compTypeName);
-            compTypeStr[0] = (char)Urho3D::ToUpper(compTypeStr[0]);
             IComponent* comp = entity->Component(compTypeStr);
             if (comp)
             {
@@ -505,6 +511,11 @@ void AssignAttributeValue(duk_context* ctx, duk_idx_t stackIndex, IAttribute* de
             static_cast<Attribute<AssetReferenceList>*>(destAttr)->Set(list);
         }
         break;
+
+    case IAttribute::EntityReferenceId:
+        if (duk_is_object(ctx, stackIndex) && strcmp(GetValueObjectType(ctx, stackIndex), EntityReference_ID) == 0)
+            static_cast<Attribute<EntityReference>*>(destAttr)->Set(*GetValueObject<EntityReference>(ctx, stackIndex, nullptr), change);
+        break;
     }
 }
 
@@ -562,7 +573,9 @@ void PushAttributeValue(duk_context* ctx, IAttribute* attr)
             PushValueObjectCopy<AssetReferenceList>(ctx, static_cast<Attribute<AssetReferenceList>*>(attr)->Get(), AssetReferenceList_ID, AssetReferenceList_Finalizer);
             return;
 
-            /// \todo More types
+        case IAttribute::EntityReferenceId:
+            PushValueObjectCopy<EntityReference>(ctx, static_cast<Attribute<EntityReference>*>(attr)->Get(), EntityReference_ID, EntityReference_Finalizer);
+            return;
         }
     }
 

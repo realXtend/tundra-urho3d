@@ -339,6 +339,26 @@ static duk_ret_t Name_SetReplicated_bool(duk_context* ctx)
     return 0;
 }
 
+static duk_ret_t Name_SetAttribute_String_Variant_AttributeChange__Type(duk_context* ctx)
+{
+    int numArgs = duk_get_top(ctx);
+    Name* thisObj = GetThisWeakObject<Name>(ctx);
+    String id = duk_require_string(ctx, 0);
+    Variant value = GetVariant(ctx, 1);
+    AttributeChange::Type change = numArgs > 2 ? (AttributeChange::Type)(int)duk_require_number(ctx, 2) : AttributeChange::Default;
+    thisObj->SetAttribute(id, value, change);
+    return 0;
+}
+
+static duk_ret_t Name_GetAttribute_String(duk_context* ctx)
+{
+    Name* thisObj = GetThisWeakObject<Name>(ctx);
+    String id = duk_require_string(ctx, 0);
+    Variant ret = thisObj->GetAttribute(id);
+    PushVariant(ctx, ret);
+    return 1;
+}
+
 static duk_ret_t Name_GetFramework(duk_context* ctx)
 {
     Name* thisObj = GetThisWeakObject<Name>(ctx);
@@ -516,6 +536,8 @@ static const duk_function_list_entry Name_Functions[] = {
     ,{"SetName", Name_SetName_String, 1}
     ,{"SetParentEntity", Name_SetParentEntity_Entity, 1}
     ,{"SetReplicated", Name_SetReplicated_bool, 1}
+    ,{"SetAttribute", Name_SetAttribute_String_Variant_AttributeChange__Type, DUK_VARARGS}
+    ,{"GetAttribute", Name_GetAttribute_String, 1}
     ,{"GetFramework", Name_GetFramework, 0}
     ,{"IsReplicated", Name_IsReplicated, 0}
     ,{"IsLocal", Name_IsLocal, 0}

@@ -64,7 +64,13 @@ void JavaScript::Initialize()
     LocalAssetStoragePtr storage = framework->Asset()->AssetProvider<LocalAssetProvider>()->AddStorageDirectory(jsAssetDir, "Javascript", true, false);
     storage->SetReplicated(false); // If we are a server, don't pass this storage to the client.
 
+    // Set startup scripts and --run commands to be run on the first frame.
+    // This is to ensure that all loaded modules have hooked themselves up to JS instance creation before creating JS instances
+    framework->Frame()->DelayedExecute(0.0f).Connect(this, &JavaScript::OnFirstFrame);
+}
 
+void JavaScript::OnFirstFrame(float /*dt*/)
+{
     // Initialize startup scripts
     LoadStartupScripts();
 
@@ -302,12 +308,12 @@ void JavaScript::CreateScriptObject(Script* app, Script* instance, const String&
             duk_remove(ctx, -4);
             success = duk_pcall(ctx, 2) == 0;
             if (!success)
-                LogError("[JavaScript] CreateScriptObject: failed to store script object for " + appAndClassName + ": " + String(duk_safe_to_string(ctx, -1)));
+                LogError("[JavaScript] CreateScriptObject: failed to store script object for " + appAndClassName + ": " + GetErrorString(ctx));
             duk_pop(ctx);
         }
         else
         {
-            LogError("[JavaScript] CreateScriptObject: failed to run constructor for " + appAndClassName + ": " + String(duk_safe_to_string(ctx, -1)));
+            LogError("[JavaScript] CreateScriptObject: failed to run constructor for " + appAndClassName + ": " + GetErrorString(ctx));
             duk_pop(ctx);
         }
     }
@@ -316,6 +322,9 @@ void JavaScript::CreateScriptObject(Script* app, Script* instance, const String&
         LogError("[JavaScript] CreateScriptObject: constructor not found for " + appAndClassName);
         duk_pop(ctx);
     }
+
+    // Remember that the component has a script object created from this application
+    instance->SetScriptApplication(app);
 }
 
 void JavaScript::RemoveScriptObject(Script* instance)
@@ -334,9 +343,12 @@ void JavaScript::RemoveScriptObject(Script* instance)
         // Use pointer of the object instance script component as the key
         duk_push_number(ctx, (size_t)instance);
         bool success = duk_pcall(ctx, 1) == 0;
-        if (!success) LogError("[JavaScript] RemoveScriptObject: " + String(duk_safe_to_string(ctx, -1)));
+        if (!success) LogError("[JavaScript] RemoveScriptObject: " + GetErrorString(ctx));
         duk_pop(ctx);
     }
+
+    // Forget the application
+    instance->SetScriptApplication(0);
 }
 
 void JavaScript::CreateScriptObjects(Script* app)

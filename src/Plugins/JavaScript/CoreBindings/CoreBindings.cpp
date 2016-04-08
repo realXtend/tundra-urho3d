@@ -19,6 +19,7 @@ void Expose_Point(duk_context* ctx);
 void Expose_Transform(duk_context* ctx);
 void Expose_AssetReference(duk_context* ctx);
 void Expose_AssetReferenceList(duk_context* ctx);
+void Expose_EntityReference(duk_context* ctx);
 void Expose_RayQueryResult(duk_context* ctx);
 void Expose_Framework(duk_context* ctx);
 void Expose_FrameAPI(duk_context* ctx);
@@ -50,6 +51,7 @@ void ExposeCoreClasses(duk_context* ctx)
     Expose_Transform(ctx);
     Expose_AssetReference(ctx);
     Expose_AssetReferenceList(ctx);
+    Expose_EntityReference(ctx);
     Expose_RayQueryResult(ctx);
     Expose_Framework(ctx);
     Expose_FrameAPI(ctx);

@@ -2225,6 +2225,14 @@ void Expose_float4x4(duk_context* ctx)
     duk_put_function_list(ctx, -1, float4x4_Functions);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, float4x4_ID);
+    duk_get_global_string(ctx, float4x4_ID);
+    PushValueObjectCopy<float4x4>(ctx, float4x4::zero, float4x4_ID, float4x4_Finalizer);
+    duk_put_prop_string(ctx, -2, "zero");
+    PushValueObjectCopy<float4x4>(ctx, float4x4::identity, float4x4_ID, float4x4_Finalizer);
+    duk_put_prop_string(ctx, -2, "identity");
+    PushValueObjectCopy<float4x4>(ctx, float4x4::nan, float4x4_ID, float4x4_Finalizer);
+    duk_put_prop_string(ctx, -2, "nan");
+    duk_pop(ctx);
 }
 
 }

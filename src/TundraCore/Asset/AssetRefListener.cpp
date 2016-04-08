@@ -266,7 +266,7 @@ void AssetRefListListener::OnAssetFailed(IAssetTransfer *transfer, String reason
     for(uint i = 0; i < current_.Size(); ++i)
     {
         const AssetReference &ref = current_[i];
-        if (ref.ref.Compare(failedRef) == 0)
+        if (ref.ref.Compare(failedRef, false) == 0)
         {
             // Don't break/return. Same asset might be in multiple indexes!
             Failed.Emit(i, transfer, reason);
@@ -274,7 +274,7 @@ void AssetRefListListener::OnAssetFailed(IAssetTransfer *transfer, String reason
         }
     }
     if (!signaled)
-        LogWarning("AssetRefListListener: Failed to signal completion of " + failedRef + ". The asset ref is unknown to the local state.");
+        LogWarning("AssetRefListListener: Failed to signal failure to load " + failedRef + ". The asset ref is unknown to the local state.");
 }
 
 void AssetRefListListener::OnAssetLoaded(AssetPtr asset)
@@ -287,7 +287,7 @@ void AssetRefListListener::OnAssetLoaded(AssetPtr asset)
     for(uint i = 0; i < current_.Size(); ++i)
     {
         const AssetReference &ref = current_[i];
-        if (ref.ref.Compare(completedRef) == 0)
+        if (ref.ref.Compare(completedRef, false) == 0)
         {
             // Don't break/return. Same asset might be in multiple indexes!
             Loaded.Emit(i, asset);

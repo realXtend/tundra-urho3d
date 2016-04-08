@@ -373,12 +373,14 @@ namespace BindingsGenerator
         static string GeneratePushToStack(string typeName, string source)
         {
             bool isPtr = typeName.EndsWith("*");
+            bool isSharedPtr = false;
 
             typeName = SanitateTypeName(typeName);
             if (typeName.EndsWith("Ptr"))
             {
                 typeName = typeName.Substring(0, typeName.Length - 3);
                 typeName = SanitateTemplateType(typeName);
+                isSharedPtr = true;
             }
 
             if (Symbol.IsNumberType(typeName))
@@ -440,7 +442,12 @@ namespace BindingsGenerator
                         return "PushValueObjectCopy<" + typeName + ">(ctx, *" + source + ", " + ClassIdentifier(typeName) + ", " + typeName + "_Finalizer);";
                 }
                 else
-                    return "PushWeakObject(ctx, " + source + ");";
+                {
+                    if (!isSharedPtr)
+                        return "PushWeakObject(ctx, " + source + ");";
+                    else
+                        return "PushWeakObject(ctx, " + source + ".Get());";
+                }
             }
         }
 
@@ -502,6 +509,9 @@ namespace BindingsGenerator
 
         static void GenerateFinalizer(string typeName, TextWriter tw)
         {
+            if (typeName == "String" || typeName == "string")
+                return;
+
             tw.WriteLine("static duk_ret_t " + typeName + "_Finalizer" + DukSignature());
             tw.WriteLine("{");
             tw.WriteLine(Indent(1) + "FinalizeValueObject<" + typeName + ">(ctx, " + ClassIdentifier(typeName) + ");");
@@ -528,20 +538,24 @@ namespace BindingsGenerator
                     newProperty.readOnly = true;
 
                     string signalType = SanitateSignalType(child.type);
-                    List<string> parameters = ExtractSignalParameterTypes(signalType);
+                    List<string> parameters = ExtractSignalParameterTypes(signalType, true);
+                    List<string> originalParameters = ExtractSignalParameterTypes(signalType, false);
                     if (parameters.Count == 1 && parameters[0] == "void")
                         parameters.Clear();
 
-                    bool badParameters = false;
-                    foreach (string p in parameters)
+                    int firstBadParameter = 999999;
+                    bool hasBadParameters = false;
+                    for (int i = 0; i < parameters.Count; ++i)
                     {
-                        if (!IsSupportedType(p))
+                        if (!IsSupportedType(parameters[i]))
                         {
-                            badParameters = true;
+                            firstBadParameter = i;
+                            hasBadParameters = true;
                             break;
                         }
                     }
-                    if (badParameters)
+
+                    if (firstBadParameter == 0)
                         continue;
 
                     string wrapperClassName = "SignalWrapper" + "_" + className + "_" + child.name;
@@ -574,7 +588,7 @@ namespace BindingsGenerator
                     {
                         if (i > 0)
                             signatureLine += ", ";
-                        signatureLine += parameters[i] + " param" + i;
+                        signatureLine += originalParameters[i] + " param" + i;
                     }
                     signatureLine += ")";
                     tw.WriteLine(Indent(1) + signatureLine);
@@ -585,7 +599,7 @@ namespace BindingsGenerator
                     tw.WriteLine(Indent(2) + "duk_remove(ctx, -2);"); // Global object
                     tw.WriteLine(Indent(2) + "duk_push_number(ctx, (size_t)key_);"); // Signal identifier for looking up receiver(s)
                     tw.WriteLine(Indent(2) + "duk_push_array(ctx);"); // Parameter array
-                    for (int i = 0; i < parameters.Count; ++i)
+                    for (int i = 0; i < firstBadParameter && i < parameters.Count(); ++i)
                     {
                         tw.WriteLine(Indent(2) + GeneratePushToStack(parameters[i], "param" + i));
                         tw.WriteLine(Indent(2) + "duk_put_prop_index(ctx, -2, " + i + ");");
@@ -629,27 +643,30 @@ namespace BindingsGenerator
                     tw.WriteLine("}");
                     tw.WriteLine("");
 
-                    // Emit wrapper function
-                    tw.WriteLine("static duk_ret_t " + wrapperClassName + "_Emit" + DukSignature());
-                    tw.WriteLine("{");
-                    tw.WriteLine(Indent(1) + wrapperClassName + "* wrapper = GetThisValueObject<" + wrapperClassName + ">(ctx, " + ClassIdentifier(wrapperClassName) + ");");
-                    tw.WriteLine(Indent(1) + "if (!wrapper->owner_) return 0;"); // Check signal owner expiration
-                    for (int i = 0; i < parameters.Count; ++i)
+                    if (!hasBadParameters)
                     {
-                        tw.WriteLine(Indent(1) + GenerateGetFromStack(parameters[i], i, "param" + i));
+                        // Emit wrapper function
+                        tw.WriteLine("static duk_ret_t " + wrapperClassName + "_Emit" + DukSignature());
+                        tw.WriteLine("{");
+                        tw.WriteLine(Indent(1) + wrapperClassName + "* wrapper = GetThisValueObject<" + wrapperClassName + ">(ctx, " + ClassIdentifier(wrapperClassName) + ");");
+                        tw.WriteLine(Indent(1) + "if (!wrapper->owner_) return 0;"); // Check signal owner expiration
+                        for (int i = 0; i < parameters.Count; ++i)
+                        {
+                            tw.WriteLine(Indent(1) + GenerateGetFromStack(parameters[i], i, "param" + i));
+                        }
+                        string callLine = "wrapper->signal_->Emit(";
+                        for (int i = 0; i < parameters.Count; ++i)
+                        {
+                            if (i > 0)
+                                callLine += ", ";
+                            callLine += "param" + i;
+                        }
+                        callLine += ");";
+                        tw.WriteLine(Indent(1) + callLine);
+                        tw.WriteLine(Indent(1) + "return 0;");
+                        tw.WriteLine("}");
+                        tw.WriteLine("");
                     }
-                    string callLine = "wrapper->signal_->Emit(";
-                    for (int i = 0; i < parameters.Count; ++i)
-                    {
-                        if (i > 0)
-                            callLine += ", ";
-                        callLine += "param" + i;
-                    }
-                    callLine += ");";
-                    tw.WriteLine(Indent(1) + callLine);
-                    tw.WriteLine(Indent(1) + "return 0;");
-                    tw.WriteLine("}");
-                    tw.WriteLine("");
 
                     tw.WriteLine("static duk_ret_t " + className + "_Get_" + child.name + DukSignature());
                     tw.WriteLine("{");
@@ -664,8 +681,12 @@ namespace BindingsGenerator
                     tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"Disconnect\");");
                     tw.WriteLine(Indent(1) + "duk_push_c_function(ctx, " + wrapperClassName + "_Disconnect" + ", DUK_VARARGS);");
                     tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"disconnect\");");
-                    tw.WriteLine(Indent(1) + "duk_push_c_function(ctx, " + wrapperClassName + "_Emit" + ", " + parameters.Count + ");");
-                    tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"Emit\");");
+                    // Can only Emit() the signal from script if all parameters are supported
+                    if (!hasBadParameters)
+                    {
+                        tw.WriteLine(Indent(1) + "duk_push_c_function(ctx, " + wrapperClassName + "_Emit" + ", " + parameters.Count + ");");
+                        tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"Emit\");");
+                    }
                     tw.WriteLine(Indent(1) + "return 1;");
                     tw.WriteLine("}");
                     tw.WriteLine("");
@@ -1049,6 +1070,7 @@ namespace BindingsGenerator
 
             if (hasStaticFunctions)
                 tw.WriteLine(Indent(1) + "duk_put_function_list(ctx, -1, " + className + "_StaticFunctions);");
+
             foreach (Symbol child in classSymbol.children)
             {
                 if (child.kind == "enum")
@@ -1132,6 +1154,34 @@ namespace BindingsGenerator
             }
             
             tw.WriteLine(Indent(1) + "duk_put_global_string(ctx, " + ClassIdentifier(className) + ");");
+
+            // Store static const variables referring to the same class (e.g. float3::zero)
+            // This can only be done after the class object is available
+            bool hasStaticVariables = false;
+            foreach (Symbol child in classSymbol.children)
+            {
+                if (child.kind == "variable" && child.isStatic && IsScriptable(child) && child.visibilityLevel == VisibilityLevel.Public && SanitateTypeName(child.type) == className)
+                {
+                    hasStaticVariables = true;
+                    break;
+                }
+            }
+            if (hasStaticVariables)
+            {
+                tw.WriteLine(Indent(1) + "duk_get_global_string(ctx, " + ClassIdentifier(className) + ");");
+                
+                foreach (Symbol child in classSymbol.children)
+                {
+                    if (child.kind == "variable" && child.isStatic && IsScriptable(child) && child.visibilityLevel == VisibilityLevel.Public && IsSupportedType(child.type))
+                    {
+                        tw.WriteLine(Indent(1) + GeneratePushToStack(child, className + "::" + child.name));
+                        tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"" + child.name + "\");");
+                    }
+                }
+
+                tw.WriteLine(Indent(1) + "duk_pop(ctx);");
+            }
+
             tw.WriteLine("}");
             tw.WriteLine("");
         }
@@ -1280,15 +1330,20 @@ namespace BindingsGenerator
             return typeName;
         }
 
-        static List<string> ExtractSignalParameterTypes(string type)
+        static List<string> ExtractSignalParameterTypes(string type, bool sanitate)
         {
             List<string> ret = new List<string>();
             int idx = type.IndexOf('<') + 1;
-            int idx2 = type.IndexOf('>');
+            int idx2 = type.LastIndexOf('>');
             type = type.Substring(idx, idx2 - idx);
             string[] strings = type.Split(',');
             foreach (string s in strings)
-                ret.Add(SanitateTypeNameNoPtrNoConst(s.Trim()));
+            {
+                if (sanitate)
+                    ret.Add(SanitateTypeNameNoPtrNoConst(s.Trim()));
+                else
+                    ret.Add(s.Trim());
+            }
             return ret;
         }
 
@@ -1300,12 +1355,16 @@ namespace BindingsGenerator
             type = type.Replace("ComponentMap", "Entity::ComponentMap");
             type = type.Replace("ClientLoginState", "Client::ClientLoginState");
             type = type.Replace("MouseButton", "MouseEvent::MouseButton");
+            type = type.Replace("ChangeType", "IAssetStorage::ChangeType");
+            type = type.Replace("TrustState", "IAssetStorage::TrustState");
             if (type == "EventType" && currentClassName == "KeyEvent")
                 type = "KeyEvent::EventType";
             if (type == "EventType" && currentClassName == "MouseEvent")
                 type = "MouseEvent::EventType";
             if (type == "vec")
                 type = "float3";
+            if (type == "ExecTypeField")
+                type = "EntityAction::ExecTypeField";
             return type;
         }
 

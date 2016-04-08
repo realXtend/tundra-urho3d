@@ -42,7 +42,7 @@ static duk_ret_t IAssetTransfer_Set_asset(duk_context* ctx)
 static duk_ret_t IAssetTransfer_Get_asset(duk_context* ctx)
 {
     IAssetTransfer* thisObj = GetThisWeakObject<IAssetTransfer>(ctx);
-    PushWeakObject(ctx, thisObj->asset);
+    PushWeakObject(ctx, thisObj->asset.Get());
     return 1;
 }
 
@@ -209,7 +209,7 @@ public:
         duk_remove(ctx, -2);
         duk_push_number(ctx, (size_t)key_);
         duk_push_array(ctx);
-        PushWeakObject(ctx, param0);
+        PushWeakObject(ctx, param0.Get());
         duk_put_prop_index(ctx, -2, 0);
         bool success = duk_pcall(ctx, 2) == 0;
         if (!success) LogError("[JavaScript] OnSignal: " + GetErrorString(ctx));
@@ -445,7 +445,7 @@ static duk_ret_t IAssetTransfer_Asset(duk_context* ctx)
 {
     IAssetTransfer* thisObj = GetThisWeakObject<IAssetTransfer>(ctx);
     AssetPtr ret = thisObj->Asset();
-    PushWeakObject(ctx, ret);
+    PushWeakObject(ctx, ret.Get());
     return 1;
 }
 

@@ -19,3 +19,8 @@ cd %ORIGINAL_DIR%
 cd TundraLogic\TundraLogicBindings
 call RegenerateTundraLogicBindings.cmd
 cd %ORIGINAL_DIR%
+
+cd AvatarApplication\AvatarApplicationBindings
+call RegenerateAvatarApplicationBindings.cmd
+cd %ORIGINAL_DIR%
+

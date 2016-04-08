@@ -239,6 +239,26 @@ void Expose_Color(duk_context* ctx)
     DefineProperty(ctx, "a", Color_Get_a, Color_Set_a);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Color_ID);
+    duk_get_global_string(ctx, Color_ID);
+    PushValueObjectCopy<Color>(ctx, Color::Red, Color_ID, Color_Finalizer);
+    duk_put_prop_string(ctx, -2, "Red");
+    PushValueObjectCopy<Color>(ctx, Color::Green, Color_ID, Color_Finalizer);
+    duk_put_prop_string(ctx, -2, "Green");
+    PushValueObjectCopy<Color>(ctx, Color::Blue, Color_ID, Color_Finalizer);
+    duk_put_prop_string(ctx, -2, "Blue");
+    PushValueObjectCopy<Color>(ctx, Color::White, Color_ID, Color_Finalizer);
+    duk_put_prop_string(ctx, -2, "White");
+    PushValueObjectCopy<Color>(ctx, Color::Black, Color_ID, Color_Finalizer);
+    duk_put_prop_string(ctx, -2, "Black");
+    PushValueObjectCopy<Color>(ctx, Color::Yellow, Color_ID, Color_Finalizer);
+    duk_put_prop_string(ctx, -2, "Yellow");
+    PushValueObjectCopy<Color>(ctx, Color::Cyan, Color_ID, Color_Finalizer);
+    duk_put_prop_string(ctx, -2, "Cyan");
+    PushValueObjectCopy<Color>(ctx, Color::Magenta, Color_ID, Color_Finalizer);
+    duk_put_prop_string(ctx, -2, "Magenta");
+    PushValueObjectCopy<Color>(ctx, Color::Gray, Color_ID, Color_Finalizer);
+    duk_put_prop_string(ctx, -2, "Gray");
+    duk_pop(ctx);
 }
 
 }
