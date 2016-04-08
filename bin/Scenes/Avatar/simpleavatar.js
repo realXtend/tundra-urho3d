@@ -32,7 +32,7 @@ function SimpleAvatar(entity, comp)
     this.ownAvatar = false;
     this.flying = false;
     this.falling = false;
-    this.crosshair = null;
+    //this.crosshair = null;
     this.isMouseLookLockedOnX = true;
 
     // Animation detection
@@ -43,10 +43,11 @@ function SimpleAvatar(entity, comp)
     this.animList = [this.standAnimName, this.walkAnimName, this.flyAnimName, this.hoverAnimName];
 
     this.animsDetected = false;
-    this.listenGesture = false;
 
     // Android finger touch movement
     this.fingersDown = 0;
+
+    this.inputContext = null;
 
     // Create avatar on server, and camera & inputmapper on client
     if (this.isServer)
@@ -66,6 +67,7 @@ SimpleAvatar.prototype.OnScriptObjectDestroyed = function() {
     {
         // It would be a good idea to destroy the avatar when script object is destroyed/recreated, unfortunately
         // it can lead to stack overflow if we were already removing the entity
+        /// \todo Test if this is still the case on Tundra-Urho3D
 /*
         var avatar = scene.EntityByName("Avatar" + client.connectionId);
         if (avatar)
@@ -131,17 +133,13 @@ SimpleAvatar.prototype.ServerInitialize = function() {
     attrs.SetAttribute("enableZoom", true);
     attrs.SetAttribute("cameraDistance", 7.0);
 
-    // Create an inactive proximitytrigger, so that other proximitytriggers can detect the avatar
-    // var proxtrigger = me.GetOrCreateComponent("ProximityTrigger");
-    // proxtrigger.active = false;
-
     // Hook to physics update
     scene.physics.Updated.Connect(this, this.ServerUpdatePhysics);
 
     // Hook to tick update for animation update
     frame.Updated.Connect(this, this.ServerUpdate);
 
-    // Connect actions. These come from the client side inputmapper
+    // Connect actions. These come from the client side
     this.me.Action("Move").Triggered.Connect(this, this.ServerHandleMove);
     this.me.Action("Stop").Triggered.Connect(this, this.ServerHandleStop);
     this.me.Action("ToggleFly").Triggered.Connect(this, this.ServerHandleToggleFly);
@@ -163,7 +161,7 @@ SimpleAvatar.prototype.ServerUpdate = function(frametime) {
         this.motionX = 0;
         this.motionZ = 0;
     }
-    
+
     // If flying enable was toggled off, but we are still flying, disable now
     if ((this.flying) && (!attrs.GetAttribute("enableFly")))
         this.ServerSetFlying(false);
@@ -231,28 +229,28 @@ SimpleAvatar.prototype.ServerUpdatePhysics = function(frametime) {
     }
 }
 
-SimpleAvatar.prototype.ServerHandleMove = function(param) {
+SimpleAvatar.prototype.ServerHandleMove = function(params) {
     var attrs = this.me.dynamiccomponent;
 
     if (attrs.GetAttribute("enableWalk")) {
-        if (param == "forward") {
+        if (params[0] == "forward") {
             this.motionZ = 1;
         }
-        if (param == "back") {
+        if (params[0] == "back") {
             this.motionZ = -1;
         }
-        if (param == "right") {
+        if (params[0] == "right") {
             this.motionX = 1;
         }
-        if (param == "left") {
+        if (params[0] == "left") {
             this.motionX = -1;
         }
     }
 
-    if (param == "up") {
+    if (params[0] == "up") {
         this.motionY = 1;
     }
-    if (param == "down") {
+    if (params[0] == "down") {
         this.motionY = -1;
     }
 
@@ -260,22 +258,22 @@ SimpleAvatar.prototype.ServerHandleMove = function(param) {
 }
 
 SimpleAvatar.prototype.ServerHandleStop = function(param) {
-    if ((param == "forward") && (this.motionZ == 1)) {
+    if ((params[0] == "forward") && (this.motionZ == 1)) {
         this.motionZ = 0;
     }
-    if ((param == "back") && (this.motionZ == -1)) {
+    if ((params[0] == "back") && (this.motionZ == -1)) {
         this.motionZ = 0;
     }
-    if ((param == "right") && (this.motionX == 1)) {
+    if ((params[0] == "right") && (this.motionX == 1)) {
         this.motionX = 0;
     }
-    if ((param == "left") && (this.motionX == -1)) {
+    if ((params[0] == "left") && (this.motionX == -1)) {
         this.motionX = 0;
     }
-    if ((param == "up") && (this.motionY == 1)) {
+    if ((params[0] == "up") && (this.motionY == 1)) {
         this.motionY = 0;
     }
-    if ((param == "down") && (this.motionY == -1)) {
+    if ((params[0] == "down") && (this.motionY == -1)) {
         this.motionY = 0;
     }
 
@@ -314,7 +312,7 @@ SimpleAvatar.prototype.ServerSetFlying = function(newFlying) {
 SimpleAvatar.prototype.ServerHandleSetRotation = function(param) {
     var attrs = this.me.dynamiccomponent;
     if (attrs.GetAttribute("enableRotate")) {
-        var rot = new float3(0, parseFloat(param), 0);
+        var rot = new float3(0, parseFloat(params[0]), 0);
         this.me.rigidbody.SetRotation(rot);
     }
 }
@@ -349,27 +347,19 @@ SimpleAvatar.prototype.ServerSetAnimationState = function() {
 SimpleAvatar.prototype.ClientInitialize = function() {
     // Set all avatar entities as temprary also on the clients.
     // This is already done in the server but the info seems to not travel to the clients!
-    this.me.SetTemporary(true);
-    
+    this.me.temporary = true;
+
     // Check if this is our own avatar
     // Note: bad security. For now there's no checking who is allowed to invoke actions
     // on an entity, and we could theoretically control anyone's avatar
     if (this.me.name == "Avatar" + client.connectionId) {
         this.ownAvatar = true;
-        this.ClientCreateInputMapper();
+        //this.ClientCreateInputContext();
         this.ClientCreateAvatarCamera();
-        if (!isAndroid)
-            this.crosshair = new Crosshair(/*bool useLabelInsteadOfCursor*/ true);
-        var soundlistener = this.me.GetOrCreateComponent("SoundListener", 2, false);
-        soundlistener.active = true;
-
-        this.me.Action("MouseScroll").Triggered.Connect(this, this.ClientHandleMouseScroll);
-        // Use mouselook action on Android for simple panning, as Qt touch events can not be yet accessed
-        if (isAndroid)
-            this.me.Action("MouseLookX").Triggered.Connect(this, this.ClientHandleMouseLookX);
-        this.me.Action("Zoom").Triggered.Connect(this, this.ClientHandleKeyboardZoom);
-        this.me.Action("Rotate").Triggered.Connect(this, this.ClientHandleRotate);
-        this.me.Action("StopRotate").Triggered.Connect(this, this.ClientHandleStopRotate);
+        //if (!isAndroid)
+        //    this.crosshair = new Crosshair(/*bool useLabelInsteadOfCursor*/ true);
+        //var soundlistener = this.me.GetOrCreateComponent("SoundListener", 2, false);
+        //soundlistener.active = true;
     }
     else
     {
@@ -388,7 +378,7 @@ SimpleAvatar.prototype.ClientInitialize = function() {
                     nameTag.texWidth = texWidth;
                     nameTag.width = texWidth / 256.0;
 
-                    nameTag.SetTemporary(true);
+                    nameTag.temporary = true;
                     nameTag.text = clientName.description;
 
                     var pos = nameTag.position;
@@ -410,7 +400,7 @@ SimpleAvatar.prototype.ClientInitialize = function() {
 }
 
 SimpleAvatar.prototype.IsCameraActive = function() {
-    var cameraentity = scene.GetEntityByName("AvatarCamera");
+    var cameraentity = scene.EntityByName("AvatarCamera");
     if (cameraentity == null)
         return false;
     var camera = cameraentity.camera;
@@ -418,16 +408,7 @@ SimpleAvatar.prototype.IsCameraActive = function() {
 }
 
 SimpleAvatar.prototype.ClientUpdate = function(frametime) {
-    // Tie enabled state of inputmapper to the enabled state of avatar camera
     if (this.ownAvatar) {
-        var avatarcameraentity = scene.GetEntityByName("AvatarCamera");
-        var inputmapper = this.me.inputmapper;
-        if ((avatarcameraentity != null) && (inputmapper != null)) {
-            var active = avatarcameraentity.camera.IsActive();
-            if (inputmapper.enabled != active) {
-                inputmapper.enabled = active;
-            }
-        }
         this.ClientUpdateRotation(frametime);
         this.ClientUpdateAvatarCamera(frametime);
     }
@@ -450,145 +431,34 @@ SimpleAvatar.prototype.ClientUpdate = function(frametime) {
     this.CommonUpdateAnimation(frametime);
 }
 
-SimpleAvatar.prototype.ClientCreateInputMapper = function() {
-    // Create a nonsynced inputmapper
-    var inputmapper = this.me.GetOrCreateComponent("InputMapper", 2, false);
-    inputmapper.contextPriority = 101;
-    inputmapper.takeMouseEventsOverQt = false;
-    inputmapper.takeKeyboardEventsOverQt = false;
-    inputmapper.modifiersEnabled = false;
-    inputmapper.keyrepeatTrigger = false; // Disable repeat keyevent sending over network, not needed and will flood network
-    inputmapper.executionType = 2; // Execute actions on server
-
-    // Key pressed -actions
-    inputmapper.RegisterMapping("W", "Move(forward)", 1); // 1 = keypress
-    inputmapper.RegisterMapping("S", "Move(back)", 1);
-    inputmapper.RegisterMapping("A", "Move(left)", 1);
-    inputmapper.RegisterMapping("D", "Move(right))", 1);
-    inputmapper.RegisterMapping("Up", "Move(forward)", 1);
-    inputmapper.RegisterMapping("Down", "Move(back)", 1);
-    inputmapper.RegisterMapping("F", "ToggleFly()", 1);
-    inputmapper.RegisterMapping("Space", "Move(up)", 1);
-    inputmapper.RegisterMapping("C", "Move(down)", 1);
-
-    // Key released -actions
-    inputmapper.RegisterMapping("W", "Stop(forward)", 3); // 3 = keyrelease
-    inputmapper.RegisterMapping("S", "Stop(back)", 3);
-    inputmapper.RegisterMapping("A", "Stop(left)", 3);
-    inputmapper.RegisterMapping("D", "Stop(right)", 3);
-    inputmapper.RegisterMapping("Up", "Stop(forward)", 3);
-    inputmapper.RegisterMapping("Down", "Stop(back)", 3);
-    inputmapper.RegisterMapping("Space", "Stop(up)", 3);
-    inputmapper.RegisterMapping("C", "Stop(down)", 3);
-
-    // Connect mouse gestures
-    var inputContext = inputmapper.GetInputContext();
-    if (!isAndroid)
-    {
-        inputContext.GestureStarted.Connect(this, this.GestureStarted);
-        inputContext.GestureUpdated.Connect(this, this.GestureUpdated);
-        inputContext.MouseMove.Connect(this, this.ClientHandleMouseMove);
-    }
-
-    // Local mapper for mouse scroll and rotate
-    var inputmapper = this.me.GetOrCreateComponent("InputMapper", "CameraMapper", 2, false);
-    inputmapper.contextPriority = 100;
-    inputmapper.takeMouseEventsOverQt = true;
-    inputmapper.modifiersEnabled = false;
-    inputmapper.executionType = 1; // Execute actions locally
-    inputmapper.RegisterMapping("+", "Zoom(in)", 1);
-    inputmapper.RegisterMapping("-", "Zoom(out)", 1);
-    inputmapper.RegisterMapping("Left", "Rotate(left)", 1);
-    inputmapper.RegisterMapping("Right", "Rotate(right))", 1);
-    inputmapper.RegisterMapping("Left", "StopRotate(left)", 3);
-    inputmapper.RegisterMapping("Right", "StopRotate(right))", 3);
+SimpleAvatar.prototype.ClientCreateInputContext = function() {
+    // Register input handling
+    var inputContext = input.RegisterInputContextRaw("Avatar", 102);
+    inputContext.KeyPressed.Connect(this, this.ClientHandleKeyPress);
+    inputContext.KeyReleased.Connect(this, this.ClientHandleKeyReleased);
+    inputContext.MouseEventReceived.Connect(this, this.ClientHandleMouseMove);
 }
 
 SimpleAvatar.prototype.ClientCreateAvatarCamera = function() {
-    var cameraentity = scene.GetEntityByName("AvatarCamera");
+    var cameraentity = scene.EntityByName("AvatarCamera");
     if (cameraentity == null)
     {
         cameraentity = scene.CreateLocalEntity();
-        cameraentity.SetName("AvatarCamera");
-        cameraentity.SetTemporary(true);
+        cameraentity.name = "AvatarCamera";
+        cameraentity.temporary = true;
     }
 
     var camera = cameraentity.GetOrCreateComponent("Camera");
     var placeable = cameraentity.GetOrCreateComponent("Placeable");
 
     camera.SetActive();
-    
+
     var parentRef = placeable.parentRef;
-    parentRef.ref = this.me; // Parent camera to avatar, always
+    parentRef.ref = this.me.id; // Parent camera to avatar, always
     placeable.parentRef = parentRef;
 
     // Set initial position
     this.ClientUpdateAvatarCamera();
-}
-
-SimpleAvatar.prototype.GestureStarted = function(gestureEvent) {
-    if (!this.IsCameraActive())
-        return;
-    if (gestureEvent.GestureType() == Qt.PanGesture)
-    {
-        this.listenGesture = true;
-
-        var attrs = this.me.dynamiccomponent;
-        if (attrs.GetAttribute("enableRotate")) {
-            var x = new Number(gestureEvent.Gesture().offset.toPoint().x());
-            this.yaw += x;
-            this.me.Exec(2, "SetRotation", this.yaw.toString());
-        }
-
-        gestureEvent.Accept();
-    }
-    else if (gestureEvent.GestureType() == Qt.PinchGesture)
-        gestureEvent.Accept();
-}
-
-SimpleAvatar.prototype.GestureUpdated = function(gestureEvent) {
-    if (!IsCameraActive())
-        return;
-
-    if (gestureEvent.GestureType() == Qt.PanGesture && this.listenGesture == true)
-    {
-        // Rotate avatar with X pan gesture
-        delta = gestureEvent.Gesture().delta.toPoint();
-        this.yaw += delta.x;
-        this.me.Exec(2, "SetRotation", this.yaw.toString());
-
-        // Start walking or stop if total Y len of pan gesture is 100
-        var walking = false;
-        if (this.me.animationcontroller.animationState == this.walkAnimName)
-            walking = true;
-        var totalOffset = gestureEvent.Gesture().offset.toPoint();
-        if (totalOffset.y() < -100)
-        {
-            if (walking) {
-                this.me.Exec(2, "Stop", "forward");
-                this.me.Exec(2, "Stop", "back");
-            } else 
-                this.me.Exec(2, "Move", "forward");
-            listenGesture = false;
-        }
-        else if (totalOffset.y() > 100)
-        {
-            if (walking) {
-                this.me.Exec(2, "Stop", "forward");
-                this.me.Exec(2, "Stop", "back");
-            } else
-                this.me.Exec(2, "Move", "back");
-            this.listenGesture = false;
-        }
-        gestureEvent.Accept();
-    }
-    else if (gestureEvent.GestureType() == Qt.PinchGesture)
-    {
-        var scaleChange = gestureEvent.Gesture().scaleFactor - gestureEvent.Gesture().lastScaleFactor;
-        if (scaleChange > 0.1 || scaleChange < -0.1)
-            this.ClientHandleMouseScroll(scaleChange * 100);
-        gestureEvent.Accept();
-    }
 }
 
 SimpleAvatar.prototype.ClientHandleKeyboardZoom = function(direction) {
@@ -668,9 +538,6 @@ SimpleAvatar.prototype.ClientUpdateRotation = function(frametime) {
 
 SimpleAvatar.prototype.ClientUpdateAvatarCamera = function() {
 
-    // Check 1st/3rd person mode toggle
-    this.ClientCheckState();
-
     var attrs = this.me.dynamiccomponent;
     if (attrs == null)
         return;
@@ -689,8 +556,8 @@ SimpleAvatar.prototype.ClientUpdateAvatarCamera = function() {
     // Track the head bone in 1st person
     if ((firstPerson) && (me.mesh != null))
     {
-        me.mesh.ForceSkeletonUpdate();
-        var headPos = me.mesh.GetBoneDerivedPosition("Bip01_Head");
+        //me.mesh.ForceSkeletonUpdate();
+        var headPos = me.mesh.BoneDerivedPosition("Bip01_Head");
         headPos.z -= 0.5;
         headPos.y -= 0.7;
         cameratransform.pos = headPos;
@@ -699,78 +566,29 @@ SimpleAvatar.prototype.ClientUpdateAvatarCamera = function() {
     cameraplaceable.transform = cameratransform;
 }
 
-SimpleAvatar.prototype.ClientCheckState = function() {
-    var attrs = this.me.dynamiccomponent;
-    var firstPerson = attrs.GetAttribute("cameraDistance") < 0;
-
-    var cameraentity = scene.EntityByName("AvatarCamera");
-    var avatarPlaceable = this.me.Component("Placeable");
-
-    if (this.crosshair == null)
-        return;
-    // If ent got destroyed or something fatal, return cursor
-    if (cameraentity == null || avatarPlaceable == null) {
-        if (this.crosshair.isActive()) {
-            this.crosshair.hide();
-        }
-        return;
-    }
-
-    if (!firstPerson) {
-        if (this.crosshair.isActive()) {
-            this.crosshair.hide();
-        }
-        return;
-    }
-    else
-    {
-        // We might be in 1st person mode but camera might not be active
-        // hide curson and show av
-        if (!cameraentity.camera.IsActive()) {
-            if (this.crosshair.isActive()) {
-                this.crosshair.hide();
-            }
-        }
-        else {
-            // 1st person mode and camera is active
-            // show curson and av
-            if (!this.crosshair.isActive()) {
-                this.crosshair.show();
-            }
-        }
-    }
+SimpleAvatar.prototype.ClientHandleKeyPress = function(event) {
+    /// \todo Implement
 }
 
-// Android only, simplified touch rotate code
-SimpleAvatar.prototype.ClientHandleMouseLookX = function(param) {
-    var cameraentity = scene.GetEntityByName("AvatarCamera");
-    if (cameraentity == null)
-        return;
-
-    // Dont move av rotation if we are not the active cam
-    if (!cameraentity.camera.IsActive())
-        return;
-
-    var move = parseInt(param);
-    if (move != 0)
-    {
-        // Rotate avatar or camera
-        this.yaw -= this.mouseRotateSensitivity * move;
-        this.me.Exec(2, "SetRotation", this.yaw.toString());
-    }
+SimpleAvatar.prototype.ClientHandleKeyPressed = function(event) {
+    /// \todo Implement
 }
 
 SimpleAvatar.prototype.ClientHandleMouseMove = function(mouseevent) {
+
+    if (!this.IsCameraActive())
+        return;
+
+    // RMB pressed
+    if (e.eventType == MouseEvent.MousePressed && e.button == MouseEvent.RightButton && input.IsMouseCursorVisible())
+        input.SetMouseCursorVisible(false);
+    // RMB released
+    else if (e.eventType == MouseEvent.MouseReleased && e.button == MouseEvent.RightButton && !input.IsMouseCursorVisible())
+        input.SetMouseCursorVisible(true);
+
     var attrs = this.me.dynamiccomponent;
     var firstPerson = attrs.GetAttribute("cameraDistance") < 0;
 
-    if ((firstPerson) && (input.IsMouseCursorVisible()))
-    {
-        input.SetMouseCursorVisible(false);
-        //if (!this.crosshair.isUsingLabel)
-        //    QApplication.setOverrideCursor(crosshair.cursor);
-    }
-        
     // Do not rotate if not allowed
     if (!attrs.GetAttribute("enableRotate"))
         return;
@@ -779,17 +597,13 @@ SimpleAvatar.prototype.ClientHandleMouseMove = function(mouseevent) {
     if ((!firstPerson) && (input.IsMouseCursorVisible()))
         return;
 
-    if (mouseevent.IsRightButtonDown())
+    if (mouseevent.IsButtonDown(MouseEvent.RightButton))
         this.LockMouseMove(mouseevent.relativeX, mouseevent.relativeY);
     else
         this.isMouseLookLockedOnX = true;
 
     var cameraentity = scene.GetEntityByName("AvatarCamera");
     if (cameraentity == null)
-        return;
-
-    // Dont move av rotation if we are not the active cam
-    if (!cameraentity.camera.IsActive())
         return;
 
     if (mouseevent.relativeX != 0)
@@ -811,6 +625,11 @@ SimpleAvatar.prototype.ClientHandleMouseMove = function(mouseevent) {
         if (this.pitch > 90)
             this.pitch = 90;
     }
+    
+    // Wheel
+    if (mouseEvent.relativeZ != 0) {
+        this.ClientHandleMouseScroll(mouseEvent.relativeZ);
+    }
 }
 
 SimpleAvatar.prototype.LockMouseMove = function(x,y) {
@@ -824,7 +643,7 @@ SimpleAvatar.prototype.CommonFindAnimations = function() {
     var animcontrol = this.me.animationcontroller;
     if (animcontrol == null)
         return;
-    var availableAnimations = animcontrol.GetAvailableAnimations();
+    var availableAnimations = animcontrol.AvailableAnimations();
     if (availableAnimations.length > 0) {
         // Detect animation names
         for(var i=0; i<this.animList.length; i++) {
