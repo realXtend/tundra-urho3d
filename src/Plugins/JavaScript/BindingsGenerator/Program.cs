@@ -1070,6 +1070,7 @@ namespace BindingsGenerator
 
             if (hasStaticFunctions)
                 tw.WriteLine(Indent(1) + "duk_put_function_list(ctx, -1, " + className + "_StaticFunctions);");
+
             foreach (Symbol child in classSymbol.children)
             {
                 if (child.kind == "enum")
@@ -1153,6 +1154,34 @@ namespace BindingsGenerator
             }
             
             tw.WriteLine(Indent(1) + "duk_put_global_string(ctx, " + ClassIdentifier(className) + ");");
+
+            // Store static const variables referring to the same class (e.g. float3::zero)
+            // This can only be done after the class object is available
+            bool hasStaticVariables = false;
+            foreach (Symbol child in classSymbol.children)
+            {
+                if (child.kind == "variable" && child.isStatic && IsScriptable(child) && child.visibilityLevel == VisibilityLevel.Public && SanitateTypeName(child.type) == className)
+                {
+                    hasStaticVariables = true;
+                    break;
+                }
+            }
+            if (hasStaticVariables)
+            {
+                tw.WriteLine(Indent(1) + "duk_get_global_string(ctx, " + ClassIdentifier(className) + ");");
+                
+                foreach (Symbol child in classSymbol.children)
+                {
+                    if (child.kind == "variable" && child.isStatic && IsScriptable(child) && child.visibilityLevel == VisibilityLevel.Public && IsSupportedType(child.type))
+                    {
+                        tw.WriteLine(Indent(1) + GeneratePushToStack(child, className + "::" + child.name));
+                        tw.WriteLine(Indent(1) + "duk_put_prop_string(ctx, -2, \"" + child.name + "\");");
+                    }
+                }
+
+                tw.WriteLine(Indent(1) + "duk_pop(ctx);");
+            }
+
             tw.WriteLine("}");
             tw.WriteLine("");
         }

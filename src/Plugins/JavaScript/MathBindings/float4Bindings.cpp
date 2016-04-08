@@ -1809,6 +1809,24 @@ void Expose_float4(duk_context* ctx)
     DefineProperty(ctx, "w", float4_Get_w, float4_Set_w);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, float4_ID);
+    duk_get_global_string(ctx, float4_ID);
+    PushValueObjectCopy<float4>(ctx, float4::zero, float4_ID, float4_Finalizer);
+    duk_put_prop_string(ctx, -2, "zero");
+    PushValueObjectCopy<float4>(ctx, float4::one, float4_ID, float4_Finalizer);
+    duk_put_prop_string(ctx, -2, "one");
+    PushValueObjectCopy<float4>(ctx, float4::unitX, float4_ID, float4_Finalizer);
+    duk_put_prop_string(ctx, -2, "unitX");
+    PushValueObjectCopy<float4>(ctx, float4::unitY, float4_ID, float4_Finalizer);
+    duk_put_prop_string(ctx, -2, "unitY");
+    PushValueObjectCopy<float4>(ctx, float4::unitZ, float4_ID, float4_Finalizer);
+    duk_put_prop_string(ctx, -2, "unitZ");
+    PushValueObjectCopy<float4>(ctx, float4::unitW, float4_ID, float4_Finalizer);
+    duk_put_prop_string(ctx, -2, "unitW");
+    PushValueObjectCopy<float4>(ctx, float4::nan, float4_ID, float4_Finalizer);
+    duk_put_prop_string(ctx, -2, "nan");
+    PushValueObjectCopy<float4>(ctx, float4::inf, float4_ID, float4_Finalizer);
+    duk_put_prop_string(ctx, -2, "inf");
+    duk_pop(ctx);
 }
 
 }

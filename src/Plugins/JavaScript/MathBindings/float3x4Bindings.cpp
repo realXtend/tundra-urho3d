@@ -1803,6 +1803,14 @@ void Expose_float3x4(duk_context* ctx)
     duk_put_function_list(ctx, -1, float3x4_Functions);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, float3x4_ID);
+    duk_get_global_string(ctx, float3x4_ID);
+    PushValueObjectCopy<float3x4>(ctx, float3x4::zero, float3x4_ID, float3x4_Finalizer);
+    duk_put_prop_string(ctx, -2, "zero");
+    PushValueObjectCopy<float3x4>(ctx, float3x4::identity, float3x4_ID, float3x4_Finalizer);
+    duk_put_prop_string(ctx, -2, "identity");
+    PushValueObjectCopy<float3x4>(ctx, float3x4::nan, float3x4_ID, float3x4_Finalizer);
+    duk_put_prop_string(ctx, -2, "nan");
+    duk_pop(ctx);
 }
 
 }

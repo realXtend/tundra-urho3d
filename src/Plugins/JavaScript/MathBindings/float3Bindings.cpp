@@ -1776,6 +1776,22 @@ void Expose_float3(duk_context* ctx)
     DefineProperty(ctx, "z", float3_Get_z, float3_Set_z);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, float3_ID);
+    duk_get_global_string(ctx, float3_ID);
+    PushValueObjectCopy<float3>(ctx, float3::zero, float3_ID, float3_Finalizer);
+    duk_put_prop_string(ctx, -2, "zero");
+    PushValueObjectCopy<float3>(ctx, float3::one, float3_ID, float3_Finalizer);
+    duk_put_prop_string(ctx, -2, "one");
+    PushValueObjectCopy<float3>(ctx, float3::unitX, float3_ID, float3_Finalizer);
+    duk_put_prop_string(ctx, -2, "unitX");
+    PushValueObjectCopy<float3>(ctx, float3::unitY, float3_ID, float3_Finalizer);
+    duk_put_prop_string(ctx, -2, "unitY");
+    PushValueObjectCopy<float3>(ctx, float3::unitZ, float3_ID, float3_Finalizer);
+    duk_put_prop_string(ctx, -2, "unitZ");
+    PushValueObjectCopy<float3>(ctx, float3::nan, float3_ID, float3_Finalizer);
+    duk_put_prop_string(ctx, -2, "nan");
+    PushValueObjectCopy<float3>(ctx, float3::inf, float3_ID, float3_Finalizer);
+    duk_put_prop_string(ctx, -2, "inf");
+    duk_pop(ctx);
 }
 
 }

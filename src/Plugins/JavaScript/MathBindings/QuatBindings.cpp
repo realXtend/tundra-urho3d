@@ -1151,6 +1151,12 @@ void Expose_Quat(duk_context* ctx)
     DefineProperty(ctx, "w", Quat_Get_w, Quat_Set_w);
     duk_put_prop_string(ctx, -2, "prototype");
     duk_put_global_string(ctx, Quat_ID);
+    duk_get_global_string(ctx, Quat_ID);
+    PushValueObjectCopy<Quat>(ctx, Quat::identity, Quat_ID, Quat_Finalizer);
+    duk_put_prop_string(ctx, -2, "identity");
+    PushValueObjectCopy<Quat>(ctx, Quat::nan, Quat_ID, Quat_Finalizer);
+    duk_put_prop_string(ctx, -2, "nan");
+    duk_pop(ctx);
 }
 
 }
