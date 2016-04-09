@@ -333,25 +333,23 @@ bool OgreSkeletonAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
     bones.Resize(ogreSkel->bones.Size());
     for (uint i = 0; i < ogreSkel->bones.Size(); ++i)
     {
-        bones[i].name_ = ogreSkel->bones[i]->name;
+        Ogre::Bone* ogreBone = ogreSkel->bones[i];
+
+        bones[i].name_ = ogreBone->name;
         bones[i].nameHash_ = StringHash(bones[i].name_);
 
-        if (ogreSkel->bones[i]->IsParented())
-            bones[i].parentIndex_ = ogreSkel->bones[i]->parentId;
+        if (ogreBone->IsParented())
+            bones[i].parentIndex_ = ogreBone->parentId;
         else
         {
             bones[i].parentIndex_ = i;
             skeleton.SetRootBoneIndex(i);
         }
-        Urho3D::Matrix4 pose = ogreSkel->bones[i]->defaultPose;
-        Urho3D::Vector3 pos, scale;
-        Urho3D::Quaternion rot;
-        pose.Decompose(pos, rot, scale);
 
         bones[i].animated_ = true;
-        bones[i].initialPosition_ = pos;
-        bones[i].initialRotation_ = rot;
-        bones[i].initialScale_ = scale;
+        bones[i].initialPosition_ = ogreBone->position;
+        bones[i].initialRotation_ = ogreBone->rotation;
+        bones[i].initialScale_ = ogreBone->scale;
         bones[i].offsetMatrix_ = Urho3D::Matrix3x4(ogreSkel->bones[i]->worldMatrix).Inverse();
         // The skeleton can not know the vertex information necessary to calculate bone bounding boxes. Therefore that data
         // must be combined later from the mesh's data
@@ -403,7 +401,7 @@ bool OgreSkeletonAsset::DeserializeFromData(const u8 *data_, uint numBytes, bool
                 urhoKeyframe.time_ = ogreKeyframe.timePos;
 
                 // Urho uses absolute bone poses in animation, while Ogre uses additive. Convert to absolute now.
-                urhoKeyframe.position_ = urhoBone->initialPosition_ + urhoBone->initialRotation_ * ogreKeyframe.position;
+                urhoKeyframe.position_ = urhoBone->initialPosition_ + ogreKeyframe.position;
                 urhoKeyframe.rotation_ = urhoBone->initialRotation_ * ogreKeyframe.rotation;
                 urhoKeyframe.scale_ = ogreKeyframe.scale;
                 if (!ogreKeyframe.scale.Equals(float3(1.0f, 1.0f, 1.0f)))
