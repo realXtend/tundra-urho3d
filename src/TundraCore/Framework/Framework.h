@@ -100,9 +100,9 @@ public:
 
     /// Parse a filename for specific wildcard modifiers, and return as parsed
     /** $(CWD) is expanded to the current working directory.
-        $(INSTDIR) is expanded to the Tundra installation directory (Application::InstallationDirectory)
-        $(USERDATA) is expanded to Application::UserDataDirectory.
-        $(USERDOCS) is expanded to Application::UserDocumentsDirectory. */
+        $(INSTDIR) is expanded to the Tundra installation directory (Framework::InstallationDirectory)
+        $(USERDATA) is expanded to Framework::UserDataDirectory.
+        $(USERDOCS) is expanded to Framework::UserDocumentsDirectory. */
     String ParseWildCardFilename(const String& input) const;
 
     /// Returns whether or not the command line arguments contain a specific value.

@@ -45,7 +45,7 @@
 /** @def TUNDRA_VERSION_STRING
     The Tundra application's version as a string, by default this is simply the version numbers
     concatenated while omitting possible trailing zeros, f.ex. "2.5.1".
-    @note This is the authoritative source of the Application's version information.*/
+    @note This is the authoritative source of the Framework's version information.*/
 #ifndef TUNDRA_VERSION_STRING
 #define TUNDRA_VERSION_STRING "3.0.0"
 #endif

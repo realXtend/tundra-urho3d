@@ -43,7 +43,7 @@ static int argc;
 static char** argv;
 static String organizationName(TUNDRA_ORGANIZATION_NAME);
 static String applicationName(TUNDRA_APPLICATION_NAME);
-static String versionString(TUNDRA_VERSION_STRING);
+static String versionString(TUNDRA_VERSION_STRING TUNDRA_VERSION_POSTFIX);
 #ifdef ANDROID
 static String packageName(TUNDRA_PACKAGE_NAME);
 #endif
