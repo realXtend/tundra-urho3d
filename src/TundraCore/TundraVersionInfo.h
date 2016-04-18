@@ -51,7 +51,7 @@
 #endif
 
 /** @def TUNDRA_VERSION_POSTFIX
-    Postfix that is appended to the TUNDRA_VERSION_STRING in Application.cpp, an empty string by default.
+    Postfix that is appended to the TUNDRA_VERSION_STRING.
     Can be specified during the CMake invocation f.ex. when building automated nightly releases. */
 #ifndef TUNDRA_VERSION_POSTFIX
 #define TUNDRA_VERSION_POSTFIX ""
