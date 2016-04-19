@@ -16,7 +16,6 @@
 #include "MsgEntityAction.h"
 #include "EntityAction.h"
 
-#include "StdPtr.h"
 #include "Signals.h"
 
 #include "kNet/DataSerializer.h"
