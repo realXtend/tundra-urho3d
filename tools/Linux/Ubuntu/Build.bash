@@ -376,7 +376,9 @@ if [ $run_tests = true ] ; then
     start_target gtest
 
     if ! is_cloned ; then
-        svn checkout http://googletest.googlecode.com/svn/tags/release-1.7.0/ gtest
+        git clone https://github.com/google/googletest.git gtest
+        cd gtest
+        git checkout release-1.7.0
     fi
 
     if ! is_built ; then

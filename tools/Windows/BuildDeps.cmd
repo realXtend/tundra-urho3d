@@ -267,8 +267,10 @@ IF NOT %ERRORLEVEL%==0 GOTO :ERROR
 IF NOT EXIST "%DEPS%\gtest\". (
     cecho {0D}Cloning Google C++ Testing Framework into "%DEPS%\gtest".{# #}{\n}
     cd "%DEPS%"
-    svn checkout http://googletest.googlecode.com/svn/tags/release-1.7.0/ gtest
-    IF NOT EXIST "%DEPS%\gtest\.svn" GOTO :ERROR
+    git clone https://github.com/google/googletest.git gtest
+    IF NOT EXIST "%DEPS%\gtest\.git" GOTO :ERROR
+    cd "%DEPS%\gtest"
+    git checkout release-1.7.0
 )
 
 cd "%DEPS%\gtest"
