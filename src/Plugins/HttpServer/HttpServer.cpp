@@ -1,4 +1,7 @@
+// For conditions of distribution and use, see copyright notice in LICENSE
+
 #include "HttpServer.h"
+#include "HttpRequest.h"
 
 #include "Framework.h"
 #include "CoreDefines.h"
@@ -72,7 +75,7 @@ void HttpServer::StartServer()
         server_->init_asio();
 
         // Register handler callbacks
-        //server_->set_http_handler(boost::bind(&HttpServer::OnHttpRequest, this, ::_1));
+        server_->set_http_handler(boost::bind(&HttpServer::OnHttpRequest, this, ::_1));
 
         // Setup logging
         server_->get_alog().clear_channels(websocketpp::log::alevel::all);
@@ -110,6 +113,13 @@ void HttpServer::StopServer()
     {
         LogError("Error while closing HTTP server: " + String(e.what()));
     }
+}
+
+void HttpServer::OnHttpRequest(ConnectionHandle connection)
+{
+    ConnectionPtr connectionPtr = server_->get_con_from_hdl(connection);
+    HttpRequest request(connectionPtr.get());
+    HttpRequestReceived.Emit(&request);
 }
 
 }

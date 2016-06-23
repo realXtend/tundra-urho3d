@@ -20,15 +20,18 @@
 namespace Tundra
 {
 
+class HttpRequest;
+
 class HTTPSERVER_API HttpServer : public IModule
 {
+public:
     typedef boost::shared_ptr<websocketpp::server<websocketpp::config::asio> > ServerPtr;
+    typedef websocketpp::connection<websocketpp::config::asio> Connection;
     typedef websocketpp::server<websocketpp::config::asio>::connection_ptr ConnectionPtr;
     typedef boost::weak_ptr<websocketpp::server<websocketpp::config::asio>::connection_type> ConnectionWeakPtr;
     typedef websocketpp::connection_hdl ConnectionHandle;
     typedef websocketpp::server<websocketpp::config::asio>::message_ptr MessagePtr;
 
-public:
     HttpServer(Framework* framework);
     virtual ~HttpServer();
 
@@ -38,15 +41,19 @@ public:
     
     void Update(float frametime);
 
+    /// The HTTP server was started.
     Signal0<void> ServerStarted;
+    /// The server was stopped.
     Signal0<void> ServerStopped;
+    /// A request was received. Handle this signal to set response headers, body and status code. Do not hold on to the HTTP request object; it will be invalid after the signal handling is complete.
+    Signal1<HttpRequest*> HttpRequestReceived;
 
 private:
-    bool isServer_;
-
+    void OnHttpRequest(ConnectionHandle connection);
     void StartServer();
     void StopServer();
     
+    bool isServer_;
     ServerPtr server_;
 };
 
