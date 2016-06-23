@@ -7,6 +7,10 @@ configure_boost()
 file (GLOB CPP_FILES *.cpp)
 file (GLOB H_FILES *.h)
 
+AddSourceFolder(HttpServerBindings)
+
+set (SOURCE_FILES ${CPP_FILES} ${H_FILES})
+
 add_definitions (-DHTTPSERVER_EXPORTS)
 
 # Includes
@@ -23,7 +27,7 @@ include_directories(
 )
 endif()
 
-build_library (${TARGET_NAME} SHARED ${CPP_FILES} ${H_FILES} ${MOC_SRCS})
+build_library (${TARGET_NAME} SHARED ${SOURCE_FILES})
 
 # Linking
 link_modules(TundraCore Plugins/JavaScript)

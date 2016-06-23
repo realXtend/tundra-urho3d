@@ -7,15 +7,18 @@
 #include "CoreDefines.h"
 
 #include <Urho3D/Container/Str.h>
+#include <Urho3D/Core/Object.h>
 
 namespace Tundra
 {
 
-class HTTPSERVER_API HttpRequest
+class HTTPSERVER_API HttpRequest : public Object
 {
+    URHO3D_OBJECT(HttpRequest, Object);
+
 public:
     /// Construct with connection pointer. Is not valid to be accessed after the signal (from which this object is received) handling is complete.
-    HttpRequest(void* connection_);
+    HttpRequest(Urho3D::Context* ctx, void* connection_);
 
     /// Return request path. [property]
     String Path() const;
@@ -39,7 +42,7 @@ public:
     /// Set response status code.
     void SetStatusCode(int code);
 
-    /// WebSocketPP connection object.
+    /// websocketpp connection object. [noscript]
     void* connection;
 };
 

@@ -6,7 +6,8 @@
 namespace Tundra
 {
 
-HttpRequest::HttpRequest(void* connection_) :
+HttpRequest::HttpRequest(Urho3D::Context* ctx, void* connection_) :
+    Object(ctx),
     connection(connection_)
 {
     assert(connection);

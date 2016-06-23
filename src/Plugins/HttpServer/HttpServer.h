@@ -8,6 +8,7 @@
 #include "CoreTypes.h"
 #include "CoreDefines.h"
 #include "Signals.h"
+#include "HttpRequest.h"
 
 #include <boost/system/error_code.hpp>
 #ifdef BOOST_SYSTEM_NOEXCEPT
@@ -20,10 +21,12 @@
 namespace Tundra
 {
 
-class HttpRequest;
+class JavaScriptInstance;
 
 class HTTPSERVER_API HttpServer : public IModule
 {
+    URHO3D_OBJECT(HttpServer, IModule);
+
 public:
     typedef boost::shared_ptr<websocketpp::server<websocketpp::config::asio> > ServerPtr;
     typedef websocketpp::connection<websocketpp::config::asio> Connection;
@@ -49,10 +52,14 @@ public:
     Signal1<HttpRequest*> HttpRequestReceived;
 
 private:
+    /// Handle http request from websocketpp internally.
     void OnHttpRequest(ConnectionHandle connection);
     void StartServer();
     void StopServer();
     
+    /// Handles script engine creation (register HttpServer classes)
+    void OnScriptInstanceCreated(JavaScriptInstance* instance);
+
     bool isServer_;
     ServerPtr server_;
 };

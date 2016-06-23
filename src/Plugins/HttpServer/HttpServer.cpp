@@ -5,13 +5,15 @@
 
 #include "Framework.h"
 #include "CoreDefines.h"
-#include "EntityAction.h"
 #include "LoggingFunctions.h"
 
-#include "SceneAPI.h"
-#include "Scene.h"
+#include "JavaScript.h"
+#include "JavaScriptInstance.h"
+#include "HttpServerBindings/HttpServerBindings.h"
 
 #include <Urho3D/Core/Profiler.h>
+
+using namespace JSBindings;
 
 namespace Tundra
 {
@@ -36,6 +38,11 @@ void HttpServer::Initialize()
 {
     if (isServer_)
         StartServer();
+
+    // Connect to JavaScript module instance creation to be able to expose the physics classes to each instance
+    JavaScript* javaScript = framework->Module<JavaScript>();
+    if (javaScript)
+        javaScript->ScriptInstanceCreated.Connect(this, &HttpServer::OnScriptInstanceCreated);
 }
 
 void HttpServer::Uninitialize()
@@ -118,9 +125,20 @@ void HttpServer::StopServer()
 void HttpServer::OnHttpRequest(ConnectionHandle connection)
 {
     ConnectionPtr connectionPtr = server_->get_con_from_hdl(connection);
-    HttpRequest request(connectionPtr.get());
-    HttpRequestReceived.Emit(&request);
+    SharedPtr<HttpRequest> request(new HttpRequest(context_, connectionPtr.get()));
+    HttpRequestReceived.Emit(request.Get());
 }
+
+void HttpServer::OnScriptInstanceCreated(JavaScriptInstance* instance)
+{
+    URHO3D_PROFILE(ExposeBulletPhysicsClasses);
+
+    duk_context* ctx = instance->Context();
+    ExposeHttpServerClasses(ctx);
+    
+    instance->RegisterService("httpserver", this);
+}
+
 
 }
 
