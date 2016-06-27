@@ -124,6 +124,8 @@ void HttpServer::StopServer()
 
 void HttpServer::OnHttpRequest(ConnectionHandle connection)
 {
+    URHO3D_PROFILE(OnHttpRequest);
+    
     ConnectionPtr connectionPtr = server_->get_con_from_hdl(connection);
     SharedPtr<HttpRequest> request(new HttpRequest(context_, connectionPtr.get()));
     HttpRequestReceived.Emit(request.Get());
@@ -131,7 +133,7 @@ void HttpServer::OnHttpRequest(ConnectionHandle connection)
 
 void HttpServer::OnScriptInstanceCreated(JavaScriptInstance* instance)
 {
-    URHO3D_PROFILE(ExposeBulletPhysicsClasses);
+    URHO3D_PROFILE(ExposeHttpServerClasses);
 
     duk_context* ctx = instance->Context();
     ExposeHttpServerClasses(ctx);
