@@ -3,7 +3,7 @@
 PARENT_DIR=$(dirname $(readlink -f $0))
 source ${PARENT_DIR}/Paths.bash
 
-viewer=$(dirname $(readlink -f $0))/../..
+viewer=$(dirname $(readlink -f $0))/../../..
 deps=$DEPS
 viewer=$(cd $viewer && pwd)
 
@@ -22,7 +22,7 @@ mkdir -p $dest
 
 # List
 libraries=( 
-    src/urho3d/Build/lib/libUrho3D.so.0
+    lib/libboost_system.so
 )
 
 destinations=(
@@ -45,8 +45,11 @@ for (( i = 0 ; i < ${#libraries[@]} ; i++ )) do
 done
 
 # Copy Tundra build and data
-echo "Copying and stripping Tundra executable, plugins and data..."
-cp $viewer/bin/** $dest
+echo "Copying Tundra executable, plugins and data..."
+cp -f $viewer/bin/Tundra $dest
+cp -f $viewer/bin/*.so $dest
+cp -f $viewer/bin/*.json $dest
+echo "Stripping executable & libs"
 strip --strip-debug $dest/Tundra
 strip --strip-debug $dest/*.so
 
@@ -62,9 +65,10 @@ for (( i = 0 ; i < ${#tundradirs[@]} ; i++ )) do
     echo "  cp..."
     mkdir -p $dest/$dir
     cp -f -r $viewer/bin/$dir/** $dest/$dir
-    echo "  strip..."
-    strip --strip-debug $dest/$dir/*.so
 done
+
+echo "Stripping plugins"
+strip --strip-debug $dest/Plugins/*.so
 
 # Create Tundra executable script
 cat > $dest/RunTundra <<EOF

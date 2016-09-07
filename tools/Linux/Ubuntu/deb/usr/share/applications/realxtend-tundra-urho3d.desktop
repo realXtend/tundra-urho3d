@@ -1,11 +1,11 @@
 [Desktop Entry]
-Name=realXtend Tundra
-GenericName=realXtend Tundra Client
+Name=realXtend Tundra-Urho3D
+GenericName=realXtend Tundra-Urho3D 
 Comment=
-Exec=/opt/realxtend-tundra/RunTundra
+Exec=/opt/realxtend-tundra-urho3d/RunTundra
 Terminal=true
 Type=Application
-Icon=/usr/share/pixmaps/realxtend-tundra.png
+Icon=/usr/share/pixmaps/realxtend-tundra-urho3d.png
 Categories=Network;
 StartupNotify=false
 Name[en_US]=realxtend-tundra-urho3d.desktop
