@@ -9,7 +9,7 @@ viewer=$(cd $viewer && pwd)
 
 dest=deb/opt/realxtend-tundra-urho3d
 
-version="1.0.0"
+version="3.0.0"
 package="realxtend-tundra-urho3d-$version-ubuntu-14.04-amd64.deb"
 
 echo "Creating $package"

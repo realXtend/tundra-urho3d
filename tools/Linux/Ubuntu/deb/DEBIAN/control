@@ -1,13 +1,13 @@
 Package: realxtend-tundra-urho3d
 Section: web
-Version: 1.0.0
+Version: 3.0.0
 Maintainer: Lasse Oorni <lasse.oorni@ludocraft.com>
 Priority: optional
 Architecture: amd64
 Essential: no
 Depends: libgl1-mesa-glx | libgl1, libglu1-mesa | libglu1, libx11-6, libxaw7, libxrandr2, libxt6, xvfb
 Installed-Size:
-Replaces: realxtend-tundra-urho3d (<<1.0.0)
+Replaces: realxtend-tundra-urho3d (<<3.0.0)
 Homepage: http://github.com/realXtend/tundra-urho3d
 Bugs: http://github.com/realXtend/tundra-urho3d/issues
 Description: realXtend Tundra-Urho3D 3D Internet Platform
