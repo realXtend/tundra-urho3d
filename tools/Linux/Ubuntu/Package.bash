@@ -22,7 +22,7 @@ mkdir -p $dest
 
 # List
 libraries=( 
-    lib/libboost_system.so
+    src/urho3d/Build/lib/libUrho3D.so.0
 )
 
 destinations=(
@@ -49,9 +49,13 @@ echo "Copying Tundra executable, plugins and data..."
 cp -f $viewer/bin/Tundra $dest
 cp -f $viewer/bin/*.so $dest
 cp -f $viewer/bin/*.json $dest
+# libUrho3D.so.0 is actually needed, delete this
+rm $dest/libUrho3D.so
 echo "Stripping executable & libs"
 strip --strip-debug $dest/Tundra
 strip --strip-debug $dest/*.so
+echo "Fixing Tundra rpath"
+chrpath -r . $dest/Tundra
 
 tundradirs=(
     Data
@@ -76,7 +80,7 @@ cat > $dest/RunTundra <<EOF
 
 tundradir=\$(dirname \$(readlink -f \$0))
 cd \$tundradir
-LD_LIBRARY_PATH=.:\$LD_LIBRARY_PATH ./Tundra --config tundra-client.json
+./Tundra --config tundra-client.json
 EOF
 chmod +x $dest/RunTundra
 
