@@ -1,4 +1,8 @@
 [![Build Status](https://travis-ci.org/realXtend/tundra-urho3d.svg?branch=master)](https://travis-ci.org/realXtend/tundra-urho3d)
+[![License badge](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Documentation badge](https://readthedocs.org/projects/synchronization-tundra-urho3d/badge/?version=latest)](http://synchronization-tundra-urho3d.readthedocs.org/en/latest)
+[![Docker badge](https://img.shields.io/docker/pulls/loorni/synchronization-tundra-urho3d.svg)](https://hub.docker.com/r/loorni/synchronization-tundra-urho3d/)
+[![Support badge]( https://img.shields.io/badge/support-sof-yellowgreen.svg)](http://stackoverflow.com/questions/tagged/fiware-synchronization)
 
 Tundra-Urho3D
 =============
@@ -60,6 +64,25 @@ This is a quick summary. For more details refer to the [wiki page](https://githu
 9. The apk is written to `<Tundra-Urho3D>\src\Android\bin` directory where it can be uploaded to a device or run
     on an emulator.
 
+### Ubuntu Linux
+
+1. Navigate to `<Tundra-Urho3D>\tools\Linux\Ubuntu\`
+2. Run the script file `Build.bash`.
+
 [Apache 2.0]: http://www.apache.org/licenses/LICENSE-2.0.txt "Apache 2.0 license"
 [Urho3D]: http://urho3d.github.io "Urho3D homepage"
 [CMake]: http://www.cmake.org/ "CMake homepage"
+
+FIWARE Guides
+-------------
+
+[Synchronization - Installation and Administration Guide](doc/Installation_and_Administration_guide.md)
+
+[Synchronization - User and Programmer's Guide](doc/User_and_Programmers_guide.md)
+
+---------------------------------------------------------------------------------------------------------
+This project is part of FIWARE.
+[https://www.fiware.org/](https://www.fiware.org/)
+
+FIWARE catalogue: [Synchronization GE](http://catalogue.fiware.org/enablers/synchronization)
+
