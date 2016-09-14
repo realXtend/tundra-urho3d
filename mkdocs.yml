@@ -4,6 +4,7 @@ repo_url: https://github.com/realXtend/tundra-urho3d
 site_description: Synchronization Documentation
 docs_dir: doc
 site_dir: html
+google_analytics: ['UA-84140266-1', 'synchronization-tundra-urho3d.readthedocs.io']
 markdown_extensions: [toc,fenced_code]
 use_directory_urls: false
 theme: readthedocs
