@@ -55,7 +55,7 @@ build_tests="OFF"
 # Parse command line args
 
 while [[ $1 = -* ]]; do
-    arg=$1; 
+    arg=$1;
     shift
 
     case $arg in
@@ -111,7 +111,7 @@ if [ $skip_pkg = false ] ; then
     sudo apt-get -y --quiet install \
         build-essential gcc \
         cmake \
-        autoconf libtool
+        autoconf libtool libtool-bin
 
     print_subtitle "Source control"
     sudo apt-get -y --quiet install \
@@ -203,7 +203,7 @@ if [ $skip_deps = false ] ; then
             -DURHO3D_URHO2D=0
 
         make -j $num_cpu -S
-        
+
         cp -L lib/libUrho3D.so $TUNDRA_BIN/
 
         mark_built
@@ -341,7 +341,7 @@ if [ $skip_deps = false ] ; then
         make install
 
         mark_built
-    fi    
+    fi
 
     #### boost
 
